@@ -17,11 +17,14 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.spec.TextChannelEditMono;
 import discord4j.core.spec.TextChannelEditSpec;
+import discord4j.core.spec.legacy.LegacyTextChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -63,18 +66,48 @@ public final class TextChannel extends BaseGuildMessageChannel {
     /**
      * Requests to edit this text channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link TextChannelEditSpec} to be operated on.
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyTextChannelEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link TextChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(TextChannelEditSpec)} or {@link #edit()} which offer an immutable approach to build
+     * specs
      */
-    public Mono<TextChannel> edit(final Consumer<? super TextChannelEditSpec> spec) {
+    @Deprecated
+    public Mono<TextChannel> edit(final Consumer<? super LegacyTextChannelEditSpec> spec) {
         return Mono.defer(
                 () -> {
-                    TextChannelEditSpec mutatedSpec = new TextChannelEditSpec();
+                    LegacyTextChannelEditSpec mutatedSpec = new LegacyTextChannelEditSpec();
                     spec.accept(mutatedSpec);
                     return getClient().getRestClient().getChannelService()
                             .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
                 })
+                .map(bean -> EntityUtil.getChannel(getClient(), bean))
+                .cast(TextChannel.class);
+    }
+
+    /**
+     * Requests to edit this text channel. Properties specifying how to edit this channel can be set via the {@code
+     * withXxx} methods of the returned {@link TextChannelEditMono}.
+     *
+     * @return A {@link TextChannelEditMono} where, upon successful completion, emits the edited {@link TextChannel}. If
+     * an error is received, it is emitted through the {@code TextChannelEditMono}.
+     */
+    public TextChannelEditMono edit() {
+        return TextChannelEditMono.of(this);
+    }
+
+    /**
+     * Requests to edit this text channel.
+     *
+     * @param spec an immutable object that specifies how to edit this text channel
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link TextChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> edit(TextChannelEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> getClient().getRestClient().getChannelService()
+                        .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(bean -> EntityUtil.getChannel(getClient(), bean))
                 .cast(TextChannel.class);
     }

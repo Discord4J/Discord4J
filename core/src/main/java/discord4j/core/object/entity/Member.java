@@ -23,7 +23,11 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.BanQuerySpec;
+import discord4j.core.spec.GuildMemberEditMono;
 import discord4j.core.spec.GuildMemberEditSpec;
+import discord4j.core.spec.MemberBanQueryMono;
+import discord4j.core.spec.legacy.LegacyBanQuerySpec;
+import discord4j.core.spec.legacy.LegacyGuildMemberEditSpec;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.MemberData;
@@ -318,19 +322,46 @@ public final class Member extends User {
     /**
      * Requests to ban this user.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link BanQuerySpec} to be operated on.
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyBanQuerySpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating this user was banned. If an
      * error is received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #ban(BanQuerySpec)} or {@link #ban()} which offer an immutable approach to build specs
      */
-    public Mono<Void> ban(final Consumer<? super BanQuerySpec> spec) {
+    @Deprecated
+    public Mono<Void> ban(final Consumer<? super LegacyBanQuerySpec> spec) {
         return Mono.defer(
                 () -> {
-                    BanQuerySpec mutatedSpec = new BanQuerySpec();
+                    LegacyBanQuerySpec mutatedSpec = new LegacyBanQuerySpec();
                     spec.accept(mutatedSpec);
                     return getClient().getRestClient().getGuildService()
                             .createGuildBan(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
                                     mutatedSpec.getReason());
                 });
+    }
+
+    /**
+     * Requests to ban this user. Properties specifying how to ban this user can be set via the {@code withXxx} methods
+     * of the returned {@link MemberBanQueryMono}.
+     *
+     * @return A {@link MemberBanQueryMono} where, upon successful completion, emits nothing; indicating the specified
+     * user was banned. If an error is received, it is emitted through the {@code MemberBanQueryMono}.
+     */
+    public MemberBanQueryMono ban() {
+        return MemberBanQueryMono.of(this);
+    }
+
+    /**
+     * Requests to ban this user.
+     *
+     * @param spec an immutable object that specifies how to ban this user
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating this user was banned. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> ban(BanQuerySpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> getClient().getRestClient().getGuildService()
+                        .createGuildBan(getGuildId().asLong(), getId().asLong(), spec.asRequest(), spec.reason()));
     }
 
     /**
@@ -523,20 +554,49 @@ public final class Member extends User {
     /**
      * Requests to edit this member.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildMemberEditSpec} to be operated on.
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyGuildMemberEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the modified {@link Member}. If an error is
      * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(GuildMemberEditSpec)} or {@link #edit()} which offer an immutable approach to build
+     * specs
      */
-    public Mono<Member> edit(final Consumer<? super GuildMemberEditSpec> spec) {
+    @Deprecated
+    public Mono<Member> edit(final Consumer<? super LegacyGuildMemberEditSpec> spec) {
         return Mono.defer(
                 () -> {
-                    GuildMemberEditSpec mutatedSpec = new GuildMemberEditSpec();
+                    LegacyGuildMemberEditSpec mutatedSpec = new LegacyGuildMemberEditSpec();
                     spec.accept(mutatedSpec);
                     return getClient().getRestClient().getGuildService()
                             .modifyGuildMember(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
                                     mutatedSpec.getReason())
                             .map(data -> new Member(getClient(), data, guildId));
                 });
+    }
+
+    /**
+     * Requests to edit this member. Properties specifying how to edit this member can be set via the {@code withXxx}
+     * methods of the returned {@link GuildMemberEditMono}.
+     *
+     * @return A {@link GuildMemberEditMono} where, upon successful completion, emits the modified {@link Member}. If an
+     * error is received, it is emitted through the {@code GuildMemberEditMono}.
+     */
+    public GuildMemberEditMono edit() {
+        return GuildMemberEditMono.of(this);
+    }
+
+    /**
+     * Requests to edit this member.
+     *
+     * @param spec an immutable object that specifies how to edit this member
+     * @return A {@link Mono} where, upon successful completion, emits the modified {@link Member}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Member> edit(GuildMemberEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> getClient().getRestClient().getGuildService()
+                        .modifyGuildMember(getGuildId().asLong(), getId().asLong(), spec.asRequest(), spec.reason())
+                        .map(data -> new Member(getClient(), data, guildId)));
     }
 
     @Override

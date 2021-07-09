@@ -23,8 +23,6 @@ import discord4j.core.spec.MessageCreateSpec;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
-import java.util.function.Consumer;
-
 public interface CommandResponse {
 
     CommandResponse withDirectMessage();
@@ -33,7 +31,7 @@ public interface CommandResponse {
 
     CommandResponse withScheduler(Scheduler scheduler);
 
-    Mono<Void> sendMessage(Consumer<? super MessageCreateSpec> spec);
+    Mono<Void> sendMessage(MessageCreateSpec spec);
 
-    Mono<Void> sendEmbed(Consumer<? super EmbedCreateSpec> spec);
+    Mono<Void> sendEmbed(EmbedCreateSpec spec);
 }

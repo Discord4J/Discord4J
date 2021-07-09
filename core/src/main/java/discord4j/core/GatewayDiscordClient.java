@@ -26,21 +26,28 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.Event;
+import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
-import discord4j.core.object.presence.ClientPresence;
-import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.retriever.EntityRetriever;
 import discord4j.core.shard.GatewayBootstrap;
+import discord4j.core.spec.GuildCreateMono;
 import discord4j.core.spec.GuildCreateSpec;
+import discord4j.core.spec.UserEditMono;
 import discord4j.core.spec.UserEditSpec;
+import discord4j.core.spec.legacy.LegacyGuildCreateSpec;
+import discord4j.core.spec.legacy.LegacyUserEditSpec;
 import discord4j.core.util.ValidationUtil;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.EmojiData;
+import discord4j.discordjson.json.GuildData;
+import discord4j.discordjson.json.GuildUpdateData;
+import discord4j.discordjson.json.RoleData;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.discordjson.possible.Possible;
@@ -65,6 +72,7 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -295,17 +303,46 @@ public class GatewayDiscordClient implements EntityRetriever {
     /**
      * Requests to create a guild.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildCreateSpec} to be operated on.
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyGuildCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Guild}. If an error is
      * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createGuild(GuildCreateSpec)} or {@link #createGuild(String, Region)} which offer an
+     * immutable approach to build specs
      */
-    public Mono<Guild> createGuild(final Consumer<? super GuildCreateSpec> spec) {
+    @Deprecated
+    public Mono<Guild> createGuild(final Consumer<? super LegacyGuildCreateSpec> spec) {
         return Mono.defer(
                 () -> {
-                    GuildCreateSpec mutatedSpec = new GuildCreateSpec();
+                    LegacyGuildCreateSpec mutatedSpec = new LegacyGuildCreateSpec();
                     spec.accept(mutatedSpec);
                     return getRestClient().getGuildService().createGuild(mutatedSpec.asRequest());
                 })
+                .map(data -> new Guild(this, toGuildData(data)));
+    }
+
+    /**
+     * Requests to create a guild. Properties specifying how to create the guild can be set via the {@code withXxx}
+     * methods of the returned {@link GuildCreateMono}.
+     *
+     * @param name   the name of the guild to create
+     * @param region the region of the guild to create
+     * @return A {@link GuildCreateMono} where, upon successful completion, emits the created {@link Guild}. If an error
+     * is received, it is emitted through the {@code GuildCreateMono}.
+     */
+    public GuildCreateMono createGuild(String name, Region region) {
+        return GuildCreateMono.of(name, region, this);
+    }
+
+    /**
+     * Requests to create a guild.
+     *
+     * @param spec an immutable object that specifies how to create the guild
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Guild}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> createGuild(GuildCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> getRestClient().getGuildService().createGuild(spec.asRequest()))
                 .map(data -> new Guild(this, toGuildData(data)));
     }
 
@@ -366,17 +403,43 @@ public class GatewayDiscordClient implements EntityRetriever {
     /**
      * Requests to edit this client (i.e., modify the current bot user).
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link UserEditSpec} to be operated on.
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyUserEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link User}. If an error is received,
      * it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(UserEditSpec)} or {@link #edit()} which offer an immutable approach to build specs
      */
-    public Mono<User> edit(final Consumer<? super UserEditSpec> spec) {
+    @Deprecated
+    public Mono<User> edit(final Consumer<? super LegacyUserEditSpec> spec) {
         return Mono.defer(
                 () -> {
-                    UserEditSpec mutatedSpec = new UserEditSpec();
+                    LegacyUserEditSpec mutatedSpec = new LegacyUserEditSpec();
                     spec.accept(mutatedSpec);
                     return getRestClient().getUserService().modifyCurrentUser(mutatedSpec.asRequest());
                 })
+                .map(data -> new User(this, data));
+    }
+
+    /**
+     * Requests to edit this client (i.e., modify the current bot user). Properties specifying how to edit this client
+     * can be set via the {@code withXxx} methods of the returned {@link UserEditMono}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link User}. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    public UserEditMono edit() {
+        return UserEditMono.of(this);
+    }
+
+    /**
+     * Requests to edit this client (i.e., modify the current bot user).
+     *
+     * @param spec an immutable object that specifies how to edit this client
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link User}. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    public Mono<User> edit(UserEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> getRestClient().getUserService().modifyCurrentUser(spec.asRequest()))
                 .map(data -> new User(this, data));
     }
 

@@ -58,7 +58,7 @@ public class GuildServiceTest {
     @Test
     public void testModifyGuild() {
         GuildModifyRequest req = GuildModifyRequest.builder()
-            .region("us-south")
+            .regionOrNull("us-south")
             .build();
         guildService.modifyGuild(guild, req, null).block();
     }
@@ -116,7 +116,7 @@ public class GuildServiceTest {
     @Test
     public void testModifyGuildMember() {
         GuildMemberModifyRequest req = GuildMemberModifyRequest.builder()
-            .nick("nickname")
+            .nickOrNull("nickname")
             .build();
         guildService.modifyGuildMember(guild, member, req, null).block();
     }
