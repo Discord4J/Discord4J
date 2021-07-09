@@ -35,37 +35,83 @@ import java.util.function.Function;
  *
  * @see discord4j.core.GatewayDiscordClient#updatePresence(ClientPresence)
  * @see discord4j.core.shard.GatewayBootstrap#setInitialPresence(Function)
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#presence">Presence</a>
  */
 public class ClientPresence {
 
+    /**
+     * Creates an {@link Status#ONLINE online} presence.
+     *
+     * @return An online presence.
+     */
     public static ClientPresence online() {
         return of(Status.ONLINE, null);
     }
 
+    /**
+     * Creates an {@link Status#ONLINE online} presence.
+     *
+     * @param activity The activity to be shown.
+     * @return An online presence with the given activity.
+     */
     public static ClientPresence online(ClientActivity activity) {
         return of(Status.ONLINE, activity);
     }
 
+    /**
+     * Creates a {@link Status#DO_NOT_DISTURB do not disturb} presence.
+     *
+     * @return A do not disturb presence.
+     */
     public static ClientPresence doNotDisturb() {
         return of(Status.DO_NOT_DISTURB, null);
     }
 
+    /**
+     * Creates a {@link Status#DO_NOT_DISTURB do not disturb} presence.
+     *
+     * @param activity The activity to be shown.
+     * @return A do not disturb with the given activity.
+     */
     public static ClientPresence doNotDisturb(ClientActivity activity) {
         return of(Status.DO_NOT_DISTURB, activity);
     }
 
+    /**
+     * Creates an {@link Status#IDLE idle} presence.
+     *
+     * @return An idle presence.
+     */
     public static ClientPresence idle() {
         return of(Status.IDLE, null);
     }
 
+    /**
+     * Creates an {@link Status#IDLE idle} presence.
+     *
+     * @param activity The activity to be shown.
+     * @return An idle presence with the given activity.
+     */
     public static ClientPresence idle(ClientActivity activity) {
         return of(Status.IDLE, activity);
     }
 
+    /**
+     * Creates an {@link Status#INVISIBLE} presence.
+     *
+     * @return An invisible presence.
+     */
     public static ClientPresence invisible() {
         return of(Status.INVISIBLE, null);
     }
 
+    /**
+     * Creates a presence with the given status and activity.
+     *
+     * @param status The status to be shown.
+     * @param activity The activity to be shown.
+     * @return A presence with the given status and activity.
+     */
     public static ClientPresence of(Status status, @Nullable ClientActivity activity) {
         List<ActivityUpdateRequest> activities = Optional.ofNullable(activity)
                 .map(ClientActivity::getActivityUpdateRequest)
@@ -86,6 +132,11 @@ public class ClientPresence {
         this.statusUpdate = statusUpdate;
     }
 
+    /**
+     * Converts this presence's data to an object for use by the gateway.
+     *
+     * @return An equivalent {@code StatusUpdate} for this presence.
+     */
     public StatusUpdate getStatusUpdate() {
         return statusUpdate;
     }
