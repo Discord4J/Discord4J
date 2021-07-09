@@ -59,7 +59,7 @@ public class ClientPresence {
     }
 
     public static ClientPresence idle(ClientActivity activity) {
-        return of(Status.INVISIBLE, activity);
+        return of(Status.IDLE, activity);
     }
 
     public static ClientPresence invisible() {
