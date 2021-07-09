@@ -4,9 +4,9 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.discordjson.json.ChannelData;
 
 // TODO naming
-class BaseGuildChannelNotAThread extends BaseGuildChannel implements GuildChannelNotAThread {
+class BaseTopLevelGuildChannel extends BaseGuildChannel implements TopLevelGuildChannel {
 
-    BaseGuildChannelNotAThread(GatewayDiscordClient gateway, ChannelData data) {
+    BaseTopLevelGuildChannel(GatewayDiscordClient gateway, ChannelData data) {
         super(gateway, data);
     }
 

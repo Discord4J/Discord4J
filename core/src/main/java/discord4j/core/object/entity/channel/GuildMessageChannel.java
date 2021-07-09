@@ -123,6 +123,7 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
+    @Deprecated
     Mono<Webhook> createWebhook(WebhookCreateSpec spec);
 
     /**
@@ -140,6 +141,7 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      * @return A {@link Flux} that continually emits all members from {@link Guild#getMembers()} which have access to
      * view this channel {@link discord4j.rest.util.Permission#VIEW_CHANNEL}
      */
+    @Deprecated
     Flux<Member> getMembers();
 
     @Override

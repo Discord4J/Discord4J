@@ -31,7 +31,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /** A Discord news channel. */
-public final class NewsChannel extends BaseTextOrNewsChannel {
+public final class NewsChannel extends BaseTopLevelGuildMessageChannel {
 
     /**
      * Constructs an {@code NewsChannel} with an associated {@link GatewayDiscordClient} and Discord data.

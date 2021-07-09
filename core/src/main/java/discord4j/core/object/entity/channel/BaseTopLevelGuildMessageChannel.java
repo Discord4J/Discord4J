@@ -19,11 +19,11 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-class BaseTextOrNewsChannel extends BaseCategorizableChannel implements TextOrNewsChannel {
+class BaseTopLevelGuildMessageChannel extends BaseCategorizableChannel implements TopLevelGuildMessageChannel {
 
     private final BaseGuildMessageChannel guildMessageChannel;
 
-    public BaseTextOrNewsChannel(GatewayDiscordClient gateway, ChannelData data) {
+    public BaseTopLevelGuildMessageChannel(GatewayDiscordClient gateway, ChannelData data) {
         super(gateway, data);
         this.guildMessageChannel = new BaseGuildMessageChannel(gateway, data);
     }
