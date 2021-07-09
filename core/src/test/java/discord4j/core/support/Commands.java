@@ -23,10 +23,11 @@ import discord4j.common.ReactorResources;
 import discord4j.common.util.Snowflake;
 import discord4j.core.command.CommandRequest;
 import discord4j.core.command.CommandResponse;
-import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.rest.util.Image;
 import org.slf4j.LoggerFactory;
@@ -74,16 +75,16 @@ public class Commands {
         } else {
             // showing you can block too
             return response.withScheduler(Schedulers.boundedElastic())
-                    .sendEmbed(spec -> {
-                        spec.setThumbnail(request.getClient().getSelf()
-                                .blockOptional()
-                                .orElseThrow(RuntimeException::new)
-                                .getAvatarUrl());
-                        spec.addField("Servers", request.getClient().getGuilds().count()
-                                .blockOptional()
-                                .orElse(-1L)
-                                .toString(), false);
-                    });
+                    .sendEmbed(EmbedCreateSpec.builder()
+                            .thumbnail(request.getClient().getSelf()
+                                    .blockOptional()
+                                    .orElseThrow(RuntimeException::new)
+                                    .getAvatarUrl())
+                            .addField("Servers", request.getClient().getGuilds().count()
+                                    .blockOptional()
+                                    .orElse(-1L)
+                                    .toString(), false)
+                            .build());
         }
     }
 
@@ -154,8 +155,7 @@ public class Commands {
                     .get()
                     .uri(attachment.getUrl())
                     .responseSingle((res, mono) -> mono.asByteArray())
-                    .flatMap(input -> request.getClient()
-                            .edit(spec -> spec.setAvatar(Image.ofRaw(input, Image.Format.PNG))))
+                    .flatMap(input -> request.getClient().edit().withAvatar(Image.ofRaw(input, Image.Format.PNG)))
                     .then();
         }
         return Mono.empty();
@@ -184,10 +184,11 @@ public class Commands {
         String params = request.parameters();
         return message.getClient().getUserById(Snowflake.of(params))
                 .flatMap(user -> message.getChannel()
-                        .flatMap(channel -> channel.createEmbed(embed -> embed
+                        .flatMap(channel -> channel.createEmbed(EmbedCreateSpec.builder()
                                 .addField("Name", user.getUsername(), false)
                                 .addField("Avatar URL", user.getAvatarUrl(), false)
-                                .setImage(user.getAvatarUrl()))))
+                                .image(user.getAvatarUrl())
+                                .build())))
                 .switchIfEmpty(Mono.just("Not found")
                         .flatMap(reason -> message.getChannel()
                                 .flatMap(channel -> channel.createMessage(reason))))

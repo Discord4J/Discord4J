@@ -2,6 +2,7 @@ package discord4j.core.object.entity.channel;
 
 import discord4j.core.object.entity.Webhook;
 import discord4j.core.spec.WebhookCreateSpec;
+import discord4j.core.spec.legacy.LegacyWebhookCreateSpec;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -27,7 +28,7 @@ public interface TextOrNewsChannel extends CategorizableChannel, GuildMessageCha
      * is received, it is emitted through the {@code Mono}.
      */
     @Override
-    Mono<Webhook> createWebhook(final Consumer<? super WebhookCreateSpec> spec);
+    Mono<Webhook> createWebhook(final Consumer<? super LegacyWebhookCreateSpec> spec);
 
     /**
      * Requests to retrieve the webhooks of the channel.

@@ -23,7 +23,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.common.store.Store;
 import discord4j.common.store.action.gateway.GatewayActions;
-import discord4j.common.store.legacy.LegacyStoreLayout;
+import discord4j.common.store.impl.LocalStoreLayout;
 import discord4j.common.util.Snowflake;
 import discord4j.core.CoreResources;
 import discord4j.core.DiscordClient;
@@ -37,7 +37,6 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.gateway.*;
@@ -54,8 +53,6 @@ import discord4j.gateway.state.DispatchStoreLayer;
 import discord4j.gateway.state.StatefulDispatch;
 import discord4j.rest.util.Multimap;
 import discord4j.rest.util.RouteUtils;
-import discord4j.store.api.util.StoreContext;
-import discord4j.store.jdk.JdkStoreService;
 import discord4j.voice.DefaultVoiceConnectionFactory;
 import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionFactory;
@@ -935,10 +932,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         if (store != null) {
             return store;
         }
-        Map<String, Object> hints = Collections.singletonMap("messageClass", MessageData.class);
-        JdkStoreService storeService = new JdkStoreService();
-        storeService.init(new StoreContext(hints));
-        return Store.fromLayout(LegacyStoreLayout.of(storeService));
+        return Store.fromLayout(LocalStoreLayout.create());
     }
 
     private MemberRequestFilter initMemberRequestFilter(IntentSet intents) {

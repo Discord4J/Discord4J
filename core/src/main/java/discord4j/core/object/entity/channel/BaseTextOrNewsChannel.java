@@ -8,6 +8,8 @@ import discord4j.core.object.entity.Webhook;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.WebhookCreateSpec;
+import discord4j.core.spec.legacy.LegacyMessageCreateSpec;
+import discord4j.core.spec.legacy.LegacyWebhookCreateSpec;
 import discord4j.discordjson.json.ChannelData;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -62,8 +64,13 @@ class BaseTextOrNewsChannel extends BaseCategorizableChannel implements TextOrNe
     }
 
     @Override
-    public Mono<Message> createMessage(Consumer<? super MessageCreateSpec> spec) {
+    public Mono<Message> createMessage(Consumer<? super LegacyMessageCreateSpec> spec) {
         return guildMessageChannel.createMessage(spec);
+    }
+
+    @Override
+    public Mono<Message> createMessage(MessageCreateSpec spec) {
+        return null;
     }
 
     @Override
@@ -107,7 +114,12 @@ class BaseTextOrNewsChannel extends BaseCategorizableChannel implements TextOrNe
     }
 
     @Override
-    public Mono<Webhook> createWebhook(Consumer<? super WebhookCreateSpec> spec) {
+    public Mono<Webhook> createWebhook(Consumer<? super LegacyWebhookCreateSpec> spec) {
+        return guildMessageChannel.createWebhook(spec);
+    }
+
+    @Override
+    public Mono<Webhook> createWebhook(WebhookCreateSpec spec) {
         return guildMessageChannel.createWebhook(spec);
     }
 

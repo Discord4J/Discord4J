@@ -20,8 +20,12 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
-import discord4j.core.spec.GuildTemplateEditSpec;
+import discord4j.core.spec.GuildCreateFromTemplateMono;
 import discord4j.core.spec.GuildCreateFromTemplateSpec;
+import discord4j.core.spec.GuildTemplateEditMono;
+import discord4j.core.spec.GuildTemplateEditSpec;
+import discord4j.core.spec.legacy.LegacyGuildCreateFromTemplateSpec;
+import discord4j.core.spec.legacy.LegacyGuildTemplateEditSpec;
 import discord4j.discordjson.json.SerializedSourceGuildData;
 import discord4j.discordjson.json.TemplateData;
 import reactor.core.publisher.Mono;
@@ -167,18 +171,47 @@ public final class GuildTemplate implements DiscordObject {
     /**
      * Requests to create a new guild from this template.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildTemplateEditSpec} to be operated on.
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyGuildCreateFromTemplateSpec} to be operated
+     *             on.
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild created guild}. If an error is
      * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createGuild(GuildCreateFromTemplateSpec)} or {@link #createGuild(String)} which offer an
+     * immutable approach to build specs
      */
-    public Mono<Guild> createGuild(final Consumer<? super GuildCreateFromTemplateSpec> spec) {
+    @Deprecated
+    public Mono<Guild> createGuild(final Consumer<? super LegacyGuildCreateFromTemplateSpec> spec) {
         return Mono.defer(
                 () -> {
-                    GuildCreateFromTemplateSpec mutatedSpec = new GuildCreateFromTemplateSpec();
+                    LegacyGuildCreateFromTemplateSpec mutatedSpec = new LegacyGuildCreateFromTemplateSpec();
                     spec.accept(mutatedSpec);
                     return gateway.getRestClient().getTemplateService()
                             .createGuild(getCode(), mutatedSpec.asRequest());
                 })
+                .map(data -> new Guild(gateway, data));
+    }
+
+    /**
+     * Requests to create a new guild from this template. Properties specifying how to create a new guild from this
+     * template can be set via the {@code withXxx} methods of the returned {@link GuildCreateFromTemplateMono}.
+     *
+     * @param name the name of the guild to create
+     * @return A {@link GuildCreateFromTemplateMono} where, upon successful completion, emits the {@link Guild created
+     * guild}. If an error is received, it is emitted through the {@code GuildCreateFromTemplateMono}.
+     */
+    public GuildCreateFromTemplateMono createGuild(String name) {
+        return GuildCreateFromTemplateMono.of(name, this);
+    }
+
+    /**
+     * Requests to create a new guild from this template.
+     *
+     * @param spec an immutable object that specifies how to create a new guild from this template
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild created guild}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> createGuild(GuildCreateFromTemplateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> gateway.getRestClient().getTemplateService().createGuild(getCode(), spec.asRequest()))
                 .map(data -> new Guild(gateway, data));
     }
 
@@ -197,18 +230,46 @@ public final class GuildTemplate implements DiscordObject {
     /**
      * Requests to edit this guild template.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildTemplateEditSpec} to be operated on.
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyGuildTemplateEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link GuildTemplate}. If an error is
      * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(GuildTemplateEditSpec)} or {@link #edit()} which offer an immutable approach to
+     * build specs
      */
-    public Mono<GuildTemplate> edit(final Consumer<? super GuildTemplateEditSpec> spec) {
+    @Deprecated
+    public Mono<GuildTemplate> edit(final Consumer<? super LegacyGuildTemplateEditSpec> spec) {
         return Mono.defer(
                 () -> {
-                    GuildTemplateEditSpec mutatedSpec = new GuildTemplateEditSpec();
+                    LegacyGuildTemplateEditSpec mutatedSpec = new LegacyGuildTemplateEditSpec();
                     spec.accept(mutatedSpec);
                     return gateway.getRestClient().getTemplateService()
                             .modifyTemplate(guildId, getCode(), mutatedSpec.asRequest());
                 })
+                .map(data -> new GuildTemplate(gateway, data));
+    }
+
+    /**
+     * Requests to edit this guild template. Properties specifying how to edit this template can be set via the {@code
+     * withXxx} methods of the returned {@link GuildTemplateEditMono}.
+     *
+     * @return A {@link GuildTemplateEditMono} where, upon successful completion, emits the edited {@link
+     * GuildTemplate}. If an error is received, it is emitted through the {@code GuildTemplateEditMono}.
+     */
+    public GuildTemplateEditMono edit() {
+        return GuildTemplateEditMono.of(this);
+    }
+
+    /**
+     * Requests to edit this guild template.
+     *
+     * @param spec an immutable object that specifies how to edit this template
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link GuildTemplate}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildTemplate> edit(GuildTemplateEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> gateway.getRestClient().getTemplateService().modifyTemplate(guildId, getCode(), spec.asRequest()))
                 .map(data -> new GuildTemplate(gateway, data));
     }
 

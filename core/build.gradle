@@ -5,6 +5,17 @@ dependencies {
 
     api "com.discord4j:stores-jdk:$storesVersion"
 
+    compileOnly "$immutables_group:value:$immutables_version"
+    compileOnly "$immutables_group:builder:$immutables_version"
+    annotationProcessor "$immutables_group:value:$immutables_version"
+
+    compileOnly "com.discord4j:discord-json-encoding:$discordJsonVersion"
+
+    if (JavaVersion.current().isJava8()) {
+        compileOnly "com.google.code.findbugs:annotations:3.0.1"
+        testCompileOnly "com.google.code.findbugs:annotations:3.0.1"
+    }
+
     testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_version"
     testImplementation "org.mockito:mockito-core:$mockito_version"
     testImplementation "ch.qos.logback:logback-classic:$logback_version"

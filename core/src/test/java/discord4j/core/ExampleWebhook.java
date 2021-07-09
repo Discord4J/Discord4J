@@ -19,9 +19,14 @@ package discord4j.core;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.spec.EmbedCreateSpec;
+import reactor.core.publisher.Mono;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.stream.IntStream;
+
+import static discord4j.core.spec.MessageCreateFields.File;
 
 public class ExampleWebhook {
 
@@ -54,42 +59,39 @@ public class ExampleWebhook {
         assert gateway != null;
 
         gateway.getWebhookById(webhookId)
-                .flatMap(webhook -> webhook.execute(spec -> {
-                    spec.setContent("A webhook can upload multiple files.");
+                .flatMap(webhook -> {
                     try {
-                        spec.addFile("first file.txt", new FileInputStream(file1));
-                        spec.addFile("second file.png", new FileInputStream(file2));
+                        return webhook.execute()
+                                .withContent("A webhook can upload multiple files.")
+                                .withFiles(File.of("first file.txt", new FileInputStream(file1)),
+                                        File.of("second file.png", new FileInputStream(file2)));
                     } catch (FileNotFoundException e) {
-                        e.printStackTrace();
+                        return Mono.error(e);
                     }
-                }))
+                })
                 .block();
 
         gateway.getWebhookByIdWithToken(secretWebhookId, secretWebhookToken)
-                .flatMap(webhook -> webhook.execute(spec -> {
-                    spec.setContent("A webhook can execute in channels the bot doesn't have access to.");
-                }))
+                .flatMap(webhook -> webhook.execute()
+                        .withContent("A webhook can execute in channels the bot doesn't have access to."))
                 .block();
 
         gateway.getWebhookById(webhookId)
-                .flatMap(webhook -> webhook.execute(spec -> {
-                    spec.setContent("A webhook can create several embeds.");
-                    for (int i = 0; i < 10; i++) {
-                        final int finalI = i;
-                        spec.addEmbed(embed ->
-                                embed.setDescription("I can create a lot of embeds at once too. #" + (finalI + 1))
-                        );
-                    }
-                }))
+                .flatMap(webhook -> webhook.execute()
+                        .withContent("A webhook can create several embeds.")
+                        .withEmbeds(IntStream.range(0, 10)
+                                .mapToObj(i -> EmbedCreateSpec.create()
+                                        .withDescription("I can create a lot of embeds at once too. #" + (i + 1)))
+                                .toArray(EmbedCreateSpec[]::new)))
                 .block();
 
-
         gateway.getChannelById(webhookChannel)
-                .flatMap(channel -> ((TextChannel) channel).createWebhook(webhook ->
-                        webhook.setReason("testing").setName("A webhook for testing")))
-                .flatMap(hook -> hook.executeAndWait(spec ->
-                        spec.setContent("you can execute webhooks after you create them.")
-                ).thenReturn(hook))
+                .flatMap(channel -> ((TextChannel) channel).createWebhook("A webhook for testing")
+                        .withReason("testing"))
+                .flatMap(hook -> hook.execute()
+                        .withWaitForMessage(true)
+                        .withContent("you can execute webhooks after you create them.")
+                        .thenReturn(hook))
                 .flatMap(hook -> hook.delete("deleting test webhook"))
                 .block();
     }

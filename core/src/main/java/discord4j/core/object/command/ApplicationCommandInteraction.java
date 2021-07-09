@@ -125,6 +125,15 @@ public class ApplicationCommandInteraction implements DiscordObject {
                 .findFirst();
     }
 
+    /**
+     * Gets the values selected if this is a select menu interaction.
+     *
+     * @return The select menu values selected.
+     */
+    public Optional<List<String>> getValues() {
+        return data.values().toOptional();
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
