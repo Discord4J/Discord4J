@@ -35,6 +35,7 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+/** A Discord channel in a guild that can have messages sent to it. */
 public interface GuildMessageChannel extends CategorizableChannel, MessageChannel {
 
     /**

@@ -10,7 +10,9 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-// TODO naming
+/**
+ * A Discord message channel in a guild that isn't a thread.
+ */
 public interface TopLevelGuildMessageChannel extends CategorizableChannel, GuildMessageChannel {
 
     @Override

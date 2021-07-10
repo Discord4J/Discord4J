@@ -13,7 +13,9 @@ import reactor.util.annotation.Nullable;
 import java.util.Optional;
 import java.util.Set;
 
-// TODO naming
+/**
+ * A Discord channel in a guild that isn't a thread.
+ */
 public interface TopLevelGuildChannel extends GuildChannel {
 
     @Override
