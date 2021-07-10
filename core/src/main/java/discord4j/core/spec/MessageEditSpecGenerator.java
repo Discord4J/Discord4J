@@ -27,7 +27,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 
 @Value.Immutable(singleton = true)
@@ -35,7 +37,7 @@ interface MessageEditSpecGenerator extends Spec<MessageEditRequest> {
 
     Possible<Optional<String>> content();
 
-    Possible<Optional<EmbedCreateSpec>> embed();
+    Possible<Optional<List<EmbedCreateSpec>>> embeds();
 
     Possible<Optional<AllowedMentions>> allowedMentions();
 
@@ -45,7 +47,9 @@ interface MessageEditSpecGenerator extends Spec<MessageEditRequest> {
     default MessageEditRequest asRequest() {
         return MessageEditRequest.builder()
                 .content(content())
-                .embed(mapPossibleOptional(embed(), EmbedCreateSpec::asRequest))
+                .embeds(mapPossibleOptional(embeds(), embeds -> embeds.stream()
+                        .map(EmbedCreateSpec::asRequest)
+                        .collect(Collectors.toList())))
                 .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
                 .flags(mapPossibleOptional(flags(), f -> f.stream()
                         .mapToInt(Message.Flag::getValue)

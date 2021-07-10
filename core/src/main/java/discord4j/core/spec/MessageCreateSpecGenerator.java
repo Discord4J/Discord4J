@@ -79,7 +79,7 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
 
     Possible<Boolean> tts();
 
-    Possible<EmbedCreateSpec> embed();
+    Possible<List<EmbedCreateSpec>> embeds();
 
     @Value.Default
     default List<MessageCreateFields.File> files() {
@@ -101,7 +101,9 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
                 .content(content())
                 .nonce(nonce())
                 .tts(tts())
-                .embed(mapPossible(embed(), EmbedCreateSpec::asRequest))
+                .embeds(mapPossible(embeds(), embeds -> embeds.stream()
+                        .map(EmbedCreateSpec::asRequest)
+                        .collect(Collectors.toList())))
                 .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
                 .messageReference(mapPossible(messageReference(),
                         ref -> MessageReferenceData.builder()

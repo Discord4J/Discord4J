@@ -127,7 +127,7 @@ public interface MessageChannel extends Channel {
      * @see #createMessage(MessageCreateSpec)
      */
     default MessageCreateMono createEmbed(EmbedCreateSpec embed) {
-        return MessageCreateMono.of(this).withEmbed(embed);
+        return MessageCreateMono.of(this).withEmbeds(embed);
     }
 
     /**
