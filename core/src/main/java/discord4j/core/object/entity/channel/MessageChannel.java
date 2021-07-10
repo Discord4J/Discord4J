@@ -22,6 +22,7 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateMono;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.core.spec.legacy.LegacyEmbedCreateSpec;
 import discord4j.core.spec.legacy.LegacyMessageCreateSpec;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -101,6 +102,19 @@ public interface MessageChannel extends Channel {
      */
     default MessageCreateMono createMessage(String message) {
         return MessageCreateMono.of(this).withContent(message);
+    }
+
+    /**
+     * Requests to create a message with an embed.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyEmbedCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createEmbed(EmbedCreateSpec)} which offers an immutable approach to build specs
+     */
+    @Deprecated
+    default Mono<Message> createEmbed(final Consumer<? super LegacyEmbedCreateSpec> spec) {
+        return createMessage(messageSpec -> messageSpec.setEmbed(spec));
     }
 
     /**
