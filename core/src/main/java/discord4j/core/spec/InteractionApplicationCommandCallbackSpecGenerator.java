@@ -18,6 +18,7 @@
 package discord4j.core.spec;
 
 import discord4j.core.event.domain.interaction.InteractionCreateEvent;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.discordjson.possible.Possible;
@@ -44,6 +45,8 @@ interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<Intera
 
     Possible<AllowedMentions> allowedMentions();
 
+    Possible<List<LayoutComponent>> components();
+
     @Override
     default InteractionApplicationCommandCallbackData asRequest() {
         return InteractionApplicationCommandCallbackData.builder()
@@ -53,6 +56,9 @@ interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<Intera
                 .embeds(mapPossible(embeds(), embeds -> embeds.stream()
                         .map(EmbedCreateSpec::asRequest)
                         .collect(Collectors.toList())))
+                .components(mapPossible(components(), components -> components.stream()
+                    .map(LayoutComponent::getData)
+                    .collect(Collectors.toList())))
                 .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
                 .build();
     }
