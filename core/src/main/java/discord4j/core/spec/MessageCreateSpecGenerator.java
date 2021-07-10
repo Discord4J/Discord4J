@@ -52,6 +52,7 @@
 package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.discordjson.json.MessageCreateRequest;
@@ -95,6 +96,8 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
 
     Possible<Snowflake> messageReference();
 
+    Possible<List<LayoutComponent>> components();
+
     @Override
     default MultipartRequest<MessageCreateRequest> asRequest() {
         MessageCreateRequest json = MessageCreateRequest.builder()
@@ -109,6 +112,9 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
                         ref -> MessageReferenceData.builder()
                                 .messageId(ref.asString())
                                 .build()))
+                .components(mapPossible(components(), components -> components.stream()
+                        .map(LayoutComponent::getData)
+                        .collect(Collectors.toList())))
                 .build();
         return MultipartRequest.ofRequestAndFiles(json, Stream.concat(files().stream(), fileSpoilers().stream())
                 .map(MessageCreateFields.File::asRequest)
