@@ -17,6 +17,7 @@
 
 package discord4j.core.spec;
 
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.discordjson.possible.Possible;
@@ -27,6 +28,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 
@@ -35,21 +37,28 @@ interface MessageEditSpecGenerator extends Spec<MessageEditRequest> {
 
     Possible<Optional<String>> content();
 
-    Possible<Optional<EmbedCreateSpec>> embed();
+    Possible<Optional<List<EmbedCreateSpec>>> embeds();
 
     Possible<Optional<AllowedMentions>> allowedMentions();
 
     Possible<Optional<List<Message.Flag>>> flags();
 
+    Possible<Optional<List<LayoutComponent>>> components();
+
     @Override
     default MessageEditRequest asRequest() {
         return MessageEditRequest.builder()
                 .content(content())
-                .embed(mapPossibleOptional(embed(), EmbedCreateSpec::asRequest))
+                .embeds(mapPossibleOptional(embeds(), embeds -> embeds.stream()
+                        .map(EmbedCreateSpec::asRequest)
+                        .collect(Collectors.toList())))
                 .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
                 .flags(mapPossibleOptional(flags(), f -> f.stream()
                         .mapToInt(Message.Flag::getValue)
                         .reduce(0, (left, right) -> left | right)))
+                .components(mapPossibleOptional(components(), components -> components.stream()
+                        .map(LayoutComponent::getData)
+                        .collect(Collectors.toList())))
                 .build();
     }
 }

@@ -22,6 +22,7 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateMono;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.core.spec.legacy.LegacyEmbedCreateSpec;
 import discord4j.core.spec.legacy.LegacyMessageCreateSpec;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -104,6 +105,32 @@ public interface MessageChannel extends Channel {
     }
 
     /**
+     * Requests to create a message with embeds. Other properties specifying how to create the message can be set via
+     * the {@code withXxx} methods of the returned {@link MessageCreateMono}.
+     *
+     * @param embeds immutable objects that specify how to create the embeds
+     * @return A {@link MessageCreateMono} where, upon successful completion, emits the created {@link Message}. If an
+     * error is received, it is emitted through the {@code MessageCreateMono}.
+     * @see #createMessage(MessageCreateSpec)
+     */
+    default MessageCreateMono createMessage(EmbedCreateSpec... embeds) {
+        return MessageCreateMono.of(this).withEmbeds(embeds);
+    }
+
+    /**
+     * Requests to create a message with an embed.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyEmbedCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createEmbed(EmbedCreateSpec)} which offers an immutable approach to build specs
+     */
+    @Deprecated
+    default Mono<Message> createEmbed(final Consumer<? super LegacyEmbedCreateSpec> spec) {
+        return createMessage(messageSpec -> messageSpec.setEmbed(spec));
+    }
+
+    /**
      * Requests to create a message with an embed. Other properties specifying how to create the message can be set via
      * the {@code withXxx} methods of the returned {@link MessageCreateMono}.
      *
@@ -111,9 +138,11 @@ public interface MessageChannel extends Channel {
      * @return A {@link MessageCreateMono} where, upon successful completion, emits the created {@link Message}. If an
      * error is received, it is emitted through the {@code MessageCreateMono}.
      * @see #createMessage(MessageCreateSpec)
+     * @deprecated Use {@link #createMessage(EmbedCreateSpec...)}.
      */
+    @Deprecated
     default MessageCreateMono createEmbed(EmbedCreateSpec embed) {
-        return MessageCreateMono.of(this).withEmbed(embed);
+        return MessageCreateMono.of(this).withEmbeds(embed);
     }
 
     /**
