@@ -208,6 +208,15 @@ public abstract class ReactionEmoji {
                     .build();
         }
 
+        /**
+         * Gets the formatted version of this emoji (i.e., to display in the client).
+         *
+         * @return The formatted version of this emoji (i.e., to display in the client).
+         */
+        public String asFormat() {
+            return '<' + (this.isAnimated() ? "a" : "") + ':' + this.getName() + ':' + this.getId().asString() + '>';
+        }
+
         @Override
         public String toString() {
             return "ReactionEmoji.Custom{" +
