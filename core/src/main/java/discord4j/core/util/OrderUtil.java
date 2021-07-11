@@ -17,10 +17,7 @@
 package discord4j.core.util;
 
 import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.channel.CategorizableChannel;
-import discord4j.core.object.entity.channel.Category;
-import discord4j.core.object.entity.channel.GuildChannel;
-import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.core.object.entity.channel.*;
 import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 
@@ -48,8 +45,8 @@ public final class OrderUtil {
      * Note that this order is only applicable to channels if they are of the same type and in the same category. See
      * {@link #BUCKETED_CHANNEL_ORDER} for ordering between different channel types.
      */
-    public static final Comparator<GuildChannel> CHANNEL_ORDER =
-            Comparator.comparing(GuildChannel::getRawPosition).thenComparing(GuildChannel::getId);
+    public static final Comparator<TopLevelGuildChannel> CHANNEL_ORDER =
+            Comparator.comparing(TopLevelGuildChannel::getRawPosition).thenComparing(GuildChannel::getId);
 
     /**
      * The ordering of {@link GuildChannel guild channels} which considers channel type.

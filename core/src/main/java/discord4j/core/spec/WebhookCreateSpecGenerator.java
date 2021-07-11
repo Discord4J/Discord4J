@@ -19,6 +19,7 @@ package discord4j.core.spec;
 
 import discord4j.core.object.entity.Webhook;
 import discord4j.core.object.entity.channel.GuildMessageChannel;
+import discord4j.core.object.entity.channel.TopLevelGuildMessageChannel;
 import discord4j.discordjson.json.WebhookCreateRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
@@ -50,7 +51,7 @@ interface WebhookCreateSpecGenerator extends AuditSpec<WebhookCreateRequest> {
 @Value.Immutable(builder = false)
 abstract class WebhookCreateMonoGenerator extends Mono<Webhook> implements WebhookCreateSpecGenerator {
 
-    abstract GuildMessageChannel channel();
+    abstract TopLevelGuildMessageChannel channel();
 
     @Override
     public void subscribe(CoreSubscriber<? super Webhook> actual) {

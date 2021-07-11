@@ -45,7 +45,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /** A Discord voice channel. */
-public final class VoiceChannel extends BaseCategorizableChannel {
+public final class VoiceChannel extends BaseTopLevelGuildChannel implements CategorizableChannel {
 
     /**
      * Constructs an {@code VoiceChannel} with an associated {@link GatewayDiscordClient} and Discord data.
