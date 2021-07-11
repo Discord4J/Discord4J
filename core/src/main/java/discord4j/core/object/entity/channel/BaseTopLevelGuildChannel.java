@@ -3,7 +3,6 @@ package discord4j.core.object.entity.channel;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.discordjson.json.ChannelData;
 
-// TODO naming
 class BaseTopLevelGuildChannel extends BaseGuildChannel implements TopLevelGuildChannel {
 
     BaseTopLevelGuildChannel(GatewayDiscordClient gateway, ChannelData data) {
