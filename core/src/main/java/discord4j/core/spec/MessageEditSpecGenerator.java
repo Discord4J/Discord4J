@@ -54,7 +54,7 @@ interface MessageEditSpecGenerator extends Spec<MessageEditRequest> {
                         .collect(Collectors.toList())))
                 .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
                 .flags(mapPossibleOptional(flags(), f -> f.stream()
-                        .mapToInt(Message.Flag::getValue)
+                        .mapToInt(Message.Flag::getFlag)
                         .reduce(0, (left, right) -> left | right)))
                 .components(mapPossibleOptional(components(), components -> components.stream()
                         .map(LayoutComponent::getData)

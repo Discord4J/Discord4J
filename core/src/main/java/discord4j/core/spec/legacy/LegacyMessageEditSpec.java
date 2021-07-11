@@ -128,7 +128,7 @@ public class LegacyMessageEditSpec implements LegacySpec<MessageEditRequest> {
     public LegacyMessageEditSpec setFlags(@Nullable Message.Flag... flags) {
         if (flags != null) {
             this.flags = Possible.of(Optional.of(Arrays.stream(flags)
-                    .mapToInt(Message.Flag::getValue)
+                    .mapToInt(Message.Flag::getFlag)
                     .reduce(0, (left, right) -> left | right)));
         } else {
             this.flags = Possible.of(Optional.empty());

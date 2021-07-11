@@ -17,6 +17,7 @@
 
 package discord4j.core.spec;
 
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
 import discord4j.discordjson.json.WebhookExecuteRequest;
@@ -65,6 +66,8 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
 
     Possible<AllowedMentions> allowedMentions();
 
+    Possible<List<LayoutComponent>> components();
+
     @Override
     default MultipartRequest<WebhookExecuteRequest> asRequest() {
         WebhookExecuteRequest request = WebhookExecuteRequest.builder()
@@ -74,6 +77,9 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
                 .tts(tts())
                 .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
                 .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
+                .components(mapPossible(components(), components -> components.stream()
+                    .map(LayoutComponent::getData)
+                    .collect(Collectors.toList())))
                 .build();
         return MultipartRequest.ofRequestAndFiles(request, Stream.concat(files().stream(), fileSpoilers().stream())
                 .map(MessageCreateFields.File::asRequest)
