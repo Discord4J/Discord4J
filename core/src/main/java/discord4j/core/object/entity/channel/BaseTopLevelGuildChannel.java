@@ -1,3 +1,4 @@
+
 package discord4j.core.object.entity.channel;
 
 import discord4j.common.util.Snowflake;
