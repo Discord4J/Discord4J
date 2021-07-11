@@ -4,7 +4,6 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Member;
 import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.PermissionsEditRequest;
 import discord4j.rest.util.PermissionSet;
