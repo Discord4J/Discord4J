@@ -31,7 +31,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /** A Discord category. */
-public final class Category extends BaseTopLevelGuildChannel {
+public final class Category extends BaseGuildChannel {
 
     /**
      * Constructs an {@code Category} with an associated {@link GatewayDiscordClient} and Discord data.
