@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 /**
  * A Discord text channel.
  */
-public final class TextChannel extends BaseTextOrNewsChannel {
+public final class TextChannel extends BaseTopLevelGuildChannel implements TopLevelGuildMessageChannel {
 
     /**
      * Constructs an {@code TextChannel} with an associated {@link GatewayDiscordClient} and Discord data.

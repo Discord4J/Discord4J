@@ -7,6 +7,7 @@ import discord4j.core.object.entity.User;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.ThreadMetadata;
+import discord4j.rest.util.PermissionSet;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
@@ -15,7 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.function.Function;
 
-public final class ThreadChannel extends BaseGuildMessageChannel {
+public final class ThreadChannel extends BaseChannel implements GuildMessageChannel {
 
     public ThreadChannel(GatewayDiscordClient gateway, ChannelData data) {
         super(gateway, data);
@@ -42,16 +43,16 @@ public final class ThreadChannel extends BaseGuildMessageChannel {
                 .map(Snowflake::of);
     }
 
-    public Mono<TextOrNewsChannel> getParent() {
+    public Mono<TopLevelGuildMessageChannel> getParent() {
         return Mono.justOrEmpty(getParentId())
                 .flatMap(getClient()::getChannelById)
-                .cast(TextOrNewsChannel.class);
+                .cast(TopLevelGuildMessageChannel.class);
     }
 
-    public Mono<TextOrNewsChannel> getParent(EntityRetrievalStrategy retrievalStrategy) {
+    public Mono<TopLevelGuildMessageChannel> getParent(EntityRetrievalStrategy retrievalStrategy) {
         return Mono.justOrEmpty(getParentId())
                 .flatMap(getClient().withRetrievalStrategy(retrievalStrategy)::getChannelById)
-                .cast(TextOrNewsChannel.class);
+                .cast(TopLevelGuildMessageChannel.class);
     }
 
     public int getApproximateMessageCount() {
@@ -87,6 +88,16 @@ public final class ThreadChannel extends BaseGuildMessageChannel {
     private ThreadMetadata getMetadata() {
         return getData().threadMetadata().toOptional()
                 .orElseThrow(IllegalStateException::new); // should always be present for threads
+    }
+
+    @Override
+    public Mono<PermissionSet> getEffectivePermissions(Snowflake memberId) {
+        return getParent().flatMap(parent -> parent.getEffectivePermissions(memberId));
+    }
+
+    @Override
+    public Mono<PermissionSet> getEffectivePermissions(Member member) {
+        return getParent().flatMap(parent -> parent.getEffectivePermissions(member));
     }
 
     public enum AutoArchiveDuration {

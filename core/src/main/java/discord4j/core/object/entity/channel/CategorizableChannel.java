@@ -22,6 +22,7 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.InviteCreateMono;
 import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.legacy.LegacyInviteCreateSpec;
+import discord4j.discordjson.possible.Possible;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -29,14 +30,17 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /** A Discord channel which can be categorized into a {@link Category}. These channels can also have invites. */
-public interface CategorizableChannel extends GuildChannel {
+public interface CategorizableChannel extends TopLevelGuildChannel {
 
     /**
      * Gets the ID of the category for this channel, if present.
      *
      * @return The ID of the category for this channel, if present.
      */
-    Optional<Snowflake> getCategoryId();
+    default Optional<Snowflake> getCategoryId() {
+        return Possible.flatOpt(getData().parentId())
+                .map(Snowflake::of);
+    }
 
     /**
      * Requests to retrieve the category for this channel, if present.
@@ -44,7 +48,11 @@ public interface CategorizableChannel extends GuildChannel {
      * @return A {@link Mono} where, upon successful completion, emits the {@link Category category} this channel, if
      * present. If an error is received, it is emitted through the {@code Mono}.
      */
-    Mono<Category> getCategory();
+    default Mono<Category> getCategory() {
+        return Mono.justOrEmpty(getCategoryId())
+                .flatMap(getClient()::getChannelById)
+                .cast(Category.class);
+    }
 
     /**
      * Requests to retrieve the category for this channel, if present, using the given retrieval strategy.
@@ -53,7 +61,11 @@ public interface CategorizableChannel extends GuildChannel {
      * @return A {@link Mono} where, upon successful completion, emits the {@link Category category} this channel, if
      * present. If an error is received, it is emitted through the {@code Mono}.
      */
-    Mono<Category> getCategory(EntityRetrievalStrategy retrievalStrategy);
+    default Mono<Category> getCategory(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getCategoryId())
+                .flatMap(id -> getClient().withRetrievalStrategy(retrievalStrategy).getChannelById(id))
+                .cast(Category.class);
+    }
 
     /**
      * Requests to create an invite.
@@ -65,7 +77,16 @@ public interface CategorizableChannel extends GuildChannel {
      * approach to build specs
      */
     @Deprecated
-    Mono<ExtendedInvite> createInvite(final Consumer<? super LegacyInviteCreateSpec> spec);
+    default Mono<ExtendedInvite> createInvite(final Consumer<? super LegacyInviteCreateSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyInviteCreateSpec mutatedSpec = new LegacyInviteCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getChannelService()
+                            .createChannelInvite(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
+                .map(data -> new ExtendedInvite(getClient(), data));
+    }
 
     /**
      * Requests to create an invite. Properties specifying how to create the invite can be set via the {@code withXxx }
@@ -85,7 +106,12 @@ public interface CategorizableChannel extends GuildChannel {
      * @return A {@link Mono} where, upon successful completion, emits the created {@link ExtendedInvite}. If an error
      * is received, it is emitted through the {@code Mono}.
      */
-    Mono<ExtendedInvite> createInvite(InviteCreateSpec spec);
+    default Mono<ExtendedInvite> createInvite(InviteCreateSpec spec) {
+        return Mono.defer(
+                () -> getClient().getRestClient().getChannelService()
+                        .createChannelInvite(getId().asLong(), spec.asRequest(), spec.reason()))
+                .map(data -> new ExtendedInvite(getClient(), data));
+    }
 
     /**
      * Requests to retrieve this channel's invites.
@@ -93,5 +119,9 @@ public interface CategorizableChannel extends GuildChannel {
      * @return A {@link Flux} that continually emits this channel's {@link ExtendedInvite invites}. If an error is
      * received, it is emitted through the {@code Flux}.
      */
-    Flux<ExtendedInvite> getInvites();
+    default Flux<ExtendedInvite> getInvites() {
+        return getClient().getRestClient().getChannelService()
+                .getChannelInvites(getId().asLong())
+                .map(data -> new ExtendedInvite(getClient(), data));
+    }
 }

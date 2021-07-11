@@ -19,7 +19,6 @@ package discord4j.core.object.entity.channel;
 import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.Embed;
 import discord4j.core.object.Region;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Guild;
@@ -41,11 +40,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 /** A Discord voice channel. */
-public final class VoiceChannel extends BaseCategorizableChannel {
+public final class VoiceChannel extends BaseTopLevelGuildChannel implements CategorizableChannel {
 
     /**
      * Constructs an {@code VoiceChannel} with an associated {@link GatewayDiscordClient} and Discord data.
