@@ -22,12 +22,15 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
 import discord4j.core.object.MessageInteraction;
 import discord4j.core.object.MessageReference;
+import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.core.spec.MessageEditMono;
 import discord4j.core.spec.MessageEditSpec;
+import discord4j.core.spec.legacy.LegacyMessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.SuppressEmbedsRequest;
@@ -315,14 +318,14 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets any attached files.
+     * Gets any attached files, with the same order as in the message.
      *
-     * @return Any attached files.
+     * @return Any attached files, with the same order as in the message.
      */
-    public Set<Attachment> getAttachments() {
+    public List<Attachment> getAttachments() {
         return data.attachments().stream()
                 .map(data -> new Attachment(gateway, data))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     /**
@@ -482,25 +485,69 @@ public final class Message implements Entity {
                 .map(data -> new MessageInteraction(gateway, data));
     }
 
+    public List<MessageComponent> getComponents() {
+        return data.components().toOptional()
+                .map(components -> components.stream()
+                    .map(MessageComponent::fromData)
+                    .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
+    }
+
     /**
      * Requests to edit this message.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link MessageEditSpec} to be operated on.
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyMessageEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Message}. If an error is
      * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(MessageEditSpec)}  or {@link #edit()} which offer an immutable approach to build
+     * specs
      */
-    public Mono<Message> edit(final Consumer<? super MessageEditSpec> spec) {
+    @Deprecated
+    public Mono<Message> edit(final Consumer<? super LegacyMessageEditSpec> spec) {
         return Mono.defer(
                 () -> {
-                    MessageEditSpec mutatedSpec = new MessageEditSpec();
+                    LegacyMessageEditSpec mutatedSpec = new LegacyMessageEditSpec();
                     getClient().getRestClient().getRestResources()
-                        .getAllowedMentions()
-                        .ifPresent(mutatedSpec::setAllowedMentions);
+                            .getAllowedMentions()
+                            .ifPresent(mutatedSpec::setAllowedMentions);
                     spec.accept(mutatedSpec);
                     return gateway.getRestClient().getChannelService()
                             .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest());
                 })
                 .map(data -> new Message(gateway, data));
+    }
+
+    /**
+     * Requests to edit this message.
+     *
+     * @param spec an immutable object that specifies how to edit the message
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Message> edit(MessageEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> {
+                    MessageEditSpec actualSpec = getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .map(spec::withAllowedMentionsOrNull)
+                            .orElse(spec);
+                    return gateway.getRestClient().getChannelService()
+                            .editMessage(getChannelId().asLong(), getId().asLong(), actualSpec.asRequest());
+                })
+                .map(data -> new Message(gateway, data));
+    }
+
+    /**
+     * Requests to edit this message. Properties specifying how to edit this message can be set via the {@code
+     * withXxx} methods of the returned {@link MessageEditMono}.
+     *
+     * @return A {@link MessageEditMono} where, upon successful completion, emits the edited {@link Message}. If an
+     * error is received, it is emitted through the {@code MessageEditMono}.
+     * @see #edit(MessageEditSpec)
+     */
+    public MessageEditMono edit() {
+        return MessageEditMono.of(this);
     }
 
     /**

@@ -19,12 +19,15 @@ package discord4j.core.object.entity.channel;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.FollowedChannel;
+import discord4j.core.spec.NewsChannelEditMono;
 import discord4j.core.spec.NewsChannelEditSpec;
+import discord4j.core.spec.legacy.LegacyNewsChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.NewsChannelFollowRequest;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /** A Discord news channel. */
@@ -43,18 +46,48 @@ public final class NewsChannel extends BaseTextOrNewsChannel {
     /**
      * Requests to edit this news channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link NewsChannelEditSpec} to be operated on.
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyNewsChannelEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link NewsChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(NewsChannelEditSpec)} or {@link #edit()} which offer an immutable approach to build
+     * specs
      */
-    public Mono<NewsChannel> edit(final Consumer<? super NewsChannelEditSpec> spec) {
+    @Deprecated
+    public Mono<NewsChannel> edit(final Consumer<? super LegacyNewsChannelEditSpec> spec) {
         return Mono.defer(
                 () -> {
-                    NewsChannelEditSpec mutatedSpec = new NewsChannelEditSpec();
+                    LegacyNewsChannelEditSpec mutatedSpec = new LegacyNewsChannelEditSpec();
                     spec.accept(mutatedSpec);
                     return getClient().getRestClient().getChannelService()
                             .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
                 })
+                .map(data -> EntityUtil.getChannel(getClient(), data))
+                .cast(NewsChannel.class);
+    }
+
+    /**
+     * Requests to edit this news channel. Properties specifying how to edit this news channel can be set via the {@code
+     * withXxx} methods of the returned {@link NewsChannelEditMono}.
+     *
+     * @return A {@link NewsChannelEditMono} where, upon successful completion, emits the edited {@link NewsChannel}. If
+     * an error is received, it is emitted through the {@code NewsChannelEditMono}.
+     */
+    public NewsChannelEditMono edit() {
+        return NewsChannelEditMono.of(this);
+    }
+
+    /**
+     * Requests to edit this news channel.
+     *
+     * @param spec an immutable object that specifies how to edit this news channel
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link NewsChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<NewsChannel> edit(NewsChannelEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> getClient().getRestClient().getChannelService()
+                        .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(NewsChannel.class);
     }

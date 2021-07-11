@@ -23,6 +23,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.discordjson.json.InteractionData;
@@ -93,9 +94,9 @@ public class Interaction implements DiscordObject {
      *
      * @return The command data payload.
      */
-    public ApplicationCommandInteraction getCommandInteraction() {
-        return new ApplicationCommandInteraction(getClient(), data.data().get(),
-                getGuildId().map(Snowflake::asLong).orElse(null));
+    public Optional<ApplicationCommandInteraction> getCommandInteraction() {
+        return data.data().toOptional().map(data -> new ApplicationCommandInteraction(getClient(), data,
+                getGuildId().map(Snowflake::asLong).orElse(null)));
     }
 
     /**
@@ -163,6 +164,18 @@ public class Interaction implements DiscordObject {
         return data.token();
     }
 
+    /**
+     * Gets the message associated with the interaction.
+     * <p>
+     * This is only present for component interactions.
+     *
+     * @return The message associated with the interaction.
+     */
+    public Optional<Message> getMessage() {
+        return data.message().toOptional()
+                .map(data -> new Message(gateway, data));
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
@@ -173,7 +186,8 @@ public class Interaction implements DiscordObject {
 
         UNKNOWN(-1),
         PING(1),
-        APPLICATION_COMMAND(2);
+        APPLICATION_COMMAND(2),
+        MESSAGE_COMPONENT(3);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -207,6 +221,7 @@ public class Interaction implements DiscordObject {
             switch (value) {
                 case 1: return PING;
                 case 2: return APPLICATION_COMMAND;
+                case 3: return MESSAGE_COMPONENT;
                 default: return UNKNOWN;
             }
         }

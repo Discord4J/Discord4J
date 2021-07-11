@@ -150,7 +150,7 @@ public class VoiceSupport {
                 return Mono.justOrEmpty(event.getMember())
                         .flatMap(Member::getVoiceState)
                         .flatMap(VoiceState::getChannel)
-                        .flatMap(channel -> channel.join(spec -> spec.setProvider(provider)))
+                        .flatMap(channel -> channel.join().withProvider(provider))
                         .retryWhen(Retry.backoff(2, Duration.ofSeconds(2)))
                         .doFinally(s -> log.info("Finalized join request after {}", s))
                         .onErrorResume(t -> {

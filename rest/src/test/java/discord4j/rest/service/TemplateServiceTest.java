@@ -54,7 +54,7 @@ public class TemplateServiceTest {
         // To create a new one and verify it's valid
         StepVerifier.create(templateService.createTemplate(guild, TemplateCreateRequest.builder()
                 .name("Test template")
-                .description("A template created from a test method")
+                .descriptionOrNull("A template created from a test method")
                 .build()))
                 .expectNextMatches(it -> it.sourceGuildId().equals(Id.of(guild)))
                 .verifyComplete();
