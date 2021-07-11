@@ -52,7 +52,7 @@ interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<Intera
         return InteractionApplicationCommandCallbackData.builder()
                 .content(content())
                 .tts(tts())
-                .flags(mapPossible(ephemeral(), eph -> eph ? Message.Flag.EPHEMERAL.getValue() : 0))
+                .flags(mapPossible(ephemeral(), eph -> eph ? Message.Flag.EPHEMERAL.getFlag() : 0))
                 .embeds(mapPossible(embeds(), embeds -> embeds.stream()
                         .map(EmbedCreateSpec::asRequest)
                         .collect(Collectors.toList())))
