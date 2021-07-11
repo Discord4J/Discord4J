@@ -16,10 +16,10 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.discordjson.json.ChannelData;
-import discord4j.core.GatewayDiscordClient;
 import discord4j.common.util.Snowflake;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.util.EntityUtil;
+import discord4j.discordjson.json.ChannelData;
 import discord4j.rest.entity.RestChannel;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
