@@ -95,10 +95,7 @@ public interface GuildChannel extends Channel {
      *
      * @param memberId The ID of the member to get permissions for.
      * @return The permissions for the given member.
-     * @deprecated Threads don't have permission overwrites, so when they are released, this will be moved to
-     * {@link TopLevelGuildChannel#getEffectivePermissions(Snowflake)}.
      */
-    @Deprecated
     Mono<PermissionSet> getEffectivePermissions(Snowflake memberId);
 
     /**
@@ -106,10 +103,7 @@ public interface GuildChannel extends Channel {
      *
      * @param member The member to get permissions for.
      * @return The permissions for the given member.
-     * @deprecated Threads don't have permission overwrites, so when they are released, this will be moved to
-     * {@link TopLevelGuildChannel#getEffectivePermissions(Member)}.
      */
-    @Deprecated
     Mono<PermissionSet> getEffectivePermissions(Member member);
 
     /**
