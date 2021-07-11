@@ -949,7 +949,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         final Multimap<String, Object> parameters = new Multimap<>(3);
         parameters.add("compress", "zlib-stream");
         parameters.add("encoding", "json");
-        parameters.add("v", 8);
+        parameters.add("v", 9);
         return parameters;
     }
 

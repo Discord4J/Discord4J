@@ -113,6 +113,12 @@ public interface Channel extends Entity {
         /** Represents a {@link StoreChannel}. */
         GUILD_STORE(6),
 
+        GUILD_NEWS_THREAD(10),
+
+        GUILD_PUBLIC_THREAD(11),
+
+        GUILD_PRIVATE_THREAD(12),
+
         /** Represents a {@link VoiceChannel} for hosting events with an audience. */
         GUILD_STAGE_VOICE(13);
 
