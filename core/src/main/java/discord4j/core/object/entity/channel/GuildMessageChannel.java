@@ -16,18 +16,10 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.core.object.ExtendedInvite;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.Webhook;
-import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.core.spec.InviteCreateMono;
-import discord4j.core.spec.InviteCreateSpec;
-import discord4j.core.spec.WebhookCreateMono;
-import discord4j.core.spec.WebhookCreateSpec;
-import discord4j.core.spec.legacy.LegacyWebhookCreateSpec;
 import discord4j.discordjson.json.BulkDeleteRequest;
 import discord4j.rest.util.Permission;
 import org.reactivestreams.Publisher;
@@ -39,8 +31,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /** A Discord channel in a guild that can have messages sent to it. */

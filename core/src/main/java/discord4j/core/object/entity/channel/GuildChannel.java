@@ -17,19 +17,11 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.ExtendedPermissionOverwrite;
-import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.core.util.OrderUtil;
 import discord4j.rest.util.PermissionSet;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
-
-import java.util.Optional;
-import java.util.Set;
 
 /** A Discord channel associated to a {@link Guild}. */
 public interface GuildChannel extends Channel {
