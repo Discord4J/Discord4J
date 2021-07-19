@@ -771,6 +771,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             WithUser<ImmutablePresenceData> oldPresence = presences.put(presenceId, new WithUser<>(
                     ImmutablePresenceData.copyOf(presence).withUser(EmptyPartialUser.INSTANCE), userRef,
                     (p, u) -> p.withUser(PartialUserData.builder()
+                            .id(u.id())
                             .avatar(Possible.of(u.avatar()))
                             .username(u.username())
                             .discriminator(u.discriminator())
