@@ -29,7 +29,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /** A Discord channel which can be categorized into a {@link Category}. These channels can also have invites. */
-public interface CategorizableChannel extends GuildChannel {
+public interface CategorizableChannel extends TopLevelGuildChannel {
 
     /**
      * Gets the ID of the category for this channel, if present.
