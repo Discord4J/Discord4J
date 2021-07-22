@@ -16,6 +16,7 @@
  */
 package discord4j.core.event.domain.interaction;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
@@ -31,6 +32,7 @@ import discord4j.rest.util.InteractionResponseType;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -61,12 +63,23 @@ public class ComponentInteractEvent extends InteractionCreateEvent {
 
     /**
      * Gets the message the component is on.
+     * <p>
+     * For ephemeral messages, only the ID is present. Use {@link #getMessageId()}
      *
      * @return The message the component is on.
      */
-    public Message getMessage() {
-        return getInteraction().getMessage()
-                .orElseThrow(IllegalStateException::new); // components are always on messages
+    public Optional<Message> getMessage() {
+        return getInteraction().getMessage();
+    }
+
+    /**
+     * Gets the ID of the message the component is on.
+     *
+     * @return The ID of the message the component is on.
+     */
+    public Snowflake getMessageId() {
+        return getInteraction().getMessageId()
+                .orElseThrow(IllegalStateException::new); // at least the ID is always present for component interactions
     }
 
     /**

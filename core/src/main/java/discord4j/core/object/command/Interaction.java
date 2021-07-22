@@ -27,6 +27,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.discordjson.json.InteractionData;
+import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.UserData;
 import reactor.core.publisher.Mono;
 
@@ -167,13 +168,29 @@ public class Interaction implements DiscordObject {
     /**
      * Gets the message associated with the interaction.
      * <p>
-     * This is only present for component interactions.
+     * This is only present for component interactions on non-ephemeral messages.
      *
      * @return The message associated with the interaction.
      */
     public Optional<Message> getMessage() {
         return data.message().toOptional()
+                // When the component is on an ephemeral message, Discord sends only the id and flags fields.
+                // We can't make a Message out of that.
+                .filter(json -> json.get("flags").asInt() != Message.Flag.EPHEMERAL.getFlag())
+                .map(json -> getClient().getCoreResources().getJacksonResources().getObjectMapper().convertValue(json, MessageData.class))
                 .map(data -> new Message(gateway, data));
+    }
+
+    /**
+     * Gets the ID of the message associated with the interaction.
+     * <p>
+     * This is only present for component interactions.
+     *
+     * @return The message associated with the interaction.
+     */
+    public Optional<Snowflake> getMessageId() {
+        return data.message().toOptional()
+                .map(json -> Snowflake.of(json.get("id").asText()));
     }
 
     @Override
