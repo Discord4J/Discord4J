@@ -53,7 +53,7 @@ interface TextChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest>
     @Override
     default ChannelCreateRequest asRequest() {
         return ChannelCreateRequest.builder()
-                .type(Channel.Type.GUILD_NEWS.getValue())
+                .type(Channel.Type.GUILD_TEXT.getValue())
                 .name(name())
                 .topic(topic())
                 .rateLimitPerUser(rateLimitPerUser())
