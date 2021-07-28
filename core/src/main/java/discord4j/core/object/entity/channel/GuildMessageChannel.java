@@ -17,10 +17,14 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.common.util.Snowflake;
+import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
+import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.core.spec.InviteCreateMono;
+import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.WebhookCreateMono;
 import discord4j.core.spec.WebhookCreateSpec;
 import discord4j.core.spec.legacy.LegacyWebhookCreateSpec;
@@ -31,13 +35,17 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+/** A Discord channel in a guild that can have messages sent to it. */
 public interface GuildMessageChannel extends CategorizableChannel, MessageChannel {
 
     /**
      * Gets the channel topic, if present.
      *
      * @return The channel topic, if present.
+     * @deprecated Threads don't have topics, so when they are released, this will be moved to
+     * {@link TopLevelGuildMessageChannel#getTopic()}.
      */
+    @Deprecated
     Optional<String> getTopic();
 
     /**
@@ -104,7 +112,10 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      *
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error is
      * received, it is emitted through the {@code Mono}.
+     * @deprecated Threads don't have webhooks, so when they are released, this will be moved to
+     * {@link TopLevelGuildMessageChannel#createWebhook(String)}.
      */
+    @Deprecated
     default WebhookCreateMono createWebhook(String name) {
         return WebhookCreateMono.of(name, this);
     }
@@ -115,7 +126,10 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      * @param spec an immutable object that specifies how to create the webhook
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error is
      * received, it is emitted through the {@code Mono}.
+     * @deprecated Threads don't have webhooks, so when they are released, this will be moved to
+     * {@link TopLevelGuildMessageChannel#createWebhook(WebhookCreateSpec)}.
      */
+    @Deprecated
     Mono<Webhook> createWebhook(WebhookCreateSpec spec);
 
     /**
@@ -123,7 +137,10 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      *
      * @return A {@link Flux} that continually emits the {@link Webhook webhooks} of the channel. If an error is
      * received, it is emitted through the {@code Flux}.
+     * @deprecated Threads don't have webhooks, so when they are released, this will be moved to
+     * {@link TopLevelGuildMessageChannel#getWebhooks()}.
      */
+    @Deprecated
     Flux<Webhook> getWebhooks();
 
     /**
@@ -133,4 +150,54 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      * view this channel {@link discord4j.rest.util.Permission#VIEW_CHANNEL}
      */
     Flux<Member> getMembers();
+
+    /**
+     * @deprecated Threads aren't categorizable, so when they are released, GuildMessageChannel will no longer extend
+     * CategorizableChannel. Use {@link CategorizableChannel#getCategoryId()}
+     */
+    @Override
+    @Deprecated
+    Optional<Snowflake> getCategoryId();
+
+    /**
+     * @deprecated Threads aren't categorizable, so when they are released, GuildMessageChannel will no longer extend
+     * CategorizableChannel. Use {@link CategorizableChannel#getCategory()}
+     */
+    @Override
+    @Deprecated
+    Mono<Category> getCategory();
+
+    /**
+     * @deprecated Threads aren't categorizable, so when they are released, GuildMessageChannel will no longer extend
+     * CategorizableChannel. Use {@link CategorizableChannel#getCategory(EntityRetrievalStrategy)}
+     */
+    @Override
+    @Deprecated
+    Mono<Category> getCategory(EntityRetrievalStrategy retrievalStrategy);
+
+    /**
+     * @deprecated Threads aren't categorizable, so when they are released, GuildMessageChannel will no longer extend
+     * CategorizableChannel. Use {@link CategorizableChannel#createInvite()}
+     */
+    @Override
+    @Deprecated
+    default InviteCreateMono createInvite() {
+        return CategorizableChannel.super.createInvite();
+    }
+
+    /**
+     * @deprecated Threads aren't categorizable, so when they are released, GuildMessageChannel will no longer extend
+     * CategorizableChannel. Use {@link CategorizableChannel#createInvite(InviteCreateSpec)} )}
+     */
+    @Override
+    @Deprecated
+    Mono<ExtendedInvite> createInvite(InviteCreateSpec spec);
+
+    /**
+     * @deprecated Threads aren't categorizable, so when they are released, GuildMessageChannel will no longer extend
+     * CategorizableChannel. Use {@link CategorizableChannel#getInvites()} )}
+     */
+    @Override
+    @Deprecated
+    Flux<ExtendedInvite> getInvites();
 }

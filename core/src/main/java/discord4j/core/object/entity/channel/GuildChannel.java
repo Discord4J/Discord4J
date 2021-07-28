@@ -33,6 +33,7 @@ import java.util.Set;
 
 /** A Discord channel associated to a {@link Guild}. */
 public interface GuildChannel extends Channel {
+
     /**
      * Gets the ID of the guild this channel is associated to.
      *
@@ -61,7 +62,10 @@ public interface GuildChannel extends Channel {
      * Gets the permission overwrites for this channel.
      *
      * @return The permission overwrites for this channel.
+     * @deprecated Threads don't have permission overwrites, so when they are released, this will be moved to
+     * {@link TopLevelGuildChannel#getPermissionOverwrites()}.
      */
+    @Deprecated
     Set<ExtendedPermissionOverwrite> getPermissionOverwrites();
 
     /**
@@ -69,7 +73,10 @@ public interface GuildChannel extends Channel {
      *
      * @param memberId The ID of the member to get the overwrite for.
      * @return The permission overwrite targeting the given member.
+     * @deprecated Threads don't have permission overwrites, so when they are released, this will be moved to
+     * {@link TopLevelGuildChannel#getOverwriteForMember(Snowflake)}.
      */
+    @Deprecated
     Optional<ExtendedPermissionOverwrite> getOverwriteForMember(Snowflake memberId);
 
     /**
@@ -77,7 +84,10 @@ public interface GuildChannel extends Channel {
      *
      * @param roleId The ID of the role to get the overwrite for.
      * @return The permission overwrite targeting the given role.
+     * @deprecated Threads don't have permission overwrites, so when they are released, this will be moved to
+     * {@link TopLevelGuildChannel#getOverwriteForRole(Snowflake)}.
      */
+    @Deprecated
     Optional<ExtendedPermissionOverwrite> getOverwriteForRole(Snowflake roleId);
 
     /**
@@ -108,7 +118,10 @@ public interface GuildChannel extends Channel {
      * other channels in the guild.
      *
      * @return The raw position of the channel.
+     * @deprecated Threads don't have positions, so when they are released, this will be moved to
+     * {@link TopLevelGuildChannel#getRawPosition()}.
      */
+    @Deprecated
     int getRawPosition();
 
     /**
@@ -135,7 +148,10 @@ public interface GuildChannel extends Channel {
      *
      * @return A {@link Mono} where, upon successful completion, emits the position of the channel. If an error is
      * received, it is emitted through the {@code Mono}.
+     * @deprecated Threads don't have positions, so when they are released, this will be moved to
+     * {@link TopLevelGuildChannel#getPosition()}.
      */
+    @Deprecated
     Mono<Integer> getPosition();
 
     /**
@@ -146,7 +162,10 @@ public interface GuildChannel extends Channel {
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
      * through the {@code Mono}.
+     * @deprecated Threads don't have permission overwrites, so when they are released, this will be moved to
+     * {@link TopLevelGuildChannel#addMemberOverwrite(Snowflake, PermissionOverwrite)}.
      */
+    @Deprecated
     default Mono<Void> addMemberOverwrite(final Snowflake memberId, final PermissionOverwrite overwrite) {
         return addMemberOverwrite(memberId, overwrite, null);
     }
@@ -160,7 +179,10 @@ public interface GuildChannel extends Channel {
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
      * through the {@code Mono}.
+     * @deprecated Threads don't have permission overwrites, so when they are released, this will be moved to
+     * {@link TopLevelGuildChannel#addMemberOverwrite(Snowflake, PermissionOverwrite, String)}.
      */
+    @Deprecated
     Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite, @Nullable String reason);
 
     /**
@@ -171,7 +193,10 @@ public interface GuildChannel extends Channel {
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
      * through the {@code Mono}.
+     * @deprecated Threads don't have permission overwrites, so when they are released, this will be moved to
+     * {@link TopLevelGuildChannel#addRoleOverwrite(Snowflake, PermissionOverwrite)}.
      */
+    @Deprecated
     default Mono<Void> addRoleOverwrite(final Snowflake roleId, final PermissionOverwrite overwrite) {
         return addRoleOverwrite(roleId, overwrite, null);
     }
@@ -185,6 +210,9 @@ public interface GuildChannel extends Channel {
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
      * through the {@code Mono}.
+     * @deprecated Threads don't have permission overwrites, so when they are released, this will be moved to
+     * {@link TopLevelGuildChannel#addRoleOverwrite(Snowflake, PermissionOverwrite, String)}.
      */
+    @Deprecated
     Mono<Void> addRoleOverwrite(Snowflake roleId, PermissionOverwrite overwrite, @Nullable String reason);
 }
