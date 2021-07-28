@@ -31,7 +31,8 @@ public enum ApplicationCommandOptionType {
     USER(6),
     CHANNEL(7),
     ROLE(8),
-    MENTIONABLE(9);
+    MENTIONABLE(9),
+    NUMBER(10);
 
     /**
      * The underlying value as represented by Discord.
@@ -75,6 +76,7 @@ public enum ApplicationCommandOptionType {
             case 7: return CHANNEL;
             case 8: return ROLE;
             case 9: return MENTIONABLE;
+            case 10: return NUMBER;
             default: return UNKNOWN;
         }
     }

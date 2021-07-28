@@ -69,7 +69,7 @@ public class ApplicationCommandOptionChoice implements DiscordObject {
     /**
      * Gets the value of this choice.
      *
-     * @return The name of this choice.
+     * @return The value of this choice.
      */
     public Object getValue() {
         return data.value();
@@ -94,6 +94,19 @@ public class ApplicationCommandOptionChoice implements DiscordObject {
             return Long.parseLong(asString());
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Choice value cannot be converted to long", e);
+        }
+    }
+
+    /**
+     * Gets the value of this choice as a double.
+     *
+     * @return The value of this choice as a double.
+     */
+    public double asDouble() {
+        try {
+            return Double.parseDouble(asString());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Choice value cannot be converted to double", e);
         }
     }
 
