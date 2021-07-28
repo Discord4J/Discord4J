@@ -72,6 +72,13 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
         return Long.parseLong(value);
     }
 
+    public double asDouble() {
+        if (type != ApplicationCommandOptionType.NUMBER.getValue()) {
+            throw new IllegalArgumentException("Option value cannot be converted as double");
+        }
+        return Double.parseDouble(value);
+    }
+
     public Snowflake asSnowflake() {
         if (type != ApplicationCommandOptionType.USER.getValue()
                 && type != ApplicationCommandOptionType.ROLE.getValue()
