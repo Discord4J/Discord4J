@@ -48,6 +48,16 @@ class EmptyPartialUser implements PartialUserData {
     }
 
     @Override
+    public Possible<Optional<String>> banner() {
+        return Possible.absent();
+    }
+
+    @Override
+    public Possible<Optional<Integer>> bannerAccentColor() {
+        return Possible.absent();
+    }
+
+    @Override
     public Possible<Boolean> bot() {
         return Possible.absent();
     }

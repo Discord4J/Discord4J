@@ -48,6 +48,9 @@ public class User implements Entity {
     /** The path for user avatar image URLs. */
     private static final String AVATAR_IMAGE_PATH = "avatars/%s/%s";
 
+    /** The path for user banner image URLs. */
+    private static final String BANNER_IMAGE_PATH = "banners/%s/%s";
+
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
 
@@ -127,6 +130,26 @@ public class User implements Entity {
     public final Optional<String> getAvatarUrl(final Image.Format format) {
         return data.avatar().map(avatar -> ImageUtil.getUrl(
                 String.format(AVATAR_IMAGE_PATH, getId().asString(), avatar), format));
+    }
+
+    /**
+     * Gets the user's banner URL, if present.
+     *
+     * @param format The format for the URL.
+     * @return The user's banner URL, if present.
+     */
+    public final Optional<String> getBannerUrl(final Image.Format format) {
+        return data.banner().toOptional().orElse(Optional.empty()).map(avatar -> ImageUtil.getUrl(
+                String.format(BANNER_IMAGE_PATH, getId().asString(), avatar), format));
+    }
+
+    /**
+     * Gets the user's banner accent color, if present.
+     *
+     * @return The user's banner accent color, if present.
+     */
+    public final Optional<Integer> getBannerAccentColor() {
+        return data.bannerAccentColor().toOptional().orElse(Optional.empty());
     }
 
     /**
