@@ -25,6 +25,7 @@ import discord4j.discordjson.json.ApplicationCommandInteractionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.InteractionData;
 import discord4j.discordjson.json.InteractionResponseData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.RestClient;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -95,7 +96,7 @@ public class Interactions {
      */
     public Interactions onCommand(Snowflake id,
                                   Function<RestInteraction, InteractionHandler> action) {
-        commands.add(new RequestApplicationCommandDefinition(acid -> acid.id().equals(id.asString()), action));
+        commands.add(new RequestApplicationCommandDefinition(acid -> acid.id().equals(Possible.of(id.asString())), action));
         return this;
     }
 
@@ -108,7 +109,7 @@ public class Interactions {
      */
     public Interactions onCommand(String name,
                                   Function<RestInteraction, InteractionHandler> action) {
-        commands.add(new RequestApplicationCommandDefinition(acid -> acid.name().equals(name), action));
+        commands.add(new RequestApplicationCommandDefinition(acid -> acid.name().equals(Possible.of(name)), action));
         return this;
     }
 
@@ -124,7 +125,7 @@ public class Interactions {
     public Interactions onGuildCommand(ApplicationCommandRequest createRequest,
                                        Snowflake guildId,
                                        Function<GuildInteraction, InteractionHandler> action) {
-        commands.add(new GuildApplicationCommandDefinition(acid -> acid.name().equals(createRequest.name()), action));
+        commands.add(new GuildApplicationCommandDefinition(acid -> acid.name().equals(Possible.of(createRequest.name())), action));
         createRequests.add(new GuildApplicationCommandRequest(createRequest, guildId));
         return this;
     }
@@ -143,7 +144,7 @@ public class Interactions {
      */
     public Interactions onGlobalCommand(ApplicationCommandRequest createRequest,
                                         Function<RestInteraction, InteractionHandler> action) {
-        commands.add(new RequestApplicationCommandDefinition(acid -> acid.name().equals(createRequest.name()), action));
+        commands.add(new RequestApplicationCommandDefinition(acid -> acid.name().equals(Possible.of(createRequest.name())), action));
         createRequests.add(new GlobalApplicationCommandRequest(createRequest));
         return this;
     }
