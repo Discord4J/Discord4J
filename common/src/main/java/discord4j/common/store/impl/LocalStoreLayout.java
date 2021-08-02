@@ -793,7 +793,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                 .discriminator(partialUserData.discriminatorOrElse(oldUser.discriminator()))
                 .avatar(or(Possible.flatOpt(partialUserData.avatar()), oldUser::avatar))
                 .banner(Possible.of(or(Possible.flatOpt(partialUserData.banner()), () -> Possible.flatOpt(oldUser.banner()))))
-                .bannerAccentColor(Possible.of(or(Possible.flatOpt(partialUserData.bannerAccentColor()), () -> Possible.flatOpt(oldUser.bannerAccentColor()))))
+                .accentColor(Possible.of(or(Possible.flatOpt(partialUserData.accentColor()), () -> Possible.flatOpt(oldUser.accentColor()))))
                 .build();
     }
 

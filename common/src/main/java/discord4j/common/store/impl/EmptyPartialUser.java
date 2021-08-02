@@ -53,7 +53,7 @@ class EmptyPartialUser implements PartialUserData {
     }
 
     @Override
-    public Possible<Optional<Integer>> bannerAccentColor() {
+    public Possible<Optional<Integer>> accentColor() {
         return Possible.absent();
     }
 

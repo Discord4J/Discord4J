@@ -148,8 +148,8 @@ public class User implements Entity {
      *
      * @return The user's banner accent color, if present.
      */
-    public final Optional<Integer> getBannerAccentColor() {
-        return data.bannerAccentColor().toOptional().orElse(Optional.empty());
+    public final Optional<Integer> getAccentColor() {
+        return data.accentColor().toOptional().orElse(Optional.empty());
     }
 
     /**
