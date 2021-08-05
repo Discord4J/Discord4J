@@ -75,7 +75,8 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
         return getValueAs("snowflake", Snowflake::of,
                 ApplicationCommandOptionType.USER,
                 ApplicationCommandOptionType.ROLE,
-                ApplicationCommandOptionType.CHANNEL);
+                ApplicationCommandOptionType.CHANNEL,
+                ApplicationCommandOptionType.MENTIONABLE);
     }
 
     public Mono<User> asUser() {
