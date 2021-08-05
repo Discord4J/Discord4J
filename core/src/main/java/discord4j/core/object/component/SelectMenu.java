@@ -124,6 +124,26 @@ public class SelectMenu extends ActionComponent {
     }
 
     /**
+     * Creates a new select menu with the same data as this one, but disabled.
+     *
+     * @return A new disabled select menu with the same data as this one.
+     */
+    public SelectMenu disabled() {
+        return disabled(true);
+    }
+
+    /**
+     * Creates a new select menu with the same data as this one, but depending on the value param it may be disabled or
+     * not.
+     *
+     * @param value True if the select menu should be disabled otherwise False.
+     * @return A new possibly disabled select menu with the same data as this one.
+     */
+    public SelectMenu disabled(boolean value) {
+        return new SelectMenu(ComponentData.builder().from(getData()).disabled(value).build());
+    }
+
+    /**
      * Creates a new select menu with the same data as this one, but with the given placeholder text.
      *
      * @param placeholder The new placeholder text.
