@@ -29,10 +29,7 @@ import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -219,7 +216,7 @@ public class RestChannel {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageData> createMessage(EmbedData embed) {
-        return createMessage(MessageCreateRequest.builder().embed(embed).build());
+        return createMessage(MessageCreateRequest.builder().embeds(Collections.singletonList(embed)).build());
     }
 
     /*

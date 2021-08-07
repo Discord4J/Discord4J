@@ -35,10 +35,7 @@ import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -205,14 +202,14 @@ public class LegacyMessageCreateSpec implements LegacySpec<MultipartRequest<Mess
     @Override
     public MultipartRequest<MessageCreateRequest> asRequest() {
         MessageCreateRequest json = MessageCreateRequest.builder()
-                .content(content == null ? Possible.absent() : Possible.of(content))
+                .content(content == null ? Possible.absent() : Possible.of(Optional.of(content)))
                 .nonce(nonce == null ? Possible.absent() : Possible.of(nonce))
                 .tts(tts)
-                .embeds(embeds == null ? Possible.absent() : Possible.of(embeds))
-                .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
+                .embeds(embeds == null ? Possible.absent() : Possible.of(Optional.of(embeds)))
+                .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(Optional.of(allowedMentionsData)))
                 .messageReference(messageReferenceData == null ? Possible.absent() : Possible.of(messageReferenceData))
                 .components(components == null ? Possible.absent() :
-                        Possible.of(components.stream().map(LayoutComponent::getData).collect(Collectors.toList())))
+                        Possible.of(Optional.of(components.stream().map(LayoutComponent::getData).collect(Collectors.toList()))))
                 .build();
         return MultipartRequest.ofRequestAndFiles(json, files == null ? Collections.emptyList() : files);
     }

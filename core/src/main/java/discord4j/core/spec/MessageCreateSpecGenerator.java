@@ -17,73 +17,40 @@
 package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.discordjson.json.MessageReferenceData;
 import discord4j.discordjson.possible.Possible;
-import discord4j.rest.util.AllowedMentions;
-import discord4j.rest.util.MultipartRequest;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable(singleton = true)
-interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreateRequest>> {
-
-    Possible<String> content();
+interface MessageCreateSpecGenerator extends FilesMessageRequestSpec<MessageCreateRequest> {
 
     Possible<String> nonce();
 
-    Possible<Boolean> tts();
-
-    Possible<List<EmbedCreateSpec>> embeds();
-
-    @Value.Default
-    default List<MessageCreateFields.File> files() {
-        return Collections.emptyList();
-    }
-
-    @Value.Default
-    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
-        return Collections.emptyList();
-    }
-
-    Possible<AllowedMentions> allowedMentions();
-
     Possible<Snowflake> messageReference();
 
-    Possible<List<LayoutComponent>> components();
+    @Value.Default
+    default boolean tts() {
+        return false;
+    }
 
     @Override
-    default MultipartRequest<MessageCreateRequest> asRequest() {
-        MessageCreateRequest json = MessageCreateRequest.builder()
-                .content(content())
+    default MessageCreateRequest getMessageRequest() {
+        return MessageCreateRequest.builder()
+                .from(getBaseRequest())
                 .nonce(nonce())
-                .tts(tts())
-                .embeds(mapPossible(embeds(), embeds -> embeds.stream()
-                        .map(EmbedCreateSpec::asRequest)
-                        .collect(Collectors.toList())))
-                .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
                 .messageReference(mapPossible(messageReference(),
                         ref -> MessageReferenceData.builder()
                                 .messageId(ref.asString())
                                 .build()))
-                .components(mapPossible(components(), components -> components.stream()
-                        .map(LayoutComponent::getData)
-                        .collect(Collectors.toList())))
+                .tts(tts())
                 .build();
-        return MultipartRequest.ofRequestAndFiles(json, Stream.concat(files().stream(), fileSpoilers().stream())
-                .map(MessageCreateFields.File::asRequest)
-                .collect(Collectors.toList()));
     }
 }
 

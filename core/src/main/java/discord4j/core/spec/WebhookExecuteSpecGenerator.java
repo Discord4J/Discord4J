@@ -17,73 +17,34 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
 import discord4j.discordjson.json.WebhookExecuteRequest;
 import discord4j.discordjson.possible.Possible;
-import discord4j.rest.util.AllowedMentions;
-import discord4j.rest.util.MultipartRequest;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static discord4j.core.spec.InternalSpecUtils.mapPossible;
-
 @Value.Immutable(singleton = true)
-interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecuteRequest>> {
-
-    Possible<String> content();
-
-    Possible<String> username();
-
-    Possible<String> avatarUrl();
+interface WebhookExecuteSpecGenerator extends FilesMessageRequestSpec<WebhookExecuteRequest> {
 
     @Value.Default
     default boolean tts() {
         return false;
     }
 
-    @Value.Default
-    default List<MessageCreateFields.File> files() {
-        return Collections.emptyList();
-    }
+    Possible<String> username();
 
-    @Value.Default
-    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
-        return Collections.emptyList();
-    }
-
-    @Value.Default
-    default List<EmbedCreateSpec> embeds() {
-        return Collections.emptyList();
-    }
-
-    Possible<AllowedMentions> allowedMentions();
-
-    Possible<List<LayoutComponent>> components();
+    Possible<String> avatarUrl();
 
     @Override
-    default MultipartRequest<WebhookExecuteRequest> asRequest() {
-        WebhookExecuteRequest request = WebhookExecuteRequest.builder()
-                .content(content())
+    default WebhookExecuteRequest getMessageRequest() {
+        return WebhookExecuteRequest.builder()
+                .from(getBaseRequest())
+                .tts(tts())
                 .username(username())
                 .avatarUrl(avatarUrl())
-                .tts(tts())
-                .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
-                .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
-                .components(mapPossible(components(), components -> components.stream()
-                    .map(LayoutComponent::getData)
-                    .collect(Collectors.toList())))
                 .build();
-        return MultipartRequest.ofRequestAndFiles(request, Stream.concat(files().stream(), fileSpoilers().stream())
-                .map(MessageCreateFields.File::asRequest)
-                .collect(Collectors.toList()));
     }
 }
 

@@ -29,6 +29,7 @@ import reactor.util.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -86,13 +87,13 @@ public class LegacyInteractionApplicationCommandCallbackSpec implements LegacySp
     @Override
     public InteractionApplicationCommandCallbackData asRequest() {
         return InteractionApplicationCommandCallbackData.builder()
-                .content(content == null ? Possible.absent() : Possible.of(content))
+                .content(content == null ? Possible.absent() : Possible.of(Optional.of(content)))
                 .tts(tts)
                 .flags(flags == 0 ? Possible.absent() : Possible.of(flags))
-                .embeds(embeds == null ? Possible.absent() : Possible.of(embeds))
-                .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
+                .embeds(embeds == null ? Possible.absent() : Possible.of(Optional.of(embeds)))
+                .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(Optional.of(allowedMentionsData)))
                 .components(components == null ? Possible.absent() :
-                        Possible.of(components.stream().map(LayoutComponent::getData).collect(Collectors.toList())))
+                        Possible.of(Optional.of(components.stream().map(LayoutComponent::getData).collect(Collectors.toList()))))
                 .build();
     }
 }

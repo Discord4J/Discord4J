@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -147,14 +148,13 @@ public class LegacyWebhookExecuteSpec implements LegacySpec<MultipartRequest<Web
     @Override
     public MultipartRequest<WebhookExecuteRequest> asRequest() {
         return MultipartRequest.ofRequestAndFiles(
-                WebhookExecuteRequest
-                        .builder()
-                        .content(content)
+                WebhookExecuteRequest.builder()
+                        .content(content.isAbsent() ? Possible.absent() : Possible.of(Optional.of(content.get())))
                         .username(username)
                         .avatarUrl(avatarUrl)
-                        .tts(tts)
-                        .embeds(embeds == null ? Possible.absent() : Possible.of(embeds))
-                        .allowedMentions(allowedMentions)
+                        .tts(tts.isAbsent() ? Possible.absent() : Possible.of(Optional.of(tts.get())))
+                        .embeds(embeds == null ? Possible.absent() : Possible.of(Optional.of(embeds)))
+                        .allowedMentions(allowedMentions.isAbsent() ? Possible.absent() : Possible.of(Optional.of(allowedMentions.get())))
                         .build(),
                 files == null ? Collections.emptyList() : files
         );
