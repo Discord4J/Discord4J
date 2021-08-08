@@ -264,12 +264,28 @@ public final class Message implements Entity {
     }
 
     /**
+     * Gets the users with partial members specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
+     *
+     * @return The users with partial members specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
+     */
+    public List<UserWithMember> getUserAndMemberMentions() {
+        return data.mentions().stream()
+            .map(data -> new UserWithMember(gateway, data,
+                getGuildId().map(Snowflake::asLong).orElse(null)))
+            .collect(Collectors.toList());
+    }
+
+    /**
      * Gets the users specifically mentioned in this message, without duplication and with the same order
      * as in the message.
      *
+     * @deprecated use {@link #getUserAndMemberMentions()}
      * @return The users specifically mentioned in this message, without duplication and with the same order
      * as in the message.
      */
+    @Deprecated
     public List<User> getUserMentions() {
         // TODO FIXME we throw away member data here
         return data.mentions().stream()
