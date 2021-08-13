@@ -32,6 +32,14 @@ import reactor.core.publisher.Mono;
 public interface InteractionResponse {
 
     /**
+     * Return the message data of the initial response.
+     *
+     * @return a {@link Mono} where, upon successful completion, emits the original message. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    Mono<MessageData> getInitialResponse();
+
+    /**
      * Return a {@link Mono} that upon subscription, will modify the initial response sent when accepting this
      * interaction with the given raw request content.
      *
