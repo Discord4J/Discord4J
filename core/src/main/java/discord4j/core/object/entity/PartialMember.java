@@ -27,18 +27,16 @@ import reactor.util.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 
-/** A Discord user with {@link MemberPart}. */
-public class UserWithMember extends User {
+/** A partial Discord guild member. */
+public class PartialMember extends User {
 
-    @Nullable
     private final PartialMemberData memberData;
 
-    @Nullable
-    private final Long guildId;
+    private final long guildId;
 
-    public UserWithMember(GatewayDiscordClient gateway, UserWithMemberData data, @Nullable Long guildId) {
+    public PartialMember(GatewayDiscordClient gateway, UserWithMemberData data, long guildId) {
         super(gateway, data);
-        this.memberData = data.member().toOptional().orElse(null);
+        this.memberData = data.member().get();
         this.guildId = guildId;
     }
 

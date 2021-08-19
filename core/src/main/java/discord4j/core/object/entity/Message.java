@@ -264,16 +264,19 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the users with partial members specifically mentioned in this message, without duplication and with the same order
+     * Gets the partial members specifically mentioned in this message, without duplication and with the same order
      * as in the message.
      *
-     * @return The users with partial members specifically mentioned in this message, without duplication and with the same order
+     * @return The partial members specifically mentioned in this message, without duplication and with the same order
      * as in the message.
      */
-    public List<UserWithMember> getUserAndMemberMentions() {
+    public List<PartialMember> getMemberMentions() {
+        if (data.guildId().isAbsent()) {
+            return Collections.emptyList();
+        }
+        long guildId = data.guildId().get().asLong();
         return data.mentions().stream()
-            .map(data -> new UserWithMember(gateway, data,
-                getGuildId().map(Snowflake::asLong).orElse(null)))
+            .map(data -> new PartialMember(gateway, data, guildId))
             .collect(Collectors.toList());
     }
 
@@ -281,13 +284,10 @@ public final class Message implements Entity {
      * Gets the users specifically mentioned in this message, without duplication and with the same order
      * as in the message.
      *
-     * @deprecated use {@link #getUserAndMemberMentions()}
      * @return The users specifically mentioned in this message, without duplication and with the same order
      * as in the message.
      */
-    @Deprecated
     public List<User> getUserMentions() {
-        // TODO FIXME we throw away member data here
         return data.mentions().stream()
                 .map(data -> new User(gateway, data))
                 .collect(Collectors.toList());
