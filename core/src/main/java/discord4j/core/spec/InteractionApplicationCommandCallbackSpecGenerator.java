@@ -67,7 +67,7 @@ interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<Intera
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
-abstract class InteractionApplicationCommandReplyMonoGenerator extends Mono<Void>
+abstract class InteractionApplicationCommandCallbackReplyMonoGenerator extends Mono<Void>
         implements InteractionApplicationCommandCallbackSpecGenerator {
 
     abstract InteractionCreateEvent event();
@@ -83,7 +83,7 @@ abstract class InteractionApplicationCommandReplyMonoGenerator extends Mono<Void
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
-abstract class InteractionApplicationCommandEditMonoGenerator extends Mono<Void>
+abstract class InteractionApplicationCommandCallbackEditMonoGenerator extends Mono<Void>
         implements InteractionApplicationCommandCallbackSpecGenerator {
 
     abstract ComponentInteractEvent event();

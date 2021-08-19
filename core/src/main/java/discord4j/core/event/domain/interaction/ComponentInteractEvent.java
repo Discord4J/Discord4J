@@ -23,7 +23,7 @@ import discord4j.core.object.command.Interaction;
 import discord4j.core.object.component.Button;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.Message;
-import discord4j.core.spec.InteractionApplicationCommandEditMono;
+import discord4j.core.spec.InteractionApplicationCommandCallbackEditMono;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.core.spec.legacy.LegacyInteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
@@ -112,14 +112,14 @@ public class ComponentInteractEvent extends InteractionCreateEvent {
     /**
      * Requests to respond to the interaction by immediately editing the message the button is on. Properties specifying
      * how to edit the message can be set via the {@code withXxx} methods of the returned
-     * {@link InteractionApplicationCommandEditMono}.
+     * {@link InteractionApplicationCommandCallbackEditMono}.
      *
-     * @return A {@link InteractionApplicationCommandEditMono} where, upon successful completion, emits nothing;
+     * @return A {@link InteractionApplicationCommandCallbackEditMono} where, upon successful completion, emits nothing;
      * indicating the interaction response has been sent. If an error is received, it is emitted through the {@code
      * InteractionApplicationCommandCallbackMono}.
      */
-    public InteractionApplicationCommandEditMono edit() {
-        return InteractionApplicationCommandEditMono.of(this);
+    public InteractionApplicationCommandCallbackEditMono edit() {
+        return InteractionApplicationCommandCallbackEditMono.of(this);
     }
 
     /**
