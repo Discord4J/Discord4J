@@ -22,7 +22,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Message;
-import discord4j.core.spec.InteractionApplicationCommandCallbackMono;
+import discord4j.core.spec.InteractionApplicationCommandReplyMono;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.core.spec.legacy.LegacyInteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.*;
@@ -138,27 +138,27 @@ public class InteractionCreateEvent extends Event {
     /**
      * Requests to respond to the interaction with a message. Properties specifying how to build the reply message to
      * the interaction can be set via the {@code withXxx} methods of the returned {@link
-     * InteractionApplicationCommandCallbackMono}.
+     * InteractionApplicationCommandReplyMono}.
      *
-     * @return A {@link InteractionApplicationCommandCallbackMono} where, upon successful completion, emits nothing;
+     * @return A {@link InteractionApplicationCommandReplyMono} where, upon successful completion, emits nothing;
      * indicating the interaction response has been sent. If an error is received, it is emitted through the {@code
      * InteractionApplicationCommandCallbackMono}.
      */
-    public InteractionApplicationCommandCallbackMono reply() {
-        return InteractionApplicationCommandCallbackMono.of(this);
+    public InteractionApplicationCommandReplyMono reply() {
+        return InteractionApplicationCommandReplyMono.of(this);
     }
 
     /**
      * Requests to respond to the interaction with a message initialized with the specified content. Properties
      * specifying how to build the reply message to the interaction can be set via the {@code withXxx} methods of the
-     * returned {@link InteractionApplicationCommandCallbackMono}.
+     * returned {@link InteractionApplicationCommandReplyMono}.
      *
      * @param content a string to populate the message with
-     * @return A {@link InteractionApplicationCommandCallbackMono} where, upon successful completion, emits nothing;
+     * @return A {@link InteractionApplicationCommandReplyMono} where, upon successful completion, emits nothing;
      * indicating the interaction response has been sent. If an error is received, it is emitted through the {@code
      * InteractionApplicationCommandCallbackMono}.
      */
-    public InteractionApplicationCommandCallbackMono reply(final String content) {
+    public InteractionApplicationCommandReplyMono reply(final String content) {
         return reply().withContent(content);
     }
 
