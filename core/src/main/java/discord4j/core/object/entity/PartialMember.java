@@ -21,32 +21,35 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.PartialMemberData;
 import discord4j.discordjson.json.UserWithMemberData;
+import discord4j.discordjson.possible.Possible;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
-import java.util.Objects;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /** A partial Discord guild member. */
 public class PartialMember extends User {
 
-    private final PartialMemberData memberData;
+    private final PartialMemberData data;
 
     private final long guildId;
 
     public PartialMember(GatewayDiscordClient gateway, UserWithMemberData data, long guildId) {
         super(gateway, data);
-        this.memberData = data.member().get();
+        this.data = data.member().get();
         this.guildId = guildId;
     }
 
     /**
-     * Returns the ID of the guild this user is associated to, if present
+     * Gets the ID of the guild this user is associated to.
      *
-     * @return an optional {@link Snowflake}
+     * @return The ID of the guild this user is associated to.
      */
-    public Optional<Snowflake> getGuildId() {
-        return Optional.ofNullable(guildId).map(Snowflake::of);
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**
@@ -56,7 +59,7 @@ public class PartialMember extends User {
      * to. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
+        return getClient().getGuildById(getGuildId());
     }
 
     /**
@@ -67,25 +70,79 @@ public class PartialMember extends User {
      * to. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
-        return Mono.justOrEmpty(getGuildId()).flatMap(id -> getClient()
-            .withRetrievalStrategy(retrievalStrategy).getGuildById(id));
+        return getClient().withRetrievalStrategy(retrievalStrategy).getGuildById(getGuildId());
     }
 
     /**
-     * Returns the member part, if present.
+     * Gets the data of the partial member.
      *
-     * @return an optional {@link MemberPart}
+     * @return The data of partial member.
      */
-    public Optional<MemberPart> getMember() {
-        return Optional.ofNullable(memberData)
-            .map(data -> new MemberPart(data, getId().asLong(),
-                Objects.requireNonNull(guildId)));
+    public PartialMemberData getMemberData() {
+        return data;
+    }
+
+    /**
+     * Gets the user's guild nickname (if one is set).
+     *
+     * @return The user's guild nickname (if one is set).
+     */
+    public Optional<String> getNickname() {
+        return Possible.flatOpt(data.nick());
+    }
+
+    /**
+     * Gets the user's guild roles' IDs.
+     *
+     * @return The user's guild roles' IDs.
+     */
+    public Set<Snowflake> getRoleIds() {
+        return data.roles().stream()
+            .map(Snowflake::of)
+            .collect(Collectors.toSet());
+    }
+
+    /**
+     * Gets when the user joined the guild.
+     *
+     * @return When the user joined the guild.
+     */
+    public Instant getJoinTime() {
+        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.joinedAt(), Instant::from);
+    }
+
+    /**
+     * Gets when the user started boosting the server, if present.
+     *
+     * @return When the user started boosting the server, if present.
+     */
+    public Optional<Instant> getPremiumTime() {
+        return Possible.flatOpt(data.premiumSince())
+            .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+    }
+
+    /**
+     * Gets whether this user is deafened by the server.
+     *
+     * @return {@code true} if the user is deafened by the server, {@code false} otherwise.
+     */
+    public boolean isDeaf() {
+        return data.deaf();
+    }
+
+    /**
+     * Gets whether this user is muted by the server.
+     *
+     * @return {@code true} if the user is deafened by the server, {@code false} otherwise.
+     */
+    public boolean isMute() {
+        return data.mute();
     }
 
     @Override
     public String toString() {
-        return "UserWithMember{" +
-            "memberData=" + memberData +
+        return "Partial{" +
+            "data=" + data +
             ", guildId=" + guildId +
             "} " + super.toString();
     }
