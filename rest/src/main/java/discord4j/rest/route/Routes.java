@@ -1052,6 +1052,12 @@ public abstract class Routes {
     public static final Route WEBHOOK_EXECUTE_GITHUB = Route.post("/webhooks/{webhook.id}/{webhook.token}/github");
 
     /**
+     * @see <a href="https://discord.com/developers/docs/resources/webhook#get-webhook-message">
+     * https://discord.com/developers/docs/resources/webhook#get-webhook-message</a>
+     */
+    public static final Route WEBHOOK_MESSAGE_GET = Route.get("/webhooks/{webhook.id}/{webhook.token}/messages/{message.id}");
+
+    /**
      * @see <a href="https://discord.com/developers/docs/resources/webhook#edit-webhook-message">
      * https://discord.com/developers/docs/resources/webhook#edit-webhook-message</a>
      */
