@@ -122,6 +122,12 @@ public class WebhookService extends RestService {
         }
     }
 
+    public Mono<MessageData> getWebhookMessage(long webhookId, String webhookToken, String messageId) {
+        return Routes.WEBHOOK_MESSAGE_GET.newRequest(webhookId, webhookToken, messageId)
+            .exchange(getRouter())
+            .bodyToMono(MessageData.class);
+    }
+
     public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId, WebhookMessageEditRequest request) {
         return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
             .body(request)

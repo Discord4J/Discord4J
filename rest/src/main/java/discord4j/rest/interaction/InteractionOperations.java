@@ -133,6 +133,12 @@ class InteractionOperations implements RestInteraction, InteractionResponse, Gui
     // InteractionResponse
 
     @Override
+    public Mono<MessageData> getInitialResponse() {
+        return restClient.getWebhookService()
+                .getWebhookMessage(applicationId, interactionData.token(), "@original");
+    }
+
+    @Override
     public Mono<MessageData> editInitialResponse(WebhookMessageEditRequest request) {
         return restClient.getWebhookService()
                 .modifyWebhookMessage(applicationId, interactionData.token(), "@original", request);
