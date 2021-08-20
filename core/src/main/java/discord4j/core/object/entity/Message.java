@@ -276,7 +276,7 @@ public final class Message implements Entity {
         }
         long guildId = data.guildId().get().asLong();
         return data.mentions().stream()
-            .map(data -> new PartialMember(gateway, data, guildId))
+            .map(data -> new PartialMember(gateway, data, data.member().get(), guildId))
             .collect(Collectors.toList());
     }
 
