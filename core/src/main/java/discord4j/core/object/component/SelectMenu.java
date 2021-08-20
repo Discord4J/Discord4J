@@ -79,7 +79,7 @@ public class SelectMenu extends ActionComponent {
      * @return The text displayed if no option is selected.
      */
     public Optional<String> getPlaceholder() {
-        return getData().customId().toOptional();
+        return getData().placeholder().toOptional();
     }
 
     /**
