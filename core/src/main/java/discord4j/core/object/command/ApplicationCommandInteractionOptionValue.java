@@ -28,6 +28,10 @@ import discord4j.rest.util.ApplicationCommandOptionType;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.function.Function;
+
 @Experimental
 public class ApplicationCommandInteractionOptionValue implements DiscordObject {
 
@@ -52,65 +56,54 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
     }
 
     public String asString() {
-        if (type != ApplicationCommandOptionType.STRING.getValue()) {
-            throw new IllegalArgumentException("Option value cannot be converted as string");
-        }
-        return value;
+        return getValueAs("string", Function.identity(), ApplicationCommandOptionType.STRING);
     }
 
     public boolean asBoolean() {
-        if (type != ApplicationCommandOptionType.BOOLEAN.getValue()) {
-            throw new IllegalArgumentException("Option value cannot be converted as boolean");
-        }
-        return Boolean.parseBoolean(value);
+        return getValueAs("boolean", Boolean::parseBoolean, ApplicationCommandOptionType.BOOLEAN);
     }
 
     public long asLong() {
-        if (type != ApplicationCommandOptionType.INTEGER.getValue()) {
-            throw new IllegalArgumentException("Option value cannot be converted as long");
-        }
-        return Long.parseLong(value);
+        return getValueAs("long", Long::parseLong, ApplicationCommandOptionType.INTEGER);
     }
 
     public double asDouble() {
-        if (type != ApplicationCommandOptionType.NUMBER.getValue()) {
-            throw new IllegalArgumentException("Option value cannot be converted as double");
-        }
-        return Double.parseDouble(value);
+        return getValueAs("double", Double::parseDouble, ApplicationCommandOptionType.NUMBER);
     }
 
     public Snowflake asSnowflake() {
-        if (type != ApplicationCommandOptionType.USER.getValue()
-                && type != ApplicationCommandOptionType.ROLE.getValue()
-                && type != ApplicationCommandOptionType.CHANNEL.getValue()) {
-            throw new IllegalArgumentException("Option value cannot be converted as snowflake");
-        }
-
-        return Snowflake.of(value);
+        return getValueAs("snowflake", Snowflake::of,
+                ApplicationCommandOptionType.USER,
+                ApplicationCommandOptionType.ROLE,
+                ApplicationCommandOptionType.CHANNEL,
+                ApplicationCommandOptionType.MENTIONABLE);
     }
 
     public Mono<User> asUser() {
-        if (type != ApplicationCommandOptionType.USER.getValue()) {
-            return Mono.error(new IllegalArgumentException("Option value cannot be converted as user"));
-        }
-
-        return getClient().getUserById(asSnowflake());
+        return getValueAs("user",
+                value -> getClient().getUserById(Snowflake.of(value)),
+                ApplicationCommandOptionType.USER);
     }
 
     public Mono<Role> asRole() {
-        if (type != ApplicationCommandOptionType.ROLE.getValue()) {
-            return Mono.error(new IllegalArgumentException("Option value cannot be converted as role"));
-        }
-
-        return getClient().getRoleById(Snowflake.of(guildId), asSnowflake());
+        return getValueAs("role",
+                value -> getClient().getRoleById(Snowflake.of(Objects.requireNonNull(guildId)), Snowflake.of(value)),
+                ApplicationCommandOptionType.ROLE);
     }
 
     public Mono<Channel> asChannel() {
-        if (type != ApplicationCommandOptionType.CHANNEL.getValue()) {
-            return Mono.error(new IllegalArgumentException("Option value cannot be converted as channel"));
+        return getValueAs("channel",
+                value -> getClient().getChannelById(Snowflake.of(value)),
+                ApplicationCommandOptionType.CHANNEL);
+    }
+
+    private <T> T getValueAs(String parsedTypeName, Function<String, T> parser,
+                             ApplicationCommandOptionType... allowedTypes) {
+        if (!Arrays.asList(allowedTypes).contains(ApplicationCommandOptionType.of(type))) {
+            throw new IllegalArgumentException("Option value cannot be converted as " + parsedTypeName);
         }
 
-        return getClient().getChannelById(asSnowflake());
+        return parser.apply(value);
     }
 
     @Override

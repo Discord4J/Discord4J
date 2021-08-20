@@ -287,7 +287,7 @@ public class Button extends ActionComponent {
      * @return A new disabled button with the same data as this one.
      */
     public Button disabled() {
-        return new Button(ComponentData.builder().from(getData()).disabled(true).build());
+        return disabled(true);
     }
     
     /**
