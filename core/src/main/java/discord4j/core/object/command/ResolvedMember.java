@@ -47,20 +47,25 @@ import java.util.stream.Collectors;
 @Experimental
 public class ResolvedMember implements DiscordObject {
 
-    /** The gateway associated to this object. */
+    /**
+     * The gateway associated to this object.
+     */
     private final GatewayDiscordClient gateway;
 
-    /** The raw data as represented by Discord. */
+    /**
+     * The raw data as represented by Discord.
+     */
     private final ResolvedMemberData data;
     private final UserData user;
     private final long guildId;
 
     /**
      * Constructs a {@code ResolvedMember} with an associated {@link GatewayDiscordClient} and Discord data.
-     *  @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data The raw data as represented by Discord, must be non-null.
-     * @param user The raw user associated to the member, must be non-null.
-     * @param guildId
+     *
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
+     * @param data    The raw data as represented by Discord, must be non-null.
+     * @param user    The raw user associated to the member, must be non-null.
+     * @param guildId the ID of the guild the user is member of
      */
     public ResolvedMember(final GatewayDiscordClient gateway, final ResolvedMemberData data, final UserData user,
                           long guildId) {
@@ -70,6 +75,11 @@ public class ResolvedMember implements DiscordObject {
         this.guildId = guildId;
     }
 
+    /**
+     * Returns the raw data as represented by Discord.
+     *
+     * @return the raw data
+     */
     public ResolvedMemberData getData() {
         return data;
     }
@@ -162,11 +172,11 @@ public class ResolvedMember implements DiscordObject {
     /**
      * Retrieves the full {@link Member} instance corresponding to this resolved member.
      *
-     * @return a {@link Mono} where, upon successful completion, emits the full {@link Member} instance corresponding
-     * to this resolved member. If an error is received, it is emitted through the {@code Mono}.
+     * @return a {@link Mono} where, upon successful completion, emits the full {@link Member} instance corresponding to
+     * this resolved member. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Member> asMember(Snowflake guildId) {
-        return gateway.getMemberById(guildId, getId());
+    public Mono<Member> asFullMember() {
+        return gateway.getMemberById(getGuildId(), getId());
     }
 
     /**
@@ -176,8 +186,8 @@ public class ResolvedMember implements DiscordObject {
      * @return a {@link Mono} where, upon successful completion, emits the full {@link Member} instance corresponding to
      * this resolved member. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Member> asMember(Snowflake guildId, EntityRetrievalStrategy retrievalStrategy) {
-        return gateway.withRetrievalStrategy(retrievalStrategy).getMemberById(guildId, getId());
+    public Mono<Member> asFullMember(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getMemberById(getGuildId(), getId());
     }
 
     @Override
@@ -190,6 +200,7 @@ public class ResolvedMember implements DiscordObject {
         return "ResolvedMember{" +
                 "data=" + data +
                 ", user=" + user +
+                ", guildId=" + guildId +
                 '}';
     }
 }

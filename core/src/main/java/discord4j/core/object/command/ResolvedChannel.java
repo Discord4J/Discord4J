@@ -40,23 +40,32 @@ import java.util.Objects;
 @Experimental
 public class ResolvedChannel implements DiscordObject {
 
-    /** The gateway associated to this object. */
+    /**
+     * The gateway associated to this object.
+     */
     private final GatewayDiscordClient gateway;
 
-    /** The raw data as represented by Discord. */
+    /**
+     * The raw data as represented by Discord.
+     */
     private final ResolvedChannelData data;
 
     /**
      * Constructs a {@code ResolvedChannel} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data The raw data as represented by Discord, must be non-null.
+     * @param data    The raw data as represented by Discord, must be non-null.
      */
     public ResolvedChannel(final GatewayDiscordClient gateway, final ResolvedChannelData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
+    /**
+     * Returns the raw data as represented by Discord.
+     *
+     * @return the raw data
+     */
     public ResolvedChannelData getData() {
         return data;
     }
@@ -103,7 +112,7 @@ public class ResolvedChannel implements DiscordObject {
      * @return a {@link Mono} where, upon successful completion, emits the full {@link Channel} instance corresponding
      * to this resolved channel. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Channel> asChannel() {
+    public Mono<Channel> asFullChannel() {
         return gateway.getChannelById(getId());
     }
 
@@ -114,7 +123,7 @@ public class ResolvedChannel implements DiscordObject {
      * @return a {@link Mono} where, upon successful completion, emits the full {@link Channel} instance corresponding
      * to this resolved channel. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Channel> asChannel(EntityRetrievalStrategy retrievalStrategy) {
+    public Mono<Channel> asFullChannel(EntityRetrievalStrategy retrievalStrategy) {
         return gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(getId());
     }
 
