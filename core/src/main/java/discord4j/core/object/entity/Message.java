@@ -264,6 +264,23 @@ public final class Message implements Entity {
     }
 
     /**
+     * Gets the partial members specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
+     *
+     * @return The partial members specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
+     */
+    public List<PartialMember> getMemberMentions() {
+        if (data.guildId().isAbsent()) {
+            return Collections.emptyList();
+        }
+        long guildId = data.guildId().get().asLong();
+        return data.mentions().stream()
+            .map(data -> new PartialMember(gateway, data, data.member().get(), guildId))
+            .collect(Collectors.toList());
+    }
+
+    /**
      * Gets the users specifically mentioned in this message, without duplication and with the same order
      * as in the message.
      *
@@ -271,7 +288,6 @@ public final class Message implements Entity {
      * as in the message.
      */
     public List<User> getUserMentions() {
-        // TODO FIXME we throw away member data here
         return data.mentions().stream()
                 .map(data -> new User(gateway, data))
                 .collect(Collectors.toList());
