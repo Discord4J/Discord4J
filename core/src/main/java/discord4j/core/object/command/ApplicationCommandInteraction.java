@@ -134,8 +134,26 @@ public class ApplicationCommandInteraction implements DiscordObject {
         return data.values().toOptional();
     }
 
+    /**
+     * Gets the converted users + roles + channels.
+     *
+     * @return The converted users + roles + channels.
+     */
+    public Optional<ApplicationCommandInteractionResolved> getResolved() {
+        return data.resolved().toOptional()
+                .map(data -> new ApplicationCommandInteractionResolved(gateway, data, guildId));
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
+    }
+
+    @Override
+    public String toString() {
+        return "ApplicationCommandInteraction{" +
+                "data=" + data +
+                ", guildId=" + guildId +
+                '}';
     }
 }
