@@ -127,7 +127,7 @@ Here are some real-world examples of large bots using Discord4J:
 * [Groovy](https://groovy.bot/) - An easy to use music bot used by more than 4 million servers.
 * [ZeroTwo](https://zerotwo.bot/) - An anime multi-purpose bot used in more than 250K servers.
 * [DisCal](https://www.discalbot.com/) - Implements Google Calendar into Discord as seamlessly and comprehensively as possible; serving nearly 14K servers.
-* [Shadbot](https://github.com/Shadorc/Shadbot) - A configurable multipurpose bot with music, gambling mini-games, video game stats, and more; serving almost 12K servers.
+* [Shadbot](https://github.com/Shadorc/Shadbot) (Archived) - A configurable multipurpose bot with music, gambling mini-games, video game stats, and more; serving almost 12K servers.
 
 Do you own a large bot using Discord4J? Ask an admin in our Discord or submit a pull request to add your bot to the list!
 
