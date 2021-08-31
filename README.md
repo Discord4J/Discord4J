@@ -103,11 +103,11 @@ libraryDependencies ++= Seq(
 
 Discord4J 3.1.x introduces performance and API enhancements, a plethora of new features, and dependency upgrades. A [Migration Guide](https://docs.discord4j.com/migrating-from-v3-0-to-v3-1) is provided to aide users and ensure a smooth and readily available transition.
 
-| Discord4J                                                   | Support          | Gateway/API | Intents                           |
-|-------------------------------------------------------------|------------------|-------------|-----------------------------------|
-| [v3.2.x](https://github.com/Discord4J/Discord4J/tree/master)| In development   | v8          | Mandatory, non-privileged default |
-| [v3.1.x](https://github.com/Discord4J/Discord4J/tree/3.1.x) | Current          | v6          | Optional, no intent default       |
-| [v3.0.x](https://github.com/Discord4J/Discord4J/tree/3.0.x) | Maintenance only | v6          | No intents support                |
+| Discord4J                                                   | Support          | Gateway/API | Intents                           | Interactions                       |
+|-------------------------------------------------------------|------------------|-------------|-----------------------------------|------------------------------------|
+| [v3.2.x](https://github.com/Discord4J/Discord4J/tree/master)| In development   | v8          | Mandatory, non-privileged default | Fully supported                    |
+| [v3.1.x](https://github.com/Discord4J/Discord4J/tree/3.1.x) | Current          | v6          | Optional, no intent default       | Slash commands & buttons in 3.1.5+ |
+| [v3.0.x](https://github.com/Discord4J/Discord4J/tree/3.0.x) | Maintenance only | v6          | No intents support                | Unsupported                        |
 
 See [this wiki page](https://github.com/Discord4J/Discord4J/wiki/Versions) for more details about compatibility.
 
@@ -124,10 +124,10 @@ We would like to give a special thanks to all of our sponsors for providing us t
 
 Here are some real-world examples of large bots using Discord4J:
 
-* [Groovy](https://groovy.bot/) - An easy to use music bot used by more than 4 million servers.
-* [ZeroTwo](https://zerotwo.bot/) - An anime multi-purpose bot used in more than 250K servers.
-* [DisCal](https://www.discalbot.com/) - Implements Google Calendar into Discord as seamlessly and comprehensively as possible; serving nearly 14K servers.
-* [Shadbot](https://github.com/Shadorc/Shadbot) - A configurable multipurpose bot with music, gambling mini-games, video game stats, and more; serving almost 12K servers.
+* [Groovy](https://groovy.bot/) - Was the second-largest bot on Discord, serving music to over 4 million servers before its shutdown in August 2021.
+* [ZeroTwo](https://zerotwo.bot/) - An anime multi-purpose bot used in over 1 million servers.
+* [DisCal](https://www.discalbot.com/) - Implements Google Calendar into Discord as seamlessly and comprehensively as possible; serving over 21k servers.
+* [Shadbot](https://github.com/Shadorc/Shadbot) - A configurable multipurpose bot with music, gambling mini-games, video game stats, and more; serving nearly 12K servers before its shutdown in August 2021.
 
 Do you own a large bot using Discord4J? Ask an admin in our Discord or submit a pull request to add your bot to the list!
 
