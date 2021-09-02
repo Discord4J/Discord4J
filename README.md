@@ -34,10 +34,13 @@ public final class ExampleBot {
 }
 ```
 
+For a full project example, check out our example projects repository [here](https://github.com/Discord4J/example-projects).
+
 ## 🔗 Quick Links
 
 * [Javadocs](https://www.javadoc.io/doc/com.discord4j/discord4j-core)
 * [Documentation](https://docs.discord4j.com)
+* [Example Projects](https://github.com/Discord4J/example-projects)
 * [Discord](https://discord.gg/d4j)
 
 ## 💎 Benefits
