@@ -172,17 +172,12 @@ public class Interaction implements DiscordObject {
      */
     public Optional<Message> getMessage() {
         return data.message().toOptional()
-                // When the component is on an ephemeral message, Discord sends only the id and flags fields.
-                // We can't make a Message out of that.
-                .filter(json -> json.get("flags").asInt() != Message.Flag.EPHEMERAL.getFlag())
                 .map(json -> getClient().getCoreResources().getJacksonResources().getObjectMapper().convertValue(json, MessageData.class))
                 .map(data -> new Message(gateway, data));
     }
 
     /**
      * Gets the ID of the message associated with the interaction.
-     * <p>
-     * This is only present for component interactions.
      *
      * @return The message associated with the interaction.
      */
