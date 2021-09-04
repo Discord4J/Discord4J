@@ -166,8 +166,6 @@ public class Interaction implements DiscordObject {
 
     /**
      * Gets the message associated with the interaction.
-     * <p>
-     * This is only present for component interactions.
      *
      * @return The message associated with the interaction.
      */
