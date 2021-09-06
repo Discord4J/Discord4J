@@ -217,6 +217,12 @@ public class InteractionCreateEvent extends Event {
         }
 
         @Override
+        public Mono<MessageData> editInitialResponse(MultipartRequest<WebhookMessageEditRequest> request) {
+            return restClient.getWebhookService()
+                    .modifyWebhookMessage(applicationId, interactionData.token(), "@original", request);
+        }
+
+        @Override
         public Mono<Void> deleteInitialResponse() {
             return restClient.getWebhookService()
                     .deleteWebhookMessage(applicationId, interactionData.token(), "@original");
@@ -257,6 +263,13 @@ public class InteractionCreateEvent extends Event {
 
         @Override
         public Mono<MessageData> editFollowupMessage(long messageId, WebhookMessageEditRequest request, boolean wait) {
+            return restClient.getWebhookService()
+                    .modifyWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId), request);
+        }
+
+        @Override
+        public Mono<MessageData> editFollowupMessage(long messageId,
+                                                     MultipartRequest<WebhookMessageEditRequest> request) {
             return restClient.getWebhookService()
                     .modifyWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId), request);
         }

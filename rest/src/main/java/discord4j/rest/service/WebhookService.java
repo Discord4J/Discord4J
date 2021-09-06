@@ -128,11 +128,21 @@ public class WebhookService extends RestService {
             .bodyToMono(MessageData.class);
     }
 
-    public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId, WebhookMessageEditRequest request) {
+    public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId,
+                                                  WebhookMessageEditRequest request) {
         return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
             .body(request)
             .exchange(getRouter())
             .bodyToMono(MessageData.class);
+    }
+
+    public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId,
+                                                  MultipartRequest<WebhookMessageEditRequest> request) {
+        return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
+                .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
+                .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
+                .exchange(getRouter())
+                .bodyToMono(MessageData.class);
     }
 
     public Mono<Void> deleteWebhookMessage(long webhookId, String webhookToken, String messageId) {
