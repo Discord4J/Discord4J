@@ -804,6 +804,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             guildContent.voiceStateIds.add(voiceStateId);
             computeChannelContent(voiceState.channelId().get().asLong()).voiceStateIds.add(voiceStateId);
             return voiceStates.put(voiceStateId, ImmutableVoiceStateData.copyOf(voiceState)
+                    .withGuildId(guildId)
                     .withMember(Possible.absent()));
         } else {
             guildContent.voiceStateIds.remove(voiceStateId);
