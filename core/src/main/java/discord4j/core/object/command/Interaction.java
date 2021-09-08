@@ -27,7 +27,6 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.discordjson.json.InteractionData;
-import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.UserData;
 import reactor.core.publisher.Mono;
 
@@ -172,7 +171,6 @@ public class Interaction implements DiscordObject {
      */
     public Optional<Message> getMessage() {
         return data.message().toOptional()
-                .map(json -> getClient().getCoreResources().getJacksonResources().getObjectMapper().convertValue(json, MessageData.class))
                 .map(data -> new Message(gateway, data));
     }
 
@@ -183,7 +181,7 @@ public class Interaction implements DiscordObject {
      */
     public Optional<Snowflake> getMessageId() {
         return data.message().toOptional()
-                .map(json -> Snowflake.of(json.get("id").asText()));
+                .map(data -> Snowflake.of(data.id()));
     }
 
     @Override
