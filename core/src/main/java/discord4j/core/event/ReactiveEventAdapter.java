@@ -712,19 +712,31 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
-    public Publisher<?> onSlashCommand(SlashCommandEvent event) {
+    public Publisher<?> onApplicationCommandInteraction(ApplicationCommandInteractionEvent event) {
         return Mono.empty();
     }
 
-    public Publisher<?> onComponentInteract(ComponentInteractEvent event) {
+    public Publisher<?> onChatInputInteraction(ChatInputInteractionEvent event) {
         return Mono.empty();
     }
 
-    public Publisher<?> onButtonInteract(ButtonInteractEvent event) {
+    public Publisher<?> onMessageInteraction(MessageInteractionEvent event) {
         return Mono.empty();
     }
 
-    public Publisher<?> onSelectMenuInteract(SelectMenuInteractEvent event) {
+    public Publisher<?> onUserInteraction(UserInteractionEvent event) {
+        return Mono.empty();
+    }
+
+    public Publisher<?> onComponentInteraction(ComponentInteractionEvent event) {
+        return Mono.empty();
+    }
+
+    public Publisher<?> onButtonInteraction(ButtonInteractionEvent event) {
+        return Mono.empty();
+    }
+
+    public Publisher<?> onSelectMenuInteraction(SelectMenuInteractionEvent event) {
         return Mono.empty();
     }
 
@@ -832,10 +844,13 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof DisconnectEvent) compatibleHooks.add(onDisconnect((DisconnectEvent) event));
         if (event instanceof ReconnectStartEvent) compatibleHooks.add(onReconnectStart((ReconnectStartEvent) event));
         if (event instanceof ReconnectFailEvent) compatibleHooks.add(onReconnectFail((ReconnectFailEvent) event));
-        if (event instanceof SlashCommandEvent) compatibleHooks.add(onSlashCommand((SlashCommandEvent) event));
-        if (event instanceof ButtonInteractEvent) compatibleHooks.add(onButtonInteract((ButtonInteractEvent) event));
-        if (event instanceof SelectMenuInteractEvent) compatibleHooks.add(onSelectMenuInteract((SelectMenuInteractEvent) event));
-        if (event instanceof ComponentInteractEvent) compatibleHooks.add(onComponentInteract((ComponentInteractEvent) event));
+        if (event instanceof ApplicationCommandInteractionEvent) compatibleHooks.add(onApplicationCommandInteraction((ApplicationCommandInteractionEvent) event));
+        if (event instanceof ChatInputInteractionEvent) compatibleHooks.add(onChatInputInteraction((ChatInputInteractionEvent) event));
+        if (event instanceof MessageInteractionEvent) compatibleHooks.add(onMessageInteraction((MessageInteractionEvent) event));
+        if (event instanceof UserInteractionEvent) compatibleHooks.add(onUserInteraction((UserInteractionEvent) event));
+        if (event instanceof ButtonInteractionEvent) compatibleHooks.add(onButtonInteraction((ButtonInteractionEvent) event));
+        if (event instanceof SelectMenuInteractionEvent) compatibleHooks.add(onSelectMenuInteraction((SelectMenuInteractionEvent) event));
+        if (event instanceof ComponentInteractionEvent) compatibleHooks.add(onComponentInteraction((ComponentInteractionEvent) event));
         if (event instanceof InteractionCreateEvent) compatibleHooks.add(onInteractionCreate((InteractionCreateEvent) event));
         if (event instanceof ApplicationCommandCreateEvent) compatibleHooks.add(onApplicationCommandCreate((ApplicationCommandCreateEvent) event));
         if (event instanceof ApplicationCommandUpdateEvent) compatibleHooks.add(onApplicationCommandUpdate((ApplicationCommandUpdateEvent) event));

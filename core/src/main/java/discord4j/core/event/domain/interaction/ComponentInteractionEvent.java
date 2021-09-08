@@ -35,9 +35,9 @@ import java.util.function.Consumer;
  * <p>
  * This is not directly dispatched by Discord, but is a utility specialization of {@link InteractionCreateEvent}.
  */
-public class ComponentInteractEvent extends InteractionCreateEvent {
+public class ComponentInteractionEvent extends InteractionCreateEvent {
 
-    public ComponentInteractEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
+    public ComponentInteractionEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo, interaction);
     }
 

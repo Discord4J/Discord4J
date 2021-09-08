@@ -22,6 +22,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.discordjson.json.ApplicationCommandData;
+import discord4j.rest.util.ApplicationCommandType;
 
 import java.util.Collections;
 import java.util.List;
@@ -67,6 +68,18 @@ public class ApplicationCommand implements DiscordObject {
      */
     public Snowflake getId() {
         return Snowflake.of(data.id());
+    }
+
+    /**
+     * Gets the type of the command.
+     *
+     * @return The type of the command.
+     */
+    public ApplicationCommandType getType() {
+        // Discord defaults to treating the type as a CHAT_INPUT command if type is not present.
+        return data.type().toOptional()
+            .map(ApplicationCommandType::of)
+            .orElse(ApplicationCommandType.CHAT_INPUT);
     }
 
     /**

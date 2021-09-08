@@ -18,19 +18,34 @@ package discord4j.core.event.domain.interaction;
 
 import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
-import discord4j.core.object.component.Button;
+import discord4j.core.object.component.SelectMenu;
 import discord4j.gateway.ShardInfo;
 
+import java.util.List;
+
 /**
- * Dispatched when a user interacts with a {@link Button} the bot has sent.
+ * Dispatched when a user interacts with a {@link SelectMenu} the bot has sent.
  * <p>
  * This is not directly dispatched by Discord, but is a utility specialization of {@link InteractionCreateEvent}.
  */
 @Experimental
-public class ButtonInteractEvent extends ComponentInteractEvent {
+public class SelectMenuInteractionEvent extends ComponentInteractionEvent {
 
-    public ButtonInteractEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
+    public SelectMenuInteractionEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo, interaction);
+    }
+
+    /**
+     * Get the values selected in the menu.
+     *
+     * @return The values selected in the menu.
+     * @see SelectMenu.Option#getValue()
+     */
+    public List<String> getValues() {
+        return getInteraction().getCommandInteraction()
+                .flatMap(ApplicationCommandInteraction::getValues)
+                .orElseThrow(IllegalStateException::new); // should always be present for select menus
     }
 }

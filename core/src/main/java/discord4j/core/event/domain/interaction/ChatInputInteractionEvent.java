@@ -1,5 +1,5 @@
 /*
- * This file is part of Discord4J.
+ *  This file is part of Discord4J.
  *
  * Discord4J is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -8,19 +8,17 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package discord4j.core.event.domain.interaction;
 
 import discord4j.common.annotations.Experimental;
-import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.Interaction;
 import discord4j.gateway.ShardInfo;
@@ -29,44 +27,22 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Dispatched when a user in a guild uses a Slash Command.
+ * Dispatched when a user uses a chat input command (formerly "slash command")
  * <p>
- * This event is dispatched by Discord.
+ * THis event is dispatched by Discord
  *
  * @see <a href="https://discord.com/developers/docs/topics/gateway#interaction-create">Interaction Create</a>
  */
 @Experimental
-public class SlashCommandEvent extends InteractionCreateEvent {
+public class ChatInputInteractionEvent extends ApplicationCommandInteractionEvent {
 
-    public SlashCommandEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
+    public ChatInputInteractionEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo, interaction);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Convenience methods forwarding to ApplicationCommandInteraction methods.
-    // We can assume these properties are present, because this is a slash command interaction.
-
-    /**
-     * Gets the ID of the invoked command.
-     *
-     * @return The ID of the invoked command.
-     */
-    public Snowflake getCommandId() {
-        return getInteraction().getCommandInteraction()
-                .flatMap(ApplicationCommandInteraction::getId)
-                .orElseThrow(IllegalStateException::new); // should always be present for slash commands
-    }
-
-    /**
-     * Gets the name of the invoked command.
-     *
-     * @return The name of the invoked command.
-     */
-    public String getCommandName() {
-        return getInteraction().getCommandInteraction()
-                .flatMap(ApplicationCommandInteraction::getName)
-                .orElseThrow(IllegalStateException::new); // should always be present for slash commands
-    }
+    // We can assume these properties are present, because this is a chat input command interaction.
 
     /**
      * Gets the options of the invoked command.
@@ -75,8 +51,8 @@ public class SlashCommandEvent extends InteractionCreateEvent {
      */
     public List<ApplicationCommandInteractionOption> getOptions() {
         return getInteraction().getCommandInteraction()
-                .orElseThrow(IllegalStateException::new) // should always be present for slash commands
-                .getOptions();
+            .orElseThrow(IllegalStateException::new) // should always be present for chat input commands
+            .getOptions();
     }
 
     /**
@@ -87,7 +63,7 @@ public class SlashCommandEvent extends InteractionCreateEvent {
      */
     public Optional<ApplicationCommandInteractionOption> getOption(final String name) {
         return getInteraction().getCommandInteraction()
-                .orElseThrow(IllegalStateException::new) // should always be present for slash commands
-                .getOption(name);
+            .orElseThrow(IllegalStateException::new) // should always be present for chat input commands
+            .getOption(name);
     }
 }

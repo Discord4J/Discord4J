@@ -84,7 +84,8 @@ public final class Region implements DiscordObject {
      * @return {@code true} if this is a VIP region, {@code false} otherwise.
      */
     public boolean isVip() {
-        return data.vip();
+        // Discord changed this to being optional, but if not present the default is still false
+        return data.vip().toOptional().orElse(false);
     }
 
     /**
