@@ -22,10 +22,10 @@ package discord4j.rest.util;
  * Application Command Type</a>
  */
 public enum ApplicationCommandType {
+    UNKNOWN(0),
     CHAT_INPUT(1),
     USER(2),
-    MESSAGE(3),
-    STRING(3);
+    MESSAGE(3);
 
     /**
      * The underlying value as represented by Discord.
@@ -51,7 +51,7 @@ public enum ApplicationCommandType {
     }
 
     /**
-     * Gets the type of an application command. It is guaranteed that invoking {@link #getValue()} from the
+     * Gets the type of application command. It is guaranteed that invoking {@link #getValue()} from the
      * returned enum will
      * equal ({@code ==}) the supplied {@code value}.
      *
@@ -60,9 +60,10 @@ public enum ApplicationCommandType {
      */
     public static ApplicationCommandType of(final int value) {
         switch (value) {
+            case 1: return CHAT_INPUT;
             case 2: return USER;
             case 3: return MESSAGE;
-            default: return CHAT_INPUT;
+            default: return UNKNOWN;
         }
     }
 }

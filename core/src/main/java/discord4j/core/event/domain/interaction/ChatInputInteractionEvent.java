@@ -27,9 +27,9 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Dispatched when a user uses a chat input command (formerly "slash command")
+ * Dispatched when n user uses a chat input command (formerly "slash command").
  * <p>
- * THis event is dispatched by Discord
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discord.com/developers/docs/topics/gateway#interaction-create">Interaction Create</a>
  */
