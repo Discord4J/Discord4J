@@ -24,8 +24,12 @@ import discord4j.gateway.ShardInfo;
 
 /**
  * Dispatched when a user interacts with a {@link Button} the bot has sent.
+ *
  * <p>
  * This is not directly dispatched by Discord, but is a utility specialization of {@link InteractionCreateEvent}.
+ *
+ * <p>
+ * <img src="doc-files/InteractionCreateEvent.png">
  */
 @Experimental
 public class ButtonInteractionEvent extends ComponentInteractionEvent {

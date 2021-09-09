@@ -27,10 +27,12 @@ import discord4j.rest.util.ApplicationCommandType;
 
 /**
  * Dispatched when a user uses an Application Command.
- * <p>
- * This event is dispatched by Discord.
  *
- * @see <a href="https://discord.com/developers/docs/topics/gateway#interaction-create">Interaction Create</a>
+ * <p>
+ * This is not directly dispatched by Discord, but is a utility specialization of {@link InteractionCreateEvent}.
+ *
+ * <p>
+ * <img src="doc-files/InteractionCreateEvent.png">
  */
 @Experimental
 public class ApplicationCommandInteractionEvent extends InteractionCreateEvent {

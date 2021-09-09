@@ -32,8 +32,12 @@ import java.util.function.Consumer;
 
 /**
  * Dispatched when a user interacts with a {@link MessageComponent} the bot has sent.
+ *
  * <p>
  * This is not directly dispatched by Discord, but is a utility specialization of {@link InteractionCreateEvent}.
+ *
+ * <p>
+ * <img src="doc-files/InteractionCreateEvent.png">
  */
 public class ComponentInteractionEvent extends InteractionCreateEvent {
 

@@ -28,10 +28,13 @@ import java.util.Optional;
 
 /**
  * Dispatched when n user uses a chat input command (formerly "slash command").
- * <p>
- * This event is dispatched by Discord.
  *
- * @see <a href="https://discord.com/developers/docs/topics/gateway#interaction-create">Interaction Create</a>
+ * <p>
+ * This is not directly dispatched by Discord, but is a utility specialization of
+ * {@link ApplicationCommandInteractionEvent}.
+ *
+ * <p>
+ * <img src="doc-files/InteractionCreateEvent.png">
  */
 @Experimental
 public class ChatInputInteractionEvent extends ApplicationCommandInteractionEvent {
