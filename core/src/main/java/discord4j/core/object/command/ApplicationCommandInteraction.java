@@ -21,10 +21,9 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
+import discord4j.core.object.command.ApplicationCommand.ApplicationCommandType;
 import discord4j.core.object.component.MessageComponent;
-import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ApplicationCommandInteractionData;
-import discord4j.rest.util.ApplicationCommandType;
 import reactor.util.annotation.Nullable;
 
 import java.util.Collections;
@@ -34,6 +33,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 // TODO: Discord is probably going to rename this. Redo docs then.
+
 /**
  * A Discord application command interaction.
  *
@@ -152,7 +152,7 @@ public class ApplicationCommandInteraction implements DiscordObject {
      */
     public Optional<Snowflake> getTargetId() {
         return data.targetId().toOptional()
-            .map(Snowflake::of);
+                .map(Snowflake::of);
     }
 
     @Override

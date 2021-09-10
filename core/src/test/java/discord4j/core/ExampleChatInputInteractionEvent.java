@@ -34,9 +34,9 @@ import reactor.util.Loggers;
 
 import java.util.Random;
 
-public class ExampleSlashCommandEvent {
+public class ExampleChatInputInteractionEvent {
 
-    private static final Logger log = Loggers.getLogger(ExampleSlashCommandEvent.class);
+    private static final Logger log = Loggers.getLogger(ExampleChatInputInteractionEvent.class);
 
     private static final String token = System.getenv("token");
     private static final String guildId = System.getenv("guildId");

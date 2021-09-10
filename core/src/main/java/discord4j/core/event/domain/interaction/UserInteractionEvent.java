@@ -1,5 +1,5 @@
 /*
- *  This file is part of Discord4J.
+ * This file is part of Discord4J.
  *
  * Discord4J is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -8,11 +8,11 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package discord4j.core.event.domain.interaction;
@@ -23,16 +23,15 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.User;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
 /**
  * Dispatched when a user uses a user command (user context menu)
- *
  * <p>
  * This is not directly dispatched by Discord, but is a utility specialization of
  * {@link ApplicationCommandInteractionEvent}.
- *
  * <p>
  * <img src="doc-files/InteractionCreateEvent.png">
  */
@@ -54,8 +53,8 @@ public class UserInteractionEvent extends ApplicationCommandInteractionEvent {
      */
     public Snowflake getTargetId() {
         return getInteraction().getCommandInteraction()
-            .flatMap(ApplicationCommandInteraction::getTargetId)
-            .orElseThrow(IllegalStateException::new); // should always be present for context menu commands
+                .flatMap(ApplicationCommandInteraction::getTargetId)
+                .orElseThrow(IllegalStateException::new); // should always be present for context menu commands
     }
 
     /**
@@ -66,5 +65,17 @@ public class UserInteractionEvent extends ApplicationCommandInteractionEvent {
      */
     public Mono<User> getTargetUser() {
         return getClient().getUserById(getTargetId());
+    }
+
+    /**
+     * Requests to retrieve the targeted User.
+     *
+     * @param retrievalStrategy The strategy to use to get the target User
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User} targeted by the user.
+     * If an error is received, it is emitted through the Mono.
+     */
+    public Mono<User> getTargetUser(EntityRetrievalStrategy retrievalStrategy) {
+        return getClient().withRetrievalStrategy(retrievalStrategy)
+                .getUserById(getTargetId());
     }
 }

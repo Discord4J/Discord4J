@@ -22,7 +22,6 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.discordjson.json.ApplicationCommandData;
-import discord4j.rest.util.ApplicationCommandType;
 
 import java.util.Collections;
 import java.util.List;
@@ -135,5 +134,56 @@ public class ApplicationCommand implements DiscordObject {
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
+    }
+
+    /**
+     * @see <a href="https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types">
+     * Application Command Type</a>
+     */
+    public enum ApplicationCommandType {
+        UNKNOWN(-1),
+        CHAT_INPUT(1),
+        USER(2),
+        MESSAGE(3);
+
+        /**
+         * The underlying value as represented by Discord.
+         */
+        private final int value;
+
+        /**
+         * Constructs an {@code ApplicationCommandType}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        ApplicationCommandType(final int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the type of application command. It is guaranteed that invoking {@link #getValue()} from the
+         * returned enum will
+         * equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The type of command.
+         */
+        public static ApplicationCommandType of(final int value) {
+            switch (value) {
+                case 1: return CHAT_INPUT;
+                case 2: return USER;
+                case 3: return MESSAGE;
+                default: return UNKNOWN;
+            }
+        }
     }
 }

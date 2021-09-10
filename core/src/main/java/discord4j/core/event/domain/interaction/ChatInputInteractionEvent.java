@@ -1,5 +1,5 @@
 /*
- *  This file is part of Discord4J.
+ * This file is part of Discord4J.
  *
  * Discord4J is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -8,11 +8,11 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package discord4j.core.event.domain.interaction;
@@ -28,11 +28,9 @@ import java.util.Optional;
 
 /**
  * Dispatched when n user uses a chat input command (formerly "slash command").
- *
  * <p>
  * This is not directly dispatched by Discord, but is a utility specialization of
  * {@link ApplicationCommandInteractionEvent}.
- *
  * <p>
  * <img src="doc-files/InteractionCreateEvent.png">
  */
@@ -54,8 +52,8 @@ public class ChatInputInteractionEvent extends ApplicationCommandInteractionEven
      */
     public List<ApplicationCommandInteractionOption> getOptions() {
         return getInteraction().getCommandInteraction()
-            .orElseThrow(IllegalStateException::new) // should always be present for chat input commands
-            .getOptions();
+                .orElseThrow(IllegalStateException::new) // should always be present for chat input commands
+                .getOptions();
     }
 
     /**
@@ -66,7 +64,7 @@ public class ChatInputInteractionEvent extends ApplicationCommandInteractionEven
      */
     public Optional<ApplicationCommandInteractionOption> getOption(final String name) {
         return getInteraction().getCommandInteraction()
-            .orElseThrow(IllegalStateException::new) // should always be present for chat input commands
-            .getOption(name);
+                .orElseThrow(IllegalStateException::new) // should always be present for chat input commands
+                .getOption(name);
     }
 }

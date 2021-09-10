@@ -25,7 +25,7 @@ import discord4j.core.event.domain.integration.IntegrationDeleteEvent;
 import discord4j.core.event.domain.integration.IntegrationUpdateEvent;
 import discord4j.core.event.domain.interaction.*;
 import discord4j.core.object.VoiceState;
-import discord4j.core.object.command.ApplicationCommand;
+import discord4j.core.object.command.ApplicationCommand.ApplicationCommandType;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.component.MessageComponent;
@@ -40,7 +40,6 @@ import discord4j.discordjson.json.VoiceStateData;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.retry.GatewayStateChange;
-import discord4j.rest.util.ApplicationCommandType;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
@@ -301,8 +300,8 @@ public class DispatchHandlers implements DispatchEventMapper {
         switch (interaction.getType()) {
             case APPLICATION_COMMAND:
                 ApplicationCommandType commandType = interaction.getCommandInteraction()
-                    .flatMap(ApplicationCommandInteraction::getApplicationCommandType)
-                    .orElseThrow(IllegalStateException::new); // command type must be present.
+                        .flatMap(ApplicationCommandInteraction::getApplicationCommandType)
+                        .orElseThrow(IllegalStateException::new); // command type must be present.
 
                 switch (commandType) {
                     case CHAT_INPUT:
@@ -313,7 +312,7 @@ public class DispatchHandlers implements DispatchEventMapper {
                         return Mono.just(new UserInteractionEvent(gateway, context.getShardInfo(), interaction));
                     default:
                         return Mono.just(
-                            new ApplicationCommandInteractionEvent(gateway, context.getShardInfo(), interaction)
+                                new ApplicationCommandInteractionEvent(gateway, context.getShardInfo(), interaction)
                         );
                 }
             case MESSAGE_COMPONENT:

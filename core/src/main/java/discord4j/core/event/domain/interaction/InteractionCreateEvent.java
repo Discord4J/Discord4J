@@ -37,12 +37,10 @@ import java.util.function.Consumer;
 
 /**
  * Dispatched when a user in a guild uses a Slash Command or clicks a Button.
- *
  * <p>
  * This event is dispatched by Discord.
  *
  * @see <a href="https://discord.com/developers/docs/topics/gateway#interaction-create">Interaction Create</a>
- *
  * <p>
  * <img src="doc-files/InteractionCreateEvent.png">
  */
@@ -67,17 +65,18 @@ public class InteractionCreateEvent extends Event {
         return interaction;
     }
 
-    protected Mono<Void> createInteractionResponse(InteractionResponseType responseType, @Nullable InteractionApplicationCommandCallbackData data) {
+    protected Mono<Void> createInteractionResponse(InteractionResponseType responseType,
+                                                   @Nullable InteractionApplicationCommandCallbackData data) {
         InteractionResponseData responseData = InteractionResponseData.builder()
-            .type(responseType.getValue())
-            .data(data == null ? Possible.absent() : Possible.of(data))
-            .build();
+                .type(responseType.getValue())
+                .data(data == null ? Possible.absent() : Possible.of(data))
+                .build();
 
         long id = interaction.getId().asLong();
         String token = interaction.getToken();
 
         return getClient().rest().getInteractionService()
-            .createInteractionResponse(id, token, responseData);
+                .createInteractionResponse(id, token, responseData);
     }
 
     /**
@@ -103,8 +102,8 @@ public class InteractionCreateEvent extends Event {
     // TODO: with new specs, this could be acknowledge().ephemeral() instead
     public Mono<Void> acknowledgeEphemeral() {
         InteractionApplicationCommandCallbackData data = InteractionApplicationCommandCallbackData.builder()
-            .flags(Message.Flag.EPHEMERAL.getFlag())
-            .build();
+                .flags(Message.Flag.EPHEMERAL.getFlag())
+                .build();
 
         return createInteractionResponse(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, data);
     }
@@ -143,24 +142,25 @@ public class InteractionCreateEvent extends Event {
      * Requests to respond to the interaction with a message.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link InteractionApplicationCommandCallbackSpec} to be
-     *             operated on.
+     * operated on.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
      * been sent. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> reply(final Consumer<? super InteractionApplicationCommandCallbackSpec> spec) {
         return Mono.defer(
-            () -> {
-                InteractionApplicationCommandCallbackSpec mutatedSpec =
-                    new InteractionApplicationCommandCallbackSpec();
+                () -> {
+                    InteractionApplicationCommandCallbackSpec mutatedSpec =
+                            new InteractionApplicationCommandCallbackSpec();
 
-                getClient().getRestClient().getRestResources()
-                    .getAllowedMentions()
-                    .ifPresent(mutatedSpec::setAllowedMentions);
+                    getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .ifPresent(mutatedSpec::setAllowedMentions);
 
-                spec.accept(mutatedSpec);
+                    spec.accept(mutatedSpec);
 
-                return createInteractionResponse(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, mutatedSpec.asRequest());
-            });
+                    return createInteractionResponse(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                            mutatedSpec.asRequest());
+                });
     }
 
     /**
@@ -187,19 +187,19 @@ public class InteractionCreateEvent extends Event {
         @Override
         public Mono<MessageData> getInitialResponse() {
             return restClient.getWebhookService()
-                .getWebhookMessage(applicationId, interactionData.token(), "@original");
+                    .getWebhookMessage(applicationId, interactionData.token(), "@original");
         }
 
         @Override
         public Mono<MessageData> editInitialResponse(WebhookMessageEditRequest request) {
             return restClient.getWebhookService()
-                .modifyWebhookMessage(applicationId, interactionData.token(), "@original", request);
+                    .modifyWebhookMessage(applicationId, interactionData.token(), "@original", request);
         }
 
         @Override
         public Mono<Void> deleteInitialResponse() {
             return restClient.getWebhookService()
-                .deleteWebhookMessage(applicationId, interactionData.token(), "@original");
+                    .deleteWebhookMessage(applicationId, interactionData.token(), "@original");
         }
 
         @Override
@@ -207,48 +207,48 @@ public class InteractionCreateEvent extends Event {
             FollowupMessageRequest body = FollowupMessageRequest.builder().content(content).build();
             WebhookMultipartRequest request = new WebhookMultipartRequest(body);
             return restClient.getWebhookService()
-                .executeWebhook(applicationId, interactionData.token(), true, request);
+                    .executeWebhook(applicationId, interactionData.token(), true, request);
         }
 
         @Override
         public Mono<MessageData> createFollowupMessage(WebhookMultipartRequest request) {
             return restClient.getWebhookService()
-                .executeWebhook(applicationId, interactionData.token(), true, request);
+                    .executeWebhook(applicationId, interactionData.token(), true, request);
         }
 
         @Override
         public Mono<MessageData> createFollowupMessageEphemeral(String content) {
             FollowupMessageRequest body = FollowupMessageRequest.builder()
-                .content(content)
-                .flags(Message.Flag.EPHEMERAL.getFlag())
-                .build();
+                    .content(content)
+                    .flags(Message.Flag.EPHEMERAL.getFlag())
+                    .build();
             WebhookMultipartRequest request = new WebhookMultipartRequest(body);
             return restClient.getWebhookService()
-                .executeWebhook(applicationId, interactionData.token(), true, request);
+                    .executeWebhook(applicationId, interactionData.token(), true, request);
         }
 
         @Override
         public Mono<MessageData> createFollowupMessageEphemeral(WebhookMultipartRequest request) {
             FollowupMessageRequest newBody = FollowupMessageRequest.builder()
-                .from(request.getExecuteRequest())
-                .flags(Message.Flag.EPHEMERAL.getFlag())
-                .build();
+                    .from(request.getExecuteRequest())
+                    .flags(Message.Flag.EPHEMERAL.getFlag())
+                    .build();
             WebhookMultipartRequest newRequest = new WebhookMultipartRequest(newBody, request.getFiles());
 
             return restClient.getWebhookService()
-                .executeWebhook(applicationId, interactionData.token(), true, newRequest);
+                    .executeWebhook(applicationId, interactionData.token(), true, newRequest);
         }
 
         @Override
         public Mono<MessageData> editFollowupMessage(long messageId, WebhookMessageEditRequest request, boolean wait) {
             return restClient.getWebhookService()
-                .modifyWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId), request);
+                    .modifyWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId), request);
         }
 
         @Override
         public Mono<Void> deleteFollowupMessage(long messageId) {
             return restClient.getWebhookService()
-                .deleteWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId));
+                    .deleteWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId));
         }
     }
 }
