@@ -26,8 +26,8 @@ ext {
     reactor_bom_version = '2020.0.10'
     jackson_version = '2.12.4'
     caffeine_version = '2.8.8'
-    immutables_group = 'com.discord4j.immutables'
-    immutables_version = '2.9.0-GH-1320.0'
+    immutables_group = 'org.immutables'
+    immutables_version = '2.9.0-rc1'
 
     // Test dependencies
     junit_version = '5.7.1'
