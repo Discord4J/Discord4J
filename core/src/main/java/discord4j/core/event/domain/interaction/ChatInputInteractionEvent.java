@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Dispatched when n user uses a chat input command (formerly "slash command").
+ * Dispatched when a user uses a chat input command (formerly "slash command").
  * <p>
  * This is not directly dispatched by Discord, but is a utility specialization of
  * {@link ApplicationCommandInteractionEvent}.
