@@ -21,6 +21,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.rest.RestClient;
+import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -161,7 +162,7 @@ public class RestMessage {
      * @see <a href="https://discord.com/developers/docs/resources/channel#edit-message">Edit Message</a>
      */
     public Mono<MessageData> edit(MessageEditRequest request) {
-        return restClient.getChannelService().editMessage(channelId, id, request);
+        return restClient.getChannelService().editMessage(channelId, id, MultipartRequest.ofRequest(request));
     }
 
     /**

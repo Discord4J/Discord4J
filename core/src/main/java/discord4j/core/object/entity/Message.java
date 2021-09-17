@@ -39,6 +39,7 @@ import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.entity.RestChannel;
 import discord4j.rest.entity.RestMessage;
+import discord4j.rest.util.MultipartRequest;
 import discord4j.rest.util.PaginationUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -537,7 +538,8 @@ public final class Message implements Entity {
                             .ifPresent(mutatedSpec::setAllowedMentions);
                     spec.accept(mutatedSpec);
                     return gateway.getRestClient().getChannelService()
-                            .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest());
+                            .editMessage(getChannelId().asLong(), getId().asLong(),
+                                    MultipartRequest.ofRequest(mutatedSpec.asRequest()));
                 })
                 .map(data -> new Message(gateway, data));
     }
