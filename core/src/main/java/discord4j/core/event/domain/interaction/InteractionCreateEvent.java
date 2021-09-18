@@ -41,6 +41,8 @@ import java.util.function.Consumer;
  * This event is dispatched by Discord.
  *
  * @see <a href="https://discord.com/developers/docs/topics/gateway#interaction-create">Interaction Create</a>
+ * <p>
+ * <img src="doc-files/InteractionCreateEvent.png">
  */
 @Experimental
 public class InteractionCreateEvent extends Event {
@@ -63,7 +65,8 @@ public class InteractionCreateEvent extends Event {
         return interaction;
     }
 
-    protected Mono<Void> createInteractionResponse(InteractionResponseType responseType, @Nullable InteractionApplicationCommandCallbackData data) {
+    protected Mono<Void> createInteractionResponse(InteractionResponseType responseType,
+                                                   @Nullable InteractionApplicationCommandCallbackData data) {
         InteractionResponseData responseData = InteractionResponseData.builder()
                 .type(responseType.getValue())
                 .data(data == null ? Possible.absent() : Possible.of(data))
@@ -155,7 +158,8 @@ public class InteractionCreateEvent extends Event {
 
                     spec.accept(mutatedSpec);
 
-                    return createInteractionResponse(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, mutatedSpec.asRequest());
+                    return createInteractionResponse(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                            mutatedSpec.asRequest());
                 });
     }
 

@@ -708,23 +708,91 @@ public abstract class ReactiveEventAdapter {
 
     // ================= Interactions events ================= //
 
+    /**
+     * Invoked when a user starts an interaction.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
     public Publisher<?> onInteractionCreate(InteractionCreateEvent event) {
         return Mono.empty();
     }
 
-    public Publisher<?> onSlashCommand(SlashCommandEvent event) {
+    /**
+     * Invoked when a user starts an application command interaction.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onApplicationCommandInteraction(ApplicationCommandInteractionEvent event) {
         return Mono.empty();
     }
 
-    public Publisher<?> onComponentInteract(ComponentInteractEvent event) {
+    /**
+     * Invoked when a user issues a chat input command (formerly "slash command").
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onChatInputInteraction(ChatInputInteractionEvent event) {
         return Mono.empty();
     }
 
-    public Publisher<?> onButtonInteract(ButtonInteractEvent event) {
+    /**
+     * Invoked when a user issues a message command (context menu action on a message).
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onMessageInteraction(MessageInteractionEvent event) {
         return Mono.empty();
     }
 
-    public Publisher<?> onSelectMenuInteract(SelectMenuInteractEvent event) {
+    /**
+     * Invoked when a user issues a user command (context menu action on a user).
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onUserInteraction(UserInteractionEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a user interacts with a component.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onComponentInteraction(ComponentInteractionEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a user interacts with a button component.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onButtonInteraction(ButtonInteractionEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a user interacts with a select menu.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onSelectMenuInteraction(SelectMenuInteractionEvent event) {
         return Mono.empty();
     }
 
@@ -832,10 +900,13 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof DisconnectEvent) compatibleHooks.add(onDisconnect((DisconnectEvent) event));
         if (event instanceof ReconnectStartEvent) compatibleHooks.add(onReconnectStart((ReconnectStartEvent) event));
         if (event instanceof ReconnectFailEvent) compatibleHooks.add(onReconnectFail((ReconnectFailEvent) event));
-        if (event instanceof SlashCommandEvent) compatibleHooks.add(onSlashCommand((SlashCommandEvent) event));
-        if (event instanceof ButtonInteractEvent) compatibleHooks.add(onButtonInteract((ButtonInteractEvent) event));
-        if (event instanceof SelectMenuInteractEvent) compatibleHooks.add(onSelectMenuInteract((SelectMenuInteractEvent) event));
-        if (event instanceof ComponentInteractEvent) compatibleHooks.add(onComponentInteract((ComponentInteractEvent) event));
+        if (event instanceof ApplicationCommandInteractionEvent) compatibleHooks.add(onApplicationCommandInteraction((ApplicationCommandInteractionEvent) event));
+        if (event instanceof ChatInputInteractionEvent) compatibleHooks.add(onChatInputInteraction((ChatInputInteractionEvent) event));
+        if (event instanceof MessageInteractionEvent) compatibleHooks.add(onMessageInteraction((MessageInteractionEvent) event));
+        if (event instanceof UserInteractionEvent) compatibleHooks.add(onUserInteraction((UserInteractionEvent) event));
+        if (event instanceof ButtonInteractionEvent) compatibleHooks.add(onButtonInteraction((ButtonInteractionEvent) event));
+        if (event instanceof SelectMenuInteractionEvent) compatibleHooks.add(onSelectMenuInteraction((SelectMenuInteractionEvent) event));
+        if (event instanceof ComponentInteractionEvent) compatibleHooks.add(onComponentInteraction((ComponentInteractionEvent) event));
         if (event instanceof InteractionCreateEvent) compatibleHooks.add(onInteractionCreate((InteractionCreateEvent) event));
         if (event instanceof ApplicationCommandCreateEvent) compatibleHooks.add(onApplicationCommandCreate((ApplicationCommandCreateEvent) event));
         if (event instanceof ApplicationCommandUpdateEvent) compatibleHooks.add(onApplicationCommandUpdate((ApplicationCommandUpdateEvent) event));
