@@ -18,9 +18,7 @@
 package discord4j.core.event.domain.interaction;
 
 import discord4j.common.annotations.Experimental;
-import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.Interaction;
 import discord4j.gateway.ShardInfo;
@@ -29,44 +27,23 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Dispatched when a user in a guild uses a Slash Command.
+ * Dispatched when a user uses a chat input command (formerly "slash command").
  * <p>
- * This event is dispatched by Discord.
- *
- * @see <a href="https://discord.com/developers/docs/topics/gateway#interaction-create">Interaction Create</a>
+ * This is not directly dispatched by Discord, but is a utility specialization of
+ * {@link ApplicationCommandInteractionEvent}.
+ * <p>
+ * <img src="doc-files/InteractionCreateEvent.png">
  */
 @Experimental
-public class SlashCommandEvent extends InteractionCreateEvent {
+public class ChatInputInteractionEvent extends ApplicationCommandInteractionEvent {
 
-    public SlashCommandEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
+    public ChatInputInteractionEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo, interaction);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Convenience methods forwarding to ApplicationCommandInteraction methods.
-    // We can assume these properties are present, because this is a slash command interaction.
-
-    /**
-     * Gets the ID of the invoked command.
-     *
-     * @return The ID of the invoked command.
-     */
-    public Snowflake getCommandId() {
-        return getInteraction().getCommandInteraction()
-                .flatMap(ApplicationCommandInteraction::getId)
-                .orElseThrow(IllegalStateException::new); // should always be present for slash commands
-    }
-
-    /**
-     * Gets the name of the invoked command.
-     *
-     * @return The name of the invoked command.
-     */
-    public String getCommandName() {
-        return getInteraction().getCommandInteraction()
-                .flatMap(ApplicationCommandInteraction::getName)
-                .orElseThrow(IllegalStateException::new); // should always be present for slash commands
-    }
+    // We can assume these properties are present, because this is a chat input command interaction.
 
     /**
      * Gets the options of the invoked command.
@@ -75,7 +52,7 @@ public class SlashCommandEvent extends InteractionCreateEvent {
      */
     public List<ApplicationCommandInteractionOption> getOptions() {
         return getInteraction().getCommandInteraction()
-                .orElseThrow(IllegalStateException::new) // should always be present for slash commands
+                .orElseThrow(IllegalStateException::new) // should always be present for chat input commands
                 .getOptions();
     }
 
@@ -87,7 +64,7 @@ public class SlashCommandEvent extends InteractionCreateEvent {
      */
     public Optional<ApplicationCommandInteractionOption> getOption(final String name) {
         return getInteraction().getCommandInteraction()
-                .orElseThrow(IllegalStateException::new) // should always be present for slash commands
+                .orElseThrow(IllegalStateException::new) // should always be present for chat input commands
                 .getOption(name);
     }
 }

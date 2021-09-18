@@ -29,8 +29,8 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;
 import com.sedmelluq.discord.lavaplayer.track.playback.NonAllocatingAudioFrameBuffer;
 import discord4j.common.util.Snowflake;
-import discord4j.core.event.domain.interaction.ButtonInteractEvent;
-import discord4j.core.event.domain.interaction.SlashCommandEvent;
+import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
@@ -81,7 +81,7 @@ public class ExampleSoundboard {
         }
 
         // a listener that captures our slash command interactions
-        Publisher<?> onSlash = client.on(SlashCommandEvent.class, event -> {
+        Publisher<?> onChatInputInteraction = client.on(ChatInputInteractionEvent.class, event -> {
             if ("join".equals(event.getCommandName())) {
                 return event.acknowledgeEphemeral()
                         .then(Mono.justOrEmpty(event.getInteraction().getMember()))
@@ -151,7 +151,7 @@ public class ExampleSoundboard {
         });
 
         // a listener that captures button presses
-        Publisher<?> onPress = client.on(ButtonInteractEvent.class, press -> {
+        Publisher<?> onButtonInteraction = client.on(ButtonInteractionEvent.class, press -> {
             if (press.getCustomId().startsWith("source")) {
                 return press.acknowledgeEphemeral()
                         .then(Mono.justOrEmpty(press.getInteraction().getGuildId()))
@@ -166,7 +166,7 @@ public class ExampleSoundboard {
         // register the command and then subscribe to multiple listeners, using Mono.when
         return GuildCommandRegistrar.create(client.getRestClient(), guildId, getCommandSources())
                 .registerCommands()
-                .thenMany(Mono.when(onSlash, onPress));
+                .thenMany(Mono.when(onChatInputInteraction, onButtonInteraction));
     }
 
     private static List<LayoutComponent> getButtons() {

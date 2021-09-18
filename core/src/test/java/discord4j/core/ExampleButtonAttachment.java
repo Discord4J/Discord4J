@@ -17,8 +17,8 @@
 
 package discord4j.core;
 
-import discord4j.core.event.domain.interaction.ButtonInteractEvent;
-import discord4j.core.event.domain.interaction.SlashCommandEvent;
+import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
 import discord4j.core.support.GuildCommandRegistrar;
@@ -58,7 +58,7 @@ public class ExampleButtonAttachment {
 
                     // a listener that captures our slash command interactions
                     // replies with content and a button
-                    Publisher<?> onSlash = client.on(SlashCommandEvent.class, event -> {
+                    Publisher<?> onChatInputInteraction = client.on(ChatInputInteractionEvent.class, event -> {
                         if (exampleName.equals(event.getCommandName())) {
                             return event.reply()
                                     .withContent("Hey!")
@@ -70,7 +70,7 @@ public class ExampleButtonAttachment {
                     // a listener that captures button presses
                     // to update an interaction initial response with a new attachment
                     // TODO: missing d4j-core API to do this therefore this is done through d4j-rest
-                    Publisher<?> onPress = client.on(ButtonInteractEvent.class, press -> {
+                    Publisher<?> onButtonInteraction = client.on(ButtonInteractionEvent.class, press -> {
                         if (editAttach.equals(press.getCustomId())) {
                             Mono<?> edit = press.getInteractionResponse()
                                     .editInitialResponse(MultipartRequest.ofRequestAndFiles(
@@ -86,7 +86,7 @@ public class ExampleButtonAttachment {
                     // register the command and then subscribe to multiple listeners, using Mono.when
                     return GuildCommandRegistrar.create(client.getRestClient(), guildId, commands)
                             .registerCommands()
-                            .thenMany(Mono.when(onSlash, onPress));
+                            .thenMany(Mono.when(onChatInputInteraction, onButtonInteraction));
                 })
                 .block();
     }

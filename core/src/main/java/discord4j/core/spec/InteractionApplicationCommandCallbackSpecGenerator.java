@@ -17,7 +17,7 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.event.domain.interaction.ComponentInteractEvent;
+import discord4j.core.event.domain.interaction.ComponentInteractionEvent;
 import discord4j.core.event.domain.interaction.InteractionCreateEvent;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
@@ -86,7 +86,7 @@ abstract class InteractionApplicationCommandCallbackReplyMonoGenerator extends M
 abstract class InteractionApplicationCommandCallbackEditMonoGenerator extends Mono<Void>
         implements InteractionApplicationCommandCallbackSpecGenerator {
 
-    abstract ComponentInteractEvent event();
+    abstract ComponentInteractionEvent event();
 
     @Override
     public void subscribe(CoreSubscriber<? super Void> actual) {

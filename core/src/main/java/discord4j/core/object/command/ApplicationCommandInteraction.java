@@ -21,6 +21,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
+import discord4j.core.object.command.ApplicationCommand.ApplicationCommandType;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.discordjson.json.ApplicationCommandInteractionData;
 import reactor.util.annotation.Nullable;
@@ -32,6 +33,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 // TODO: Discord is probably going to rename this. Redo docs then.
+
 /**
  * A Discord application command interaction.
  *
@@ -82,6 +84,15 @@ public class ApplicationCommandInteraction implements DiscordObject {
      */
     public Optional<String> getName() {
         return data.name().toOptional();
+    }
+
+    /**
+     * Gets the type of the invoked command.
+     *
+     * @return The type of the invoked command.
+     */
+    public Optional<ApplicationCommandType> getApplicationCommandType() {
+        return data.type().toOptional().map(ApplicationCommandType::of);
     }
 
     /**
@@ -142,6 +153,16 @@ public class ApplicationCommandInteraction implements DiscordObject {
     public Optional<ApplicationCommandInteractionResolved> getResolved() {
         return data.resolved().toOptional()
                 .map(data -> new ApplicationCommandInteractionResolved(gateway, data, guildId));
+    }
+
+    /**
+     * Gets the ID of the user or message targeted by a user or message command.
+     *
+     * @return The id of the user or message targeted.
+     */
+    public Optional<Snowflake> getTargetId() {
+        return data.targetId().toOptional()
+                .map(Snowflake::of);
     }
 
     @Override
