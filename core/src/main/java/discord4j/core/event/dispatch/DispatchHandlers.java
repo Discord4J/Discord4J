@@ -25,7 +25,7 @@ import discord4j.core.event.domain.integration.IntegrationDeleteEvent;
 import discord4j.core.event.domain.integration.IntegrationUpdateEvent;
 import discord4j.core.event.domain.interaction.*;
 import discord4j.core.object.VoiceState;
-import discord4j.core.object.command.ApplicationCommand.ApplicationCommandType;
+import discord4j.core.object.command.ApplicationCommand;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.component.MessageComponent;
@@ -299,7 +299,7 @@ public class DispatchHandlers implements DispatchEventMapper {
 
         switch (interaction.getType()) {
             case APPLICATION_COMMAND:
-                ApplicationCommandType commandType = interaction.getCommandInteraction()
+                ApplicationCommand.Type commandType = interaction.getCommandInteraction()
                         .flatMap(ApplicationCommandInteraction::getApplicationCommandType)
                         .orElseThrow(IllegalStateException::new); // command type must be present.
 
