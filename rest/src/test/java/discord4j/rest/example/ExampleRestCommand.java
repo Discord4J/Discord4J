@@ -23,7 +23,6 @@ import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.RestClient;
 import discord4j.rest.interaction.Interactions;
-import discord4j.rest.util.ApplicationCommandOptionType;
 import reactor.netty.http.server.HttpServer;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -45,7 +44,8 @@ public class ExampleRestCommand {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("digits")
                         .description("Number of digits (1-20)")
-                        .type(ApplicationCommandOptionType.INTEGER.getValue())
+                        //ApplicationCommandOption.Type.INTEGER.getValue()
+                        .type(4)
                         .required(false)
                         .build())
                 .build();

@@ -24,7 +24,6 @@ import discord4j.core.object.DiscordObject;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
-import discord4j.rest.util.ApplicationCommandOptionType;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -56,50 +55,50 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
     }
 
     public String asString() {
-        return getValueAs("string", Function.identity(), ApplicationCommandOptionType.STRING);
+        return getValueAs("string", Function.identity(), ApplicationCommandOption.Type.STRING);
     }
 
     public boolean asBoolean() {
-        return getValueAs("boolean", Boolean::parseBoolean, ApplicationCommandOptionType.BOOLEAN);
+        return getValueAs("boolean", Boolean::parseBoolean, ApplicationCommandOption.Type.BOOLEAN);
     }
 
     public long asLong() {
-        return getValueAs("long", Long::parseLong, ApplicationCommandOptionType.INTEGER);
+        return getValueAs("long", Long::parseLong, ApplicationCommandOption.Type.INTEGER);
     }
 
     public double asDouble() {
-        return getValueAs("double", Double::parseDouble, ApplicationCommandOptionType.NUMBER);
+        return getValueAs("double", Double::parseDouble, ApplicationCommandOption.Type.NUMBER);
     }
 
     public Snowflake asSnowflake() {
         return getValueAs("snowflake", Snowflake::of,
-                ApplicationCommandOptionType.USER,
-                ApplicationCommandOptionType.ROLE,
-                ApplicationCommandOptionType.CHANNEL,
-                ApplicationCommandOptionType.MENTIONABLE);
+                ApplicationCommandOption.Type.USER,
+                ApplicationCommandOption.Type.ROLE,
+                ApplicationCommandOption.Type.CHANNEL,
+                ApplicationCommandOption.Type.MENTIONABLE);
     }
 
     public Mono<User> asUser() {
         return getValueAs("user",
                 value -> getClient().getUserById(Snowflake.of(value)),
-                ApplicationCommandOptionType.USER);
+                ApplicationCommandOption.Type.USER);
     }
 
     public Mono<Role> asRole() {
         return getValueAs("role",
                 value -> getClient().getRoleById(Snowflake.of(Objects.requireNonNull(guildId)), Snowflake.of(value)),
-                ApplicationCommandOptionType.ROLE);
+                ApplicationCommandOption.Type.ROLE);
     }
 
     public Mono<Channel> asChannel() {
         return getValueAs("channel",
                 value -> getClient().getChannelById(Snowflake.of(value)),
-                ApplicationCommandOptionType.CHANNEL);
+                ApplicationCommandOption.Type.CHANNEL);
     }
 
     private <T> T getValueAs(String parsedTypeName, Function<String, T> parser,
-                             ApplicationCommandOptionType... allowedTypes) {
-        if (!Arrays.asList(allowedTypes).contains(ApplicationCommandOptionType.of(type))) {
+                             ApplicationCommandOption.Type... allowedTypes) {
+        if (!Arrays.asList(allowedTypes).contains(ApplicationCommandOption.Type.of(type))) {
             throw new IllegalArgumentException("Option value cannot be converted as " + parsedTypeName);
         }
 

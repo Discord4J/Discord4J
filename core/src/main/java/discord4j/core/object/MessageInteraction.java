@@ -19,9 +19,9 @@ package discord4j.core.object;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.MessageInteractionData;
-import discord4j.rest.util.ApplicationCommandOptionType;
 
 import java.util.Objects;
 
@@ -64,8 +64,8 @@ public class MessageInteraction implements DiscordObject {
      *
      * @return The type of interaction
      */
-    public ApplicationCommandOptionType getType() {
-        return ApplicationCommandOptionType.of(data.type());
+    public ApplicationCommandOption.Type getType() {
+        return ApplicationCommandOption.Type.of(data.type());
     }
 
     /**

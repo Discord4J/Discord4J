@@ -20,7 +20,7 @@ package discord4j.core.event.domain.interaction;
 import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.command.ApplicationCommand.ApplicationCommandType;
+import discord4j.core.object.command.ApplicationCommand;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
 import discord4j.gateway.ShardInfo;
@@ -71,7 +71,7 @@ public class ApplicationCommandInteractionEvent extends InteractionCreateEvent {
      *
      * @return The type of the invoked command.
      */
-    public ApplicationCommandType getCommandType() {
+    public ApplicationCommand.Type getCommandType() {
         return getInteraction().getCommandInteraction()
                 .flatMap(ApplicationCommandInteraction::getApplicationCommandType)
                 .orElseThrow(IllegalStateException::new); // should always be present for application commands
