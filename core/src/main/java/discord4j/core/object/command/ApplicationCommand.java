@@ -74,11 +74,11 @@ public class ApplicationCommand implements DiscordObject {
      *
      * @return The type of the command.
      */
-    public ApplicationCommandType getType() {
+    public Type getType() {
         // Discord defaults to treating the type as a CHAT_INPUT command if type is not present.
         return data.type().toOptional()
-            .map(ApplicationCommandType::of)
-            .orElse(ApplicationCommandType.CHAT_INPUT);
+            .map(Type::of)
+            .orElse(Type.CHAT_INPUT);
     }
 
     /**
@@ -140,7 +140,7 @@ public class ApplicationCommand implements DiscordObject {
      * @see <a href="https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types">
      * Application Command Type</a>
      */
-    public enum ApplicationCommandType {
+    public enum Type {
         UNKNOWN(-1),
         CHAT_INPUT(1),
         USER(2),
@@ -156,7 +156,7 @@ public class ApplicationCommand implements DiscordObject {
          *
          * @param value The underlying value as represented by Discord.
          */
-        ApplicationCommandType(final int value) {
+        Type(final int value) {
             this.value = value;
         }
 
@@ -177,7 +177,7 @@ public class ApplicationCommand implements DiscordObject {
          * @param value The underlying value as represented by Discord.
          * @return The type of command.
          */
-        public static ApplicationCommandType of(final int value) {
+        public static Type of(final int value) {
             switch (value) {
                 case 1: return CHAT_INPUT;
                 case 2: return USER;

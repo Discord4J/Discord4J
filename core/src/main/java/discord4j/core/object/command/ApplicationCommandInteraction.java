@@ -21,7 +21,6 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
-import discord4j.core.object.command.ApplicationCommand.ApplicationCommandType;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.discordjson.json.ApplicationCommandInteractionData;
 import reactor.util.annotation.Nullable;
@@ -91,8 +90,8 @@ public class ApplicationCommandInteraction implements DiscordObject {
      *
      * @return The type of the invoked command.
      */
-    public Optional<ApplicationCommandType> getApplicationCommandType() {
-        return data.type().toOptional().map(ApplicationCommandType::of);
+    public Optional<ApplicationCommand.Type> getApplicationCommandType() {
+        return data.type().toOptional().map(ApplicationCommand.Type::of);
     }
 
     /**

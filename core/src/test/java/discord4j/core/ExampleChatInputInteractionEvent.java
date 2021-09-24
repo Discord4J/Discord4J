@@ -23,10 +23,10 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
+import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.RestClient;
-import discord4j.rest.util.ApplicationCommandOptionType;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
@@ -52,7 +52,7 @@ public class ExampleChatInputInteractionEvent {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("digits")
                         .description("Number of digits (1-20)")
-                        .type(ApplicationCommandOptionType.INTEGER.getValue())
+                        .type(ApplicationCommandOption.Type.INTEGER.getValue())
                         .required(false)
                         .build())
                 .build();
