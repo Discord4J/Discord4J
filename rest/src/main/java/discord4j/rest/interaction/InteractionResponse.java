@@ -86,7 +86,7 @@ public interface InteractionResponse {
      * @return a {@link Mono} where, upon successful completion, emits the sent message. If an error is received,
      * it is emitted through the {@code Mono}.
      */
-    Mono<MessageData> createFollowupMessage(MultipartRequest<WebhookExecuteRequest> request);
+    Mono<MessageData> createFollowupMessage(MultipartRequest<? extends WebhookExecuteRequest> request);
 
     /**
      * Create a new ephemeral followup message with the given content. This uses a webhook tied to the interaction ID

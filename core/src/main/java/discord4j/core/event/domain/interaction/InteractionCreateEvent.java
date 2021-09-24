@@ -217,10 +217,76 @@ public class InteractionCreateEvent extends Event {
                 });
     }
 
+    public Mono<Message> editReply(String content) {
+        return editReply().withContentOrNull(content);
+    }
+
     /**
-     * Gets a handler for common operations related to an interaction followup response associated with this event.
+     * Edit the initial reply sent when accepting this interaction. Properties specifying how to build the edit message
+     * request can be set via the {@code withXxx} methods of the returned {@link InteractionReplyEditMono}.
      *
-     * @return A handler for common operations related to an interaction followup response associated with this event.
+     * @return a {@link Mono} where, upon successful completion, emits the updated message. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    public InteractionReplyEditMono editReply() {
+        return InteractionReplyEditMono.of(this);
+    }
+
+    /**
+     * Edit the initial reply sent when accepting this interaction with the given spec contents.
+     *
+     * @param spec an immutable object that specifies how to edit the initial reply
+     * @return a {@link Mono} where, upon successful completion, emits the updated message. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    public Mono<Message> editReply(InteractionReplyEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> {
+                    InteractionReplyEditSpec actualSpec = getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .map(spec::withAllowedMentionsOrNull)
+                            .orElse(spec);
+                    return getInteractionResponse().editInitialResponse(actualSpec.asRequest());
+                })
+                .map(data -> new Message(getClient(), data));
+    }
+
+    public Mono<Message> getReply() {
+        return getInteractionResponse().getInitialResponse().map(data -> new Message(getClient(), data));
+    }
+
+    public Mono<Void> deleteReply() {
+        return getInteractionResponse().deleteInitialResponse();
+    }
+
+    public Mono<Message> createFollowup(InteractionFollowupCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> {
+                    InteractionFollowupCreateSpec actualSpec = getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .map(spec::withAllowedMentions)
+                            .orElse(spec);
+                    return getInteractionResponse().createFollowupMessage(actualSpec.asRequest());
+                })
+                .map(data -> new Message(getClient(), data));
+    }
+
+    public Mono<Message> editFollowup(final Snowflake messageId, InteractionReplyEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> {
+                    InteractionReplyEditSpec actualSpec = getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .map(spec::withAllowedMentionsOrNull)
+                            .orElse(spec);
+                    return getInteractionResponse().editFollowupMessage(messageId.asLong(), actualSpec.asRequest());
+                })
+                .map(data -> new Message(getClient(), data));
+    }
+
+    /**
+     * Returns a REST-only handler for common operations related to an interaction response associated with this event.
+     *
+     * @return a handler aggregating a collection of REST API methods to work with an interaction response
      */
     public InteractionResponse getInteractionResponse() {
         return response;
@@ -270,7 +336,7 @@ public class InteractionCreateEvent extends Event {
         }
 
         @Override
-        public Mono<MessageData> createFollowupMessage(MultipartRequest<WebhookExecuteRequest> request) {
+        public Mono<MessageData> createFollowupMessage(MultipartRequest<? extends WebhookExecuteRequest> request) {
             return restClient.getWebhookService()
                     .executeWebhook(applicationId, interactionData.token(), true, request);
         }

@@ -38,7 +38,6 @@ import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.support.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.discordjson.json.WebhookMessageEditRequest;
 import discord4j.voice.AudioProvider;
 import discord4j.voice.VoiceConnection;
 import org.reactivestreams.Publisher;
@@ -83,7 +82,7 @@ public class ExampleSoundboard {
         // a listener that captures our slash command interactions
         Publisher<?> onChatInputInteraction = client.on(ChatInputInteractionEvent.class, event -> {
             if ("join".equals(event.getCommandName())) {
-                return event.acknowledgeEphemeral()
+                return event.deferReply().withEphemeral(true)
                         .then(Mono.justOrEmpty(event.getInteraction().getMember()))
                         .flatMap(Member::getVoiceState)
                         .flatMap(VoiceState::getChannel)
@@ -93,20 +92,16 @@ public class ExampleSoundboard {
 
                             return channel.join()
                                     .withProvider(voice.provider)
-                                    .then(event.getInteractionResponse().editInitialResponse(WebhookMessageEditRequest.builder()
-                                            .contentOrNull("Done!")
-                                            .build()));
+                                    .then(event.editReply("Done!"));
                         })
                         .doFinally(s -> log.info("Finalized join request after {}", s))
                         .onErrorResume(t -> {
                             log.error("Failed to join voice channel", t);
-                            return event.getInteractionResponse().editInitialResponse(WebhookMessageEditRequest.builder()
-                                    .contentOrNull("Something happened...")
-                                    .build());
+                            return event.editReply("Something happened...");
                         })
                         .then();
             } else if ("leave".equals(event.getCommandName())) {
-                return event.acknowledgeEphemeral()
+                return event.deferReply().withEphemeral(true)
                         .then(Mono.justOrEmpty(event.getInteraction().getMember()))
                         .flatMap(Member::getVoiceState)
                         .flatMap(vs -> client.getVoiceConnectionRegistry()
@@ -117,14 +112,10 @@ public class ExampleSoundboard {
                                     }
                                 }))
                         .flatMap(VoiceConnection::disconnect)
-                        .then(event.getInteractionResponse().editInitialResponse(WebhookMessageEditRequest.builder()
-                                .contentOrNull("Bye bye!")
-                                .build()))
+                        .then(event.editReply("Bye bye!"))
                         .onErrorResume(t -> {
                             log.error("Failed to leave voice channel", t);
-                            return event.getInteractionResponse().editInitialResponse(WebhookMessageEditRequest.builder()
-                                    .contentOrNull("Something happened...")
-                                    .build());
+                            return event.editReply("Something happened...");
                         })
                         .then();
             } else if ("sounds".equals(event.getCommandName())) {
@@ -153,7 +144,7 @@ public class ExampleSoundboard {
         // a listener that captures button presses
         Publisher<?> onButtonInteraction = client.on(ButtonInteractionEvent.class, press -> {
             if (press.getCustomId().startsWith("source")) {
-                return press.acknowledgeEphemeral()
+                return press.deferEdit().withEphemeral(true)
                         .then(Mono.justOrEmpty(press.getInteraction().getGuildId()))
                         .flatMap(id -> Mono.justOrEmpty(voiceGuildMap.get(id)))
                         .map(it -> it.playerManager.loadItem(System.getenv(press.getCustomId()),
