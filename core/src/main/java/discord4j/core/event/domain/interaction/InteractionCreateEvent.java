@@ -22,8 +22,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Message;
-import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
-import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
+import discord4j.core.spec.*;
 import discord4j.core.spec.legacy.LegacyInteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
@@ -84,15 +83,45 @@ public class InteractionCreateEvent extends Event {
 
     /**
      * Acknowledges the interaction indicating a response will be edited later. The user sees a loading state, visible
-     * to all participants in the invoking channel. For a "only you can see this" response, see {@link
+     * to all participants in the invoking channel. For an "only you can see this" response, see {@link
      * #acknowledgeEphemeral()}, or to include a message, {@link #reply(String) reply(String).withEphemeral(true)}
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction and
      * indicating a response will be edited later. The user sees a loading state. If an error is received, it is emitted
      * through the {@code Mono}.
+     * @deprecated use {@link #deferReply()} instead
      */
+    @Deprecated
     public Mono<Void> acknowledge() {
         return createInteractionResponse(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, null);
+    }
+
+    /**
+     * Acknowledges the interaction indicating a response will be edited later. The user sees a loading state, visible
+     * to all participants in the invoking channel. For an "only you can see this" response, add
+     * {@code withEphemeral(true)}, or to include a message, {@link #reply(String) reply(String).withEphemeral(true)}
+     *
+     * @return A {@link InteractionCallbackSpecDeferReplyMono} where, upon successful completion, emits nothing;
+     * acknowledging the interaction and indicating a response will be edited later. The user sees a loading state. If
+     * an error is received, it is emitted through it.
+     */
+    public InteractionCallbackSpecDeferReplyMono deferReply() {
+        return InteractionCallbackSpecDeferReplyMono.of(this);
+    }
+
+    /**
+     * Acknowledges the interaction indicating a response will be edited later. The user sees a loading state, visible
+     * to all participants in the invoking channel.
+     *
+     * @param spec an immutable object that specifies how to build the reply message to the interaction
+     * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction and
+     * indicating a response will be edited later. The user sees a loading state. If an error is received, it is emitted
+     * through the {@code Mono}.
+     */
+    public Mono<Void> deferReply(InteractionCallbackSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> createInteractionResponse(
+                InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, spec.asRequest()));
     }
 
     /**
@@ -101,8 +130,9 @@ public class InteractionCreateEvent extends Event {
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing, acknowledging the interaction
      * and indicating a response will be edited later. If an error is received, it is emitted through the {@code Mono}.
+     * @deprecated migrate to {@link #deferReply() deferReply().withEphemeral(true)}
      */
-    // TODO: with new specs, this could be acknowledge().ephemeral() instead
+    @Deprecated
     public Mono<Void> acknowledgeEphemeral() {
         InteractionApplicationCommandCallbackData data = InteractionApplicationCommandCallbackData.builder()
                 .flags(Message.Flag.EPHEMERAL.getFlag())

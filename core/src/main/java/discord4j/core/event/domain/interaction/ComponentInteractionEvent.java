@@ -25,6 +25,8 @@ import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.InteractionApplicationCommandCallbackEditMono;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
+import discord4j.core.spec.InteractionCallbackSpec;
+import discord4j.core.spec.InteractionCallbackSpecDeferEditMono;
 import discord4j.core.spec.legacy.LegacyInteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.gateway.ShardInfo;
@@ -82,6 +84,34 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
     public Snowflake getMessageId() {
         return getInteraction().getMessageId()
                 .orElseThrow(IllegalStateException::new); // at least the ID is always present for component interactions
+    }
+
+    /**
+     * Acknowledge the interaction by indicating a message will be edited later. For components, the user <strong>does
+     * not</strong> see a loading state. For an "only you can see this" response, add
+     * {@code withEphemeral(true)}, or to directly edit it, {@link #edit() edit().withEphemeral(true)}
+     *
+     * @return a {@link InteractionCallbackSpecDeferEditMono} where, upon successful completion, emits nothing;
+     * acknowledging the interaction and indicating a response will be edited later. If an error is received, it is
+     * emitted through it.
+     */
+    public InteractionCallbackSpecDeferEditMono deferEdit() {
+        return InteractionCallbackSpecDeferEditMono.of(this);
+    }
+
+    /**
+     * Acknowledges the interaction indicating a message will be edited later. The user sees a loading state, visible
+     * to all participants in the invoking channel.
+     *
+     * @param spec an immutable object that specifies how to build the reply message to the interaction
+     * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction and
+     * indicating a response will be edited later. The user sees a loading state. If an error is received, it is emitted
+     * through the {@code Mono}.
+     */
+    public Mono<Void> deferEdit(InteractionCallbackSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> createInteractionResponse(
+                InteractionResponseType.DEFERRED_UPDATE_MESSAGE, spec.asRequest()));
     }
 
     /**
