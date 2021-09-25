@@ -105,10 +105,9 @@ public class GuildCommandRegistrar {
     }
 
     private boolean isChanged(ApplicationCommandData existingCommand, ApplicationCommandRequest command) {
-        return !existingCommand.description().equals(command.description())
+        return command.description().toOptional().map(value -> !existingCommand.description().equals(value)).orElse(false)
                 || !existingCommand.options().equals(command.options())
-                || existingCommand.defaultPermission().toOptional().orElse(true)
-                != command.defaultPermission().toOptional().orElse(true);
+                || existingCommand.defaultPermission().toOptional().orElse(true) != command.defaultPermission().toOptional().orElse(true);
     }
 
     private Mono<Map<String, ApplicationCommandData>> getExistingCommands() {

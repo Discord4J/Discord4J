@@ -27,7 +27,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -35,16 +34,14 @@ import java.util.function.Predicate;
 public class CommandListener extends ReactiveEventAdapter {
 
     private final Function<MessageCreateEvent, Publisher<String>> prefixFunction;
-    private final Function<? super CommandRequest, Mono<Boolean>> filter;
+    private final Function<? super CommandContext, Mono<Boolean>> filter;
     private final CopyOnWriteArrayList<CommandHandler> handlers;
-    private final CopyOnWriteArrayList<BiFunction<? super CommandRequest, Throwable, Publisher<?>>> errorHandlers;
 
     CommandListener(Function<MessageCreateEvent, Publisher<String>> prefixFunction,
-                    Function<? super CommandRequest, Mono<Boolean>> filter) {
+                    Function<? super CommandContext, Mono<Boolean>> filter) {
         this.prefixFunction = prefixFunction;
         this.filter = filter;
         this.handlers = new CopyOnWriteArrayList<>();
-        this.errorHandlers = new CopyOnWriteArrayList<>();
     }
 
     public static CommandListener create() {
@@ -59,7 +56,7 @@ public class CommandListener extends ReactiveEventAdapter {
         return new CommandListener(Objects.requireNonNull(prefixFunction, "prefixFunction"), __ -> Mono.just(true));
     }
 
-    public CommandListener filter(Function<? super CommandRequest, Mono<Boolean>> condition) {
+    public CommandListener filter(Function<? super CommandContext, Mono<Boolean>> condition) {
         return new CommandListener(this.prefixFunction,
                 req -> this.filter.apply(req).flatMap(result -> condition.apply(req)));
     }
@@ -68,7 +65,7 @@ public class CommandListener extends ReactiveEventAdapter {
         return handle(request -> request.command().equals(command), handler);
     }
 
-    public CommandListener handle(Predicate<? super CommandRequest> condition, Command handler) {
+    public CommandListener handle(Predicate<? super CommandContext> condition, Command handler) {
         handlers.add(new CommandHandler(condition, handler));
         return this;
     }
@@ -94,15 +91,15 @@ public class CommandListener extends ReactiveEventAdapter {
                         return new CommandOperations(event, commandName, remaining);
                     })
                     .filterWhen(filter)
-                    .flatMap(ops -> applyCommand(ops, ops));
+                    .flatMap(this::applyCommand);
         }
     }
 
-    private Mono<Void> applyCommand(CommandRequest req, CommandResponse res) {
+    private Mono<Void> applyCommand(CommandContext context) {
         return Mono.from(handlers.stream()
-                .filter(handler -> handler.test(req))
+                .filter(handler -> handler.test(context))
                 .findFirst()
                 .orElse(CommandHandler.NOOP_HANDLER)
-                .apply(req, res));
+                .apply(context));
     }
 }
