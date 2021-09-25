@@ -4,7 +4,7 @@
 
 [![Support Server Invite](https://img.shields.io/discord/208023865127862272.svg?color=7289da&label=Discord4J&logo=discord&style=flat-square)](https://discord.gg/d4j)
 [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core/3.1.svg?style=flat-square)](https://search.maven.org/artifact/com.discord4j/discord4j-core)
-[![Javadocs](https://javadoc.io/badge2/com.discord4j/discord4j-core/3.1.7/javadoc.svg?color=blue&style=flat-square)](https://javadoc.io/doc/com.discord4j/discord4j-core/3.1.7)
+[![Javadocs](https://javadoc.io/badge2/com.discord4j/discord4j-core/3.1.8/javadoc.svg?color=blue&style=flat-square)](https://javadoc.io/doc/com.discord4j/discord4j-core/3.1.8)
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Discord4J/Discord4J/Java%20CI/master?logo=github&style=flat-square)](https://github.com/Discord4J/Discord4J/actions)
 
 Discord4J is a fast, powerful, unopinionated, reactive library to enable quick and easy development of Discord bots for Java, Kotlin, and other JVM languages using the official [Discord Bot API](https://discord.com/developers/docs/intro).
@@ -69,7 +69,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.discord4j:discord4j-core:3.1.7'
+  implementation 'com.discord4j:discord4j-core:3.1.8'
 }
 ```
 
@@ -80,7 +80,7 @@ repositories {
 }
 
 dependencies {
-  implementation("com.discord4j:discord4j-core:3.1.7")
+  implementation("com.discord4j:discord4j-core:3.1.8")
 }
 ```
 
@@ -90,7 +90,7 @@ dependencies {
   <dependency>
     <groupId>com.discord4j</groupId>
     <artifactId>discord4j-core</artifactId>
-    <version>3.1.7</version>
+    <version>3.1.8</version>
   </dependency>
 </dependencies>
 ```
@@ -98,21 +98,21 @@ dependencies {
 ### SBT
 ```scala
 libraryDependencies ++= Seq(
-  "com.discord4j" % "discord4j-core" % "3.1.7"
+  "com.discord4j" % "discord4j-core" % "3.1.8"
 )
 ```
 
 ## 🔀 Discord4J Versions
 
-Discord4J 3.1.x introduces performance and API enhancements, a plethora of new features, and dependency upgrades. A [Migration Guide](https://docs.discord4j.com/migrating-from-v3-0-to-v3-1) is provided to aide users and ensure a smooth and readily available transition.
+Discord4J 3.1.x introduces performance and API enhancements, a plethora of new features, and dependency upgrades. A [Migration Guide](https://docs.discord4j.com/migrating-from-v3-0-to-v3-1) is provided to aid users and ensure a smooth and readily available transition.
 
-| Discord4J                                                   | Support          | Gateway/API | Intents                           | Interactions                       |
-|-------------------------------------------------------------|------------------|-------------|-----------------------------------|------------------------------------|
-| [v3.2.x](https://github.com/Discord4J/Discord4J/tree/master)| In development   | v8          | Mandatory, non-privileged default | Fully supported                    |
-| [v3.1.x](https://github.com/Discord4J/Discord4J/tree/3.1.x) | Current          | v6          | Optional, no intent default       | Slash commands & buttons in 3.1.5+ |
-| [v3.0.x](https://github.com/Discord4J/Discord4J/tree/3.0.x) | Maintenance only | v6          | No intents support                | Unsupported                        |
+| Discord4J                                                   | Support          | Gateway/API | Intents                           | Interactions    |
+|-------------------------------------------------------------|------------------|-------------|-----------------------------------|-----------------|
+| [v3.2.x](https://github.com/Discord4J/Discord4J/tree/master)| In development   | v8          | Mandatory, non-privileged default | Fully supported |
+| [v3.1.x](https://github.com/Discord4J/Discord4J/tree/3.1.x) | Current          | v6          | Optional, no intent default       | Fully supported |
+| [v3.0.x](https://github.com/Discord4J/Discord4J/tree/3.0.x) | Maintenance only | v6          | No intents support                | Unsupported     |
 
-See [this wiki page](https://github.com/Discord4J/Discord4J/wiki/Versions) for more details about compatibility.
+See [our docs](https://docs.discord4j.com/versions) for more details about compatibility.
 
 ## 🎉 Sponsors
 
