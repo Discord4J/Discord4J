@@ -222,18 +222,18 @@ public class InteractionCreateEvent extends Event {
     }
 
     /**
-     * Edit the initial reply sent when accepting this interaction. Properties specifying how to build the edit message
+     * Edits the initial reply sent when accepting this interaction. Properties specifying how to build the edit message
      * request can be set via the {@code withXxx} methods of the returned {@link InteractionReplyEditMono}.
      *
-     * @return a {@link Mono} where, upon successful completion, emits the updated message. If an error is received,
-     * it is emitted through the {@code Mono}.
+     * @return a {@link InteractionReplyEditMono} where, upon successful completion, emits the updated message. If an
+     * error is received, it is emitted through the {@code InteractionReplyEditMono}.
      */
     public InteractionReplyEditMono editReply() {
         return InteractionReplyEditMono.of(this);
     }
 
     /**
-     * Edit the initial reply sent when accepting this interaction with the given spec contents.
+     * Edits the initial reply sent when accepting this interaction with the given spec contents.
      *
      * @param spec an immutable object that specifies how to edit the initial reply
      * @return a {@link Mono} where, upon successful completion, emits the updated message. If an error is received,
@@ -251,14 +251,44 @@ public class InteractionCreateEvent extends Event {
                 .map(data -> new Message(getClient(), data));
     }
 
+    /**
+     * Returns the initial reply to this interaction.
+     *
+     * @return a {@link Mono} where, upon successful completion, emits the initial reply message. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
     public Mono<Message> getReply() {
         return getInteractionResponse().getInitialResponse().map(data -> new Message(getClient(), data));
     }
 
+    /**
+     * Deletes the initial reply to this interaction.
+     *
+     * @return a {@link Mono} where, upon successful initial reply deletion, emits nothing indicating completion. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<Void> deleteReply() {
         return getInteractionResponse().deleteInitialResponse();
     }
 
+    /**
+     * Creates a follow-up message to this interaction. Properties specifying how to build the follow-up message can be
+     * set via the {@code withXxx} methods of the returned {@link InteractionFollowupCreateMono}.
+     *
+     * @return a {@link InteractionFollowupCreateMono} where, upon successful completion, emits the resulting follow-up
+     * message. If an error is received, it is emitted through the {@code InteractionApplicationCommandCallbackMono}.
+     */
+    public InteractionFollowupCreateMono createFollowup() {
+        return InteractionFollowupCreateMono.of(this);
+    }
+
+    /**
+     * Creates a follow-up message to this interaction.
+     *
+     * @param spec an immutable object that specifies how to build the follow-up message
+     * @return a {@link Mono} where, upon successful completion, emits the resulting follow-up message. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
     public Mono<Message> createFollowup(InteractionFollowupCreateSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(() -> {
@@ -271,6 +301,26 @@ public class InteractionCreateEvent extends Event {
                 .map(data -> new Message(getClient(), data));
     }
 
+    /**
+     * Edits a follow-up message to this interaction. Properties specifying how to edit the follow-up message can be
+     * set via the {@code withXxx} methods of the returned {@link InteractionFollowupEditMono}.
+     *
+     * @param messageId the follow-up message ID to edit
+     * @return a {@link InteractionFollowupEditMono} where, upon successful completion, emits the updated follow-up
+     * message. If an error is received, it is emitted through the {@code InteractionFollowupEditMono}.
+     */
+    public InteractionFollowupEditMono editFollowup(Snowflake messageId) {
+        return InteractionFollowupEditMono.of(messageId, this);
+    }
+
+    /**
+     * Edits a follow-up message to this interaction.
+     *
+     * @param messageId the follow-up message ID to edit
+     * @param spec an immutable object that specifies how to build the edited follow-up message
+     * @return a {@link Mono} where, upon successful completion, emits the updated follow-up message. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
     public Mono<Message> editFollowup(final Snowflake messageId, InteractionReplyEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(() -> {
@@ -287,6 +337,11 @@ public class InteractionCreateEvent extends Event {
      * Returns a REST-only handler for common operations related to an interaction response associated with this event.
      *
      * @return a handler aggregating a collection of REST API methods to work with an interaction response
+     * @see InteractionCreateEvent#editReply()
+     * @see InteractionCreateEvent#getReply()
+     * @see InteractionCreateEvent#deleteReply()
+     * @see InteractionCreateEvent#createFollowup()
+     * @see InteractionCreateEvent#editFollowup(Snowflake)
      */
     public InteractionResponse getInteractionResponse() {
         return response;

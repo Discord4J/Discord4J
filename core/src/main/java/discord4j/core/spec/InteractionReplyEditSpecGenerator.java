@@ -17,6 +17,7 @@
 
 package discord4j.core.spec;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.InteractionCreateEvent;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
@@ -87,6 +88,23 @@ abstract class InteractionReplyEditMonoGenerator extends Mono<Message> implement
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
         event().editReply(InteractionReplyEditSpec.copyOf(this)).subscribe(actual);
+    }
+
+    @Override
+    public abstract String toString();
+}
+
+@SuppressWarnings("immutables:subtype")
+@Value.Immutable(builder = false)
+abstract class InteractionFollowupEditMonoGenerator extends Mono<Message> implements InteractionReplyEditSpecGenerator {
+
+    abstract Snowflake messageId();
+
+    abstract InteractionCreateEvent event();
+
+    @Override
+    public void subscribe(CoreSubscriber<? super Message> actual) {
+        event().editFollowup(messageId(), InteractionReplyEditSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override

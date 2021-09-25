@@ -100,8 +100,8 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
     }
 
     /**
-     * Acknowledges the interaction indicating a message will be edited later. The user sees a loading state, visible
-     * to all participants in the invoking channel.
+     * Acknowledge the interaction by indicating a message will be edited later. For components, the user <strong>does
+     * not</strong> see a loading state.
      *
      * @param spec an immutable object that specifies how to build the reply message to the interaction
      * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction and
@@ -175,11 +175,28 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
                 });
     }
 
+    /**
+     * Acknowledge the interaction by indicating a message will be edited later. For components, the user <strong>does
+     * not</strong> see a loading state.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction and
+     * indicating a response will be edited later. The user sees a loading state. If an error is received, it is emitted
+     * through the {@code Mono}.
+     * @deprecated for components, migrate to {@link #deferEdit()}
+     */
     @Override
     public Mono<Void> acknowledge() {
         return createInteractionResponse(InteractionResponseType.DEFERRED_UPDATE_MESSAGE, null);
     }
 
+    /**
+     * Acknowledges the interaction indicating a response will be edited later. For components, the user <strong>does
+     * not</strong> see a loading state.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing, acknowledging the interaction
+     * and indicating a response will be edited later. If an error is received, it is emitted through the {@code Mono}.
+     * @deprecated for components, migrate to {@link #deferEdit() deferEdit().withEphemeral(true)}
+     */
     @Override
     public Mono<Void> acknowledgeEphemeral() {
         InteractionApplicationCommandCallbackData data = InteractionApplicationCommandCallbackData.builder()

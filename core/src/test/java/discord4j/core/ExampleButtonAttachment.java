@@ -72,7 +72,7 @@ public class ExampleButtonAttachment {
                                     .withContentOrNull("Wow, a new attachment!")
                                     .withFiles(getFile())
                                     .withComponents(row);
-                            return press.acknowledge().then(edit);
+                            return press.deferEdit().then(edit);
                         }
                         return Mono.empty();
                     });
