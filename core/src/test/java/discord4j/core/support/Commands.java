@@ -21,8 +21,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import discord4j.common.ReactorResources;
 import discord4j.common.util.Snowflake;
-import discord4j.core.command.CommandRequest;
-import discord4j.core.command.CommandResponse;
+import discord4j.core.command.CommandContext;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.presence.Presence;
@@ -41,8 +40,8 @@ public class Commands {
 
     private static final Logger log = Loggers.getLogger(Commands.class);
 
-    public static Mono<Boolean> isAuthor(Mono<Long> authorId, CommandRequest request) {
-        return authorId.filter(id -> request.getAuthor()
+    public static Mono<Boolean> isAuthor(Mono<Long> authorId, CommandContext context) {
+        return authorId.filter(id -> context.getAuthor()
                 .map(User::getId)
                 .map(Snowflake::asLong)
                 .map(eventAuthor -> eventAuthor.equals(id))
@@ -50,36 +49,36 @@ public class Commands {
                 .hasElement();
     }
 
-    public static Mono<Void> echo(CommandRequest request, CommandResponse response) {
-        Message message = request.getMessage();
+    public static Mono<Void> echo(CommandContext context) {
+        Message message = context.getMessage();
         return message.getRestChannel().createMessage(
                 MessageCreateRequest.builder()
-                        .content("<@" + message.getUserData().id() + "> " + request.parameters())
+                        .content("<@" + message.getUserData().id() + "> " + context.parameters())
                         .build())
-                .flatMap(data -> request.getClient().rest().restMessage(data)
+                .flatMap(data -> context.getClient().rest().restMessage(data)
                         .createReaction("✅"))
                 .then();
     }
 
-    public static Mono<Void> status(CommandRequest request, CommandResponse response) {
-        String params = request.parameters();
+    public static Mono<Void> status(CommandContext context) {
+        String params = context.parameters();
         if (params.equalsIgnoreCase("online")) {
-            return request.getClient().updatePresence(Presence.online());
+            return context.getClient().updatePresence(Presence.online());
         } else if (params.equalsIgnoreCase("dnd")) {
-            return request.getClient().updatePresence(Presence.doNotDisturb());
+            return context.getClient().updatePresence(Presence.doNotDisturb());
         } else if (params.equalsIgnoreCase("idle")) {
-            return request.getClient().updatePresence(Presence.idle());
+            return context.getClient().updatePresence(Presence.idle());
         } else if (params.equalsIgnoreCase("invisible")) {
-            return request.getClient().updatePresence(Presence.invisible());
+            return context.getClient().updatePresence(Presence.invisible());
         } else {
             // showing you can block too
-            return response.withScheduler(Schedulers.boundedElastic())
+            return context.withScheduler(Schedulers.boundedElastic())
                     .sendEmbed(spec -> {
-                        spec.setThumbnail(request.getClient().getSelf()
+                        spec.setThumbnail(context.getClient().getSelf()
                                 .blockOptional()
                                 .orElseThrow(RuntimeException::new)
                                 .getAvatarUrl());
-                        spec.addField("Servers", request.getClient().getGuilds().count()
+                        spec.addField("Servers", context.getClient().getGuilds().count()
                                 .blockOptional()
                                 .orElse(-1L)
                                 .toString(), false);
@@ -87,10 +86,10 @@ public class Commands {
         }
     }
 
-    public static Mono<Void> requestMembers(CommandRequest request, CommandResponse response) {
-        Message message = request.getMessage();
-        String guildId = request.parameters();
-        return request.getClient().requestMembers(Snowflake.of(guildId))
+    public static Mono<Void> requestMembers(CommandContext context) {
+        Message message = context.getMessage();
+        String guildId = context.parameters();
+        return context.getClient().requestMembers(Snowflake.of(guildId))
                 .doOnNext(member -> log.info("{}", member))
                 .then(message.getRestChannel().createMessage(
                         MessageCreateRequest.builder()
@@ -99,17 +98,17 @@ public class Commands {
                 .then();
     }
 
-    public static Mono<Void> getMembers(CommandRequest request, CommandResponse response) {
-        String guildId = request.parameters();
-        return request.getClient().getGuildById(Snowflake.of(guildId))
+    public static Mono<Void> getMembers(CommandContext context) {
+        String guildId = context.parameters();
+        return context.getClient().getGuildById(Snowflake.of(guildId))
                 .flatMapMany(Guild::getMembers)
                 .doOnNext(member -> log.info("{}", member.getTag()))
                 .then();
     }
 
-    public static Mono<Void> addRole(CommandRequest request, CommandResponse response) {
-        Message message = request.getMessage();
-        String params = request.parameters();
+    public static Mono<Void> addRole(CommandContext context) {
+        Message message = context.getMessage();
+        String params = context.parameters();
         return message.getGuild()
                 .flatMap(guild -> {
                     // params: "userId roleName"
@@ -128,8 +127,8 @@ public class Commands {
                 });
     }
 
-    public static Mono<Void> burstMessages(CommandRequest request, CommandResponse response) {
-        return request.getMessage().getGuild()
+    public static Mono<Void> burstMessages(CommandContext context) {
+        return context.getMessage().getGuild()
                 .flatMapMany(Guild::getChannels)
                 .ofType(TextChannel.class)
                 .filter(channel -> channel.getName().startsWith("test"))
@@ -147,30 +146,30 @@ public class Commands {
                 .then();
     }
 
-    public static Mono<Void> changeAvatar(CommandRequest request, CommandResponse response) {
-        for (Attachment attachment : request.getMessage().getAttachments()) {
+    public static Mono<Void> changeAvatar(CommandContext context) {
+        for (Attachment attachment : context.getMessage().getAttachments()) {
             // This code is very optimistic as it does not check for status codes or file types
             return ReactorResources.DEFAULT_HTTP_CLIENT.get()
                     .get()
                     .uri(attachment.getUrl())
                     .responseSingle((res, mono) -> mono.asByteArray())
-                    .flatMap(input -> request.getClient()
+                    .flatMap(input -> context.getClient()
                             .edit(spec -> spec.setAvatar(Image.ofRaw(input, Image.Format.PNG))))
                     .then();
         }
         return Mono.empty();
     }
 
-    private static final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+    private static final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
-    public static Mono<Void> logLevelChange(CommandRequest request, CommandResponse response) {
+    public static Mono<Void> logLevelChange(CommandContext context) {
         return Mono.fromRunnable(() -> {
-            String params = request.parameters();
+            String params = context.parameters();
             String[] tokens = params.split(" ");
             String level = tokens[0];
             String name = tokens[1];
             Level logLevel = Level.valueOf(level);
-            context.getLoggerList().stream()
+            loggerContext.getLoggerList().stream()
                     .filter(logger -> logger.getName().startsWith(name))
                     .forEach(logger -> {
                         log.info("Changing {} to {}", logger, logLevel);
@@ -179,9 +178,9 @@ public class Commands {
         });
     }
 
-    public static Mono<Void> userInfo(CommandRequest request, CommandResponse response) {
-        Message message = request.getMessage();
-        String params = request.parameters();
+    public static Mono<Void> userInfo(CommandContext context) {
+        Message message = context.getMessage();
+        String params = context.parameters();
         return message.getClient().getUserById(Snowflake.of(params))
                 .flatMap(user -> message.getChannel()
                         .flatMap(channel -> channel.createEmbed(embed -> embed
@@ -194,14 +193,14 @@ public class Commands {
                 .then();
     }
 
-    public static Mono<Void> reactionRemove(CommandRequest request, CommandResponse response) {
-        String[] tokens = request.parameters().split(" ");
-        return request.getClient().getMessageById(Snowflake.of(tokens[0]), Snowflake.of(tokens[1]))
+    public static Mono<Void> reactionRemove(CommandContext context) {
+        String[] tokens = context.parameters().split(" ");
+        return context.getClient().getMessageById(Snowflake.of(tokens[0]), Snowflake.of(tokens[1]))
                 .flatMap(m -> m.removeReactions(ReactionEmoji.unicode("✅")));
     }
 
-    public static Mono<Void> leaveGuild(CommandRequest request, CommandResponse response) {
-        String params = request.parameters();
-        return request.getClient().getGuildById(Snowflake.of(params)).flatMap(Guild::leave);
+    public static Mono<Void> leaveGuild(CommandContext context) {
+        String params = context.parameters();
+        return context.getClient().getGuildById(Snowflake.of(params)).flatMap(Guild::leave);
     }
 }

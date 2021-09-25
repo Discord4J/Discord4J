@@ -24,12 +24,16 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.PrivateChannel;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.PermissionSet;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
-public interface CommandRequest {
+public interface CommandContext {
 
     MessageCreateEvent event();
 
@@ -59,4 +63,14 @@ public interface CommandRequest {
                         .flatMap(channel -> channel.getEffectivePermissions(authorId))
                         .map(set -> set.containsAll(requiredPermissions)));
     }
+
+    CommandContext withDirectMessage();
+
+    CommandContext withReplyChannel(Mono<MessageChannel> channelSource);
+
+    CommandContext withScheduler(Scheduler scheduler);
+
+    Mono<Void> sendMessage(Consumer<? super MessageCreateSpec> spec);
+
+    Mono<Void> sendEmbed(Consumer<? super EmbedCreateSpec> spec);
 }

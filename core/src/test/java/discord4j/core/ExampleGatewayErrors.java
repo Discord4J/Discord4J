@@ -31,7 +31,7 @@ public class ExampleGatewayErrors {
         GatewayDiscordClient client = DiscordClient.create(System.getenv("token"))
                 .gateway()
                 .setEnabledIntents(IntentSet.all())
-                .setInitialStatus(s -> Presence.invisible())
+                .setInitialPresence(s -> Presence.invisible())
                 .setAwaitConnections(false)
                 .login()
                 .doOnError(e -> log.error("Failed to authenticate with Discord", e))

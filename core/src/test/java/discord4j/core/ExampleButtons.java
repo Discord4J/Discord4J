@@ -33,8 +33,7 @@ public class ExampleButtons {
 
     public static void main(String[] args) {
         DiscordClient.create(token)
-                .login()
-                .flatMap(gw -> {
+                .withGateway(gw -> {
                     Mono<Message> sendMessage = gw.on(GuildCreateEvent.class)
                             .filter(e -> e.getGuild().getId().asString().equals(guildId))
                             .next()
