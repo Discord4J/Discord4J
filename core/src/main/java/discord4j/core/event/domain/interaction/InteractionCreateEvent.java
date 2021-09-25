@@ -39,7 +39,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * Dispatched when a user in a guild uses a Slash Command or clicks a Button.
+ * Dispatched when a user in a guild interacts with an application command or component.
  * <p>
  * This event is dispatched by Discord.
  *
