@@ -22,8 +22,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Message;
-import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
-import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
+import discord4j.core.spec.*;
 import discord4j.core.spec.legacy.LegacyInteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
@@ -39,7 +38,31 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * Dispatched when a user in a guild interacts with an application command or component.
+ * Dispatched when a user in a guild interacts with an application command or component. It is recommended you use a
+ * subclass in your event listeners to access interaction-specific methods. Application command interactions like
+ * {@link ChatInputInteractionEvent}, {@link UserInteractionEvent} and {@link MessageInteractionEvent} are created
+ * through Discord REST API, while component interactions like {@link ButtonInteractionEvent} and
+ * {@link SelectMenuInteractionEvent} are added to a message as user interface. See a diagram below for the current
+ * event hierarchy for interactions.
+ * <p>
+ * You are required to respond to this interaction within a three-second window by using one of the following:
+ * <ul>
+ *     <li>{@link #reply()} to directly include a message</li>
+ *     <li>{@link #deferReply()} to acknowledge without a message, typically to perform a background task and give the
+ *     user a loading state until it is edited</li>
+ * </ul>
+ * After the initial response is complete, you can work with the interaction using the following methods:
+ * <ul>
+ *     <li>{@link #editReply()} to edit the initial response</li>
+ *     <li>{@link #getReply()} to fetch the initial response</li>
+ *     <li>{@link #deleteReply()} to delete the initial response</li>
+ * </ul>
+ * You can also work with followup messages using:
+ * <ul>
+ *     <li>{@link #createFollowup()} to create a followup message</li>
+ *     <li>{@link #editFollowup(Snowflake)} to update a followup message, given its ID</li>
+ *     <li>{@link #deleteFollowup(Snowflake)} to delete a followup message, given its ID</li>
+ * </ul>
  * <p>
  * This event is dispatched by Discord.
  *
@@ -84,15 +107,55 @@ public class InteractionCreateEvent extends Event {
 
     /**
      * Acknowledges the interaction indicating a response will be edited later. The user sees a loading state, visible
-     * to all participants in the invoking channel. For a "only you can see this" response, see {@link
+     * to all participants in the invoking channel. For an "only you can see this" response, see {@link
      * #acknowledgeEphemeral()}, or to include a message, {@link #reply(String) reply(String).withEphemeral(true)}
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction and
      * indicating a response will be edited later. The user sees a loading state. If an error is received, it is emitted
      * through the {@code Mono}.
+     * @deprecated use {@link #deferReply()} instead
      */
+    @Deprecated
     public Mono<Void> acknowledge() {
         return createInteractionResponse(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, null);
+    }
+
+    /**
+     * Acknowledges the interaction indicating a response will be edited later. The user sees a loading state, visible
+     * to all participants in the invoking channel. For an "only you can see this" response, add
+     * {@code withEphemeral(true)}, or to include a message, {@link #reply(String) reply(String).withEphemeral(true)}.
+     * <p>
+     * After calling {@code deferReply}, you are not allowed to call other acknowledging or reply method and have to
+     * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
+     * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
+     * {@link #deleteFollowup(Snowflake)}.
+     *
+     * @return A {@link InteractionCallbackSpecDeferReplyMono} where, upon successful completion, emits nothing;
+     * acknowledging the interaction and indicating a response will be edited later. The user sees a loading state. If
+     * an error is received, it is emitted through it.
+     */
+    public InteractionCallbackSpecDeferReplyMono deferReply() {
+        return InteractionCallbackSpecDeferReplyMono.of(this);
+    }
+
+    /**
+     * Acknowledges the interaction indicating a response will be edited later. The user sees a loading state, visible
+     * to all participants in the invoking channel.
+     * <p>
+     * After calling {@code deferReply}, you are not allowed to call other acknowledging or reply method and have to
+     * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
+     * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
+     * {@link #deleteFollowup(Snowflake)}.
+     *
+     * @param spec an immutable object that specifies how to build the reply message to the interaction
+     * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction and
+     * indicating a response will be edited later. The user sees a loading state. If an error is received, it is emitted
+     * through the {@code Mono}.
+     */
+    public Mono<Void> deferReply(InteractionCallbackSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> createInteractionResponse(
+                InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, spec.asRequest()));
     }
 
     /**
@@ -101,8 +164,9 @@ public class InteractionCreateEvent extends Event {
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing, acknowledging the interaction
      * and indicating a response will be edited later. If an error is received, it is emitted through the {@code Mono}.
+     * @deprecated migrate to {@link #deferReply() deferReply().withEphemeral(true)}
      */
-    // TODO: with new specs, this could be acknowledge().ephemeral() instead
+    @Deprecated
     public Mono<Void> acknowledgeEphemeral() {
         InteractionApplicationCommandCallbackData data = InteractionApplicationCommandCallbackData.builder()
                 .flags(Message.Flag.EPHEMERAL.getFlag())
@@ -143,6 +207,15 @@ public class InteractionCreateEvent extends Event {
      * Requests to respond to the interaction with a message. Properties specifying how to build the reply message to
      * the interaction can be set via the {@code withXxx} methods of the returned {@link
      * InteractionApplicationCommandCallbackReplyMono}.
+     * <p>
+     * For component interactions, like buttons or select menus, this method will create a <strong>new</strong> message.
+     * If you want to modify the message the component is on, see {@link ComponentInteractionEvent#edit()} or
+     * {@link ComponentInteractionEvent#deferEdit()}.
+     * <p>
+     * After calling {@code reply}, you are not allowed to call other acknowledging or reply method and have to
+     * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
+     * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
+     * {@link #deleteFollowup(Snowflake)}.
      *
      * @return A {@link InteractionApplicationCommandCallbackReplyMono} where, upon successful completion, emits nothing;
      * indicating the interaction response has been sent. If an error is received, it is emitted through the {@code
@@ -156,6 +229,15 @@ public class InteractionCreateEvent extends Event {
      * Requests to respond to the interaction with a message initialized with the specified content. Properties
      * specifying how to build the reply message to the interaction can be set via the {@code withXxx} methods of the
      * returned {@link InteractionApplicationCommandCallbackReplyMono}.
+     * <p>
+     * For component interactions, like buttons or select menus, this method will create a <strong>new</strong> message.
+     * If you want to modify the message the component is on, see {@link ComponentInteractionEvent#edit()} or
+     * {@link ComponentInteractionEvent#deferEdit()}.
+     * <p>
+     * After calling {@code reply}, you are not allowed to call other acknowledging or reply method and have to
+     * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
+     * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
+     * {@link #deleteFollowup(Snowflake)}.
      *
      * @param content a string to populate the message with
      * @return A {@link InteractionApplicationCommandCallbackReplyMono} where, upon successful completion, emits nothing;
@@ -168,6 +250,15 @@ public class InteractionCreateEvent extends Event {
 
     /**
      * Requests to respond to the interaction with a message.
+     * <p>
+     * For component interactions, like buttons or select menus, this method will create a <strong>new</strong> message.
+     * If you want to modify the message the component is on, see {@link ComponentInteractionEvent#edit()} or
+     * {@link ComponentInteractionEvent#deferEdit()}.
+     * <p>
+     * After calling {@code reply}, you are not allowed to call other acknowledging or reply method and have to
+     * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
+     * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
+     * {@link #deleteFollowup(Snowflake)}.
      *
      * @param spec an immutable object that specifies how to build the reply message to the interaction
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
@@ -188,9 +279,175 @@ public class InteractionCreateEvent extends Event {
     }
 
     /**
-     * Gets a handler for common operations related to an interaction followup response associated with this event.
+     * Edits the initial reply sent when accepting this interaction with the given message content.
+     * <p>
+     * For component interactions, like buttons or select menus, this method modifies the message depending on the
+     * initial response method chosen: if {@link #deferReply()} or {@link #reply()} was used, the <strong>new</strong>
+     * message created with the reply; if {@link ComponentInteractionEvent#edit()} or
+     * {@link ComponentInteractionEvent#deferEdit()} was used, this method will modify the message the component is on.
      *
-     * @return A handler for common operations related to an interaction followup response associated with this event.
+     * @param content a string to update the message with
+     * @return a {@link InteractionReplyEditMono} where, upon successful completion, emits the updated message. If an
+     * error is received, it is emitted through the {@code InteractionReplyEditMono}.
+     */
+    public InteractionReplyEditMono editReply(String content) {
+        return editReply().withContentOrNull(content);
+    }
+
+    /**
+     * Edits the initial reply sent when accepting this interaction. Properties specifying how to build the edit message
+     * request can be set via the {@code withXxx} methods of the returned {@link InteractionReplyEditMono}.
+     * <p>
+     * For component interactions, like buttons or select menus, this method modifies the message depending on the
+     * initial response method chosen: if {@link #deferReply()} or {@link #reply()} was used, the <strong>new</strong>
+     * message created with the reply; if {@link ComponentInteractionEvent#edit()} or
+     * {@link ComponentInteractionEvent#deferEdit()} was used, this method will modify the message the component is on.
+     *
+     * @return a {@link InteractionReplyEditMono} where, upon successful completion, emits the updated message. If an
+     * error is received, it is emitted through the {@code InteractionReplyEditMono}.
+     */
+    public InteractionReplyEditMono editReply() {
+        return InteractionReplyEditMono.of(this);
+    }
+
+    /**
+     * Edits the initial reply sent when accepting this interaction with the given spec contents.
+     * <p>
+     * For component interactions, like buttons or select menus, this method modifies the message depending on the
+     * initial response method chosen: if {@link #deferReply()} or {@link #reply()} was used, the <strong>new</strong>
+     * message created with the reply; if {@link ComponentInteractionEvent#edit()} or
+     * {@link ComponentInteractionEvent#deferEdit()} was used, this method will modify the message the component is on.
+     *
+     * @param spec an immutable object that specifies how to edit the initial reply
+     * @return a {@link Mono} where, upon successful completion, emits the updated message. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    public Mono<Message> editReply(InteractionReplyEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> {
+                    InteractionReplyEditSpec actualSpec = getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .map(spec::withAllowedMentionsOrNull)
+                            .orElse(spec);
+                    return getInteractionResponse().editInitialResponse(actualSpec.asRequest());
+                })
+                .map(data -> new Message(getClient(), data));
+    }
+
+    /**
+     * Returns the initial reply to this interaction.
+     *
+     * @return a {@link Mono} where, upon successful completion, emits the initial reply message. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Message> getReply() {
+        return getInteractionResponse().getInitialResponse().map(data -> new Message(getClient(), data));
+    }
+
+    /**
+     * Deletes the initial reply to this interaction.
+     *
+     * @return a {@link Mono} where, upon successful initial reply deletion, emits nothing indicating completion. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> deleteReply() {
+        return getInteractionResponse().deleteInitialResponse();
+    }
+
+    /**
+     * Creates a follow-up message to this interaction. Properties specifying how to build the follow-up message can be
+     * set via the {@code withXxx} methods of the returned {@link InteractionFollowupCreateMono}.
+     *
+     * @return a {@link InteractionFollowupCreateMono} where, upon successful completion, emits the resulting follow-up
+     * message. If an error is received, it is emitted through the {@code InteractionApplicationCommandCallbackMono}.
+     */
+    public InteractionFollowupCreateMono createFollowup() {
+        return InteractionFollowupCreateMono.of(this);
+    }
+
+    /**
+     * Creates a follow-up message to this interaction with the given message content.
+     *
+     * @param content a string to populate the followup message with
+     * @return a {@link InteractionFollowupCreateMono} where, upon successful completion, emits the resulting follow-up
+     * message. If an error is received, it is emitted through the {@code InteractionApplicationCommandCallbackMono}.
+     */
+    public InteractionFollowupCreateMono createFollowup(String content) {
+        return createFollowup().withContent(content);
+    }
+
+    /**
+     * Creates a follow-up message to this interaction.
+     *
+     * @param spec an immutable object that specifies how to build the follow-up message
+     * @return a {@link Mono} where, upon successful completion, emits the resulting follow-up message. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Message> createFollowup(InteractionFollowupCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> {
+                    InteractionFollowupCreateSpec actualSpec = getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .map(spec::withAllowedMentions)
+                            .orElse(spec);
+                    return getInteractionResponse().createFollowupMessage(actualSpec.asRequest());
+                })
+                .map(data -> new Message(getClient(), data));
+    }
+
+    /**
+     * Edits a follow-up message to this interaction. Properties specifying how to edit the follow-up message can be
+     * set via the {@code withXxx} methods of the returned {@link InteractionFollowupEditMono}.
+     *
+     * @param messageId the follow-up message ID to edit
+     * @return a {@link InteractionFollowupEditMono} where, upon successful completion, emits the updated follow-up
+     * message. If an error is received, it is emitted through the {@code InteractionFollowupEditMono}.
+     */
+    public InteractionFollowupEditMono editFollowup(Snowflake messageId) {
+        return InteractionFollowupEditMono.of(messageId, this);
+    }
+
+    /**
+     * Edits a follow-up message to this interaction.
+     *
+     * @param messageId the follow-up message ID to edit
+     * @param spec an immutable object that specifies how to build the edited follow-up message
+     * @return a {@link Mono} where, upon successful completion, emits the updated follow-up message. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Message> editFollowup(final Snowflake messageId, InteractionReplyEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> {
+                    InteractionReplyEditSpec actualSpec = getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .map(spec::withAllowedMentionsOrNull)
+                            .orElse(spec);
+                    return getInteractionResponse().editFollowupMessage(messageId.asLong(), actualSpec.asRequest());
+                })
+                .map(data -> new Message(getClient(), data));
+    }
+
+    /**
+     * Delete a followup message created under this interaction.
+     *
+     * @param messageId the message ID to be deleted
+     * @return a {@link Mono} where, upon successful message deletion, returns a completion signal. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> deleteFollowup(final Snowflake messageId) {
+        return getInteractionResponse().deleteFollowupMessage(messageId.asLong());
+    }
+
+    /**
+     * Returns a REST-only handler for common operations related to an interaction response associated with this event.
+     *
+     * @return a handler aggregating a collection of REST API methods to work with an interaction response
+     * @see InteractionCreateEvent#editReply()
+     * @see InteractionCreateEvent#getReply()
+     * @see InteractionCreateEvent#deleteReply()
+     * @see InteractionCreateEvent#createFollowup()
+     * @see InteractionCreateEvent#editFollowup(Snowflake)
+     * @see InteractionCreateEvent#deleteFollowup(Snowflake)
      */
     public InteractionResponse getInteractionResponse() {
         return response;
@@ -240,7 +497,7 @@ public class InteractionCreateEvent extends Event {
         }
 
         @Override
-        public Mono<MessageData> createFollowupMessage(MultipartRequest<WebhookExecuteRequest> request) {
+        public Mono<MessageData> createFollowupMessage(MultipartRequest<? extends WebhookExecuteRequest> request) {
             return restClient.getWebhookService()
                     .executeWebhook(applicationId, interactionData.token(), true, request);
         }

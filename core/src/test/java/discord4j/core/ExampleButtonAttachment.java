@@ -21,14 +21,11 @@ import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
+import discord4j.core.spec.MessageCreateFields;
 import discord4j.core.support.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.discordjson.json.WebhookMessageEditRequest;
-import discord4j.rest.util.MultipartRequest;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
 
 import java.io.InputStream;
 import java.util.Collections;
@@ -69,16 +66,13 @@ public class ExampleButtonAttachment {
 
                     // a listener that captures button presses
                     // to update an interaction initial response with a new attachment
-                    // TODO: missing d4j-core API to do this therefore this is done through d4j-rest
                     Publisher<?> onButtonInteraction = client.on(ButtonInteractionEvent.class, press -> {
                         if (editAttach.equals(press.getCustomId())) {
-                            Mono<?> edit = press.getInteractionResponse()
-                                    .editInitialResponse(MultipartRequest.ofRequestAndFiles(
-                                            WebhookMessageEditRequest.builder()
-                                                    .contentOrNull("Wow, a new attachment!")
-                                                    .components(Collections.singletonList(row.getData()))
-                                                    .build(), getFile()));
-                            return press.acknowledge().then(edit);
+                            Mono<?> edit = press.editReply()
+                                    .withContentOrNull("Wow, a new attachment!")
+                                    .withFiles(getFile())
+                                    .withComponents(row);
+                            return press.deferEdit().then(edit);
                         }
                         return Mono.empty();
                     });
@@ -91,8 +85,8 @@ public class ExampleButtonAttachment {
                 .block();
     }
 
-    private static List<Tuple2<String, InputStream>> getFile() {
+    private static MessageCreateFields.File getFile() {
         InputStream stream = ExampleButtonAttachment.class.getClassLoader().getResourceAsStream("logback.xml");
-        return Collections.singletonList(Tuples.of("logback.xml", stream));
+        return MessageCreateFields.File.of("logback.xml", stream);
     }
 }

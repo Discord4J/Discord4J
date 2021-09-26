@@ -107,7 +107,7 @@ public class WebhookService extends RestService {
      * is finished sending, and DOES NOT result in an error if the message is not saved.
      */
     public Mono<MessageData> executeWebhook(long webhookId, String token, boolean wait,
-                                            MultipartRequest<WebhookExecuteRequest> request) {
+                                            MultipartRequest<? extends WebhookExecuteRequest> request) {
         DiscordWebResponse response = Routes.WEBHOOK_EXECUTE
                 .newRequest(webhookId, token)
                 .query("wait", wait)

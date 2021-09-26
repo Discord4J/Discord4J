@@ -165,7 +165,7 @@ class InteractionOperations implements RestInteraction, InteractionResponse, Gui
     }
 
     @Override
-    public Mono<MessageData> createFollowupMessage(MultipartRequest<WebhookExecuteRequest> request) {
+    public Mono<MessageData> createFollowupMessage(MultipartRequest<? extends WebhookExecuteRequest> request) {
         return restClient.getWebhookService()
                 .executeWebhook(applicationId, interactionData.token(), true, request);
     }
