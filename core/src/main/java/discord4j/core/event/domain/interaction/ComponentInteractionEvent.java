@@ -89,7 +89,12 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
     /**
      * Acknowledge the interaction by indicating a message will be edited later. For components, the user <strong>does
      * not</strong> see a loading state. For an "only you can see this" response, add
-     * {@code withEphemeral(true)}, or to directly edit it, {@link #edit() edit().withEphemeral(true)}
+     * {@code withEphemeral(true)}, or to directly edit it, {@link #edit() edit().withEphemeral(true)}.
+     * <p>
+     * After calling {@code deferEdit}, you are not allowed to call other acknowledging or reply method and have to
+     * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
+     * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
+     * {@link #deleteFollowup(Snowflake)}.
      *
      * @return a {@link InteractionCallbackSpecDeferEditMono} where, upon successful completion, emits nothing;
      * acknowledging the interaction and indicating a response will be edited later. If an error is received, it is
@@ -102,6 +107,11 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
     /**
      * Acknowledge the interaction by indicating a message will be edited later. For components, the user <strong>does
      * not</strong> see a loading state.
+     * <p>
+     * After calling {@code deferEdit}, you are not allowed to call other acknowledging or reply method and have to
+     * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
+     * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
+     * {@link #deleteFollowup(Snowflake)}.
      *
      * @param spec an immutable object that specifies how to build the reply message to the interaction
      * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction and
@@ -145,6 +155,11 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
      * Requests to respond to the interaction by immediately editing the message the button is on. Properties specifying
      * how to edit the message can be set via the {@code withXxx} methods of the returned
      * {@link InteractionApplicationCommandCallbackEditMono}.
+     * <p>
+     * After calling {@code edit}, you are not allowed to call other acknowledging or reply method and have to
+     * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
+     * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
+     * {@link #deleteFollowup(Snowflake)}.
      *
      * @return A {@link InteractionApplicationCommandCallbackEditMono} where, upon successful completion, emits nothing;
      * indicating the interaction response has been sent. If an error is received, it is emitted through the {@code
@@ -155,7 +170,30 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
     }
 
     /**
+     * Requests to respond to the interaction by immediately editing the message the button is on with the given message
+     * content. Properties specifying how to edit the message can be set via the {@code withXxx} methods of the returned
+     * {@link InteractionApplicationCommandCallbackEditMono}.
+     * <p>
+     * After calling {@code edit}, you are not allowed to call other acknowledging or reply method and have to
+     * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
+     * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
+     * {@link #deleteFollowup(Snowflake)}.
+     *
+     * @return A {@link InteractionApplicationCommandCallbackEditMono} where, upon successful completion, emits nothing;
+     * indicating the interaction response has been sent. If an error is received, it is emitted through the {@code
+     * InteractionApplicationCommandCallbackMono}.
+     */
+    public InteractionApplicationCommandCallbackEditMono edit(String content) {
+        return edit().withContent(content);
+    }
+
+    /**
      * Requests to respond to the interaction by immediately editing the message the button is on.
+     * <p>
+     * After calling {@code edit}, you are not allowed to call other acknowledging or reply method and have to
+     * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
+     * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
+     * {@link #deleteFollowup(Snowflake)}.
      *
      * @param spec an immutable object that specifies how to edit the message the button is on.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
