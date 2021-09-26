@@ -25,6 +25,17 @@ import discord4j.gateway.ShardInfo;
 /**
  * Dispatched when a user interacts with a {@link Button} the bot has sent.
  * <p>
+ * You are required to respond to this interaction within a three-second window by using one of the following:
+ * <ul>
+ *     <li>{@link #reply()} to directly include a message</li>
+ *     <li>{@link #deferReply()} to acknowledge without a message, typically to perform a background task and give the
+ *     user a loading state until it is edited</li>
+ *     <li>{@link #edit()} to modify the message the component is on</li>
+ *     <li>{@link #deferEdit()} to acknowledge without a message, will not display a loading state and allows later
+ *     modifications to the message the component is on</li>
+ * </ul>
+ * See {@link InteractionCreateEvent} for more details about valid operations.
+ * <p>
  * This is not directly dispatched by Discord, but is a utility specialization of {@link InteractionCreateEvent}.
  * <p>
  * <img src="doc-files/InteractionCreateEvent.png">

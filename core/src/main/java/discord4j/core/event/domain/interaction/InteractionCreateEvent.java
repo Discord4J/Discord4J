@@ -38,7 +38,31 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * Dispatched when a user in a guild interacts with an application command or component.
+ * Dispatched when a user in a guild interacts with an application command or component. It is recommended you use a
+ * subclass in your event listeners to access interaction-specific methods. Application command interactions like
+ * {@link ChatInputInteractionEvent}, {@link UserInteractionEvent} and {@link MessageInteractionEvent} are created
+ * through Discord REST API, while component interactions like {@link ButtonInteractionEvent} and
+ * {@link SelectMenuInteractionEvent} are added to a message as user interface. See a diagram below for the current
+ * event hierarchy for interactions.
+ * <p>
+ * You are required to respond to this interaction within a three-second window by using one of the following:
+ * <ul>
+ *     <li>{@link #reply()} to directly include a message</li>
+ *     <li>{@link #deferReply()} to acknowledge without a message, typically to perform a background task and give the
+ *     user a loading state until it is edited</li>
+ * </ul>
+ * After the initial response is complete, you can work with the interaction using the following methods:
+ * <ul>
+ *     <li>{@link #editReply()} to edit the initial response</li>
+ *     <li>{@link #getReply()} to fetch the initial response</li>
+ *     <li>{@link #deleteReply()} to delete the initial response</li>
+ * </ul>
+ * You can also work with followup messages using:
+ * <ul>
+ *     <li>{@link #createFollowup()} to create a followup message</li>
+ *     <li>{@link #editFollowup(Snowflake)} to update a followup message, given its ID</li>
+ *     <li>{@link #deleteFollowup(Snowflake)} to delete a followup message, given its ID</li>
+ * </ul>
  * <p>
  * This event is dispatched by Discord.
  *
@@ -423,6 +447,7 @@ public class InteractionCreateEvent extends Event {
      * @see InteractionCreateEvent#deleteReply()
      * @see InteractionCreateEvent#createFollowup()
      * @see InteractionCreateEvent#editFollowup(Snowflake)
+     * @see InteractionCreateEvent#deleteFollowup(Snowflake)
      */
     public InteractionResponse getInteractionResponse() {
         return response;

@@ -40,6 +40,17 @@ import java.util.function.Consumer;
 /**
  * Dispatched when a user interacts with a {@link MessageComponent} the bot has sent.
  * <p>
+ * You are required to respond to this interaction within a three-second window by using one of the following:
+ * <ul>
+ *     <li>{@link #reply()} to directly include a message</li>
+ *     <li>{@link #deferReply()} to acknowledge without a message, typically to perform a background task and give the
+ *     user a loading state until it is edited</li>
+ *     <li>{@link #edit()} to modify the message the component is on</li>
+ *     <li>{@link #deferEdit()} to acknowledge without a message, will not display a loading state and allows later
+ *     modifications to the message the component is on</li>
+ * </ul>
+ * See {@link InteractionCreateEvent} for more details about valid operations.
+ * <p>
  * This is not directly dispatched by Discord, but is a utility specialization of {@link InteractionCreateEvent}.
  * <p>
  * <img src="doc-files/InteractionCreateEvent.png">
@@ -91,7 +102,7 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
      * not</strong> see a loading state. For an "only you can see this" response, add
      * {@code withEphemeral(true)}, or to directly edit it, {@link #edit() edit().withEphemeral(true)}.
      * <p>
-     * After calling {@code deferEdit}, you are not allowed to call other acknowledging or reply method and have to
+     * After calling {@code deferEdit}, you are not allowed to call other acknowledge, reply or edit method and have to
      * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
      * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
      * {@link #deleteFollowup(Snowflake)}.
@@ -108,7 +119,7 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
      * Acknowledge the interaction by indicating a message will be edited later. For components, the user <strong>does
      * not</strong> see a loading state.
      * <p>
-     * After calling {@code deferEdit}, you are not allowed to call other acknowledging or reply method and have to
+     * After calling {@code deferEdit}, you are not allowed to call other acknowledge, reply or edit method and have to
      * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
      * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
      * {@link #deleteFollowup(Snowflake)}.
@@ -156,7 +167,7 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
      * how to edit the message can be set via the {@code withXxx} methods of the returned
      * {@link InteractionApplicationCommandCallbackEditMono}.
      * <p>
-     * After calling {@code edit}, you are not allowed to call other acknowledging or reply method and have to
+     * After calling {@code edit}, you are not allowed to call other acknowledging, reply or edit method and have to
      * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
      * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
      * {@link #deleteFollowup(Snowflake)}.
@@ -174,7 +185,7 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
      * content. Properties specifying how to edit the message can be set via the {@code withXxx} methods of the returned
      * {@link InteractionApplicationCommandCallbackEditMono}.
      * <p>
-     * After calling {@code edit}, you are not allowed to call other acknowledging or reply method and have to
+     * After calling {@code edit}, you are not allowed to call other acknowledging, reply or edit method and have to
      * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
      * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
      * {@link #deleteFollowup(Snowflake)}.
@@ -190,7 +201,7 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
     /**
      * Requests to respond to the interaction by immediately editing the message the button is on.
      * <p>
-     * After calling {@code edit}, you are not allowed to call other acknowledging or reply method and have to
+     * After calling {@code edit}, you are not allowed to call other acknowledging, reply or edit method and have to
      * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
      * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
      * {@link #deleteFollowup(Snowflake)}.
