@@ -687,17 +687,19 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<StageInstanceData> onStageInstanceCreate(int shardIndex, StageInstanceCreate dispatch) {
-        return null;
+        stageInstances.put(dispatch.stageInstance().channelId().asLong(), dispatch.stageInstance());
+        return Mono.justOrEmpty(dispatch.stageInstance());
     }
 
     @Override
     public Mono<StageInstanceData> onStageInstanceUpdate(int shardIndex, StageInstanceUpdate dispatch) {
-        return null;
+        stageInstances.replace(dispatch.stageInstance().channelId().asLong(), dispatch.stageInstance());
+        return Mono.justOrEmpty(dispatch.stageInstance());
     }
 
     @Override
     public Mono<StageInstanceData> onStageInstanceDelete(int shardIndex, StageInstanceDelete dispatch) {
-        return null;
+        return Mono.justOrEmpty(stageInstances.remove(dispatch.stageInstance().channelId().asLong()));
     }
 
     @Override

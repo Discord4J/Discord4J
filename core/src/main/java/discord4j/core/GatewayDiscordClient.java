@@ -29,7 +29,15 @@ import discord4j.core.event.domain.Event;
 import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
-import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.ApplicationInfo;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.GuildEmoji;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.StageInstance;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.Webhook;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.presence.ClientPresence;
@@ -48,6 +56,7 @@ import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.GuildData;
 import discord4j.discordjson.json.GuildUpdateData;
 import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.UpdateCurrentUserVoiceStateRequest;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.discordjson.possible.Possible;
@@ -441,6 +450,22 @@ public class GatewayDiscordClient implements EntityRetriever {
         Objects.requireNonNull(spec);
         return Mono.defer(() -> getRestClient().getUserService().modifyCurrentUser(spec.asRequest()))
                 .map(data -> new User(this, data));
+    }
+
+    @Override
+    public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId) {
+        Objects.requireNonNull(channelId);
+        return entityRetriever.getStageInstanceByChannelId(channelId);
+    }
+
+    public Mono<Void> joinStageSpeakers(Snowflake guildId) {
+        Objects.requireNonNull(guildId);
+        return Mono.defer(() -> getRestClient().getGuildService().modifySelfVoiceState(guildId.asLong(), UpdateCurrentUserVoiceStateRequest.builder().suppress(false).build()));
+    }
+
+    public Mono<Void> joinStageAudience(Snowflake guildId) {
+        Objects.requireNonNull(guildId);
+        return Mono.defer(() -> getRestClient().getGuildService().modifySelfVoiceState(guildId.asLong(), UpdateCurrentUserVoiceStateRequest.builder().suppress(true).build()));
     }
 
     /**

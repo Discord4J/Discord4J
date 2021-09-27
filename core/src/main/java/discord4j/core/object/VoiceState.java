@@ -20,6 +20,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.AudioChannel;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.VoiceStateData;
@@ -117,8 +118,8 @@ public final class VoiceState implements DiscordObject {
      * @return A {@link Mono} where, upon successful completion, emits the {@link VoiceChannel} this user is connected
      * to, if present. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<VoiceChannel> getChannel() {
-        return Mono.justOrEmpty(getChannelId()).flatMap(gateway::getChannelById).cast(VoiceChannel.class);
+    public Mono<AudioChannel> getChannel() {
+        return Mono.justOrEmpty(getChannelId()).flatMap(gateway::getChannelById).cast(AudioChannel.class);
     }
 
     /**
@@ -128,10 +129,10 @@ public final class VoiceState implements DiscordObject {
      * @return A {@link Mono} where, upon successful completion, emits the {@link VoiceChannel} this user is connected
      * to, if present. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<VoiceChannel> getChannel(EntityRetrievalStrategy retrievalStrategy) {
+    public Mono<AudioChannel> getChannel(EntityRetrievalStrategy retrievalStrategy) {
         return Mono.justOrEmpty(getChannelId())
                 .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id))
-                .cast(VoiceChannel.class);
+                .cast(AudioChannel.class);
     }
 
     /**

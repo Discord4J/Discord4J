@@ -387,6 +387,10 @@ public class RestClient {
         return userService.modifyCurrentUser(request);
     }
 
+    public Mono<StageInstanceData> getStageInstance(final Snowflake channelId) {
+        return stageInstanceService.getStageInstance(channelId.asLong());
+    }
+
     /**
      * Access a low-level representation of the API endpoints for the Application resource.
      *

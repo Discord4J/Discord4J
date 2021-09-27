@@ -127,4 +127,10 @@ public class StoreEntityRetriever implements EntityRetriever {
         return Flux.from(store.execute(ReadActions.getEmojisInGuild(guildId.asLong())))
                 .map(emojiData -> new GuildEmoji(gateway, emojiData, guildId.asLong()));
     }
+
+    @Override
+    public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId) {
+        return Mono.from(store.execute(ReadActions.getStageInstanceByChannelId(channelId.asLong())))
+            .map(data -> new StageInstance(gateway, data));
+    }
 }

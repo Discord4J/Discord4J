@@ -21,6 +21,7 @@ import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.StageInstance;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -165,4 +166,13 @@ public interface EntityRetriever {
      * it is emitted through the {@code Flux}.
      */
     Flux<GuildEmoji> getGuildEmojis(Snowflake guildId);
+
+    /**
+     * Requests to retrieve the stage instance represented by the supplied channel ID.
+     *
+     * @param channelId The ID of the channel.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link StageInstance} as represented by the supplied
+     *         channel ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId);
 }

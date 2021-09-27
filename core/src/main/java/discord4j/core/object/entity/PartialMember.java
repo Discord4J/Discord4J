@@ -32,6 +32,7 @@ import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.PartialMemberData;
+import discord4j.discordjson.json.UpdateUserVoiceStateRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.json.gateway.ImmutableRequestGuildMembers;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
@@ -649,6 +650,18 @@ public class PartialMember extends User {
             () -> getClient().getRestClient().getGuildService()
                 .modifyGuildMember(getGuildId().asLong(), getId().asLong(), spec.asRequest(), spec.reason())
                 .map(data -> new Member(getClient(), data, getGuildId().asLong())));
+    }
+
+    public Mono<Void> inviteToStageSpeakers() {
+        return Mono.defer(
+            () -> getClient().getRestClient().getGuildService()
+                .modifyOthersVoiceState(getGuildId().asLong(), getUserData().id().asLong(), UpdateUserVoiceStateRequest.builder().suppress(false).build()));
+    }
+
+    public Mono<Void> moveToStageAudience() {
+        return Mono.defer(
+            () -> getClient().getRestClient().getGuildService()
+                .modifyOthersVoiceState(getGuildId().asLong(), getUserData().id().asLong(), UpdateUserVoiceStateRequest.builder().suppress(true).build()));
     }
 
     @Override

@@ -16,7 +16,6 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Region;
@@ -26,22 +25,16 @@ import discord4j.core.object.entity.StageInstance;
 import discord4j.core.spec.StageChannelEditMono;
 import discord4j.core.spec.StageChannelEditSpec;
 import discord4j.core.spec.legacy.LegacyStageChannelEditSpec;
-import discord4j.core.spec.legacy.LegacyStageChannelJoinSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.StageInstanceCreateRequest;
-import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.discordjson.possible.Possible;
-import discord4j.gateway.GatewayClientGroup;
-import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.voice.VoiceConnection;
-import discord4j.voice.VoiceConnectionRegistry;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /** A Discord stage channel. */
 public final class StageChannel extends AudioChannel implements CategorizableChannel {
@@ -179,23 +172,6 @@ public final class StageChannel extends AudioChannel implements CategorizableCha
     @Override
     public String toString() {
         return "StageChannel{} " + super.toString();
-    }
-
-    public enum PrivacyLevel {
-
-        PUBLIC(1),
-        GUILD_ONLY(2);
-
-        private final int value;
-
-        PrivacyLevel(int value) {
-            this.value = value;
-        }
-
-        public int getValue() {
-            return this.value;
-        }
-
     }
 
 }

@@ -106,6 +106,10 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(ThreadListSync.class, ThreadDispatchHandlers::threadListSync);
         addHandler(ThreadMemberUpdate.class, ThreadDispatchHandlers::threadMemberUpdate);
         addHandler(ThreadMembersUpdate.class, ThreadDispatchHandlers::threadMembersUpdate);
+        addHandler(StageInstanceCreate.class, StageInstanceDispatchHandlers::stageInstanceCreate);
+        addHandler(StageInstanceUpdate.class, StageInstanceDispatchHandlers::stageInstanceUpdate);
+        addHandler(StageInstanceDelete.class, StageInstanceDispatchHandlers::stageInstanceDelete);
+        addHandler(VoiceStateUpdate.class, StageInstanceDispatchHandlers::stageRequestToSpeak);
 
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
 

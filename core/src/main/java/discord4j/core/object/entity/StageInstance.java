@@ -5,9 +5,8 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.spec.StageInstanceEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.StageInstanceData;
-import discord4j.rest.entity.RestRole;
+import discord4j.discordjson.json.UpdateUserVoiceStateRequest;
 import discord4j.rest.entity.RestStageInstance;
-import reactor.core.CorePublisher;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -16,15 +15,27 @@ import java.util.Objects;
 public final class StageInstance implements Entity {
 
     private final GatewayDiscordClient gateway;
-
     private final StageInstanceData data;
-
     private final RestStageInstance rest;
 
     public StageInstance(final GatewayDiscordClient gateway, final StageInstanceData data) {
         this.gateway = gateway;
         this.data = data;
         this.rest = RestStageInstance.create(gateway.rest(), Snowflake.of(data.channelId()));
+    }
+
+    public Mono<StageInstance> edit(StageInstanceEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> rest.edit(spec.asRequest(), spec.reason())
+            .map(bean -> new StageInstance(gateway, bean)));
+    }
+
+    public Mono<Void> inviteMemberToStageSpeakers(Member member) {
+        return Mono.defer(() -> gateway.getRestClient().getGuildService().modifyOthersVoiceState(member.getGuildId().asLong(), member.getId().asLong(), UpdateUserVoiceStateRequest.builder().suppress(false).build()));
+    }
+
+    public Mono<Void> moveMemberToStageAudience(Member member) {
+        return Mono.defer(() -> gateway.getRestClient().getGuildService().modifyOthersVoiceState(member.getGuildId().asLong(), member.getId().asLong(), UpdateUserVoiceStateRequest.builder().suppress(true).build()));
     }
 
     @Override
@@ -54,14 +65,8 @@ public final class StageInstance implements Entity {
     @Override
     public String toString() {
         return "StageInstance{" +
-                "gateway=" + gateway +
-                ", data=" + data +
-                '}';
-    }
-
-    public Mono<StageInstance> edit(StageInstanceEditSpec spec) {
-        Objects.requireNonNull(spec);
-        return Mono.defer(() -> rest.edit(spec.asRequest(), spec.reason())
-                .map(bean -> new StageInstance(gateway, bean)));
+            "gateway=" + gateway +
+            ", data=" + data +
+            '}';
     }
 }
