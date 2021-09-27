@@ -117,9 +117,10 @@ public class ChannelService extends RestService {
                 .bodyToMono(Void.class);
     }
 
-    public Mono<MessageData> editMessage(long channelId, long messageId, MessageEditRequest request) {
+    public Mono<MessageData> editMessage(long channelId, long messageId, MultipartRequest<MessageEditRequest> request) {
         return Routes.MESSAGE_EDIT.newRequest(channelId, messageId)
-                .body(request)
+                .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
+                .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
                 .exchange(getRouter())
                 .bodyToMono(MessageData.class);
     }

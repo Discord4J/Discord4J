@@ -18,7 +18,7 @@ package discord4j.core;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
-import discord4j.core.event.domain.interaction.ButtonInteractEvent;
+import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
 import discord4j.core.object.entity.Message;
@@ -33,8 +33,7 @@ public class ExampleButtons {
 
     public static void main(String[] args) {
         DiscordClient.create(token)
-                .login()
-                .flatMap(gw -> {
+                .withGateway(gw -> {
                     Mono<Message> sendMessage = gw.on(GuildCreateEvent.class)
                             .filter(e -> e.getGuild().getId().asString().equals(guildId))
                             .next()
@@ -85,7 +84,7 @@ public class ExampleButtons {
                     return sendMessage
                             .map(Message::getId)
                             .flatMapMany(buttonMessageId ->
-                                    gw.on(ButtonInteractEvent.class, event ->
+                                    gw.on(ButtonInteractionEvent.class, event ->
                                             Mono.justOrEmpty(event.getInteraction().getMessage())
                                                 .map(Message::getId)
                                                 .filter(buttonMessageId::equals)

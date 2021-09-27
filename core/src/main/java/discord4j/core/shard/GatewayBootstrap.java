@@ -92,7 +92,7 @@ import static reactor.function.TupleUtils.function;
  *     <li>Setting the number of shards to connect through the
  *     {@link #setSharding(ShardingStrategy)} method.</li>
  *     <li>Setting the initial status of the bot depending on the shard, through
- *     {@link #setInitialStatus(Function)}</li>
+ *     {@link #setInitialPresence(Function)}</li>
  *     <li>Customize the entity cache using {@link #setStore(Store)}</li>
  * </ul>
  * <p>

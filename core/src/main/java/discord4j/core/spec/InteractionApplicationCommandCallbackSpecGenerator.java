@@ -17,6 +17,7 @@
 
 package discord4j.core.spec;
 
+import discord4j.core.event.domain.interaction.ComponentInteractionEvent;
 import discord4j.core.event.domain.interaction.InteractionCreateEvent;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
@@ -66,7 +67,7 @@ interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<Intera
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
-abstract class InteractionApplicationCommandCallbackMonoGenerator extends Mono<Void>
+abstract class InteractionApplicationCommandCallbackReplyMonoGenerator extends Mono<Void>
         implements InteractionApplicationCommandCallbackSpecGenerator {
 
     abstract InteractionCreateEvent event();
@@ -74,6 +75,22 @@ abstract class InteractionApplicationCommandCallbackMonoGenerator extends Mono<V
     @Override
     public void subscribe(CoreSubscriber<? super Void> actual) {
         event().reply(InteractionApplicationCommandCallbackSpec.copyOf(this)).subscribe(actual);
+    }
+
+    @Override
+    public abstract String toString();
+}
+
+@SuppressWarnings("immutables:subtype")
+@Value.Immutable(builder = false)
+abstract class InteractionApplicationCommandCallbackEditMonoGenerator extends Mono<Void>
+        implements InteractionApplicationCommandCallbackSpecGenerator {
+
+    abstract ComponentInteractionEvent event();
+
+    @Override
+    public void subscribe(CoreSubscriber<? super Void> actual) {
+        event().edit(InteractionApplicationCommandCallbackSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override

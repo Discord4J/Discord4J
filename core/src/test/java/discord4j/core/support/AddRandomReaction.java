@@ -18,8 +18,7 @@
 package discord4j.core.support;
 
 import discord4j.core.command.Command;
-import discord4j.core.command.CommandRequest;
-import discord4j.core.command.CommandResponse;
+import discord4j.core.command.CommandContext;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.reaction.ReactionEmoji;
 import reactor.core.Exceptions;
@@ -71,9 +70,9 @@ public class AddRandomReaction implements Command {
             "💔", "❣", "💕", "💓", "💗", "💖", "💘", "💝", "💠", "🔔"));
 
     @Override
-    public Mono<Void> apply(CommandRequest request, CommandResponse response) {
-        Message message = request.getMessage();
-        String rawCount = request.parameters();
+    public Mono<Void> apply(CommandContext context) {
+        Message message = context.getMessage();
+        String rawCount = context.parameters();
         int count = 1;
         if (!rawCount.isEmpty()) {
             try {

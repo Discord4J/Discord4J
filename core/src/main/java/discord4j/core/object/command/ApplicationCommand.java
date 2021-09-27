@@ -70,6 +70,18 @@ public class ApplicationCommand implements DiscordObject {
     }
 
     /**
+     * Gets the type of the command.
+     *
+     * @return The type of the command.
+     */
+    public Type getType() {
+        // Discord defaults to treating the type as a CHAT_INPUT command if type is not present.
+        return data.type().toOptional()
+            .map(Type::of)
+            .orElse(Type.CHAT_INPUT);
+    }
+
+    /**
      * Gets the unique id of the parent application.
      *
      * @return The unique id of the parent application.
@@ -122,5 +134,56 @@ public class ApplicationCommand implements DiscordObject {
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
+    }
+
+    /**
+     * @see <a href="https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types">
+     * Application Command Type</a>
+     */
+    public enum Type {
+        UNKNOWN(-1),
+        CHAT_INPUT(1),
+        USER(2),
+        MESSAGE(3);
+
+        /**
+         * The underlying value as represented by Discord.
+         */
+        private final int value;
+
+        /**
+         * Constructs an {@code ApplicationCommandType}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        Type(final int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the type of application command. It is guaranteed that invoking {@link #getValue()} from the
+         * returned enum will
+         * equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The type of command.
+         */
+        public static Type of(final int value) {
+            switch (value) {
+                case 1: return CHAT_INPUT;
+                case 2: return USER;
+                case 3: return MESSAGE;
+                default: return UNKNOWN;
+            }
+        }
     }
 }

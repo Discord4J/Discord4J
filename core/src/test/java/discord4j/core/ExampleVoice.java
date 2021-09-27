@@ -51,7 +51,7 @@ public class ExampleVoice {
         CommandListener listener = CommandListener.createWithPrefix("!!")
                 .filter(req -> isAuthor(ownerId, req))
                 .on("echo", Commands::echo)
-                .on("exit", (req, res) -> req.getClient().logout())
+                .on("exit", ctx -> ctx.getClient().logout())
                 .on("status", Commands::status)
                 .on("requestMembers", Commands::requestMembers)
                 .on("getMembers", Commands::getMembers)

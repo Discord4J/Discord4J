@@ -14,6 +14,9 @@ dependencies {
     if (JavaVersion.current().isJava8()) {
         compileOnly "com.google.code.findbugs:annotations:3.0.1"
         testCompileOnly "com.google.code.findbugs:annotations:3.0.1"
+    } else {
+        compileOnly "javax.annotation:javax.annotation-api:1.3.2"
+        testCompileOnly "javax.annotation:javax.annotation-api:1.3.2"
     }
 
     testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_version"

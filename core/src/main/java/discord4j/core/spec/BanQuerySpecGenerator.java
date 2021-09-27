@@ -19,7 +19,7 @@ package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.PartialMember;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
@@ -66,7 +66,7 @@ abstract class GuildBanQueryMonoGenerator extends Mono<Void> implements BanQuery
 @Value.Immutable(builder = false)
 abstract class MemberBanQueryMonoGenerator extends Mono<Void> implements BanQuerySpecGenerator {
 
-    abstract Member member();
+    abstract PartialMember member();
 
     @Override
     public void subscribe(CoreSubscriber<? super Void> actual) {

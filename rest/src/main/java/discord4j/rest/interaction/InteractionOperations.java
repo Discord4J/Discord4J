@@ -133,7 +133,19 @@ class InteractionOperations implements RestInteraction, InteractionResponse, Gui
     // InteractionResponse
 
     @Override
+    public Mono<MessageData> getInitialResponse() {
+        return restClient.getWebhookService()
+                .getWebhookMessage(applicationId, interactionData.token(), "@original");
+    }
+
+    @Override
     public Mono<MessageData> editInitialResponse(WebhookMessageEditRequest request) {
+        return restClient.getWebhookService()
+                .modifyWebhookMessage(applicationId, interactionData.token(), "@original", request);
+    }
+
+    @Override
+    public Mono<MessageData> editInitialResponse(MultipartRequest<WebhookMessageEditRequest> request) {
         return restClient.getWebhookService()
                 .modifyWebhookMessage(applicationId, interactionData.token(), "@original", request);
     }
@@ -153,7 +165,7 @@ class InteractionOperations implements RestInteraction, InteractionResponse, Gui
     }
 
     @Override
-    public Mono<MessageData> createFollowupMessage(MultipartRequest<WebhookExecuteRequest> request) {
+    public Mono<MessageData> createFollowupMessage(MultipartRequest<? extends WebhookExecuteRequest> request) {
         return restClient.getWebhookService()
                 .executeWebhook(applicationId, interactionData.token(), true, request);
     }
@@ -180,6 +192,12 @@ class InteractionOperations implements RestInteraction, InteractionResponse, Gui
 
     @Override
     public Mono<MessageData> editFollowupMessage(long messageId, WebhookMessageEditRequest request, boolean wait) {
+        return restClient.getWebhookService()
+                .modifyWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId), request);
+    }
+
+    @Override
+    public Mono<MessageData> editFollowupMessage(long messageId, MultipartRequest<WebhookMessageEditRequest> request) {
         return restClient.getWebhookService()
                 .modifyWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId), request);
     }

@@ -21,7 +21,6 @@ import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.discordjson.json.ApplicationCommandInteractionOptionData;
-import discord4j.rest.util.ApplicationCommandOptionType;
 import reactor.util.annotation.Nullable;
 
 import java.util.Collections;
@@ -84,8 +83,8 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
      *
      * @return The type of this option.
      */
-    public ApplicationCommandOptionType getType() {
-        return ApplicationCommandOptionType.of(data.type());
+    public ApplicationCommandOption.Type getType() {
+        return ApplicationCommandOption.Type.of(data.type());
     }
 
     /**

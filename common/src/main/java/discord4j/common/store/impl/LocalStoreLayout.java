@@ -771,6 +771,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             WithUser<ImmutablePresenceData> oldPresence = presences.put(presenceId, new WithUser<>(
                     ImmutablePresenceData.copyOf(presence).withUser(EmptyPartialUser.INSTANCE), userRef,
                     (p, u) -> p.withUser(PartialUserData.builder()
+                            .id(u.id())
                             .avatar(Possible.of(u.avatar()))
                             .username(u.username())
                             .discriminator(u.discriminator())
@@ -791,6 +792,8 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                 .username(partialUserData.usernameOrElse(oldUser.username()))
                 .discriminator(partialUserData.discriminatorOrElse(oldUser.discriminator()))
                 .avatar(or(Possible.flatOpt(partialUserData.avatar()), oldUser::avatar))
+                .banner(Possible.of(or(Possible.flatOpt(partialUserData.banner()), () -> Possible.flatOpt(oldUser.banner()))))
+                .accentColor(Possible.of(or(Possible.flatOpt(partialUserData.accentColor()), () -> Possible.flatOpt(oldUser.accentColor()))))
                 .build();
     }
 
@@ -801,6 +804,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             guildContent.voiceStateIds.add(voiceStateId);
             computeChannelContent(voiceState.channelId().get().asLong()).voiceStateIds.add(voiceStateId);
             return voiceStates.put(voiceStateId, ImmutableVoiceStateData.copyOf(voiceState)
+                    .withGuildId(guildId)
                     .withMember(Possible.absent()));
         } else {
             guildContent.voiceStateIds.remove(voiceStateId);

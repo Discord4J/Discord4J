@@ -166,14 +166,22 @@ public class Interaction implements DiscordObject {
 
     /**
      * Gets the message associated with the interaction.
-     * <p>
-     * This is only present for component interactions.
      *
      * @return The message associated with the interaction.
      */
     public Optional<Message> getMessage() {
         return data.message().toOptional()
                 .map(data -> new Message(gateway, data));
+    }
+
+    /**
+     * Gets the ID of the message associated with the interaction.
+     *
+     * @return The message associated with the interaction.
+     */
+    public Optional<Snowflake> getMessageId() {
+        return data.message().toOptional()
+                .map(data -> Snowflake.of(data.id()));
     }
 
     @Override
