@@ -1369,6 +1369,23 @@ public final class Guild implements Entity {
                 .cast(VoiceChannel.class);
     }
 
+
+    /**
+     * Requests to create a stage channel.
+     *
+     * @param spec an immutable object that specifies how to create the stage channel
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link StageChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<VoiceChannel> createStageChannel(StageChannelCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                        () -> gateway.getRestClient().getGuildService()
+                                .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+                .map(data -> EntityUtil.getChannel(gateway, data))
+                .cast(VoiceChannel.class);
+    }
+
     /**
      * Requests to delete this guild.
      *

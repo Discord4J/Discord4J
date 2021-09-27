@@ -45,6 +45,7 @@ public class RestClient {
     private final GuildService guildService;
     private final InteractionService interactionService;
     private final InviteService inviteService;
+    private final StageInstanceService stageInstanceService;
     private final TemplateService templateService;
     private final UserService userService;
     private final VoiceService voiceService;
@@ -88,6 +89,7 @@ public class RestClient {
         this.guildService = new GuildService(router);
         this.interactionService = new InteractionService(router);
         this.inviteService = new InviteService(router);
+        this.stageInstanceService = new StageInstanceService(router);
         this.templateService = new TemplateService(router);
         this.userService = new UserService(router);
         this.voiceService = new VoiceService(router);
@@ -461,6 +463,10 @@ public class RestClient {
      */
     public InviteService getInviteService() {
         return inviteService;
+    }
+
+    public StageInstanceService getStageInstanceService() {
+        return this.stageInstanceService;
     }
 
     /**

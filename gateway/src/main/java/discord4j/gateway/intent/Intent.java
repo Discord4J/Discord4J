@@ -37,6 +37,9 @@ public enum Intent {
      *     <li>CHANNEL_UPDATE</li>
      *     <li>CHANNEL_DELETE</li>
      *     <li>CHANNEL_PINS_UPDATE</li>
+     *     <li>STAGE_INSTANCE_CREATE</li>
+     *     <li>STAGE_INSTANCE_UPDATE</li>
+     *     <li>STAGE_INSTANCE_DELETE</li>
      * </ul>
      */
     GUILDS(0),
