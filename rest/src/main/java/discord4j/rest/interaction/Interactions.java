@@ -25,7 +25,9 @@ import discord4j.discordjson.json.ApplicationCommandInteractionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.InteractionData;
 import discord4j.discordjson.json.InteractionResponseData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.RestClient;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -95,7 +97,7 @@ public class Interactions {
      */
     public Interactions onCommand(Snowflake id,
                                   Function<RestInteraction, InteractionHandler> action) {
-        commands.add(new RequestApplicationCommandDefinition(acid -> acid.id().equals(id.asString()), action));
+        commands.add(new RequestApplicationCommandDefinition(acid -> acid.id().equals(Possible.of(id.asString())), action));
         return this;
     }
 
@@ -108,7 +110,7 @@ public class Interactions {
      */
     public Interactions onCommand(String name,
                                   Function<RestInteraction, InteractionHandler> action) {
-        commands.add(new RequestApplicationCommandDefinition(acid -> acid.name().equals(name), action));
+        commands.add(new RequestApplicationCommandDefinition(acid -> acid.name().equals(Possible.of(name)), action));
         return this;
     }
 
@@ -124,7 +126,7 @@ public class Interactions {
     public Interactions onGuildCommand(ApplicationCommandRequest createRequest,
                                        Snowflake guildId,
                                        Function<GuildInteraction, InteractionHandler> action) {
-        commands.add(new GuildApplicationCommandDefinition(acid -> acid.name().equals(createRequest.name()), action));
+        commands.add(new GuildApplicationCommandDefinition(acid -> acid.name().equals(Possible.of(createRequest.name())), action));
         createRequests.add(new GuildApplicationCommandRequest(createRequest, guildId));
         return this;
     }
@@ -143,7 +145,7 @@ public class Interactions {
      */
     public Interactions onGlobalCommand(ApplicationCommandRequest createRequest,
                                         Function<RestInteraction, InteractionHandler> action) {
-        commands.add(new RequestApplicationCommandDefinition(acid -> acid.name().equals(createRequest.name()), action));
+        commands.add(new RequestApplicationCommandDefinition(acid -> acid.name().equals(Possible.of(createRequest.name())), action));
         createRequests.add(new GlobalApplicationCommandRequest(createRequest));
         return this;
     }
@@ -203,11 +205,39 @@ public class Interactions {
      * @return a Reactor Netty server route to handle endpoint-based interactions
      */
     public ReactorNettyServerHandler buildReactorNettyHandler(RestClient restClient) {
-        ObjectMapper mapper = restClient.getRestResources().getJacksonResources().getObjectMapper();
+        return buildReactorNettyHandler(restClient, new NoopInteractionValidator());
+    }
+
+    /**
+     * Create a Reactor Netty {@link HttpServer} handler to be applied to a single route using a method like
+     * {@link HttpServer#route(Consumer)}. This route will accept interactions from Discord when working in endpoint
+     * mode.
+     * <p>
+     * Currently, no signature validation signature is implemented yet in D4J but you may provide your own
+     * implementation of {@link InteractionValidator}
+     *
+     * @param restClient           the web client used to interact with Discord API
+     * @param interactionValidator the validator used to validate incoming requests
+     * @return a Reactor Netty server route to handle endpoint-based interactions
+     */
+    public ReactorNettyServerHandler buildReactorNettyHandler(RestClient restClient, InteractionValidator interactionValidator) {
         return (serverRequest, serverResponse) -> serverRequest.receive()
                 .aggregate()
-                .asByteArray()
-                .flatMap(buf -> Mono.fromCallable(() -> mapper.readValue(buf, JsonNode.class)))
+                .asString()
+                .flatMap(body -> {
+                    String signature = serverRequest.requestHeaders().get("X-Signature-Ed25519");
+                    String timestamp = serverRequest.requestHeaders().get("X-Signature-Timestamp");
+                    if (interactionValidator.validateSignature(signature, timestamp, body)) {
+                        return handleValidated(body, serverResponse, restClient);
+                    } else {
+                        return serverResponse.status(HttpResponseStatus.UNAUTHORIZED).send();
+                    }
+                });
+    }
+
+    private Mono<Void> handleValidated(String body, HttpServerResponse serverResponse, RestClient restClient) {
+        ObjectMapper mapper = restClient.getRestResources().getJacksonResources().getObjectMapper();
+        return Mono.fromCallable(() -> mapper.readValue(body, JsonNode.class))
                 .flatMap(node -> {
                     int type = node.get("type").asInt();
                     if (type == 1) {
@@ -390,4 +420,12 @@ public class Interactions {
             return Mono.empty();
         }
     };
+
+    private static class NoopInteractionValidator implements InteractionValidator {
+
+        @Override
+        public boolean validateSignature(String body, String signature, String timestamp) {
+            return true;
+        }
+    }
 }

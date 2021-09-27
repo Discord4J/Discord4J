@@ -29,7 +29,7 @@ public class ExampleWithGateway {
     public static void main(String[] args) {
         DiscordClient.create(System.getenv("token"))
                 .gateway()
-                .setInitialStatus(s -> ClientPresence.invisible())
+                .setInitialPresence(s -> ClientPresence.invisible())
                 .withGateway(client -> client.on(ReadyEvent.class)
                         .doOnNext(ready -> log.info("Logged in as {}", ready.getSelf().getUsername()))
                         .then())

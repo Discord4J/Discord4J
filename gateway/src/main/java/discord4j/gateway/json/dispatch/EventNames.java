@@ -65,5 +65,6 @@ public abstract class EventNames {
     public static final String INTEGRATION_CREATE = "INTEGRATION_CREATE";
     public static final String INTEGRATION_UPDATE = "INTEGRATION_UPDATE";
     public static final String INTEGRATION_DELETE = "INTEGRATION_DELETE";
+    public static final String GUILD_JOIN_REQUEST_DELETE = "GUILD_JOIN_REQUEST_DELETE";
 
 }

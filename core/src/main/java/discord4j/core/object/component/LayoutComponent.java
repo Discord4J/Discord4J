@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @Experimental
 public abstract class LayoutComponent extends MessageComponent {
 
-    public LayoutComponent(ComponentData data) {
+    LayoutComponent(ComponentData data) {
         super(data);
     }
 

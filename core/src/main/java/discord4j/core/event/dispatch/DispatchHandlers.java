@@ -26,6 +26,7 @@ import discord4j.core.event.domain.integration.IntegrationDeleteEvent;
 import discord4j.core.event.domain.integration.IntegrationUpdateEvent;
 import discord4j.core.event.domain.interaction.*;
 import discord4j.core.object.VoiceState;
+import discord4j.core.object.command.ApplicationCommand;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.component.MessageComponent;
@@ -248,19 +249,34 @@ public class DispatchHandlers implements DispatchEventMapper {
 
         switch (interaction.getType()) {
             case APPLICATION_COMMAND:
-                return Mono.just(new SlashCommandEvent(gateway, context.getShardInfo(), interaction));
+                ApplicationCommand.Type commandType = interaction.getCommandInteraction()
+                        .flatMap(ApplicationCommandInteraction::getApplicationCommandType)
+                        .orElseThrow(IllegalStateException::new); // command type must be present.
+
+                switch (commandType) {
+                    case CHAT_INPUT:
+                        return Mono.just(new ChatInputInteractionEvent(gateway, context.getShardInfo(), interaction));
+                    case MESSAGE:
+                        return Mono.just(new MessageInteractionEvent(gateway, context.getShardInfo(), interaction));
+                    case USER:
+                        return Mono.just(new UserInteractionEvent(gateway, context.getShardInfo(), interaction));
+                    default:
+                        return Mono.just(
+                                new ApplicationCommandInteractionEvent(gateway, context.getShardInfo(), interaction)
+                        );
+                }
             case MESSAGE_COMPONENT:
-                MessageComponent.Type type = interaction.getCommandInteraction()
+                MessageComponent.Type componentType = interaction.getCommandInteraction()
                         .flatMap(ApplicationCommandInteraction::getComponentType)
                         .orElseThrow(IllegalStateException::new); // component type must be present
 
-                switch (type) {
+                switch (componentType) {
                     case BUTTON:
-                        return Mono.just(new ButtonInteractEvent(gateway, context.getShardInfo(), interaction));
+                        return Mono.just(new ButtonInteractionEvent(gateway, context.getShardInfo(), interaction));
                     case SELECT_MENU:
-                        return Mono.just(new SelectMenuInteractEvent(gateway, context.getShardInfo(), interaction));
+                        return Mono.just(new SelectMenuInteractionEvent(gateway, context.getShardInfo(), interaction));
                     default:
-                        return Mono.just(new ComponentInteractEvent(gateway, context.getShardInfo(), interaction));
+                        return Mono.just(new ComponentInteractionEvent(gateway, context.getShardInfo(), interaction));
                 }
 
             default:

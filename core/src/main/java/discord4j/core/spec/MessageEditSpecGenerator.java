@@ -22,22 +22,35 @@ import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
+import discord4j.rest.util.MultipartRequest;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 
 @Value.Immutable(singleton = true)
-interface MessageEditSpecGenerator extends Spec<MessageEditRequest> {
+interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequest>> {
 
     Possible<Optional<String>> content();
 
     Possible<Optional<List<EmbedCreateSpec>>> embeds();
+
+    @Value.Default
+    default List<MessageCreateFields.File> files() {
+        return Collections.emptyList();
+    }
+
+    @Value.Default
+    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
+        return Collections.emptyList();
+    }
 
     Possible<Optional<AllowedMentions>> allowedMentions();
 
@@ -46,8 +59,8 @@ interface MessageEditSpecGenerator extends Spec<MessageEditRequest> {
     Possible<Optional<List<LayoutComponent>>> components();
 
     @Override
-    default MessageEditRequest asRequest() {
-        return MessageEditRequest.builder()
+    default MultipartRequest<MessageEditRequest> asRequest() {
+        MessageEditRequest json = MessageEditRequest.builder()
                 .content(content())
                 .embeds(mapPossibleOptional(embeds(), embeds -> embeds.stream()
                         .map(EmbedCreateSpec::asRequest)
@@ -60,6 +73,9 @@ interface MessageEditSpecGenerator extends Spec<MessageEditRequest> {
                         .map(LayoutComponent::getData)
                         .collect(Collectors.toList())))
                 .build();
+        return MultipartRequest.ofRequestAndFiles(json, Stream.concat(files().stream(), fileSpoilers().stream())
+                .map(MessageCreateFields.File::asRequest)
+                .collect(Collectors.toList()));
     }
 }
 

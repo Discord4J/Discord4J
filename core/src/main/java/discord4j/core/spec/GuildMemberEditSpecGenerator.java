@@ -19,6 +19,7 @@ package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.PartialMember;
 import discord4j.discordjson.json.GuildMemberModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
@@ -61,7 +62,7 @@ interface GuildMemberEditSpecGenerator extends AuditSpec<GuildMemberModifyReques
 @Value.Immutable(builder = false)
 abstract class GuildMemberEditMonoGenerator extends Mono<Member> implements GuildMemberEditSpecGenerator {
 
-    abstract Member member();
+    abstract PartialMember member();
 
     @Override
     public void subscribe(CoreSubscriber<? super Member> actual) {

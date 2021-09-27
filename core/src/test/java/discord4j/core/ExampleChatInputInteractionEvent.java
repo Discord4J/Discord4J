@@ -19,14 +19,14 @@ package discord4j.core;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.ReactiveEventAdapter;
-import discord4j.core.event.domain.interaction.SlashCommandEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
+import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.RestClient;
-import discord4j.rest.util.ApplicationCommandOptionType;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
@@ -34,9 +34,9 @@ import reactor.util.Loggers;
 
 import java.util.Random;
 
-public class ExampleSlashCommandEvent {
+public class ExampleChatInputInteractionEvent {
 
-    private static final Logger log = Loggers.getLogger(ExampleSlashCommandEvent.class);
+    private static final Logger log = Loggers.getLogger(ExampleChatInputInteractionEvent.class);
 
     private static final String token = System.getenv("token");
     private static final String guildId = System.getenv("guildId");
@@ -52,7 +52,7 @@ public class ExampleSlashCommandEvent {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("digits")
                         .description("Number of digits (1-20)")
-                        .type(ApplicationCommandOptionType.INTEGER.getValue())
+                        .type(ApplicationCommandOption.Type.INTEGER.getValue())
                         .required(false)
                         .build())
                 .build();
@@ -72,7 +72,7 @@ public class ExampleSlashCommandEvent {
             private final Random random = new Random();
 
             @Override
-            public Publisher<?> onSlashCommand(SlashCommandEvent event) {
+            public Publisher<?> onChatInputInteraction(ChatInputInteractionEvent event) {
                 if (event.getCommandName().equals("random")) {
                     String result = result(random, event.getInteraction().getCommandInteraction().get());
                     return event.reply(result);

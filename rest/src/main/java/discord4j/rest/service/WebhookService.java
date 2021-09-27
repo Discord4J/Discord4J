@@ -107,7 +107,7 @@ public class WebhookService extends RestService {
      * is finished sending, and DOES NOT result in an error if the message is not saved.
      */
     public Mono<MessageData> executeWebhook(long webhookId, String token, boolean wait,
-                                            MultipartRequest<WebhookExecuteRequest> request) {
+                                            MultipartRequest<? extends WebhookExecuteRequest> request) {
         DiscordWebResponse response = Routes.WEBHOOK_EXECUTE
                 .newRequest(webhookId, token)
                 .query("wait", wait)
@@ -122,11 +122,27 @@ public class WebhookService extends RestService {
         }
     }
 
-    public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId, WebhookMessageEditRequest request) {
+    public Mono<MessageData> getWebhookMessage(long webhookId, String webhookToken, String messageId) {
+        return Routes.WEBHOOK_MESSAGE_GET.newRequest(webhookId, webhookToken, messageId)
+            .exchange(getRouter())
+            .bodyToMono(MessageData.class);
+    }
+
+    public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId,
+                                                  WebhookMessageEditRequest request) {
         return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
             .body(request)
             .exchange(getRouter())
             .bodyToMono(MessageData.class);
+    }
+
+    public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId,
+                                                  MultipartRequest<WebhookMessageEditRequest> request) {
+        return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
+                .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
+                .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
+                .exchange(getRouter())
+                .bodyToMono(MessageData.class);
     }
 
     public Mono<Void> deleteWebhookMessage(long webhookId, String webhookToken, String messageId) {

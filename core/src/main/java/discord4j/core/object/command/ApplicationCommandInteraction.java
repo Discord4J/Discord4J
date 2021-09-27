@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 // TODO: Discord is probably going to rename this. Redo docs then.
+
 /**
  * A Discord application command interaction.
  *
@@ -85,6 +86,15 @@ public class ApplicationCommandInteraction implements DiscordObject {
     }
 
     /**
+     * Gets the type of the invoked command.
+     *
+     * @return The type of the invoked command.
+     */
+    public Optional<ApplicationCommand.Type> getApplicationCommandType() {
+        return data.type().toOptional().map(ApplicationCommand.Type::of);
+    }
+
+    /**
      * Gets the developer-defined custom id of the component.
      *
      * @return The custom id of the component.
@@ -134,8 +144,36 @@ public class ApplicationCommandInteraction implements DiscordObject {
         return data.values().toOptional();
     }
 
+    /**
+     * Gets the converted users + roles + channels.
+     *
+     * @return The converted users + roles + channels.
+     */
+    public Optional<ApplicationCommandInteractionResolved> getResolved() {
+        return data.resolved().toOptional()
+                .map(data -> new ApplicationCommandInteractionResolved(gateway, data, guildId));
+    }
+
+    /**
+     * Gets the ID of the user or message targeted by a user or message command.
+     *
+     * @return The id of the user or message targeted.
+     */
+    public Optional<Snowflake> getTargetId() {
+        return data.targetId().toOptional()
+                .map(Snowflake::of);
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
+    }
+
+    @Override
+    public String toString() {
+        return "ApplicationCommandInteraction{" +
+                "data=" + data +
+                ", guildId=" + guildId +
+                '}';
     }
 }

@@ -17,9 +17,8 @@
 package discord4j.core;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
-import discord4j.core.event.domain.interaction.SelectMenuInteractEvent;
+import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.SelectMenu;
 import discord4j.core.object.entity.Message;
@@ -34,8 +33,7 @@ public class ExampleSelectMenu {
 
     public static void main(String[] args) {
         DiscordClient.create(token)
-                .login()
-                .flatMap(gw -> {
+                .withGateway(gw -> {
                     Mono<Message> sendMessage = gw.on(GuildCreateEvent.class)
                             .filter(e -> e.getGuild().getId().asString().equals(guildId))
                             .next()
@@ -57,7 +55,7 @@ public class ExampleSelectMenu {
                     return sendMessage
                             .map(Message::getId)
                             .flatMapMany(selectMenuMessageId ->
-                                    gw.on(SelectMenuInteractEvent.class, event ->
+                                    gw.on(SelectMenuInteractionEvent.class, event ->
                                             Mono.justOrEmpty(event.getInteraction().getMessage())
                                                     .map(Message::getId)
                                                     .filter(selectMenuMessageId::equals)

@@ -22,6 +22,7 @@ import discord4j.core.event.domain.channel.*;
 import discord4j.core.event.domain.guild.*;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.*;
+import discord4j.core.event.domain.interaction.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.core.event.domain.role.RoleUpdateEvent;
@@ -52,6 +53,19 @@ import discord4j.gateway.intent.Intent;
  *     <li>{@link ReactionRemoveEvent}: a reaction was removed from a message</li>
  *     <li>{@link ReactionRemoveEmojiEvent}: reactions for a given emoji were removed from a message</li>
  *     <li>{@link ReactionRemoveAllEvent}: all reactions were removed from a message</li>
+ * </ul>
+ *
+ * <h2>Interaction related events</h2>
+ *
+ * <ul>
+ *     <li>{@link ChatInputInteractionEvent}: user interacted with a slash command</li>
+ *     <li>{@link MessageInteractionEvent}: user interacted with a message context menu</li>
+ *     <li>{@link UserInteractionEvent}: user interacted with a user context menu</li>
+ *     <li>{@link ApplicationCommandInteractionEvent}: user interacted with an application command</li>
+ *     <li>{@link SelectMenuInteractionEvent}: user interacted with a select menu component</li>
+ *     <li>{@link ButtonInteractionEvent}: user interacted with a button component</li>
+ *     <li>{@link ComponentInteractionEvent}: user interacted with a component</li>
+ *     <li>{@link InteractionCreateEvent}: base for all Gateway interaction events</li>
  * </ul>
  *
  * <h2>Guild related events</h2>

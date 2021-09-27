@@ -22,6 +22,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
 import discord4j.core.object.MessageInteraction;
 import discord4j.core.object.MessageReference;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -38,6 +39,7 @@ import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.entity.RestChannel;
 import discord4j.rest.entity.RestMessage;
+import discord4j.rest.util.MultipartRequest;
 import discord4j.rest.util.PaginationUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -263,6 +265,23 @@ public final class Message implements Entity {
     }
 
     /**
+     * Gets the partial members specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
+     *
+     * @return The partial members specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
+     */
+    public List<PartialMember> getMemberMentions() {
+        if (data.guildId().isAbsent()) {
+            return Collections.emptyList();
+        }
+        long guildId = data.guildId().get().asLong();
+        return data.mentions().stream()
+            .map(data -> new PartialMember(gateway, data, data.member().get(), guildId))
+            .collect(Collectors.toList());
+    }
+
+    /**
      * Gets the users specifically mentioned in this message, without duplication and with the same order
      * as in the message.
      *
@@ -270,7 +289,6 @@ public final class Message implements Entity {
      * as in the message.
      */
     public List<User> getUserMentions() {
-        // TODO FIXME we throw away member data here
         return data.mentions().stream()
                 .map(data -> new User(gateway, data))
                 .collect(Collectors.toList());
@@ -485,11 +503,19 @@ public final class Message implements Entity {
                 .map(data -> new MessageInteraction(gateway, data));
     }
 
-    public List<MessageComponent> getComponents() {
+    /**
+     * Gets the components on the message.
+     *
+     * @return The components on the message.
+     */
+    public List<LayoutComponent> getComponents() {
         return data.components().toOptional()
                 .map(components -> components.stream()
-                    .map(MessageComponent::fromData)
-                    .collect(Collectors.toList()))
+                        .map(MessageComponent::fromData)
+                        // top level message components should only be LayoutComponents
+                        .filter(component -> component instanceof LayoutComponent)
+                        .map(component -> (LayoutComponent) component)
+                        .collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
     }
 
@@ -512,7 +538,8 @@ public final class Message implements Entity {
                             .ifPresent(mutatedSpec::setAllowedMentions);
                     spec.accept(mutatedSpec);
                     return gateway.getRestClient().getChannelService()
-                            .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest());
+                            .editMessage(getChannelId().asLong(), getId().asLong(),
+                                    MultipartRequest.ofRequest(mutatedSpec.asRequest()));
                 })
                 .map(data -> new Message(gateway, data));
     }

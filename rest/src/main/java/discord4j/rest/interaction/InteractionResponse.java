@@ -32,6 +32,15 @@ import reactor.core.publisher.Mono;
 public interface InteractionResponse {
 
     /**
+     * Return a {@link Mono} that upon subscription, will retrieve the initial response sent when accepting this
+     * interaction.
+     *
+     * @return a {@link Mono} where, upon successful completion, emits the original message. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    Mono<MessageData> getInitialResponse();
+
+    /**
      * Return a {@link Mono} that upon subscription, will modify the initial response sent when accepting this
      * interaction with the given raw request content.
      *
@@ -40,6 +49,16 @@ public interface InteractionResponse {
      * it is emitted through the {@code Mono}.
      */
     Mono<MessageData> editInitialResponse(WebhookMessageEditRequest request);
+
+    /**
+     * Return a {@link Mono} that upon subscription, will modify the initial response sent when accepting this
+     * interaction with the given raw request content.
+     *
+     * @param request the raw request to be sent as new initial response content
+     * @return a {@link Mono} where, upon successful completion, emits the updated message. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    Mono<MessageData> editInitialResponse(MultipartRequest<WebhookMessageEditRequest> request);
 
     /**
      * Return a {@link Mono} that upon subscription, will delete the initial response sent when accepting this
@@ -67,7 +86,7 @@ public interface InteractionResponse {
      * @return a {@link Mono} where, upon successful completion, emits the sent message. If an error is received,
      * it is emitted through the {@code Mono}.
      */
-    Mono<MessageData> createFollowupMessage(MultipartRequest<WebhookExecuteRequest> request);
+    Mono<MessageData> createFollowupMessage(MultipartRequest<? extends WebhookExecuteRequest> request);
 
     /**
      * Create a new ephemeral followup message with the given content. This uses a webhook tied to the interaction ID
@@ -101,6 +120,17 @@ public interface InteractionResponse {
      * it is emitted through the {@code Mono}.
      */
     Mono<MessageData> editFollowupMessage(long messageId, WebhookMessageEditRequest request, boolean wait);
+
+    /**
+     * Modify the given message by ID using the provided request. This uses a webhook tied to the interaction ID and
+     * token.
+     *
+     * @param messageId the message ID to be modified. You can convert IDs using {@link Snowflake} methods.
+     * @param request the message request to be sent as followup
+     * @return a {@link Mono} where, upon successful completion, emits the edited message. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    Mono<MessageData> editFollowupMessage(long messageId, MultipartRequest<WebhookMessageEditRequest> request);
 
     /**
      * Delete a followup message created under this interaction.

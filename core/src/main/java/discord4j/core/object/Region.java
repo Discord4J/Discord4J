@@ -84,7 +84,8 @@ public final class Region implements DiscordObject {
      * @return {@code true} if this is a VIP region, {@code false} otherwise.
      */
     public boolean isVip() {
-        return data.vip();
+        // TODO: workaround, see https://github.com/Discord4J/Discord4J/issues/999
+        return data.vip().toOptional().orElse(false);
     }
 
     /**
