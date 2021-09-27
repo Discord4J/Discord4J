@@ -379,4 +379,6 @@ public interface DataAccessor {
      * @return A {@link Mono} emitting the voice state, or empty if not found
      */
     Mono<VoiceStateData> getVoiceStateById(long guildId, long userId);
+
+    Mono<StageInstanceData> getStageInstanceByChannelId(long channelId);
 }

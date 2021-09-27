@@ -71,6 +71,8 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     private final ConcurrentMap<Long, RoleData> roles = new ConcurrentHashMap<>();
 
+    private final ConcurrentMap<Long, StageInstanceData> stageInstances = new ConcurrentHashMap<>();
+
     private final ConcurrentMap<Long, AtomicReference<ImmutableUserData>> users =
             StorageBackend.caffeine(Caffeine::weakValues).newMap();
 
@@ -681,6 +683,26 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             }
             shardsConnected.add(shardInfo[0]);
         });
+    }
+
+    @Override
+    public Mono<StageInstanceData> onStageInstanceCreate(int shardIndex, StageInstanceCreate dispatch) {
+        return null;
+    }
+
+    @Override
+    public Mono<StageInstanceData> onStageInstanceUpdate(int shardIndex, StageInstanceUpdate dispatch) {
+        return null;
+    }
+
+    @Override
+    public Mono<StageInstanceData> onStageInstanceDelete(int shardIndex, StageInstanceDelete dispatch) {
+        return null;
+    }
+
+    @Override
+    public Mono<StageInstanceData> getStageInstanceByChannelId(long channelId) {
+        return Mono.justOrEmpty(stageInstances.get(channelId));
     }
 
     @Override

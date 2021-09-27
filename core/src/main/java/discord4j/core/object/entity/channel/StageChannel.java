@@ -46,7 +46,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /** A Discord stage channel. */
-public final class StageChannel extends BaseTopLevelGuildChannel implements CategorizableChannel {
+public final class StageChannel extends VoiceChannel implements CategorizableChannel {
 
     /**
      * Constructs an {@code StageChannel} with an associated {@link GatewayDiscordClient} and Discord data.

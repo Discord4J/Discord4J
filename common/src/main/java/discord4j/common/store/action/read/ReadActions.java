@@ -474,4 +474,8 @@ public class ReadActions {
     public static GetVoiceStateByIdAction getVoiceStateById(long guildId, long userId) {
         return new GetVoiceStateByIdAction(guildId, userId);
     }
+
+    public static GetStageInstanceByChannelIdAction getStageInstanceByChannelId(long channelId) {
+        return new GetStageInstanceByChannelIdAction(channelId);
+    }
 }

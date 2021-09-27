@@ -30,7 +30,14 @@ public class StageInstanceService extends RestService {
 
     public Mono<StageInstanceData> modifyStageInstance(long channelId, StageInstanceModifyRequest request, @Nullable String reason) {
         return Routes.MODIFY_STAGE_INSTANCE.newRequest(channelId)
-                .body(reason)
+                .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
+                .exchange(getRouter())
+                .bodyToMono(StageInstanceData.class);
+    }
+
+    public Mono<StageInstanceData> deleteStageInstance(long channelId, @Nullable String reason) {
+        return Routes.DELETE_STAGE_INSTANCE.newRequest(channelId)
                 .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
                 .bodyToMono(StageInstanceData.class);

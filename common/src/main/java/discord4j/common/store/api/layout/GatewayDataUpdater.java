@@ -314,6 +314,12 @@ public interface GatewayDataUpdater {
      */
     Mono<Void> onReady(Ready dispatch);
 
+    Mono<StageInstanceData> onStageInstanceCreate(int shardIndex, StageInstanceCreate dispatch);
+
+    Mono<StageInstanceData> onStageInstanceUpdate(int shardIndex, StageInstanceUpdate dispatch);
+
+    Mono<StageInstanceData> onStageInstanceDelete(int shardIndex, StageInstanceDelete dispatch);
+
     /**
      * Updates the internal state of the store according to the given {@link UserUpdate} gateway dispatch. This will
      * typically perform an update operation on a related {@link UserData} that is already present in the store.

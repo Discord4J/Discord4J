@@ -64,7 +64,9 @@ public abstract class EventNames {
     public static final String THREAD_LIST_SYNC = "THREAD_LIST_SYNC";
     public static final String THREAD_MEMBER_UPDATE = "THREAD_MEMBER_UPDATE";
     public static final String THREAD_MEMBERS_UPDATE = "THREAD_MEMBERS_UPDATE";
-
+    public static final String STAGE_INSTANCE_CREATE = "STAGE_INSTANCE_CREATE";
+    public static final String STAGE_INSTANCE_UPDATE = "STAGE_INSTANCE_UPDATE";
+    public static final String STAGE_INSTANCE_DELETE = "STAGE_INSTANCE_DELETE";
 
     // Ignored
     public static final String PRESENCES_REPLACE = "PRESENCES_REPLACE";
