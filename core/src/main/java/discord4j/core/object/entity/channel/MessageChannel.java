@@ -24,13 +24,22 @@ import discord4j.core.spec.MessageCreateMono;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.legacy.LegacyEmbedCreateSpec;
 import discord4j.core.spec.legacy.LegacyMessageCreateSpec;
+import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.PaginationUtil;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -43,7 +52,10 @@ public interface MessageChannel extends Channel {
      *
      * @return The ID of the last message sent in this channel, if present.
      */
-    Optional<Snowflake> getLastMessageId();
+    default Optional<Snowflake> getLastMessageId() {
+        return Possible.flatOpt(getData().lastMessageId())
+                .map(Snowflake::of);
+    }
 
     /**
      * Requests to retrieve the last message sent in this channel, if present.
@@ -51,7 +63,10 @@ public interface MessageChannel extends Channel {
      * @return A {@link Mono} where, upon successful completion, emits the last {@link Message message} sent in this
      * channel, if present. If an error is received, it is emitted through the {@code Mono}.
      */
-    Mono<Message> getLastMessage();
+    default Mono<Message> getLastMessage() {
+        return Mono.justOrEmpty(getLastMessageId())
+                .flatMap(id -> getClient().getMessageById(getId(), id));
+    }
 
     /**
      * Requests to retrieve the last message sent in this channel, if present, using the given retrieval strategy.
@@ -60,14 +75,20 @@ public interface MessageChannel extends Channel {
      * @return A {@link Mono} where, upon successful completion, emits the last {@link Message message} sent in this
      * channel, if present. If an error is received, it is emitted through the {@code Mono}.
      */
-    Mono<Message> getLastMessage(EntityRetrievalStrategy retrievalStrategy);
+    default Mono<Message> getLastMessage(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getLastMessageId())
+                .flatMap(id -> getClient().withRetrievalStrategy(retrievalStrategy).getMessageById(getId(), id));
+    }
 
     /**
      * Gets when the last pinned message was pinned, if present.
      *
      * @return When the last pinned message was pinned, if present.
      */
-    Optional<Instant> getLastPinTimestamp();
+    default Optional<Instant> getLastPinTimestamp() {
+        return Possible.flatOpt(getData().lastPinTimestamp())
+                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+    }
 
     /**
      * Requests to create a message.
@@ -79,7 +100,18 @@ public interface MessageChannel extends Channel {
      * immutable approach to build specs
      */
     @Deprecated
-    Mono<Message> createMessage(Consumer<? super LegacyMessageCreateSpec> spec);
+    default Mono<Message> createMessage(Consumer<? super LegacyMessageCreateSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyMessageCreateSpec mutatedSpec = new LegacyMessageCreateSpec();
+                    getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .ifPresent(mutatedSpec::setAllowedMentions);
+                    spec.accept(mutatedSpec);
+                    return getRestChannel().createMessage(mutatedSpec.asRequest());
+                })
+                .map(data -> new Message(getClient(), data));
+    }
 
     /**
      * Requests to create a message.
@@ -89,7 +121,19 @@ public interface MessageChannel extends Channel {
      * received, it is emitted through the {@code Mono}.
      * @see MessageCreateSpec#builder()
      */
-    Mono<Message> createMessage(MessageCreateSpec spec);
+    default Mono<Message> createMessage(MessageCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> {
+                    MessageCreateSpec actualSpec = getClient().getRestClient()
+                            .getRestResources()
+                            .getAllowedMentions()
+                            .map(spec::withAllowedMentions)
+                            .orElse(spec);
+                    return getRestChannel().createMessage(actualSpec.asRequest());
+                })
+                .map(data -> new Message(getClient(), data));
+    }
 
     /**
      * Requests to create a message with a content. Other properties specifying how to create the message can be set via
@@ -152,7 +196,11 @@ public interface MessageChannel extends Channel {
      * @return A {@link Mono} which completes upon successful triggering of the typing indicator in this channel. If an
      * error is received, it is emitted through the {@code Mono}.
      */
-    Mono<Void> type();
+    default Mono<Void> type() {
+        return getClient().getRestClient().getChannelService()
+                .triggerTypingIndicator(getId().asLong())
+                .then();
+    }
 
     /**
      * Requests to trigger the typing indicator in this channel. It will be continuously triggered every 10 seconds
@@ -180,7 +228,19 @@ public interface MessageChannel extends Channel {
      * will no longer be triggered. If an error is received, it is emitted through the {@code Flux}.
      * @implNote The default implementation actually sends a typing request every 8 seconds so it appears continuous.
      */
-    Flux<Long> typeUntil(Publisher<?> until);
+    default Flux<Long> typeUntil(Publisher<?> until) {
+        Scheduler delayScheduler = getClient().getCoreResources().getReactorResources().getTimerTaskScheduler();
+        Flux<Long> repeatUntilOther = Flux.interval(Duration.ofSeconds(8L), delayScheduler) // 8 to avoid
+                // choppiness
+                .flatMap(tick -> type().thenReturn(tick + 1)) // add 1 to offset the separate type() request
+                .takeUntilOther(until);
+
+        // send the first typing indicator before subscribing to the other publisher to ensure that a message send will
+        // cancel the indicator properly. #509
+        return type()
+                .thenReturn(0L) // start with tick 0
+                .concatWith(repeatUntilOther);
+    }
 
     /**
      * Requests to retrieve <i>all</i> messages <i>before</i> the specified ID.
@@ -197,7 +257,14 @@ public interface MessageChannel extends Channel {
      * @return A {@link Flux} that continually emits <i>all</i> {@link Message messages} <i>before</i> the specified ID.
      * If an error is received, it is emitted through the {@code Flux}.
      */
-    Flux<Message> getMessagesBefore(Snowflake messageId);
+    default Flux<Message> getMessagesBefore(Snowflake messageId) {
+        final Function<Map<String, Object>, Flux<MessageData>> doRequest = params ->
+                getClient().getRestClient().getChannelService()
+                        .getMessages(getId().asLong(), params);
+
+        return PaginationUtil.paginateBefore(doRequest, data -> Snowflake.asLong(data.id()), messageId.asLong(), 100)
+                .map(data -> new Message(getClient(), data));
+    }
 
     /**
      * Requests to retrieve <i>all</i> messages <i>after</i> the specified ID.
@@ -214,7 +281,14 @@ public interface MessageChannel extends Channel {
      * @return A {@link Flux} that continually emits <i>all</i> {@link Message messages} <i>after</i> the specified ID.
      * If an error is received, it is emitted through the {@code Flux}.
      */
-    Flux<Message> getMessagesAfter(Snowflake messageId);
+    default Flux<Message> getMessagesAfter(Snowflake messageId) {
+        final Function<Map<String, Object>, Flux<MessageData>> doRequest = params ->
+                getClient().getRestClient().getChannelService()
+                        .getMessages(getId().asLong(), params);
+
+        return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.id()), messageId.asLong(), 100)
+                .map(data -> new Message(getClient(), data));
+    }
 
     /**
      * Requests to retrieve the message as represented by the supplied ID.
@@ -223,7 +297,9 @@ public interface MessageChannel extends Channel {
      * @return A {@link Mono} where, upon successful completion, emits the {@link Message} as represented by the
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
-    Mono<Message> getMessageById(Snowflake id);
+    default Mono<Message> getMessageById(Snowflake id) {
+        return getClient().getMessageById(getId(), id);
+    }
 
     /**
      * Requests to retrieve the message as represented by the supplied ID, using the given retrieval strategy.
@@ -233,7 +309,9 @@ public interface MessageChannel extends Channel {
      * @return A {@link Mono} where, upon successful completion, emits the {@link Message} as represented by the
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
-    Mono<Message> getMessageById(Snowflake id, EntityRetrievalStrategy retrievalStrategy);
+    default Mono<Message> getMessageById(Snowflake id, EntityRetrievalStrategy retrievalStrategy) {
+        return getClient().withRetrievalStrategy(retrievalStrategy).getMessageById(getId(), id);
+    }
 
     /**
      * Requests to retrieve all the pinned messages for this channel.
@@ -241,5 +319,9 @@ public interface MessageChannel extends Channel {
      * @return A {@link Flux} that continually emits all the pinned messages for this channel. If an error is received,
      * it is emitted through the {@code Flux}.
      */
-    Flux<Message> getPinnedMessages();
+    default Flux<Message> getPinnedMessages() {
+        return getClient().getRestClient().getChannelService()
+                .getPinnedMessages(getId().asLong())
+                .map(data -> new Message(getClient(), data));
+    }
 }

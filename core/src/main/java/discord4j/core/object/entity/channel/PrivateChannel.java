@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /** A Discord private channel (also known as a DM channel). */
-public final class PrivateChannel extends BaseMessageChannel {
+public final class PrivateChannel extends BaseChannel implements MessageChannel {
 
     /**
      * Constructs an {@code PrivateChannel} with an associated {@link GatewayDiscordClient} and Discord data.
