@@ -11,6 +11,7 @@ on:
       - 'master'
       - '3.0.x'
       - '3.1.x'
+      - '3.2.x'
     tags-ignore:
       - '*.*'
   pull_request:
