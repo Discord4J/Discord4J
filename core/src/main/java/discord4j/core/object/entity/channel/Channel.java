@@ -16,7 +16,9 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Entity;
+import discord4j.discordjson.json.ChannelData;
 import discord4j.rest.entity.RestChannel;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -33,7 +35,14 @@ public interface Channel extends Entity {
      *
      * @return The type of channel.
      */
-    Type getType();
+    default Type getType() {
+        return Type.of(getData().type());
+    }
+
+    @Override
+    default Snowflake getId() {
+        return Snowflake.of(getData().id());
+    }
 
     /**
      * Requests to delete this channel.
@@ -52,7 +61,9 @@ public interface Channel extends Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the channel has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    Mono<Void> delete(@Nullable String reason);
+    default Mono<Void> delete(@Nullable String reason) {
+        return getRestChannel().delete(reason);
+    }
 
     /**
      * Gets the <i>raw</i> mention. This is the format utilized to directly mention another channel.
@@ -67,6 +78,13 @@ public interface Channel extends Entity {
      * Return a {@link RestChannel} handle to execute REST API operations on this entity.
      */
     RestChannel getRestChannel();
+
+    /**
+     * Gets the raw data as represented by Discord.
+     *
+     * @return The raw data as represented by Discord.
+     */
+    ChannelData getData();
 
     /** Represents the various types of channels. */
     enum Type {
