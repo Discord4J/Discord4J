@@ -21,31 +21,30 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
-class CommandHandler implements BiFunction<CommandRequest, CommandResponse, Publisher<Void>>,
-        Predicate<CommandRequest> {
+class CommandHandler implements Function<CommandContext, Publisher<Void>>, Predicate<CommandContext> {
 
-    final Predicate<? super CommandRequest> condition;
-    final BiFunction<? super CommandRequest, ? super CommandResponse, ? extends Publisher<Void>> handler;
+    final Predicate<? super CommandContext> condition;
+    final Function<? super CommandContext, ? extends Publisher<Void>> handler;
 
     public CommandHandler(
-            Predicate<? super CommandRequest> condition,
-            BiFunction<? super CommandRequest, ? super CommandResponse, ? extends Publisher<Void>> handler) {
+            Predicate<? super CommandContext> condition,
+            Function<? super CommandContext, ? extends Publisher<Void>> handler) {
         this.condition = Objects.requireNonNull(condition, "condition");
         this.handler = Objects.requireNonNull(handler, "handler");
     }
 
     @Override
-    public Publisher<Void> apply(CommandRequest request, CommandResponse response) {
-        return handler.apply(request, response);
+    public Publisher<Void> apply(CommandContext context) {
+        return handler.apply(context);
     }
 
     @Override
-    public boolean test(CommandRequest request) {
+    public boolean test(CommandContext request) {
         return condition.test(request);
     }
 
-    static CommandHandler NOOP_HANDLER = new CommandHandler(req -> false, (req, res) -> Mono.empty());
+    static CommandHandler NOOP_HANDLER = new CommandHandler(ctx -> false, ctx -> Mono.empty());
 }

@@ -54,6 +54,17 @@ public abstract class EventNames {
     public static final String WEBHOOKS_UPDATE = "WEBHOOKS_UPDATE";
     public static final String INVITE_CREATE = "INVITE_CREATE";
     public static final String INVITE_DELETE = "INVITE_DELETE";
+    public static final String APPLICATION_COMMAND_CREATE = "APPLICATION_COMMAND_CREATE";
+    public static final String APPLICATION_COMMAND_UPDATE = "APPLICATION_COMMAND_UPDATE";
+    public static final String APPLICATION_COMMAND_DELETE = "APPLICATION_COMMAND_DELETE";
+    public static final String INTERACTION_CREATE = "INTERACTION_CREATE";
+    public static final String THREAD_CREATE = "THREAD_CREATE";
+    public static final String THREAD_UPDATE = "THREAD_UPDATE";
+    public static final String THREAD_DELETE = "THREAD_DELETE";
+    public static final String THREAD_LIST_SYNC = "THREAD_LIST_SYNC";
+    public static final String THREAD_MEMBER_UPDATE = "THREAD_MEMBER_UPDATE";
+    public static final String THREAD_MEMBERS_UPDATE = "THREAD_MEMBERS_UPDATE";
+
 
     // Ignored
     public static final String PRESENCES_REPLACE = "PRESENCES_REPLACE";
@@ -61,5 +72,6 @@ public abstract class EventNames {
     public static final String INTEGRATION_CREATE = "INTEGRATION_CREATE";
     public static final String INTEGRATION_UPDATE = "INTEGRATION_UPDATE";
     public static final String INTEGRATION_DELETE = "INTEGRATION_DELETE";
+    public static final String GUILD_JOIN_REQUEST_DELETE = "GUILD_JOIN_REQUEST_DELETE";
 
 }

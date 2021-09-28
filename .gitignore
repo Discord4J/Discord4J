@@ -19,6 +19,7 @@ nbdist/
 out/
 build/
 **/bin/
+generated/
 
 # Gradle
 .gradle

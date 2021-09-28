@@ -19,7 +19,7 @@ package discord4j.core.command;
 
 import org.reactivestreams.Publisher;
 
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
-public interface Command extends BiFunction<CommandRequest, CommandResponse, Publisher<Void>> {
+public interface Command extends Function<CommandContext, Publisher<Void>> {
 }

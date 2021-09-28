@@ -43,8 +43,7 @@ class LifecycleDispatchHandlers {
                 .map(g -> new ReadyEvent.Guild(Snowflake.asLong(g.id()), !g.unavailable().get()))
                 .collect(Collectors.toSet());
 
-        return Mono.just(new ReadyEvent(gateway, context.getShardInfo(), dispatch.v(), self, guilds,
-                        dispatch.sessionId(), dispatch.trace()));
+        return Mono.just(new ReadyEvent(gateway, context.getShardInfo(), dispatch, self, guilds));
     }
 
     static Mono<ResumeEvent> resumed(DispatchContext<Resumed, Void> context) {

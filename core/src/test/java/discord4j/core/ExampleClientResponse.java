@@ -38,7 +38,7 @@ public class ExampleClientResponse {
                 .build()
                 .withGateway(client -> client.on(CommandListener.createWithPrefix("!!")
                         .on("echo", Commands::echo)
-                        .on("exit", (req, res) -> req.getClient().logout())
+                        .on("exit", ctx -> ctx.getClient().logout())
                         .on("status", Commands::status)));
     }
 }

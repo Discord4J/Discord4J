@@ -21,7 +21,16 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.*;
 import discord4j.core.event.domain.channel.TypingStartEvent;
+import discord4j.core.event.domain.integration.IntegrationCreateEvent;
+import discord4j.core.event.domain.integration.IntegrationDeleteEvent;
+import discord4j.core.event.domain.integration.IntegrationUpdateEvent;
+import discord4j.core.event.domain.interaction.*;
 import discord4j.core.object.VoiceState;
+import discord4j.core.object.command.ApplicationCommand;
+import discord4j.core.object.command.ApplicationCommandInteraction;
+import discord4j.core.object.command.Interaction;
+import discord4j.core.object.component.MessageComponent;
+import discord4j.core.object.entity.Integration;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
@@ -84,6 +93,19 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(WebhooksUpdate.class, DispatchHandlers::webhooksUpdate);
         addHandler(InviteCreate.class, DispatchHandlers::inviteCreate);
         addHandler(InviteDelete.class, DispatchHandlers::inviteDelete);
+        addHandler(InteractionCreate.class, DispatchHandlers::interactionCreate);
+        addHandler(ApplicationCommandCreate.class, ApplicationCommandDispatchHandlers::applicationCommandCreate);
+        addHandler(ApplicationCommandUpdate.class, ApplicationCommandDispatchHandlers::applicationCommandUpdate);
+        addHandler(ApplicationCommandDelete.class, ApplicationCommandDispatchHandlers::applicationCommandDelete);
+        addHandler(IntegrationCreate.class, DispatchHandlers::integrationCreate);
+        addHandler(IntegrationUpdate.class, DispatchHandlers::integrationUpdate);
+        addHandler(IntegrationDelete.class, DispatchHandlers::integrationDelete);
+        addHandler(ThreadCreate.class, ThreadDispatchHandlers::threadCreate);
+        addHandler(ThreadUpdate.class, ThreadDispatchHandlers::threadUpdate);
+        addHandler(ThreadDelete.class, ThreadDispatchHandlers::threadDelete);
+        addHandler(ThreadListSync.class, ThreadDispatchHandlers::threadListSync);
+        addHandler(ThreadMemberUpdate.class, ThreadDispatchHandlers::threadMemberUpdate);
+        addHandler(ThreadMembersUpdate.class, ThreadDispatchHandlers::threadMembersUpdate);
 
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
 
@@ -91,7 +113,7 @@ public class DispatchHandlers implements DispatchEventMapper {
     }
 
     private static <D, S, E extends Event> void addHandler(Class<D> dispatchType,
-                                                        DispatchHandler<D, S, E> dispatchHandler) {
+                                                           DispatchHandler<D, S, E> dispatchHandler) {
         handlerMap.put(dispatchType, dispatchHandler);
     }
 
@@ -102,6 +124,7 @@ public class DispatchHandlers implements DispatchEventMapper {
      *
      * @param context the DispatchContext used with this Dispatch object
      * @param <D> the Dispatch type
+     * @param <S> the old state type, if applicable
      * @param <E> the resulting Event type
      * @return an Event mapped from the given Dispatch object, or null if no Event is produced.
      */
@@ -224,5 +247,71 @@ public class DispatchHandlers implements DispatchEventMapper {
         String code = context.getDispatch().code();
 
         return Mono.just(new InviteDeleteEvent(context.getGateway(), context.getShardInfo(), guildId, channelId, code));
+    }
+
+    private static Mono<InteractionCreateEvent> interactionCreate(DispatchContext<InteractionCreate, Void> context) {
+        GatewayDiscordClient gateway = context.getGateway();
+        Interaction interaction = new Interaction(gateway, context.getDispatch().interaction());
+
+        switch (interaction.getType()) {
+            case APPLICATION_COMMAND:
+                ApplicationCommand.Type commandType = interaction.getCommandInteraction()
+                        .flatMap(ApplicationCommandInteraction::getApplicationCommandType)
+                        .orElseThrow(IllegalStateException::new); // command type must be present.
+
+                switch (commandType) {
+                    case CHAT_INPUT:
+                        return Mono.just(new ChatInputInteractionEvent(gateway, context.getShardInfo(), interaction));
+                    case MESSAGE:
+                        return Mono.just(new MessageInteractionEvent(gateway, context.getShardInfo(), interaction));
+                    case USER:
+                        return Mono.just(new UserInteractionEvent(gateway, context.getShardInfo(), interaction));
+                    default:
+                        return Mono.just(
+                                new ApplicationCommandInteractionEvent(gateway, context.getShardInfo(), interaction)
+                        );
+                }
+            case MESSAGE_COMPONENT:
+                MessageComponent.Type componentType = interaction.getCommandInteraction()
+                        .flatMap(ApplicationCommandInteraction::getComponentType)
+                        .orElseThrow(IllegalStateException::new); // component type must be present
+
+                switch (componentType) {
+                    case BUTTON:
+                        return Mono.just(new ButtonInteractionEvent(gateway, context.getShardInfo(), interaction));
+                    case SELECT_MENU:
+                        return Mono.just(new SelectMenuInteractionEvent(gateway, context.getShardInfo(), interaction));
+                    default:
+                        return Mono.just(new ComponentInteractionEvent(gateway, context.getShardInfo(), interaction));
+                }
+
+            default:
+                return Mono.just(new InteractionCreateEvent(gateway, context.getShardInfo(), interaction));
+        }
+
+    }
+
+    private static Mono<IntegrationDeleteEvent> integrationDelete(DispatchContext<IntegrationDelete, Void> context) {
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        long id = Snowflake.asLong(context.getDispatch().id());
+        Long applicationId = context.getDispatch().applicationId().toOptional().map(Snowflake::asLong).orElse(null);
+
+        return Mono.just(new IntegrationDeleteEvent(context.getGateway(), context.getShardInfo(), id, guildId,
+                applicationId));
+    }
+
+    private static Mono<IntegrationUpdateEvent> integrationUpdate(DispatchContext<IntegrationUpdate, Void> context) {
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        Integration integration = new Integration(context.getGateway(), context.getDispatch().integration(), guildId);
+
+        return Mono.just(new IntegrationUpdateEvent(context.getGateway(), context.getShardInfo(), guildId,
+                integration));
+    }
+
+    private static Mono<IntegrationCreateEvent> integrationCreate(DispatchContext<IntegrationCreate, Void> context) {
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        Integration integration = new Integration(context.getGateway(), context.getDispatch().integration(), guildId);
+
+        return Mono.just(new IntegrationCreateEvent(context.getGateway(), context.getShardInfo(), guildId, integration));
     }
 }

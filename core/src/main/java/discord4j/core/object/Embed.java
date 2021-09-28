@@ -17,8 +17,8 @@
 package discord4j.core.object;
 
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.*;
-import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import reactor.util.annotation.Nullable;
 
@@ -41,12 +41,18 @@ public final class Embed implements DiscordObject {
     public static final int MAX_TITLE_LENGTH = 256;
 
     /** The maximum amount of characters that can be in an embed description. */
-    public static final int MAX_DESCRIPTION_LENGTH = 2048;
+    public static final int MAX_DESCRIPTION_LENGTH = 4096;
 
     /** The maximum amount of fields that can be appended to an embed. */
     public static final int MAX_FIELDS = 25;
 
-    /** The maximum amount of total characters that can be present in an embed. */
+    /**
+     * The maximum amount of total characters that can be present in an embed.
+     *
+     * @deprecated this limit applies across all embeds of a message instead of a single one. Use
+     * {@link Message#MAX_TOTAL_EMBEDS_CHARACTER_LENGTH} instead
+     */
+    @Deprecated
     public static final int MAX_CHARACTER_LENGTH = 6000;
 
     /** The gateway associated to this object. */
@@ -56,7 +62,7 @@ public final class Embed implements DiscordObject {
     private final EmbedData data;
 
     /**
-     * Constructs an {@code Embed} with an associated ServiceMediator and Discord data.
+     * Constructs an {@code Embed} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -69,6 +75,15 @@ public final class Embed implements DiscordObject {
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
+    }
+
+    /**
+     * Gets the data of the embed.
+     *
+     * @return The data of the embed.
+     */
+    public EmbedData getData() {
+        return data;
     }
 
     /**
@@ -278,6 +293,15 @@ public final class Embed implements DiscordObject {
         }
 
         /**
+         * Gets the data of the footer.
+         *
+         * @return The data of the footer.
+         */
+        public EmbedFooterData getData() {
+            return data;
+        }
+
+        /**
          * Gets the footer text.
          *
          * @return The footer text.
@@ -327,6 +351,15 @@ public final class Embed implements DiscordObject {
          */
         public Embed getEmbed() {
             return Embed.this;
+        }
+
+        /**
+         * Gets the data of the image.
+         *
+         * @return The data of the image.
+         */
+        public EmbedImageData getData() {
+            return data;
         }
 
         /**
@@ -395,6 +428,15 @@ public final class Embed implements DiscordObject {
         }
 
         /**
+         * Gets the data of the thumbnail.
+         *
+         * @return The data of the thumbnail.
+         */
+        public EmbedThumbnailData getData() {
+            return data;
+        }
+
+        /**
          * Gets the source URL of the thumbnail (only supports http(s) and attachments).
          *
          * @return The source URL of the thumbnail (only supports http(s) and attachments).
@@ -460,6 +502,15 @@ public final class Embed implements DiscordObject {
         }
 
         /**
+         * Gets the data of the video.
+         *
+         * @return The data of the video.
+         */
+        public EmbedVideoData getData() {
+            return data;
+        }
+
+        /**
          * Gets the source URL of the video.
          *
          * @return The source URL of the video.
@@ -467,6 +518,16 @@ public final class Embed implements DiscordObject {
         public String getUrl() {
             return data.url().toOptional()
                     .orElseThrow(IllegalStateException::new); // video url should always be present on received embeds
+        }
+
+        /**
+         * Gets a proxied URL of the video.
+         *
+         * @return A proxied URL of the video.
+         */
+        @Nullable
+        public String getProxyUrl() {
+            return data.proxyUrl().toOptional().orElse(null);
         }
 
         /**
@@ -515,6 +576,15 @@ public final class Embed implements DiscordObject {
         }
 
         /**
+         * Gets the data of the provider.
+         *
+         * @return The data of the provider.
+         */
+        public EmbedProviderData getData() {
+            return data;
+        }
+
+        /**
          * Gets the name of the provider.
          *
          * @return The name of the provider.
@@ -529,7 +599,7 @@ public final class Embed implements DiscordObject {
          * @return The URL of the provider.
          */
         public Optional<String> getUrl() {
-            return Possible.flatOpt(data.url());
+            return data.url().toOptional();
         }
     }
 
@@ -558,6 +628,15 @@ public final class Embed implements DiscordObject {
          */
         public Embed getEmbed() {
             return Embed.this;
+        }
+
+        /**
+         * Gets the data of the author.
+         *
+         * @return The data of the author.
+         */
+        public EmbedAuthorData getData() {
+            return data;
         }
 
         /**
@@ -625,6 +704,15 @@ public final class Embed implements DiscordObject {
          */
         public Embed getEmbed() {
             return Embed.this;
+        }
+
+        /**
+         * Gets the data of the field.
+         *
+         * @return The data of the field.
+         */
+        public EmbedFieldData getData() {
+            return data;
         }
 
         /**

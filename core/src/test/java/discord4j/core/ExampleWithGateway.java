@@ -18,7 +18,7 @@
 package discord4j.core;
 
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
-import discord4j.core.object.presence.Presence;
+import discord4j.core.object.presence.ClientPresence;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -29,7 +29,7 @@ public class ExampleWithGateway {
     public static void main(String[] args) {
         DiscordClient.create(System.getenv("token"))
                 .gateway()
-                .setInitialStatus(s -> Presence.invisible())
+                .setInitialPresence(s -> ClientPresence.invisible())
                 .withGateway(client -> client.on(ReadyEvent.class)
                         .doOnNext(ready -> log.info("Logged in as {}", ready.getSelf().getUsername()))
                         .then())

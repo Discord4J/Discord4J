@@ -40,6 +40,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.ConnectionObserver;
+import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -100,6 +101,8 @@ public class DefaultGatewayClient implements GatewayClient {
     private final EmissionStrategy emissionStrategy;
 
     private final Map<Opcode<?>, PayloadHandler<?>> handlerMap = new HashMap<>();
+
+    private final HttpClient httpClient;
 
     /**
      * Payloads coming from the websocket.
@@ -171,6 +174,7 @@ public class DefaultGatewayClient implements GatewayClient {
         addHandler(Opcode.HELLO, this::handleHello);
         addHandler(Opcode.HEARTBEAT_ACK, this::handleHeartbeatAck);
 
+        this.httpClient = initHttpClient();
         this.receiver = newEmitterSink();
         this.sender = newEmitterSink();
         this.dispatch = newEmitterSink();
@@ -308,9 +312,7 @@ public class DefaultGatewayClient implements GatewayClient {
                             .doOnNext(tick -> emissionStrategy.emitNext(heartbeats, tick))
                             .then();
 
-                    Mono<Void> httpFuture = reactorResources.getHttpClient()
-                            .headers(headers -> headers.add(USER_AGENT, initUserAgent()))
-                            .observe(getObserver(context))
+                    Mono<Void> httpFuture = httpClient
                             .websocket(WebsocketClientSpec.builder()
                                     .maxFramePayloadLength(Integer.MAX_VALUE)
                                     .build())
@@ -344,6 +346,17 @@ public class DefaultGatewayClient implements GatewayClient {
                 });
     }
 
+    private HttpClient initHttpClient() {
+        HttpClient client = reactorResources.getHttpClient()
+                .headers(headers -> headers.add(USER_AGENT, initUserAgent()));
+        if (observer == GatewayObserver.NOOP_LISTENER) {
+            // don't apply an observer if the feature is not used
+            return client;
+        } else {
+            return client.observe((connection, newState) -> notifyObserver(newState));
+        }
+    }
+
     private String initUserAgent() {
         final Properties properties = GitProperties.getProperties();
         final String version = properties.getProperty(GitProperties.APPLICATION_VERSION, "3");
@@ -351,9 +364,15 @@ public class DefaultGatewayClient implements GatewayClient {
         return "DiscordBot(" + url + ", " + version + ")";
     }
 
+    private void notifyObserver(ConnectionObserver.State state) {
+        observer.onStateChange(state, this);
+    }
+
     private void logPayload(Logger logger, ContextView context, ByteBuf buf) {
-        logger.trace(format(context, buf.toString(StandardCharsets.UTF_8)
-                .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3")));
+        if (logger.isTraceEnabled()) {
+            logger.trace(format(context, buf.toString(StandardCharsets.UTF_8)
+                    .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3")));
+        }
     }
 
     private static boolean isNotStartupPayload(GatewayPayload<?> payload) {
@@ -407,6 +426,7 @@ public class DefaultGatewayClient implements GatewayClient {
     }
 
     private Mono<Void> handleInvalidSession(GatewayPayload<InvalidSession> payload) {
+        //noinspection ConstantConditions
         if (payload.getData().resumable()) {
             emissionStrategy.emitNext(outbound,
                     GatewayPayload.resume(ImmutableResume.of(token, sessionId.get(), sequence.get())));
@@ -418,6 +438,7 @@ public class DefaultGatewayClient implements GatewayClient {
     }
 
     private Mono<Void> handleHello(GatewayPayload<Hello> payload) {
+        //noinspection ConstantConditions
         Duration interval = Duration.ofMillis(payload.getData().heartbeatInterval());
         heartbeatEmitter.start(Duration.ZERO, interval);
         return state.asFlux()
@@ -449,7 +470,6 @@ public class DefaultGatewayClient implements GatewayClient {
                 .largeThreshold(identifyOptions.getLargeThreshold())
                 .shard(identifyOptions.getShardInfo().asArray())
                 .presence(identifyOptions.getInitialStatus().map(Possible::of).orElse(Possible.absent()))
-                .guildSubscriptions(identifyOptions.getGuildSubscriptions().map(Possible::of).orElse(Possible.absent()))
                 .build();
         log.debug(format(currentContext, "Identifying to Gateway"), sequence.get());
         emissionStrategy.emitNext(outbound, GatewayPayload.identify(identify));
@@ -544,17 +564,6 @@ public class DefaultGatewayClient implements GatewayClient {
                     return Mono.error(new CloseException(closeStatus, ctx, behavior.getCause()));
             }
         });
-    }
-
-    private ConnectionObserver getObserver(ContextView context) {
-        return (connection, newState) -> {
-            log.debug(format(context, "{} {}"), newState, connection);
-            notifyObserver(newState);
-        };
-    }
-
-    private void notifyObserver(ConnectionObserver.State state) {
-        observer.onStateChange(state, this);
     }
 
     @Override

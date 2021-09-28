@@ -32,6 +32,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class VoiceSupport {
@@ -58,34 +60,46 @@ public class VoiceSupport {
                 .map(user -> Snowflake.asLong(user.id()))
                 .cache();
 
-        AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
-        playerManager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
-        AudioSourceManagers.registerRemoteSources(playerManager);
-        AudioPlayer player = playerManager.createPlayer();
-        AudioProvider provider = new LavaplayerAudioProvider(player);
+        Map<Snowflake, GuildVoiceSupport> voiceGuildMap = new ConcurrentHashMap<>();
 
         List<EventHandler> eventHandlers = new ArrayList<>();
-        eventHandlers.add(new Join(provider));
+        eventHandlers.add(new Join(voiceGuildMap));
         eventHandlers.add(new Leave(client));
         eventHandlers.add(new Reconnect(client));
         eventHandlers.add(new Resume(client));
-        eventHandlers.add(new Play(playerManager, player));
-        eventHandlers.add(new Stop(player));
+        eventHandlers.add(new Play(voiceGuildMap));
+        eventHandlers.add(new Stop(voiceGuildMap));
 
         return client.on(MessageCreateEvent.class,
-                event -> ownerId.filter(
-                        owner -> {
-                            Long author = event.getMessage().getAuthor()
-                                    .map(User::getId)
-                                    .map(Snowflake::asLong)
-                                    .orElse(null);
-                            return owner.equals(author);
-                        })
-                        .flatMap(id -> Mono.when(eventHandlers.stream()
-                                .map(handler -> handler.onMessageCreate(event))
-                                .collect(Collectors.toList()))
-                        ))
+                        event -> ownerId.filter(
+                                        owner -> {
+                                            Long author = event.getMessage().getAuthor()
+                                                    .map(User::getId)
+                                                    .map(Snowflake::asLong)
+                                                    .orElse(null);
+                                            return owner.equals(author);
+                                        })
+                                .flatMap(id -> Mono.when(eventHandlers.stream()
+                                        .map(handler -> handler.onMessageCreate(event))
+                                        .collect(Collectors.toList()))
+                                ))
                 .then();
+    }
+
+    private static class GuildVoiceSupport {
+
+        private final AudioPlayerManager playerManager;
+        private final AudioProvider provider;
+        private final AudioPlayer player;
+
+        public GuildVoiceSupport() {
+            this.playerManager = new DefaultAudioPlayerManager();
+            playerManager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
+            AudioSourceManagers.registerLocalSource(playerManager);
+            AudioSourceManagers.registerRemoteSources(playerManager);
+            this.player = playerManager.createPlayer();
+            this.provider = new LavaplayerAudioProvider(player);
+        }
     }
 
     private static class LavaplayerAudioProvider extends AudioProvider {
@@ -140,9 +154,11 @@ public class VoiceSupport {
 
     public static class Join extends EventHandler {
 
-        private final AudioProvider provider;
+        private final Map<Snowflake, GuildVoiceSupport> voiceMap;
 
-        public Join(AudioProvider provider) {this.provider = provider;}
+        public Join(Map<Snowflake, GuildVoiceSupport> voiceMap) {
+            this.voiceMap = voiceMap;
+        }
 
         @Override
         public Mono<Void> onMessageCreate(MessageCreateEvent event) {
@@ -150,7 +166,11 @@ public class VoiceSupport {
                 return Mono.justOrEmpty(event.getMember())
                         .flatMap(Member::getVoiceState)
                         .flatMap(VoiceState::getChannel)
-                        .flatMap(channel -> channel.join(spec -> spec.setProvider(provider)))
+                        .flatMap(channel -> {
+                            GuildVoiceSupport voice = voiceMap.computeIfAbsent(channel.getGuildId(),
+                                    k -> new GuildVoiceSupport());
+                            return channel.join().withProvider(voice.provider);
+                        })
                         .retryWhen(Retry.backoff(2, Duration.ofSeconds(2)))
                         .doFinally(s -> log.info("Finalized join request after {}", s))
                         .onErrorResume(t -> {
@@ -235,12 +255,10 @@ public class VoiceSupport {
 
     public static class Play extends EventHandler {
 
-        private final AudioPlayerManager playerManager;
-        private final AudioPlayer player;
+        private final Map<Snowflake, GuildVoiceSupport> voiceMap;
 
-        public Play(AudioPlayerManager playerManager, AudioPlayer player) {
-            this.playerManager = playerManager;
-            this.player = player;
+        public Play(Map<Snowflake, GuildVoiceSupport> voiceMap) {
+            this.voiceMap = voiceMap;
         }
 
         @Override
@@ -248,8 +266,10 @@ public class VoiceSupport {
             if (event.getMessage().getContent().startsWith("!vc play ")) {
                 return Mono.justOrEmpty(event.getMessage().getContent())
                         .map(content -> Arrays.asList(content.split(" ")))
-                        .doOnNext(command -> playerManager.loadItem(command.get(2),
-                                new MyAudioLoadResultHandler(player)))
+                        .doOnNext(command -> event.getGuildId()
+                                .map(id -> voiceMap.computeIfAbsent(id, k -> new GuildVoiceSupport()))
+                                .ifPresent(voice -> voice.playerManager.loadItem(command.get(2),
+                                        new MyAudioLoadResultHandler(voice.player))))
                         .then();
             }
             return Mono.empty();
@@ -258,16 +278,19 @@ public class VoiceSupport {
 
     public static class Stop extends EventHandler {
 
-        private final AudioPlayer player;
+        private final Map<Snowflake, GuildVoiceSupport> voiceMap;
 
-        public Stop(AudioPlayer player) {
-            this.player = player;
+        public Stop(Map<Snowflake, GuildVoiceSupport> voiceMap) {
+            this.voiceMap = voiceMap;
         }
 
         @Override
         public Mono<Void> onMessageCreate(MessageCreateEvent event) {
             if (event.getMessage().getContent().equals("!vc stop")) {
-                return Mono.fromRunnable(player::stopTrack);
+                return event.getGuildId()
+                        .map(id -> voiceMap.computeIfAbsent(id, k -> new GuildVoiceSupport()))
+                        .map(voice -> Mono.<Void>fromRunnable(voice.player::stopTrack))
+                        .orElseGet(Mono::empty);
             }
             return Mono.empty();
         }

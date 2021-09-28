@@ -16,7 +16,9 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Entity;
+import discord4j.discordjson.json.ChannelData;
 import discord4j.rest.entity.RestChannel;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -33,7 +35,14 @@ public interface Channel extends Entity {
      *
      * @return The type of channel.
      */
-    Type getType();
+    default Type getType() {
+        return Type.of(getData().type());
+    }
+
+    @Override
+    default Snowflake getId() {
+        return Snowflake.of(getData().id());
+    }
 
     /**
      * Requests to delete this channel.
@@ -52,7 +61,9 @@ public interface Channel extends Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the channel has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    Mono<Void> delete(@Nullable String reason);
+    default Mono<Void> delete(@Nullable String reason) {
+        return getRestChannel().delete(reason);
+    }
 
     /**
      * Gets the <i>raw</i> mention. This is the format utilized to directly mention another channel.
@@ -67,6 +78,13 @@ public interface Channel extends Entity {
      * Return a {@link RestChannel} handle to execute REST API operations on this entity.
      */
     RestChannel getRestChannel();
+
+    /**
+     * Gets the raw data as represented by Discord.
+     *
+     * @return The raw data as represented by Discord.
+     */
+    ChannelData getData();
 
     /** Represents the various types of channels. */
     enum Type {
@@ -93,7 +111,16 @@ public interface Channel extends Entity {
         GUILD_NEWS(5),
 
         /** Represents a {@link StoreChannel}. */
-        GUILD_STORE(6);
+        GUILD_STORE(6),
+
+        GUILD_NEWS_THREAD(10),
+
+        GUILD_PUBLIC_THREAD(11),
+
+        GUILD_PRIVATE_THREAD(12),
+
+        /** Represents a {@link VoiceChannel} for hosting events with an audience. */
+        GUILD_STAGE_VOICE(13);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -132,6 +159,7 @@ public interface Channel extends Entity {
                 case 4: return GUILD_CATEGORY;
                 case 5: return GUILD_NEWS;
                 case 6: return GUILD_STORE;
+                case 13: return GUILD_STAGE_VOICE;
                 default: return UNKNOWN;
             }
         }

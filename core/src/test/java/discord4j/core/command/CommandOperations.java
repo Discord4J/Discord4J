@@ -27,10 +27,10 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.function.Consumer;
+import java.util.Objects;
 import java.util.function.Supplier;
 
-class CommandOperations implements CommandRequest, CommandResponse {
+class CommandOperations implements CommandContext {
 
     private final MessageCreateEvent event;
     private final String command;
@@ -81,23 +81,24 @@ class CommandOperations implements CommandRequest, CommandResponse {
     }
 
     @Override
-    public CommandResponse withDirectMessage() {
+    public CommandContext withDirectMessage() {
         return new CommandOperations(event, command, parameters, () -> getPrivateChannel().cast(MessageChannel.class),
                 replyScheduler);
     }
 
     @Override
-    public CommandResponse withReplyChannel(Mono<MessageChannel> channelSource) {
+    public CommandContext withReplyChannel(Mono<MessageChannel> channelSource) {
         return new CommandOperations(event, command, parameters, () -> channelSource, replyScheduler);
     }
 
     @Override
-    public CommandResponse withScheduler(Scheduler scheduler) {
+    public CommandContext withScheduler(Scheduler scheduler) {
         return new CommandOperations(event, command, parameters, replyChannel, scheduler);
     }
 
     @Override
-    public Mono<Void> sendMessage(Consumer<? super MessageCreateSpec> spec) {
+    public Mono<Void> sendMessage(MessageCreateSpec spec) {
+        Objects.requireNonNull(spec);
         return replyChannel.get()
                 .publishOn(replyScheduler)
                 .flatMap(channel -> channel.createMessage(spec))
@@ -105,7 +106,8 @@ class CommandOperations implements CommandRequest, CommandResponse {
     }
 
     @Override
-    public Mono<Void> sendEmbed(Consumer<? super EmbedCreateSpec> spec) {
+    public Mono<Void> sendEmbed(EmbedCreateSpec spec) {
+        Objects.requireNonNull(spec);
         return replyChannel.get()
                 .publishOn(replyScheduler)
                 .flatMap(channel -> channel.createEmbed(spec))

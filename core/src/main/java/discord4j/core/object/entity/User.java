@@ -23,6 +23,8 @@ import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.discordjson.json.DMCreateRequest;
 import discord4j.discordjson.json.UserData;
+import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Color;
 import discord4j.rest.util.Image;
 import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
@@ -48,6 +50,9 @@ public class User implements Entity {
     /** The path for user avatar image URLs. */
     private static final String AVATAR_IMAGE_PATH = "avatars/%s/%s";
 
+    /** The path for user banner image URLs. */
+    private static final String BANNER_IMAGE_PATH = "banners/%s/%s";
+
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
 
@@ -55,7 +60,7 @@ public class User implements Entity {
     private final UserData data;
 
     /**
-     * Constructs an {@code User} with an associated ServiceMediator and Discord data.
+     * Constructs an {@code User} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -68,6 +73,15 @@ public class User implements Entity {
     @Override
     public final GatewayDiscordClient getClient() {
         return gateway;
+    }
+
+    /**
+     * Gets the data of the user.
+     *
+     * @return The data of the user.
+     */
+    public UserData getUserData() {
+        return data;
     }
 
     /**
@@ -157,6 +171,67 @@ public class User implements Entity {
      */
     public final String getDefaultAvatarUrl() {
         return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, Integer.parseInt(getDiscriminator()) % 5), PNG);
+    }
+
+    /**
+     * Gets if the user's banner is animated.
+     *
+     * @return {@code true} if the user's banner is animated, {@code false} otherwise.
+     */
+    public final boolean hasAnimatedBanner() {
+        final String banner = Possible.flatOpt(data.banner()).orElse(null);
+        return (banner != null) && banner.startsWith("a_");
+    }
+
+    /**
+     * Gets the user's banner URL, if present.
+     *
+     * @param format The format for the URL.
+     * @return The user's banner URL, if present.
+     */
+    public final Optional<String> getBannerUrl(final Image.Format format) {
+        return Possible.flatOpt(data.banner()).map(banner -> ImageUtil.getUrl(
+                String.format(BANNER_IMAGE_PATH, getId().asString(), banner), format));
+    }
+
+    /**
+     * Gets the user's effective banner URL.
+     *
+     * @return The user's effective banner URL.
+     */
+    public final Optional<String> getBannerUrl() {
+        final boolean animated = hasAnimatedBanner();
+        return getAvatarUrl(animated ? GIF : PNG);
+    }
+
+    /**
+     * Gets the user's banner. This is the banner at the url given by {@link #getBannerUrl(Image.Format)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image banner} of the user. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getBanner(final Image.Format format) {
+        return Mono.justOrEmpty(getBannerUrl(format)).flatMap(Image::ofUrl);
+    }
+
+    /**
+     * Gets the user's effective banner. This is the banner at the url given by {@link #getBannerUrl()}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image banner} of the user. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<Image> getBanner() {
+        return Mono.justOrEmpty(getBannerUrl()).flatMap(Image::ofUrl);
+    }
+
+    /**
+     * Gets the user's banner accent color, if present.
+     *
+     * @return The user's banner accent color, if present.
+     */
+    public final Optional<Color> getAccentColor() {
+        return Possible.flatOpt(data.accentColor())
+                .map(Color::of);
     }
 
     /**
@@ -268,7 +343,9 @@ public class User implements Entity {
 
         VERIFIED_BOT(16),
 
-        VERIFIED_BOT_DEVELOPER(17);
+        VERIFIED_BOT_DEVELOPER(17),
+        
+        DISCORD_CERTIFIED_MODERATOR(18);
 
         /** The underlying value as represented by Discord. */
         private final int value;

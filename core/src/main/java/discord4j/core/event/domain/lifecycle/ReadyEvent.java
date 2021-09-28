@@ -16,9 +16,10 @@
  */
 package discord4j.core.event.domain.lifecycle;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.User;
-import discord4j.common.util.Snowflake;
+import discord4j.discordjson.json.gateway.Ready;
 import discord4j.gateway.ShardInfo;
 import reactor.util.annotation.Nullable;
 
@@ -35,20 +36,19 @@ import java.util.Set;
  */
 public class ReadyEvent extends GatewayLifecycleEvent {
 
-    private final int gatewayVersion;
+    private final Ready data;
     private final User self;
     private final Set<Guild> guilds;
-    private final String sessionId;
-    private final List<String> trace;
 
-    public ReadyEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, int gatewayVersion, User self,
-                      Set<Guild> guilds, String sessionId, List<String> trace) {
+    public ReadyEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Ready data, User self, Set<Guild> guilds) {
         super(gateway, shardInfo);
-        this.gatewayVersion = gatewayVersion;
+        this.data = data;
         this.self = self;
         this.guilds = guilds;
-        this.sessionId = sessionId;
-        this.trace = trace;
+    }
+
+    public Ready getData() {
+        return data;
     }
 
     /**
@@ -57,7 +57,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
      * @return The gateway protocol version being used.
      */
     public int getGatewayVersion() {
-        return gatewayVersion;
+        return data.v();
     }
 
     /**
@@ -87,7 +87,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
      * @return the session ID of the connection
      */
     public String getSessionId() {
-        return sessionId;
+        return data.sessionId();
     }
 
     /**
@@ -96,7 +96,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
      * @return The trace provided by Discord.
      */
     public List<String> getTrace() {
-        return trace;
+        return data.trace();
     }
 
     /**
@@ -161,11 +161,9 @@ public class ReadyEvent extends GatewayLifecycleEvent {
     @Override
     public String toString() {
         return "ReadyEvent{" +
-                "gatewayVersion=" + gatewayVersion +
+                "data=" + data +
                 ", self=" + self +
                 ", guilds=" + guilds +
-                ", sessionId='" + sessionId + '\'' +
-                ", trace=" + trace +
-                "}";
+                '}';
     }
 }

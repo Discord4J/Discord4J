@@ -137,7 +137,6 @@ public class DispatchStoreLayer {
                 .filter(entry -> entry.predicate.test(actualDispatch))
                 .map(entry -> entry.actionFactory))
                 .singleOrEmpty()
-                .onErrorMap(IndexOutOfBoundsException.class, AssertionError::new)
                 .map(actionFactory -> actionFactory.apply(shardInfo.getIndex(), actualDispatch))
                 .flatMap(action -> Mono.from(store.execute(action)))
                 .<StatefulDispatch<?, ?>>map(oldState -> StatefulDispatch.of(shardInfo, actualDispatch, oldState))

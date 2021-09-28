@@ -22,18 +22,10 @@ import reactor.util.annotation.Nullable;
 public interface AuditSpec<T> extends Spec<T> {
 
     /**
-     * Sets the reason to show in the audit logs when the spec is built.
-     *
-     * @param reason The audit log reason.
-     * @return This spec.
-     */
-    AuditSpec<T> setReason(@Nullable String reason);
-
-    /**
      * Returns the current audit log reason set on the spec.
      *
      * @return The current audit log reason.
      */
     @Nullable
-    String getReason();
+    String reason();
 }

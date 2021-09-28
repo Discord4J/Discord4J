@@ -16,27 +16,26 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
+import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.Webhook;
-import discord4j.core.spec.WebhookCreateSpec;
-import discord4j.common.util.Snowflake;
+import discord4j.discordjson.json.BulkDeleteRequest;
+import discord4j.rest.util.Permission;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Optional;
-import java.util.function.Consumer;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public interface GuildMessageChannel extends CategorizableChannel, MessageChannel {
-
-    /**
-     * Gets the channel topic, if present.
-     *
-     * @return The channel topic, if present.
-     */
-    Optional<String> getTopic();
+/** A Discord channel in a guild that can have messages sent to it. */
+public interface GuildMessageChannel extends GuildChannel, MessageChannel {
 
     /**
      * Requests to bulk delete the supplied message IDs.
@@ -59,7 +58,9 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      * @return A {@link Flux} that continually emits {@link Snowflake message IDs} that were <b>not</b> bulk deleted
      * (typically if the ID was older than 2 weeks). If an error is received, it is emitted through the {@code Flux}.
      */
-    Flux<Snowflake> bulkDelete(Publisher<Snowflake> messageIds);
+    default Flux<Snowflake> bulkDelete(Publisher<Snowflake> messageIds) {
+        return getRestChannel().bulkDelete(messageIds);
+    }
 
     /**
      * Requests to bulk delete the supplied messages.
@@ -82,24 +83,46 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      * (typically if the message was older than 2 weeks). If an error is received, it is emitted through the
      * {@code Flux}.
      */
-    Flux<Message> bulkDeleteMessages(Publisher<Message> messages);
+    default Flux<Message> bulkDeleteMessages(Publisher<Message> messages) {
+        // FIXME This is essentially a copy of the RestChannel implementation which incurs a potentially
+        //  problematic amount of duplication. Optimally, this method should be able to delegate to
+        //  bulkDelete, but no implementation has been found that can do so in a performant manner.
+        final Instant timeLimit = Instant.now().minus(Duration.ofDays(14L));
 
-    /**
-     * Requests to create a webhook.
-     *
-     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookCreateSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error
-     * is received, it is emitted through the {@code Mono}.
-     */
-    Mono<Webhook> createWebhook(final Consumer<? super WebhookCreateSpec> spec);
+        return Flux.from(messages)
+                .distinct(Message::getId)
+                .buffer(100)
+                .flatMap(allMessages -> {
+                    final List<Message> eligibleMessages = new ArrayList<>(0);
+                    final Collection<Message> ineligibleMessages = new ArrayList<>(0);
 
-    /**
-     * Requests to retrieve the webhooks of the channel.
-     *
-     * @return A {@link Flux} that continually emits the {@link Webhook webhooks} of the channel. If an error is
-     * received, it is emitted through the {@code Flux}.
-     */
-    Flux<Webhook> getWebhooks();
+                    for (final Message message : allMessages) {
+                        if (message.getId().getTimestamp().isBefore(timeLimit)) {
+                            ineligibleMessages.add(message);
+
+                        } else {
+                            eligibleMessages.add(message);
+                        }
+                    }
+
+                    if (eligibleMessages.size() == 1) {
+                        ineligibleMessages.add(eligibleMessages.get(0));
+                        eligibleMessages.clear();
+                    }
+
+                    final Collection<String> eligibleIds = eligibleMessages.stream()
+                            .map(Message::getId)
+                            .map(Snowflake::asString)
+                            .collect(Collectors.toList());
+
+                    return Mono.just(eligibleIds)
+                            .filter(chunk -> !chunk.isEmpty())
+                            .flatMap(chunk -> getClient().getRestClient()
+                                    .getChannelService()
+                                    .bulkDeleteMessages(getId().asLong(), BulkDeleteRequest.builder().messages(chunk).build()))
+                            .thenMany(Flux.fromIterable(ineligibleMessages));
+                });
+    }
 
     /**
      * Returns all members in the guild which have access to <b>view</b> this channel.
@@ -107,5 +130,10 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      * @return A {@link Flux} that continually emits all members from {@link Guild#getMembers()} which have access to
      * view this channel {@link discord4j.rest.util.Permission#VIEW_CHANNEL}
      */
-    Flux<Member> getMembers();
+    default Flux<Member> getMembers() {
+        return getGuild()
+                .flatMapMany(Guild::getMembers)
+                .filterWhen(member -> getEffectivePermissions(member.getId())
+                        .map(permissions -> permissions.contains(Permission.VIEW_CHANNEL)));
+    }
 }

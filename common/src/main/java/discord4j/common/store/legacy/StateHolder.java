@@ -64,7 +64,7 @@ public final class StateHolder {
     public StateHolder(final StoreService service) {
         storeService = service;
 
-        service.init(new StoreContext(Collections.emptyMap()));
+        service.init(new StoreContext(Collections.singletonMap("messageClass", MessageData.class)));
 
         channelStore = service.provideLongObjStore(ChannelData.class);
         log.debug("Channel storage     : {}", channelStore);

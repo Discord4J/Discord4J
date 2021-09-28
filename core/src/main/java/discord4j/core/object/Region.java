@@ -18,6 +18,7 @@ package discord4j.core.object;
 
 import discord4j.discordjson.json.RegionData;
 import discord4j.core.GatewayDiscordClient;
+import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 
@@ -35,7 +36,7 @@ public final class Region implements DiscordObject {
     private final RegionData data;
 
     /**
-     * Constructs a {@code Region} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code Region} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -48,6 +49,15 @@ public final class Region implements DiscordObject {
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
+    }
+
+    /**
+     * Gets the data of the region.
+     *
+     * @return The data of the region.
+     */
+    public RegionData getData() {
+        return data;
     }
 
     /**
@@ -74,7 +84,8 @@ public final class Region implements DiscordObject {
      * @return {@code true} if this is a VIP region, {@code false} otherwise.
      */
     public boolean isVip() {
-        return data.vip();
+        // TODO: workaround, see https://github.com/Discord4J/Discord4J/issues/999
+        return data.vip().toOptional().orElse(false);
     }
 
     /**
@@ -109,5 +120,91 @@ public final class Region implements DiscordObject {
         return "Region{" +
                 "data=" + data +
                 '}';
+    }
+
+    /** Represents the different non-deprecated voice region ids. */
+    public enum Id {
+
+        UNKNOWN(null),
+
+        AUTOMATIC(null),
+
+        US_WEST("us-west"),
+
+        US_EAST("us-east"),
+
+        US_CENTRAL("us-central"),
+
+        US_SOUTH("us-south"),
+
+        SINGAPORE("singapore"),
+
+        SOUTHAFRICA("southafrica"),
+
+        SYDNEY("sydney"),
+
+        EUROPE("europe"),
+
+        BRAZIL("brazil"),
+
+        HONGKONG("hongkong"),
+
+        RUSSIA("russia"),
+
+        JAPAN("japan"),
+
+        INDIA("india");
+
+        /** The underlying value as represented by Discord. */
+        private final String value;
+
+        /**
+         * Constructs a {@code Region.Id}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        Id(@Nullable final String value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        @Nullable
+        public String getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the enum associated with the value. It is guaranteed that invoking {@link #getValue()} from the returned
+         * enum will equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The region id.
+         */
+        public static Region.Id of(@Nullable final String value) {
+            if(value == null) {
+                return AUTOMATIC;
+            }
+
+            switch (value) {
+                case "us-west": return US_WEST;
+                case "us-east": return US_EAST;
+                case "us-central": return US_CENTRAL;
+                case "us-south": return US_SOUTH;
+                case "singapore": return SINGAPORE;
+                case "southafrica": return SOUTHAFRICA;
+                case "sydney": return SYDNEY;
+                case "europe": return EUROPE;
+                case "brazil": return BRAZIL;
+                case "hongkong": return HONGKONG;
+                case "russia": return RUSSIA;
+                case "japan": return JAPAN;
+                case "india": return INDIA;
+                default: return UNKNOWN;
+            }
+        }
     }
 }

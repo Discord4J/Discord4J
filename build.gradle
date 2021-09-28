@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id 'com.gorylenko.gradle-git-properties' version '2.2.4' apply false
-    id 'com.github.ben-manes.versions' version '0.36.0'
+    id 'com.github.ben-manes.versions' version '0.38.0'
     id 'net.researchgate.release' version '2.8.1'
 }
 
@@ -23,16 +23,18 @@ ext {
     }
 
     // Dependencies
-    reactor_bom_version = '2020.0.2'
-    jackson_version = '2.11.3'
+    reactor_bom_version = '2020.0.11'
+    jackson_version = '2.12.4'
     caffeine_version = '2.8.8'
+    immutables_group = 'org.immutables'
+    immutables_version = '2.9.0-rc1'
 
     // Test dependencies
-    junit_version = '5.6.2'
-    mockito_version = '3.3.3'
+    junit_version = '5.7.1'
+    mockito_version = '3.11.2'
     logback_version = '1.2.3'
     reflections_version = '0.9.12'
-    lavaplayer_version = '1.3.63'
+    lavaplayer_version = '1.3.78'
 
     isJitpack = "true" == System.getenv("JITPACK")
     isRelease = !version.toString().endsWith('-SNAPSHOT')
@@ -59,14 +61,13 @@ allprojects {
     }
 
     repositories {
+        mavenLocal()
         mavenCentral()
         if (!isRelease || isJitpack) {
             maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
             maven { url 'https://oss.sonatype.org/content/repositories/staging' }
         }
-        maven { url 'https://jitpack.io' }
-        maven { url 'https://repo.spring.io/milestone' }
-        jcenter()
+        maven { url 'https://m2.dv8tion.net/releases' }
     }
 
     configurations.all {
@@ -205,13 +206,8 @@ subprojects {
 }
 
 def buildDocsUrl(String project) {
-    if (isJitpack) {
-        def docVersion = System.getenv('GIT_COMMIT')
-        return "https://javadoc.jitpack.io/com/discord4j/discord4j/$project/$docVersion/javadoc/" as String
-    } else {
-        def docVersion = isRelease ? "$version" : "3.1"
-        return "https://www.javadoc.io/page/com.discord4j/$project/$docVersion/" as String
-    }
+    def docVersion = isRelease ? "$version" : "3.2"
+    return "https://javadoc.io/doc/com.discord4j/$project/$docVersion/" as String
 }
 
 release {

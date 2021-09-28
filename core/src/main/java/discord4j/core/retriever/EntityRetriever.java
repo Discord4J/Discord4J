@@ -119,6 +119,14 @@ public interface EntityRetriever {
     Mono<User> getSelf();
 
     /**
+     * Requests to retrieve the bot user represented as a {@link Member member} of the guild with the supplied ID.
+     * @param guildId The ID of the guild.
+     * @return A {@link Mono} where, upon successful completion, emits the bot {@link Member member}. If an error is
+     *         received, it is emitted through the {@code Mono}.
+     */
+    Mono<Member> getSelfMember(Snowflake guildId);
+
+    /**
      * Requests to retrieve the guild's members.
      *
      * @param guildId   the ID of the guild.

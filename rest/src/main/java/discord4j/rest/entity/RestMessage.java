@@ -17,11 +17,11 @@
 
 package discord4j.rest.entity;
 
-import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.rest.RestClient;
+import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -54,6 +54,24 @@ public class RestMessage {
 
     static RestMessage create(RestClient restClient, long channelId, long id) {
         return new RestMessage(restClient, channelId, id);
+    }
+
+    /**
+     * Returns the ID of the channel this message belongs to.
+     *
+     * @return The ID of the channel this message belongs to
+     */
+    public Snowflake getChannelId() {
+        return Snowflake.of(channelId);
+    }
+
+    /**
+     * Returns the ID of this message.
+     *
+     * @return The ID of this message
+     */
+    public Snowflake getId() {
+        return Snowflake.of(id);
     }
 
     public RestChannel channel() {
@@ -144,7 +162,7 @@ public class RestMessage {
      * @see <a href="https://discord.com/developers/docs/resources/channel#edit-message">Edit Message</a>
      */
     public Mono<MessageData> edit(MessageEditRequest request) {
-        return restClient.getChannelService().editMessage(channelId, id, request);
+        return restClient.getChannelService().editMessage(channelId, id, MultipartRequest.ofRequest(request));
     }
 
     /**

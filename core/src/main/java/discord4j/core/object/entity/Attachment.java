@@ -20,10 +20,14 @@ import discord4j.discordjson.json.AttachmentData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.common.util.Snowflake;
 import discord4j.core.util.EntityUtil;
+import discord4j.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * A Discord attachment.
@@ -42,7 +46,7 @@ public final class Attachment implements Entity {
     private final AttachmentData data;
 
     /**
-     * Constructs an {@code Attachment} with an associated ServiceMediator and Discord data.
+     * Constructs an {@code Attachment} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -60,6 +64,15 @@ public final class Attachment implements Entity {
     @Override
     public Snowflake getId() {
         return Snowflake.of(data.id());
+    }
+
+    /**
+     * Gets the data of the attachment.
+     *
+     * @return The data of the attachment.
+     */
+    public AttachmentData getData() {
+        return data;
     }
 
     /**
@@ -104,7 +117,9 @@ public final class Attachment implements Entity {
      * @return The height of the file, if present.
      */
     public OptionalInt getHeight() {
-        return data.height();
+        return Possible.flatOpt(data.height())
+            .map(OptionalInt::of)
+            .orElse(OptionalInt.empty());
     }
 
     /**
@@ -113,7 +128,9 @@ public final class Attachment implements Entity {
      * @return The width of the file, if present.
      */
     public OptionalInt getWidth() {
-        return data.width();
+        return Possible.flatOpt(data.width())
+            .map(OptionalInt::of)
+            .orElse(OptionalInt.empty());
     }
 
     /**
@@ -123,6 +140,15 @@ public final class Attachment implements Entity {
      */
     public boolean isSpoiler() {
         return getFilename().startsWith(SPOILER_PREFIX);
+    }
+
+    /**
+     * Gets the attachment's media type, if present.
+     *
+     * @return The attachment's media type, if present.
+     */
+    public Optional<String> getContentType() {
+        return data.contentType().toOptional();
     }
 
     @Override

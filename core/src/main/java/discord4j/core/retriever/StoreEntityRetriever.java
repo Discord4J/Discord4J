@@ -98,6 +98,11 @@ public class StoreEntityRetriever implements EntityRetriever {
     }
 
     @Override
+    public Mono<Member> getSelfMember(Snowflake guildId) {
+        return getMemberById(guildId, gateway.getSelfId());
+    }
+
+    @Override
     public Flux<Member> getGuildMembers(Snowflake guildId) {
         return Flux.from(store.execute(ReadActions.getExactMembersInGuild(guildId.asLong())))
                 .map(data -> new Member(gateway, data, guildId.asLong()))

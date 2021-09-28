@@ -28,7 +28,7 @@ import discord4j.discordjson.json.gateway.*;
 public class GatewayActions {
 
     private GatewayActions() {
-        throw new AssertionError();
+        throw new AssertionError("No discord4j.common.store.action.gateway.GatewayActions instances for you!");
     }
 
     /**
