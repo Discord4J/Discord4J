@@ -37,78 +37,9 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://discord.com/developers/docs/resources/channel#modify-channel">Modify Channel</a>
  */
-public class LegacyVoiceChannelEditSpec implements LegacyAuditSpec<ChannelModifyRequest> {
+public class LegacyVoiceChannelEditSpec extends LegacyAudioChannelEditSpec {
 
     private final ImmutableChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
-    @Nullable
-    private String reason;
-
-    /**
-     * Sets the name for the modified {@link VoiceChannel}.
-     *
-     * @param name The name of the voice channel.
-     * @return This spec.
-     */
-    public LegacyVoiceChannelEditSpec setName(String name) {
-        requestBuilder.name(name);
-        return this;
-    }
-
-    /**
-     * Sets the position for the modified {@link VoiceChannel}.
-     *
-     * @param position The raw position for the channel.
-     * @return This spec.
-     */
-    public LegacyVoiceChannelEditSpec setPosition(int position) {
-        requestBuilder.position(position);
-        return this;
-    }
-
-    /**
-     * Sets the permission overwrites for the modified {@link VoiceChannel}.
-     *
-     * @param permissionOverwrites The {@code Set<PermissionOverwrite>} which contains overwrites for the channel.
-     * @return This spec.
-     */
-    public LegacyVoiceChannelEditSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
-        List<OverwriteData> raw = permissionOverwrites.stream()
-                .map(o -> OverwriteData.builder()
-                        .id(o.getTargetId().asString())
-                        .type(o.getType().getValue())
-                        .allow(o.getAllowed().getRawValue())
-                        .deny(o.getDenied().getRawValue())
-                        .build())
-                .collect(Collectors.toList());
-
-        requestBuilder.permissionOverwrites(raw);
-        return this;
-    }
-
-    /**
-     * Sets the parent ID for the modified {@link VoiceChannel}.
-     * <p>
-     * The parent ID is equivalent to a {@link Category} ID.
-     *
-     * @param parentId The {@code Snowflake} of the parent {@code Category}.
-     * @return This spec.
-     */
-    public LegacyVoiceChannelEditSpec setParentId(@Nullable Snowflake parentId) {
-        requestBuilder.parentId(parentId == null ? Possible.of(Optional.empty()) : Possible.of(Optional.of(parentId.asString())));
-        return this;
-    }
-
-    /**
-     * Sets the bitrate for the modified {@link VoiceChannel}.
-     *
-     * @param bitrate The maximum amount of bits to send per second in the voice channel, related to the quality of
-     * audio. A valid bitrate is a number from 8 to 96.
-     * @return This spec.
-     */
-    public LegacyVoiceChannelEditSpec setBitrate(int bitrate) {
-        requestBuilder.bitrate(bitrate);
-        return this;
-    }
 
     /**
      * Sets the user limit for the modified {@link VoiceChannel}.
@@ -125,17 +56,6 @@ public class LegacyVoiceChannelEditSpec implements LegacyAuditSpec<ChannelModify
     }
 
     /**
-     * Sets the channel voice region id, automatic if null.
-     *
-     * @param rtcRegion The channel voice region id, automatic if null.
-     * @return This spec.
-     */
-    public LegacyVoiceChannelEditSpec setRtcRegion(@Nullable String rtcRegion) {
-        requestBuilder.rtcRegionOrNull(rtcRegion);
-        return this;
-    }
-
-    /**
      * Sets the camera video quality mode of the voice channel.
      *
      * @param videoQualityMode The camera video quality mode of the voice channel.
@@ -144,18 +64,6 @@ public class LegacyVoiceChannelEditSpec implements LegacyAuditSpec<ChannelModify
     public LegacyVoiceChannelEditSpec setVideoQualityMode(VoiceChannel.Mode videoQualityMode) {
         requestBuilder.videoQualityModeOrNull(videoQualityMode.getValue());
         return this;
-    }
-
-    @Override
-    public LegacyVoiceChannelEditSpec setReason(@Nullable final String reason) {
-        this.reason = reason;
-        return this;
-    }
-
-    @Override
-    @Nullable
-    public String getReason() {
-        return reason;
     }
 
     @Override
