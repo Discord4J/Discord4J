@@ -217,6 +217,7 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
                     InteractionApplicationCommandCallbackSpec actualSpec = getClient().getRestClient()
                             .getRestResources()
                             .getAllowedMentions()
+                            .filter(allowedMentions -> !spec.isAllowedMentionsPresent())
                             .map(spec::withAllowedMentions)
                             .orElse(spec);
 

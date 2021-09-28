@@ -128,6 +128,7 @@ public interface MessageChannel extends Channel {
                     MessageCreateSpec actualSpec = getClient().getRestClient()
                             .getRestResources()
                             .getAllowedMentions()
+                            .filter(allowedMentions -> !spec.isAllowedMentionsPresent())
                             .map(spec::withAllowedMentions)
                             .orElse(spec);
                     return getRestChannel().createMessage(actualSpec.asRequest());

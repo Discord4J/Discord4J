@@ -271,6 +271,7 @@ public class InteractionCreateEvent extends Event {
                     InteractionApplicationCommandCallbackSpec actualSpec = getClient().getRestClient()
                             .getRestResources()
                             .getAllowedMentions()
+                            .filter(allowedMentions -> !spec.isAllowedMentionsPresent())
                             .map(spec::withAllowedMentions)
                             .orElse(spec);
 
@@ -327,6 +328,7 @@ public class InteractionCreateEvent extends Event {
         return Mono.defer(() -> {
                     InteractionReplyEditSpec actualSpec = getClient().getRestClient().getRestResources()
                             .getAllowedMentions()
+                            .filter(allowedMentions -> !spec.isAllowedMentionsPresent())
                             .map(spec::withAllowedMentionsOrNull)
                             .orElse(spec);
                     return getInteractionResponse().editInitialResponse(actualSpec.asRequest());
@@ -388,6 +390,7 @@ public class InteractionCreateEvent extends Event {
         return Mono.defer(() -> {
                     InteractionFollowupCreateSpec actualSpec = getClient().getRestClient().getRestResources()
                             .getAllowedMentions()
+                            .filter(allowedMentions -> !spec.isAllowedMentionsPresent())
                             .map(spec::withAllowedMentions)
                             .orElse(spec);
                     return getInteractionResponse().createFollowupMessage(actualSpec.asRequest());
@@ -420,6 +423,7 @@ public class InteractionCreateEvent extends Event {
         return Mono.defer(() -> {
                     InteractionReplyEditSpec actualSpec = getClient().getRestClient().getRestResources()
                             .getAllowedMentions()
+                            .filter(allowedMentions -> !spec.isAllowedMentionsPresent())
                             .map(spec::withAllowedMentionsOrNull)
                             .orElse(spec);
                     return getInteractionResponse().editFollowupMessage(messageId.asLong(), actualSpec.asRequest());
