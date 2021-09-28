@@ -1,5 +1,6 @@
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Member;
@@ -16,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.function.Function;
 
+@Experimental
 public final class ThreadChannel extends BaseChannel implements GuildMessageChannel {
 
     public ThreadChannel(GatewayDiscordClient gateway, ChannelData data) {
@@ -132,5 +134,10 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
                 default: return UNKNOWN;
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "ThreadChannel{} " + super.toString();
     }
 }
