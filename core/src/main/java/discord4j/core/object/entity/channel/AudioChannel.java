@@ -22,14 +22,9 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Region;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.spec.VoiceChannelEditMono;
-import discord4j.core.spec.VoiceChannelEditSpec;
-import discord4j.core.spec.VoiceChannelJoinMono;
-import discord4j.core.spec.VoiceChannelJoinSpec;
-import discord4j.core.spec.legacy.LegacyAudioChannelEditSpec;
+import discord4j.core.spec.AudioChannelJoinMono;
+import discord4j.core.spec.AudioChannelJoinSpec;
 import discord4j.core.spec.legacy.LegacyAudioChannelJoinSpec;
-import discord4j.core.spec.legacy.LegacyVoiceChannelEditSpec;
-import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.discordjson.possible.Possible;
@@ -96,7 +91,7 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
      * @param spec A {@link Consumer} that provides a "blank" {@link LegacyAudioChannelJoinSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceConnection}, indicating a
      * connection to the channel has been established. If an error is received, it is emitted through the {@code Mono}.
-     * @deprecated use {@link #join(VoiceChannelJoinSpec)} or {@link #join()} which offer an immutable approach to build
+     * @deprecated use {@link #join(AudioChannelJoinSpec)} or {@link #join()} which offer an immutable approach to build
      * specs
      */
     @Deprecated
@@ -111,13 +106,13 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
 
     /**
      * Request to join this voice channel upon subscription. Properties specifying how to join this voice channel can be
-     * set via the {@code withXxx} methods of the returned {@link VoiceChannelJoinMono}. The resulting {@link
+     * set via the {@code withXxx} methods of the returned {@link AudioChannelJoinMono}. The resulting {@link
      * VoiceConnection} will be available to you from the {@code Mono} but also through a {@link
      * VoiceConnectionRegistry} and can be obtained through {@link GatewayDiscordClient#getVoiceConnectionRegistry()}.
      * Additionally, the resulting {@code VoiceConnection} can be retrieved from the associated guild through {@link
      * Guild#getVoiceConnection()} and through {@link #getVoiceConnection()}.
      *
-     * @return A {@link VoiceChannelJoinMono} where, upon successful completion, emits a {@link VoiceConnection},
+     * @return A {@link AudioChannelJoinMono} where, upon successful completion, emits a {@link VoiceConnection},
      * indicating a connection to the channel has been established. If an error is received, it is emitted through the
      * {@code VoiceChannelJoinMono}.
      */
@@ -207,33 +202,6 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
         return getGuild()
                 .flatMap(Guild::getVoiceConnection)
                 .filterWhen(voiceConnection -> voiceConnection.getChannelId().map(channelId -> channelId.equals(getId())));
-    }
-
-    /**
-     * Requests to edit this voice channel. Properties specifying how to edit this voice channel can be set via the
-     * {@code withXxx} methods of the returned {@link AudioChannelEditMono}.
-     *
-     * @return A {@link AudioChannelEditMono} where, upon successful completion, emits the edited {@link AudioChannel}.
-     * If an error is received, it is emitted through the {@code AudioChannelEditMono}.
-     */
-    public AudioChannelEditMono edit() {
-        return AudioChannelEditMono.of(this);
-    }
-
-    /**
-     * Requests to edit this audio channel.
-     *
-     * @param spec an immutable object that specifies how to edit this voice channel
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link AudioChannel}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<AudioChannel> edit(AudioChannelEditSpec spec) {
-        Objects.requireNonNull(spec);
-        return Mono.defer(
-                        () -> getClient().getRestClient().getChannelService()
-                                .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
-                .map(data -> EntityUtil.getChannel(getClient(), data))
-                .cast(AudioChannel.class);
     }
 
     @Override

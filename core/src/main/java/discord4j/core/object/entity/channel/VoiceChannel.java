@@ -17,6 +17,8 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.spec.VoiceChannelEditMono;
+import discord4j.core.spec.VoiceChannelEditSpec;
 import discord4j.core.spec.legacy.LegacyVoiceChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
@@ -85,7 +87,7 @@ public final class VoiceChannel extends AudioChannel {
      * @return A {@link VoiceChannelEditMono} where, upon successful completion, emits the edited {@link VoiceChannel}.
      * If an error is received, it is emitted through the {@code VoiceChannelEditMono}.
      */
-    public AudioChannelEditMono edit() {
+    public VoiceChannelEditMono edit() {
         return VoiceChannelEditMono.of(this);
     }
 

@@ -25,8 +25,6 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.StageInstance;
 import discord4j.core.spec.StageChannelEditMono;
 import discord4j.core.spec.StageChannelEditSpec;
-import discord4j.core.spec.StageChannelJoinMono;
-import discord4j.core.spec.StageChannelJoinSpec;
 import discord4j.core.spec.legacy.LegacyStageChannelEditSpec;
 import discord4j.core.spec.legacy.LegacyStageChannelJoinSpec;
 import discord4j.core.util.EntityUtil;
@@ -46,7 +44,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /** A Discord stage channel. */
-public final class StageChannel extends VoiceChannel implements CategorizableChannel {
+public final class StageChannel extends AudioChannel implements CategorizableChannel {
 
     /**
      * Constructs an {@code StageChannel} with an associated {@link GatewayDiscordClient} and Discord data.
@@ -123,128 +121,6 @@ public final class StageChannel extends VoiceChannel implements CategorizableCha
                                 .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(StageChannel.class);
-    }
-
-    /**
-     * Requests to retrieve the voice states of this stage channel.
-     *
-     * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of this stage channel. If an
-     * error is received, it is emitted through the {@code Flux}.
-     */
-    public Flux<VoiceState> getVoiceStates() {
-        return Flux.from(getClient().getGatewayResources().getStore()
-                .execute(ReadActions.getVoiceStatesInChannel(getGuildId().asLong(), getId().asLong())))
-                .map(data -> new VoiceState(getClient(), data));
-    }
-
-    /**
-     * Request to join this stage channel upon subscription. The resulting {@link VoiceConnection} will be available to
-     * you from the {@code Mono} but also through a {@link VoiceConnectionRegistry} and can be obtained through {@link
-     * GatewayDiscordClient#getVoiceConnectionRegistry()}. Additionally, the resulting {@code VoiceConnection} can be
-     * retrieved from the associated guild through {@link Guild#getVoiceConnection()} and through {@link
-     * #getVoiceConnection()}.
-     *
-     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyStageChannelJoinSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceConnection}, indicating a
-     * connection to the channel has been established. If an error is received, it is emitted through the {@code Mono}.
-     * @deprecated use {@link #join(StageChannelJoinSpec)} or {@link #join()} which offer an immutable approach to build
-     * specs
-     */
-    @Deprecated
-    public Mono<VoiceConnection> join(final Consumer<? super LegacyStageChannelJoinSpec> spec) {
-        return Mono.defer(() -> {
-            final LegacyStageChannelJoinSpec mutatedSpec = new LegacyStageChannelJoinSpec(getClient(), this);
-            spec.accept(mutatedSpec);
-
-            return mutatedSpec.asRequest();
-        });
-    }
-
-    /**
-     * Request to join this stage channel upon subscription. Properties specifying how to join this stage channel can be
-     * set via the {@code withXxx} methods of the returned {@link StageChannelJoinMono}. The resulting {@link
-     * VoiceConnection} will be available to you from the {@code Mono} but also through a {@link
-     * VoiceConnectionRegistry} and can be obtained through {@link GatewayDiscordClient#getVoiceConnectionRegistry()}.
-     * Additionally, the resulting {@code VoiceConnection} can be retrieved from the associated guild through {@link
-     * Guild#getVoiceConnection()} and through {@link #getVoiceConnection()}.
-     *
-     * @return A {@link StageChannelJoinMono} where, upon successful completion, emits a {@link VoiceConnection},
-     * indicating a connection to the channel has been established. If an error is received, it is emitted through the
-     * {@code StageChannelJoinMono}.
-     */
-    public StageChannelJoinMono join() {
-        return StageChannelJoinMono.of(this);
-    }
-
-    /**
-     * Request to join this stage channel upon subscription. The resulting {@link VoiceConnection} will be available to
-     * you from the {@code Mono} but also through a {@link VoiceConnectionRegistry} and can be obtained through {@link
-     * GatewayDiscordClient#getVoiceConnectionRegistry()}. Additionally, the resulting {@code VoiceConnection} can be
-     * retrieved from the associated guild through {@link Guild#getVoiceConnection()} and through {@link
-     * #getVoiceConnection()}.
-     *
-     * @param spec an immutable object that specifies how to join this stage channel
-     * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceConnection}, indicating a
-     * connection to the channel has been established. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<VoiceConnection> join(StageChannelJoinSpec spec) {
-        Objects.requireNonNull(spec);
-        return Mono.defer(() -> spec.asRequest().apply(this));
-    }
-
-    /**
-     * Sends a join request to the gateway
-     * <p>
-     * This method does not trigger any logic and requires external state handling
-     *
-     * @param selfMute if the client should be mutes
-     * @param selfDeaf if the client should be deaf
-     * @return An empty mono which completes when the payload was sent to the gateway
-     */
-    public Mono<Void> sendConnectVoiceState(final boolean selfMute, final boolean selfDeaf) {
-        final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
-        final int shardId = clientGroup.computeShardIndex(getGuildId());
-        return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
-                VoiceStateUpdate.builder()
-                        .guildId(getGuildId().asString())
-                        .channelId(getId().asString())
-                        .selfMute(selfMute)
-                        .selfDeaf(selfDeaf)
-                        .build(), shardId));
-    }
-
-    /**
-     * Sends a leave request to the gateway
-     * <p>
-     * This method does not replace {@link VoiceConnection#disconnect()} when the channel was joined by using
-     * {@link StageChannel#join(StageChannelJoinSpec)}
-     *
-     * @return An empty mono which completes when the payload was sent to the gateway
-     */
-    public Mono<Void> sendDisconnectVoiceState() {
-        final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
-        final int shardId = clientGroup.computeShardIndex(getGuildId());
-        return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
-                VoiceStateUpdate.builder()
-                        .guildId(getGuildId().asString())
-                        .selfMute(false)
-                        .selfDeaf(false)
-                        .build(), shardId));
-    }
-
-    /**
-     * Requests to determine if the member represented by the provided {@link Snowflake} is connected to this stage
-     * channel.
-     *
-     * @param memberId The ID of the member to check.
-     * @return A {@link Mono} where, upon successful completion, emits {@code true} if the member represented by the
-     * provided {@link Snowflake} is connected to this stage channel, {@code false} otherwise. If an error is received,
-     * it is emitted through the {@code Mono}.
-     */
-    public Mono<Boolean> isMemberConnected(final Snowflake memberId) {
-        return getVoiceStates()
-                .map(VoiceState::getUserId)
-                .any(memberId::equals);
     }
 
     /**
