@@ -104,7 +104,7 @@ public class ExampleInteractions {
                             return event.deferReply()
                                     .then(event.getTargetMessage())
                                     .flatMap(it -> it.addReaction(ReactionEmoji.unicode("✅")))
-                                    .then(event.reply("Done!"));
+                                    .then(event.editReply("Done!"));
                         }
                         return Mono.empty();
                     });
