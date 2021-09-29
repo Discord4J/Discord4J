@@ -28,6 +28,7 @@ import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.core.spec.MemberBanQueryMono;
 import discord4j.core.spec.legacy.LegacyBanQuerySpec;
 import discord4j.core.spec.legacy.LegacyGuildMemberEditSpec;
+import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.PartialMemberData;
@@ -36,6 +37,7 @@ import discord4j.discordjson.json.gateway.ImmutableRequestGuildMembers;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
+import discord4j.rest.util.Image;
 import discord4j.rest.util.PermissionSet;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -52,8 +54,14 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static discord4j.rest.util.Image.Format.GIF;
+import static discord4j.rest.util.Image.Format.PNG;
+
 /** A partial Discord guild member. */
 public class PartialMember extends User {
+
+    /** The path for member avatar image URLs. */
+    private static final String AVATAR_IMAGE_PATH = "guilds/%s/users/%s/avatars/%s";
 
     private final PartialMemberData data;
 
@@ -237,6 +245,61 @@ public class PartialMember extends User {
      */
     public String getNicknameMention() {
         return "<@!" + getId().asString() + ">";
+    }
+
+    /**
+     * Gets if the member's guild avatar is animated.
+     *
+     * @return {@code true} if the user's avatar is animated, {@code false} otherwise.
+     */
+    public final boolean hasAnimatedGuildAvatar() {
+        final String avatar = data.avatar().orElse(null);
+        return (avatar != null) && avatar.startsWith("a_");
+    }
+
+    /**
+     * Gets the member's guild avatar URL, if present.
+     *
+     * @param format the format for the URL.
+     * @return The member's guild avatar URL, if present.
+     */
+    public final Optional<String> getGuildAvatarUrl(final Image.Format format) {
+        return data.avatar().map(avatar -> ImageUtil.getUrl(
+                String.format(AVATAR_IMAGE_PATH, guildId, getId().asString(), avatar), format));
+    }
+
+    /**
+     * Gets the member's effective avatar URL.
+     * If the member does not have a guild avatar, this defaults to the user's global avatar.
+     *
+     * @return The member's effective avatar URL.
+     */
+    public final String getEffectiveAvatarUrl() {
+        final boolean animated = hasAnimatedGuildAvatar();
+        return getGuildAvatarUrl(animated ? GIF : PNG).orElse(getDefaultAvatarUrl());
+    }
+
+    /**
+     * Gets the member's guild avatar. This is the avatar at the url given by {@link #getGuildAvatarUrl(Image.Format)}.
+     * </p>
+     * If the member does not have a guild avatar, this method emits {@code Mono.empty()}.
+     *
+     * @param format The format for the avatar.
+     * @return a {@link Mono} where, upon successful completion, emotes the {@link Image guild avatar} of the member.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getGuildAvatar(final Image.Format format) {
+        return Mono.justOrEmpty(getGuildAvatarUrl(format)).flatMap(Image::ofUrl);
+    }
+
+    /**
+     * Gets the member's effective avatar. This is the avatar at the url given by {@link #getEffectiveAvatarUrl()}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image avatar} of the user.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<Image> getEffectiveAvatar() {
+        return Image.ofUrl(getEffectiveAvatarUrl());
     }
 
     /**
