@@ -61,9 +61,9 @@ public class UserInteractionEvent extends ApplicationCommandInteractionEvent {
      */
     public User getResolvedUser() {
         return getInteraction().getCommandInteraction()
-            .flatMap(ApplicationCommandInteraction::getResolved)
-            .flatMap(it -> it.getUser(getTargetId()))
-            .orElseThrow(IllegalStateException::new);
+                .flatMap(ApplicationCommandInteraction::getResolved)
+                .flatMap(it -> it.getUser(getTargetId()))
+                .orElseThrow(IllegalStateException::new);
     }
 
     /**

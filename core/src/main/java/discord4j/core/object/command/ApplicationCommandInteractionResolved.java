@@ -196,11 +196,11 @@ public class ApplicationCommandInteractionResolved implements DiscordObject {
      */
     public Map<Snowflake, Message> getMessages() {
         return data.messages().toOptional()
-            .map(map -> map.entrySet().stream()
-                .map(entry -> Tuples.of(Snowflake.of(entry.getKey()),
-                    new Message(gateway, entry.getValue())))
-                .collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2)))
-            .orElseGet(Collections::emptyMap);
+                .map(map -> map.entrySet().stream()
+                        .map(entry -> Tuples.of(Snowflake.of(entry.getKey()),
+                                new Message(gateway, entry.getValue())))
+                        .collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2)))
+                .orElseGet(Collections::emptyMap);
     }
 
     @Override

@@ -61,9 +61,9 @@ public class MessageInteractionEvent extends ApplicationCommandInteractionEvent 
      */
     public Message getResolvedMessage() {
         return getInteraction().getCommandInteraction()
-            .flatMap(ApplicationCommandInteraction::getResolved)
-            .flatMap(it -> it.getMessage(getTargetId()))
-            .orElseThrow(IllegalStateException::new);
+                .flatMap(ApplicationCommandInteraction::getResolved)
+                .flatMap(it -> it.getMessage(getTargetId()))
+                .orElseThrow(IllegalStateException::new);
     }
 
     /**
