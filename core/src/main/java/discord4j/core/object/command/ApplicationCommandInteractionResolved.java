@@ -21,6 +21,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.ApplicationCommandInteractionResolvedData;
@@ -176,6 +177,30 @@ public class ApplicationCommandInteractionResolved implements DiscordObject {
                                 Optional.ofNullable(guildId).orElseThrow(IllegalStateException::new))))
                         .collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2)))
                 .orElseGet(Collections::emptyMap);
+    }
+
+    /**
+     * Gets the resolved message with the given ID, if present.
+     *
+     * @param messageId the ID of the message to get
+     * @return the resolved message, if present
+     */
+    public Optional<Message> getMessage(Snowflake messageId) {
+        return Optional.ofNullable(getMessages().get(messageId));
+    }
+
+    /**
+     * Gets a map containing the resolved messages associated by their IDs
+     *
+     * @return the resolved messages
+     */
+    public Map<Snowflake, Message> getMessages() {
+        return data.messages().toOptional()
+            .map(map -> map.entrySet().stream()
+                .map(entry -> Tuples.of(Snowflake.of(entry.getKey()),
+                    new Message(gateway, entry.getValue())))
+                .collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2)))
+            .orElseGet(Collections::emptyMap);
     }
 
     @Override

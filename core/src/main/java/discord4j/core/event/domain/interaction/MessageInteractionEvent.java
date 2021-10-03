@@ -55,6 +55,18 @@ public class MessageInteractionEvent extends ApplicationCommandInteractionEvent 
     // We can assume these properties are present, because this is a message command interaction.
 
     /**
+     * Gets the resolved targeted Message.
+     *
+     * @return The resolved targeted Message.
+     */
+    public Message getResolvedMessage() {
+        return getInteraction().getCommandInteraction()
+            .flatMap(ApplicationCommandInteraction::getResolved)
+            .flatMap(it -> it.getMessage(getTargetId()))
+            .orElseThrow(IllegalStateException::new);
+    }
+
+    /**
      * Gets the ID of the targeted Message.
      *
      * @return The ID of the targeted Message.
