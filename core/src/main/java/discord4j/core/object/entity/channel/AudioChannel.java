@@ -26,6 +26,7 @@ import discord4j.core.spec.AudioChannelJoinMono;
 import discord4j.core.spec.AudioChannelJoinSpec;
 import discord4j.core.spec.legacy.LegacyAudioChannelJoinSpec;
 import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.VoiceStateData;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.GatewayClientGroup;
@@ -38,14 +39,16 @@ import reactor.core.publisher.Mono;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-/** A Discord audio channel. */
+/**
+ * A Discord audio channel.
+ */
 public class AudioChannel extends BaseTopLevelGuildChannel implements CategorizableChannel {
 
     /**
      * Constructs an {@code AudioChannel} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data The raw data as represented by Discord, must be non-null.
+     * @param data    The raw data as represented by Discord, must be non-null.
      */
     public AudioChannel(final GatewayDiscordClient gateway, final ChannelData data) {
         super(gateway, data);
@@ -78,7 +81,7 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
     public Flux<VoiceState> getVoiceStates() {
         return Flux.from(getClient().getGatewayResources().getStore()
                 .execute(ReadActions.getVoiceStatesInChannel(getGuildId().asLong(), getId().asLong())))
-                .map(data -> new VoiceState(getClient(), data));
+            .map(data -> new VoiceState(getClient(), data));
     }
 
     /**
@@ -150,11 +153,13 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
         final int shardId = clientGroup.computeShardIndex(getGuildId());
         return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
                 VoiceStateUpdate.builder()
+                    .voiceStateData(VoiceStateData.builder()
                         .guildId(getGuildId().asString())
                         .channelId(getId().asString())
                         .selfMute(selfMute)
                         .selfDeaf(selfDeaf)
-                        .build(), shardId));
+                        .build())
+                    .build(), shardId));
     }
 
     /**
@@ -170,10 +175,12 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
         final int shardId = clientGroup.computeShardIndex(getGuildId());
         return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
                 VoiceStateUpdate.builder()
+                    .voiceStateData(VoiceStateData.builder()
                         .guildId(getGuildId().asString())
                         .selfMute(false)
                         .selfDeaf(false)
-                        .build(), shardId));
+                        .build())
+                    .build(), shardId));
     }
 
     /**
@@ -187,8 +194,8 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
      */
     public Mono<Boolean> isMemberConnected(final Snowflake memberId) {
         return getVoiceStates()
-                .map(VoiceState::getUserId)
-                .any(memberId::equals);
+            .map(VoiceState::getUserId)
+            .any(memberId::equals);
     }
 
     /**
@@ -200,8 +207,8 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
      */
     public Mono<VoiceConnection> getVoiceConnection() {
         return getGuild()
-                .flatMap(Guild::getVoiceConnection)
-                .filterWhen(voiceConnection -> voiceConnection.getChannelId().map(channelId -> channelId.equals(getId())));
+            .flatMap(Guild::getVoiceConnection)
+            .filterWhen(voiceConnection -> voiceConnection.getChannelId().map(channelId -> channelId.equals(getId())));
     }
 
     @Override

@@ -46,11 +46,16 @@ class StageInstanceDispatchHandlers {
     static Mono<StageRequestToSpeakEvent> stageRequestToSpeak(DispatchContext<VoiceStateUpdate, VoiceStateData> context) {
         GatewayDiscordClient gateway = context.getGateway();
         VoiceStateUpdate voiceStateUpdate = context.getDispatch();
+        VoiceStateData voiceStateData = voiceStateUpdate.voiceStateData();
 
-        if (voiceStateUpdate.channelId().isPresent() && voiceStateUpdate.suppress() && voiceStateUpdate.requestToSpeakTimestamp().isPresent()) {
-            Snowflake channelId = voiceStateUpdate.channelId().map(Snowflake::of).get();
-            Snowflake guildId = Snowflake.of(voiceStateUpdate.guildId());
-            Mono<Member> memberMono = voiceStateUpdate.member().toOptional().map(data -> Mono.just(new Member(gateway, data, guildId.asLong()))).orElse(gateway.getMemberById(guildId, Snowflake.of(voiceStateUpdate.userId())));
+        if (voiceStateData.channelId().isPresent()
+            && !voiceStateData.guildId().isAbsent()
+            && voiceStateData.suppress()
+            && voiceStateData.requestToSpeakTimestamp().isPresent()) {
+
+            Snowflake channelId = voiceStateData.channelId().map(Snowflake::of).get();
+            Snowflake guildId = Snowflake.of(voiceStateData.guildId().get());
+            Mono<Member> memberMono = voiceStateData.member().toOptional().map(data -> Mono.just(new Member(gateway, data, guildId.asLong()))).orElse(gateway.getMemberById(guildId, Snowflake.of(voiceStateData.userId())));
 
             return gateway.getStageInstanceByChannelId(channelId).flatMap(stageInstance -> memberMono.flatMap(member -> Mono.just(new StageRequestToSpeakEvent(gateway, context.getShardInfo(), stageInstance, member))));
         } else {

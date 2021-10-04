@@ -24,12 +24,24 @@ import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.AudioChannel;
-import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.discordjson.json.VoiceStateData;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.intent.Intent;
 import discord4j.gateway.json.ShardGatewayPayload;
-import discord4j.voice.*;
+import discord4j.voice.AudioProvider;
+import discord4j.voice.AudioReceiver;
+import discord4j.voice.LocalVoiceReceiveTaskFactory;
+import discord4j.voice.LocalVoiceSendTaskFactory;
+import discord4j.voice.VoiceChannelRetrieveTask;
+import discord4j.voice.VoiceConnection;
+import discord4j.voice.VoiceDisconnectTask;
+import discord4j.voice.VoiceGatewayOptions;
+import discord4j.voice.VoiceReceiveTaskFactory;
+import discord4j.voice.VoiceSendTaskFactory;
+import discord4j.voice.VoiceServerOptions;
+import discord4j.voice.VoiceServerUpdateTask;
+import discord4j.voice.VoiceStateUpdateTask;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Flux;
@@ -139,10 +151,12 @@ interface AudioChannelJoinSpecGenerator extends Spec<Function<AudioChannel, Mono
             final int shardId = clientGroup.computeShardIndex(guildId);
             final Mono<Void> sendVoiceStateUpdate = clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
                     VoiceStateUpdate.builder()
-                            .guildId(guildId.asString())
-                            .channelId(channelId.asString())
-                            .selfMute(selfMute())
-                            .selfDeaf(selfDeaf())
+                            .voiceStateData(VoiceStateData.builder()
+                                .guildId(guildId.asString())
+                                .channelId(channelId.asString())
+                                .selfMute(selfMute())
+                                .selfDeaf(selfDeaf())
+                                .build())
                             .build(), shardId));
 
             final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = onVoiceStateUpdates(gateway, guildId).next();
