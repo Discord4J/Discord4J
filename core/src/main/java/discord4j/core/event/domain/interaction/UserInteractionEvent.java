@@ -55,6 +55,18 @@ public class UserInteractionEvent extends ApplicationCommandInteractionEvent {
     // We can assume these properties are present, because this is a user command interaction.
 
     /**
+     * Gets the resolved targeted User.
+     *
+     * @return The resolved targeted User.
+     */
+    public User getResolvedUser() {
+        return getInteraction().getCommandInteraction()
+                .flatMap(ApplicationCommandInteraction::getResolved)
+                .flatMap(it -> it.getUser(getTargetId()))
+                .orElseThrow(IllegalStateException::new);
+    }
+
+    /**
      * Gets the ID of the targeted User.
      *
      * @return The ID of the targeted User.
