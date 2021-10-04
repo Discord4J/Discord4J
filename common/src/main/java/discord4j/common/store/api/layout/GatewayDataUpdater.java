@@ -314,10 +314,39 @@ public interface GatewayDataUpdater {
      */
     Mono<Void> onReady(Ready dispatch);
 
+    /**
+     * Updates the internal state of the store according to the given {@link StageInstanceCreate} gateway dispatch.
+     * This will typically perform an insert operation on the related {@link StageInstanceData}.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done, returning the state of the
+     * {@link StageInstanceData} after the insert
+     */
     Mono<StageInstanceData> onStageInstanceCreate(int shardIndex, StageInstanceCreate dispatch);
 
+    /**
+     * Updates the internal state of the store according to the given {@link StageInstanceCreate} gateway dispatch.
+     * This will typically perform an insert operation on the related {@link StageInstanceData} that is already present
+     * in the store.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done, returning the old state of the
+     * {@link StageInstanceData} before the update
+     */
     Mono<StageInstanceData> onStageInstanceUpdate(int shardIndex, StageInstanceUpdate dispatch);
 
+    /**
+     * Updates the internal state of the store according to the given {@link StageInstanceCreate} gateway dispatch.
+     * This will typically perform an delete operation on the related {@link StageInstanceData} that is already present
+     * in the store.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done, returning the old state of the
+     * {@link StageInstanceData} before the delete
+     */
     Mono<StageInstanceData> onStageInstanceDelete(int shardIndex, StageInstanceDelete dispatch);
 
     /**

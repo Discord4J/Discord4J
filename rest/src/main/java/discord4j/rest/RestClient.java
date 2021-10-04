@@ -387,6 +387,13 @@ public class RestClient {
         return userService.modifyCurrentUser(request);
     }
 
+    /**
+     * Requests to retrieve a stage instance.
+     *
+     * @param channelId The channel id associated to the stage instance.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link StageInstanceData} associated to the
+     * supplied channel ID. If an error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<StageInstanceData> getStageInstance(final Snowflake channelId) {
         return stageInstanceService.getStageInstance(channelId.asLong());
     }
@@ -469,6 +476,12 @@ public class RestClient {
         return inviteService;
     }
 
+    /**
+     * Access a low-level representation of the API endpoints for the Stage Instance resource. It is recommended you use
+     * the {@link #getStageInstance(Snowflake)} method.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
     public StageInstanceService getStageInstanceService() {
         return this.stageInstanceService;
     }

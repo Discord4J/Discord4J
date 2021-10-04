@@ -168,10 +168,10 @@ public interface EntityRetriever {
     Flux<GuildEmoji> getGuildEmojis(Snowflake guildId);
 
     /**
-     * Requests to retrieve the stage instance represented by the supplied channel ID.
+     * Requests to retrieve the stage instance associated to the supplied channel ID.
      *
      * @param channelId The ID of the channel.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link StageInstance} as represented by the supplied
+     * @return A {@link Mono} where, upon successful completion, emits the {@link StageInstance} associated to the supplied
      *         channel ID. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId);

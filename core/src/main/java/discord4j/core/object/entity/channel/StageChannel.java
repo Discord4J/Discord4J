@@ -18,7 +18,6 @@ package discord4j.core.object.entity.channel;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.Region;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.StageInstance;
@@ -28,10 +27,10 @@ import discord4j.core.spec.legacy.LegacyStageChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.StageInstanceCreateRequest;
-import discord4j.discordjson.possible.Possible;
 import discord4j.voice.VoiceConnection;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -40,31 +39,13 @@ import java.util.function.Consumer;
 public final class StageChannel extends AudioChannel implements CategorizableChannel {
 
     /**
-     * Constructs an {@code StageChannel} with an associated {@link GatewayDiscordClient} and Discord data.
+     * Constructs a {@code StageChannel} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
     public StageChannel(final GatewayDiscordClient gateway, final ChannelData data) {
         super(gateway, data);
-    }
-
-    /**
-     * Gets the bitrate (in bits) for this stage channel.
-     *
-     * @return Gets the bitrate (in bits) for this stage channel.
-     */
-    public int getBitrate() {
-        return getData().bitrate().toOptional().orElseThrow(IllegalStateException::new);
-    }
-
-    /**
-     * Gets the voice region id for the stage channel.
-     *
-     * @return The voice region id for the stage channel.
-     */
-    public Region.Id getRtcRegion() {
-        return Possible.flatOpt(getData().rtcRegion()).map(Region.Id::of).orElse(Region.Id.AUTOMATIC);
     }
 
     /**
@@ -144,16 +125,35 @@ public final class StageChannel extends AudioChannel implements CategorizableCha
                 .filterWhen(voiceConnection -> voiceConnection.getChannelId().map(channelId -> channelId.equals(getId())));
     }
 
+    /**
+     * Requests to retrieve the voice states of this channel with a request to speak.
+     *
+     * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of this stage channel with a
+     * request to speak. If an error is received, it is emitted through the {@code Flux}.
+     */
     public Flux<VoiceState> getRequestsToSpeak() {
         return getVoiceStates()
                 .filter(voiceState -> voiceState.getRequestedToSpeakAt().isPresent());
     }
 
+    /**
+     * Requests to retrieve the voice states of this channel associated to speaker users.
+     *
+     * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of this stage channel
+     * associated to speaker users. If an error is received, it is emitted through the {@code Flux}.
+     */
     public Flux<VoiceState> getSpeakers() {
         return getVoiceStates()
                 .filter(voiceState -> !voiceState.isSuppressed() && !voiceState.getRequestedToSpeakAt().isPresent());
     }
 
+    /**
+     * Requests to retrieve if there is a {@link StageInstance} for this channel.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits {@code true} if this stage channel
+     *         is associated with a {@link StageInstance}, {@code false} otherwise. If an error is received,
+     *         it is emitted through the {@code Mono}.
+     */
     public Mono<Boolean> isStageLive() {
         return getClient()
                 .getRestClient()
@@ -161,11 +161,20 @@ public final class StageChannel extends AudioChannel implements CategorizableCha
                 .getStageInstance(this.getId().asLong()).map(Objects::nonNull);
     }
 
-    public Mono<StageInstance> startStageLive(String topic, Integer privacyLevel, String reason) {
+    /**
+     * Requests to start a {@link StageInstance} on this channel.
+     *
+     * @param topic The topic of this {@link StageInstance}
+     * @param reason The reason, if present
+     * @return A {@link Mono} where, upon successful completion, emits a {@link StageInstance} created
+     *         for this channel with the specified {@param topic}. If an error is received, it is emitted
+     *         through the {@code Mono}
+     */
+    public Mono<StageInstance> startStageLive(String topic, @Nullable String reason) {
         return getClient()
                 .getRestClient()
                 .getStageInstanceService()
-                .createStageInstance(StageInstanceCreateRequest.builder().channelId(this.getId().asLong()).topic(topic).privacyLevel(privacyLevel).build(), reason)
+                .createStageInstance(StageInstanceCreateRequest.builder().channelId(this.getId().asLong()).topic(topic).build(), reason)
                 .map(stageInstanceData -> new StageInstance(getClient(), stageInstanceData));
     }
 

@@ -2,13 +2,11 @@ package discord4j.core.event.dispatch;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.StageInstanceCreateEvent;
 import discord4j.core.event.domain.StageInstanceDeleteEvent;
 import discord4j.core.event.domain.StageInstanceUpdateEvent;
 import discord4j.core.event.domain.StageRequestToSpeakEvent;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.PartialMember;
 import discord4j.core.object.entity.StageInstance;
 import discord4j.discordjson.json.StageInstanceData;
 import discord4j.discordjson.json.VoiceStateData;

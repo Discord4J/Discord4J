@@ -18,20 +18,14 @@
 package discord4j.rest.entity;
 
 import discord4j.common.util.Snowflake;
-import discord4j.discordjson.json.ChannelData;
-import discord4j.discordjson.json.DMCreateRequest;
-import discord4j.discordjson.json.RoleData;
-import discord4j.discordjson.json.RoleModifyRequest;
 import discord4j.discordjson.json.StageInstanceData;
 import discord4j.discordjson.json.StageInstanceModifyRequest;
-import discord4j.discordjson.json.UserData;
 import discord4j.rest.RestClient;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 /**
- * Represents a user (bot or normal) entity in Discord. Users can spawn across the entire platform, be members of
- * guilds, participate in text and voice chat, and much more.
+ * Represents a stage instance entity in Discord.
  */
 public class RestStageInstance {
 
@@ -44,11 +38,11 @@ public class RestStageInstance {
     }
 
     /**
-     * Create a {@link RestStageInstance} for a given ID. This method does not perform any API request.
+     * Create a {@link RestStageInstance} for a given channel ID. This method does not perform any API request.
      *
      * @param restClient the client to make API requests
-     * @param id the ID of this entity
-     * @return a {@code RestUser} represented by this {@code id}.
+     * @param channelId the channel ID of this entity
+     * @return a {@link RestStageInstance} represented by this {@param channelId}.
      */
     public static RestStageInstance create(RestClient restClient, Snowflake channelId) {
         return new RestStageInstance(restClient, channelId.asLong());
@@ -59,24 +53,32 @@ public class RestStageInstance {
     }
 
     /**
-     * Returns the ID of this user.
+     * Returns the channel ID.
      *
-     * @return The ID of this user
+     * @return The channel ID of this stage instance
      */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
     /**
-     * Retrieve this user's data upon subscription.
+     * Retrieve this stage instance's data upon subscription.
      *
-     * @return a {@link Mono} where, upon successful completion, emits the {@link UserData} belonging to this user.
+     * @return a {@link Mono} where, upon successful completion, emits the {@link StageInstanceData} belonging to this stage instance.
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<StageInstanceData> getData() {
         return restClient.getStageInstanceService().getStageInstance(channelId);
     }
 
+    /**
+     * Requests to edit this stage instance.
+     *
+     * @param request A {@link StageInstanceModifyRequest} to parameterize this request.
+     * @param reason The reason, if present.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link StageInstanceData}. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
     public Mono<StageInstanceData> edit(final StageInstanceModifyRequest request, @Nullable String reason) {
         return restClient.getStageInstanceService().modifyStageInstance(channelId, request, reason);
     }

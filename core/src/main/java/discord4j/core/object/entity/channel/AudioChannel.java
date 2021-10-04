@@ -42,7 +42,7 @@ import java.util.function.Consumer;
 public class AudioChannel extends BaseTopLevelGuildChannel implements CategorizableChannel {
 
     /**
-     * Constructs an {@code VoiceChannel} with an associated {@link GatewayDiscordClient} and Discord data.
+     * Constructs an {@code AudioChannel} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -52,27 +52,27 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
     }
 
     /**
-     * Gets the bitrate (in bits) for this voice channel.
+     * Gets the bitrate (in bits) for this audio channel.
      *
-     * @return Gets the bitrate (in bits) for this voice channel.
+     * @return Gets the bitrate (in bits) for this audio channel.
      */
     public int getBitrate() {
         return getData().bitrate().toOptional().orElseThrow(IllegalStateException::new);
     }
 
     /**
-     * Gets the voice region id for the voice channel.
+     * Gets the voice region id for the audio channel.
      *
-     * @return The voice region id for the voice channel.
+     * @return The voice region id for the audio channel.
      */
     public Region.Id getRtcRegion() {
         return Possible.flatOpt(getData().rtcRegion()).map(Region.Id::of).orElse(Region.Id.AUTOMATIC);
     }
 
     /**
-     * Requests to retrieve the voice states of this voice channel.
+     * Requests to retrieve the voice states of this audio channel.
      *
-     * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of this voice channel. If an
+     * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of this audio channel. If an
      * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<VoiceState> getVoiceStates() {
@@ -82,7 +82,7 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
     }
 
     /**
-     * Request to join this voice channel upon subscription. The resulting {@link VoiceConnection} will be available to
+     * Request to join this audio channel upon subscription. The resulting {@link VoiceConnection} will be available to
      * you from the {@code Mono} but also through a {@link VoiceConnectionRegistry} and can be obtained through {@link
      * GatewayDiscordClient#getVoiceConnectionRegistry()}. Additionally, the resulting {@code VoiceConnection} can be
      * retrieved from the associated guild through {@link Guild#getVoiceConnection()} and through {@link
@@ -105,7 +105,7 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
     }
 
     /**
-     * Request to join this voice channel upon subscription. Properties specifying how to join this voice channel can be
+     * Request to join this audio channel upon subscription. Properties specifying how to join this audio channel can be
      * set via the {@code withXxx} methods of the returned {@link AudioChannelJoinMono}. The resulting {@link
      * VoiceConnection} will be available to you from the {@code Mono} but also through a {@link
      * VoiceConnectionRegistry} and can be obtained through {@link GatewayDiscordClient#getVoiceConnectionRegistry()}.
@@ -114,20 +114,20 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
      *
      * @return A {@link AudioChannelJoinMono} where, upon successful completion, emits a {@link VoiceConnection},
      * indicating a connection to the channel has been established. If an error is received, it is emitted through the
-     * {@code VoiceChannelJoinMono}.
+     * {@code AudioChannelJoinMono}.
      */
     public AudioChannelJoinMono join() {
         return AudioChannelJoinMono.of(this);
     }
 
     /**
-     * Request to join this voice channel upon subscription. The resulting {@link VoiceConnection} will be available to
+     * Request to join this audio channel upon subscription. The resulting {@link VoiceConnection} will be available to
      * you from the {@code Mono} but also through a {@link VoiceConnectionRegistry} and can be obtained through {@link
      * GatewayDiscordClient#getVoiceConnectionRegistry()}. Additionally, the resulting {@code VoiceConnection} can be
      * retrieved from the associated guild through {@link Guild#getVoiceConnection()} and through {@link
      * #getVoiceConnection()}.
      *
-     * @param spec an immutable object that specifies how to join this voice channel
+     * @param spec an immutable object that specifies how to join this audio channel
      * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceConnection}, indicating a
      * connection to the channel has been established. If an error is received, it is emitted through the {@code Mono}.
      */
@@ -177,12 +177,12 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
     }
 
     /**
-     * Requests to determine if the member represented by the provided {@link Snowflake} is connected to this voice
+     * Requests to determine if the member represented by the provided {@link Snowflake} is connected to this audio
      * channel.
      *
      * @param memberId The ID of the member to check.
      * @return A {@link Mono} where, upon successful completion, emits {@code true} if the member represented by the
-     * provided {@link Snowflake} is connected to this voice channel, {@code false} otherwise. If an error is received,
+     * provided {@link Snowflake} is connected to this audio channel, {@code false} otherwise. If an error is received,
      * it is emitted through the {@code Mono}.
      */
     public Mono<Boolean> isMemberConnected(final Snowflake memberId) {
@@ -192,11 +192,11 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
     }
 
     /**
-     * Returns the current voice connection registered for this voice channel's guild.
+     * Returns the current voice connection registered for this audio channel's guild.
      *
-     * @return A {@link Mono} of {@link VoiceConnection} for this voice channel's guild if present, or empty otherwise.
+     * @return A {@link Mono} of {@link VoiceConnection} for this audio channel's guild if present, or empty otherwise.
      * The resulting {@code Mono} will also complete empty if the registered voice connection is not associated with
-     * this voice channel.
+     * this audio channel.
      */
     public Mono<VoiceConnection> getVoiceConnection() {
         return getGuild()

@@ -40,6 +40,7 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.Webhook;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.entity.channel.StageChannel;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -452,17 +453,38 @@ public class GatewayDiscordClient implements EntityRetriever {
                 .map(data -> new User(this, data));
     }
 
+    /**
+     * Requests to retrieve a {@link StageInstance}.
+     *
+     * @param channelId The channel ID associated to the {@link StageInstance}.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link StageInstance} associated to the
+     * supplied channel ID. If an error is received, it is emitted through the {@code Mono}.
+     */
     @Override
     public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId) {
         Objects.requireNonNull(channelId);
         return entityRetriever.getStageInstanceByChannelId(channelId);
     }
 
+    /**
+     * Move the {@link Member} represented by this {@link GatewayDiscordClient} to the stage speakers.
+     * Requires the {@link Member} to be connected to a {@link StageChannel}
+     *
+     * @return A {@link Mono} that upon subscription, will move the {@link Member} represented by this
+     * {@link GatewayDiscordClient} to the stage speakers.
+     */
     public Mono<Void> joinStageSpeakers(Snowflake guildId) {
         Objects.requireNonNull(guildId);
         return Mono.defer(() -> getRestClient().getGuildService().modifySelfVoiceState(guildId.asLong(), UpdateCurrentUserVoiceStateRequest.builder().suppress(false).build()));
     }
 
+    /**
+     * Move the {@link Member} represented by this {@link GatewayDiscordClient} to the stage audience.
+     * Requires the {@link Member} to be connected to a {@link StageChannel}
+     *
+     * @return A {@link Mono} that upon subscription, will move the {@link Member} represented by this
+     * {@link GatewayDiscordClient} to the stage audience.
+     */
     public Mono<Void> joinStageAudience(Snowflake guildId) {
         Objects.requireNonNull(guildId);
         return Mono.defer(() -> getRestClient().getGuildService().modifySelfVoiceState(guildId.asLong(), UpdateCurrentUserVoiceStateRequest.builder().suppress(true).build()));
