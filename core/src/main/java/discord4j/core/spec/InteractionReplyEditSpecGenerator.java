@@ -39,43 +39,13 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 
 @Value.Immutable(singleton = true)
-interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<WebhookMessageEditRequest>> {
-
-    Possible<Optional<String>> content();
-
-    Possible<Optional<List<EmbedCreateSpec>>> embeds();
-
-    @Value.Default
-    default List<MessageCreateFields.File> files() {
-        return Collections.emptyList();
-    }
-
-    @Value.Default
-    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
-        return Collections.emptyList();
-    }
-
-    Possible<Optional<AllowedMentions>> allowedMentions();
-
-    Possible<Optional<List<LayoutComponent>>> components();
+interface InteractionReplyEditSpecGenerator extends FilesMessageRequestSpec<WebhookMessageEditRequest> {
 
     @Override
-    default MultipartRequest<WebhookMessageEditRequest> asRequest() {
-        WebhookMessageEditRequest json = WebhookMessageEditRequest.builder()
-                .content(content())
-                .embeds(mapPossibleOptional(embeds(), embeds -> embeds.stream()
-                        .map(EmbedCreateSpec::asRequest)
-                        .collect(Collectors.toList())))
-                .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
-                .components(mapPossible(components(), components -> components
-                        .map(list -> list.stream()
-                                .map(LayoutComponent::getData)
-                                .collect(Collectors.toList()))
-                        .orElse(Collections.emptyList())))
+    default WebhookMessageEditRequest getMessageRequest() {
+        return WebhookMessageEditRequest.builder()
+                .from(getBaseRequest())
                 .build();
-        return MultipartRequest.ofRequestAndFiles(json, Stream.concat(files().stream(), fileSpoilers().stream())
-                .map(MessageCreateFields.File::asRequest)
-                .collect(Collectors.toList()));
     }
 }
 

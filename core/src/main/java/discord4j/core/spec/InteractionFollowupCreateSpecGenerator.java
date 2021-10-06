@@ -36,57 +36,22 @@ import java.util.stream.Stream;
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable(singleton = true)
-interface InteractionFollowupCreateSpecGenerator extends Spec<MultipartRequest<FollowupMessageRequest>> {
-
-    Possible<String> content();
+interface InteractionFollowupCreateSpecGenerator extends FilesMessageRequestSpec<FollowupMessageRequest> {
 
     Possible<String> username();
 
     Possible<String> avatarUrl();
 
-    @Value.Default
-    default boolean tts() {
-        return false;
-    }
-
-    @Value.Default
-    default List<MessageCreateFields.File> files() {
-        return Collections.emptyList();
-    }
-
-    @Value.Default
-    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
-        return Collections.emptyList();
-    }
-
-    @Value.Default
-    default List<EmbedCreateSpec> embeds() {
-        return Collections.emptyList();
-    }
-
-    Possible<AllowedMentions> allowedMentions();
-
-    Possible<List<LayoutComponent>> components();
-
     Possible<Boolean> ephemeral();
 
     @Override
-    default MultipartRequest<FollowupMessageRequest> asRequest() {
-        FollowupMessageRequest request = FollowupMessageRequest.builder()
-                .content(content())
+    default FollowupMessageRequest getMessageRequest() {
+        return FollowupMessageRequest.builder()
+                .from(getBaseRequest())
                 .username(username())
                 .avatarUrl(avatarUrl())
-                .tts(tts())
-                .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
-                .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
-                .components(mapPossible(components(), components -> components.stream()
-                    .map(LayoutComponent::getData)
-                    .collect(Collectors.toList())))
                 .flags(mapPossible(ephemeral(), eph -> eph ? Message.Flag.EPHEMERAL.getFlag() : 0))
                 .build();
-        return MultipartRequest.ofRequestAndFiles(request, Stream.concat(files().stream(), fileSpoilers().stream())
-                .map(MessageCreateFields.File::asRequest)
-                .collect(Collectors.toList()));
     }
 }
 

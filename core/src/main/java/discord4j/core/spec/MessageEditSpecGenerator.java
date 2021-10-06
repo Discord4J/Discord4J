@@ -20,34 +20,28 @@ package discord4j.core.spec;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.discordjson.possible.Possible;
-import discord4j.rest.util.MultipartRequest;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 
 @Value.Immutable(singleton = true)
-interface MessageEditSpecGenerator extends MessageRequestSpec<MultipartRequest<MessageEditRequest>> {
+interface MessageEditSpecGenerator extends FilesMessageRequestSpec<MessageEditRequest> {
 
     Possible<Optional<List<Message.Flag>>> flags();
 
     @Override
-    default MessageEditRequest asRequest() {
-        MessageEditRequest json = MessageEditRequest.builder()
+    default MessageEditRequest getMessageRequest() {
+        return MessageEditRequest.builder()
                 .from(getBaseRequest())
                 .flags(mapPossibleOptional(flags(), f -> f.stream()
                         .mapToInt(Message.Flag::getFlag)
                         .reduce(0, (left, right) -> left | right)))
                 .build();
-        return MultipartRequest.ofRequestAndFiles(json, Stream.concat(files().stream(), fileSpoilers().stream())
-                .map(MessageCreateFields.File::asRequest)
-                .collect(Collectors.toList()));
     }
 }
 
