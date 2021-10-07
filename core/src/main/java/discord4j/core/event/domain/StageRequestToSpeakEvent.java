@@ -7,7 +7,7 @@ import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
 /**
- * Dispatched when a user connected to a stage channel make a request to speak.
+ * Dispatched when a user connected to a stage channel makes a request to speak.
  * <p>
  * This event is dispatched by Discord.
  *

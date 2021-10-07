@@ -457,6 +457,20 @@ public class GatewayDiscordClient implements EntityRetriever {
      * Requests to retrieve a {@link StageInstance}.
      *
      * @param channelId The channel ID associated to the {@link StageInstance}.
+     * @param retrievalStrategy The retreival strategy to use
+     * @return A {@link Mono} where, upon successful completion, emits the {@link StageInstance} associated to the
+     * supplied channel ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId, EntityRetrievalStrategy retrievalStrategy) {
+        Objects.requireNonNull(channelId);
+        Objects.requireNonNull(retrievalStrategy);
+        return withRetrievalStrategy(retrievalStrategy).getStageInstanceByChannelId(channelId);
+    }
+
+    /**
+     * Requests to retrieve a {@link StageInstance}.
+     *
+     * @param channelId The channel ID associated to the {@link StageInstance}.
      * @return A {@link Mono} where, upon successful completion, emits the {@link StageInstance} associated to the
      * supplied channel ID. If an error is received, it is emitted through the {@code Mono}.
      */

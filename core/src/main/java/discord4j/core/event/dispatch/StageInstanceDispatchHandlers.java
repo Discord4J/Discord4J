@@ -16,6 +16,8 @@ import discord4j.discordjson.json.gateway.StageInstanceUpdate;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
+
 class StageInstanceDispatchHandlers {
 
     static Mono<StageInstanceCreateEvent> stageInstanceCreate(DispatchContext<StageInstanceCreate, StageInstanceData> context) {
@@ -32,7 +34,7 @@ class StageInstanceDispatchHandlers {
         StageInstance current = new StageInstance(gateway, currentData);
 
         return Mono.just(new StageInstanceUpdateEvent(gateway, context.getShardInfo(), current, context.getOldState()
-                .map(old -> new StageInstance(gateway, old)).orElse(null)));
+            .map(old -> new StageInstance(gateway, old)).orElse(null)));
     }
 
     static Mono<StageInstanceDeleteEvent> stageInstanceDelete(DispatchContext<StageInstanceDelete, StageInstanceData> context) {
@@ -45,13 +47,16 @@ class StageInstanceDispatchHandlers {
 
     static Mono<StageRequestToSpeakEvent> stageRequestToSpeak(DispatchContext<VoiceStateUpdate, VoiceStateData> context) {
         GatewayDiscordClient gateway = context.getGateway();
+        Optional<VoiceStateData> oldVoiceStateData = context.getOldState();
         VoiceStateUpdate voiceStateUpdate = context.getDispatch();
         VoiceStateData voiceStateData = voiceStateUpdate.voiceStateData();
 
-        if (voiceStateData.channelId().isPresent()
+        if (oldVoiceStateData.isPresent()
+            && voiceStateData.channelId().isPresent()
             && !voiceStateData.guildId().isAbsent()
             && voiceStateData.suppress()
-            && voiceStateData.requestToSpeakTimestamp().isPresent()) {
+            && voiceStateData.requestToSpeakTimestamp().isPresent()
+            && !oldVoiceStateData.flatMap(VoiceStateData::requestToSpeakTimestamp).isPresent()) {
 
             Snowflake channelId = voiceStateData.channelId().map(Snowflake::of).get();
             Snowflake guildId = Snowflake.of(voiceStateData.guildId().get());
