@@ -27,6 +27,7 @@ import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.*;
 
@@ -44,7 +45,9 @@ interface CategoryCreateSpecGenerator extends AuditSpec<ChannelCreateRequest> {
         return ChannelCreateRequest.builder()
                 .name(name())
                 .position(position())
-                .permissionOverwrites(mapPossibleOverwrites(permissionOverwrites()))
+                .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
+                        .map(PermissionOverwrite::getData)
+                        .collect(Collectors.toList())))
                 .build();
     }
 }

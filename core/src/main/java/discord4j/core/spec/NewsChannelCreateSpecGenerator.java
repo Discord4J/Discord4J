@@ -29,9 +29,9 @@ import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
-import static discord4j.core.spec.InternalSpecUtils.mapPossibleOverwrites;
 
 @Value.Immutable
 interface NewsChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest> {
@@ -55,7 +55,9 @@ interface NewsChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest>
                 .name(name())
                 .topic(topic())
                 .position(position())
-                .permissionOverwrites(mapPossibleOverwrites(permissionOverwrites()))
+                .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
+                        .map(PermissionOverwrite::getData)
+                        .collect(Collectors.toList())))
                 .parentId(mapPossible(parentId(), Snowflake::asString))
                 .nsfw(nsfw())
                 .build();
