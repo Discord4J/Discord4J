@@ -25,7 +25,6 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.spec.AudioChannelJoinMono;
 import discord4j.core.spec.AudioChannelJoinSpec;
 import discord4j.core.spec.legacy.LegacyAudioChannelJoinSpec;
-import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.VoiceStateData;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.discordjson.possible.Possible;
@@ -40,26 +39,17 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * A Discord audio channel.
+ * A Discord audio channel. This can be either a {@link StageChannel} or a {@link VoiceChannel}.
+ * This superclass contains the common audio methods for these two types.
  */
-public class AudioChannel extends BaseTopLevelGuildChannel implements CategorizableChannel {
-
-    /**
-     * Constructs an {@code AudioChannel} with an associated {@link GatewayDiscordClient} and Discord data.
-     *
-     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data    The raw data as represented by Discord, must be non-null.
-     */
-    public AudioChannel(final GatewayDiscordClient gateway, final ChannelData data) {
-        super(gateway, data);
-    }
+public interface AudioChannel extends CategorizableChannel {
 
     /**
      * Gets the bitrate (in bits) for this audio channel.
      *
      * @return Gets the bitrate (in bits) for this audio channel.
      */
-    public int getBitrate() {
+    default int getBitrate() {
         return getData().bitrate().toOptional().orElseThrow(IllegalStateException::new);
     }
 
@@ -68,7 +58,7 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
      *
      * @return The voice region id for the audio channel.
      */
-    public Region.Id getRtcRegion() {
+    default Region.Id getRtcRegion() {
         return Possible.flatOpt(getData().rtcRegion()).map(Region.Id::of).orElse(Region.Id.AUTOMATIC);
     }
 
@@ -78,7 +68,7 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
      * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of this audio channel. If an
      * error is received, it is emitted through the {@code Flux}.
      */
-    public Flux<VoiceState> getVoiceStates() {
+    default Flux<VoiceState> getVoiceStates() {
         return Flux.from(getClient().getGatewayResources().getStore()
                 .execute(ReadActions.getVoiceStatesInChannel(getGuildId().asLong(), getId().asLong())))
             .map(data -> new VoiceState(getClient(), data));
@@ -98,7 +88,7 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
      * specs
      */
     @Deprecated
-    public Mono<VoiceConnection> join(final Consumer<? super LegacyAudioChannelJoinSpec> spec) {
+    default Mono<VoiceConnection> join(final Consumer<? super LegacyAudioChannelJoinSpec> spec) {
         return Mono.defer(() -> {
             final LegacyAudioChannelJoinSpec mutatedSpec = new LegacyAudioChannelJoinSpec(getClient(), this);
             spec.accept(mutatedSpec);
@@ -119,7 +109,7 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
      * indicating a connection to the channel has been established. If an error is received, it is emitted through the
      * {@code AudioChannelJoinMono}.
      */
-    public AudioChannelJoinMono join() {
+    default AudioChannelJoinMono join() {
         return AudioChannelJoinMono.of(this);
     }
 
@@ -134,7 +124,7 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
      * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceConnection}, indicating a
      * connection to the channel has been established. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<VoiceConnection> join(AudioChannelJoinSpec spec) {
+    default Mono<VoiceConnection> join(AudioChannelJoinSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(() -> spec.asRequest().apply(this));
     }
@@ -148,7 +138,7 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
      * @param selfDeaf if the client should be deaf
      * @return An empty mono which completes when the payload was sent to the gateway
      */
-    public Mono<Void> sendConnectVoiceState(final boolean selfMute, final boolean selfDeaf) {
+    default Mono<Void> sendConnectVoiceState(final boolean selfMute, final boolean selfDeaf) {
         final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
         final int shardId = clientGroup.computeShardIndex(getGuildId());
         return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
@@ -170,7 +160,7 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
      *
      * @return An empty mono which completes when the payload was sent to the gateway
      */
-    public Mono<Void> sendDisconnectVoiceState() {
+    default Mono<Void> sendDisconnectVoiceState() {
         final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
         final int shardId = clientGroup.computeShardIndex(getGuildId());
         return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
@@ -192,7 +182,7 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
      * provided {@link Snowflake} is connected to this audio channel, {@code false} otherwise. If an error is received,
      * it is emitted through the {@code Mono}.
      */
-    public Mono<Boolean> isMemberConnected(final Snowflake memberId) {
+    default Mono<Boolean> isMemberConnected(final Snowflake memberId) {
         return getVoiceStates()
             .map(VoiceState::getUserId)
             .any(memberId::equals);
@@ -205,15 +195,10 @@ public class AudioChannel extends BaseTopLevelGuildChannel implements Categoriza
      * The resulting {@code Mono} will also complete empty if the registered voice connection is not associated with
      * this audio channel.
      */
-    public Mono<VoiceConnection> getVoiceConnection() {
+    default Mono<VoiceConnection> getVoiceConnection() {
         return getGuild()
             .flatMap(Guild::getVoiceConnection)
             .filterWhen(voiceConnection -> voiceConnection.getChannelId().map(channelId -> channelId.equals(getId())));
-    }
-
-    @Override
-    public String toString() {
-        return "AudioChannel{} " + super.toString();
     }
 
 }

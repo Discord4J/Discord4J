@@ -109,7 +109,7 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(StageInstanceCreate.class, StageInstanceDispatchHandlers::stageInstanceCreate);
         addHandler(StageInstanceUpdate.class, StageInstanceDispatchHandlers::stageInstanceUpdate);
         addHandler(StageInstanceDelete.class, StageInstanceDispatchHandlers::stageInstanceDelete);
-        addHandler(VoiceStateUpdate.class, StageInstanceDispatchHandlers::stageRequestToSpeak);
+        addHandler(VoiceStateUpdateDispatch.class, StageInstanceDispatchHandlers::stageRequestToSpeak);
 
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
 

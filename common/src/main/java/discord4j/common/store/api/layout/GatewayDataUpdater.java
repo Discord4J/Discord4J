@@ -320,10 +320,9 @@ public interface GatewayDataUpdater {
      *
      * @param shardIndex the index of the shard where the dispatch comes from
      * @param dispatch   the dispatch data coming from Discord gateway
-     * @return a {@link Mono} completing when the operation is done, returning the state of the
-     * {@link StageInstanceData} after the insert
+     * @return a {@link Mono} completing when the operation is done
      */
-    Mono<StageInstanceData> onStageInstanceCreate(int shardIndex, StageInstanceCreate dispatch);
+    Mono<Void> onStageInstanceCreate(int shardIndex, StageInstanceCreate dispatch);
 
     /**
      * Updates the internal state of the store according to the given {@link StageInstanceCreate} gateway dispatch.

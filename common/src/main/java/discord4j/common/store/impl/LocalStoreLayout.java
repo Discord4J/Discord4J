@@ -686,24 +686,23 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     }
 
     @Override
-    public Mono<StageInstanceData> onStageInstanceCreate(int shardIndex, StageInstanceCreate dispatch) {
-        stageInstances.put(dispatch.stageInstance().channelId().asLong(), dispatch.stageInstance());
-        return Mono.justOrEmpty(dispatch.stageInstance());
+    public Mono<Void> onStageInstanceCreate(int shardIndex, StageInstanceCreate dispatch) {
+        return Mono.fromRunnable(() -> stageInstances.put(dispatch.stageInstance().channelId().asLong(), dispatch.stageInstance()));
     }
 
     @Override
     public Mono<StageInstanceData> onStageInstanceUpdate(int shardIndex, StageInstanceUpdate dispatch) {
-        return Mono.justOrEmpty(stageInstances.replace(dispatch.stageInstance().channelId().asLong(), dispatch.stageInstance()));
+        return Mono.fromRunnable(() -> stageInstances.replace(dispatch.stageInstance().channelId().asLong(), dispatch.stageInstance()));
     }
 
     @Override
     public Mono<StageInstanceData> onStageInstanceDelete(int shardIndex, StageInstanceDelete dispatch) {
-        return Mono.justOrEmpty(stageInstances.remove(dispatch.stageInstance().channelId().asLong()));
+        return Mono.fromRunnable(() -> stageInstances.remove(dispatch.stageInstance().channelId().asLong()));
     }
 
     @Override
     public Mono<StageInstanceData> getStageInstanceByChannelId(long channelId) {
-        return Mono.justOrEmpty(stageInstances.get(channelId));
+        return Mono.fromCallable(() -> stageInstances.get(channelId));
     }
 
     @Override

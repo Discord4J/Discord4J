@@ -17,11 +17,9 @@
 
 package discord4j.common.store.action.gateway;
 
-import discord4j.discordjson.json.StageInstanceData;
 import discord4j.discordjson.json.gateway.StageInstanceCreate;
-import discord4j.discordjson.json.gateway.StageInstanceUpdate;
 
-public class StageInstanceCreateAction extends ShardAwareAction<StageInstanceData> {
+public class StageInstanceCreateAction extends ShardAwareAction<Void> {
 
     private final StageInstanceCreate stageInstanceCreate;
 

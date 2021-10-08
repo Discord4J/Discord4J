@@ -21,7 +21,6 @@ import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.util.OrderUtil;
-import discord4j.discordjson.json.OverwriteData;
 import discord4j.discordjson.json.PermissionsEditRequest;
 import discord4j.rest.util.PermissionSet;
 import reactor.core.publisher.Flux;
@@ -74,12 +73,6 @@ public interface TopLevelGuildChannel extends GuildChannel {
     default Optional<ExtendedPermissionOverwrite> getOverwriteForRole(Snowflake roleId) {
         return getPermissionOverwrites().stream()
                 .filter(overwrite -> overwrite.getRoleId().map(roleId::equals).orElse(false))
-                .findFirst();
-    }
-
-    default Optional<ExtendedPermissionOverwrite> getOverwriteForEveryone() {
-        return getPermissionOverwrites().stream()
-                .filter(overwrite -> overwrite.getRoleId().map(getGuildId()::equals).orElse(false))
                 .findFirst();
     }
 

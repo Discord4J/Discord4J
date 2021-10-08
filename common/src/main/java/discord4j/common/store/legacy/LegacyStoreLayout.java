@@ -1145,16 +1145,11 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     }
 
     @Override
-    public Mono<StageInstanceData> onStageInstanceCreate(int shardIndex, StageInstanceCreate dispatch) {
+    public Mono<Void> onStageInstanceCreate(int shardIndex, StageInstanceCreate dispatch) {
         StageInstanceData stageInstance = dispatch.stageInstance();
         long channelId = Snowflake.asLong(stageInstance.id());
 
-        Mono<Void> saveNew = stateHolder.getStageInstanceStore().save(channelId, stageInstance);
-
-        return stateHolder.getStageInstanceStore()
-                .find(channelId)
-                .flatMap(saveNew::thenReturn)
-                .switchIfEmpty(saveNew.then(Mono.empty()));
+        return stateHolder.getStageInstanceStore().save(channelId, stageInstance);
     }
 
     @Override
