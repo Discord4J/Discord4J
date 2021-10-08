@@ -15,10 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Classes related to the Gateway Intents feature to selectively disable some events.
- */
 @NonNullApi
-package discord4j.gateway.intent;
+package discord4j.core.command;
 
 import reactor.util.annotation.NonNullApi;

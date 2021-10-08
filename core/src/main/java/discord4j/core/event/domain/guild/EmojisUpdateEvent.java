@@ -43,7 +43,8 @@ public class EmojisUpdateEvent extends GuildEvent {
     @Nullable
     private final Set<GuildEmoji> old;
 
-    public EmojisUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<GuildEmoji> emojis, Set<GuildEmoji> old) {
+    public EmojisUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<GuildEmoji> emojis,
+                             @Nullable Set<GuildEmoji> old) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.emojis = emojis;

@@ -112,7 +112,7 @@ public class WebhookService extends RestService {
                 .newRequest(webhookId, token)
                 .query("wait", wait)
                 .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
-                .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
+                .body(request.getFiles().isEmpty() ? request.getJsonPayload() : request)
                 .exchange(getRouter());
 
         if (wait) {
@@ -140,7 +140,7 @@ public class WebhookService extends RestService {
                                                   MultipartRequest<WebhookMessageEditRequest> request) {
         return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
                 .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
-                .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
+                .body(request.getFiles().isEmpty() ? request.getJsonPayload() : request)
                 .exchange(getRouter())
                 .bodyToMono(MessageData.class);
     }

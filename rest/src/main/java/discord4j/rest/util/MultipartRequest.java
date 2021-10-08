@@ -66,7 +66,6 @@ public class MultipartRequest<T> {
         return (MessageCreateRequest) jsonPayload;
     }
 
-    @Nullable
     public T getJsonPayload() { return jsonPayload; }
 
     public List<Tuple2<String, InputStream>> getFiles() {

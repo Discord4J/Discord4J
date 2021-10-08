@@ -106,8 +106,10 @@ public abstract class ReactionEmoji {
      * @param isAnimated Whether the emoji is animated OR false if the emoji is a unicode emoji.
      * @return A reaction emoji using the given information.
      */
-    public static ReactionEmoji of(@Nullable Long id, String name, boolean isAnimated) {
-        return id == null ? unicode(name) : custom(Snowflake.of(id), name, isAnimated);
+    public static ReactionEmoji of(@Nullable Long id, @Nullable String name, boolean isAnimated) {
+        // not using custom() factory, because the Custom constructor accepts a null name, while the factory method
+        // doesn't, because name can only be null when received from Discord
+        return id == null ? unicode(Objects.requireNonNull(name)) : new Custom(id, name, isAnimated);
     }
 
     /**
@@ -163,10 +165,11 @@ public abstract class ReactionEmoji {
     public static final class Custom extends ReactionEmoji {
 
         private final long id;
+        @Nullable
         private final String name;
         private final boolean isAnimated;
 
-        private Custom(long id, String name, boolean isAnimated) {
+        private Custom(long id, @Nullable String name, boolean isAnimated) {
             this.id = id;
             this.name = name;
             this.isAnimated = isAnimated;
@@ -183,11 +186,14 @@ public abstract class ReactionEmoji {
 
         /**
          * Gets the name of the emoji.
+         * <p>
+         * This might not be present if custom emoji data is not available (for example, if it was deleted from the
+         * guild).
          *
          * @return The name of the emoji.
          */
-        public String getName() {
-            return name;
+        public Optional<String> getName() {
+            return Optional.ofNullable(name);
         }
 
         /**
@@ -203,7 +209,7 @@ public abstract class ReactionEmoji {
         public EmojiData asEmojiData() {
             return EmojiData.builder()
                     .id(id)
-                    .name(name)
+                    .name(getName())
                     .animated(isAnimated)
                     .build();
         }

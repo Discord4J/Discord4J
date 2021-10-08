@@ -131,7 +131,7 @@ class GuildDispatchHandlers {
                 .map(oldState -> oldState.stream()
                         .map(data -> new GuildEmoji(gateway, data, guildId))
                         .collect(Collectors.toSet()))
-                .orElse(Collections.emptySet());
+                .orElse(null);
 
         return Mono.just(new EmojisUpdateEvent(gateway, context.getShardInfo(), guildId, emojis, oldEmojis));
     }

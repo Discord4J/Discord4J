@@ -38,8 +38,7 @@ import java.util.Optional;
  */
 public class InviteCreateEvent extends Event {
 
-    @Nullable
-    private final Long guildId;
+    private final long guildId;
     private final long channelId;
     private final String code;
     @Nullable
@@ -50,7 +49,7 @@ public class InviteCreateEvent extends Event {
     private final int maxAge;
     private final boolean temporary;
 
-    public InviteCreateEvent(GatewayDiscordClient client, ShardInfo shardInfo, Long guildId, long channelId,
+    public InviteCreateEvent(GatewayDiscordClient client, ShardInfo shardInfo, long guildId, long channelId,
                              String code, @Nullable User inviter, Instant createdAt, int uses, int maxUses, int maxAge,
                              boolean temporary) {
         super(client, shardInfo);

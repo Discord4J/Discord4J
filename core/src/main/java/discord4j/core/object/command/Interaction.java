@@ -142,7 +142,9 @@ public class Interaction implements DiscordObject {
      */
     public Optional<Member> getMember() {
         return data.member().toOptional()
-                .map(data -> new Member(gateway, data, getGuildId().get().asLong()));
+                .map(data -> new Member(gateway, data,
+                        // guildId should always be present if member was present
+                        getGuildId().orElseThrow(IllegalStateException::new).asLong()));
     }
 
     /**

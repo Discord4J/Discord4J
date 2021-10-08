@@ -23,6 +23,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.discordjson.json.GuildCreateRequest;
 import discord4j.discordjson.json.PartialChannelCreateRequest;
 import discord4j.discordjson.json.RoleCreateRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.mapNullable;
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable
 interface GuildCreateSpecGenerator extends Spec<GuildCreateRequest> {
@@ -43,8 +45,7 @@ interface GuildCreateSpecGenerator extends Spec<GuildCreateRequest> {
 
     Region region();
 
-    @Nullable
-    Image icon();
+    Possible<Image> icon();
 
     @Value.Default
     default Guild.VerificationLevel verificationLevel() {
@@ -89,7 +90,7 @@ interface GuildCreateSpecGenerator extends Spec<GuildCreateRequest> {
         return GuildCreateRequest.builder()
                 .name(name())
                 .region(region().getId())
-                .icon(mapNullable(icon(), Image::getDataUri))
+                .icon(mapPossible(icon(), Image::getDataUri))
                 .verificationLevel(verificationLevel().getValue())
                 .defaultMessageNotifications(defaultMessageNotificationLevel().getValue())
                 .explicitContentFilter(explicitContentFilter().getValue())

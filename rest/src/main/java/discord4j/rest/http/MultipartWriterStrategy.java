@@ -69,16 +69,14 @@ public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest<
                 }
             }
 
-            if (createRequest != null) {
-                try {
-                    String payload = objectMapper.writeValueAsString(createRequest);
-                    if (log.isTraceEnabled()) {
-                        log.trace("{}", payload);
-                    }
-                    form.attr("payload_json", payload);
-                } catch (JsonProcessingException e) {
-                    throw Exceptions.propagate(e);
+            try {
+                String payload = objectMapper.writeValueAsString(createRequest);
+                if (log.isTraceEnabled()) {
+                    log.trace("{}", payload);
                 }
+                form.attr("payload_json", payload);
+            } catch (JsonProcessingException e) {
+                throw Exceptions.propagate(e);
             }
         }));
     }
