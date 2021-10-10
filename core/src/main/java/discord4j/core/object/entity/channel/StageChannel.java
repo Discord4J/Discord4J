@@ -27,6 +27,7 @@ import discord4j.core.spec.legacy.LegacyStageChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.StageInstanceCreateRequest;
+import discord4j.rest.http.client.ClientException;
 import discord4j.voice.VoiceConnection;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -158,7 +159,9 @@ public final class StageChannel extends BaseTopLevelGuildChannel implements Audi
         return getClient()
                 .getRestClient()
                 .getStageInstanceService()
-                .getStageInstance(this.getId().asLong()).map(Objects::nonNull);
+                .getStageInstance(this.getId().asLong())
+                .onErrorResume(ClientException.isStatusCode(404), e -> Mono.empty())
+                .hasElement();
     }
 
     /**
