@@ -20,6 +20,7 @@ package discord4j.core.object.command;
 import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
+import discord4j.core.object.entity.channel.Channel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 
 import java.util.Collections;
@@ -144,6 +145,21 @@ public class ApplicationCommandOption implements DiscordObject {
                 .filter(option -> option.getName().equals(name))
                 .findFirst();
     }
+
+    /**
+     * Returns a list of acceptable channel types the user may pick
+     * </p>
+     * Only applies to CHANNEL type options, if empty, no restriction on channel types is placed.
+     * @return A list of channel types a user may pick. Empty list means no restriction is applied.
+     */
+    public List<Channel.Type> getAllowedChannelTypes() {
+        return data.channelTypes().toOptional()
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(Channel.Type::of)
+                .collect(Collectors.toList());
+    }
+
 
     @Override
     public GatewayDiscordClient getClient() {

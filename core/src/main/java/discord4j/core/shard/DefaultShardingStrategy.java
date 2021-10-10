@@ -31,6 +31,11 @@ import java.util.function.Predicate;
 
 public class DefaultShardingStrategy implements ShardingStrategy {
 
+    /**
+     * Value representing the use of a recommended amount of shards.
+     */
+    public static int RECOMMENDED_SHARD_COUNT = 0;
+
     private final int count;
     private final Function<Integer, Publisher<Integer>> indexSource;
     private final Predicate<ShardInfo> filter;
@@ -76,11 +81,6 @@ public class DefaultShardingStrategy implements ShardingStrategy {
      * A {@link ShardingStrategy} builder.
      */
     public static class Builder {
-
-        /**
-         * Value representing the use of a recommended amount of shards.
-         */
-        static int RECOMMENDED_SHARD_COUNT = 0;
 
         private int shardCount = RECOMMENDED_SHARD_COUNT;
         private Function<Integer, Publisher<Integer>> shardIndexSource = count -> Flux.range(0, count);

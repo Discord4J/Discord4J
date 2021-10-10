@@ -18,7 +18,9 @@
 package discord4j.core.support;
 
 import discord4j.discordjson.json.ApplicationCommandData;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.RestClient;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
@@ -106,8 +108,27 @@ public class GuildCommandRegistrar {
 
     private boolean isChanged(ApplicationCommandData existingCommand, ApplicationCommandRequest command) {
         return command.description().toOptional().map(value -> !existingCommand.description().equals(value)).orElse(false)
-                || !existingCommand.options().equals(command.options())
-                || existingCommand.defaultPermission().toOptional().orElse(true) != command.defaultPermission().toOptional().orElse(true);
+                || existingCommand.defaultPermission().toOptional().orElse(true) != command.defaultPermission().toOptional().orElse(true)
+                || !existingCommand.options().equals(buildOptions(command.options()));
+    }
+
+    private Possible<List<ApplicationCommandOptionData>> buildOptions(Possible<List<ApplicationCommandOptionData>> options) {
+        if (options.isAbsent()) {
+            return options;
+        }
+        List<ApplicationCommandOptionData> newOptions = new ArrayList<>();
+        for (ApplicationCommandOptionData optionData : options.get()) {
+            // turn required == false into absent, to fix equality checks
+            newOptions.add(ApplicationCommandOptionData.builder()
+                    .from(optionData)
+                    .required(optionData.required().toOptional()
+                            .filter(it -> it)
+                            .map(Possible::of)
+                            .orElse(Possible.absent()))
+                    .options(buildOptions(optionData.options()))
+                    .build());
+        }
+        return Possible.of(newOptions);
     }
 
     private Mono<Map<String, ApplicationCommandData>> getExistingCommands() {
