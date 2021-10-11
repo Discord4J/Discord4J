@@ -488,6 +488,49 @@ public final class Webhook implements Entity {
         return execute(true, spec);
     }
 
+    /**
+     * Executes this webhook to edit a message.
+     *
+     * @param messageId The ID of the message to edit
+     * @param spec an immutable object that specifies how to execute this webhook
+     * @return A {@link Mono} where, upon successful webhook execution, emits a Message. If the message edit fails, an
+     * error is emitted through the {@code Mono}.
+     */
+    public Mono<Message> executeMessageEdit(Snowflake messageId, WebhookMessageEditSpec spec) {
+        Objects.requireNonNull(messageId);
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+            () -> {
+                if (!getToken().isPresent()) {
+                    throw new IllegalArgumentException("Can't edit message with this webhook.");
+                }
+                return gateway.getRestClient().getWebhookService()
+                    .modifyWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(), spec.asRequest())
+                    .map(data -> new Message(gateway, data));
+            }
+        );
+    }
+
+    /**
+     * Executes this webhook to delete a message.
+     *
+     * @param messageId The ID of the message to delete
+     * @return A {@link Mono} where, upon successful webhook execution, emits a Message. If the message delete fails, an
+     * error is emitted through the {@code Mono}.
+     */
+    public Mono<Void> executeMessageDelete(Snowflake messageId) {
+        Objects.requireNonNull(messageId);
+        return Mono.defer(
+            () -> {
+                if (!getToken().isPresent()) {
+                    throw new IllegalArgumentException("Can't delete message with this webhook.");
+                }
+                return gateway.getRestClient().getWebhookService()
+                    .deleteWebhookMessage(getId().asLong(), getToken().get(), messageId.asString());
+            }
+        );
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
