@@ -1,5 +1,6 @@
 package discord4j.core.spec;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
@@ -64,7 +65,7 @@ public interface WebhookMessageEditSpecGenerator extends Spec<MultipartRequest<W
 @Value.Immutable(builder = false)
 abstract class WebhookMessageEditMonoGenerator extends Mono<Message> implements WebhookMessageEditSpecGenerator {
 
-    abstract String messageId();
+    abstract Snowflake messageId();
 
     abstract Webhook webhook();
 
