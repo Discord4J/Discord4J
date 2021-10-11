@@ -488,6 +488,74 @@ public final class Webhook implements Entity {
         return execute(true, spec);
     }
 
+    /**
+     * Executes this webhook to edit a message. Properties specifying how to execute this webhook, including the ID of
+     * the message being edited, can be set via the {@code withXxx} methods of the returned {@link
+     * WebhookMessageEditMono}.
+     *
+     * @param messageId The ID of the message to edit
+     * @return A {@link WebhookMessageEditMono} where, upon successful webhook execution, emits a Message. If the
+     * message edit fails, an error is emitted through the {@link WebhookMessageEditMono}.
+     */
+    public WebhookMessageEditMono executeMessageEdit(Snowflake messageId) {
+        return WebhookMessageEditMono.of(messageId,this);
+    }
+
+    /**
+     * Executes this webhook to edit a message.
+     *
+     * @param spec an immutable object that specifies how to execute this webhook
+     * @return A {@link Mono} where, upon successful webhook execution, emits a Message. If the message edit fails, an
+     * error is emitted through the {@code Mono}.
+     */
+    public Mono<Message> executeMessageEdit(WebhookMessageEditSpec spec) {
+        Objects.requireNonNull(spec);
+        Objects.requireNonNull(spec.messageId());
+        return Mono.defer(
+            () -> {
+                if (!getToken().isPresent()) {
+                    throw new IllegalArgumentException("Can't edit message with this webhook.");
+                }
+                return gateway.getRestClient().getWebhookService()
+                    .modifyWebhookMessage(getId().asLong(), getToken().get(), spec.messageId().asString(), spec.asRequest())
+                    .map(data -> new Message(gateway, data));
+            }
+        );
+    }
+
+    /**
+     * Executes this webhook to delete a message. The ID of the message being edited can be set via the {@code
+     * withMessageId} method of the returned {@link WebhookMessageDeleteMono}.
+     *
+     * @param messageId The ID of the message to delete
+     * @return A {@link WebhookMessageDeleteMono} where, upon successful webhook execution, emits Void. If the
+     * message delete fails, an error is emitted through the {@link WebhookMessageDeleteMono}.
+     */
+    public WebhookMessageDeleteMono executeMessageDelete(Snowflake messageId) {
+        return WebhookMessageDeleteMono.of(messageId,this);
+    }
+
+    /**
+     * Executes this webhook to delete a message.
+     *
+     * @param spec an immutable object that specifies how to execute this webhook
+     * @return A {@link Mono} where, upon successful webhook execution, emits Void. If the message delete fails, an
+     * error is emitted through the {@code Mono}.
+     */
+    public Mono<Void> executeMessageDelete(WebhookMessageDeleteSpec spec) {
+        Objects.requireNonNull(spec);
+        Objects.requireNonNull(spec.messageId());
+        return Mono.defer(
+            () -> {
+                if (!getToken().isPresent()) {
+                    throw new IllegalArgumentException("Can't delete message with this webhook.");
+                }
+                return gateway.getRestClient().getWebhookService()
+                    .deleteWebhookMessage(getId().asLong(), getToken().get(), spec.messageId().asString());
+            }
+        );
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
