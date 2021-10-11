@@ -489,6 +489,18 @@ public final class Webhook implements Entity {
     }
 
     /**
+     * Executes this webhook to edit a message. Properties specifying how to execute this webhook, including the ID of
+     * the message being edited, can be set via the {@code withXxx} methods of the returned {@link
+     * WebhookExecuteMessageEditMono}.
+     *
+     * @return A {@link WebhookExecuteMessageEditMono} where, upon successful webhook execution, emits a Message. If the
+     * message edit fails, an error is emitted through the {@link WebhookExecuteMessageEditMono}.
+     */
+    public WebhookExecuteMessageEditMono executeMessageEdit(Snowflake messageId) {
+        return WebhookExecuteMessageEditMono.of(messageId,this);
+    }
+
+    /**
      * Executes this webhook to edit a message.
      *
      * @param messageId The ID of the message to edit
