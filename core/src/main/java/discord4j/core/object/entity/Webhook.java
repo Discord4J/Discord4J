@@ -525,20 +525,21 @@ public final class Webhook implements Entity {
     /**
      * Executes this webhook to edit a message.
      *
-     * @param spec an immutable object that specifies how to execute this webhook
+     * @param messageId The ID of the message to edit
+     * @param spec an immutable object that specifies how to edit the message
      * @return A {@link Mono} where, upon successful webhook execution, emits a Message. If the message edit fails, an
      * error is emitted through the {@code Mono}.
      */
-    public Mono<Message> executeMessageEdit(WebhookMessageEditSpec spec) {
+    public Mono<Message> executeMessageEdit(Snowflake messageId, WebhookMessageEditSpec spec) {
+        Objects.requireNonNull(messageId);
         Objects.requireNonNull(spec);
-        Objects.requireNonNull(spec.messageId());
         return Mono.defer(
             () -> {
                 if (!getToken().isPresent()) {
                     throw new IllegalArgumentException("Can't edit message with this webhook.");
                 }
                 return gateway.getRestClient().getWebhookService()
-                    .modifyWebhookMessage(getId().asLong(), getToken().get(), spec.messageId().asString(), spec.asRequest())
+                    .modifyWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(), spec.asRequest())
                     .map(data -> new Message(gateway, data));
             }
         );

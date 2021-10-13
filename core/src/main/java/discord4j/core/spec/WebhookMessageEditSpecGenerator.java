@@ -41,8 +41,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 @Value.Immutable(singleton = true)
 public interface WebhookMessageEditSpecGenerator extends Spec<MultipartRequest<WebhookMessageEditRequest>> {
 
-    Snowflake messageId();
-
     Possible<Optional<String>> content();
 
     @Value.Default
@@ -84,11 +82,13 @@ public interface WebhookMessageEditSpecGenerator extends Spec<MultipartRequest<W
 @Value.Immutable(builder = false)
 abstract class WebhookMessageEditMonoGenerator extends Mono<Message> implements WebhookMessageEditSpecGenerator {
 
+    abstract Snowflake messageId();
+
     abstract Webhook webhook();
 
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
-        webhook().executeMessageEdit(WebhookMessageEditSpec.copyOf(this)).subscribe(actual);
+        webhook().executeMessageEdit(messageId(), WebhookMessageEditSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override
