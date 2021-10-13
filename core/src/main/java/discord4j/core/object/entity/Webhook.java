@@ -549,8 +549,8 @@ public final class Webhook implements Entity {
      * Executes this webhook to delete a message.
      *
      * @param messageId The ID of the message to delete
-     * @return A {@link Mono} where, upon successful webhook execution, emits Void. If the message delete fails, an
-     * error is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful webhook execution, emits nothing; indicating the message has been
+     * deleted. If the message delete fails, an error is emitted through the {@code Mono}.
      */
     public Mono<Void> executeMessageDelete(Snowflake messageId) {
         Objects.requireNonNull(messageId);
