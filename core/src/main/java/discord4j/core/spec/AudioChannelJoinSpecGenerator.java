@@ -24,7 +24,6 @@ import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.AudioChannel;
-import discord4j.discordjson.json.VoiceStateData;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.intent.Intent;
@@ -150,14 +149,12 @@ interface AudioChannelJoinSpecGenerator extends Spec<Function<AudioChannel, Mono
             final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();
             final int shardId = clientGroup.computeShardIndex(guildId);
             final Mono<Void> sendVoiceStateUpdate = clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
-                    VoiceStateUpdate.builder()
-                            .voiceStateData(VoiceStateData.builder()
-                                .guildId(guildId.asString())
-                                .channelId(channelId.asString())
-                                .selfMute(selfMute())
-                                .selfDeaf(selfDeaf())
-                                .build())
-                            .build(), shardId));
+                VoiceStateUpdate.builder()
+                    .guildId(guildId.asString())
+                    .channelId(channelId.asString())
+                    .selfMute(selfMute())
+                    .selfDeaf(selfDeaf())
+                    .build(), shardId));
 
             final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = onVoiceStateUpdates(gateway, guildId).next();
             final Mono<VoiceServerUpdateEvent> waitForVoiceServerUpdate = onVoiceServerUpdate(gateway, guildId);

@@ -25,7 +25,6 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.spec.AudioChannelJoinMono;
 import discord4j.core.spec.AudioChannelJoinSpec;
 import discord4j.core.spec.legacy.LegacyAudioChannelJoinSpec;
-import discord4j.discordjson.json.VoiceStateData;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.GatewayClientGroup;
@@ -142,14 +141,12 @@ public interface AudioChannel extends CategorizableChannel {
         final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
         final int shardId = clientGroup.computeShardIndex(getGuildId());
         return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
-                VoiceStateUpdate.builder()
-                    .voiceStateData(VoiceStateData.builder()
-                        .guildId(getGuildId().asString())
-                        .channelId(getId().asString())
-                        .selfMute(selfMute)
-                        .selfDeaf(selfDeaf)
-                        .build())
-                    .build(), shardId));
+            VoiceStateUpdate.builder()
+                .guildId(getGuildId().asString())
+                .channelId(getId().asString())
+                .selfMute(selfMute)
+                .selfDeaf(selfDeaf)
+                .build(), shardId));
     }
 
     /**
@@ -164,13 +161,11 @@ public interface AudioChannel extends CategorizableChannel {
         final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
         final int shardId = clientGroup.computeShardIndex(getGuildId());
         return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
-                VoiceStateUpdate.builder()
-                    .voiceStateData(VoiceStateData.builder()
-                        .guildId(getGuildId().asString())
-                        .selfMute(false)
-                        .selfDeaf(false)
-                        .build())
-                    .build(), shardId));
+            VoiceStateUpdate.builder()
+                .guildId(getGuildId().asString())
+                .selfMute(false)
+                .selfDeaf(false)
+                .build(), shardId));
     }
 
     /**
