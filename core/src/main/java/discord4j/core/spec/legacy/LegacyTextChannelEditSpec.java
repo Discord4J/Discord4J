@@ -94,12 +94,7 @@ public class LegacyTextChannelEditSpec implements LegacyAuditSpec<ChannelModifyR
      */
     public LegacyTextChannelEditSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         List<OverwriteData> raw = permissionOverwrites.stream()
-                .map(o -> OverwriteData.builder()
-                        .id(o.getTargetId().asString())
-                        .type(o.getType().getValue())
-                        .allow(o.getAllowed().getRawValue())
-                        .deny(o.getDenied().getRawValue())
-                        .build())
+                .map(PermissionOverwrite::getData)
                 .collect(Collectors.toList());
 
         requestBuilder.permissionOverwrites(raw);
