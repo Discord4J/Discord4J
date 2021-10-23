@@ -58,8 +58,8 @@ interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<Intera
                         .map(EmbedCreateSpec::asRequest)
                         .collect(Collectors.toList())))
                 .components(mapPossible(components(), components -> components.stream()
-                    .map(LayoutComponent::getData)
-                    .collect(Collectors.toList())))
+                        .map(LayoutComponent::getData)
+                        .collect(Collectors.toList())))
                 .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
                 .build();
     }

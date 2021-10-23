@@ -29,9 +29,9 @@ import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
-import static discord4j.core.spec.InternalSpecUtils.mapPossibleOverwrites;
 
 @Value.Immutable
 interface VoiceChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest> {
@@ -56,7 +56,9 @@ interface VoiceChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest
                 .bitrate(bitrate())
                 .userLimit(userLimit())
                 .position(position())
-                .permissionOverwrites(mapPossibleOverwrites(permissionOverwrites()))
+                .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
+                        .map(PermissionOverwrite::getData)
+                        .collect(Collectors.toList())))
                 .parentId(mapPossible(parentId(), Snowflake::asString))
                 .build();
     }
