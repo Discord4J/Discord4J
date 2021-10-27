@@ -110,6 +110,16 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
                 .findFirst();
     }
 
+    /**
+     * Whether this option is currently focused or not.
+     * <p>
+     * This will always return false unless this option is from an autocomplete interaction.
+     * @return Whether this option is currently focused or not.
+     */
+    public boolean isFocused() {
+        return data.focused().toOptional().orElse(false);
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;

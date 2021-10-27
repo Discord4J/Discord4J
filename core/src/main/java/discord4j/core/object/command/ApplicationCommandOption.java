@@ -160,6 +160,16 @@ public class ApplicationCommandOption implements DiscordObject {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Whether this option supports auto-complete or not. Default is false.
+     * </p>
+     * Autocomplete cannot be enabled on options that have choices.
+     * @return Whether this option supports auto-complete or not.
+     */
+    public boolean hasAutocompleteEnabled() {
+        return data.autocomplete().toOptional().orElse(false);
+    }
+
 
     @Override
     public GatewayDiscordClient getClient() {
