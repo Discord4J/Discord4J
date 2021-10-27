@@ -20,6 +20,7 @@ package discord4j.core.spec;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.Category;
+import discord4j.core.object.entity.channel.Channel;
 import discord4j.discordjson.json.ChannelCreateRequest;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
@@ -43,6 +44,7 @@ interface CategoryCreateSpecGenerator extends AuditSpec<ChannelCreateRequest> {
     @Override
     default ChannelCreateRequest asRequest() {
         return ChannelCreateRequest.builder()
+                .type(Channel.Type.GUILD_CATEGORY.getValue())
                 .name(name())
                 .position(position())
                 .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
