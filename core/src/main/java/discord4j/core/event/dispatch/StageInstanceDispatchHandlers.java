@@ -20,17 +20,12 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.StageInstanceCreateEvent;
 import discord4j.core.event.domain.StageInstanceDeleteEvent;
 import discord4j.core.event.domain.StageInstanceUpdateEvent;
-import discord4j.core.event.domain.StageRequestToSpeakEvent;
 import discord4j.core.object.entity.StageInstance;
 import discord4j.discordjson.json.StageInstanceData;
-import discord4j.discordjson.json.VoiceStateData;
 import discord4j.discordjson.json.gateway.StageInstanceCreate;
 import discord4j.discordjson.json.gateway.StageInstanceDelete;
 import discord4j.discordjson.json.gateway.StageInstanceUpdate;
-import discord4j.discordjson.json.gateway.VoiceStateUpdateDispatch;
 import reactor.core.publisher.Mono;
-
-import java.util.Optional;
 
 class StageInstanceDispatchHandlers {
 
@@ -57,24 +52,6 @@ class StageInstanceDispatchHandlers {
         StageInstance stageInstance = new StageInstance(gateway, stageInstanceData);
 
         return Mono.just(new StageInstanceDeleteEvent(gateway, context.getShardInfo(), stageInstance));
-    }
-
-    static Mono<StageRequestToSpeakEvent> stageRequestToSpeak(DispatchContext<VoiceStateUpdateDispatch, VoiceStateData> context) {
-        GatewayDiscordClient gateway = context.getGateway();
-        Optional<VoiceStateData> oldVoiceStateData = context.getOldState();
-        VoiceStateUpdateDispatch voiceStateUpdate = context.getDispatch();
-        VoiceStateData voiceStateData = voiceStateUpdate.voiceState();
-
-        if (oldVoiceStateData.isPresent()
-            && voiceStateData.channelId().isPresent()
-            && !voiceStateData.guildId().isAbsent()
-            && voiceStateData.suppress()
-            && voiceStateData.requestToSpeakTimestamp().isPresent()
-            && !oldVoiceStateData.flatMap(VoiceStateData::requestToSpeakTimestamp).isPresent()) {
-            return Mono.just(new StageRequestToSpeakEvent(gateway, context.getShardInfo(), voiceStateData));
-        } else {
-            return Mono.empty();
-        }
     }
 
 }

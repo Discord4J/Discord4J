@@ -18,11 +18,14 @@ package discord4j.core.event.domain;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.PartialMember;
 import discord4j.core.object.entity.StageInstance;
 import discord4j.discordjson.json.VoiceStateData;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
 /**
  * Dispatched when a user connected to a stage channel makes a request to speak.
@@ -31,15 +34,15 @@ import reactor.core.publisher.Mono;
  *
  * @see <a href="https://discord.com/developers/docs/topics/gateway#voice-state-update">Voice State Update</a>
  */
-public class StageRequestToSpeakEvent extends Event {
+public class StageRequestToSpeakEvent extends VoiceStateUpdateEvent {
 
     private final GatewayDiscordClient gateway;
     private final VoiceStateData voiceStateData;
 
-    public StageRequestToSpeakEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, VoiceStateData voiceStateData) {
-        super(gateway, shardInfo);
+    public StageRequestToSpeakEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, VoiceState current, @Nullable VoiceState old) {
+        super(gateway, shardInfo, current, old);
         this.gateway = gateway;
-        this.voiceStateData = voiceStateData;
+        this.voiceStateData = current.getData();
     }
 
     /**
@@ -50,7 +53,7 @@ public class StageRequestToSpeakEvent extends Event {
      *         {@code Mono}.
      */
     public Mono<Void> acceptRequest() {
-        return getMember().flatMap(member -> getStageInstance().flatMap(stageInstance -> stageInstance.inviteMemberToStageSpeakers(member)));
+        return getMember().flatMap(PartialMember::inviteToStageSpeakers);
     }
 
     /**
@@ -61,7 +64,7 @@ public class StageRequestToSpeakEvent extends Event {
      *         {@code Mono}.
      */
     public Mono<Void> denyRequest() {
-        return getMember().flatMap(member -> getStageInstance().flatMap(stageInstance -> stageInstance.moveMemberToStageAudience(member)));
+        return getMember().flatMap(PartialMember::moveToStageAudience);
     }
 
     /**

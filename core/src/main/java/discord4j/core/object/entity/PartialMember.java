@@ -660,9 +660,9 @@ public class PartialMember extends User {
      *         has been invited to the speakers. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> inviteToStageSpeakers() {
-        return Mono.defer(
-            () -> getClient().getRestClient().getGuildService()
-                .modifyOthersVoiceState(getGuildId().asLong(), getUserData().id().asLong(), UpdateUserVoiceStateRequest.builder().suppress(false).build()));
+        return getVoiceState().flatMap(voiceState ->
+            Mono.defer(() -> getClient().getRestClient().getGuildService()
+                .modifyOthersVoiceState(getGuildId().asLong(), getUserData().id().asLong(), UpdateUserVoiceStateRequest.builder().channelId(voiceState.getChannelId().orElseThrow(IllegalStateException::new).asString()).suppress(false).build())));
     }
 
     /**
@@ -673,9 +673,9 @@ public class PartialMember extends User {
      *         has been moved to the audience. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> moveToStageAudience() {
-        return Mono.defer(
-            () -> getClient().getRestClient().getGuildService()
-                .modifyOthersVoiceState(getGuildId().asLong(), getUserData().id().asLong(), UpdateUserVoiceStateRequest.builder().suppress(true).build()));
+        return getVoiceState().flatMap(voiceState ->
+            Mono.defer(() -> getClient().getRestClient().getGuildService()
+                .modifyOthersVoiceState(getGuildId().asLong(), getUserData().id().asLong(), UpdateUserVoiceStateRequest.builder().channelId(voiceState.getChannelId().orElseThrow(IllegalStateException::new).asString()).suppress(true).build())));
     }
 
     @Override

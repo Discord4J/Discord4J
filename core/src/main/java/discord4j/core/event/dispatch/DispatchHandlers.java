@@ -48,6 +48,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Registry for {@link Dispatch} to {@link Event} mapping operations.
@@ -109,7 +110,6 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(StageInstanceCreate.class, StageInstanceDispatchHandlers::stageInstanceCreate);
         addHandler(StageInstanceUpdate.class, StageInstanceDispatchHandlers::stageInstanceUpdate);
         addHandler(StageInstanceDelete.class, StageInstanceDispatchHandlers::stageInstanceDelete);
-        addHandler(VoiceStateUpdateDispatch.class, StageInstanceDispatchHandlers::stageRequestToSpeak);
 
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
 
@@ -211,12 +211,22 @@ public class DispatchHandlers implements DispatchEventMapper {
 
     private static Mono<VoiceStateUpdateEvent> voiceStateUpdateDispatch(DispatchContext<VoiceStateUpdateDispatch, VoiceStateData> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        VoiceStateData voiceStateData = context.getDispatch().voiceState();
-
+        Optional<VoiceStateData> oldVoiceStateData = context.getOldState();
+        VoiceStateUpdateDispatch voiceStateUpdate = context.getDispatch();
+        VoiceStateData voiceStateData = voiceStateUpdate.voiceState();
         VoiceState current = new VoiceState(gateway, voiceStateData);
 
-        return Mono.just(new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current, context.getOldState()
-                                .map(old -> new VoiceState(gateway, old)).orElse(null)));
+        if (oldVoiceStateData.isPresent()
+            && voiceStateData.channelId().isPresent()
+            && !voiceStateData.guildId().isAbsent()
+            && voiceStateData.suppress()
+            && voiceStateData.requestToSpeakTimestamp().isPresent()
+            && !oldVoiceStateData.flatMap(VoiceStateData::requestToSpeakTimestamp).isPresent()) {
+            return Mono.just(new StageRequestToSpeakEvent(gateway, context.getShardInfo(), current, oldVoiceStateData.map(old -> new VoiceState(gateway, old)).orElse(null)));
+        } else {
+            return Mono.just(new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current, context.getOldState()
+                .map(old -> new VoiceState(gateway, old)).orElse(null)));
+        }
     }
 
     private static Mono<Event> webhooksUpdate(DispatchContext<WebhooksUpdate, Void> context) {
