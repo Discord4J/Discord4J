@@ -16,10 +16,11 @@
  */
 package discord4j.core.object;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
+import discord4j.discordjson.json.OverwriteData;
 import discord4j.rest.util.PermissionSet;
-import discord4j.common.util.Snowflake;
 
 import java.util.Optional;
 
@@ -59,6 +60,20 @@ public class PermissionOverwrite {
         this.denied = denied;
         this.targetId = targetId;
         this.type = type;
+    }
+
+    /**
+     * Map this {@link PermissionOverwrite} object to a {@link OverwriteData} JSON.
+     *
+     * @return JSON object.
+     */
+    public OverwriteData getData() {
+        return OverwriteData.builder()
+                .id(targetId)
+                .type(type.getValue())
+                .allow(allowed)
+                .deny(denied)
+                .build();
     }
 
     /**

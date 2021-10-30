@@ -16,8 +16,6 @@
  */
 package discord4j.core.spec;
 
-import discord4j.core.object.PermissionOverwrite;
-import discord4j.discordjson.json.OverwriteData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Multimap;
 import reactor.util.annotation.Nullable;
@@ -26,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 final class InternalSpecUtils {
 
@@ -42,7 +39,7 @@ final class InternalSpecUtils {
     static <T, R> R mapNullable(@Nullable T value, Function<? super T, ? extends R> mapper) {
         return value != null ? mapper.apply(value) : null;
     }
-    
+
     static void putIfNotNull(Map<String, Object> map, String key, @Nullable Object value) {
         if (value != null) {
             map.put(key, value);
@@ -68,16 +65,5 @@ final class InternalSpecUtils {
     static <T, R> Possible<Optional<R>> mapPossibleOptional(Possible<Optional<T>> value,
                                                            Function<? super T, ? extends R> mapper) {
         return value.isAbsent() ? Possible.absent() : Possible.of(value.get().map(mapper));
-    }
-
-    static Possible<List<OverwriteData>> mapPossibleOverwrites(Possible<List<PermissionOverwrite>> possible) {
-        return mapPossible(possible, po -> po.stream()
-                .map(o -> OverwriteData.builder()
-                        .id(o.getTargetId().asString())
-                        .type(o.getType().getValue())
-                        .allow(o.getAllowed().getRawValue())
-                        .deny(o.getDenied().getRawValue())
-                        .build())
-                .collect(Collectors.toList()));
     }
 }
