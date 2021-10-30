@@ -88,7 +88,7 @@ abstract class WebhookMessageEditMonoGenerator extends Mono<Message> implements 
 
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
-        webhook().executeMessageEdit(messageId(), WebhookMessageEditSpec.copyOf(this)).subscribe(actual);
+        webhook().editMessage(messageId(), WebhookMessageEditSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override
