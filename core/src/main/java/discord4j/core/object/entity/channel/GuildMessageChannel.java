@@ -21,21 +21,32 @@ import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
-import discord4j.discordjson.json.BulkDeleteRequest;
-import discord4j.rest.util.Permission;
+import discord4j.core.object.entity.Webhook;
+import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.core.spec.InviteCreateMono;
+import discord4j.core.spec.InviteCreateSpec;
+import discord4j.core.spec.WebhookCreateMono;
+import discord4j.core.spec.WebhookCreateSpec;
+import discord4j.core.spec.legacy.LegacyWebhookCreateSpec;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 /** A Discord channel in a guild that can have messages sent to it. */
-public interface GuildMessageChannel extends GuildChannel, MessageChannel {
+public interface GuildMessageChannel extends CategorizableChannel, MessageChannel {
+
+    /**
+     * Gets the channel topic, if present.
+     *
+     * @return The channel topic, if present.
+     * @deprecated Threads don't have topics, so when they are released, this will be moved to
+     * {@link TopLevelGuildMessageChannel#getTopic()}.
+     */
+    @Deprecated
+    Optional<String> getTopic();
 
     /**
      * Requests to bulk delete the supplied message IDs.
@@ -58,9 +69,7 @@ public interface GuildMessageChannel extends GuildChannel, MessageChannel {
      * @return A {@link Flux} that continually emits {@link Snowflake message IDs} that were <b>not</b> bulk deleted
      * (typically if the ID was older than 2 weeks). If an error is received, it is emitted through the {@code Flux}.
      */
-    default Flux<Snowflake> bulkDelete(Publisher<Snowflake> messageIds) {
-        return getRestChannel().bulkDelete(messageIds);
-    }
+    Flux<Snowflake> bulkDelete(Publisher<Snowflake> messageIds);
 
     /**
      * Requests to bulk delete the supplied messages.
@@ -83,46 +92,56 @@ public interface GuildMessageChannel extends GuildChannel, MessageChannel {
      * (typically if the message was older than 2 weeks). If an error is received, it is emitted through the
      * {@code Flux}.
      */
-    default Flux<Message> bulkDeleteMessages(Publisher<Message> messages) {
-        // FIXME This is essentially a copy of the RestChannel implementation which incurs a potentially
-        //  problematic amount of duplication. Optimally, this method should be able to delegate to
-        //  bulkDelete, but no implementation has been found that can do so in a performant manner.
-        final Instant timeLimit = Instant.now().minus(Duration.ofDays(14L));
+    Flux<Message> bulkDeleteMessages(Publisher<Message> messages);
 
-        return Flux.from(messages)
-                .distinct(Message::getId)
-                .buffer(100)
-                .flatMap(allMessages -> {
-                    final List<Message> eligibleMessages = new ArrayList<>(0);
-                    final Collection<Message> ineligibleMessages = new ArrayList<>(0);
+    /**
+     * Requests to create a webhook.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyWebhookCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createWebhook(WebhookCreateSpec)} or {@link #createWebhook(String)} which offer an
+     * immutable approach to build specs
+     */
+    @Deprecated
+    Mono<Webhook> createWebhook(final Consumer<? super LegacyWebhookCreateSpec> spec);
 
-                    for (final Message message : allMessages) {
-                        if (message.getId().getTimestamp().isBefore(timeLimit)) {
-                            ineligibleMessages.add(message);
-
-                        } else {
-                            eligibleMessages.add(message);
-                        }
-                    }
-
-                    if (eligibleMessages.size() == 1) {
-                        ineligibleMessages.add(eligibleMessages.get(0));
-                        eligibleMessages.clear();
-                    }
-
-                    final Collection<String> eligibleIds = eligibleMessages.stream()
-                            .map(Message::getId)
-                            .map(Snowflake::asString)
-                            .collect(Collectors.toList());
-
-                    return Mono.just(eligibleIds)
-                            .filter(chunk -> !chunk.isEmpty())
-                            .flatMap(chunk -> getClient().getRestClient()
-                                    .getChannelService()
-                                    .bulkDeleteMessages(getId().asLong(), BulkDeleteRequest.builder().messages(chunk).build()))
-                            .thenMany(Flux.fromIterable(ineligibleMessages));
-                });
+    /**
+     * Requests to create a webhook. Properties specifying how to create the webhook can be set via the {@code withXxx}
+     * methods of the returned {@link WebhookCreateMono}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated Threads don't have webhooks, so when they are released, this will be moved to
+     * {@link TopLevelGuildMessageChannel#createWebhook(String)}.
+     */
+    @Deprecated
+    default WebhookCreateMono createWebhook(String name) {
+        return WebhookCreateMono.of(name, this);
     }
+
+    /**
+     * Requests to create a webhook.
+     *
+     * @param spec an immutable object that specifies how to create the webhook
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated Threads don't have webhooks, so when they are released, this will be moved to
+     * {@link TopLevelGuildMessageChannel#createWebhook(WebhookCreateSpec)}.
+     */
+    @Deprecated
+    Mono<Webhook> createWebhook(WebhookCreateSpec spec);
+
+    /**
+     * Requests to retrieve the webhooks of the channel.
+     *
+     * @return A {@link Flux} that continually emits the {@link Webhook webhooks} of the channel. If an error is
+     * received, it is emitted through the {@code Flux}.
+     * @deprecated Threads don't have webhooks, so when they are released, this will be moved to
+     * {@link TopLevelGuildMessageChannel#getWebhooks()}.
+     */
+    @Deprecated
+    Flux<Webhook> getWebhooks();
 
     /**
      * Returns all members in the guild which have access to <b>view</b> this channel.
@@ -130,10 +149,55 @@ public interface GuildMessageChannel extends GuildChannel, MessageChannel {
      * @return A {@link Flux} that continually emits all members from {@link Guild#getMembers()} which have access to
      * view this channel {@link discord4j.rest.util.Permission#VIEW_CHANNEL}
      */
-    default Flux<Member> getMembers() {
-        return getGuild()
-                .flatMapMany(Guild::getMembers)
-                .filterWhen(member -> getEffectivePermissions(member.getId())
-                        .map(permissions -> permissions.contains(Permission.VIEW_CHANNEL)));
+    Flux<Member> getMembers();
+
+    /**
+     * @deprecated Threads aren't categorizable, so when they are released, GuildMessageChannel will no longer extend
+     * CategorizableChannel. Use {@link CategorizableChannel#getCategoryId()}
+     */
+    @Override
+    @Deprecated
+    Optional<Snowflake> getCategoryId();
+
+    /**
+     * @deprecated Threads aren't categorizable, so when they are released, GuildMessageChannel will no longer extend
+     * CategorizableChannel. Use {@link CategorizableChannel#getCategory()}
+     */
+    @Override
+    @Deprecated
+    Mono<Category> getCategory();
+
+    /**
+     * @deprecated Threads aren't categorizable, so when they are released, GuildMessageChannel will no longer extend
+     * CategorizableChannel. Use {@link CategorizableChannel#getCategory(EntityRetrievalStrategy)}
+     */
+    @Override
+    @Deprecated
+    Mono<Category> getCategory(EntityRetrievalStrategy retrievalStrategy);
+
+    /**
+     * @deprecated Threads aren't categorizable, so when they are released, GuildMessageChannel will no longer extend
+     * CategorizableChannel. Use {@link CategorizableChannel#createInvite()}
+     */
+    @Override
+    @Deprecated
+    default InviteCreateMono createInvite() {
+        return CategorizableChannel.super.createInvite();
     }
+
+    /**
+     * @deprecated Threads aren't categorizable, so when they are released, GuildMessageChannel will no longer extend
+     * CategorizableChannel. Use {@link CategorizableChannel#createInvite(InviteCreateSpec)} )}
+     */
+    @Override
+    @Deprecated
+    Mono<ExtendedInvite> createInvite(InviteCreateSpec spec);
+
+    /**
+     * @deprecated Threads aren't categorizable, so when they are released, GuildMessageChannel will no longer extend
+     * CategorizableChannel. Use {@link CategorizableChannel#getInvites()} )}
+     */
+    @Override
+    @Deprecated
+    Flux<ExtendedInvite> getInvites();
 }

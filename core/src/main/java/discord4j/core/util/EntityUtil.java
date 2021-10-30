@@ -62,10 +62,6 @@ public final class EntityUtil {
             case GUILD_CATEGORY: return new Category(gateway, data);
             case GUILD_NEWS: return new NewsChannel(gateway, data);
             case GUILD_STORE: return new StoreChannel(gateway, data);
-            case GUILD_NEWS_THREAD:
-            case GUILD_PUBLIC_THREAD:
-            case GUILD_PRIVATE_THREAD:
-                return new ThreadChannel(gateway, data);
             default: return throwUnsupportedDiscordValue(data);
         }
     }

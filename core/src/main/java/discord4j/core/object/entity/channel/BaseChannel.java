@@ -16,11 +16,12 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
-import discord4j.core.GatewayDiscordClient;
-import discord4j.common.util.Snowflake;
 import discord4j.rest.entity.RestChannel;
+import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
@@ -28,11 +29,11 @@ import java.util.Objects;
 /** An internal implementation of {@link Channel} designed to streamline inheritance. */
 class BaseChannel implements Channel {
 
-    /** The gateway associated to this object. */
-    private final GatewayDiscordClient gateway;
-
     /** The raw data as represented by Discord. */
     private final ChannelData data;
+
+    /** The gateway associated to this object. */
+    private final GatewayDiscordClient gateway;
 
     /** A handle to execute REST API operations for this entity. */
     private final RestChannel rest;
@@ -55,12 +56,31 @@ class BaseChannel implements Channel {
     }
 
     @Override
-    public final RestChannel getRestChannel() {
+    public final Snowflake getId() {
+        return Snowflake.of(data.id());
+    }
+
+    @Override
+    public RestChannel getRestChannel() {
         return rest;
     }
 
     @Override
-    public final ChannelData getData() {
+    public final Type getType() {
+        return Type.of(data.type());
+    }
+
+    @Override
+    public final Mono<Void> delete(@Nullable final String reason) {
+        return rest.delete(reason);
+    }
+
+    /**
+     * Gets the raw data as represented by Discord.
+     *
+     * @return The raw data as represented by Discord.
+     */
+    ChannelData getData() {
         return data;
     }
 

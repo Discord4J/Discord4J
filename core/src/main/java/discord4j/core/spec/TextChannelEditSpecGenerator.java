@@ -28,9 +28,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
+import static discord4j.core.spec.InternalSpecUtils.mapPossibleOverwrites;
 
 @Value.Immutable(singleton = true)
 interface TextChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
@@ -57,9 +57,7 @@ interface TextChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
                 .topic(topic())
                 .rateLimitPerUser(rateLimitPerUser())
                 .nsfw(nsfw())
-                .permissionOverwrites(InternalSpecUtils.mapPossible(permissionOverwrites(), po -> po.stream()
-                        .map(PermissionOverwrite::getData)
-                        .collect(Collectors.toList())))
+                .permissionOverwrites(mapPossibleOverwrites(permissionOverwrites()))
                 .parentId(mapPossibleOptional(parentId(), Snowflake::asString))
                 .build();
     }

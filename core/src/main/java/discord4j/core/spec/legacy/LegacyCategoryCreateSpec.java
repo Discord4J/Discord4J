@@ -66,7 +66,12 @@ public class LegacyCategoryCreateSpec implements LegacyAuditSpec<ChannelCreateRe
      */
     public LegacyCategoryCreateSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         List<OverwriteData> raw = permissionOverwrites.stream()
-                .map(PermissionOverwrite::getData)
+                .map(o -> OverwriteData.builder()
+                        .id(o.getTargetId().asString())
+                        .type(o.getType().getValue())
+                        .allow(o.getAllowed().getRawValue())
+                        .deny(o.getDenied().getRawValue())
+                        .build())
                 .collect(Collectors.toList());
 
         requestBuilder.permissionOverwrites(raw);

@@ -28,7 +28,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.*;
 
@@ -58,9 +57,7 @@ interface VoiceChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> 
                 .bitrate(bitrate())
                 .userLimit(userLimit())
                 .position(position())
-                .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
-                        .map(PermissionOverwrite::getData)
-                        .collect(Collectors.toList())))
+                .permissionOverwrites(mapPossibleOverwrites(permissionOverwrites()))
                 .parentId(mapPossibleOptional(parentId(), Snowflake::asString))
                 .rtcRegion(rtcRegion())
                 .videoQualityMode(mapPossibleOptional(videoQualityMode(), VoiceChannel.Mode::getValue))

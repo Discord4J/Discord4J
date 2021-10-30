@@ -80,8 +80,8 @@ interface InteractionFollowupCreateSpecGenerator extends Spec<MultipartRequest<F
                 .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
                 .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
                 .components(mapPossible(components(), components -> components.stream()
-                        .map(LayoutComponent::getData)
-                        .collect(Collectors.toList())))
+                    .map(LayoutComponent::getData)
+                    .collect(Collectors.toList())))
                 .flags(mapPossible(ephemeral(), eph -> eph ? Message.Flag.EPHEMERAL.getFlag() : 0))
                 .build();
         return MultipartRequest.ofRequestAndFiles(request, Stream.concat(files().stream(), fileSpoilers().stream())

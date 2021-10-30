@@ -45,7 +45,3 @@ jar {
                 'Automatic-Module-Name': 'discord4j.core'
     }
 }
-
-sourcesJar {
-    from "build/generated/sources/annotationProcessor/java/main"
-}

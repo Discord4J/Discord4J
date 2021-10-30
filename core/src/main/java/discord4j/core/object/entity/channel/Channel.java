@@ -16,9 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Entity;
-import discord4j.discordjson.json.ChannelData;
 import discord4j.rest.entity.RestChannel;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -35,14 +33,7 @@ public interface Channel extends Entity {
      *
      * @return The type of channel.
      */
-    default Type getType() {
-        return Type.of(getData().type());
-    }
-
-    @Override
-    default Snowflake getId() {
-        return Snowflake.of(getData().id());
-    }
+    Type getType();
 
     /**
      * Requests to delete this channel.
@@ -61,9 +52,7 @@ public interface Channel extends Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the channel has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    default Mono<Void> delete(@Nullable String reason) {
-        return getRestChannel().delete(reason);
-    }
+    Mono<Void> delete(@Nullable String reason);
 
     /**
      * Gets the <i>raw</i> mention. This is the format utilized to directly mention another channel.
@@ -78,13 +67,6 @@ public interface Channel extends Entity {
      * Return a {@link RestChannel} handle to execute REST API operations on this entity.
      */
     RestChannel getRestChannel();
-
-    /**
-     * Gets the raw data as represented by Discord.
-     *
-     * @return The raw data as represented by Discord.
-     */
-    ChannelData getData();
 
     /** Represents the various types of channels. */
     enum Type {
@@ -112,12 +94,6 @@ public interface Channel extends Entity {
 
         /** Represents a {@link StoreChannel}. */
         GUILD_STORE(6),
-
-        GUILD_NEWS_THREAD(10),
-
-        GUILD_PUBLIC_THREAD(11),
-
-        GUILD_PRIVATE_THREAD(12),
 
         /** Represents a {@link VoiceChannel} for hosting events with an audience. */
         GUILD_STAGE_VOICE(13);
@@ -159,9 +135,6 @@ public interface Channel extends Entity {
                 case 4: return GUILD_CATEGORY;
                 case 5: return GUILD_NEWS;
                 case 6: return GUILD_STORE;
-                case 10: return GUILD_NEWS_THREAD;
-                case 11: return GUILD_PUBLIC_THREAD;
-                case 12: return GUILD_PRIVATE_THREAD;
                 case 13: return GUILD_STAGE_VOICE;
                 default: return UNKNOWN;
             }

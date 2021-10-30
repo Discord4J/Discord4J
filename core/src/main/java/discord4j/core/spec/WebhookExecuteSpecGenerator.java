@@ -78,8 +78,8 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
                 .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
                 .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
                 .components(mapPossible(components(), components -> components.stream()
-                        .map(LayoutComponent::getData)
-                        .collect(Collectors.toList())))
+                    .map(LayoutComponent::getData)
+                    .collect(Collectors.toList())))
                 .build();
         return MultipartRequest.ofRequestAndFiles(request, Stream.concat(files().stream(), fileSpoilers().stream())
                 .map(MessageCreateFields.File::asRequest)

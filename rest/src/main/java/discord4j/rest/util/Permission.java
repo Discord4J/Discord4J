@@ -128,16 +128,7 @@ public enum Permission {
      * Allows for requesting to speak in stage channels.
      */
     @Experimental
-    REQUEST_TO_SPEAK(0x100000000L, false),
-
-    /** Allows for deleting and archiving threads, and viewing all private threads */
-    MANAGE_THREADS(0x0400000000L, true),
-
-    /** Allows for creating and participating in threads */
-    USE_PUBLIC_THREADS(0x0800000000L, false),
-
-    /** Allows for creating and participating in private threads */
-    USE_PRIVATE_THREADS(0x1000000000L, false);
+    REQUEST_TO_SPEAK(0x100000000L, false);
 
     /** Whether MFA is required. */
     private final boolean mfa;
