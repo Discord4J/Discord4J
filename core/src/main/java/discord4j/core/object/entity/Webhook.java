@@ -495,7 +495,7 @@ public final class Webhook implements Entity {
      * @return A {@link Mono} where, upon successful webhook execution, emits a Message. If the message get fails, an
      * error is emitted through the {@code Mono}.
      */
-    public Mono<Message> executeMessageGet(Snowflake messageId) {
+    public Mono<Message> getMessage(Snowflake messageId) {
         Objects.requireNonNull(messageId);
         return Mono.defer(
             () -> {
@@ -518,7 +518,7 @@ public final class Webhook implements Entity {
      * @return A {@link WebhookMessageEditMono} where, upon successful webhook execution, emits a Message. If the
      * message edit fails, an error is emitted through the {@link WebhookMessageEditMono}.
      */
-    public WebhookMessageEditMono executeMessageEdit(Snowflake messageId) {
+    public WebhookMessageEditMono editMessage(Snowflake messageId) {
         return WebhookMessageEditMono.of(messageId,this);
     }
 
@@ -530,7 +530,7 @@ public final class Webhook implements Entity {
      * @return A {@link Mono} where, upon successful webhook execution, emits a Message. If the message edit fails, an
      * error is emitted through the {@code Mono}.
      */
-    public Mono<Message> executeMessageEdit(Snowflake messageId, WebhookMessageEditSpec spec) {
+    public Mono<Message> editMessage(Snowflake messageId, WebhookMessageEditSpec spec) {
         Objects.requireNonNull(messageId);
         Objects.requireNonNull(spec);
         return Mono.defer(
@@ -552,7 +552,7 @@ public final class Webhook implements Entity {
      * @return A {@link Mono} where, upon successful webhook execution, emits nothing; indicating the message has been
      * deleted. If the message delete fails, an error is emitted through the {@code Mono}.
      */
-    public Mono<Void> executeMessageDelete(Snowflake messageId) {
+    public Mono<Void> deleteMessage(Snowflake messageId) {
         Objects.requireNonNull(messageId);
         return Mono.defer(
             () -> {
