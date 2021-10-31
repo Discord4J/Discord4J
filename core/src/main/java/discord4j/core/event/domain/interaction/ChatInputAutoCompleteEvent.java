@@ -95,7 +95,7 @@ public class ChatInputAutoCompleteEvent extends AutoCompleteInteractionEvent {
     }
 
     /**
-     * Gets tne type of the invoked command.
+     * Gets the type of the invoked command.
      *
      * @return The type of the invoked command.
      */
