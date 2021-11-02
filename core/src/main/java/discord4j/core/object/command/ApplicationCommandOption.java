@@ -170,6 +170,25 @@ public class ApplicationCommandOption implements DiscordObject {
         return data.autocomplete().toOptional().orElse(false);
     }
 
+    /**
+     * Returns the minimum value a user is allowed to input, represented as a {@link Double}.
+     * </p>
+     * This is only applicable to {@link Type#INTEGER} and {@link Type#NUMBER} types.
+     * @return The minimum value a user is allowed to input if present, otherwise {@link Optional#empty()}.
+     */
+    public Optional<Double> getMinimumValue() {
+        return data.minValue().toOptional();
+    }
+
+    /**
+     * Returns the maximum value a user is allowed to input, represented as a {@link Double}.
+     * </p>
+     * This is only applicable to {@link Type#INTEGER} and {@link Type#NUMBER} types.
+     * @return The maximum value a user is allowed to input if present, otherwise {@link Optional#empty()}.
+     */
+    public Optional<Double> getMaximumValue() {
+        return data.maxValue().toOptional();
+    }
 
     @Override
     public GatewayDiscordClient getClient() {

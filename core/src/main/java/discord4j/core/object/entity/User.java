@@ -345,7 +345,9 @@ public class User implements Entity {
 
         VERIFIED_BOT_DEVELOPER(17),
         
-        DISCORD_CERTIFIED_MODERATOR(18);
+        DISCORD_CERTIFIED_MODERATOR(18),
+
+        BOT_HTTP_INTERACTIONS(19);
 
         /** The underlying value as represented by Discord. */
         private final int value;

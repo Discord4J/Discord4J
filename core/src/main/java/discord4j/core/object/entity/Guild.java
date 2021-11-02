@@ -2089,7 +2089,10 @@ public final class Guild implements Entity {
         SUPPRESS_PREMIUM_SUBSCRIPTIONS(1),
 
         /** Suppress server setup tips. */
-        SUPPRESS_GUILD_REMINDER_NOTIFICATIONS(2);
+        SUPPRESS_GUILD_REMINDER_NOTIFICATIONS(2),
+
+        /** Hide member join sticker reply buttons */
+        SUPPRESS_JOIN_NOTIFICATION_REPLIES(3);
 
         /** The underlying value as represented by Discord. */
         private final int value;
