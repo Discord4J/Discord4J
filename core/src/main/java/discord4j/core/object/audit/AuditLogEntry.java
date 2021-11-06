@@ -136,7 +136,7 @@ public class AuditLogEntry implements Entity {
                             .map(v -> changeKey.parseValue(this, v))
                             .orElse(null);
 
-                    T newValue = changeData.oldValue().toOptional()
+                    T newValue = changeData.newValue().toOptional()
                             .map(v -> changeKey.parseValue(this, v))
                             .orElse(null);
 
