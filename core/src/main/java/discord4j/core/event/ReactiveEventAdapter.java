@@ -693,6 +693,17 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    /**
+     * Invoked when a gateway session has been invalidated.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onSessionInvalidated(SessionInvalidatedEvent event) {
+        return Mono.empty();
+    }
+
     // ================= Interactions events ================= //
 
     /**
@@ -886,6 +897,7 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof DisconnectEvent) compatibleHooks.add(onDisconnect((DisconnectEvent) event));
         if (event instanceof ReconnectStartEvent) compatibleHooks.add(onReconnectStart((ReconnectStartEvent) event));
         if (event instanceof ReconnectFailEvent) compatibleHooks.add(onReconnectFail((ReconnectFailEvent) event));
+        if (event instanceof SessionInvalidatedEvent) compatibleHooks.add(onSessionInvalidated((SessionInvalidatedEvent) event));
         if (event instanceof ApplicationCommandInteractionEvent) compatibleHooks.add(onApplicationCommandInteraction((ApplicationCommandInteractionEvent) event));
         if (event instanceof ChatInputInteractionEvent) compatibleHooks.add(onChatInputInteraction((ChatInputInteractionEvent) event));
         if (event instanceof MessageInteractionEvent) compatibleHooks.add(onMessageInteraction((MessageInteractionEvent) event));
