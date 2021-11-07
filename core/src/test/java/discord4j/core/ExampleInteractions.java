@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Example to showcase how {@link InteractionCreateEvent#deferReply()}, {@link InteractionCreateEvent#reply()},
+ * Example to showcase how {@link DeferrableInteractionEvent#deferReply()}, {@link DeferrableInteractionEvent#reply()},
  * {@link ComponentInteractionEvent#deferEdit()} and {@link ComponentInteractionEvent#edit()} work for chat input, user,
  * message commands and component interactions.
  */

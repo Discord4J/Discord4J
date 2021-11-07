@@ -17,7 +17,7 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.event.domain.interaction.InteractionCreateEvent;
+import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.FollowupMessageRequest;
@@ -94,7 +94,7 @@ interface InteractionFollowupCreateSpecGenerator extends Spec<MultipartRequest<F
 @Value.Immutable(builder = false)
 abstract class InteractionFollowupCreateMonoGenerator extends Mono<Message> implements InteractionFollowupCreateSpecGenerator {
 
-    abstract InteractionCreateEvent event();
+    abstract DeferrableInteractionEvent event();
 
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {

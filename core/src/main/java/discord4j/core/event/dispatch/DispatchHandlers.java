@@ -300,6 +300,8 @@ public class DispatchHandlers implements DispatchEventMapper {
                         return Mono.just(new ComponentInteractionEvent(gateway, context.getShardInfo(), interaction));
                 }
 
+            case APPLICATION_COMMAND_AUTOCOMPLETE:
+                return Mono.just(new ChatInputAutoCompleteEvent(gateway, context.getShardInfo(), interaction));
             default:
                 return Mono.just(new InteractionCreateEvent(gateway, context.getShardInfo(), interaction));
         }

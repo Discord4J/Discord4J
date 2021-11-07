@@ -18,7 +18,7 @@
 package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.event.domain.interaction.InteractionCreateEvent;
+import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.WebhookMessageEditRequest;
@@ -83,7 +83,7 @@ interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<Webhoo
 @Value.Immutable(builder = false)
 abstract class InteractionReplyEditMonoGenerator extends Mono<Message> implements InteractionReplyEditSpecGenerator {
 
-    abstract InteractionCreateEvent event();
+    abstract DeferrableInteractionEvent event();
 
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
@@ -100,7 +100,7 @@ abstract class InteractionFollowupEditMonoGenerator extends Mono<Message> implem
 
     abstract Snowflake messageId();
 
-    abstract InteractionCreateEvent event();
+    abstract DeferrableInteractionEvent event();
 
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {

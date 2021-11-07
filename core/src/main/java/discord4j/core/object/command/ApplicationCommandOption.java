@@ -161,6 +161,16 @@ public class ApplicationCommandOption implements DiscordObject {
     }
 
     /**
+     * Whether this option supports auto-complete or not. Default is false.
+     * </p>
+     * Autocomplete cannot be enabled on options that have choices.
+     * @return Whether this option supports auto-complete or not.
+     */
+    public boolean hasAutocompleteEnabled() {
+        return data.autocomplete().toOptional().orElse(false);
+    }
+
+    /**
      * Returns the minimum value a user is allowed to input, represented as a {@link Double}.
      * </p>
      * This is only applicable to {@link Type#INTEGER} and {@link Type#NUMBER} types.

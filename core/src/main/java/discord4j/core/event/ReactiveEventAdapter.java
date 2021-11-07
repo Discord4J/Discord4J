@@ -718,6 +718,16 @@ public abstract class ReactiveEventAdapter {
     }
 
     /**
+     * Invoked when a user starts a deferrable interaction
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onDeferrableInteraction(DeferrableInteractionEvent event) {
+        return Mono.empty();
+    }
+
+    /**
      * Invoked when a user starts an application command interaction.
      *
      * @param event the event instance
@@ -791,6 +801,28 @@ public abstract class ReactiveEventAdapter {
      * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
      */
     public Publisher<?> onSelectMenuInteraction(SelectMenuInteractionEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a user starts an auto-complete interaction.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onAutoCompleteInteraction(AutoCompleteInteractionEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a user is typing a chat input command option that has auto-complete enabled.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onChatInputAutoCompleteInteraction(ChatInputAutoCompleteEvent event) {
         return Mono.empty();
     }
 
@@ -905,6 +937,9 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof ButtonInteractionEvent) compatibleHooks.add(onButtonInteraction((ButtonInteractionEvent) event));
         if (event instanceof SelectMenuInteractionEvent) compatibleHooks.add(onSelectMenuInteraction((SelectMenuInteractionEvent) event));
         if (event instanceof ComponentInteractionEvent) compatibleHooks.add(onComponentInteraction((ComponentInteractionEvent) event));
+        if (event instanceof AutoCompleteInteractionEvent) compatibleHooks.add(onAutoCompleteInteraction((AutoCompleteInteractionEvent) event));
+        if (event instanceof ChatInputAutoCompleteEvent) compatibleHooks.add(onChatInputAutoCompleteInteraction((ChatInputAutoCompleteEvent) event));
+        if (event instanceof DeferrableInteractionEvent) compatibleHooks.add(onDeferrableInteraction((DeferrableInteractionEvent) event));
         if (event instanceof InteractionCreateEvent) compatibleHooks.add(onInteractionCreate((InteractionCreateEvent) event));
         if (event instanceof ApplicationCommandCreateEvent) compatibleHooks.add(onApplicationCommandCreate((ApplicationCommandCreateEvent) event));
         if (event instanceof ApplicationCommandUpdateEvent) compatibleHooks.add(onApplicationCommandUpdate((ApplicationCommandUpdateEvent) event));

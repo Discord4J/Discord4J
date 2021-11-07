@@ -555,7 +555,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      * </pre>
      * <p>
      * For more alternatives to handling errors, please see
-     * <a href="https://github.com/Discord4J/Discord4J/wiki/Error-Handling">Error Handling</a> wiki page.
+     * <a href="https://docs.discord4j.com/error-handling">Error Handling</a> docs page.
      *
      * @param eventClass the event class to obtain events from
      * @param <E> the type of the event class
