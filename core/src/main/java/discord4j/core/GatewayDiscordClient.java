@@ -29,9 +29,18 @@ import discord4j.core.event.domain.Event;
 import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
-import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.ApplicationInfo;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.GuildEmoji;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.StageInstance;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.Webhook;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.entity.channel.StageChannel;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -48,6 +57,7 @@ import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.GuildData;
 import discord4j.discordjson.json.GuildUpdateData;
 import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.UpdateCurrentUserVoiceStateRequest;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.discordjson.possible.Possible;
@@ -441,6 +451,57 @@ public class GatewayDiscordClient implements EntityRetriever {
         Objects.requireNonNull(spec);
         return Mono.defer(() -> getRestClient().getUserService().modifyCurrentUser(spec.asRequest()))
                 .map(data -> new User(this, data));
+    }
+
+    /**
+     * Requests to retrieve a {@link StageInstance}.
+     *
+     * @param channelId The channel ID associated to the {@link StageInstance}.
+     * @param retrievalStrategy The retreival strategy to use
+     * @return A {@link Mono} where, upon successful completion, emits the {@link StageInstance} associated to the
+     * supplied channel ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId, EntityRetrievalStrategy retrievalStrategy) {
+        Objects.requireNonNull(channelId);
+        Objects.requireNonNull(retrievalStrategy);
+        return withRetrievalStrategy(retrievalStrategy).getStageInstanceByChannelId(channelId);
+    }
+
+    /**
+     * Requests to retrieve a {@link StageInstance}.
+     *
+     * @param channelId The channel ID associated to the {@link StageInstance}.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link StageInstance} associated to the
+     * supplied channel ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Override
+    public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId) {
+        Objects.requireNonNull(channelId);
+        return entityRetriever.getStageInstanceByChannelId(channelId);
+    }
+
+    /**
+     * Move the {@link Member} represented by this {@link GatewayDiscordClient} to the stage speakers.
+     * Requires the {@link Member} to be connected to a {@link StageChannel}
+     *
+     * @return A {@link Mono} that upon subscription, will move the {@link Member} represented by this
+     * {@link GatewayDiscordClient} to the stage speakers.
+     */
+    public Mono<Void> joinStageSpeakers(Snowflake guildId) {
+        Objects.requireNonNull(guildId);
+        return Mono.defer(() -> getRestClient().getGuildService().modifySelfVoiceState(guildId.asLong(), UpdateCurrentUserVoiceStateRequest.builder().suppress(false).build()));
+    }
+
+    /**
+     * Move the {@link Member} represented by this {@link GatewayDiscordClient} to the stage audience.
+     * Requires the {@link Member} to be connected to a {@link StageChannel}
+     *
+     * @return A {@link Mono} that upon subscription, will move the {@link Member} represented by this
+     * {@link GatewayDiscordClient} to the stage audience.
+     */
+    public Mono<Void> joinStageAudience(Snowflake guildId) {
+        Objects.requireNonNull(guildId);
+        return Mono.defer(() -> getRestClient().getGuildService().modifySelfVoiceState(guildId.asLong(), UpdateCurrentUserVoiceStateRequest.builder().suppress(true).build()));
     }
 
     /**

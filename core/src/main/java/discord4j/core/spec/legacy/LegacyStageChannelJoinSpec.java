@@ -22,13 +22,25 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.core.object.entity.channel.StageChannel;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.intent.Intent;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.util.Permission;
-import discord4j.voice.*;
+import discord4j.voice.AudioProvider;
+import discord4j.voice.AudioReceiver;
+import discord4j.voice.LocalVoiceReceiveTaskFactory;
+import discord4j.voice.LocalVoiceSendTaskFactory;
+import discord4j.voice.VoiceChannelRetrieveTask;
+import discord4j.voice.VoiceConnection;
+import discord4j.voice.VoiceDisconnectTask;
+import discord4j.voice.VoiceGatewayOptions;
+import discord4j.voice.VoiceReceiveTaskFactory;
+import discord4j.voice.VoiceSendTaskFactory;
+import discord4j.voice.VoiceServerOptions;
+import discord4j.voice.VoiceServerUpdateTask;
+import discord4j.voice.VoiceStateUpdateTask;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
@@ -43,12 +55,12 @@ import java.util.concurrent.TimeoutException;
 import static discord4j.common.LogUtil.format;
 
 /**
- * LegacySpec used to request a connection to a {@link VoiceChannel} and handle the initialization of the resulting
+ * LegacySpec used to request a connection to a {@link StageChannel} and handle the initialization of the resulting
  * {@link VoiceConnection}.
  */
-public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnection>> {
+public class LegacyStageChannelJoinSpec implements LegacySpec<Mono<VoiceConnection>> {
 
-    private static final Logger log = Loggers.getLogger(LegacyVoiceChannelJoinSpec.class);
+    private static final Logger log = Loggers.getLogger(LegacyStageChannelJoinSpec.class);
 
     /** Default maximum amount of time in seconds to wait before the connection to the voice channel times out. */
     private static final int DEFAULT_TIMEOUT = 10;
@@ -67,9 +79,9 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
     private RetrySpec LegacyipDiscoveryRetrySpec = RetrySpec.maxInARow(1);
 
     private final GatewayDiscordClient gateway;
-    private final VoiceChannel voiceChannel;
+    private final StageChannel voiceChannel;
 
-    public LegacyVoiceChannelJoinSpec(final GatewayDiscordClient gateway, final VoiceChannel voiceChannel) {
+    public LegacyStageChannelJoinSpec(final GatewayDiscordClient gateway, final StageChannel voiceChannel) {
         this.gateway = Objects.requireNonNull(gateway);
         this.voiceChannel = voiceChannel;
     }
@@ -80,7 +92,7 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
      * @param provider Used to send audio.
      * @return This spec.
      */
-    public LegacyVoiceChannelJoinSpec setProvider(final AudioProvider provider) {
+    public LegacyStageChannelJoinSpec setProvider(final AudioProvider provider) {
         this.provider = provider;
         return this;
     }
@@ -94,7 +106,7 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
      * functionality works properly. Use at your own risk.
      */
     @Deprecated
-    public LegacyVoiceChannelJoinSpec setReceiver(final AudioReceiver receiver) {
+    public LegacyStageChannelJoinSpec setReceiver(final AudioReceiver receiver) {
         this.receiver = receiver;
         return this;
     }
@@ -106,7 +118,7 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
      * @param sendTaskFactory provides an audio send system that process outbound packets
      * @return this spec
      */
-    public LegacyVoiceChannelJoinSpec setSendTaskFactory(VoiceSendTaskFactory sendTaskFactory) {
+    public LegacyStageChannelJoinSpec setSendTaskFactory(VoiceSendTaskFactory sendTaskFactory) {
         this.sendTaskFactory = sendTaskFactory;
         return this;
     }
@@ -121,7 +133,7 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
      * functionality works properly. Use at your own risk.
      */
     @Deprecated
-    public LegacyVoiceChannelJoinSpec setReceiveTaskFactory(VoiceReceiveTaskFactory receiveTaskFactory) {
+    public LegacyStageChannelJoinSpec setReceiveTaskFactory(VoiceReceiveTaskFactory receiveTaskFactory) {
         this.receiveTaskFactory = receiveTaskFactory;
         return this;
     }
@@ -132,7 +144,7 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
      * @param selfDeaf if this client is deafened
      * @return this spec
      */
-    public LegacyVoiceChannelJoinSpec setSelfDeaf(final boolean selfDeaf) {
+    public LegacyStageChannelJoinSpec setSelfDeaf(final boolean selfDeaf) {
         this.selfDeaf = selfDeaf;
         return this;
     }
@@ -143,7 +155,7 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
      * @param selfMute if this client is muted
      * @return this spec
      */
-    public LegacyVoiceChannelJoinSpec setSelfMute(final boolean selfMute) {
+    public LegacyStageChannelJoinSpec setSelfMute(final boolean selfMute) {
         this.selfMute = selfMute;
         return this;
     }
@@ -157,7 +169,7 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
      * @param timeout the maximum amount of time to wait before the connection to the voice channel timeouts
      * @return this spec
      */
-    public LegacyVoiceChannelJoinSpec setTimeout(Duration timeout) {
+    public LegacyStageChannelJoinSpec setTimeout(Duration timeout) {
         this.timeout = Objects.requireNonNull(timeout);
         return this;
     }
@@ -171,7 +183,7 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
      * @param ipDiscoveryTimeout the maximum amount of time to wait in a single attempt at IP discovery
      * @return this spec
      */
-    public LegacyVoiceChannelJoinSpec setIpDiscoveryTimeout(Duration ipDiscoveryTimeout) {
+    public LegacyStageChannelJoinSpec setIpDiscoveryTimeout(Duration ipDiscoveryTimeout) {
         this.ipDiscoveryTimeout = Objects.requireNonNull(ipDiscoveryTimeout);
         return this;
     }
@@ -185,7 +197,7 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
      * @param LegacyipDiscoveryRetrySpec the maximum amount of time to wait in a single attempt at IP discovery
      * @return this spec
      */
-    public LegacyVoiceChannelJoinSpec LegacysetIpDiscoveryRetrySpec(RetrySpec LegacyipDiscoveryRetrySpec) {
+    public LegacyStageChannelJoinSpec LegacysetIpDiscoveryRetrySpec(RetrySpec LegacyipDiscoveryRetrySpec) {
         this.LegacyipDiscoveryRetrySpec = Objects.requireNonNull(LegacyipDiscoveryRetrySpec);
         return this;
     }
@@ -202,12 +214,12 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
         final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();
         final int shardId = clientGroup.computeShardIndex(guildId);
         final Mono<Void> sendVoiceStateUpdate = clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
-                VoiceStateUpdate.builder()
-                        .guildId(guildId.asString())
-                        .channelId(channelId.asString())
-                        .selfMute(selfMute)
-                        .selfDeaf(selfDeaf)
-                        .build(), shardId));
+            VoiceStateUpdate.builder()
+                .guildId(guildId.asString())
+                .channelId(channelId.asString())
+                .selfMute(selfMute)
+                .selfDeaf(selfDeaf)
+                .build(), shardId));
 
         final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = onVoiceStateUpdates(gateway, guildId).next();
         final Mono<VoiceServerUpdateEvent> waitForVoiceServerUpdate = onVoiceServerUpdate(gateway, guildId);

@@ -127,7 +127,6 @@ public enum Permission {
     /**
      * Allows for requesting to speak in stage channels.
      */
-    @Experimental
     REQUEST_TO_SPEAK(0x100000000L, false),
 
     /** Allows for deleting and archiving threads, and viewing all private threads */

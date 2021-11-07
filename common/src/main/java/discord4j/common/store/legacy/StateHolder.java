@@ -58,6 +58,7 @@ public final class StateHolder {
     private final LongObjStore<MessageData> messageStore;
     private final Store<LongLongTuple2, PresenceData> presenceStore;
     private final LongObjStore<RoleData> roleStore;
+    private final LongObjStore<StageInstanceData> stageInstanceStore;
     private final LongObjStore<UserData> userStore;
     private final Store<LongLongTuple2, VoiceStateData> voiceStateStore;
 
@@ -86,6 +87,9 @@ public final class StateHolder {
 
         roleStore = service.provideLongObjStore(RoleData.class);
         log.debug("Role storage        : {}", roleStore);
+
+        stageInstanceStore = service.provideLongObjStore(StageInstanceData.class);
+        log.debug("StageInstance storage        : {}", stageInstanceStore);
 
         userStore = service.provideLongObjStore(UserData.class);
         log.debug("User storage        : {}", userStore);
@@ -126,6 +130,10 @@ public final class StateHolder {
         return roleStore;
     }
 
+    public LongObjStore<StageInstanceData> getStageInstanceStore() {
+        return this.stageInstanceStore;
+    }
+
     public LongObjStore<UserData> getUserStore() {
         return userStore;
     }
@@ -142,6 +150,7 @@ public final class StateHolder {
                 .and(messageStore.invalidate())
                 .and(presenceStore.invalidate())
                 .and(roleStore.invalidate())
+                .and(stageInstanceStore.invalidate())
                 .and(userStore.invalidate())
                 .and(voiceStateStore.invalidate());
     }

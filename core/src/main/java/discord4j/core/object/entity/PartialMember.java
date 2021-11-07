@@ -32,6 +32,7 @@ import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.PartialMemberData;
+import discord4j.discordjson.json.UpdateUserVoiceStateRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.json.gateway.ImmutableRequestGuildMembers;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
@@ -649,6 +650,32 @@ public class PartialMember extends User {
             () -> getClient().getRestClient().getGuildService()
                 .modifyGuildMember(getGuildId().asLong(), getId().asLong(), spec.asRequest(), spec.reason())
                 .map(data -> new Member(getClient(), data, getGuildId().asLong())));
+    }
+
+    /**
+     * Requests to invite this member to the stage speakers. Require this user to be connected to
+     * a stage channel.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member
+     *         has been invited to the speakers. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> inviteToStageSpeakers() {
+        return getVoiceState().flatMap(voiceState ->
+            Mono.defer(() -> getClient().getRestClient().getGuildService()
+                .modifyOthersVoiceState(getGuildId().asLong(), getUserData().id().asLong(), UpdateUserVoiceStateRequest.builder().channelId(voiceState.getChannelId().orElseThrow(IllegalStateException::new).asString()).suppress(false).build())));
+    }
+
+    /**
+     * Requests to move this member to the stage audience. Require this user to be connected to
+     * a stage channel.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member
+     *         has been moved to the audience. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> moveToStageAudience() {
+        return getVoiceState().flatMap(voiceState ->
+            Mono.defer(() -> getClient().getRestClient().getGuildService()
+                .modifyOthersVoiceState(getGuildId().asLong(), getUserData().id().asLong(), UpdateUserVoiceStateRequest.builder().channelId(voiceState.getChannelId().orElseThrow(IllegalStateException::new).asString()).suppress(true).build())));
     }
 
     @Override
