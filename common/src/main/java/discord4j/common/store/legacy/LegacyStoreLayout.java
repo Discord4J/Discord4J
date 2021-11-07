@@ -355,6 +355,11 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         return stateHolder.getVoiceStateStore().find(LongLongTuple2.of(guildId, userId));
     }
 
+    @Override
+    public Mono<StageInstanceData> getStageInstanceByChannelId(long channelId) {
+        return stateHolder.getStageInstanceStore().find(channelId);
+    }
+
     /////////////////////////////////////////////////////////////////////////////
     //// Command model methods
     /////////////////////////////////////////////////////////////////////////////
@@ -1274,6 +1279,40 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         long userId = Snowflake.asLong(userData.id());
 
         return stateHolder.getUserStore().save(userId, userData);
+    }
+
+    @Override
+    public Mono<Void> onStageInstanceCreate(int shardIndex, StageInstanceCreate dispatch) {
+        StageInstanceData stageInstance = dispatch.stageInstance();
+        long channelId = Snowflake.asLong(stageInstance.id());
+
+        return stateHolder.getStageInstanceStore().save(channelId, stageInstance);
+    }
+
+    @Override
+    public Mono<StageInstanceData> onStageInstanceUpdate(int shardIndex, StageInstanceUpdate dispatch) {
+        StageInstanceData stageInstance = dispatch.stageInstance();
+        long channelId = Snowflake.asLong(stageInstance.id());
+
+        Mono<Void> saveNew = stateHolder.getStageInstanceStore().save(channelId, stageInstance);
+
+        return stateHolder.getStageInstanceStore()
+                .find(channelId)
+                .flatMap(saveNew::thenReturn)
+                .switchIfEmpty(saveNew.then(Mono.empty()));
+    }
+
+    @Override
+    public Mono<StageInstanceData> onStageInstanceDelete(int shardIndex, StageInstanceDelete dispatch) {
+        StageInstanceData stageInstance = dispatch.stageInstance();
+        long channelId = Snowflake.asLong(stageInstance.id());
+
+        Mono<Void> delete = stateHolder.getStageInstanceStore().delete(channelId);
+
+        return stateHolder.getStageInstanceStore()
+                .find(channelId)
+                .flatMap(delete::thenReturn)
+                .switchIfEmpty(delete.then(Mono.empty()));
     }
 
     @Override

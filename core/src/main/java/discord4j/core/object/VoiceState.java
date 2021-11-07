@@ -16,14 +16,14 @@
  */
 package discord4j.core.object;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.core.object.entity.channel.AudioChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.VoiceStateData;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
@@ -112,26 +112,26 @@ public final class VoiceState implements DiscordObject {
     }
 
     /**
-     * Requests to retrieve the channel this user is connected to, if present.
+     * Requests to retrieve the audio channel this user is connected to, if present.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link VoiceChannel} this user is connected
+     * @return A {@link Mono} where, upon successful completion, emits the {@link AudioChannel} this user is connected
      * to, if present. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<VoiceChannel> getChannel() {
-        return Mono.justOrEmpty(getChannelId()).flatMap(gateway::getChannelById).cast(VoiceChannel.class);
+    public Mono<AudioChannel> getChannel() {
+        return Mono.justOrEmpty(getChannelId()).flatMap(gateway::getChannelById).cast(AudioChannel.class);
     }
 
     /**
-     * Requests to retrieve the channel this user is connected to, if present, using the given retrieval strategy.
+     * Requests to retrieve the audio channel this user is connected to, if present, using the given retrieval strategy.
      *
      * @param retrievalStrategy the strategy to use to get the channel
-     * @return A {@link Mono} where, upon successful completion, emits the {@link VoiceChannel} this user is connected
+     * @return A {@link Mono} where, upon successful completion, emits the {@link AudioChannel} this user is connected
      * to, if present. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<VoiceChannel> getChannel(EntityRetrievalStrategy retrievalStrategy) {
+    public Mono<AudioChannel> getChannel(EntityRetrievalStrategy retrievalStrategy) {
         return Mono.justOrEmpty(getChannelId())
                 .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id))
-                .cast(VoiceChannel.class);
+                .cast(AudioChannel.class);
     }
 
     /**
