@@ -21,6 +21,7 @@ import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.StageInstance;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -107,4 +108,10 @@ public class FallbackEntityRetriever implements EntityRetriever {
     public Flux<GuildEmoji> getGuildEmojis(Snowflake guildId) {
         return first.getGuildEmojis(guildId).switchIfEmpty(fallback.getGuildEmojis(guildId));
     }
+
+    @Override
+    public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId) {
+        return first.getStageInstanceByChannelId(channelId).switchIfEmpty(fallback.getStageInstanceByChannelId(channelId));
+    }
+
 }

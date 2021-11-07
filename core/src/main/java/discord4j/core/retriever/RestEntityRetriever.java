@@ -16,15 +16,26 @@
  */
 package discord4j.core.retriever;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.GuildEmoji;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.StageInstance;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.util.EntityUtil;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.EmojiData;
+import discord4j.discordjson.json.GuildData;
+import discord4j.discordjson.json.GuildUpdateData;
+import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.UserGuildData;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -165,5 +176,12 @@ public class RestEntityRetriever implements EntityRetriever {
                 .large(false) // unable to retrieve this data
                 .memberCount(0) // unable to retrieve this data
                 .build();
+    }
+
+    @Override
+    public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId) {
+        return rest.getStageInstanceService()
+            .getStageInstance(channelId.asLong())
+            .map(data -> new StageInstance(gateway, data));
     }
 }
