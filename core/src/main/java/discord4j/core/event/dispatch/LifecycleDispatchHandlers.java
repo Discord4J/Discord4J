@@ -68,6 +68,8 @@ class LifecycleDispatchHandlers {
             case DISCONNECTED_RESUME:
                 ClosingStateChange c = (ClosingStateChange) context.getDispatch();
                 return Mono.just(new DisconnectEvent(gateway, context.getShardInfo(), c.getStatus(), c.getBehavior().getCause()));
+            case SESSION_INVALIDATED:
+                return Mono.just(new SessionInvalidatedEvent(gateway, context.getShardInfo()));
         }
         return Mono.empty();
     }
