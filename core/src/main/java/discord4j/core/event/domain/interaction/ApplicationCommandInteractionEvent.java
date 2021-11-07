@@ -41,7 +41,7 @@ import discord4j.gateway.ShardInfo;
  * <img src="doc-files/InteractionCreateEvent.png">
  */
 @Experimental
-public class ApplicationCommandInteractionEvent extends InteractionCreateEvent {
+public class ApplicationCommandInteractionEvent extends DeferrableInteractionEvent {
 
     public ApplicationCommandInteractionEvent(GatewayDiscordClient gateway, ShardInfo shardInfo,
                                               Interaction interaction) {

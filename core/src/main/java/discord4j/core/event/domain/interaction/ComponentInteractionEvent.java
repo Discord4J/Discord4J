@@ -55,7 +55,7 @@ import java.util.function.Consumer;
  * <p>
  * <img src="doc-files/InteractionCreateEvent.png">
  */
-public class ComponentInteractionEvent extends InteractionCreateEvent {
+public class ComponentInteractionEvent extends DeferrableInteractionEvent {
 
     public ComponentInteractionEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo, interaction);
