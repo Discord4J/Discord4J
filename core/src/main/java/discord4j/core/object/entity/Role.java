@@ -266,6 +266,9 @@ public final class Role implements Entity {
      * @return The <i>raw</i> mention.
      */
     public String getMention() {
+        if (isEveryone()) {
+            return "@everyone";
+        }
         return "<@&" + getId().asString() + ">";
     }
 
