@@ -43,7 +43,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /** A Discord voice channel. */
-public final class VoiceChannel extends BaseCategorizableChannel {
+public final class VoiceChannel extends BaseTopLevelGuildMessageChannel {
 
     /**
      * Constructs an {@code VoiceChannel} with an associated {@link GatewayDiscordClient} and Discord data.
