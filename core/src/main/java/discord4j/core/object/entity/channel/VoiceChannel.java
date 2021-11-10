@@ -28,7 +28,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /** A Discord voice channel. */
-public final class VoiceChannel extends BaseTopLevelGuildChannel implements AudioChannel, CategorizableChannel {
+public final class VoiceChannel extends BaseTopLevelGuildChannel implements AudioChannel, TopLevelGuildMessageChannel {
 
     /**
      * Constructs an {@code VoiceChannel} with an associated {@link GatewayDiscordClient} and Discord data.
