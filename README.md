@@ -209,23 +209,22 @@ client.withGateway {
 // IMAGE_URL = https://cdn.betterttv.net/emote/55028cd2135896936880fdd7/3x
 // ANY_URL = https://www.youtube.com/watch?v=5zwY50-necw
 final MessageChannel channel = ...
-channel.createEmbed(spec -> 
-  spec.setColor(Color.RED)
-    .setAuthor("setAuthor", ANY_URL, IMAGE_URL)
-    .setImage(IMAGE_URL)
-    .setTitle("setTitle/setUrl")
-    .setUrl(ANY_URL)
-    .setDescription("setDescription\n" +
+EmbedCreateSpec.Builder embedBuilder = EmbedCreateSpec.builder();
+embedBuilder.author("setAuthor", ANY_URL, IMAGE_URL);
+embedBuilder.image(IMAGE_URL);
+embedBuilder.title("setTitle/setUrl");
+embedBuilder.url(ANY_URL);
+embedBuilder.description("setDescription\n" +
       "big D: is setImage\n" +
       "small D: is setThumbnail\n" +
-      "<-- setColor")
-    .addField("addField", "inline = true", true)
-    .addField("addFIeld", "inline = true", true)
-    .addField("addFile", "inline = false", false)
-    .setThumbnail(IMAGE_URL)
-    .setFooter("setFooter --> setTimestamp", IMAGE_URL)
-    .setTimestamp(Instant.now())
-).block();
+      "<-- setColor");
+embedBuilder.addField("addField", "inline = true", true);
+embedBuilder.addField("addFIeld", "inline = true", true);
+embedBuilder.addField("addFile", "inline = false", false);
+embedBuilder.thumbnail(IMAGE_URL);
+embedBuilder.footer("setFooter --> setTimestamp", IMAGE_URL);
+embedBuilder.timestamp(Instant.now());
+channel.createMessage(embedBuilder.build()).block();
 ```
 
 ### 🏷️ Find Members by Role Name
