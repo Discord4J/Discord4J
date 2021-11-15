@@ -563,7 +563,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             ChannelContent channelContent = computeChannelContent(id.a);
             channels.computeIfPresent(id.a, (k, channel) -> channel.withLastMessageIdOrNull(id.b));
             channelContent.messageIds.add(id);
-            AtomicReference<ImmutableUserData> userRef = computeUserRef(id.b, message,
+            AtomicReference<ImmutableUserData> userRef = computeUserRef(message.author().id().asLong(), message,
                     (m, old) -> ImmutableUserData.copyOf(m.author()));
             messages.put(id, new WithUser<>(message.withAuthor(EmptyUser.INSTANCE), userRef,
                     ImmutableMessageData::withAuthor));
