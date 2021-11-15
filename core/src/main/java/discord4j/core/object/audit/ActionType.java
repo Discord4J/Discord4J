@@ -58,7 +58,10 @@ public enum ActionType {
     MESSAGE_UNPIN(75),
     INTEGRATION_CREATE(80),
     INTEGRATION_UPDATE(81),
-    INTEGRATION_DELETE(82);
+    INTEGRATION_DELETE(82),
+    GUILD_SCHEDULED_EVENT_CREATE(100),
+    GUILD_SCHEDULED_EVENT_UPDATE(101),
+    GUILD_SCHEDULED_EVENT_DELETE(102);
 
     /**
      * Gets the type of action. It is guaranteed that invoking {@link #getValue()} from the returned enum will equal
@@ -104,6 +107,9 @@ public enum ActionType {
             case 80: return INTEGRATION_CREATE;
             case 81: return INTEGRATION_UPDATE;
             case 82: return INTEGRATION_DELETE;
+            case 100: return GUILD_SCHEDULED_EVENT_CREATE;
+            case 101: return GUILD_SCHEDULED_EVENT_UPDATE;
+            case 102: return GUILD_SCHEDULED_EVENT_DELETE;
             default: return UNKNOWN;
         }
     }

@@ -128,7 +128,12 @@ public enum Permission {
      * Allows for requesting to speak in stage channels.
      */
     @Experimental
-    REQUEST_TO_SPEAK(0x100000000L, false);
+    REQUEST_TO_SPEAK(0x100000000L, false),
+
+    /**
+     * Allows for managing guild scheduled events.
+     */
+    MANAGE_EVENTS(0x0200000000L, false);
 
     /** Whether MFA is required. */
     private final boolean mfa;
