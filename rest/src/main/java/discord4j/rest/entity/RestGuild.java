@@ -125,6 +125,17 @@ public class RestGuild {
     }
 
     /**
+     * Returns a {@link RestGuildScheduledEvent} representation under this guild.
+     * This method does not perform any API request.
+     *
+     * @param eventId The entity ID
+     * @return a {@code RestGuildScheduledEvent} with the given ID, under this guild
+     */
+    public RestGuildScheduledEvent scheduledEvent(Snowflake eventId) {
+        return RestGuildScheduledEvent.create(restClient, id, eventId.asLong());
+    }
+
+    /**
      * Modify a guild's settings. Requires the {@link Permission#MANAGE_GUILD} permission. Returns the updated guild
      * object on success.
      *
@@ -331,5 +342,37 @@ public class RestGuild {
     public Flux<TemplateData> getTemplates() {
         return restClient.getTemplateService().getTemplates(id);
     }
+
+    /**
+     * Requests to retrieve the scheduled event under this guild.
+     *
+     * @param eventId The ID of the event
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildScheduledEventData}. If an
+     *  error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildScheduledEventData> getScheduledEvent(Snowflake eventId) {
+        return restClient.getGuildService().getScheduledEvent(id, eventId.asLong());
+    }
+
+    /**
+     * Requests to retrieve the scheduled events under this guild.
+     *
+     * @return A {@link Flux} where, upon successful completion, emits 0...N {@link GuildScheduledEventData}. If an
+     *  error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<GuildScheduledEventData> getScheduledEvents(@Nullable Boolean withUserCounts) {
+        Map<String, Object> queryParams = new HashMap<>();
+        Optional.ofNullable(withUserCounts).ifPresent(value -> queryParams.put("with_user_count", value));
+        return restClient.getGuildService().getScheduledEvents(id, queryParams);
+    }
+
+    //TODO: get RSVP'd users for an event
+
+    //TODO: create event
+
+    //TODO: modify event
+
+    //TODO: delete event
+
 
 }
