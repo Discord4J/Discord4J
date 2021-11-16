@@ -114,7 +114,7 @@ public final class ChangeKey<T> {
     public static final ChangeKey<PermissionSet> DENY = changeKey("deny", PERMISSION_SET_PARSER);
     /** Invite code changed */
     public static final ChangeKey<String> INVITE_CODE = changeKey("code", STRING_PARSER);
-    /** Channel for invite code changed */
+    /** Channel for invite code or guild scheduled event changed */
     public static final ChangeKey<Snowflake> INVITE_CHANNEL_ID = changeKey("channel_id", SNOWFLAKE_PARSER);
     /** Person who created invite code changed */
     public static final ChangeKey<Snowflake> INVITER_ID = changeKey("inviter_id", SNOWFLAKE_PARSER);
@@ -147,6 +147,13 @@ public final class ChangeKey<T> {
     public static final ChangeKey<Integer> EXPIRE_GRACE_PERIOD = changeKey("expire_grace_period", INTEGER_PARSER);
     /** New user limit in a voice channel */
     public static final ChangeKey<Integer> USER_LIMIT = changeKey("user_limit", INTEGER_PARSER);
+    /** entity type of guild scheduled event changed */
+    public static final ChangeKey<Integer> ENTITY_TYPE = changeKey("entity_type", INTEGER_PARSER);
+    /** channel ID for guild scheduled event changed */
+    public static final ChangeKey<String> LOCATION = changeKey("location", STRING_PARSER);
+    /** status of guild scheduled event changed */
+    public static final ChangeKey<Integer> STATUS = changeKey("status", INTEGER_PARSER);
+
 
     private static <T> ChangeKey<T> changeKey(String name, BiFunction<AuditLogEntry, JsonNode, T> parser) {
         return new ChangeKey<>(name, parser);

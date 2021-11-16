@@ -167,7 +167,19 @@ public enum Intent {
      *     <li>TYPING_START</li>
      * </ul>
      */
-    DIRECT_MESSAGE_TYPING(14);
+    DIRECT_MESSAGE_TYPING(14),
+
+    /**
+     * Events which will be received by subscribing to GUILD_SCHEDULED_EVENTS
+     * <ul>
+     *     <li>GUILD_SCHEDULED_EVENT_CREATE</li>
+     *     <li>GUILD_SCHEDULED_EVENT_UPDATE</li>
+     *     <li>GUILD_SCHEDULED_EVENT_DELETE</li>
+     *     <li>GUILD_SCHEDULED_EVENT_USER_ADD (experimental, not officially supported by discord)</li>
+     *     <li>GUILD_SCHEDULED_EVENT_USER_REMOVE (experimental, not officially supported by discord)</li>
+     * </ul>
+     */
+    GUILD_SCHEDULED_EVENTS(16);
 
     private final int value;
 
