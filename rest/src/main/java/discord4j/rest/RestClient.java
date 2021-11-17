@@ -246,6 +246,21 @@ public class RestClient {
     }
 
     /**
+     * Requests to retrieve the scheduled event represented by the supplied ID.
+     *
+     * @param guildId The ID of the guild
+     * @param eventId The ID of the event
+     * @return A {@link RestScheduledEvent} as represented by the supplied IDs.
+     */
+    public RestScheduledEvent getScheduledEventById(final Snowflake guildId, final Snowflake eventId) {
+        return RestScheduledEvent.create(this, guildId, eventId);
+    }
+
+    public RestScheduledEvent restScheduledEvent(Snowflake guildId, GuildScheduledEventData data) {
+        return RestScheduledEvent.create(this, guildId, Snowflake.of(data.id()));
+    }
+
+    /**
      * Requests to retrieve the user represented by the supplied ID.
      *
      * @param userId The ID of the user.

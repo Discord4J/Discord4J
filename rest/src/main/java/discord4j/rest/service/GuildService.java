@@ -368,12 +368,11 @@ public class GuildService extends RestService {
             .bodyToMono(Void.class);
     }
 
-    //TODO: Discord might be changing the data structure of the response, awaiting confirmation.
-    public Flux<UserData> getScheduledEventUsers(long guildId, long eventId, Map<String, Object> queryParams) {
+    public Flux<GuildScheduledEventUserData> getScheduledEventUsers(long guildId, long eventId, Map<String, Object> queryParams) {
         return Routes.GUILD_SCHEDULED_EVENT_USERS_GET.newRequest(guildId, eventId)
             .query(queryParams)
             .exchange(getRouter())
-            .bodyToMono(UserData[].class)
+            .bodyToMono(GuildScheduledEventUserData[].class)
             .flatMapMany(Flux::fromArray);
     }
 }
