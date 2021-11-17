@@ -122,14 +122,14 @@ public class RestGuild {
     }
 
     /**
-     * Returns a {@link RestGuildScheduledEvent} representation under this guild.
+     * Returns a {@link RestScheduledEvent} representation under this guild.
      * This method does not perform any API request.
      *
      * @param eventId The entity ID
      * @return a {@code RestGuildScheduledEvent} with the given ID, under this guild
      */
-    public RestGuildScheduledEvent scheduledEvent(Snowflake eventId) {
-        return RestGuildScheduledEvent.create(restClient, id, eventId.asLong());
+    public RestScheduledEvent scheduledEvent(Snowflake eventId) {
+        return RestScheduledEvent.create(restClient, id, eventId.asLong());
     }
 
     /**
@@ -354,22 +354,56 @@ public class RestGuild {
     /**
      * Requests to retrieve the scheduled events under this guild.
      *
-     * @return A {@link Flux} where, upon successful completion, emits 0...N {@link GuildScheduledEventData}. If an
-     *  error is received, it is emitted through the {@code Flux}.
+     * @param withUserCount Whether to include number of users subscribed to each event
+     * @return A {@link Flux} that continually emits all the  {@link GuildScheduledEventData} associated with this guild.
+     * If an error is received, it is emitted through the {@code Flux}.
      */
-    public Flux<GuildScheduledEventData> getScheduledEvents(@Nullable Boolean withUserCounts) {
+    public Flux<GuildScheduledEventData> getScheduledEvents(@Nullable Boolean withUserCount) {
         Map<String, Object> queryParams = new HashMap<>();
-        Optional.ofNullable(withUserCounts).ifPresent(value -> queryParams.put("with_user_count", value));
+        Optional.ofNullable(withUserCount).ifPresent(value -> queryParams.put("with_user_count", value));
         return restClient.getGuildService().getScheduledEvents(id, queryParams);
     }
 
-    //TODO: get RSVP'd users for an event
+    /**
+     * Create a new scheduled event for the guild. Requires the {@link Permission#MANAGE_EVENTS} permission. Returns
+     * the new event object on success.
+     *
+     * @param request the request body
+     * @return A {@link Mono} where, upon subscription, emits the created {@link GuildScheduledEventData} on success.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildScheduledEventData> createScheduledEvent(GuildScheduledEventCreateRequest request) {
+        return restClient.getGuildService().createScheduledEvent(id, request);
+    }
 
-    //TODO: create event
+    /**
+     * Requests to modify a scheduled event. Requires the {@link Permission#MANAGE_EVENTS} permission.
+     * Returns the modified event object on success.
+     *
+     * @param eventId The ID of the event
+     * @param request the request body
+     * @param reason an optional reason for the audit log
+     * @return A {@link Mono} where, upon subscription, emits the modified {@link GuildScheduledEventData} on success.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildScheduledEventData> modifyScheduledEvent(Snowflake eventId,
+                                                              GuildScheduledEventModifyRequest request,
+                                                              @Nullable String reason) {
+        return restClient.getGuildService().modifyScheduledEvent(id, eventId.asLong(), request, reason);
+    }
 
-    //TODO: modify event
+    /**
+     * Requests to delete a scheduled event. Requires the {@link Permission#MANAGE_EVENTS} permission.
+     *
+     * @param eventId The ID of the event
+     * @param reason an optional reason for the audit log
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the event has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> deleteScheduledEvent(Snowflake eventId, @Nullable String reason) {
+        return restClient.getGuildService().deleteScheduledEvent(id, eventId.asLong(), reason);
+    }
 
-    //TODO: delete event
 
 
     @Override
