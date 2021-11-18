@@ -344,17 +344,20 @@ public class RestGuild {
      * Requests to retrieve the scheduled event under this guild.
      *
      * @param eventId The ID of the event
+     * @param withUserCount Whether to optionally include the number of "interested" users
      * @return A {@link Mono} where, upon successful completion, emits the {@link GuildScheduledEventData}. If an
      *  error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<GuildScheduledEventData> getScheduledEvent(Snowflake eventId) {
-        return restClient.getGuildService().getScheduledEvent(id, eventId.asLong());
+    public Mono<GuildScheduledEventData> getScheduledEvent(Snowflake eventId, @Nullable Boolean withUserCount) {
+        Map<String, Object> queryParams = new HashMap<>();
+        Optional.ofNullable(withUserCount).ifPresent(value -> queryParams.put("with_user_count", value));
+        return restClient.getGuildService().getScheduledEvent(id, eventId.asLong(), queryParams);
     }
 
     /**
      * Requests to retrieve the scheduled events under this guild.
      *
-     * @param withUserCount Whether to include number of users subscribed to each event
+     * @param withUserCount Whether to optionally include the number of "interested" users for each event
      * @return A {@link Flux} that continually emits all the  {@link GuildScheduledEventData} associated with this guild.
      * If an error is received, it is emitted through the {@code Flux}.
      */
