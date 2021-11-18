@@ -332,8 +332,9 @@ public class GuildService extends RestService {
             .bodyToMono(Void.class);
     }
 
-    public Mono<GuildScheduledEventData> getScheduledEvent(long guildId, long eventId) {
+    public Mono<GuildScheduledEventData> getScheduledEvent(long guildId, long eventId, Map<String, Object> queryParams) {
         return Routes.GUILD_SCHEDULED_EVENT_GET.newRequest(guildId, eventId)
+            .query(queryParams)
             .exchange(getRouter())
             .bodyToMono(GuildScheduledEventData.class);
     }

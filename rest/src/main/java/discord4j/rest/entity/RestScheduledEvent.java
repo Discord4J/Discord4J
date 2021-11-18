@@ -27,6 +27,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -170,10 +171,13 @@ public class RestScheduledEvent {
     /**
      * Retrieve this scheduled event's data upon subscription.
      *
+     * @param withUserCount Whether to optionally include the "interested" user count in the returned data.
      * @return A {@link Mono} where, upon successful completion, emits the {@link GuildScheduledEventData} belonging to
      * this scheduled event. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<GuildScheduledEventData> getData() {
-        return restClient.getGuildService().getScheduledEvent(guildId, id);
+    public Mono<GuildScheduledEventData> getData(@Nullable Boolean withUserCount) {
+        Map<String, Object> queryParams = new HashMap<>();
+        Optional.ofNullable(withUserCount).ifPresent(value -> queryParams.put("with_user_count", value));
+        return restClient.getGuildService().getScheduledEvent(guildId, id, queryParams);
     }
 }
