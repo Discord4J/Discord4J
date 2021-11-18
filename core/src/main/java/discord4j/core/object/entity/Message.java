@@ -905,6 +905,11 @@ public final class Message implements Entity {
         /** A message created using an application (like slash commands) **/
         APPLICATION_COMMAND(20),
 
+        /**
+         * The first message in a thread pointing to a related message in the parent channel from which the thread was started
+         * <br>
+         * <b>Note: </b> Only supported from v9 of API
+        **/
         THREAD_STARTER_MESSAGE(21),
 
         GUILD_INVITE_REMINDER(22),
