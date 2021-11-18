@@ -912,6 +912,7 @@ public final class Message implements Entity {
         **/
         THREAD_STARTER_MESSAGE(21),
 
+        /** A message created for notice the servers owners about invite new users (only in new servers) **/
         GUILD_INVITE_REMINDER(22),
 
         CONTEXT_MENU_COMMAND(23);
