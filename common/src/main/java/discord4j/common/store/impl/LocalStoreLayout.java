@@ -994,7 +994,6 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             channels.remove(channelId);
             contentByChannel.remove(channelId);
             messages.keySet().removeAll(messageIds);
-            voiceStates.keySet().removeAll(voiceStateIds);
         }
     }
 }
