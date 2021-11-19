@@ -22,7 +22,9 @@ import discord4j.gateway.json.GatewayPayload;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.util.ReferenceCountUtil;
+import org.reactivestreams.Publisher;
 import reactor.core.Exceptions;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -47,9 +49,34 @@ public class JacksonPayloadReader implements PayloadReader {
     }
 
     @Override
+    public Publisher<GatewayPayload<?>> decode(Flux<ByteBuf> input) {
+        // TODO: upgrade to TokenBuffer API
+        return input.handle((buf, sink) -> {
+            try {
+                GatewayPayload<?> value = mapper.readValue(
+                        ByteBufUtil.getBytes(buf, buf.readerIndex(), buf.readableBytes(), false),
+                        new TypeReference<GatewayPayload<?>>() {});
+                sink.next(value);
+            } catch (IOException | IllegalArgumentException e) {
+                if (lenient) {
+                    // if eof input - just ignore
+                    if (buf.readableBytes() > 0) {
+                        log.warn("Error while decoding JSON ({}): {}", e.toString(),
+                                new String(ByteBufUtil.getBytes(buf), StandardCharsets.UTF_8));
+                    }
+                } else {
+                    sink.error(Exceptions.propagate(e));
+                }
+            } finally {
+                ReferenceCountUtil.safeRelease(buf);
+            }
+        });
+    }
+
+    @Override
     public Mono<GatewayPayload<?>> read(ByteBuf buf) {
         return Mono.create(sink -> {
-            sink.onDispose(() -> ReferenceCountUtil.release(buf));
+            sink.onDispose(() -> ReferenceCountUtil.safeRelease(buf));
             try {
                 GatewayPayload<?> value = mapper.readValue(
                         ByteBufUtil.getBytes(buf, buf.readerIndex(), buf.readableBytes(), false),

@@ -19,6 +19,7 @@ package discord4j.gateway.payload;
 import discord4j.gateway.json.GatewayPayload;
 import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 
 /**
  * Strategy for reading from a {@link ByteBuf} and decoding its contents to a {@link Publisher} of
@@ -33,4 +34,13 @@ public interface PayloadReader {
      * @return a publisher of {@code GatewayPayload} representing the inbound payload
      */
     Publisher<GatewayPayload<?>> read(ByteBuf payload);
+
+    /**
+     * Decode {@link GatewayPayload} instances from a {@link Flux} of input buffers.
+     *
+     * @param input the input stream of {@link ByteBuf} instances
+     * @return a publisher of {@code GatewayPayload} representing the inbound payloads result
+     */
+    Publisher<GatewayPayload<?>> decode(Flux<ByteBuf> input);
+
 }

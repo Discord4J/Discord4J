@@ -598,7 +598,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * sequence, it will be emitted through the {@link Mono}.
      */
     public Mono<GatewayDiscordClient> login() {
-        return login(DefaultGatewayClient::new);
+        return login(NextGatewayClient::new);
     }
 
     /**
