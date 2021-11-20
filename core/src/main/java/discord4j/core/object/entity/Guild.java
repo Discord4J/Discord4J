@@ -233,7 +233,7 @@ public final class Guild implements Entity {
      */
     @Deprecated
     public Region.Id getRegionId() {
-        return Region.Id.of(data.region());
+        return Region.Id.of(Possible.flatOpt(data.region()).orElse(null));
     }
 
     /**
