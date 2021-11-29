@@ -35,7 +35,6 @@ import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.*;
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.IllegalReferenceCountException;
@@ -53,7 +52,6 @@ import reactor.util.Loggers;
 import reactor.util.concurrent.Queues;
 import reactor.util.context.Context;
 import reactor.util.context.ContextView;
-import reactor.util.function.Tuple2;
 import reactor.util.retry.Retry;
 
 import java.nio.charset.StandardCharsets;
@@ -109,11 +107,6 @@ public class NextGatewayClient implements GatewayClient {
     private final HttpClient httpClient;
 
     /**
-     * Payloads coming from the websocket.
-     */
-    private final Sinks.Many<ByteBuf> receiver;
-
-    /**
      * Payloads that are being sent to the websocket.
      */
     private final Sinks.Many<ByteBuf> sender;
@@ -138,6 +131,8 @@ public class NextGatewayClient implements GatewayClient {
      */
     private final Sinks.Many<GatewayConnection.State> state;
 
+    private final Sinks.Many<Connection> connections;
+
     // Gateway session state tracking across multiple ws connections
     private final AtomicInteger sequence = new AtomicInteger(0);
     private final AtomicReference<String> sessionId = new AtomicReference<>("");
@@ -149,11 +144,9 @@ public class NextGatewayClient implements GatewayClient {
     // TODO: cleanup
 
     // References that are changing each time a new ws connection is opened
-    private volatile Sinks.One<CloseStatus> disconnectNotifier;
-    //private volatile GatewayWebsocketHandler sessionHandler;
     private volatile ContextView currentContext;
-
-    private volatile Sinks.One<DisconnectBehavior> closeNotifier;
+    private volatile Sinks.One<CloseStatus> disconnectNotifier;
+    private volatile DisconnectBehavior disconnectBehavior;
 
     /**
      * Initializes a new GatewayClient.
@@ -183,11 +176,11 @@ public class NextGatewayClient implements GatewayClient {
         addHandler(Opcode.HEARTBEAT_ACK, this::handleHeartbeatAck);
 
         this.httpClient = initHttpClient();
-        this.receiver = newEmitterSink();
         this.sender = newEmitterSink();
         this.dispatch = newEmitterSink();
         this.outbound = newEmitterSink();
         this.heartbeats = newEmitterSink();
+        this.connections = Sinks.many().replay().latest();
 
         this.heartbeatEmitter = new ResettableInterval(this.reactorResources.getTimerTaskScheduler());
 
@@ -211,93 +204,23 @@ public class NextGatewayClient implements GatewayClient {
 
     @Override
     public Mono<Void> execute(String gatewayUrl) {
-        return Mono.deferContextual(
-                context -> {
+        return Mono.deferContextual(context -> {
                     currentContext = context;
                     disconnectNotifier = Sinks.one();
-                    closeNotifier = Sinks.one();
-                    lastAck.set(0);
-                    lastSent.set(0);
-                    missedAck.set(0);
+                    disconnectBehavior = DisconnectBehavior.retry(null);
 
-                    Sinks.Empty<Void> ping = Sinks.empty();
-
-                    // Setup the sending logic from multiple sources into one merged Flux
-                    Mono<Void> onConnected = state.asFlux().filter(s -> s == GatewayConnection.State.CONNECTED).next().then();
-                    Flux<ByteBuf> heartbeatFlux = heartbeats.asFlux()
-                            .flatMap(payload -> Flux.from(payloadWriter.write(payload)));
-                    Flux<ByteBuf> identifyFlux = outbound.asFlux()
-                            .filter(payload -> Opcode.IDENTIFY.equals(payload.getOp()))
-                            .delayUntil(__ -> ping.asMono())
-                            .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
-                            .transform(identifyLimiter);
-                    Flux<ByteBuf> resumeFlux = outbound.asFlux()
-                            .filter(payload -> Opcode.RESUME.equals(payload.getOp()))
-                            .flatMap(payload -> Flux.from(payloadWriter.write(payload)));
-                    Flux<ByteBuf> payloadFlux = outbound.asFlux()
-                            .filter(NextGatewayClient::isNotStartupPayload)
-                            .delayUntil(__ -> onConnected)
-                            .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
-                            .transform(buf -> Flux.merge(buf, sender.asFlux()))
-                            .transform(new RateLimitOperator<>(outboundLimiterCapacity(), Duration.ofSeconds(60),
-                                    reactorResources.getTimerTaskScheduler(),
-                                    reactorResources.getPayloadSenderScheduler()));
-                    Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, resumeFlux, payloadFlux)
-                            .doOnNext(buf -> logPayload(senderLog, context, buf))
-                            .doOnDiscard(ByteBuf.class, NextGatewayClient::safeRelease);
-
-                    //sessionHandler = new GatewayWebsocketHandler(receiver, outFlux, context);
-
-                    Mono<Void> readyHandler = dispatch()
-                            .filter(NextGatewayClient::isReadyOrResumed)
-                            .zipWith(state.asFlux().next().repeat())
-                            .doOnNext(consumer((event, currentState) -> {
-                                ConnectionObserver.State observerState;
-                                if (currentState == GatewayConnection.State.START_IDENTIFYING
-                                        || currentState == GatewayConnection.State.START_RESUMING) {
-                                    log.info(format(context, "Connected to Gateway"));
-                                    emissionStrategy.emitNext(dispatch, GatewayStateChange.connected());
-                                    observerState = GatewayObserver.CONNECTED;
-                                } else {
-                                    log.info(format(context, "Reconnected to Gateway"));
-                                    emissionStrategy.emitNext(dispatch,
-                                            GatewayStateChange.retrySucceeded(reconnectContext.getAttempts()));
-                                    observerState = GatewayObserver.RETRY_SUCCEEDED;
-                                }
-
-                                reconnectContext.reset();
-                                state.emitNext(GatewayConnection.State.CONNECTED, FAIL_FAST);
-                                notifyObserver(observerState);
-                            }))
-                            .then();
-
-                    // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
-//                    Mono<Void> receiverFuture = receiver.asFlux()
-//                            .map(buf -> unpooled ? buf : buf.retain())
-//                            .doOnNext(buf -> logPayload(receiverLog, context, buf))
-//                            .flatMap(payloadReader::read)
-//                            .doOnDiscard(ByteBuf.class, NewGatewayClient::safeRelease)
-//                            .doOnNext(payload -> {
-//                                if (Opcode.HEARTBEAT_ACK.equals(payload.getOp())) {
-//                                    ping.emitEmpty(FAIL_FAST);
-//                                }
-//                            })
-//                            .map(this::updateSequence)
-//                            .flatMap(this::handlePayload)
-//                            .then();
-
-                    // Subscribe the handler's outbound exchange with our outbound signals
-                    // routing completion signals to close the gateway
+                    // Detect terminal scenarios from sender flux
                     Mono<Void> senderFuture = outbound.asFlux()
-                            .doOnComplete(() -> closeSession(DisconnectBehavior.retry(null)))
-                            .doOnNext(payload -> {
+                            .flatMap(payload -> {
                                 if (Opcode.RECONNECT.equals(payload.getOp())) {
-                                    errorSession(new GatewayException(context, "Reconnecting due to user action"));
+                                    return closeWithException("Reconnecting due to user action");
                                 }
+                                return Mono.empty();
                             })
-                            .then();
+                            .then()
+                            .doFinally(s -> log.debug("senderFuture finalized after {}", s));
 
-                    // Create the heartbeat loop, and subscribe it using the sender sink
+                    // Heartbeat ticks, detect zombie shards and send to sink
                     Mono<Void> heartbeatHandler = heartbeatEmitter.ticks()
                             .flatMap(t -> {
                                 long now = System.nanoTime();
@@ -305,44 +228,69 @@ public class NextGatewayClient implements GatewayClient {
                                 long delay = now - lastAck.get();
                                 if (lastSent.get() - lastAck.get() > 0) {
                                     if (missedAck.incrementAndGet() > maxMissedHeartbeatAck) {
-                                        log.warn(format(context, "Missing heartbeat ACK for {} (tick: {}, seq: {})"),
+                                        log.warn(format(currentContext,
+                                                        "Missing heartbeat ACK for {} (tick: {}, seq: {})"),
                                                 Duration.ofNanos(delay), t, sequence.get());
-                                        errorSession(new GatewayException(context,
-                                                "Reconnecting due to zombie or failed connection"));
-                                        return Mono.empty();
+                                        return closeWithException("Reconnecting due to zombie or failed connection")
+                                                .then(Mono.empty());
                                     }
                                 }
-                                log.debug(format(context, "Sending heartbeat {} after last ACK"),
+                                log.debug(format(currentContext, "Sending heartbeat {} after last ACK"),
                                         Duration.ofNanos(delay));
                                 lastSent.set(now);
                                 return Mono.just(GatewayPayload.heartbeat(ImmutableHeartbeat.of(sequence.get())));
                             })
                             .doOnNext(tick -> emissionStrategy.emitNext(heartbeats, tick))
-                            .then();
+                            .then()
+                            .doFinally(s -> log.debug("heartbeatHandler finalized after {}", s));
 
-                    Mono<Void> httpFuture = httpClient
-                            .websocket(WebsocketClientSpec.builder()
-                                    .maxFramePayloadLength(Integer.MAX_VALUE)
-                                    .build())
-                            .uri(gatewayUrl)
-                            .handle((in, out) -> handleSession(in, out, outFlux, closeNotifier, ping))
-                            .contextWrite(LogUtil.clearContext())
-                            .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2()))
-                            .then();
+                    return connect(gatewayUrl, c -> {
+                        // Receive dispatch to detect ready/resume and update connection state
+                        Mono<Void> readyHandler = c.receiveDispatch
+                                .filter(NextGatewayClient::isReadyOrResumed)
+                                .zipWith(state.asFlux().next().repeat())
+                                .doOnNext(consumer((event, currentState) -> {
+                                    ConnectionObserver.State observerState;
+                                    if (currentState == GatewayConnection.State.START_IDENTIFYING
+                                            || currentState == GatewayConnection.State.START_RESUMING) {
+                                        log.info(format(currentContext, "Connected to Gateway"));
+                                        emissionStrategy.emitNext(dispatch, GatewayStateChange.connected());
+                                        observerState = GatewayObserver.CONNECTED;
+                                    } else {
+                                        log.info(format(currentContext, "Reconnected to Gateway"));
+                                        emissionStrategy.emitNext(dispatch,
+                                                GatewayStateChange.retrySucceeded(reconnectContext.getAttempts()));
+                                        observerState = GatewayObserver.RETRY_SUCCEEDED;
+                                    }
 
-                    return Mono.zip(httpFuture, readyHandler, senderFuture, heartbeatHandler) // receiverFuture removed
-                            .doOnError(t -> {
-                                if (t instanceof ReconnectException) {
-                                    log.info(format(context, "{}"), t.getMessage());
-                                } else if (t instanceof CloseException || t instanceof GatewayException) {
-                                    log.warn(format(context, "{}"), t.toString());
-                                } else {
-                                    log.error(format(context, "Gateway client error"), t);
-                                }
-                            })
-                            .doOnTerminate(heartbeatEmitter::stop)
-                            .doOnCancel(() -> closeSession(DisconnectBehavior.retry(null)))
-                            .then();
+                                    reconnectContext.reset();
+                                    state.emitNext(GatewayConnection.State.CONNECTED, FAIL_FAST);
+                                    notifyObserver(observerState);
+                                }))
+                                .then()
+                                .doFinally(s -> log.debug("readyHandler finalized after {}", s));
+
+                        // Detect websocket closing to trigger disconnect/reconnect procedure
+                        Mono<Void> closeHandler = c.onClose.doOnNext(s -> log.debug("onClose: {}", s))
+                                .doOnError(e -> log.debug("onClose received an error", e))
+                                .flatMap(status -> handleClose(disconnectBehavior, status))
+                                .doFinally(s -> log.debug("onClose finalized after {}", s))
+                                .then();
+
+                        return Mono.zip(closeHandler, readyHandler, senderFuture, heartbeatHandler)
+                                .then()
+                                .doOnError(e -> {
+                                    if (e instanceof ReconnectException) {
+                                        log.info(format(context, "{}"), e.getMessage());
+                                    } else if (e instanceof CloseException || e instanceof GatewayException) {
+                                        log.warn(format(context, "{}"), e.toString());
+                                    } else {
+                                        log.error(format(context, "Gateway client error"), e);
+                                    }
+                                })
+                                .doOnTerminate(heartbeatEmitter::stop)
+                                .doFinally(s -> log.debug("Client finalized after {}", s));
+                    });
                 })
                 .contextWrite(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, identifyOptions.getShardInfo().getIndex()))
                 .retryWhen(retryFactory())
@@ -354,78 +302,199 @@ public class NextGatewayClient implements GatewayClient {
                 });
     }
 
-    public void closeSession(DisconnectBehavior behavior) {
-        closeNotifier.emitValue(behavior, FAIL_FAST);
+    // retrieve current connection or wait until one is available if not present
+    Mono<Connection> onConnection() {
+        return connections.asFlux().next();
     }
 
-    public void errorSession(Throwable error) {
-        if (!(error instanceof ReconnectException)) {
-            log.info(format(currentContext, "Triggering error sequence: {}"), error.toString());
+    Mono<Void> closeWithException(String message) {
+        return onConnection().flatMap(c ->
+                c.close(DisconnectBehavior.retry(new GatewayException(currentContext, message))));
+    }
+
+    Mono<Void> closeConnection(DisconnectBehavior behavior) {
+        return onConnection().flatMap(c -> {
+            disconnectBehavior = behavior;
+            return c.close(behavior);
+        });
+    }
+
+    // Handler for all resources needed to maintain a single websocket connection to the Gateway
+    static class Connection {
+
+        private final WebsocketInbound websocketInbound;
+        private final WebsocketOutbound websocketOutbound;
+        private final Flux<ByteBuf> inboundDataStream;
+        private final Flux<Dispatch> receiveDispatch;
+        private final Mono<CloseStatus> onClose;
+        private final ContextView context;
+
+        Connection(WebsocketInbound websocketInbound,
+                   WebsocketOutbound websocketOutbound,
+                   Flux<ByteBuf> inboundDataStream,
+                   Flux<Dispatch> receiveDispatch,
+                   Mono<CloseStatus> onClose,
+                   ContextView context) {
+            this.websocketInbound = websocketInbound;
+            this.websocketOutbound = websocketOutbound;
+            this.inboundDataStream = inboundDataStream;
+            this.receiveDispatch = receiveDispatch;
+            this.onClose = onClose;
+            this.context = context;
         }
-        closeSession(DisconnectBehavior.retryAbruptly(error));
+
+        Mono<Void> close(DisconnectBehavior behavior) {
+            log.debug(format(context, "Closing session with behavior: {}"), behavior);
+            CloseStatus status;
+            switch (behavior.getAction()) {
+                case RETRY_ABRUPTLY:
+                case STOP_ABRUPTLY:
+                    status = CloseStatus.PROTOCOL_ERROR; // non-1000/1001 close code keeps the Gateway session active
+                    return websocketOutbound.sendClose(status.getCode(), status.getReason().orElse(null));
+                case RETRY:
+                case STOP:
+                default:
+                    status = CloseStatus.NORMAL_CLOSE;
+                    return websocketOutbound.sendClose(status.getCode(), status.getReason().orElse(null));
+            }
+        }
+
+        Mono<Void> dispose() {
+            return Mono.defer(() -> {
+                reactor.netty.Connection connection = ((reactor.netty.Connection) websocketInbound);
+                connection.dispose();
+                return connection.onDispose();
+            });
+        }
+
+        Mono<Void> onDispose() {
+            return Mono.defer(() -> {
+                reactor.netty.Connection connection = ((reactor.netty.Connection) websocketInbound);
+                return connection.onDispose();
+            });
+        }
     }
 
-    private Mono<Tuple2<DisconnectBehavior, CloseStatus>> handleSession(WebsocketInbound in,
-                                                                        WebsocketOutbound out,
-                                                                        Flux<ByteBuf> outFlux,
-                                                                        Sinks.One<DisconnectBehavior> sessionClose,
-                                                                        Sinks.Empty<Void> ping) {
+    /** Establish a connection to the Gateway and apply the given function in a transactional way **/
+    private <T> Mono<T> connect(String url, Function<Connection, Mono<T>> function) {
+        Mono<Connection> factory = Mono.deferContextual(context -> {
+            // reset state
+            currentContext = context;
+            lastAck.set(0);
+            lastSent.set(0);
+            missedAck.set(0);
+
+            Sinks.Empty<Void> onFirstAck = Sinks.empty();
+            Flux<ByteBuf> outbound = outbound(onFirstAck);
+
+            return httpClient.websocket(WebsocketClientSpec.builder()
+                            .maxFramePayloadLength(Integer.MAX_VALUE)
+                            .build())
+                    .uri(url)
+                    .connect()
+                    .flatMap(c -> {
+                        WebsocketInbound in = (WebsocketInbound) c.inbound();
+                        WebsocketOutbound out = (WebsocketOutbound) c.outbound();
+                        return handleWebsocket(in, out, outbound, onFirstAck);
+                    })
+                    .doOnNext(it -> {
+                        log.debug("Acquired connection: {}", it);
+                        connections.emitNext(it, FAIL_FAST);
+                    });
+        });
+
+        return Mono.usingWhen(factory, function, Connection::dispose);
+    }
+
+    /** Set up the sending logic from multiple sources into one merged Flux **/
+    private Flux<ByteBuf> outbound(Sinks.Empty<Void> onFirstAck) {
+        Mono<Void> onConnected = state.asFlux()
+                .filter(s -> s == GatewayConnection.State.CONNECTED)
+                .next()
+                .then();
+        Flux<ByteBuf> heartbeatFlux = heartbeats.asFlux()
+                .flatMap(payload -> Flux.from(payloadWriter.write(payload)));
+        Flux<ByteBuf> identifyFlux = outbound.asFlux()
+                .filter(payload -> Opcode.IDENTIFY.equals(payload.getOp()))
+                .delayUntil(__ -> onFirstAck.asMono())
+                .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
+                .transform(identifyLimiter);
+        Flux<ByteBuf> resumeFlux = outbound.asFlux()
+                .filter(payload -> Opcode.RESUME.equals(payload.getOp()))
+                .flatMap(payload -> Flux.from(payloadWriter.write(payload)));
+        Flux<ByteBuf> payloadFlux = outbound.asFlux()
+                .filter(NextGatewayClient::isNotStartupPayload)
+                .delayUntil(__ -> onConnected)
+                .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
+                .transform(buf -> Flux.merge(buf, sender.asFlux()))
+                .transform(new RateLimitOperator<>(outboundLimiterCapacity(),
+                        Duration.ofSeconds(60),
+                        reactorResources.getTimerTaskScheduler(),
+                        reactorResources.getPayloadSenderScheduler()));
+        return Flux.merge(heartbeatFlux, identifyFlux, resumeFlux, payloadFlux)
+                .doOnNext(buf -> logPayload(senderLog, currentContext, buf))
+                .doOnDiscard(ByteBuf.class, NextGatewayClient::safeRelease);
+    }
+
+    /** Use the (in, out) netty ws channels and build all data sources into a Connection object **/
+    private Mono<Connection> handleWebsocket(WebsocketInbound in, WebsocketOutbound out,
+                                             Flux<ByteBuf> outboundDataStream, Sinks.Empty<Void> onFirstAck) {
 
         ZlibDecompressor decompressor = new ZlibDecompressor(out.alloc(), unpooled);
 
-        Mono<CloseWebSocketFrame> outboundClose = sessionClose.asMono()
-                .doOnNext(behavior -> log.debug(format(currentContext, "Closing session with behavior: {}"), behavior))
-                .flatMap(behavior -> {
-                    switch (behavior.getAction()) {
-                        case RETRY_ABRUPTLY:
-                        case STOP_ABRUPTLY:
-                            return Mono.error(behavior.getCause() != null ? behavior.getCause() :
-                                    new PartialDisconnectException(currentContext));
-                        case RETRY:
-                        case STOP:
-                        default:
-                            return Mono.just(CloseStatus.NORMAL_CLOSE);
-                    }
-                })
-                .map(status -> new CloseWebSocketFrame(status.getCode(), status.getReason().orElse(null)));
-
-        Mono<Void> outboundEvents = out.sendObject(Flux.merge(outboundClose, outFlux.map(TextWebSocketFrame::new)))
-                .then();
+        Mono<Void> outbound = out.sendObject(outboundDataStream.map(TextWebSocketFrame::new)).then();
 
         Mono<CloseStatus> inboundClose = in.receiveCloseStatus()
                 .map(status -> new CloseStatus(status.code(), status.reasonText()))
                 .doOnNext(status -> {
                     log.debug(format(currentContext, "Received close status: {}"), status);
-                    sessionClose.emitValue(DisconnectBehavior.retryAbruptly(
-                            new GatewayException(currentContext, "Inbound close status")), FAIL_FAST);
+                    out.sendClose(status.getCode(), status.getReason().orElse(null));
                 });
 
-        Mono<Void> inboundEvents = in.aggregateFrames()
+        // TODO expose for configuration
+        int framePrefetch = 64;
+        int payloadPrefetch = 64;
+
+        Flux<ByteBuf> inboundDataStream = in.aggregateFrames()
                 .receiveFrames()
                 .map(WebSocketFrame::content)
-                .transformDeferred(decompressor::completeMessages)
+                .transform(decompressor::completeMessages)
+                .limitRate(framePrefetch)
+                .share();
+
+        Flux<GatewayPayload<?>> inbound = inboundDataStream
                 .doOnNext(buf -> logPayload(receiverLog, currentContext, buf))
                 .transform(payloadReader::decode)
-                .flatMap(payload -> {
+                .doFinally(s -> log.debug("handler.inbound finalized after {}", s))
+                .limitRate(payloadPrefetch)
+                .share();
+
+        Flux<Dispatch> receiveDispatch = inbound.concatMap(payload -> {
                     if (Opcode.HEARTBEAT_ACK.equals(payload.getOp())) {
-                        ping.emitEmpty(FAIL_FAST);
+                        onFirstAck.emitEmpty(FAIL_FAST);
                     }
                     if (payload.getSequence() != null) {
                         sequence.set(payload.getSequence());
                     }
-                    return handlePayload(payload);
+                    return handlePayload(payload).ofType(Dispatch.class);
                 })
-                .then();
+                .onErrorResume(e -> {
+                    log.error("handler.receiveDispatch encountered an error", e);
+                    return Mono.error(e);
+                    //return connection.close(DisconnectBehavior.retryAbruptly(e)).then(Mono.error(e));
+                })
+                .share();
 
-        return Mono.zip(outboundEvents, inboundEvents)
-                .doOnError(e -> {
-                    if (!(e instanceof ReconnectException)) {
-                        log.info(format(currentContext, "Triggering error sequence: {}"), e.toString());
-                    }
-                    sessionClose.emitValue(DisconnectBehavior.retryAbruptly(e), FAIL_FAST);
-                })
+        Mono<CloseStatus> onClose = Mono.zip(outbound, inbound.then())
+                .doFinally(s -> log.debug("handler.onClose finalized after {}", s))
                 .onErrorResume(t -> t.getCause() instanceof GatewayException, t -> Mono.empty())
-                .then(Mono.zip(sessionClose.asMono(), inboundClose.defaultIfEmpty(CloseStatus.ABNORMAL_CLOSE)));
+                .then(inboundClose.switchIfEmpty(Mono.fromCallable(() -> {
+                    log.debug("Inbound closed without a close status");
+                    return CloseStatus.ABNORMAL_CLOSE;
+                })))
+                .share();
+
+        return Mono.just(new Connection(in, out, inboundDataStream, receiveDispatch, onClose, currentContext));
     }
 
     private HttpClient initHttpClient() {
@@ -473,9 +542,15 @@ public class NextGatewayClient implements GatewayClient {
         return payload;
     }
 
+    @FunctionalInterface
+    interface PayloadHandler<T extends PayloadData> {
+
+        Mono<?> handle(GatewayPayload<T> context);
+    }
+
     @SuppressWarnings("unchecked")
-    private <T extends PayloadData> Mono<Void> handlePayload(GatewayPayload<T> payload) {
-        discord4j.gateway.PayloadHandler<T> handler = (discord4j.gateway.PayloadHandler<T>) handlerMap.get(payload.getOp());
+    private <T extends PayloadData> Mono<?> handlePayload(GatewayPayload<T> payload) {
+        PayloadHandler<T> handler = (PayloadHandler<T>) handlerMap.get(payload.getOp());
         if (handler == null) {
             log.warn(format(currentContext, "Handler not found from: {}"), payload);
             return Mono.empty();
@@ -485,13 +560,13 @@ public class NextGatewayClient implements GatewayClient {
                         " seq " + payload.getSequence() + " type " + payload.getType());
     }
 
-    private Mono<Void> handleDispatch(GatewayPayload<Dispatch> payload) {
+    private Mono<?> handleDispatch(GatewayPayload<?> payload) {
         if (payload.getData() instanceof Ready) {
             String newSessionId = ((Ready) payload.getData()).sessionId();
             sessionId.set(newSessionId);
         }
         if (payload.getData() != null) {
-            emissionStrategy.emitNext(dispatch, payload.getData());
+            return Mono.just((Dispatch) payload.getData());
         }
         return Mono.empty();
     }
@@ -503,20 +578,22 @@ public class NextGatewayClient implements GatewayClient {
     }
 
     private Mono<Void> handleReconnect(GatewayPayload<?> payload) {
-        errorSession(new ReconnectException(currentContext, "Reconnecting due to reconnect packet received"));
+        //errorSession(new ReconnectException(currentContext, "Reconnecting due to reconnect packet received"));
         return Mono.empty();
     }
 
     private Mono<Void> handleInvalidSession(GatewayPayload<InvalidSession> payload) {
-        //noinspection ConstantConditions
-        if (payload.getData().resumable()) {
-            emissionStrategy.emitNext(outbound,
-                    GatewayPayload.resume(ImmutableResume.of(token, sessionId.get(), sequence.get())));
-        } else {
-            errorSession(new InvalidSessionException(currentContext,
-                    "Reconnecting due to non-resumable session invalidation"));
-        }
-        return Mono.empty();
+        return Mono.defer(() -> {
+            //noinspection ConstantConditions
+            if (payload.getData().resumable()) {
+                emissionStrategy.emitNext(outbound,
+                        GatewayPayload.resume(ImmutableResume.of(token, sessionId.get(), sequence.get())));
+            } else {
+                return closeConnection(DisconnectBehavior.retryAbruptly(new InvalidSessionException(currentContext,
+                        "Reconnecting due to non-resumable session invalidation")));
+            }
+            return Mono.empty();
+        });
     }
 
     private Mono<Void> handleHello(GatewayPayload<Hello> payload) {
@@ -650,37 +727,53 @@ public class NextGatewayClient implements GatewayClient {
 
     @Override
     public Mono<CloseStatus> close(boolean allowResume) {
-        return Mono.defer(() -> {
-            if (closeNotifier == null || disconnectNotifier == null) {
-                return Mono.error(new IllegalStateException("Gateway client is not active!"));
-            }
-            if (allowResume) {
-                closeSession(DisconnectBehavior.stopAbruptly(null));
-            } else {
-                closeSession(DisconnectBehavior.stop(null));
-            }
-            return disconnectNotifier.asMono();
-        });
+        return closeConnection(allowResume ? DisconnectBehavior.stopAbruptly(null) : DisconnectBehavior.stop(null))
+                .then(Mono.defer(() -> disconnectNotifier.asMono()));
     }
 
     @Override
     public Flux<Dispatch> dispatch() {
-        return dispatch.asFlux();
+        Flux<Dispatch> fromInbound = onConnection()
+                .flatMapMany(c -> c.receiveDispatch.takeUntilOther(c.onDispose()))
+                .onErrorResume(e -> Mono.empty())
+                .repeatWhen(onAttempt -> onAttempt.concatMap(lastEmitted -> {
+                            log.debug("Awaiting for next connection after element # {}", lastEmitted);
+                            // skip current connection and await for the next one
+                            return connections.asFlux().skip(1).next();
+                        })
+                        .doOnNext(it -> log.debug("Ready to connect: {}", it)))
+                .doFinally(s -> log.debug("fromInbound finalized after {}", s));
+
+        return Flux.merge(fromInbound, dispatch.asFlux())
+                .contextWrite(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, identifyOptions.getShardInfo().getIndex()))
+                .doOnSubscribe(s -> log.debug("Subscribing to dispatch stream"))
+                .doFinally(s -> log.debug("dispatch finalized after {}", s))
+                .onErrorResume(e -> {
+                    log.error("dispatch encountered an error", e);
+                    return Mono.empty();
+                });
     }
 
     @Override
     public Flux<GatewayPayload<?>> receiver() {
-        return Flux.error(new RuntimeException("WIP"));
-        //return receiver(payloadReader::read);
+        return receiver(payloadReader::read);
     }
 
     @Override
     public <T> Flux<T> receiver(Function<ByteBuf, Publisher<? extends T>> mapper) {
-        return Flux.error(new RuntimeException("WIP"));
-//        return receiver.asFlux()
-//                .map(ByteBuf::retainedDuplicate)
-//                .doOnDiscard(ByteBuf.class, NewGatewayClient::safeRelease)
-//                .flatMap(mapper);
+        return onConnection()
+                .flatMapMany(c -> c.inboundDataStream)
+                .map(ByteBuf::retainedDuplicate)
+                .doOnDiscard(ByteBuf.class, NextGatewayClient::safeRelease)
+                .concatMap(mapper)
+                .onErrorResume(e -> {
+                    log.error("External receiver discarded an error", e);
+                    return Mono.empty();
+                })
+                .repeatWhen(onAttempt -> onAttempt.concatMap(lastEmitted -> {
+                    // skip current connection and await for the next one
+                    return connections.asFlux().skip(1).next();
+                }));
     }
 
     private static void safeRelease(ByteBuf buf) {
