@@ -433,4 +433,44 @@ public interface DataAccessor {
      * @return A {@link Mono} emitting the voice state, or empty if not found
      */
     Mono<VoiceStateData> getVoiceStateById(long guildId, long userId);
+
+    /**
+     * Retrieves data for all guild scheduled events in the store.
+     *
+     * @return A {@link Flux} emitting the scheduled events, or empty if none is present
+     */
+    Flux<GuildScheduledEventData> getScheduledEvents();
+
+    /**
+     * Retrieves data for all guild scheduled events corresponding to the given guild ID.
+     *
+     * @param guildId the guild ID
+     * @return A {@link Flux} emitting the scheduled events, or empty if none is present
+     */
+    Flux<GuildScheduledEventData> getScheduledEventsInGuild(long guildId);
+
+    /**
+     * Retrieves data for the guild scheduled event corresponding to the given guild ID and event ID.
+     *
+     * @param guildId the guild ID
+     * @param eventId the event ID
+     * @return A {@link Mono} emitting the scheduled event, or empty if not found
+     */
+    Mono<GuildScheduledEventData> getScheduledEventById(long guildId, long eventId);
+
+    /**
+     * Retrieves data for all guild scheduled event users in the store
+     *
+     * @return A {@link Flux} emitting the scheduled event users, or empty if none is present
+     */
+    Flux<GuildScheduledEventUserData> getScheduledEventUsers();
+
+    /**
+     * Retrieves data for all guild scheduled event users corresponding to the given guild ID and event ID.
+     *
+     * @param guildId the guild ID
+     * @param eventId the event ID
+     * @return A {@link Flux} emitting the scheduled event users, or empty if none is present
+     */
+    Flux<GuildScheduledEventUserData> getScheduledEventUsersInEvent(long guildId, long eventId);
 }

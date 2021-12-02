@@ -16,6 +16,7 @@
  */
 package discord4j.core.retriever;
 
+import discord4j.core.object.ScheduledEventUser;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildEmoji;
@@ -23,6 +24,7 @@ import discord4j.core.object.entity.GuildSticker;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.ScheduledEvent;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -193,4 +195,31 @@ public interface EntityRetriever {
      * it is emitted through the {@code Flux}.
      */
     Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId);
+
+    /**
+     * Requests to retrieve the {@link ScheduledEvent} represented by the supplied IDs.
+     *
+     * @param guildId The ID of the guild.
+     * @param eventId The ID of the scheduled event.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link ScheduledEvent} as represented by the
+     * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<ScheduledEvent> getScheduledEventById(Snowflake guildId, Snowflake eventId);
+
+    /**
+     * Requests to retrieve the guild's scheduled events.
+     *
+     * @return A {@link Flux} that continually emits the guild's {@link ScheduledEvent events}. If an error is received,
+     * it is emitted through the {@code Flux}.
+     */
+    Flux<ScheduledEvent> getScheduledEvents(Snowflake guildId);
+
+    /**
+     * Requests to retrieve the users that have RSVPed as "interested" to the event represented by the supplied IDs.
+     *
+     * @return A {@link Flux} that continually emits the event's {@link ScheduledEventUser users}.
+     * If an error is received, it is emitted through the {@code Flux}.
+     */
+    Flux<ScheduledEventUser> getScheduledEventUsers(Snowflake guildId, Snowflake eventId);
+
 }

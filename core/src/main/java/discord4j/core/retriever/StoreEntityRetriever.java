@@ -21,6 +21,7 @@ import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.store.api.object.ExactResultNotAvailableException;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.ScheduledEventUser;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
@@ -145,5 +146,23 @@ public class StoreEntityRetriever implements EntityRetriever {
     public Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId) {
         return Flux.from(store.execute(ReadActions.getAutoModRulesInGuild(guildId.asLong())))
             .map(data -> new AutoModRule(gateway, data));
+    }
+
+    //TODO: Implement
+    @Override
+    public Mono<ScheduledEvent> getScheduledEventById(Snowflake guildId, Snowflake eventId) {
+        return null;
+    }
+
+    //TODO: Implement
+    @Override
+    public Flux<ScheduledEvent> getScheduledEvents(Snowflake guildId) {
+        return null;
+    }
+
+    //TODO: Implement
+    @Override
+    public Flux<ScheduledEventUser> getScheduledEventUsers(Snowflake guildId, Snowflake eventId) {
+        return null;
     }
 }
