@@ -76,6 +76,9 @@ public class GatewayRetrySpec extends Retry {
     private boolean canResume(Throwable t) {
         if (t instanceof CloseException) {
             CloseException closeException = (CloseException) t;
+            if (closeException.getCause() instanceof InvalidSessionException) {
+                return false;
+            }
             return closeException.getCode() < 4000;
         }
         return !(t instanceof InvalidSessionException);
