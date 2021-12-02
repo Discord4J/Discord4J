@@ -166,6 +166,14 @@ public final class Store {
                         .getVoiceStatesInGuild(action.getGuildId()))
                 .map(GetVoiceStateByIdAction.class, action -> dataAccessor
                         .getVoiceStateById(action.getGuildId(), action.getUserId()))
+                .map(GetGuildScheduledEventsAction.class, action -> dataAccessor.getScheduledEvents())
+                .map(GetGuildScheduledEventsInGuildAction.class, action -> dataAccessor
+                        .getScheduledEventsInGuild(action.getGuildId()))
+                .map(GetGuildScheduledEventByIdAction.class, action -> dataAccessor
+                        .getScheduledEventById(action.getGuildId(), action.getEventId()))
+                .map(GetGuildScheduledEventUsersAction.class, action -> dataAccessor.getScheduledEventUsers())
+                .map(GetGuildScheduledEventUsersInEventAction.class, action -> dataAccessor
+                        .getScheduledEventUsersInEvent(action.getGuildId(), action.getEventId()))
                 .build();
     }
 

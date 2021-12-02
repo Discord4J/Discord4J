@@ -21,6 +21,7 @@ import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.store.api.object.ExactResultNotAvailableException;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.ScheduledEventUser;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -126,5 +127,23 @@ public class StoreEntityRetriever implements EntityRetriever {
     public Flux<GuildEmoji> getGuildEmojis(Snowflake guildId) {
         return Flux.from(store.execute(ReadActions.getEmojisInGuild(guildId.asLong())))
                 .map(emojiData -> new GuildEmoji(gateway, emojiData, guildId.asLong()));
+    }
+
+    //TODO: Implement
+    @Override
+    public Mono<ScheduledEvent> getScheduledEventById(Snowflake guildId, Snowflake eventId) {
+        return null;
+    }
+
+    //TODO: Implement
+    @Override
+    public Flux<ScheduledEvent> getScheduledEvents(Snowflake guildId) {
+        return null;
+    }
+
+    //TODO: Implement
+    @Override
+    public Flux<ScheduledEventUser> getScheduledEventUsers(Snowflake guildId, Snowflake eventId) {
+        return null;
     }
 }

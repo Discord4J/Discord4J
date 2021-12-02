@@ -1784,6 +1784,14 @@ public final class Guild implements Entity {
         return gateway.getVoiceConnectionRegistry().getVoiceConnection(getId());
     }
 
+    //TODO: get scheduled events
+    //TODO: get scheduled events with retrieval strat
+
+    //TODO: get scheduled event
+    //TODO: get scheduled event with retrieval strat
+
+    //TODO: create scheduled event
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);

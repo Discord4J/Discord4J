@@ -474,4 +474,54 @@ public class ReadActions {
     public static GetVoiceStateByIdAction getVoiceStateById(long guildId, long userId) {
         return new GetVoiceStateByIdAction(guildId, userId);
     }
+
+    /**
+     * Creates an action to retrieve data for all scheduled events in a store.
+     *
+     * @return a new {@link GetGuildScheduledEventsAction}
+     */
+    public static GetGuildScheduledEventsAction getEvents() {
+        return new GetGuildScheduledEventsAction();
+    }
+
+    /**
+     * Creates an action to retrieve data for all scheduled events in a store for the given guild ID.
+     *
+     * @param guildId the guild ID
+     * @return a new {@link GetGuildScheduledEventsAction}
+     */
+    public static GetGuildScheduledEventsInGuildAction getEvents(long guildId) {
+        return new GetGuildScheduledEventsInGuildAction(guildId);
+    }
+
+    /**
+     * Creates an action to retrieve data for the scheduled event corresponding to the given guild ID and event ID.
+     *
+     * @param guildId the guild ID
+     * @param eventId the event ID
+     * @return a new {@link GetGuildScheduledEventByIdAction}
+     */
+    public static GetGuildScheduledEventByIdAction getEvent(long guildId, long eventId) {
+        return new GetGuildScheduledEventByIdAction(guildId, eventId);
+    }
+
+    /**
+     * Creates an action to retrieve all data for scheduled event users in a store.
+     *
+     * @return a new {@link GetGuildScheduledEventUsersAction}
+     */
+    public static GetGuildScheduledEventUsersAction getEventUsers() {
+        return new GetGuildScheduledEventUsersAction();
+    }
+
+    /**
+     * Creates an action to retrieve data for the scheduled event users corresponding to the given guild ID and event ID.
+     *
+     * @param guildId the guild ID
+     * @param eventId the event ID
+     * @return a new {@link GetGuildScheduledEventUsersAction}
+     */
+    public static GetGuildScheduledEventUsersInEventAction getEventUsers(long guildId, long eventId) {
+        return new GetGuildScheduledEventUsersInEventAction(guildId, eventId);
+    }
 }

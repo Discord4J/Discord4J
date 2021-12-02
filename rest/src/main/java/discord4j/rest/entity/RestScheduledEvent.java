@@ -127,7 +127,7 @@ public class RestScheduledEvent {
      * {@code getInterestedUsersBefore(userId).takeWhile(user -> user.getId().compareTo(myOtherUserId) >= 0)}
      *
      * @param userId The ID of the <i>newest</i> user to retrieve.
-     * @param withMember Whether to optionally include the member object in the returned data.
+     * @param withMember Whether to optionally include the member object in the returned data (if the user is a member).
      * @return A {@link Flux} that continually emits <i>all</i> {@link GuildScheduledEventUserData users} <i>before</i>
      * the specified ID. If an error is received, it is emitted through the {@code Flux}.
      * @see
@@ -153,7 +153,7 @@ public class RestScheduledEvent {
      * {@code getInterestedUsersAfter(userId).takeWhile(user -> user.getId().compareTo(myOtherUserId) <= 0)}
      *
      * @param userId The ID of the <i>oldest</i> user to retrieve.
-     * @param withMember Whether to optionally include the member object in the returned data.
+     * @param withMember Whether to optionally include the member object in the returned data (if the user is a member).
      * @return A {@link Flux} that continually emits <i>all</i> {@link GuildScheduledEventUserData users} <i>after</i>
      * the specified ID. If an error is received, it is emitted through the {@code Flux}.
      * @see
