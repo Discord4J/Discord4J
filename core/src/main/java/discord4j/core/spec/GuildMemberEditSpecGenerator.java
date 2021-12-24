@@ -26,6 +26,7 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,7 +47,7 @@ interface GuildMemberEditSpecGenerator extends AuditSpec<GuildMemberModifyReques
 
     Possible<List<Snowflake>> roles();
 
-    Possible<Optional<String>> communicationDisableUntil();
+    Possible<Optional<Instant>> communicationDisableUntil();
 
     @Override
     default GuildMemberModifyRequest asRequest() {
@@ -56,7 +57,7 @@ interface GuildMemberEditSpecGenerator extends AuditSpec<GuildMemberModifyReques
                 .deaf(deafen())
                 .nick(nickname())
                 .roles(mapPossible(roles(), r -> r.stream().map(Snowflake::asString).collect(Collectors.toList())))
-                .communicationDisableUntil(communicationDisableUntil())
+                .communicationDisableUntil(mapPossibleOptional(communicationDisableUntil(), Instant::toString))
                 .build();
     }
 }
