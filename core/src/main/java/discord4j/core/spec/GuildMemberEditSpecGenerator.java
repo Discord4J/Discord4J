@@ -46,6 +46,8 @@ interface GuildMemberEditSpecGenerator extends AuditSpec<GuildMemberModifyReques
 
     Possible<List<Snowflake>> roles();
 
+    Possible<Optional<String>> communicationDisableUntil();
+
     @Override
     default GuildMemberModifyRequest asRequest() {
         return GuildMemberModifyRequest.builder()
@@ -54,6 +56,7 @@ interface GuildMemberEditSpecGenerator extends AuditSpec<GuildMemberModifyReques
                 .deaf(deafen())
                 .nick(nickname())
                 .roles(mapPossible(roles(), r -> r.stream().map(Snowflake::asString).collect(Collectors.toList())))
+                .communicationDisableUntil(communicationDisableUntil())
                 .build();
     }
 }
