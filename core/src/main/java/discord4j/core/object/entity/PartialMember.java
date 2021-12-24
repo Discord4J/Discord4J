@@ -190,6 +190,16 @@ public class PartialMember extends User {
     }
 
     /**
+     * Gets when the user ends their timeout, if present.
+     *
+     * @return When the user ends their timeout in the server, if present.
+     */
+    public Optional<Instant> getCommunicationDisableUntil() {
+        return Possible.flatOpt(data.communicationDisableUntil())
+            .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+    }
+
+    /**
      * Gets the ID of the guild this user is associated to.
      *
      * @return The ID of the guild this user is associated to.
