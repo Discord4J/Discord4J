@@ -194,8 +194,8 @@ public class PartialMember extends User {
      *
      * @return When the user ends their timeout in the server, if present.
      */
-    public Optional<Instant> getCommunicationDisableUntil() {
-        return Possible.flatOpt(data.communicationDisableUntil())
+    public Optional<Instant> getCommunicationDisabledUntil() {
+        return Possible.flatOpt(data.communicationDisabledUntil())
             .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
