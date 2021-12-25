@@ -47,7 +47,7 @@ interface GuildMemberEditSpecGenerator extends AuditSpec<GuildMemberModifyReques
 
     Possible<List<Snowflake>> roles();
 
-    Possible<Optional<Instant>> communicationDisableUntil();
+    Possible<Optional<Instant>> communicationDisabledUntil();
 
     @Override
     default GuildMemberModifyRequest asRequest() {
@@ -57,7 +57,7 @@ interface GuildMemberEditSpecGenerator extends AuditSpec<GuildMemberModifyReques
                 .deaf(deafen())
                 .nick(nickname())
                 .roles(mapPossible(roles(), r -> r.stream().map(Snowflake::asString).collect(Collectors.toList())))
-                .communicationDisableUntil(mapPossibleOptional(communicationDisableUntil(), Instant::toString))
+                .communicationDisabledUntil(mapPossibleOptional(communicationDisabledUntil(), Instant::toString))
                 .build();
     }
 }
