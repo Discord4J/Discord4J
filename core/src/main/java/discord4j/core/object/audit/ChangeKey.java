@@ -24,6 +24,7 @@ import discord4j.core.object.entity.channel.Channel;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.PermissionSet;
 
+import java.time.Instant;
 import java.util.Set;
 import java.util.function.BiFunction;
 
@@ -147,6 +148,8 @@ public final class ChangeKey<T> {
     public static final ChangeKey<Integer> EXPIRE_GRACE_PERIOD = changeKey("expire_grace_period", INTEGER_PARSER);
     /** New user limit in a voice channel */
     public static final ChangeKey<Integer> USER_LIMIT = changeKey("user_limit", INTEGER_PARSER);
+    /** New user date for expire a timeout */
+    public static final ChangeKey<Instant> COMMUNICATION_DISABLED_UNTIL = changeKey("communication_disabled_until", INSTANT_PARSER);
 
     private static <T> ChangeKey<T> changeKey(String name, BiFunction<AuditLogEntry, JsonNode, T> parser) {
         return new ChangeKey<>(name, parser);
