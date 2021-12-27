@@ -24,6 +24,8 @@ import discord4j.discordjson.json.UserData;
 import discord4j.rest.RestClient;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 /**
  * Represents a user (bot or normal) entity in Discord. Users can spawn across the entire platform, be members of
  * guilds, participate in text and voice chat, and much more.
@@ -80,5 +82,18 @@ public class RestUser {
      */
     public final Mono<ChannelData> getPrivateChannel() {
         return restClient.getUserService().createDM(DMCreateRequest.builder().recipientId(Snowflake.asString(id)).build());
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RestUser restUser = (RestUser) o;
+        return id == restUser.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

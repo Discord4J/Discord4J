@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -466,6 +467,19 @@ public class RestChannel {
 
     public Mono<Void> deleteGroupDMRecipient(Snowflake userId) {
         return restClient.getChannelService().deleteGroupDMRecipient(id, userId.asLong());
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RestChannel that = (RestChannel) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     public Flux<WebhookData> getWebhooks() {
