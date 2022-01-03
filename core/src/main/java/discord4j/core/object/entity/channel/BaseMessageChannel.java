@@ -97,6 +97,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
                     MessageCreateSpec actualSpec = getClient().getRestClient()
                             .getRestResources()
                             .getAllowedMentions()
+                            .filter(allowedMentions -> !spec.isAllowedMentionsPresent())
                             .map(spec::withAllowedMentions)
                             .orElse(spec);
                     return getRestChannel().createMessage(actualSpec.asRequest());
