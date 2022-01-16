@@ -122,7 +122,7 @@ public enum Permission {
     MANAGE_EMOJIS(0x40000000, true),
 
     /** Allows members to use slash commands in text channels. */
-    USE_SLASH_COMMANDS(0x80000000, false),
+    USE_SLASH_COMMANDS(0x80000000L, false),
 
     /**
      * Allows for requesting to speak in stage channels.
