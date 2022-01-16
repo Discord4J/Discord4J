@@ -128,7 +128,12 @@ public enum Permission {
      * Allows for requesting to speak in stage channels.
      */
     @Experimental
-    REQUEST_TO_SPEAK(0x100000000L, false);
+    REQUEST_TO_SPEAK(0x100000000L, false),
+
+    /**
+     * Allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from speaking in voice and stage channels
+     */
+    MODERATE_MEMBERS(0x0000010000000000L, false);
 
     /** Whether MFA is required. */
     private final boolean mfa;
