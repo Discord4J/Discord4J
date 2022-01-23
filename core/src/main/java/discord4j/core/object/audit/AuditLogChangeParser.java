@@ -26,6 +26,8 @@ import discord4j.discordjson.json.OverwriteData;
 import discord4j.rest.util.PermissionSet;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -49,6 +51,8 @@ interface AuditLogChangeParser<T> extends BiFunction<AuditLogEntry, JsonNode, T>
     AuditLogChangeParser<Snowflake> SNOWFLAKE_PARSER = (entry, node) -> Snowflake.of(node.asText());
 
     AuditLogChangeParser<PermissionSet> PERMISSION_SET_PARSER = (entry, node) -> PermissionSet.of(node.asText());
+
+    AuditLogChangeParser<Instant> INSTANT_PARSER = (entry, node) -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(node.asText(), Instant::from);
 
     AuditLogChangeParser<Set<AuditLogRole>> AUDIT_LOG_ROLES_PARSER = (entry, node) -> {
         try {
