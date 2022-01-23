@@ -48,12 +48,15 @@ public final class ThreadMember {
     }
 
     public Snowflake getThreadId() {
-        return Snowflake.of(data.id());
+        // ThreadMemberData#id is absent in GUILD_CREATE (threads self is part of)
+        // D4J should be able to include the missing value with the outer thread id when creating ThreadMember
+        return Snowflake.of(data.id().toOptional().orElseThrow(IllegalStateException::new));
     }
 
     public Snowflake getUserId() {
-        // TODO: handle guild_create thread member objects, meaning threads visible by self
-        return Snowflake.of(data.userId());
+        // ThreadMemberData#userId is absent in GUILD_CREATE (threads self is part of)
+        // D4J should be able to include the missing value with the self id when creating ThreadMember
+        return Snowflake.of(data.userId().toOptional().orElseThrow(IllegalStateException::new));
     }
 
     public Instant getJoinTimestamp() {
