@@ -29,11 +29,7 @@ import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -469,6 +465,10 @@ public class RestChannel {
         return restClient.getChannelService().deleteGroupDMRecipient(id, userId.asLong());
     }
 
+    public Flux<WebhookData> getWebhooks() {
+        return restClient.getWebhookService().getChannelWebhooks(id);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -480,9 +480,5 @@ public class RestChannel {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    public Flux<WebhookData> getWebhooks() {
-        return restClient.getWebhookService().getChannelWebhooks(id);
     }
 }
