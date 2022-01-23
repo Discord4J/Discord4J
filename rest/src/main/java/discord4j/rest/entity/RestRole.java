@@ -26,6 +26,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.Objects;
+
 /**
  * Roles represent a set of permissions, unique per guild, attached to a group of users.
  */
@@ -132,5 +134,18 @@ public class RestRole {
                 .getGuildRoles(guildId)
                 .filter(response -> Snowflake.asLong(response.id()) == id)
                 .singleOrEmpty();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RestRole restRole = (RestRole) o;
+        return guildId == restRole.guildId && id == restRole.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(guildId, id);
     }
 }

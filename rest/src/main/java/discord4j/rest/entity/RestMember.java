@@ -29,6 +29,7 @@ import reactor.math.MathFlux;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a user (bot or normal) that is member of a specific guild.
@@ -220,5 +221,18 @@ public class RestMember {
 
                     return thisHighestRolePos.map(thisPos -> thisPos > otherHighestPos);
                 });
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RestMember that = (RestMember) o;
+        return guildId == that.guildId && id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(guildId, id);
     }
 }
