@@ -102,6 +102,15 @@ public final class Sticker implements Entity {
         return Format.of(data.formatType());
     }
 
+    /**
+     * Gets the type of sticker.
+     *
+     * @return The type of sticker.
+     */
+    public Type getType() {
+        return Type.of(data.type());
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
@@ -164,6 +173,61 @@ public final class Sticker implements Entity {
                     return APNG;
                 case 3:
                     return LOTTIE;
+                default:
+                    return UNKNOWN;
+            }
+        }
+    }
+
+    /**
+     * The type of sticker.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-types">
+     *     Sticker Types</a>
+     */
+    public enum Type {
+        /**
+         * Unknown sticker type.
+         */
+        UNKNOWN(0),
+
+        /**
+         * Represents an official sticker in a pack, part of Nitro or in a removed purchasable pack.
+         */
+        STANDARD(1),
+
+        /**
+         * Represents a sticker uploaded to a Boosted guild for the guild's members.
+         */
+        GUILD(2);
+
+        /**
+         * The underlying value as represented by Discord.
+         */
+        private final int value;
+
+        /**
+         * Constructs a {@code Sticker.Type}.
+         */
+        Type(final int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        public static Type of(final int value) {
+            switch (value) {
+                case 1:
+                    return STANDARD;
+                case 2:
+                    return GUILD;
                 default:
                     return UNKNOWN;
             }
