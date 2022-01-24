@@ -18,6 +18,7 @@ package discord4j.core.retriever;
 
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildEmoji;
+import discord4j.core.object.entity.GuildSticker;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
@@ -165,4 +166,12 @@ public interface EntityRetriever {
      * it is emitted through the {@code Flux}.
      */
     Flux<GuildEmoji> getGuildEmojis(Snowflake guildId);
+
+    /**
+     * Requests to retrieve the guild's stickers.
+     *
+     * @return A {@link Flux} that continually emits the guild's {@link GuildSticker stickers}. If an error is received,
+     * it is emitted through the {@code Flux}.
+     */
+    Flux<GuildSticker> getGuildStickers(Snowflake guildId);
 }

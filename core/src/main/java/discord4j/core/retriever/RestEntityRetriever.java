@@ -148,6 +148,13 @@ public class RestEntityRetriever implements EntityRetriever {
                 .map(data -> new GuildEmoji(gateway, data, guildId.asLong()));
     }
 
+    @Override
+    public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
+        return rest.getStickerService()
+            .getGuildStickers(guildId.asLong())
+            .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
+    }
+
     private GuildData toGuildData(GuildUpdateData guild) {
         return GuildData.builder()
                 .from(guild)

@@ -127,4 +127,10 @@ public class StoreEntityRetriever implements EntityRetriever {
         return Flux.from(store.execute(ReadActions.getEmojisInGuild(guildId.asLong())))
                 .map(emojiData -> new GuildEmoji(gateway, emojiData, guildId.asLong()));
     }
+
+    @Override
+    public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
+        return Flux.from(store.execute(ReadActions.getStickersInGuild(guildId.asLong())))
+            .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
+    }
 }

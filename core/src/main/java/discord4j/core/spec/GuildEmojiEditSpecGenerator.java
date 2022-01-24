@@ -54,7 +54,7 @@ abstract class GuildEmojiEditMonoGenerator extends Mono<GuildEmoji> implements G
 
     @Override
     public void subscribe(CoreSubscriber<? super GuildEmoji> actual) {
-        guildEmoji().edit(GuildEmojiEditSpec.copyOf(this)).subscribe(actual);
+        guildSticker().edit(GuildEmojiEditSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override

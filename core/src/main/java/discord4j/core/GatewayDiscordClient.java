@@ -760,4 +760,9 @@ public class GatewayDiscordClient implements EntityRetriever {
     public Flux<GuildEmoji> getGuildEmojis(Snowflake guildId) {
         return entityRetriever.getGuildEmojis(guildId);
     }
+
+    @Override
+    public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
+        return entityRetriever.getGuildStickers(guildId);
+    }
 }

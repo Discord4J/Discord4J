@@ -475,6 +475,21 @@ public final class Message implements Entity {
      *
      * @return The stickers sent with the message.
      */
+    @Experimental
+    public List<PartialSticker> getStickersItems() {
+        return data.stickerItems().toOptional()
+            .map(reactions -> reactions.stream()
+                .map(data -> new PartialSticker(gateway, data))
+                .collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
+    }
+
+    /**
+     * Gets the stickers sent with the message.
+     *
+     * @return The stickers sent with the message.
+     */
+    @Deprecated
     public List<Sticker> getStickers() {
         return data.stickers().toOptional()
                 .orElse(Collections.emptyList())

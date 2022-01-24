@@ -235,6 +235,27 @@ public class ReadActions {
     }
 
     /**
+     * Creates an action to retrieve data for all stickers present in a store for the given guild ID.
+     *
+     * @param guildId the guild ID
+     * @return a new {@link GetStickersInGuildAction}
+     */
+    public static GetStickersInGuildAction getStickersInGuild(long guildId) {
+        return new GetStickersInGuildAction(guildId);
+    }
+
+    /**
+     * Creates an action to retrieve data for the sticker corresponding to the given guild ID and sticker ID.
+     *
+     * @param guildId the guild ID
+     * @param stickerId the sticker ID
+     * @return a new {@link GetStickerByIdAction}
+     */
+    public static GetStickerByIdAction getStickerById(long guildId, long stickerId) {
+        return new GetStickerByIdAction(guildId, stickerId);
+    }
+
+    /**
      * Creates an action to retrieve data for all emojis present in a store.
      *
      * @return a new {@link GetEmojisAction}

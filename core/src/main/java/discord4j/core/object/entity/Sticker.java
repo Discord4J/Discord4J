@@ -23,26 +23,10 @@ import discord4j.discordjson.json.StickerData;
 
 import java.util.*;
 
-public final class Sticker implements Entity {
-
-    /**
-     * The gateway associated to this object.
-     */
-    private final GatewayDiscordClient gateway;
-
-    /**
-     * The raw data as represented by Discord.
-     */
-    private final StickerData data;
+public class Sticker extends PartialSticker {
 
     public Sticker(final GatewayDiscordClient gateway, final StickerData data) {
-        this.gateway = Objects.requireNonNull(gateway);
-        this.data = Objects.requireNonNull(data);
-    }
-
-    @Override
-    public Snowflake getId() {
-        return Snowflake.of(data.id());
+        super(gateway, data);
     }
 
     /**
@@ -51,7 +35,7 @@ public final class Sticker implements Entity {
      * @return The data of the sticker.
      */
     public StickerData getData() {
-        return data;
+        return (StickerData) super.getStickerData();
     }
 
     /**
@@ -60,16 +44,7 @@ public final class Sticker implements Entity {
      * @return The ID of the pack the sticker is from.
      */
     public Snowflake getPackId() {
-        return Snowflake.of(data.packId());
-    }
-
-    /**
-     * Gets the name of the sticker.
-     *
-     * @return The name of the sticker.
-     */
-    public String getName() {
-        return data.name();
+        return Snowflake.of(getData().packId());
     }
 
     /**
@@ -78,7 +53,7 @@ public final class Sticker implements Entity {
      * @return The description of the sticker;
      */
     public String getDescription() {
-        return data.description();
+        return getData().description();
     }
 
     /**
@@ -87,19 +62,20 @@ public final class Sticker implements Entity {
      * @return The list of tags for the sticker.
      */
     public List<String> getTags() {
-        return data.tags().toOptional()
+        return getData().tags().toOptional()
             .map(tags -> tags.split(", "))
             .map(Arrays::asList)
             .orElse(Collections.emptyList());
     }
 
     /**
-     * Gets the type of sticker format.
+     * Gets whether this sticker is available for use.
      *
-     * @return The type of sticker format.
+     * @return {@code true} if this sticker is available, {@code false} otherwise (due to loss of Server Boosts for example).
      */
-    public Format getFormatType() {
-        return Format.of(data.formatType());
+    public boolean isAvailable() {
+        return getData().available().toOptional()
+            .orElseThrow(IllegalStateException::new); // this should be safe
     }
 
     /**
@@ -108,12 +84,7 @@ public final class Sticker implements Entity {
      * @return The type of sticker.
      */
     public Type getType() {
-        return Type.of(data.type());
-    }
-
-    @Override
-    public GatewayDiscordClient getClient() {
-        return gateway;
+        return Type.of(getData().type());
     }
 
     /**
@@ -165,7 +136,7 @@ public final class Sticker implements Entity {
             return value;
         }
 
-        private static Format of(final int value) {
+        public static Format of(final int value) {
             switch (value) {
                 case 1:
                     return PNG;

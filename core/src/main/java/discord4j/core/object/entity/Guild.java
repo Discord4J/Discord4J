@@ -440,6 +440,25 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the guild's sticker's IDs.
+     *
+     * @return The guild's sticker's IDs.
+     */
+    public Set<Snowflake> getStickerIds() {
+        return data.stickers().toOptional().map(ids -> ids.stream().map(Snowflake::of).collect(Collectors.toSet())).orElse(Collections.emptySet());
+    }
+
+    /**
+     * Requests to retrieve the sticker's emojis.
+     *
+     * @return A {@link Flux} that continually emits guild's {@link GuildSticker stickers}. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<GuildSticker> getStickers() {
+        return gateway.getGuildStickers(getId());
+    }
+
+    /**
      * Gets the guild's emoji's IDs.
      *
      * @return The guild's emoji's IDs.
