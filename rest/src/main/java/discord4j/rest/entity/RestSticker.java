@@ -1,98 +1,81 @@
-/*
- * This file is part of Discord4J.
- *
- * Discord4J is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Discord4J is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
- */
-
 package discord4j.rest.entity;
 
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.GuildEmojiModifyRequest;
+import discord4j.discordjson.json.StickerData;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.Permission;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
-
 import java.util.Objects;
 
 /**
- * Represents a guild emoji entity in Discord.
+ * Represents a guild sticker entity in Discord.
  */
-public class RestEmoji {
+public class RestSticker {
 
     private final RestClient restClient;
     private final long guildId;
     private final long id;
 
-    private RestEmoji(RestClient restClient, long guildId, long id) {
+    private RestSticker(RestClient restClient, long guildId, long id) {
         this.restClient = restClient;
         this.guildId = guildId;
         this.id = id;
     }
 
     /**
-     * Create a {@link RestEmoji} with the given parameters. This method does not perform any API request.
+     * Create a {@link RestSticker} with the given parameters. This method does not perform any API request.
      *
      * @param restClient REST API resources
-     * @param guildId the ID of the guild this emoji belongs to
+     * @param guildId the ID of the guild this sticker belongs to
      * @param id the ID of this member
-     * @return a {@code RestEmoji} represented by the given parameters.
+     * @return a {@code RestSticker} represented by the given parameters.
      */
-    public static RestEmoji create(RestClient restClient, Snowflake guildId, Snowflake id) {
-        return new RestEmoji(restClient, guildId.asLong(), id.asLong());
+    public static RestSticker create(RestClient restClient, Snowflake guildId, Snowflake id) {
+        return new RestSticker(restClient, guildId.asLong(), id.asLong());
     }
 
-    static RestEmoji create(RestClient restClient, long guildId, long id) {
-        return new RestEmoji(restClient, guildId, id);
+    static RestSticker create(RestClient restClient, long guildId, long id) {
+        return new RestSticker(restClient, guildId, id);
     }
 
     /**
-     * Returns the ID of the guild this emoji belongs to.
+     * Returns the ID of the guild this sticker belongs to.
      *
-     * @return The ID of the guild this emoji belongs to.
+     * @return The ID of the guild this sticker belongs to.
      */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
     /**
-     * Returns the ID of this emoji.
+     * Returns the ID of this sticker.
      *
-     * @return The ID of this emoji
+     * @return The ID of this sticker
      */
     public Snowflake getId() {
         return Snowflake.of(id);
     }
 
     /**
-     * Return this emoji's parent {@link RestGuild}. This method does not perform any API request.
+     * Return this sticker's parent {@link RestGuild}. This method does not perform any API request.
      *
-     * @return the parent {@code RestGuild} of this guild emoji.
+     * @return the parent {@code RestGuild} of this guild sticker.
      */
     public RestGuild guild() {
         return RestGuild.create(restClient, guildId);
     }
 
     /**
-     * Retrieve this guild emoji's data upon subscription.
+     * Retrieve this guild sticker's data upon subscription.
      *
      * @return a {@link Mono} where, upon successful completion, emits the {@link EmojiData} belonging to this entity.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<EmojiData> getData() {
-        return restClient.getEmojiService().getGuildEmoji(guildId, id);
+    public Mono<StickerData> getData() {
+        return restClient.getStickerService().getGuildSticker(guildId, id);
     }
 
     /**
@@ -116,15 +99,15 @@ public class RestEmoji {
      * is emitted through the {@code Mono}.
      */
     public Mono<Void> delete(@Nullable String reason) {
-        return restClient.getEmojiService().deleteGuildEmoji(guildId, id, reason);
+        return restClient.getStickerService().deleteGuildSticker(guildId, id, reason);
     }
 
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final RestEmoji restEmoji = (RestEmoji) o;
-        return guildId == restEmoji.guildId && id == restEmoji.id;
+        final RestSticker restSticker = (RestSticker) o;
+        return guildId == restSticker.guildId && id == restSticker.id;
     }
 
     @Override
