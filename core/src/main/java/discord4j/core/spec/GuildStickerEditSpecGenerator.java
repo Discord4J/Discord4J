@@ -17,12 +17,9 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.object.entity.GuildSticker;
 import discord4j.discordjson.json.GuildStickerModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
-import reactor.core.CoreSubscriber;
-import reactor.core.publisher.Mono;
 
 @Value.Immutable(singleton = true)
 interface GuildStickerEditSpecGenerator extends AuditSpec<GuildStickerModifyRequest> {
