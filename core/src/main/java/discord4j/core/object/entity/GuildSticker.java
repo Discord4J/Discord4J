@@ -71,7 +71,7 @@ public final class GuildSticker extends Sticker {
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link GuildEmoji}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<GuildSticker> edit(GuildEmojiEditSpec spec) {
+    public Mono<GuildSticker> edit(GuildStickerEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> gateway.getRestClient().getStickerService()

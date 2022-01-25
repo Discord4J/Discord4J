@@ -471,14 +471,14 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the stickers sent with the message.
+     * Gets the partial stickers sent with the message.
      *
-     * @return The stickers sent with the message.
+     * @return The partial stickers sent with the message.
      */
     @Experimental
     public List<PartialSticker> getStickersItems() {
         return data.stickerItems().toOptional()
-            .map(reactions -> reactions.stream()
+            .map(partialStickers -> partialStickers.stream()
                 .map(data -> new PartialSticker(gateway, data))
                 .collect(Collectors.toList()))
             .orElse(Collections.emptyList());
