@@ -184,6 +184,31 @@ public class Interaction implements DiscordObject {
                 .map(data -> Snowflake.of(data.id()));
     }
 
+    /**
+     * Gets the invoking user's client locale.
+     * <br>
+     * This is not present on {@code PING} interactions and will therefore default to {@code en-US}
+     *
+     * @see <a href="https://discord.com/developers/docs/reference#locales">Discord Locales</a>
+     * @return The invoking user's client locale.
+     */
+    public String getUserLocale() {
+        return data.locale().toOptional().orElse("en-US");
+    }
+
+    /**
+     * Gets the guild's locale if the interaction was invoked from a guild.
+     * Defaults to {@code en-US} for non-community guilds.
+     * <br>
+     * This is not present on {@code PING} interactions
+     *
+     * @see <a href="https://discord.com/developers/docs/reference#locales">Discord Locales</a>
+     * @return The locale of the guild where the interaction was invoked, otherwise {@link Optional#empty()}
+     */
+    public Optional<String> getGuildLocale() {
+        return data.guildLocale().toOptional();
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
