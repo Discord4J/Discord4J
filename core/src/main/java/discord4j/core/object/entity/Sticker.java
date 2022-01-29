@@ -43,8 +43,8 @@ public class Sticker extends PartialSticker {
      *
      * @return The ID of the pack the sticker is from.
      */
-    public Snowflake getPackId() {
-        return Snowflake.of(getData().packId());
+    public Optional<Snowflake> getPackId() {
+        return getData().packId().toOptional().map(Snowflake::of);
     }
 
     /**
