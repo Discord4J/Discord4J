@@ -50,6 +50,11 @@ public class FallbackEntityRetriever implements EntityRetriever {
     }
 
     @Override
+    public Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId) {
+        return first.getGuildStickerById(guildId, stickerId).switchIfEmpty(fallback.getGuildStickerById(guildId, stickerId));
+    }
+
+    @Override
     public Mono<GuildEmoji> getGuildEmojiById(Snowflake guildId, Snowflake emojiId) {
         return first.getGuildEmojiById(guildId, emojiId).switchIfEmpty(fallback.getGuildEmojiById(guildId, emojiId));
     }

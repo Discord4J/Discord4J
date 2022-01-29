@@ -53,6 +53,12 @@ public class StoreEntityRetriever implements EntityRetriever {
     }
 
     @Override
+    public Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId) {
+        return Mono.from(store.execute(ReadActions.getStickerById(guildId.asLong(), stickerId.asLong())))
+            .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
+    }
+
+    @Override
     public Mono<GuildEmoji> getGuildEmojiById(Snowflake guildId, Snowflake emojiId) {
         return Mono.from(store.execute(ReadActions.getEmojiById(guildId.asLong(), emojiId.asLong())))
                 .map(data -> new GuildEmoji(gateway, data, guildId.asLong()));
