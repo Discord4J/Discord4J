@@ -1129,6 +1129,21 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create a sticker.
+     *
+     * @param spec an immutable object that specifies how to create the sticker
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link GuildSticker}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildSticker> createSticker(GuildStickerCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> gateway.getRestClient().getStickerService()
+                    .createGuildSticker(getId().asLong(), spec.asRequest(), spec.reason()))
+            .map(data -> new GuildSticker(gateway, data, getId().asLong()));
+    }
+
+    /**
      * Requests to create a template based on this guild.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link LegacyGuildTemplateCreateSpec} to be operated on.
