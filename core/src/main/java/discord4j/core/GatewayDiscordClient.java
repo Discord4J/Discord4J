@@ -702,6 +702,11 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     @Override
+    public Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId) {
+        return entityRetriever.getGuildStickerById(guildId, stickerId);
+    }
+
+    @Override
     public Mono<GuildEmoji> getGuildEmojiById(Snowflake guildId, Snowflake emojiId) {
         return entityRetriever.getGuildEmojiById(guildId, emojiId);
     }

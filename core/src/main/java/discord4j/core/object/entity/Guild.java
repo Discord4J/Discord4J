@@ -468,6 +468,40 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to retrieve the guild's emojis, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the emojis
+     * @return A {@link Flux} that continually emits guild's {@link GuildEmoji emojis}. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<GuildSticker> getStickers(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildStickers(getId());
+    }
+
+    /**
+     * Requests to retrieve the guild emoji as represented by the supplied ID.
+     *
+     * @param id The ID of the guild emoji.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
+     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildSticker> getGuildStickerById(final Snowflake id) {
+        return gateway.getGuildStickerById(getId(), id);
+    }
+
+    /**
+     * Requests to retrieve the guild emoji as represented by the supplied ID, using the given retrieval strategy.
+     *
+     * @param id The ID of the guild emoji.
+     * @param retrievalStrategy the strategy to use to get the guild emoji
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
+     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildSticker> getGuildStickerById(final Snowflake id, EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildStickerById(getId(), id);
+    }
+
+    /**
      * Requests to retrieve the guild's emojis.
      *
      * @return A {@link Flux} that continually emits guild's {@link GuildEmoji emojis}. If an error is received, it is

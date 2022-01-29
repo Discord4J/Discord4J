@@ -87,6 +87,17 @@ public class GatewayActions {
     }
 
     /**
+     * Creates an action to execute when a {@link GuildStickersUpdate} is received from the gateway.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a new {@link GuildStickersUpdateAction}
+     */
+    public static GuildStickersUpdateAction guildStickersUpdate(int shardIndex, GuildStickersUpdate dispatch) {
+        return new GuildStickersUpdateAction(shardIndex, dispatch);
+    }
+
+    /**
      * Creates an action to execute when a {@link GuildEmojisUpdate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from

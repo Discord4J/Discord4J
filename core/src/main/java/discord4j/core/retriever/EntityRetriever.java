@@ -54,6 +54,16 @@ public interface EntityRetriever {
     Mono<Guild> getGuildById(Snowflake guildId);
 
     /**
+     * Requests to retrieve the guild sticker represented by the supplied IDs.
+     *
+     * @param guildId The ID of the guild.
+     * @param stickerId The ID of the sticker.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildSticker} as represented by the
+     *         supplied IDs. If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId);
+
+    /**
      * Requests to retrieve the guild emoji represented by the supplied IDs.
      *
      * @param guildId The ID of the guild.

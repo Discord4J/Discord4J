@@ -79,6 +79,16 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     }
 
     @Override
+    public Mono<Long> countStickers() {
+        return stateHolder.getGuildStickerStore().count();
+    }
+
+    @Override
+    public Mono<Long> countStickersInGuild(long guildId) {
+        return getStickersInGuild(guildId).count();
+    }
+
+    @Override
     public Mono<Long> countEmojis() {
         return stateHolder.getGuildEmojiStore().count();
     }
@@ -174,6 +184,23 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     @Override
     public Mono<ChannelData> getChannelById(long channelId) {
         return stateHolder.getChannelStore().find(channelId);
+    }
+
+    @Override
+    public Flux<StickerData> getStickers() {
+        return stateHolder.getGuildStickerStore().values();
+    }
+
+    @Override
+    public Flux<StickerData> getStickersInGuild(long guildId) {
+        return stateHolder.getGuildStore().find(guildId)
+            .flatMapMany(guild -> Flux.fromStream(guild.emojis().stream().map(Snowflake::asLong)))
+            .flatMap(id -> stateHolder.getGuildStickerStore().find(id));
+    }
+
+    @Override
+    public Mono<StickerData> getStickerById(long guildId, long stickerId) {
+        return stateHolder.getGuildStickerStore().find(stickerId);
     }
 
     @Override
@@ -597,6 +624,11 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                             .thenReturn(guild);
                 })
                 .flatMap(deleteGuild::thenReturn);
+    }
+
+    @Override
+    public Mono<Set<StickerData>> onGuildStickersUpdate(int shardIndex, GuildStickersUpdate dispatch) {
+        return null;
     }
 
     @Override
