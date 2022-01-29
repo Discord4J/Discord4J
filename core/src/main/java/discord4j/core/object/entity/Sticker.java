@@ -39,18 +39,18 @@ public class Sticker extends PartialSticker {
     }
 
     /**
-     * Gets the ID of the pack the sticker is from.
+     * Gets the ID of the pack the sticker is from, if present.
      *
-     * @return The ID of the pack the sticker is from.
+     * @return The ID of the pack the sticker is from, if present.
      */
     public Optional<Snowflake> getPackId() {
         return getData().packId().toOptional().map(Snowflake::of);
     }
 
     /**
-     * Gets the description of the sticker.
+     * Gets the description of the sticker, if present.
      *
-     * @return The description of the sticker;
+     * @return The description of the sticker, if present.
      */
     public Optional<String> getDescription() {
         return getData().description();
