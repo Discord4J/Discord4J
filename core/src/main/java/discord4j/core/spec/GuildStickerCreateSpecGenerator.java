@@ -17,45 +17,46 @@
 
 package discord4j.core.spec;
 
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildSticker;
-import discord4j.discordjson.json.GuildStickerModifyRequest;
-import discord4j.discordjson.possible.Possible;
+import discord4j.discordjson.json.GuildStickerCreateRequest;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-@Value.Immutable(singleton = true)
-interface GuildStickerEditSpecGenerator extends AuditSpec<GuildStickerModifyRequest> {
+@Value.Immutable
+interface GuildStickerCreateSpecGenerator extends AuditSpec<GuildStickerCreateRequest> {
 
     String name();
 
-    Possible<String> description();
+    String description();
 
     String tags();
 
+    String file();
+
     @Override
-    default GuildStickerModifyRequest asRequest() {
-        return GuildStickerModifyRequest.builder()
+    default GuildStickerCreateRequest asRequest() {
+        return GuildStickerCreateRequest.builder()
                 .name(name())
                 .description(description())
                 .tags(tags())
+                .file(file())
                 .build();
     }
-
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
-abstract class GuildStickerEditMonoGenerator extends Mono<GuildSticker> implements GuildStickerEditSpecGenerator {
+abstract class GuildStickerCreateMonoGenerator extends Mono<GuildSticker> implements GuildStickerCreateSpecGenerator {
 
-    abstract GuildSticker sticker();
+    abstract Guild guild();
 
     @Override
     public void subscribe(CoreSubscriber<? super GuildSticker> actual) {
-        sticker().edit(GuildStickerEditSpec.copyOf(this)).subscribe(actual);
+        guild().createSticker(GuildStickerCreateSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override
     public abstract String toString();
 }
-
