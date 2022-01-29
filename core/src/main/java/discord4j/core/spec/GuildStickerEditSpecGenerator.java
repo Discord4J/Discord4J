@@ -58,4 +58,3 @@ abstract class GuildStickerEditMonoGenerator extends Mono<GuildSticker> implemen
     @Override
     public abstract String toString();
 }
-

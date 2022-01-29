@@ -3,6 +3,8 @@ package discord4j.core.object.entity;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.core.spec.GuildStickerEditMono;
+import discord4j.core.spec.GuildStickerEditSpec;
 import discord4j.discordjson.json.StickerData;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -57,7 +59,7 @@ public final class GuildSticker extends Sticker {
      * Requests to edit this guild sticker. Properties specifying how to edit this emoji can be set via the {@code
      * withXxx} methods of the returned {@link GuildStickerEditMono}.
      *
-     * @return A {@link GuildStickerEditMono} where, upon successful completion, emits the edited {@link GuildEmoji}. If
+     * @return A {@link GuildStickerEditMono} where, upon successful completion, emits the edited {@link GuildSticker}. If
      * an error is received, it is emitted through the {@code GuildStickerEditMono}.
      */
     public GuildStickerEditMono edit() {
