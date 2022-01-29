@@ -27,11 +27,11 @@ import reactor.core.publisher.Mono;
 @Value.Immutable(singleton = true)
 interface GuildStickerEditSpecGenerator extends AuditSpec<GuildStickerModifyRequest> {
 
-    String name();
+    Possible<String> name();
 
     Possible<String> description();
 
-    String tags();
+    Possible<String> tags();
 
     @Override
     default GuildStickerModifyRequest asRequest() {
