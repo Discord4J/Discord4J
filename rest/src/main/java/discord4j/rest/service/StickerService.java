@@ -50,8 +50,8 @@ public class StickerService extends RestService {
             .bodyToMono(StickerData.class);
     }
 
-    public Mono<StickerData> modifyGuildSticker(long guildId, GuildStickerModifyRequest request, @Nullable String reason) {
-        return Routes.GUILD_STICKER_MODIFY.newRequest(guildId)
+    public Mono<StickerData> modifyGuildSticker(long guildId, long stickerId, GuildStickerModifyRequest request, @Nullable String reason) {
+        return Routes.GUILD_STICKER_MODIFY.newRequest(guildId, stickerId)
             .body(request)
             .optionalHeader("X-Audit-Log-Reason", reason)
             .exchange(getRouter())
