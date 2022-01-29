@@ -52,7 +52,7 @@ public class Sticker extends PartialSticker {
      *
      * @return The description of the sticker;
      */
-    public String getDescription() {
+    public Optional<String> getDescription() {
         return getData().description();
     }
 
