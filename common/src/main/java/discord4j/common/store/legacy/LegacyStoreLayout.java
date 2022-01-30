@@ -194,7 +194,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     @Override
     public Flux<StickerData> getStickersInGuild(long guildId) {
         return stateHolder.getGuildStore().find(guildId)
-            .flatMapMany(guild -> Flux.fromStream(guild.emojis().stream().map(Snowflake::asLong)))
+            .flatMapMany(guild -> Flux.fromStream(guild.stickers().toOptional().orElse(Collections.emptyList()).stream().map(Snowflake::asLong)))
             .flatMap(id -> stateHolder.getGuildStickerStore().find(id));
     }
 
@@ -628,7 +628,31 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
     @Override
     public Mono<Set<StickerData>> onGuildStickersUpdate(int shardIndex, GuildStickersUpdate dispatch) {
-        return null;
+        long guildId = Snowflake.asLong(dispatch.guildId());
+
+        Mono<Void> updateGuildBean = stateHolder.getGuildStore()
+            .find(guildId)
+            .map(guild -> GuildData.builder()
+                .from(guild)
+                .emojis(dispatch.stickers().stream()
+                    .map(StickerData::id)
+                    .collect(Collectors.toList()))
+                .build())
+            .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
+            .doOnSubscribe(s -> log.trace("GuildStickersUpdate doOnSubscribe {}", guildId))
+            .doFinally(s -> log.trace("GuildStickersUpdate doFinally {}: {}", guildId, s));
+
+        Mono<Void> saveStickers = stateHolder.getGuildStickerStore()
+            .saveWithLong(Flux.fromIterable(dispatch.stickers())
+                .map(sticker -> LongObjTuple2.of(Snowflake.asLong(sticker.id()), sticker)));
+
+        return stateHolder.getGuildStore()
+            .find(guildId)
+            .flatMapMany(guild -> updateGuildBean
+                .and(saveStickers)
+                .thenMany(Flux.fromIterable(guild.stickers().toOptional().orElse(Collections.emptyList())).map(Snowflake::asLong)
+                    .flatMap(id -> stateHolder.getGuildStickerStore().find(id))))
+            .collect(Collectors.toSet());
     }
 
     @Override
