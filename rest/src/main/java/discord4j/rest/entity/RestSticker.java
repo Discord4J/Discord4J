@@ -1,8 +1,7 @@
 package discord4j.rest.entity;
 
 import discord4j.common.util.Snowflake;
-import discord4j.discordjson.json.EmojiData;
-import discord4j.discordjson.json.GuildEmojiModifyRequest;
+import discord4j.discordjson.json.GuildStickerModifyRequest;
 import discord4j.discordjson.json.StickerData;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.Permission;
@@ -71,7 +70,7 @@ public class RestSticker {
     /**
      * Retrieve this guild sticker's data upon subscription.
      *
-     * @return a {@link Mono} where, upon successful completion, emits the {@link EmojiData} belonging to this entity.
+     * @return a {@link Mono} where, upon successful completion, emits the {@link StickerData} belonging to this entity.
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<StickerData> getData() {
@@ -79,20 +78,20 @@ public class RestSticker {
     }
 
     /**
-     * Modify this guild emoji. Requires the {@link Permission#MANAGE_EMOJIS} permission. Returns the updated emoji
+     * Modify this guild sticker. Requires the {@link Permission#MANAGE_EMOJIS_AND_STICKERS} permission. Returns the updated sticker
      * object on success.
      *
-     * @param request the guild emoji modify request
+     * @param request the guild sticker modify request
      * @param reason an optional reason for the audit log
-     * @return a {@link Mono} where, upon subscription, emits the updated {@link EmojiData} on success. If an error
+     * @return a {@link Mono} where, upon subscription, emits the updated {@link StickerData} on success. If an error
      * is received, it is emitted through the {@code Mono}.
      */
-    public Mono<EmojiData> modify(GuildEmojiModifyRequest request, @Nullable String reason) {
-        return restClient.getEmojiService().modifyGuildEmoji(guildId, id, request, reason);
+    public Mono<StickerData> modify(GuildStickerModifyRequest request, @Nullable String reason) {
+        return restClient.getStickerService().modifyGuildSticker(guildId, id, request, reason);
     }
 
     /**
-     * Delete this guild emoji. Requires the {@link Permission#MANAGE_EMOJIS} permission. Returns empty on success.
+     * Delete this guild sticker. Requires the {@link Permission#MANAGE_EMOJIS_AND_STICKERS} permission. Returns empty on success.
      *
      * @param reason an optional reason for the audit log
      * @return a {@link Mono} where, upon subscription, emits a complete signal on success. If an error is received, it

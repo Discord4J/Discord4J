@@ -449,7 +449,7 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the sticker's emojis.
+     * Requests to retrieve the guild's stickers.
      *
      * @return A {@link Flux} that continually emits guild's {@link GuildSticker stickers}. If an error is received, it is
      * emitted through the {@code Flux}.
@@ -479,10 +479,10 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the guild emoji as represented by the supplied ID.
+     * Requests to retrieve the guild sticker as represented by the supplied ID.
      *
-     * @param id The ID of the guild emoji.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
+     * @param id The ID of the guild sticker.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildSticker} as represented by the
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildSticker> getGuildStickerById(final Snowflake id) {
@@ -490,11 +490,11 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the guild emoji as represented by the supplied ID, using the given retrieval strategy.
+     * Requests to retrieve the guild sticker as represented by the supplied ID, using the given retrieval strategy.
      *
-     * @param id The ID of the guild emoji.
-     * @param retrievalStrategy the strategy to use to get the guild emoji
-     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
+     * @param id The ID of the guild sticker.
+     * @param retrievalStrategy the strategy to use to get the guild sticker
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildSticker} as represented by the
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildSticker> getGuildStickerById(final Snowflake id, EntityRetrievalStrategy retrievalStrategy) {
