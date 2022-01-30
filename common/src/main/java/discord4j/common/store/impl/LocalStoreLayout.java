@@ -788,7 +788,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     private void saveSticker(long guildId, StickerData sticker) {
         long stickerId = sticker.id().asLong();
-        computeGuildContent(guildId).emojiIds.add(stickerId);
+        computeGuildContent(guildId).stickerIds.add(stickerId);
         ifNonNullDo(guilds.get(guildId), guild -> guild.getStickers().add(Id.of(stickerId)));
         stickers.put(stickerId, ImmutableStickerData.copyOf(sticker));
     }

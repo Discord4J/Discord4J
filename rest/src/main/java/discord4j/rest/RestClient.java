@@ -188,7 +188,7 @@ public class RestClient {
      *
      * @param guildId The ID of the guild.
      * @param data The data of the sticker.
-     * @return A {@link RestEmoji} as represented by the supplied parameters.
+     * @return A {@link RestSticker} as represented by the supplied parameters.
      */
     public RestSticker restGuildSticker(Snowflake guildId, StickerData data) {
         return RestSticker.create(this, guildId,

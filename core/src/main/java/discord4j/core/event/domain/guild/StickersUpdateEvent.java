@@ -59,7 +59,7 @@ public class StickersUpdateEvent extends GuildEvent {
     }
 
     /**
-     * Requests to retrieve the {@link Guild} whose emojis have been updated.
+     * Requests to retrieve the {@link Guild} whose stickers have been updated.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved.
      * If an error is received, it is emitted through the {@code Mono}.
@@ -73,13 +73,13 @@ public class StickersUpdateEvent extends GuildEvent {
      *
      * @return A list of ALL stickers of the {@link Guild}.
      */
-    public Set<GuildSticker> getEmojis() {
+    public Set<GuildSticker> getStickers() {
         return stickers;
     }
 
     /**
      * Gets a list of ALL old stickers of the {@link Guild}, if present.
-     * This may not be available if {@code GuildEmojis} are not stored.
+     * This may not be available if {@code GuildSticker} are not stored.
      *
      * @return A list of ALL old stickers of the {@link Guild}.
      */

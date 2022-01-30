@@ -468,10 +468,10 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the guild's emojis, using the given retrieval strategy.
+     * Requests to retrieve the guild's stickers, using the given retrieval strategy.
      *
-     * @param retrievalStrategy the strategy to use to get the emojis
-     * @return A {@link Flux} that continually emits guild's {@link GuildEmoji emojis}. If an error is received, it is
+     * @param retrievalStrategy the strategy to use to get the stickers
+     * @return A {@link Flux} that continually emits guild's {@link GuildSticker stickers}. If an error is received, it is
      * emitted through the {@code Flux}.
      */
     public Flux<GuildSticker> getStickers(EntityRetrievalStrategy retrievalStrategy) {

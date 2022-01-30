@@ -18,7 +18,6 @@
 package discord4j.common.store.action.read;
 
 import discord4j.common.store.api.StoreAction;
-import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.StickerData;
 
 public class GetStickerByIdAction implements StoreAction<StickerData> {
