@@ -1,5 +1,5 @@
 /*
- * This file is part of Discord4J.
+ *  This file is part of Discord4J.
  *
  * Discord4J is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -20,13 +20,17 @@ package discord4j.core.event.domain.interaction;
 import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.command.ApplicationCommand;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
+import discord4j.core.object.component.MessageComponent;
 import discord4j.gateway.ShardInfo;
 
+import java.util.Collections;
+import java.util.List;
+
+
 /**
- * Dispatched when a user uses an Application Command.
+ * Dispatched when a user has pressed submit on a modal presented to them earlier
  * <p>
  * You are required to respond to this interaction within a three-second window by using one of the following:
  * <ul>
@@ -34,54 +38,55 @@ import discord4j.gateway.ShardInfo;
  *     <li>{@link #deferReply()} to acknowledge without a message, typically to perform a background task and give the
  *     user a loading state until it is edited</li>
  * </ul>
- * See {@link InteractionCreateEvent} for more details about valid operations.
+ * After the initial response is complete, you can work with the interaction using the following methods:
+ * <ul>
+ *     <li>{@link #editReply()} to edit the initial response</li>
+ *     <li>{@link #getReply()} to fetch the initial response</li>
+ *     <li>{@link #deleteReply()} to delete the initial response</li>
+ * </ul>
+ * You can also work with followup messages using:
+ * <ul>
+ *     <li>{@link #createFollowup()} to create a followup message</li>
+ *     <li>{@link #editFollowup(Snowflake)} to update a followup message, given its ID</li>
+ *     <li>{@link #deleteFollowup(Snowflake)} to delete a followup message, given its ID</li>
+ * </ul>
  * <p>
  * This is not directly dispatched by Discord, but is a utility specialization of {@link InteractionCreateEvent}.
+ *
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#interaction-create">Interaction Create</a>
  * <p>
  * <img src="doc-files/InteractionCreateEvent.png">
  */
 @Experimental
-public class ApplicationCommandInteractionEvent extends ModalSupportedInteractionEvent {
+public class ModalSubmitInteractionEvent extends DeferrableInteractionEvent {
 
-    public ApplicationCommandInteractionEvent(GatewayDiscordClient gateway, ShardInfo shardInfo,
-                                              Interaction interaction) {
+    public ModalSubmitInteractionEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo, interaction);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Convenience methods forwarding to ApplicationCommandInteraction methods.
-    // We can assume these properties are present, because this is an application command interaction.
+    // We can assume these properties are present, because this is a modal submit interaction.
 
     /**
-     * Gets the ID of the invoked command.
+     * Gets the developer defined custom ID of this modal
      *
-     * @return The ID of the invoked command.
+     * @return The custom ID of this modal
      */
-    public Snowflake getCommandId() {
+    public String getCustomId() {
         return getInteraction().getCommandInteraction()
-                .flatMap(ApplicationCommandInteraction::getId)
-                .orElseThrow(IllegalStateException::new); // should always be present for application commands
+                .flatMap(ApplicationCommandInteraction::getCustomId)
+                .orElseThrow(IllegalStateException::new); // should always be present for modal submits
     }
 
     /**
-     * Gets the name of the invoked command.
+     * Gets the components from the modal
      *
-     * @return The name of the invoked command.
+     * @return The components from the modal
      */
-    public String getCommandName() {
+    public List<MessageComponent> getComponents() {
         return getInteraction().getCommandInteraction()
-                .flatMap(ApplicationCommandInteraction::getName)
-                .orElseThrow(IllegalStateException::new); // should always be present for application commands
-    }
-
-    /**
-     * Gets the type of the invoked command.
-     *
-     * @return The type of the invoked command.
-     */
-    public ApplicationCommand.Type getCommandType() {
-        return getInteraction().getCommandInteraction()
-                .flatMap(ApplicationCommandInteraction::getApplicationCommandType)
-                .orElseThrow(IllegalStateException::new); // should always be present for application commands
+                .map(ApplicationCommandInteraction::getComponents)
+                .orElse(Collections.emptyList()); // the list should never actually be empty, but just in case
     }
 }

@@ -70,7 +70,8 @@ public class MessageComponent {
         UNKNOWN(-1),
         ACTION_ROW(1),
         BUTTON(2),
-        SELECT_MENU(3);
+        SELECT_MENU(3),
+        TEXT_INPUT(4);
 
         private final int value;
 
@@ -87,6 +88,7 @@ public class MessageComponent {
                 case 1: return ACTION_ROW;
                 case 2: return BUTTON;
                 case 3: return SELECT_MENU;
+                case 4: return TEXT_INPUT;
                 default: return UNKNOWN;
             }
         }
