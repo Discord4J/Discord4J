@@ -23,6 +23,7 @@ import discord4j.core.object.command.Interaction;
 import discord4j.core.object.component.SelectMenu;
 import discord4j.gateway.ShardInfo;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -36,6 +37,7 @@ import java.util.List;
  *     <li>{@link #edit()} to modify the message the component is on</li>
  *     <li>{@link #deferEdit()} to acknowledge without a message, will not display a loading state and allows later
  *     modifications to the message the component is on</li>
+ *     <li>{@link #presentModal(String, String, Collection)} to pop a modal for the user to interact with</li>
  * </ul>
  * See {@link InteractionCreateEvent} for more details about valid operations.
  * <p>

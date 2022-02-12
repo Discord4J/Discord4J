@@ -20,28 +20,25 @@ package discord4j.core;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.*;
 import discord4j.core.object.command.ApplicationCommand;
-import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.component.Button;
-import discord4j.core.object.component.LayoutComponent;
-import discord4j.core.object.component.SelectMenu;
+import discord4j.core.object.component.*;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.core.support.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Example to showcase how {@link DeferrableInteractionEvent#deferReply()}, {@link DeferrableInteractionEvent#reply()},
- * {@link ComponentInteractionEvent#deferEdit()} and {@link ComponentInteractionEvent#edit()} work for chat input, user,
- * message commands and component interactions.
+ * {@link ComponentInteractionEvent#deferEdit()}, {@link ComponentInteractionEvent#edit()} and
+ * {@link ComponentInteractionEvent#presentModal(String, String, Collection)} work.
+ * <p>
+ * Creates an /example command in a given guildId environment variable and two context menu commands (user and message).
+ * The chat input command allows to configure how to react on its created button press, including presenting a modal.
  */
 public class ExampleInteractions {
 
@@ -54,6 +51,8 @@ public class ExampleInteractions {
     public static final String REPLY = "reply";
     public static final String DEFER_EDIT = "deferEdit";
     public static final String EDIT = "edit";
+    public static final String MODAL = "modal";
+    public static final String MODAL_CUSTOM_ID = "modal-step";
     public static final String ACTION_BUTTON = "action";
     public static final String USER_COMMAND_NAME = "Show user info";
     public static final String MESSAGE_COMMAND_NAME = "Approve";
@@ -92,8 +91,10 @@ public class ExampleInteractions {
                                     .flatMap(user -> event.reply()
                                             .withEmbeds(EmbedCreateSpec.create()
                                                     .withFields(
-                                                            EmbedCreateFields.Field.of("Name", user.getUsername(), false),
-                                                            EmbedCreateFields.Field.of("Avatar URL", user.getAvatarUrl(), false))
+                                                            EmbedCreateFields.Field.of("Name", user.getUsername(),
+                                                                    false),
+                                                            EmbedCreateFields.Field.of("Avatar URL",
+                                                                    user.getAvatarUrl(), false))
                                                     .withImage(user.getAvatarUrl())));
                         }
                         return Mono.empty();
@@ -149,15 +150,56 @@ public class ExampleInteractions {
                                     return event.edit("`edit` immediately disables the components from the " +
                                                     "original message")
                                             .withComponents(getComponents(true));
+                                case MODAL:
+                                    return event.presentModal("Type deferReply, reply, deferEdit or edit",
+                                            MODAL_CUSTOM_ID,
+                                            getModalComponents());
                             }
                         }
                         return Mono.empty();
                     });
 
+                    Publisher<?> onModal = client.on(ModalSubmitInteractionEvent.class, event -> {
+                        if (MODAL_CUSTOM_ID.equals(event.getCustomId())) {
+                            for (TextInput input : event.getComponents(TextInput.class)) {
+                                if (REPLY_MODE_SELECT.equals(input.getCustomId())) {
+                                    switch (input.getValue().orElse("")) {
+                                        case DEFER_REPLY:
+                                            return event.deferReply()
+                                                    .then(Mono.delay(Duration.ofSeconds(2)))
+                                                    .then(event.editReply("`deferReply` shows a loading state and " +
+                                                            "`editReply` gives content to a **new** message after two" +
+                                                            " seconds"))
+                                                    .then();
+                                        case REPLY:
+                                            return event.reply("`reply` immediately displays a **new** message");
+                                        case DEFER_EDIT:
+                                            return event.deferEdit()
+                                                    .then(Mono.delay(Duration.ofSeconds(2)))
+                                                    .then(event.editReply("`deferEdit` does not show a loading state " +
+                                                                    "and `editReply` is used to disable the " +
+                                                                    "components from " +
+                                                                    "the original message after two seconds")
+                                                            .withComponentsOrNull(getComponents(true)))
+                                                    .then();
+                                        case EDIT:
+                                            return event.edit("`edit` immediately disables the components from the " +
+                                                            "original message")
+                                                    .withComponents(getComponents(true));
+                                    }
+                                }
+                            }
+                        }
+                        return event.reply("No valid type input: must be one of: " +
+                                "`deferReply`, `reply`, `deferEdit` or `edit`");
+                    });
+
                     // register the command and then subscribe to multiple listeners, using Mono.when
-                    return GuildCommandRegistrar.create(client.getRestClient(), guildId, commands)
-                            .registerCommands()
-                            .thenMany(Mono.when(onChatInput, onUser, onMessage, onSelect, onButton));
+                    return client.getRestClient().getApplicationId()
+                            .flatMap(appId -> client.getRestClient().getApplicationService()
+                                    .bulkOverwriteGuildApplicationCommand(appId, guildId, commands)
+                                    .then())
+                            .thenMany(Mono.when(onChatInput, onUser, onMessage, onSelect, onButton, onModal));
                 })
                 .block();
     }
@@ -167,9 +209,15 @@ public class ExampleInteractions {
                                 SelectMenu.Option.ofDefault("Deferred reply", DEFER_REPLY),
                                 SelectMenu.Option.of("Reply", REPLY),
                                 SelectMenu.Option.of("Deferred edit", DEFER_EDIT),
-                                SelectMenu.Option.of("Edit", EDIT))
+                                SelectMenu.Option.of("Edit", EDIT),
+                                SelectMenu.Option.of("Modal", MODAL))
                         .withMaxValues(1)
                         .disabled(disabled)),
                 ActionRow.of(Button.primary(ACTION_BUTTON, "Click me!").disabled(disabled)));
+    }
+
+    private static List<LayoutComponent> getModalComponents() {
+        return Collections.singletonList(ActionRow.of(TextInput.small(
+                REPLY_MODE_SELECT, "What should happen next?", 4, 10).required()));
     }
 }

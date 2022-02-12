@@ -221,7 +221,8 @@ public class Interaction implements DiscordObject {
         PING(1),
         APPLICATION_COMMAND(2),
         MESSAGE_COMPONENT(3),
-        APPLICATION_COMMAND_AUTOCOMPLETE(4);
+        APPLICATION_COMMAND_AUTOCOMPLETE(4),
+        MODAL_SUBMIT(5);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -257,6 +258,7 @@ public class Interaction implements DiscordObject {
                 case 2: return APPLICATION_COMMAND;
                 case 3: return MESSAGE_COMPONENT;
                 case 4: return APPLICATION_COMMAND_AUTOCOMPLETE;
+                case 5: return MODAL_SUBMIT;
                 default: return UNKNOWN;
             }
         }

@@ -22,11 +22,17 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.gateway.ShardInfo;
+import reactor.core.publisher.Mono;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -37,6 +43,9 @@ import java.util.List;
  *     <li>{@link #reply()} to directly include a message</li>
  *     <li>{@link #deferReply()} to acknowledge without a message, typically to perform a background task and give the
  *     user a loading state until it is edited</li>
+ *     <li>{@link #edit()} to modify the message that presented the modal</li>
+ *     <li>{@link #deferEdit()} to acknowledge without a message, will not display a loading state and allows later
+ *     modifications to the message that presented the modal</li>
  * </ul>
  * After the initial response is complete, you can work with the interaction using the following methods:
  * <ul>
@@ -58,7 +67,7 @@ import java.util.List;
  * <img src="doc-files/InteractionCreateEvent.png">
  */
 @Experimental
-public class ModalSubmitInteractionEvent extends DeferrableInteractionEvent {
+public class ModalSubmitInteractionEvent extends ComponentInteractionEvent {
 
     public ModalSubmitInteractionEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo, interaction);
@@ -88,5 +97,35 @@ public class ModalSubmitInteractionEvent extends DeferrableInteractionEvent {
         return getInteraction().getCommandInteraction()
                 .map(ApplicationCommandInteraction::getComponents)
                 .orElse(Collections.emptyList()); // the list should never actually be empty, but just in case
+    }
+
+    /**
+     * Gets the components from the modal that match the given component type.
+     *
+     * @param componentType the modal component type to return
+     * @return The components from the modal
+     */
+    public <T extends MessageComponent> List<T> getComponents(Class<T> componentType) {
+        return getComponents()
+                .stream()
+                .flatMap(it -> {
+                    if (it instanceof ActionRow) {
+                        ActionRow row = (ActionRow) it;
+                        return row.getChildren().stream();
+                    }
+                    return Stream.empty();
+                })
+                .flatMap(it -> {
+                    if (componentType.isAssignableFrom(it.getClass())) {
+                        return Stream.of(componentType.cast(it));
+                    }
+                    return Stream.empty();
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Mono<Void> presentModal(String title, String customId, Collection<LayoutComponent> components) {
+        return Mono.error(new UnsupportedOperationException("Modal submit interactions cannot present other modals"));
     }
 }
