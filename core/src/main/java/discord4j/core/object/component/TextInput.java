@@ -205,12 +205,12 @@ public class TextInput extends ActionComponent {
     }
 
     /**
-     * Gets whether the text input is required to be filled. Defaults to {@code false}
+     * Gets whether the text input is required to be filled. Defaults to {@code true}
      *
      * @return Whether the text input is required
      */
     public boolean isRequired() {
-        return getData().required().toOptional().orElse(false);
+        return getData().required().toOptional().orElse(true);
     }
 
     /**
