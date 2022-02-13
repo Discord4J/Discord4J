@@ -88,7 +88,7 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      */
     @Deprecated
     public Mono<Void> acknowledge() {
-        return createInteractionResponse(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, null);
+        return createInteractionResponse(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, (InteractionApplicationCommandCallbackData) null);
     }
 
     /**
