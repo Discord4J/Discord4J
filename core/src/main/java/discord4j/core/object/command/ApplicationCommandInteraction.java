@@ -145,9 +145,9 @@ public class ApplicationCommandInteraction implements DiscordObject {
     }
 
     /**
-     * Gets the converted users + roles + channels.
+     * Gets the converted users + roles + channels + attachments.
      *
-     * @return The converted users + roles + channels.
+     * @return The converted users + roles + channels + attachments.
      */
     public Optional<ApplicationCommandInteractionResolved> getResolved() {
         return data.resolved().toOptional()
