@@ -20,6 +20,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.Interaction;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.*;
 import discord4j.core.spec.legacy.LegacyInteractionApplicationCommandCallbackSpec;
@@ -29,8 +30,10 @@ import discord4j.rest.interaction.InteractionResponse;
 import discord4j.rest.util.InteractionResponseType;
 import reactor.core.publisher.Mono;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Dispatched when a user in a guild interacts with an application command or component. It is recommended you use a
@@ -246,6 +249,28 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
 
                     return createInteractionResponse(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, actualSpec.asRequest());
                 });
+    }
+
+    /**
+     * Requests to respond to the interaction by presenting a modal for the user to fill out and submit.
+     * Once the user submits the modal, it will be received as a new {@link ModalSubmitInteractionEvent}.
+     *
+     * @param title The title of the modal
+     * @param customId A developer defined ID for the modal
+     * @param components A collection of components the modal should contain
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
+     * been sent. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> presentModal(String title, String customId, Collection<LayoutComponent> components) {
+        InteractionApplicationCommandCallbackData data = InteractionApplicationCommandCallbackData.builder()
+                .title(Objects.requireNonNull(title))
+                .customId(Objects.requireNonNull(customId))
+                .components(components.stream()
+                        .map(LayoutComponent::getData)
+                        .collect(Collectors.toList())
+                ).build();
+
+        return createInteractionResponse(InteractionResponseType.MODAL, data);
     }
 
     /**

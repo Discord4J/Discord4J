@@ -21,7 +21,6 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.component.Button;
-import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.InteractionApplicationCommandCallbackEditMono;
@@ -38,7 +37,6 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Dispatched when a user interacts with a {@link MessageComponent} the bot has sent.
@@ -258,27 +256,5 @@ public class ComponentInteractionEvent extends DeferrableInteractionEvent {
                 .build();
 
         return createInteractionResponse(InteractionResponseType.DEFERRED_UPDATE_MESSAGE, data);
-    }
-
-    /**
-     * Requests to respond to the interaction by presenting a modal for the user to fill out and submit.
-     * Once the user submits the modal, it will be received as a new {@link ModalSubmitInteractionEvent}.
-     *
-     * @param title The title of the modal
-     * @param customId A developer defined ID for the modal
-     * @param components A collection of components the modal should contain
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
-     * been sent. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Void> presentModal(String title, String customId, Collection<LayoutComponent> components) {
-        InteractionApplicationCommandCallbackData data = InteractionApplicationCommandCallbackData.builder()
-                .title(Objects.requireNonNull(title))
-                .customId(Objects.requireNonNull(customId))
-                .components(components.stream()
-                        .map(LayoutComponent::getData)
-                        .collect(Collectors.toList())
-                ).build();
-
-        return createInteractionResponse(InteractionResponseType.MODAL, data);
     }
 }
