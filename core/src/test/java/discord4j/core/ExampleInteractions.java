@@ -24,6 +24,7 @@ import discord4j.core.object.component.*;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.InteractionPresentModalSpec;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -151,9 +152,11 @@ public class ExampleInteractions {
                                                     "original message")
                                             .withComponents(getComponents(true));
                                 case MODAL:
-                                    return event.presentModal("Type deferReply, reply, deferEdit or edit",
-                                            MODAL_CUSTOM_ID,
-                                            getModalComponents());
+                                    return event.presentModal(InteractionPresentModalSpec.builder()
+                                                    .title("Type deferReply, reply, deferEdit or edit")
+                                                    .customId(MODAL_CUSTOM_ID)
+                                                    .addComponent(getModalComponent())
+                                                    .build());
                             }
                         }
                         return Mono.empty();
@@ -186,6 +189,10 @@ public class ExampleInteractions {
                                             return event.edit("`edit` immediately disables the components from the " +
                                                             "original message")
                                                     .withComponents(getComponents(true));
+                                        case MODAL:
+                                            // this option will fail with an UnsupportedOperationException
+                                            // Modal submit interactions cannot present other modals
+                                            return event.presentModal();
                                     }
                                 }
                             }
@@ -216,8 +223,7 @@ public class ExampleInteractions {
                 ActionRow.of(Button.primary(ACTION_BUTTON, "Click me!").disabled(disabled)));
     }
 
-    private static List<LayoutComponent> getModalComponents() {
-        return Collections.singletonList(ActionRow.of(TextInput.small(
-                REPLY_MODE_SELECT, "What should happen next?", 4, 10).required()));
+    private static LayoutComponent getModalComponent() {
+        return ActionRow.of(TextInput.small(REPLY_MODE_SELECT, "What should happen next?", 4, 10).required());
     }
 }

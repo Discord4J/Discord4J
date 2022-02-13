@@ -33,7 +33,6 @@ import reactor.core.publisher.Mono;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Dispatched when a user in a guild interacts with an application command or component. It is recommended you use a
@@ -253,6 +252,20 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
 
     /**
      * Requests to respond to the interaction by presenting a modal for the user to fill out and submit.
+     * Once the user submits the modal, it will be received as a new {@link ModalSubmitInteractionEvent}. Properties
+     * specifying how to build the modal can be set via the {@code withXxx} methods of the returned
+     * {@link InteractionPresentModalMono}.
+     *
+     * @return A {@link InteractionPresentModalMono} where, upon successful completion, emits nothing; indicating the
+     * interaction response has been sent. If an error is received, it is emitted through the
+     * {@code InteractionPresentModalMono}.
+     */
+    public InteractionPresentModalMono presentModal() {
+        return InteractionPresentModalMono.of(this);
+    }
+
+    /**
+     * Requests to respond to the interaction by presenting a modal for the user to fill out and submit.
      * Once the user submits the modal, it will be received as a new {@link ModalSubmitInteractionEvent}.
      *
      * @param title The title of the modal
@@ -262,15 +275,20 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      * been sent. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> presentModal(String title, String customId, Collection<LayoutComponent> components) {
-        InteractionApplicationCommandCallbackData data = InteractionApplicationCommandCallbackData.builder()
-                .title(Objects.requireNonNull(title))
-                .customId(Objects.requireNonNull(customId))
-                .components(components.stream()
-                        .map(LayoutComponent::getData)
-                        .collect(Collectors.toList())
-                ).build();
+        return presentModal().withTitle(title).withCustomId(customId).withComponents(components);
+    }
 
-        return createInteractionResponse(InteractionResponseType.MODAL, data);
+    /**
+     * Requests to respond to the interaction by presenting a modal for the user to fill out and submit with the given
+     * spec contents. Once the user submits the modal, it will be received as a new {@link ModalSubmitInteractionEvent}.
+     *
+     * @param spec an immutable object that specifies how to present the modal window
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
+     * been sent. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> presentModal(InteractionPresentModalSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> createInteractionResponse(InteractionResponseType.MODAL, spec.asRequest()));
     }
 
     /**

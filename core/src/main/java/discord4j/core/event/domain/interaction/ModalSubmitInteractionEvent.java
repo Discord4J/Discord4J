@@ -23,12 +23,11 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
+import discord4j.core.spec.InteractionPresentModalSpec;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -125,7 +124,7 @@ public class ModalSubmitInteractionEvent extends ComponentInteractionEvent {
     }
 
     @Override
-    public Mono<Void> presentModal(String title, String customId, Collection<LayoutComponent> components) {
+    public Mono<Void> presentModal(InteractionPresentModalSpec spec) {
         return Mono.error(new UnsupportedOperationException("Modal submit interactions cannot present other modals"));
     }
 }

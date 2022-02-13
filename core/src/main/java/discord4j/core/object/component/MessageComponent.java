@@ -38,7 +38,6 @@ public class MessageComponent {
             case ACTION_ROW: return new ActionRow(data);
             case BUTTON: return new Button(data);
             case SELECT_MENU: return new SelectMenu(data);
-            // TODO: consider treating this separately - ModalComponent
             case TEXT_INPUT: return new TextInput(data);
             default: return new MessageComponent(data);
         }
