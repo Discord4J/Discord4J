@@ -164,6 +164,17 @@ public class ApplicationCommandInteraction implements DiscordObject {
                 .map(Snowflake::of);
     }
 
+    /**
+     * Gets the components of the submitted modal.
+     *
+     * @return The components of the submitted modal.
+     */
+    public List<MessageComponent> getComponents() {
+        return data.components().toOptional().orElse(Collections.emptyList()).stream()
+                .map(MessageComponent::fromData)
+                .collect(Collectors.toList());
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
