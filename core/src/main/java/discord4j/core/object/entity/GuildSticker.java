@@ -70,7 +70,7 @@ public final class GuildSticker extends Sticker {
      * Requests to edit this guild sticker.
      *
      * @param spec an immutable object that specifies how to edit this sticker
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guildsticker}. If an error is
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link GuildSticker}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildSticker> edit(GuildStickerEditSpec spec) {
