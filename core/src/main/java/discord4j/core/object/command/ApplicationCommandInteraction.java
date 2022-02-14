@@ -145,9 +145,9 @@ public class ApplicationCommandInteraction implements DiscordObject {
     }
 
     /**
-     * Gets the converted users + roles + channels.
+     * Gets the converted users + roles + channels + attachments.
      *
-     * @return The converted users + roles + channels.
+     * @return The converted users + roles + channels + attachments.
      */
     public Optional<ApplicationCommandInteractionResolved> getResolved() {
         return data.resolved().toOptional()
@@ -162,6 +162,17 @@ public class ApplicationCommandInteraction implements DiscordObject {
     public Optional<Snowflake> getTargetId() {
         return data.targetId().toOptional()
                 .map(Snowflake::of);
+    }
+
+    /**
+     * Gets the components of the submitted modal.
+     *
+     * @return The components of the submitted modal.
+     */
+    public List<MessageComponent> getComponents() {
+        return data.components().toOptional().orElse(Collections.emptyList()).stream()
+                .map(MessageComponent::fromData)
+                .collect(Collectors.toList());
     }
 
     @Override

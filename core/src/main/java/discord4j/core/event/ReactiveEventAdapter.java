@@ -837,6 +837,16 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    /**
+     * Invoked when a user starts a modal supported interaction
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onModalSubmitInteraction(ModalSubmitInteractionEvent event) {
+        return Mono.empty();
+    }
+
     // ================= Integration related events ================= //
 
     /**
@@ -951,6 +961,7 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof ComponentInteractionEvent) compatibleHooks.add(onComponentInteraction((ComponentInteractionEvent) event));
         if (event instanceof AutoCompleteInteractionEvent) compatibleHooks.add(onAutoCompleteInteraction((AutoCompleteInteractionEvent) event));
         if (event instanceof ChatInputAutoCompleteEvent) compatibleHooks.add(onChatInputAutoCompleteInteraction((ChatInputAutoCompleteEvent) event));
+        if (event instanceof ModalSubmitInteractionEvent) compatibleHooks.add(onModalSubmitInteraction((ModalSubmitInteractionEvent) event));
         if (event instanceof DeferrableInteractionEvent) compatibleHooks.add(onDeferrableInteraction((DeferrableInteractionEvent) event));
         if (event instanceof InteractionCreateEvent) compatibleHooks.add(onInteractionCreate((InteractionCreateEvent) event));
         if (event instanceof ApplicationCommandCreateEvent) compatibleHooks.add(onApplicationCommandCreate((ApplicationCommandCreateEvent) event));

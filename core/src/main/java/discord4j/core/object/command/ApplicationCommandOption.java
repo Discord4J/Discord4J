@@ -210,7 +210,8 @@ public class ApplicationCommandOption implements DiscordObject {
         CHANNEL(7),
         ROLE(8),
         MENTIONABLE(9),
-        NUMBER(10);
+        NUMBER(10),
+        ATTACHMENT(11);
 
         /**
          * The underlying value as represented by Discord.
@@ -255,6 +256,7 @@ public class ApplicationCommandOption implements DiscordObject {
                 case 8: return ROLE;
                 case 9: return MENTIONABLE;
                 case 10: return NUMBER;
+                case 11: return ATTACHMENT;
                 default: return UNKNOWN;
             }
         }

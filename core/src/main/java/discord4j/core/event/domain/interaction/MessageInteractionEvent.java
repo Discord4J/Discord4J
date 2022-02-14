@@ -27,6 +27,8 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
+import java.util.Collection;
+
 /**
  * Dispatched when a user uses a message command (message context menu)
  * <p>
@@ -35,6 +37,7 @@ import reactor.core.publisher.Mono;
  *     <li>{@link #reply()} to directly include a message</li>
  *     <li>{@link #deferReply()} to acknowledge without a message, typically to perform a background task and give the
  *     user a loading state until it is edited</li>
+ *     <li>{@link #presentModal(String, String, Collection)} to pop a modal for the user to interact with</li>
  * </ul>
  * See {@link InteractionCreateEvent} for more details about valid operations.
  * <p>

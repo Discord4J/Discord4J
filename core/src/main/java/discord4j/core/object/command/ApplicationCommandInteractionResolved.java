@@ -21,6 +21,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
+import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
@@ -199,6 +200,30 @@ public class ApplicationCommandInteractionResolved implements DiscordObject {
                 .map(map -> map.entrySet().stream()
                         .map(entry -> Tuples.of(Snowflake.of(entry.getKey()),
                                 new Message(gateway, entry.getValue())))
+                        .collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2)))
+                .orElseGet(Collections::emptyMap);
+    }
+
+    /**
+     * Gets the resolved attachment with the given ID, if present.
+     *
+     * @param attachmentId the ID of the attachment to get
+     * @return the resolved attachment, if present
+     */
+    public Optional<Attachment> getAttachment(Snowflake attachmentId) {
+        return Optional.ofNullable(getAttachments().get(attachmentId));
+    }
+
+    /**
+     * Gets a map containing the resolved attachments associated by their IDs
+     *
+     * @return the resolved attachments
+     */
+    public Map<Snowflake, Attachment> getAttachments() {
+        return data.attachments().toOptional()
+                .map(map -> map.entrySet().stream()
+                        .map(entry -> Tuples.of(Snowflake.of(entry.getKey()),
+                                new Attachment(gateway, entry.getValue())))
                         .collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2)))
                 .orElseGet(Collections::emptyMap);
     }
