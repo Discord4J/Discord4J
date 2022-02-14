@@ -48,7 +48,12 @@ public enum InteractionResponseType {
     /**
      * Respond to an autocomplete interaction with suggested choices
      */
-    APPLICATION_COMMAND_AUTOCOMPLETE_RESULT(8);
+    APPLICATION_COMMAND_AUTOCOMPLETE_RESULT(8),
+
+    /**
+     * Response to a supported interaction with a modal
+     */
+    MODAL(9);
 
     /**
      * The underlying value as represented by Discord.
@@ -87,6 +92,8 @@ public enum InteractionResponseType {
             case 5: return DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE;
             case 6: return DEFERRED_UPDATE_MESSAGE;
             case 7: return UPDATE_MESSAGE;
+            case 8: return APPLICATION_COMMAND_AUTOCOMPLETE_RESULT;
+            case 9: return MODAL;
             default: return UNKNOWN;
         }
     }
