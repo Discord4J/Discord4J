@@ -22,7 +22,7 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.Emoji;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
@@ -46,12 +46,12 @@ public class ReactionAddEvent extends MessageEvent {
     private final long messageId;
     @Nullable
     private final Long guildId;
-    private final ReactionEmoji emoji;
+    private final Emoji emoji;
     @Nullable
     private final Member member;
 
     public ReactionAddEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long userId, long channelId, long messageId, @Nullable Long guildId,
-                            ReactionEmoji emoji, @Nullable Member member) {
+                            Emoji emoji, @Nullable Member member) {
         super(gateway, shardInfo);
         this.userId = userId;
         this.channelId = channelId;
@@ -140,11 +140,11 @@ public class ReactionAddEvent extends MessageEvent {
     }
 
     /**
-     * Gets the {@link ReactionEmoji} that was added to the {@link Message} in this event.
+     * Gets the {@link Emoji} that was added to the {@link Message} in this event.
      *
      * @return The {@code Emoji} added to the {@link Message} as a reaction.
      */
-    public ReactionEmoji getEmoji() {
+    public Emoji getEmoji() {
         return emoji;
     }
 

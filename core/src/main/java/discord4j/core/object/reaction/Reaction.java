@@ -18,8 +18,8 @@ package discord4j.core.object.reaction;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
+import discord4j.core.object.Emoji;
 import discord4j.discordjson.json.ReactionData;
-
 import java.util.Objects;
 
 /**
@@ -83,8 +83,8 @@ public final class Reaction implements DiscordObject  {
      *
      * @return This reaction's emoji.
      */
-    public ReactionEmoji getEmoji() {
-        return ReactionEmoji.of(data);
+    public Emoji getEmoji() {
+        return Emoji.of(data);
     }
 
     @Override

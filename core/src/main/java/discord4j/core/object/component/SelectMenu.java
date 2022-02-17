@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.component;
 
-import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.Emoji;
 import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.json.ImmutableComponentData;
 import discord4j.discordjson.json.SelectOptionData;
@@ -248,9 +248,9 @@ public class SelectMenu extends ActionComponent {
          *
          * @return The option's emoji.
          */
-        public Optional<ReactionEmoji> getEmoji() {
+        public Optional<Emoji> getEmoji() {
             return data.emoji().toOptional()
-                    .map(ReactionEmoji::of);
+                    .map(Emoji::of);
         }
 
         /**
@@ -278,7 +278,7 @@ public class SelectMenu extends ActionComponent {
          * @param emoji An emoji to display with the option.
          * @return A new option with the given emoji.
          */
-        public Option withEmoji(ReactionEmoji emoji) {
+        public Option withEmoji(Emoji emoji) {
             return new Option(SelectOptionData.builder().from(data).emoji(emoji.asEmojiData()).build());
         }
 

@@ -22,7 +22,7 @@ import discord4j.core.event.domain.message.*;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.Emoji;
 import discord4j.discordjson.json.MemberData;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.PartialMessageData;
@@ -120,7 +120,7 @@ class MessageDispatchHandlers {
         boolean emojiAnimated = context.getDispatch().emoji().animated()
                 .toOptional()
                 .orElse(false);
-        ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
+        Emoji emoji = Emoji.of(emojiId, emojiName, emojiAnimated);
         @SuppressWarnings("ConstantConditions")
         Member member = memberData != null ? new Member(gateway, memberData, guildId) : null;
 
@@ -146,7 +146,7 @@ class MessageDispatchHandlers {
         boolean emojiAnimated = context.getDispatch().emoji().animated()
                 .toOptional()
                 .orElse(false);
-        ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
+        Emoji emoji = Emoji.of(emojiId, emojiName, emojiAnimated);
         return Mono.just(new ReactionRemoveEvent(gateway, context.getShardInfo(), userId,
                 channelId, messageId, guildId, emoji));
     }
@@ -168,7 +168,7 @@ class MessageDispatchHandlers {
         boolean emojiAnimated = context.getDispatch().emoji().animated()
                 .toOptional()
                 .orElse(false);
-        ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
+        Emoji emoji = Emoji.of(emojiId, emojiName, emojiAnimated);
         return Mono.just(new ReactionRemoveEmojiEvent(gateway, context.getShardInfo(), channelId,
                 messageId, guildId, emoji));
     }

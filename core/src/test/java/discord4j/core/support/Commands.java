@@ -25,7 +25,7 @@ import discord4j.core.command.CommandContext;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.presence.ClientPresence;
-import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.Emoji;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.rest.util.Image;
@@ -197,7 +197,7 @@ public class Commands {
     public static Mono<Void> reactionRemove(CommandContext context) {
         String[] tokens = context.parameters().split(" ");
         return context.getClient().getMessageById(Snowflake.of(tokens[0]), Snowflake.of(tokens[1]))
-                .flatMap(m -> m.removeReactions(ReactionEmoji.unicode("✅")));
+                .flatMap(m -> m.removeReactions(Emoji.unicode("✅")));
     }
 
     public static Mono<Void> leaveGuild(CommandContext context) {

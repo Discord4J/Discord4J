@@ -19,7 +19,7 @@ package discord4j.core.util;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.channel.*;
-import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.Emoji;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
@@ -35,11 +35,11 @@ public final class EntityUtil {
     @Deprecated
     public static final long DISCORD_EPOCH = 1420070400000L;
 
-    public static String getEmojiString(ReactionEmoji emoji) {
-        if (emoji instanceof ReactionEmoji.Unicode) {
-            return ((ReactionEmoji.Unicode) emoji).getRaw();
+    public static String getEmojiString(Emoji emoji) {
+        if (emoji instanceof Emoji.Unicode) {
+            return ((Emoji.Unicode) emoji).getRaw();
         } else {
-            ReactionEmoji.Custom custom = ((ReactionEmoji.Custom) emoji);
+            Emoji.Custom custom = ((Emoji.Custom) emoji);
             return custom.getName() + ":" + custom.getId().asString();
         }
     }

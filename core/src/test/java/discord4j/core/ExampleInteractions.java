@@ -21,7 +21,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.*;
 import discord4j.core.object.command.ApplicationCommand;
 import discord4j.core.object.component.*;
-import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.Emoji;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.InteractionPresentModalSpec;
@@ -105,7 +105,7 @@ public class ExampleInteractions {
                         if (MESSAGE_COMMAND_NAME.equals(event.getCommandName())) {
                             return event.deferReply()
                                     .then(event.getTargetMessage())
-                                    .flatMap(it -> it.addReaction(ReactionEmoji.unicode("✅")))
+                                    .flatMap(it -> it.addReaction(Emoji.unicode("✅")))
                                     .then(event.editReply("Done!"));
                         }
                         return Mono.empty();

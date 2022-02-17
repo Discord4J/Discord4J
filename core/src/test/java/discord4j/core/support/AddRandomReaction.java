@@ -20,7 +20,7 @@ package discord4j.core.support;
 import discord4j.core.command.Command;
 import discord4j.core.command.CommandContext;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.Emoji;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -82,7 +82,7 @@ public class AddRandomReaction implements Command {
             }
         }
         return Flux.fromIterable(fetch(count))
-                .flatMap(emoji -> message.addReaction(ReactionEmoji.unicode(emoji)))
+                .flatMap(emoji -> message.addReaction(Emoji.unicode(emoji)))
                 .then();
     }
 

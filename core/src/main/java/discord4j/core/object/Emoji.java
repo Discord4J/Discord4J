@@ -18,7 +18,6 @@ package discord4j.core.object;
 
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.reaction.Reaction;
-import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.ReactionData;
 import discord4j.common.util.Snowflake;
@@ -35,7 +34,7 @@ import java.util.Optional;
 public abstract class Emoji {
 
     /**
-     * Constructs a {@code ReactionEmoji} using information from a {@link GuildEmoji known guild emoji}.
+     * Constructs a {@code Emoji} using information from a {@link GuildEmoji known guild emoji}.
      *
      * @param emoji The guild emoji from which to take information.
      * @return A reaction emoji using information from the given guild emoji.
@@ -45,7 +44,7 @@ public abstract class Emoji {
     }
 
     /**
-     * Constructs a {@code ReactionEmoji} for a custom emoji using the given information.
+     * Constructs a {@code Emoji} for a custom emoji using the given information.
      *
      * @param id The ID of the custom emoji.
      * @param name The name of the custom emoji.
@@ -57,13 +56,13 @@ public abstract class Emoji {
     }
 
     /**
-     * Constructs a {@code ReactionEmoji} for a unicode emoji.
+     * Constructs a {@code Emoji} for a unicode emoji.
      * <p>
      * The string argument to this method should be the exact UTF-16 encoded string of the desired emoji. For example,
      * <pre>
-     * ReactionEmoji.unicode("&#92;u2764") // "heart"
-     * ReactionEmoji.unicode("&#92;uD83D&#92;uDE00") // "grinning face"
-     * ReactionEmoji.unicode("&#92;uD83D&#92;uDC68&#92;u200D&#92;uD83E&#92;uDDB0") // "man: red hair"
+     * Emoji.unicode("&#92;u2764") // "heart"
+     * Emoji.unicode("&#92;uD83D&#92;uDE00") // "grinning face"
+     * Emoji.unicode("&#92;uD83D&#92;uDC68&#92;u200D&#92;uD83E&#92;uDDB0") // "man: red hair"
      * </pre>
      * A full list of emoji can be found <a href="https://unicode.org/emoji/charts/full-emoji-list.html">here</a>.
      * <p>
@@ -78,13 +77,13 @@ public abstract class Emoji {
     }
 
     /**
-     * Constructs a {@code ReactionEmoji} for a unicode emoji.
+     * Constructs a {@code Emoji} for a unicode emoji.
      * <p>
      * The argument(s) to this method should use the "U+" notation for codepoints. For example,
      * <pre>
-     * ReactionEmoji.codepoints("U+2764") // "heart"
-     * ReactionEmoji.codepoints("U+1F600") // "grinning face"
-     * ReactionEmoji.codepoints("U+1F468", "U+200D", "U+1F9B0") // "man: red hair"
+     * Emoji.codepoints("U+2764") // "heart"
+     * Emoji.codepoints("U+1F600") // "grinning face"
+     * Emoji.codepoints("U+1F468", "U+200D", "U+1F9B0") // "man: red hair"
      * </pre>
      * A full list of emoji can be found <a href="https://unicode.org/emoji/charts/full-emoji-list.html">here</a>.
      *
@@ -101,34 +100,34 @@ public abstract class Emoji {
     }
 
     /**
-     * Constructs a {@code ReactionEmoji} for generic emoji information.
+     * Constructs a {@code Emoji} for generic emoji information.
      *
      * @param id The ID of the custom emoji OR null if the emoji is a unicode emoji.
      * @param name The name of the custom emoji OR the raw unicode string for the emoji.
      * @param isAnimated Whether the emoji is animated OR false if the emoji is a unicode emoji.
      * @return A reaction emoji using the given information.
      */
-    public static ReactionEmoji of(@Nullable Long id, String name, boolean isAnimated) {
+    public static Emoji of(@Nullable Long id, String name, boolean isAnimated) {
         return id == null ? unicode(name) : custom(Snowflake.of(id), name, isAnimated);
     }
 
     /**
-     * Constructs a {@code ReactionEmoji} from a {@link ReactionData} representation.
+     * Constructs a {@code Emoji} from a {@link ReactionData} representation.
      *
      * @param data the {@link ReactionData} wrapper.
      * @return a reaction emoji using the given information.
      */
-    public static ReactionEmoji of(ReactionData data) {
+    public static Emoji of(ReactionData data) {
         return of(data.emoji());
     }
 
     /**
-     * Constructs a {@code ReactionEmoji} from a {@link EmojiData} representation.
+     * Constructs a {@code Emoji} from a {@link EmojiData} representation.
      *
      * @param data the {@link EmojiData} wrapper.
      * @return a reaction emoji using the given information.
      */
-    public static ReactionEmoji of(EmojiData data) {
+    public static Emoji of(EmojiData data) {
         if (data.id().isPresent()) {
             return custom(Snowflake.of(data.id().get()),
                     data.name().orElseThrow(IllegalArgumentException::new),
@@ -156,13 +155,13 @@ public abstract class Emoji {
     }
 
     /**
-     * Converts this {@code ReactionEmoji} to a {@link EmojiData}.
+     * Converts this {@code Emoji} to a {@link EmojiData}.
      *
      * @return An {@link EmojiData} for this emoji.
      */
     public abstract EmojiData asEmojiData();
 
-    public static final class Custom extends ReactionEmoji {
+    public static final class Custom extends Emoji {
 
         private final long id;
         private final String name;
@@ -221,7 +220,7 @@ public abstract class Emoji {
 
         @Override
         public String toString() {
-            return "ReactionEmoji.Custom{" +
+            return "Emoji.Custom{" +
                     "id=" + id +
                     ", name='" + name + '\'' +
                     ", isAnimated=" + isAnimated +
@@ -246,7 +245,7 @@ public abstract class Emoji {
         }
     }
 
-    public static final class Unicode extends ReactionEmoji {
+    public static final class Unicode extends Emoji {
 
         private final String raw;
 
@@ -267,7 +266,7 @@ public abstract class Emoji {
 
         @Override
         public String toString() {
-            return "ReactionEmoji.Unicode{" +
+            return "Emoji.Unicode{" +
                     "raw='" + raw + '\'' +
                     "} " + super.toString();
         }
