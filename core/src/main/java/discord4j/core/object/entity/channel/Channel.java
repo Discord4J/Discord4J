@@ -119,7 +119,7 @@ public interface Channel extends Entity {
 
         GUILD_PRIVATE_THREAD(12),
 
-        /** Represents a {@link VoiceChannel} for hosting events with an audience. */
+        /** Represents a {@link StageChannel} for hosting events with an audience. */
         GUILD_STAGE_VOICE(13);
 
         /** The underlying value as represented by Discord. */

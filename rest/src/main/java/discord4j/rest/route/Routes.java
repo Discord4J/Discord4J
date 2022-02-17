@@ -1111,4 +1111,17 @@ public abstract class Routes {
     ///////////////////////////////////////////
 
     public static final Route INTERACTION_RESPONSE_CREATE = Route.post("/interactions/{interaction.id}/{interaction.token}/callback");
+
+    ///////////////////////////////////////////
+    //////// Stage Instance Ressource /////////
+    ///////////////////////////////////////////
+
+    public static final Route CREATE_STAGE_INSTANCE = Route.post("/stage-instances");
+
+    public static final Route GET_STAGE_INSTANCE = Route.get("/stage-instances/{channel.id}");
+
+    public static final Route MODIFY_STAGE_INSTANCE = Route.patch("/stage-instances/{channel.id}");
+
+    public static final Route DELETE_STAGE_INSTANCE = Route.delete("/stage-instances/{channel.id}");
+
 }

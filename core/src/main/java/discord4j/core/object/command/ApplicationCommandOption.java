@@ -160,6 +160,35 @@ public class ApplicationCommandOption implements DiscordObject {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Whether this option supports auto-complete or not. Default is false.
+     * </p>
+     * Autocomplete cannot be enabled on options that have choices.
+     * @return Whether this option supports auto-complete or not.
+     */
+    public boolean hasAutocompleteEnabled() {
+        return data.autocomplete().toOptional().orElse(false);
+    }
+
+    /**
+     * Returns the minimum value a user is allowed to input, represented as a {@link Double}.
+     * </p>
+     * This is only applicable to {@link Type#INTEGER} and {@link Type#NUMBER} types.
+     * @return The minimum value a user is allowed to input if present, otherwise {@link Optional#empty()}.
+     */
+    public Optional<Double> getMinimumValue() {
+        return data.minValue().toOptional();
+    }
+
+    /**
+     * Returns the maximum value a user is allowed to input, represented as a {@link Double}.
+     * </p>
+     * This is only applicable to {@link Type#INTEGER} and {@link Type#NUMBER} types.
+     * @return The maximum value a user is allowed to input if present, otherwise {@link Optional#empty()}.
+     */
+    public Optional<Double> getMaximumValue() {
+        return data.maxValue().toOptional();
+    }
 
     @Override
     public GatewayDiscordClient getClient() {
@@ -181,7 +210,8 @@ public class ApplicationCommandOption implements DiscordObject {
         CHANNEL(7),
         ROLE(8),
         MENTIONABLE(9),
-        NUMBER(10);
+        NUMBER(10),
+        ATTACHMENT(11);
 
         /**
          * The underlying value as represented by Discord.
@@ -226,6 +256,7 @@ public class ApplicationCommandOption implements DiscordObject {
                 case 8: return ROLE;
                 case 9: return MENTIONABLE;
                 case 10: return NUMBER;
+                case 11: return ATTACHMENT;
                 default: return UNKNOWN;
             }
         }

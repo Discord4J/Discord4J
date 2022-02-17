@@ -16,8 +16,6 @@
  */
 package discord4j.rest.util;
 
-import discord4j.common.annotations.Experimental;
-
 /**
  * Permissions are a way to limit and grant certain abilities to users.
  *
@@ -122,12 +120,9 @@ public enum Permission {
     MANAGE_EMOJIS(0x40000000, true),
 
     /** Allows members to use slash commands in text channels. */
-    USE_SLASH_COMMANDS(0x80000000, false),
+    USE_SLASH_COMMANDS(0x80000000L, false),
 
-    /**
-     * Allows for requesting to speak in stage channels.
-     */
-    @Experimental
+    /** Allows for requesting to speak in stage channels. */
     REQUEST_TO_SPEAK(0x100000000L, false),
 
     /** Allows for deleting and archiving threads, and viewing all private threads */
@@ -137,7 +132,13 @@ public enum Permission {
     USE_PUBLIC_THREADS(0x0800000000L, false),
 
     /** Allows for creating and participating in private threads */
-    USE_PRIVATE_THREADS(0x1000000000L, false);
+    USE_PRIVATE_THREADS(0x1000000000L, false),
+
+    /**
+     * Allows for timing out users to prevent them from sending or reacting to messages in chat and threads,
+     * and from speaking in voice and stage channels.
+     */
+    MODERATE_MEMBERS(0x0000010000000000L, false);
 
     /** Whether MFA is required. */
     private final boolean mfa;

@@ -14,7 +14,7 @@ dependencies {
 }
 
 gitProperties {
-    gitPropertiesDir = "$project.buildDir/resources/main/discord4j/common"
+    gitPropertiesDir = file("$project.buildDir/resources/main/discord4j/common")
     customProperty 'git.commit.id.describe', { it.describe(tags: true) }
     customProperty 'application.name', project_name
     customProperty 'application.description', project_description

@@ -474,4 +474,14 @@ public class ReadActions {
     public static GetVoiceStateByIdAction getVoiceStateById(long guildId, long userId) {
         return new GetVoiceStateByIdAction(guildId, userId);
     }
+
+    /**
+     * Creates an action to retrieve data for the stage instance corresponding to the given channel ID.
+     *
+     * @param channelId the channel ID
+     * @return a new {@link GetStageInstanceByChannelIdAction}
+     */
+    public static GetStageInstanceByChannelIdAction getStageInstanceByChannelId(long channelId) {
+        return new GetStageInstanceByChannelIdAction(channelId);
+    }
 }

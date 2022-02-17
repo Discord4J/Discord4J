@@ -4,7 +4,7 @@
 
 [![Support Server Invite](https://img.shields.io/discord/208023865127862272.svg?color=7289da&label=Discord4J&logo=discord&style=flat-square)](https://discord.gg/d4j)
 [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core/3.2.svg?style=flat-square)](https://search.maven.org/artifact/com.discord4j/discord4j-core)
-[![Javadocs](https://javadoc.io/badge2/com.discord4j/discord4j-core/3.2.0/javadoc.svg?color=blue&style=flat-square)](https://javadoc.io/doc/com.discord4j/discord4j-core/3.2.0)
+[![Javadocs](https://javadoc.io/badge2/com.discord4j/discord4j-core/3.2.1/javadoc.svg?color=blue&style=flat-square)](https://javadoc.io/doc/com.discord4j/discord4j-core/3.2.1)
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Discord4J/Discord4J/Java%20CI/master?logo=github&style=flat-square)](https://github.com/Discord4J/Discord4J/actions)
 
 Discord4J is a fast, powerful, unopinionated, reactive library to enable quick and easy development of Discord bots for Java, Kotlin, and other JVM languages using the official [Discord Bot API](https://discord.com/developers/docs/intro).
@@ -69,7 +69,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.discord4j:discord4j-core:3.2.0'
+  implementation 'com.discord4j:discord4j-core:3.2.1'
 }
 ```
 
@@ -80,7 +80,7 @@ repositories {
 }
 
 dependencies {
-  implementation("com.discord4j:discord4j-core:3.2.0")
+  implementation("com.discord4j:discord4j-core:3.2.1")
 }
 ```
 
@@ -90,7 +90,7 @@ dependencies {
   <dependency>
     <groupId>com.discord4j</groupId>
     <artifactId>discord4j-core</artifactId>
-    <version>3.2.0</version>
+    <version>3.2.1</version>
   </dependency>
 </dependencies>
 ```
@@ -98,7 +98,7 @@ dependencies {
 ### SBT
 ```scala
 libraryDependencies ++= Seq(
-  "com.discord4j" % "discord4j-core" % "3.2.0"
+  "com.discord4j" % "discord4j-core" % "3.2.1"
 )
 ```
 
@@ -209,23 +209,22 @@ client.withGateway {
 // IMAGE_URL = https://cdn.betterttv.net/emote/55028cd2135896936880fdd7/3x
 // ANY_URL = https://www.youtube.com/watch?v=5zwY50-necw
 final MessageChannel channel = ...
-channel.createEmbed(spec -> 
-  spec.setColor(Color.RED)
-    .setAuthor("setAuthor", ANY_URL, IMAGE_URL)
-    .setImage(IMAGE_URL)
-    .setTitle("setTitle/setUrl")
-    .setUrl(ANY_URL)
-    .setDescription("setDescription\n" +
+EmbedCreateSpec.Builder builder = EmbedCreateSpec.builder();
+builder.author("setAuthor", ANY_URL, IMAGE_URL);
+builder.image(IMAGE_URL);
+builder.title("setTitle/setUrl");
+builder.url(ANY_URL);
+builder.description("setDescription\n" +
       "big D: is setImage\n" +
       "small D: is setThumbnail\n" +
-      "<-- setColor")
-    .addField("addField", "inline = true", true)
-    .addField("addFIeld", "inline = true", true)
-    .addField("addFile", "inline = false", false)
-    .setThumbnail(IMAGE_URL)
-    .setFooter("setFooter --> setTimestamp", IMAGE_URL)
-    .setTimestamp(Instant.now())
-).block();
+      "<-- setColor");
+builder.addField("addField", "inline = true", true);
+builder.addField("addFIeld", "inline = true", true);
+builder.addField("addFile", "inline = false", false);
+builder.thumbnail(IMAGE_URL);
+builder.footer("setFooter --> setTimestamp", IMAGE_URL);
+builder.timestamp(Instant.now());
+channel.createMessage(builder.build()).block();
 ```
 
 ### 🏷️ Find Members by Role Name

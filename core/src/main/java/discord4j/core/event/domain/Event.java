@@ -139,6 +139,7 @@ import discord4j.gateway.intent.Intent;
  *     <li>{@link DisconnectEvent}: disconnected from the Gateway</li>
  *     <li>{@link ReconnectStartEvent}: a resumption or reconnection attempt has begun</li>
  *     <li>{@link ReconnectFailEvent}: a resumption or reconnection attempt has failed but can be retried</li>
+ *     <li>{@link SessionInvalidatedEvent}: a gateway session has been invalidated</li>
  * </ul>
  */
 public abstract class Event {

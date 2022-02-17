@@ -33,6 +33,7 @@ import discord4j.gateway.ShardInfo;
 import discord4j.rest.util.InteractionResponseType;
 import reactor.core.publisher.Mono;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -48,6 +49,7 @@ import java.util.function.Consumer;
  *     <li>{@link #edit()} to modify the message the component is on</li>
  *     <li>{@link #deferEdit()} to acknowledge without a message, will not display a loading state and allows later
  *     modifications to the message the component is on</li>
+ *     <li>{@link #presentModal(String, String, Collection)} to pop a modal for the user to interact with</li>
  * </ul>
  * See {@link InteractionCreateEvent} for more details about valid operations.
  * <p>
@@ -55,7 +57,7 @@ import java.util.function.Consumer;
  * <p>
  * <img src="doc-files/InteractionCreateEvent.png">
  */
-public class ComponentInteractionEvent extends InteractionCreateEvent {
+public class ComponentInteractionEvent extends DeferrableInteractionEvent {
 
     public ComponentInteractionEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo, interaction);
@@ -98,8 +100,8 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
     }
 
     /**
-     * Acknowledge the interaction by indicating a message will be edited later. For components, the user <strong>does
-     * not</strong> see a loading state. For an "only you can see this" response, add
+     * Acknowledge the interaction by indicating a message will be edited later. For component interactions, the user
+     * <strong>does not</strong> see a loading state. For an "only you can see this" response, add
      * {@code withEphemeral(true)}, or to directly edit it, {@link #edit() edit().withEphemeral(true)}.
      * <p>
      * After calling {@code deferEdit}, you are not allowed to call other acknowledge, reply or edit method and have to
@@ -116,8 +118,8 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
     }
 
     /**
-     * Acknowledge the interaction by indicating a message will be edited later. For components, the user <strong>does
-     * not</strong> see a loading state.
+     * Acknowledge the interaction by indicating a message will be edited later. For component interactions, the user
+     * <strong>does not</strong> see a loading state.
      * <p>
      * After calling {@code deferEdit}, you are not allowed to call other acknowledge, reply or edit method and have to
      * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
@@ -136,7 +138,7 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
     }
 
     /**
-     * Requests to respond to the interaction by immediately editing the message the button is on.
+     * Requests to respond to the interaction by editing the message that originated this component interaction.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link InteractionApplicationCommandCallbackSpec} to be
      * operated on.
@@ -163,8 +165,8 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
     }
 
     /**
-     * Requests to respond to the interaction by immediately editing the message the button is on. Properties specifying
-     * how to edit the message can be set via the {@code withXxx} methods of the returned
+     * Requests to respond to the interaction by editing the message that originated this component interaction.
+     * Properties specifying how to edit the message can be set via the {@code withXxx} methods of the returned
      * {@link InteractionApplicationCommandCallbackEditMono}.
      * <p>
      * After calling {@code edit}, you are not allowed to call other acknowledging, reply or edit method and have to
@@ -181,8 +183,8 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
     }
 
     /**
-     * Requests to respond to the interaction by immediately editing the message the button is on with the given message
-     * content. Properties specifying how to edit the message can be set via the {@code withXxx} methods of the returned
+     * Requests to respond to the interaction by editing the message that originated this component interaction.
+     * Properties specifying how to edit the message can be set via the {@code withXxx} methods of the returned
      * {@link InteractionApplicationCommandCallbackEditMono}.
      * <p>
      * After calling {@code edit}, you are not allowed to call other acknowledging, reply or edit method and have to
@@ -199,7 +201,7 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
     }
 
     /**
-     * Requests to respond to the interaction by immediately editing the message the button is on.
+     * Requests to respond to the interaction by editing the message that originated this component interaction.
      * <p>
      * After calling {@code edit}, you are not allowed to call other acknowledging, reply or edit method and have to
      * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
@@ -226,8 +228,8 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
     }
 
     /**
-     * Acknowledge the interaction by indicating a message will be edited later. For components, the user <strong>does
-     * not</strong> see a loading state.
+     * Acknowledge the interaction by indicating a message will be edited later. For component interactions, the user
+     * <strong>does not</strong> see a loading state.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction and
      * indicating a response will be edited later. The user sees a loading state. If an error is received, it is emitted
@@ -240,8 +242,8 @@ public class ComponentInteractionEvent extends InteractionCreateEvent {
     }
 
     /**
-     * Acknowledges the interaction indicating a response will be edited later. For components, the user <strong>does
-     * not</strong> see a loading state.
+     * Acknowledges the interaction indicating a response will be edited later. For component interactions, the user
+     * <strong>does not</strong> see a loading state.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing, acknowledging the interaction
      * and indicating a response will be edited later. If an error is received, it is emitted through the {@code Mono}.

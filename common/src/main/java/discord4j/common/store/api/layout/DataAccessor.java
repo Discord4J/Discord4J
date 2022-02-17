@@ -379,4 +379,12 @@ public interface DataAccessor {
      * @return A {@link Mono} emitting the voice state, or empty if not found
      */
     Mono<VoiceStateData> getVoiceStateById(long guildId, long userId);
+
+    /**
+     * Retrieves data for the stage instance corresponding to the given channel ID.
+     *
+     * @param channelId the channel ID
+     * @return A {@link Mono} emitting the stage instance data, or empty if not found
+     */
+    Mono<StageInstanceData> getStageInstanceByChannelId(long channelId);
 }

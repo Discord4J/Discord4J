@@ -85,6 +85,9 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         dispatchTypes.put(EventNames.THREAD_LIST_SYNC, ThreadListSync.class);
         dispatchTypes.put(EventNames.THREAD_MEMBER_UPDATE, ThreadMemberUpdate.class);
         dispatchTypes.put(EventNames.THREAD_MEMBERS_UPDATE, ThreadMembersUpdate.class);
+        dispatchTypes.put(EventNames.STAGE_INSTANCE_CREATE, StageInstanceCreate.class);
+        dispatchTypes.put(EventNames.STAGE_INSTANCE_UPDATE, StageInstanceUpdate.class);
+        dispatchTypes.put(EventNames.STAGE_INSTANCE_DELETE, StageInstanceDelete.class);
 
         // Ignored
         dispatchTypes.put(EventNames.PRESENCES_REPLACE, null);

@@ -233,7 +233,7 @@ public final class Guild implements Entity {
      */
     @Deprecated
     public Region.Id getRegionId() {
-        return Region.Id.of(data.region());
+        return Region.Id.of(Possible.flatOpt(data.region()).orElse(null));
     }
 
     /**
@@ -1369,6 +1369,23 @@ public final class Guild implements Entity {
                 .cast(VoiceChannel.class);
     }
 
+
+    /**
+     * Requests to create a stage channel.
+     *
+     * @param spec an immutable object that specifies how to create the stage channel
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link StageChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<VoiceChannel> createStageChannel(StageChannelCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                        () -> gateway.getRestClient().getGuildService()
+                                .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+                .map(data -> EntityUtil.getChannel(gateway, data))
+                .cast(VoiceChannel.class);
+    }
+
     /**
      * Requests to delete this guild.
      *
@@ -2089,7 +2106,10 @@ public final class Guild implements Entity {
         SUPPRESS_PREMIUM_SUBSCRIPTIONS(1),
 
         /** Suppress server setup tips. */
-        SUPPRESS_GUILD_REMINDER_NOTIFICATIONS(2);
+        SUPPRESS_GUILD_REMINDER_NOTIFICATIONS(2),
+
+        /** Hide member join sticker reply buttons */
+        SUPPRESS_JOIN_NOTIFICATION_REPLIES(3);
 
         /** The underlying value as represented by Discord. */
         private final int value;

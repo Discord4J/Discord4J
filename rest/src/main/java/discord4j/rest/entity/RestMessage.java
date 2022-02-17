@@ -25,6 +25,8 @@ import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.Objects;
+
 /**
  * Represents a message within Discord.
  */
@@ -187,5 +189,18 @@ public class RestMessage {
      */
     public Mono<MessageData> publish() {
         return restClient.getChannelService().publishMessage(channelId, id);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RestMessage that = (RestMessage) o;
+        return channelId == that.channelId && id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(channelId, id);
     }
 }

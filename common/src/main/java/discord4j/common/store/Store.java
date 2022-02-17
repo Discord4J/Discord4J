@@ -166,6 +166,8 @@ public final class Store {
                         .getVoiceStatesInGuild(action.getGuildId()))
                 .map(GetVoiceStateByIdAction.class, action -> dataAccessor
                         .getVoiceStateById(action.getGuildId(), action.getUserId()))
+                .map(GetStageInstanceByChannelIdAction.class, action -> dataAccessor
+                        .getStageInstanceByChannelId(action.getChannelId()))
                 .build();
     }
 
@@ -221,6 +223,12 @@ public final class Store {
                 .map(PresenceUpdateAction.class, action -> gatewayDataUpdater
                         .onPresenceUpdate(action.getShardIndex(), action.getPresenceUpdate()))
                 .map(ReadyAction.class, action -> gatewayDataUpdater.onReady(action.getReady()))
+                .map(StageInstanceCreateAction.class, action -> gatewayDataUpdater
+                        .onStageInstanceCreate(action.getShardIndex(), action.getStageInstanceCreate()))
+                .map(StageInstanceUpdateAction.class, action -> gatewayDataUpdater
+                        .onStageInstanceUpdate(action.getShardIndex(), action.getStageInstanceUpdate()))
+                .map(StageInstanceDeleteAction.class, action -> gatewayDataUpdater
+                        .onStageInstanceDelete(action.getShardIndex(), action.getStageInstanceDelete()))
                 .map(UserUpdateAction.class, action -> gatewayDataUpdater
                         .onUserUpdate(action.getShardIndex(), action.getUserUpdate()))
                 .map(VoiceStateUpdateDispatchAction.class, action -> gatewayDataUpdater

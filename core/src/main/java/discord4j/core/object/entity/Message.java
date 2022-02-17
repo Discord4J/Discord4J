@@ -742,6 +742,9 @@ public final class Message implements Entity {
         /** This message came from the urgent message system. */
         URGENT(4),
 
+        /** This message has an associated thread, with the same id as the message. */
+        HAS_THREAD(5),
+
         /** This message is an ephemeral interaction response. */
         EPHEMERAL(6),
 
@@ -885,20 +888,34 @@ public final class Message implements Entity {
         /** A message created when the Guild is requalified for Discovery Feature **/
         GUILD_DISCOVERY_REQUALIFIED(15),
 
+        /** A message created for warning about the grace period of Guild Discovery **/
         GUILD_DISCOVERY_GRACE_PERIOD_INITIAL_WARNING(16),
 
+        /** A message created for last warning about the grace period of Guild Discovery **/
         GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING(17),
 
+        /**
+         * A message created when a Thread is started ( <a href="https://support.discord.com/hc/es/articles/4403205878423-Threads">Threads</a> )
+         */
         THREAD_CREATED(18),
 
         /** A message created with a reply */
         REPLY(19),
 
+        /** A message created using an application (like slash commands) **/
         APPLICATION_COMMAND(20),
 
+        /**
+         * The first message in a thread pointing to a related message in the parent channel from which the thread was started
+         * <br>
+         * <b>Note: </b> Only supported from v9 of API
+        **/
         THREAD_STARTER_MESSAGE(21),
 
-        GUILD_INVITE_REMINDER(22);
+        /** A message created for notice the servers owners about invite new users (only in new servers) **/
+        GUILD_INVITE_REMINDER(22),
+
+        CONTEXT_MENU_COMMAND(23);
 
         /**
          * The underlying value as represented by Discord.
@@ -954,6 +971,7 @@ public final class Message implements Entity {
                 case 20: return APPLICATION_COMMAND;
                 case 21: return THREAD_STARTER_MESSAGE;
                 case 22: return GUILD_INVITE_REMINDER;
+                case 23: return CONTEXT_MENU_COMMAND;
                 default: return UNKNOWN;
             }
         }

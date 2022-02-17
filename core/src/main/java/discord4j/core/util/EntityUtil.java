@@ -57,8 +57,9 @@ public final class EntityUtil {
             case GUILD_TEXT: return new TextChannel(gateway, data);
             case DM: return new PrivateChannel(gateway, data);
             case GUILD_VOICE:
-            case GUILD_STAGE_VOICE:
                 return new VoiceChannel(gateway, data);
+            case GUILD_STAGE_VOICE:
+                return new StageChannel(gateway, data);
             case GUILD_CATEGORY: return new Category(gateway, data);
             case GUILD_NEWS: return new NewsChannel(gateway, data);
             case GUILD_STORE: return new StoreChannel(gateway, data);
