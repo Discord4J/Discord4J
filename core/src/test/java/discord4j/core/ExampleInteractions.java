@@ -25,6 +25,7 @@ import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.InteractionPresentModalSpec;
+import discord4j.core.support.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -202,10 +203,8 @@ public class ExampleInteractions {
                     });
 
                     // register the command and then subscribe to multiple listeners, using Mono.when
-                    return client.getRestClient().getApplicationId()
-                            .flatMap(appId -> client.getRestClient().getApplicationService()
-                                    .bulkOverwriteGuildApplicationCommand(appId, guildId, commands)
-                                    .then())
+                    return GuildCommandRegistrar.create(client.getRestClient(), guildId, commands)
+                            .registerCommands()
                             .thenMany(Mono.when(onChatInput, onUser, onMessage, onSelect, onButton, onModal));
                 })
                 .block();
