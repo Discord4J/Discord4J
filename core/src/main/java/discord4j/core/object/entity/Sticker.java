@@ -156,7 +156,7 @@ public final class Sticker implements Entity {
             return value;
         }
 
-        private static Format of(final int value) {
+        public static Format of(final int value) {
             switch (value) {
                 case 1:
                     return PNG;
