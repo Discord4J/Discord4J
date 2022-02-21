@@ -23,10 +23,7 @@ import discord4j.core.object.command.Interaction;
 import discord4j.core.object.component.Button;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.Message;
-import discord4j.core.spec.InteractionApplicationCommandCallbackEditMono;
-import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
-import discord4j.core.spec.InteractionCallbackSpec;
-import discord4j.core.spec.InteractionCallbackSpecDeferEditMono;
+import discord4j.core.spec.*;
 import discord4j.core.spec.legacy.LegacyInteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.gateway.ShardInfo;
@@ -238,7 +235,7 @@ public class ComponentInteractionEvent extends DeferrableInteractionEvent {
      */
     @Override
     public Mono<Void> acknowledge() {
-        return createInteractionResponse(InteractionResponseType.DEFERRED_UPDATE_MESSAGE, null);
+        return createInteractionResponse(InteractionResponseType.DEFERRED_UPDATE_MESSAGE, (InteractionApplicationCommandCallbackData) null);
     }
 
     /**

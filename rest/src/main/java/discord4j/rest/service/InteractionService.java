@@ -19,7 +19,10 @@ package discord4j.rest.service;
 import discord4j.discordjson.json.InteractionResponseData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
+
+import java.util.Objects;
 
 public class InteractionService extends RestService {
 
@@ -27,10 +30,19 @@ public class InteractionService extends RestService {
         super(router);
     }
 
+    @Deprecated
     public Mono<Void> createInteractionResponse(long interactionId, String interactionToken, InteractionResponseData response) {
         return Routes.INTERACTION_RESPONSE_CREATE.newRequest(interactionId, interactionToken)
             .body(response)
             .exchange(getRouter())
             .bodyToMono(Void.class);
+    }
+
+    public Mono<Void> createInteractionResponse(long interactionId, String interactionToken, MultipartRequest<InteractionResponseData> request) {
+        return Routes.INTERACTION_RESPONSE_CREATE.newRequest(interactionId, interactionToken)
+                .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
+                .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 }
