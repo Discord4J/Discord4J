@@ -24,10 +24,12 @@ import discord4j.core.spec.RoleEditMono;
 import discord4j.core.spec.RoleEditSpec;
 import discord4j.core.spec.legacy.LegacyRoleEditSpec;
 import discord4j.core.util.EntityUtil;
+import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.RoleData;
 import discord4j.rest.entity.RestRole;
 import discord4j.rest.util.Color;
+import discord4j.rest.util.Image;
 import discord4j.rest.util.PermissionSet;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -46,6 +48,9 @@ public final class Role implements Entity {
 
     /** The default {@link Color} of a {@code Role}. */
     public static final Color DEFAULT_COLOR = Color.of(0);
+
+    /** The path for role icon image URLs. */
+    private static final String ICON_IMAGE_PATH = "role-icons/%s/%s";
 
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
@@ -124,10 +129,10 @@ public final class Role implements Entity {
      */
     public Mono<Integer> getPosition() {
         return getGuild()
-                .flatMapMany(Guild::getRoles)
-                .transform(OrderUtil::orderRoles)
-                .collectList()
-                .map(roles -> roles.indexOf(this));
+            .flatMapMany(Guild::getRoles)
+            .transform(OrderUtil::orderRoles)
+            .collectList()
+            .map(roles -> roles.indexOf(this));
     }
 
     /**
@@ -160,10 +165,30 @@ public final class Role implements Entity {
      */
     public Mono<Integer> getPosition(EntityRetrievalStrategy retrievalStrategy) {
         return getGuild(retrievalStrategy)
-                .flatMapMany(guild -> guild.getRoles(retrievalStrategy))
-                .transform(OrderUtil::orderRoles)
-                .collectList()
-                .map(roles -> roles.indexOf(this));
+            .flatMapMany(guild -> guild.getRoles(retrievalStrategy))
+            .transform(OrderUtil::orderRoles)
+            .collectList()
+            .map(roles -> roles.indexOf(this));
+    }
+
+    /**
+     * Gets the icon URL of the role, if present.
+     *
+     * @param format The format for the URL.
+     * @return The icon URL of the role, if present.
+     */
+    public Optional<String> getIconUrl(final Image.Format format) {
+        return data.icon().toOptional()
+            .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
+    }
+
+    /**
+     * Gets the Unicode Emoji of the role, if present.
+     *
+     * @return The Unicode Emoji of the role, if present.
+     */
+    public Optional<String> getUnicodeEmoji() {
+        return data.unicodeEmoji().toOptional();
     }
 
     /**
@@ -297,12 +322,12 @@ public final class Role implements Entity {
     @Deprecated
     public Mono<Role> edit(final Consumer<? super LegacyRoleEditSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyRoleEditSpec mutatedSpec = new LegacyRoleEditSpec();
-                    spec.accept(mutatedSpec);
-                    return rest.edit(mutatedSpec.asRequest(), mutatedSpec.getReason())
-                            .map(bean -> new Role(gateway, bean, getGuildId().asLong()));
-                });
+            () -> {
+                LegacyRoleEditSpec mutatedSpec = new LegacyRoleEditSpec();
+                spec.accept(mutatedSpec);
+                return rest.edit(mutatedSpec.asRequest(), mutatedSpec.getReason())
+                    .map(bean -> new Role(gateway, bean, getGuildId().asLong()));
+            });
     }
 
     /**
@@ -326,7 +351,7 @@ public final class Role implements Entity {
     public Mono<Role> edit(RoleEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(() -> rest.edit(spec.asRequest(), spec.reason())
-                .map(bean -> new Role(gateway, bean, getGuildId().asLong())));
+            .map(bean -> new Role(gateway, bean, getGuildId().asLong())));
     }
 
     /**
@@ -359,7 +384,7 @@ public final class Role implements Entity {
      */
     public Flux<Role> changePosition(final int position) {
         return rest.changePosition(position)
-                .map(data -> new Role(gateway, data, getGuildId().asLong()));
+            .map(data -> new Role(gateway, data, getGuildId().asLong()));
     }
 
     @Override
@@ -375,8 +400,8 @@ public final class Role implements Entity {
     @Override
     public String toString() {
         return "Role{" +
-                "data=" + data +
-                ", guildId=" + guildId +
-                '}';
+            "data=" + data +
+            ", guildId=" + guildId +
+            '}';
     }
 }
