@@ -26,6 +26,7 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable(singleton = true)
@@ -41,6 +42,10 @@ interface RoleEditSpecGenerator extends AuditSpec<RoleModifyRequest> {
 
     Possible<Boolean> mentionable();
 
+    Possible<Optional<String>> icon();
+
+    Possible<Optional<String>> unicodeEmoji();
+
     @Override
     default RoleModifyRequest asRequest() {
         return RoleModifyRequest.builder()
@@ -49,6 +54,8 @@ interface RoleEditSpecGenerator extends AuditSpec<RoleModifyRequest> {
                 .color(mapPossible(color(), Color::getRGB))
                 .hoist(hoist())
                 .mentionable(mentionable())
+                .icon(icon())
+                .unicodeEmoji(unicodeEmoji())
                 .build();
     }
 }

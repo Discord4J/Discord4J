@@ -17,6 +17,7 @@
 
 package discord4j.core.spec;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.discordjson.json.RoleCreateRequest;
@@ -27,6 +28,7 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable(singleton = true)
@@ -42,6 +44,10 @@ interface RoleCreateSpecGenerator extends AuditSpec<RoleCreateRequest> {
 
     Possible<Boolean> mentionable();
 
+    Possible<Optional<String>> icon();
+
+    Possible<Optional<String>> unicodeEmoji();
+
     @Override
     default RoleCreateRequest asRequest() {
         return RoleCreateRequest.builder()
@@ -50,6 +56,8 @@ interface RoleCreateSpecGenerator extends AuditSpec<RoleCreateRequest> {
                 .color(mapPossible(color(), Color::getRGB))
                 .hoist(hoist())
                 .mentionable(mentionable())
+                .icon(icon())
+                .unicodeEmoji(unicodeEmoji())
                 .build();
     }
 }

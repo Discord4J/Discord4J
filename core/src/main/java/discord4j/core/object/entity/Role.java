@@ -27,6 +27,7 @@ import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.entity.RestRole;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.Image;
@@ -178,7 +179,7 @@ public final class Role implements Entity {
      * @return The icon URL of the role, if present.
      */
     public Optional<String> getIconUrl(final Image.Format format) {
-        return data.icon().toOptional()
+        return Possible.flatOpt(data.icon())
             .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
     }
 
@@ -188,7 +189,7 @@ public final class Role implements Entity {
      * @return The Unicode Emoji of the role, if present.
      */
     public Optional<String> getUnicodeEmoji() {
-        return data.unicodeEmoji().toOptional();
+        return Possible.flatOpt(data.unicodeEmoji());
     }
 
     /**
