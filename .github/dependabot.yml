@@ -8,7 +8,6 @@ updates:
         reviewers:
             - "quanticc"
             - "austinv11"
-            - "darichey"
         commit-message:
             prefix: "gradle"
             include: "scope"
@@ -20,7 +19,6 @@ updates:
         reviewers:
             - "quanticc"
             - "austinv11"
-            - "darichey"
         commit-message:
             prefix: "github-actions"
             include: "scope"
