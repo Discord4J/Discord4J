@@ -18,7 +18,6 @@
 package discord4j.rest.interaction;
 
 import com.iwebpp.crypto.TweetNaclFast;
-import discord4j.rest.interaction.InteractionValidator;
 
 public class TweetNaclFastInteractionValidator implements InteractionValidator {
 
