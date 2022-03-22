@@ -21,7 +21,9 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Role;
+import discord4j.core.util.ImageUtil;
 import discord4j.gateway.ShardInfo;
+import discord4j.rest.util.Image;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -41,6 +43,9 @@ import java.util.stream.Collectors;
  */
 public class MemberUpdateEvent extends GuildEvent {
 
+    /** The path for member avatar image URLs. */
+    private static final String AVATAR_IMAGE_PATH = "guilds/%s/users/%s/avatars/%s";
+
     private final long guildId;
     private final long memberId;
 
@@ -51,16 +56,20 @@ public class MemberUpdateEvent extends GuildEvent {
     @Nullable
     private final String currentNickname;
     @Nullable
+    private final String currentAvatar;
+    @Nullable
     private final String currentJoinedAt;
     @Nullable
     private final String currentPremiumSince;
     @Nullable
     private final Boolean currentPending;
+    @Nullable
+    private final String communicationDisabledUntil;
 
     public MemberUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long memberId,
                              @Nullable Member old, Set<Long> currentRoleIds, @Nullable String currentNickname,
-                             @Nullable String currentJoinedAt, @Nullable String currentPremiumSince,
-                             @Nullable Boolean currentPending) {
+                             @Nullable String currentAvatar, @Nullable String currentJoinedAt, @Nullable String currentPremiumSince,
+                             @Nullable Boolean currentPending, @Nullable String communicationDisabledUntil) {
         super(gateway, shardInfo);
 
         this.guildId = guildId;
@@ -68,9 +77,11 @@ public class MemberUpdateEvent extends GuildEvent {
         this.old = old;
         this.currentRoleIds = currentRoleIds;
         this.currentNickname = currentNickname;
+        this.currentAvatar = currentAvatar;
         this.currentJoinedAt = currentJoinedAt;
         this.currentPremiumSince = currentPremiumSince;
         this.currentPending = currentPending;
+        this.communicationDisabledUntil = communicationDisabledUntil;
     }
 
     /**
@@ -152,6 +163,30 @@ public class MemberUpdateEvent extends GuildEvent {
     }
 
     /**
+     * Gets the current member's guild avatar URL, if present.
+     *
+     * @param format the format for the URL.
+     * @return The current member's guild avatar URL, if present.
+     */
+    public Optional<String> getCurrentGuildAvatarUrl(Image.Format format) {
+        return Optional.ofNullable(currentAvatar)
+                .map(avatar -> ImageUtil.getUrl(String.format(AVATAR_IMAGE_PATH,
+                        guildId, Snowflake.asString(memberId), avatar), format));
+    }
+
+
+    /**
+     * Gets the current member's guild avatar. This is the avatar at the url given by {@link #getCurrentGuildAvatarUrl(Image.Format)}.
+     *
+     * @param format The format for the avatar.
+     * @return a {@link Mono} where, upon successful completion, emits the current {@link Image guild avatar} of the member.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getCurrentGuildAvatar(Image.Format format) {
+        return Mono.justOrEmpty(getCurrentGuildAvatarUrl(format)).flatMap(Image::ofUrl);
+    }
+
+    /**
      * Gets the current join time of the {@link Member} involved in this event, if present. It is typically absent if
      * this event is caused by a lurking stage channel member.
      *
@@ -181,6 +216,16 @@ public class MemberUpdateEvent extends GuildEvent {
         return Optional.ofNullable(currentPending).orElse(false);
     }
 
+    /**
+     * Gets when the user ends their timeout, if present.
+     *
+     * @return When the user ends their timeout in the server, if present.
+     */
+    public Optional<Instant> getCommunicationDisabledUntil() {
+        return Optional.ofNullable(communicationDisabledUntil)
+                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+    }
+
     @Override
     public String toString() {
         return "MemberUpdateEvent{" +
@@ -189,9 +234,11 @@ public class MemberUpdateEvent extends GuildEvent {
                 ", old=" + old +
                 ", currentRoleIds=" + currentRoleIds +
                 ", currentNickname='" + currentNickname + '\'' +
+                ", currentAvatar='" + currentAvatar + '\'' +
                 ", currentJoinedAt='" + currentJoinedAt + '\'' +
                 ", currentPremiumSince='" + currentPremiumSince + '\'' +
-                ", currentPending='" + currentPending + '\'' +
+                ", currentPending=" + currentPending +
+                ", communicationDisabledUntil='" + communicationDisabledUntil + '\'' +
                 '}';
     }
 }
