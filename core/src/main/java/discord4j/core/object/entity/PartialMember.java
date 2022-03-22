@@ -287,7 +287,7 @@ public class PartialMember extends User {
      */
     public final String getEffectiveAvatarUrl() {
         final boolean animated = hasAnimatedGuildAvatar();
-        return getGuildAvatarUrl(animated ? GIF : PNG).orElse(getDefaultAvatarUrl());
+        return getGuildAvatarUrl(animated ? GIF : PNG).orElse(getAvatarUrl());
     }
 
     /**

@@ -63,7 +63,7 @@ public class UserServiceTest {
     @Test
     public void testModifyCurrentUser() {
         UserModifyRequest req = UserModifyRequest.builder()
-            .username("Discord4J 3 Test Bot")
+            .username("D4J 3 Test Bot")
             .build();
         userService.modifyCurrentUser(req).block();
     }
