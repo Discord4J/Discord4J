@@ -211,15 +211,18 @@ class GuildDispatchHandlers {
                 .map(Snowflake::asLong)
                 .collect(Collectors.toSet());
         String currentNick = Possible.flatOpt(context.getDispatch().nick()).orElse(null);
+        String currentAvatar = context.getDispatch().avatar().orElse(null);
         String currentJoinedAt = context.getDispatch().joinedAt().orElse(null);
         String currentPremiumSince = Possible.flatOpt(context.getDispatch().premiumSince()).orElse(null);
         Boolean currentPending = context.getDispatch().pending().toOptional().orElse(null);
+        String communicationDisabledUntil = Possible.flatOpt(context.getDispatch().communicationDisabledUntil()).orElse(null);
         Member oldMember = context.getOldState()
                 .map(data -> new Member(gateway, data, guildId))
                 .orElse(null);
 
         return Mono.just(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, oldMember,
-                currentRoleIds, currentNick, currentJoinedAt, currentPremiumSince, currentPending));
+                currentRoleIds, currentNick, currentAvatar, currentJoinedAt,
+                currentPremiumSince, currentPending, communicationDisabledUntil));
     }
 
     static Mono<RoleCreateEvent> guildRoleCreate(DispatchContext<GuildRoleCreate, Void> context) {

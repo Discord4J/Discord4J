@@ -23,8 +23,8 @@ ext {
     }
 
     // Dependencies
-    reactor_bom_version = '2020.0.15'
-    jackson_version = '2.12.4'
+    reactor_bom_version = '2020.0.16'
+    jackson_version = '2.12.6'
     caffeine_version = '2.8.8'
     immutables_group = 'org.immutables'
     immutables_version = '2.9.0-rc1'
@@ -95,6 +95,9 @@ allprojects {
         }
         if (JavaVersion.current().isJava9Compatible()) {
             options.addBooleanOption('html5', true)
+        }
+        if (JavaVersion.current().isJava11Compatible()) {
+            options.addBooleanOption('-no-module-directories', true)
         }
     }
 

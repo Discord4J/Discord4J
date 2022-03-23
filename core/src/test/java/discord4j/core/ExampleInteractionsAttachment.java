@@ -21,6 +21,7 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Attachment;
+import discord4j.core.support.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import org.reactivestreams.Publisher;
@@ -73,10 +74,8 @@ public class ExampleInteractionsAttachment {
                     });
 
                     // register the command and then subscribe to multiple listeners, using Mono.when
-                    return client.getRestClient().getApplicationId()
-                            .flatMap(appId -> client.getRestClient().getApplicationService()
-                                    .bulkOverwriteGuildApplicationCommand(appId, guildId, commands)
-                                    .then())
+                    return GuildCommandRegistrar.create(client.getRestClient(), guildId, commands)
+                            .registerCommands()
                             .thenMany(onChatInput);
                 })
                 .block();

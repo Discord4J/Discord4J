@@ -33,7 +33,8 @@ import static java.lang.Character.toUpperCase;
 
 public class RouteUtils {
 
-    private static final Pattern PARAMETER_PATTERN = Pattern.compile("\\{([\\w.]+)}");
+    @SuppressWarnings("RegExpRedundantEscape")
+    private static final Pattern PARAMETER_PATTERN = Pattern.compile("\\{([\\w.]+)\\}");
     private static final Charset UTF_8 = StandardCharsets.UTF_8;
 
     private RouteUtils() {
