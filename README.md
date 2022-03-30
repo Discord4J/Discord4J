@@ -118,7 +118,7 @@ See [our docs](https://docs.discord4j.com/versions) for more details about compa
 
 We would like to give a special thanks to all of our sponsors for providing us the funding to continue developing and hosting repository resources as well as driving forward initiatives for community programs. In particular, we would like to give a special shoutout to these wonderful individuals:
 
-* [decyg](https://github.com/decyg)
+* [decyg](https://github.com/d-g-n)
 * [nikammerlaan](https://github.com/nikammerlaan)
 * [ByteAlex](https://github.com/ByteAlex)
 * [Shadorc](https://github.com/Shadorc)
