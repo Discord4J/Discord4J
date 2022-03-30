@@ -43,6 +43,21 @@ public interface DataAccessor {
     Mono<Long> countChannelsInGuild(long guildId);
 
     /**
+     * Counts the number of stickers present in the store.
+     *
+     * @return A {@link Mono} emitting the sticker count
+     */
+    Mono<Long> countStickers();
+
+    /**
+     * Counts the number of stickers present in the store for the given guild ID.
+     *
+     * @param guildId the guild ID
+     * @return A {@link Mono} emitting the sticker count
+     */
+    Mono<Long> countStickersInGuild(long guildId);
+
+    /**
      * Counts the number of emojis present in the store.
      *
      * @return A {@link Mono} emitting the emoji count
@@ -186,6 +201,30 @@ public interface DataAccessor {
      * @return A {@link Mono} emitting the channel, or empty if not found
      */
     Mono<ChannelData> getChannelById(long channelId);
+
+    /**
+     * Retrieves data for all stickers present in the store.
+     *
+     * @return A {@link Flux} emitting the stickers, or empty if none is present
+     */
+    Flux<StickerData> getStickers();
+
+    /**
+     * Retrieves data for all stickers present in the store for the given guild ID.
+     *
+     * @param guildId the guild ID
+     * @return A {@link Flux} emitting the stickers, or empty if none is present
+     */
+    Flux<StickerData> getStickersInGuild(long guildId);
+
+    /**
+     * Retrieves data for the sticker corresponding to the given guild ID and sticker ID.
+     *
+     * @param guildId the guild ID
+     * @param stickerId the sticker ID
+     * @return A {@link Mono} emitting the sticker, or empty if not found
+     */
+    Mono<StickerData> getStickerById(long guildId, long stickerId);
 
     /**
      * Retrieves data for all emojis present in the store.

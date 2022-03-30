@@ -41,6 +41,7 @@ public class RestClient {
     private final AuditLogService auditLogService;
     private final ChannelService channelService;
     private final EmojiService emojiService;
+    private final StickerService stickerService;
     private final GatewayService gatewayService;
     private final GuildService guildService;
     private final InteractionService interactionService;
@@ -84,6 +85,7 @@ public class RestClient {
         this.auditLogService = new AuditLogService(router);
         this.channelService = new ChannelService(router);
         this.emojiService = new EmojiService(router);
+        this.stickerService = new StickerService(router);
         this.gatewayService = new GatewayService(router);
         this.guildService = new GuildService(router);
         this.interactionService = new InteractionService(router);
@@ -167,7 +169,30 @@ public class RestClient {
      */
     public RestEmoji restGuildEmoji(Snowflake guildId, EmojiData data) {
         return RestEmoji.create(this, guildId,
-                Snowflake.of(data.id().orElseThrow(() -> new IllegalArgumentException("Not a guild emoji"))));
+            Snowflake.of(data.id().orElseThrow(() -> new IllegalArgumentException("Not a guild emoji"))));
+    }
+
+    /**
+     * Requests to retrieve the guild sticker represented by the supplied IDs.
+     *
+     * @param guildId The ID of the guild.
+     * @param stickerId The ID of the sticker.
+     * @return A {@link RestSticker} as represented by the supplied IDs.
+     */
+    public RestSticker getGuildStickerById(final Snowflake guildId, final Snowflake stickerId) {
+        return RestSticker.create(this, guildId, stickerId);
+    }
+
+    /**
+     * Requests to retrieve the guild sticker represented by the supplied ID and {@link StickerData}.
+     *
+     * @param guildId The ID of the guild.
+     * @param data The data of the sticker.
+     * @return A {@link RestSticker} as represented by the supplied parameters.
+     */
+    public RestSticker restGuildSticker(Snowflake guildId, StickerData data) {
+        return RestSticker.create(this, guildId,
+            Snowflake.of(data.id()));
     }
 
     /**
@@ -423,6 +448,17 @@ public class RestClient {
      */
     public EmojiService getEmojiService() {
         return emojiService;
+    }
+
+    /**
+     * Access a low-level representation of the API endpoints for the Guild Sticker resource. It is recommended you use
+     * methods like {@link #getGuildStickerById(Snowflake, Snowflake)}, {@link #restGuildSticker(Snowflake, StickerData)} or
+     * {@link RestSticker#create(RestClient, Snowflake, Snowflake)}.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
+    public StickerService getStickerService() {
+        return stickerService;
     }
 
     /**

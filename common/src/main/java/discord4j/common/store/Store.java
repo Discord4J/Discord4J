@@ -89,6 +89,8 @@ public final class Store {
                     switch (action.getEntity()) {
                         case CHANNELS:
                             return dataAccessor.countChannelsInGuild(action.getGuildId());
+                        case STICKERS:
+                            return dataAccessor.countStickersInGuild(action.getGuildId());
                         case EMOJIS:
                             return dataAccessor.countEmojisInGuild(action.getGuildId());
                         case MEMBERS:
@@ -109,6 +111,8 @@ public final class Store {
                     switch (action.getEntity()) {
                         case CHANNELS:
                             return dataAccessor.countChannels();
+                        case STICKERS:
+                            return dataAccessor.countStickers();
                         case EMOJIS:
                             return dataAccessor.countEmojis();
                         case GUILDS:
@@ -132,6 +136,10 @@ public final class Store {
                 .map(GetChannelsAction.class, action -> dataAccessor.getChannels())
                 .map(GetChannelsInGuildAction.class, action -> dataAccessor.getChannelsInGuild(action.getGuildId()))
                 .map(GetChannelByIdAction.class, action -> dataAccessor.getChannelById(action.getChannelId()))
+                .map(GetStickersAction.class, action -> dataAccessor.getStickers())
+                .map(GetStickersInGuildAction.class, action -> dataAccessor.getStickersInGuild(action.getGuildId()))
+                .map(GetStickerByIdAction.class, action -> dataAccessor
+                    .getStickerById(action.getGuildId(), action.getStickerId()))
                 .map(GetEmojisAction.class, action -> dataAccessor.getEmojis())
                 .map(GetEmojisInGuildAction.class, action -> dataAccessor.getEmojisInGuild(action.getGuildId()))
                 .map(GetEmojiByIdAction.class, action -> dataAccessor
@@ -182,6 +190,8 @@ public final class Store {
                         .onGuildCreate(action.getShardIndex(), action.getGuildCreate()))
                 .map(GuildDeleteAction.class, action -> gatewayDataUpdater
                         .onGuildDelete(action.getShardIndex(), action.getGuildDelete()))
+                .map(GuildStickersUpdateAction.class, action -> gatewayDataUpdater
+                    .onGuildStickersUpdate(action.getShardIndex(), action.getGuildStickersUpdate()))
                 .map(GuildEmojisUpdateAction.class, action -> gatewayDataUpdater
                         .onGuildEmojisUpdate(action.getShardIndex(), action.getGuildEmojisUpdate()))
                 .map(GuildMemberAddAction.class, action -> gatewayDataUpdater

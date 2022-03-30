@@ -17,44 +17,44 @@
 
 package discord4j.core.spec;
 
-import discord4j.common.util.Snowflake;
-import discord4j.core.object.entity.GuildEmoji;
-import discord4j.discordjson.json.GuildEmojiModifyRequest;
-import discord4j.discordjson.possible.Possible;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.GuildSticker;
+import discord4j.discordjson.json.GuildStickerCreateRequest;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.stream.Collectors;
+@Value.Immutable
+interface GuildStickerCreateSpecGenerator extends AuditSpec<GuildStickerCreateRequest> {
 
-import static discord4j.core.spec.InternalSpecUtils.mapPossible;
+    String name();
 
-@Value.Immutable(singleton = true)
-interface GuildEmojiEditSpecGenerator extends AuditSpec<GuildEmojiModifyRequest> {
+    String description();
 
-    Possible<String> name();
+    String tags();
 
-    Possible<List<Snowflake>> roles();
+    String file();
 
     @Override
-    default GuildEmojiModifyRequest asRequest() {
-        return GuildEmojiModifyRequest.builder()
+    default GuildStickerCreateRequest asRequest() {
+        return GuildStickerCreateRequest.builder()
                 .name(name())
-                .roles(mapPossible(roles(), r -> r.stream().map(Snowflake::asString).collect(Collectors.toList())))
+                .description(description())
+                .tags(tags())
+                .file(file())
                 .build();
     }
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
-abstract class GuildEmojiEditMonoGenerator extends Mono<GuildEmoji> implements GuildEmojiEditSpecGenerator {
+abstract class GuildStickerCreateMonoGenerator extends Mono<GuildSticker> implements GuildStickerCreateSpecGenerator {
 
-    abstract GuildEmoji guildEmoji();
+    abstract Guild guild();
 
     @Override
-    public void subscribe(CoreSubscriber<? super GuildEmoji> actual) {
-        guildEmoji().edit(GuildEmojiEditSpec.copyOf(this)).subscribe(actual);
+    public void subscribe(CoreSubscriber<? super GuildSticker> actual) {
+        guild().createSticker(GuildStickerCreateSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override

@@ -17,44 +17,42 @@
 
 package discord4j.core.spec;
 
-import discord4j.common.util.Snowflake;
-import discord4j.core.object.entity.GuildEmoji;
-import discord4j.discordjson.json.GuildEmojiModifyRequest;
+import discord4j.core.object.entity.GuildSticker;
+import discord4j.discordjson.json.GuildStickerModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static discord4j.core.spec.InternalSpecUtils.mapPossible;
-
 @Value.Immutable(singleton = true)
-interface GuildEmojiEditSpecGenerator extends AuditSpec<GuildEmojiModifyRequest> {
+interface GuildStickerEditSpecGenerator extends AuditSpec<GuildStickerModifyRequest> {
 
     Possible<String> name();
 
-    Possible<List<Snowflake>> roles();
+    Possible<String> description();
+
+    Possible<String> tags();
 
     @Override
-    default GuildEmojiModifyRequest asRequest() {
-        return GuildEmojiModifyRequest.builder()
+    default GuildStickerModifyRequest asRequest() {
+        return GuildStickerModifyRequest.builder()
                 .name(name())
-                .roles(mapPossible(roles(), r -> r.stream().map(Snowflake::asString).collect(Collectors.toList())))
+                .description(description())
+                .tags(tags())
                 .build();
     }
+
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
-abstract class GuildEmojiEditMonoGenerator extends Mono<GuildEmoji> implements GuildEmojiEditSpecGenerator {
+abstract class GuildStickerEditMonoGenerator extends Mono<GuildSticker> implements GuildStickerEditSpecGenerator {
 
-    abstract GuildEmoji guildEmoji();
+    abstract GuildSticker sticker();
 
     @Override
-    public void subscribe(CoreSubscriber<? super GuildEmoji> actual) {
-        guildEmoji().edit(GuildEmojiEditSpec.copyOf(this)).subscribe(actual);
+    public void subscribe(CoreSubscriber<? super GuildSticker> actual) {
+        sticker().edit(GuildStickerEditSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override

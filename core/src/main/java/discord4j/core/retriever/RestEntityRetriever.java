@@ -60,6 +60,13 @@ public class RestEntityRetriever implements EntityRetriever {
     }
 
     @Override
+    public Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId) {
+        return rest.getStickerService()
+            .getGuildSticker(guildId.asLong(), stickerId.asLong())
+            .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
+    }
+
+    @Override
     public Mono<GuildEmoji> getGuildEmojiById(Snowflake guildId, Snowflake emojiId) {
         return rest.getEmojiService()
                 .getGuildEmoji(guildId.asLong(), emojiId.asLong())
@@ -146,6 +153,13 @@ public class RestEntityRetriever implements EntityRetriever {
         return rest.getEmojiService()
                 .getGuildEmojis(guildId.asLong())
                 .map(data -> new GuildEmoji(gateway, data, guildId.asLong()));
+    }
+
+    @Override
+    public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
+        return rest.getStickerService()
+            .getGuildStickers(guildId.asLong())
+            .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
     }
 
     private GuildData toGuildData(GuildUpdateData guild) {

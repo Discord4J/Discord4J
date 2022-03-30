@@ -18,29 +18,17 @@
 package discord4j.common.store.action.read;
 
 import discord4j.common.store.api.StoreAction;
+import discord4j.discordjson.json.StickerData;
 
-public class CountTotalAction implements StoreAction<Long> {
+public class GetStickersInGuildAction implements StoreAction<StickerData> {
 
-    public enum CountableEntity {
-        CHANNELS,
-        STICKERS,
-        EMOJIS,
-        GUILDS,
-        MEMBERS,
-        MESSAGES,
-        PRESENCES,
-        ROLES,
-        USERS,
-        VOICE_STATES
+    private final long guildId;
+
+    GetStickersInGuildAction(long guildId) {
+        this.guildId = guildId;
     }
 
-    private final CountableEntity entity;
-
-    CountTotalAction(CountableEntity entity) {
-        this.entity = entity;
-    }
-
-    public CountableEntity getEntity() {
-        return entity;
+    public long getGuildId() {
+        return guildId;
     }
 }
