@@ -130,10 +130,10 @@ public final class Role implements Entity {
      */
     public Mono<Integer> getPosition() {
         return getGuild()
-            .flatMapMany(Guild::getRoles)
-            .transform(OrderUtil::orderRoles)
-            .collectList()
-            .map(roles -> roles.indexOf(this));
+                .flatMapMany(Guild::getRoles)
+                .transform(OrderUtil::orderRoles)
+                .collectList()
+                .map(roles -> roles.indexOf(this));
     }
 
     /**
@@ -166,10 +166,10 @@ public final class Role implements Entity {
      */
     public Mono<Integer> getPosition(EntityRetrievalStrategy retrievalStrategy) {
         return getGuild(retrievalStrategy)
-            .flatMapMany(guild -> guild.getRoles(retrievalStrategy))
-            .transform(OrderUtil::orderRoles)
-            .collectList()
-            .map(roles -> roles.indexOf(this));
+                .flatMapMany(guild -> guild.getRoles(retrievalStrategy))
+                .transform(OrderUtil::orderRoles)
+                .collectList()
+                .map(roles -> roles.indexOf(this));
     }
 
     /**
@@ -323,12 +323,12 @@ public final class Role implements Entity {
     @Deprecated
     public Mono<Role> edit(final Consumer<? super LegacyRoleEditSpec> spec) {
         return Mono.defer(
-            () -> {
-                LegacyRoleEditSpec mutatedSpec = new LegacyRoleEditSpec();
-                spec.accept(mutatedSpec);
-                return rest.edit(mutatedSpec.asRequest(), mutatedSpec.getReason())
-                    .map(bean -> new Role(gateway, bean, getGuildId().asLong()));
-            });
+                () -> {
+                    LegacyRoleEditSpec mutatedSpec = new LegacyRoleEditSpec();
+                    spec.accept(mutatedSpec);
+                    return rest.edit(mutatedSpec.asRequest(), mutatedSpec.getReason())
+                        .map(bean -> new Role(gateway, bean, getGuildId().asLong()));
+                });
     }
 
     /**
@@ -385,7 +385,7 @@ public final class Role implements Entity {
      */
     public Flux<Role> changePosition(final int position) {
         return rest.changePosition(position)
-            .map(data -> new Role(gateway, data, getGuildId().asLong()));
+                .map(data -> new Role(gateway, data, getGuildId().asLong()));
     }
 
     @Override
@@ -401,8 +401,8 @@ public final class Role implements Entity {
     @Override
     public String toString() {
         return "Role{" +
-            "data=" + data +
-            ", guildId=" + guildId +
-            '}';
+                "data=" + data +
+                ", guildId=" + guildId +
+                '}';
     }
 }
