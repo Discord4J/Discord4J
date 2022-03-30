@@ -15,32 +15,22 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.common.store.action.read;
+package discord4j.common.store.action.gateway;
 
-import discord4j.common.store.api.StoreAction;
+import discord4j.discordjson.json.StickerData;
+import discord4j.discordjson.json.gateway.GuildStickersUpdate;
+import java.util.Set;
 
-public class CountTotalAction implements StoreAction<Long> {
+public class GuildStickersUpdateAction extends ShardAwareAction<Set<StickerData>> {
 
-    public enum CountableEntity {
-        CHANNELS,
-        STICKERS,
-        EMOJIS,
-        GUILDS,
-        MEMBERS,
-        MESSAGES,
-        PRESENCES,
-        ROLES,
-        USERS,
-        VOICE_STATES
+    private final GuildStickersUpdate guildStickersUpdate;
+
+    GuildStickersUpdateAction(int shardIndex, GuildStickersUpdate guildStickersUpdate) {
+        super(shardIndex);
+        this.guildStickersUpdate = guildStickersUpdate;
     }
 
-    private final CountableEntity entity;
-
-    CountTotalAction(CountableEntity entity) {
-        this.entity = entity;
-    }
-
-    public CountableEntity getEntity() {
-        return entity;
+    public GuildStickersUpdate getGuildStickersUpdate() {
+        return guildStickersUpdate;
     }
 }

@@ -89,6 +89,18 @@ public interface GatewayDataUpdater {
     Mono<GuildData> onGuildDelete(int shardIndex, GuildDelete dispatch);
 
     /**
+     * Updates the internal state of the store according to the given {@link GuildStickersUpdate} gateway dispatch.
+     * This will typically perform an update operation on a related collection of {@link StickerData} that is already
+     * present in the store, and update the list returned by {@link GuildData#stickers()}.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
+     * set of {@link StickerData} before the update
+     */
+    Mono<Set<StickerData>> onGuildStickersUpdate(int shardIndex, GuildStickersUpdate dispatch);
+
+    /**
      * Updates the internal state of the store according to the given {@link GuildEmojisUpdate} gateway dispatch.
      * This will typically perform an update operation on a related collection of {@link EmojiData} that is already
      * present in the store, and update the list returned by {@link GuildData#emojis()}.

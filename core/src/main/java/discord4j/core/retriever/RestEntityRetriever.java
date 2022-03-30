@@ -18,13 +18,7 @@ package discord4j.core.retriever;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.GuildEmoji;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.StageInstance;
-import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.util.EntityUtil;
@@ -68,6 +62,13 @@ public class RestEntityRetriever implements EntityRetriever {
                 .getGuild(guildId.asLong())
                 .map(this::toGuildData)
                 .map(data -> new Guild(gateway, data));
+    }
+
+    @Override
+    public Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId) {
+        return rest.getStickerService()
+            .getGuildSticker(guildId.asLong(), stickerId.asLong())
+            .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
     }
 
     @Override
@@ -157,6 +158,13 @@ public class RestEntityRetriever implements EntityRetriever {
         return rest.getEmojiService()
                 .getGuildEmojis(guildId.asLong())
                 .map(data -> new GuildEmoji(gateway, data, guildId.asLong()));
+    }
+
+    @Override
+    public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
+        return rest.getStickerService()
+            .getGuildStickers(guildId.asLong())
+            .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
     }
 
     private GuildData toGuildData(GuildUpdateData guild) {

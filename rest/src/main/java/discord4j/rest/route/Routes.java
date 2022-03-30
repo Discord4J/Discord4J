@@ -383,6 +383,66 @@ public abstract class Routes {
     public static final Route LIST_JOINED_PRIVATE_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/users/@me/threads/archived/private");
 
     ////////////////////////////////////////////
+    ////////////// Sticker Resource //////////////
+    ////////////////////////////////////////////
+
+    /**
+     * Returns a sticker object for the given sticker ID.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#get-sticker">
+     * https://discord.com/developers/docs/resources/sticker#get-sticker</a>
+     */
+    public static final Route STICKER_GET = Route.get("/stickers/{sticker.id}");
+
+    /**
+     * Returns the list of sticker packs available to Nitro subscribers.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs">
+     * https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs</a>
+     */
+    public static final Route NITRO_STICKER_PACKS_GET = Route.get("/sticker-packs");
+
+    /**
+     * Returns an array of sticker objects for the given guild. Includes user fields if the bot has the MANAGE_EMOJIS_AND_STICKERS permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#list-guild-stickers">
+     * https://discord.com/developers/docs/resources/sticker#list-guild-stickers</a>
+     */
+    public static final Route GUILD_STICKERS_GET = Route.get("/guilds/{guild.id}/stickers");
+
+    /**
+     * Returns a sticker object for the given guild and sticker IDs. Includes the user field if the bot has the MANAGE_EMOJIS_AND_STICKERS permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#get-guild-sticker">
+     * https://discord.com/developers/docs/resources/sticker#get-guild-sticker</a>
+     */
+    public static final Route GUILD_STICKER_GET = Route.get("/guilds/{guild.id}/stickers/{sticker.id}");
+
+    /**
+     * Create a new sticker for the guild. Send a multipart/form-data body. Requires the MANAGE_EMOJIS_AND_STICKERS permission. Returns the new sticker object on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#create-guild-sticker">
+     * https://discord.com/developers/docs/resources/sticker#create-guild-sticker</a>
+     */
+    public static final Route GUILD_STICKER_CREATE = Route.post("/guilds/{guild.id}/stickers");
+
+    /**
+     * Modify the given sticker. Requires the MANAGE_EMOJIS_AND_STICKERS permission. Returns the updated sticker object on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#modify-guild-sticker">
+     * https://discord.com/developers/docs/resources/sticker#modify-guild-sticker</a>
+     */
+    public static final Route GUILD_STICKER_MODIFY = Route.patch("/guilds/{guild.id}/stickers/{sticker.id}");
+
+    /**
+     * Delete the given sticker. Requires the MANAGE_EMOJIS_AND_STICKERS permission. Returns 204 No Content on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#delete-guild-sticker">
+     * https://discord.com/developers/docs/resources/sticker#delete-guild-sticker</a>
+     */
+    public static final Route GUILD_STICKER_DELETE = Route.delete("/guilds/{guild.id}/stickers/{sticker.id}");
+
+    ////////////////////////////////////////////
     ////////////// Emoji Resource //////////////
     ////////////////////////////////////////////
 

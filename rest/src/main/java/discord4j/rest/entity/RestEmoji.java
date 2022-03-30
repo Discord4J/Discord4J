@@ -61,7 +61,7 @@ public class RestEmoji {
     /**
      * Returns the ID of the guild this emoji belongs to.
      *
-     * @return The ID of the the guild this emoji belongs to.
+     * @return The ID of the guild this emoji belongs to.
      */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);

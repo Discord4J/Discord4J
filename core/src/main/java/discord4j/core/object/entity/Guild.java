@@ -440,12 +440,65 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the guild's sticker's IDs.
+     *
+     * @return The guild's sticker's IDs.
+     */
+    public Set<Snowflake> getStickerIds() {
+        return data.stickers().toOptional().map(ids -> ids.stream().map(Snowflake::of).collect(Collectors.toSet())).orElse(Collections.emptySet());
+    }
+
+    /**
+     * Requests to retrieve the guild's stickers.
+     *
+     * @return A {@link Flux} that continually emits guild's {@link GuildSticker stickers}. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<GuildSticker> getStickers() {
+        return gateway.getGuildStickers(getId());
+    }
+
+    /**
      * Gets the guild's emoji's IDs.
      *
      * @return The guild's emoji's IDs.
      */
     public Set<Snowflake> getEmojiIds() {
         return data.emojis().stream().map(Snowflake::of).collect(Collectors.toSet());
+    }
+
+    /**
+     * Requests to retrieve the guild's stickers, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the stickers
+     * @return A {@link Flux} that continually emits guild's {@link GuildSticker stickers}. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<GuildSticker> getStickers(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildStickers(getId());
+    }
+
+    /**
+     * Requests to retrieve the guild sticker as represented by the supplied ID.
+     *
+     * @param id The ID of the guild sticker.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildSticker} as represented by the
+     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildSticker> getGuildStickerById(final Snowflake id) {
+        return gateway.getGuildStickerById(getId(), id);
+    }
+
+    /**
+     * Requests to retrieve the guild sticker as represented by the supplied ID, using the given retrieval strategy.
+     *
+     * @param id The ID of the guild sticker.
+     * @param retrievalStrategy the strategy to use to get the guild sticker
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildSticker} as represented by the
+     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildSticker> getGuildStickerById(final Snowflake id, EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildStickerById(getId(), id);
     }
 
     /**
@@ -1073,6 +1126,21 @@ public final class Guild implements Entity {
                 () -> gateway.getRestClient().getEmojiService()
                         .createGuildEmoji(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> new GuildEmoji(gateway, data, getId().asLong()));
+    }
+
+    /**
+     * Requests to create a sticker.
+     *
+     * @param spec an immutable object that specifies how to create the sticker
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link GuildSticker}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildSticker> createSticker(GuildStickerCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> gateway.getRestClient().getStickerService()
+                    .createGuildSticker(getId().asLong(), spec.asRequest(), spec.reason()))
+            .map(data -> new GuildSticker(gateway, data, getId().asLong()));
     }
 
     /**

@@ -54,6 +54,7 @@ public final class StateHolder {
     private final LongObjStore<ChannelData> channelStore;
     private final LongObjStore<GuildData> guildStore;
     private final LongObjStore<EmojiData> guildEmojiStore;
+    private final LongObjStore<StickerData> guildStickerStore;
     private final Store<LongLongTuple2, MemberData> memberStore;
     private final LongObjStore<MessageData> messageStore;
     private final Store<LongLongTuple2, PresenceData> presenceStore;
@@ -72,6 +73,9 @@ public final class StateHolder {
 
         guildStore = service.provideLongObjStore(GuildData.class);
         log.debug("Guild storage       : {}", guildStore);
+
+        guildStickerStore = service.provideLongObjStore(StickerData.class);
+        log.debug("Guild sticker storage : {}", guildStickerStore);
 
         guildEmojiStore = service.provideLongObjStore(EmojiData.class);
         log.debug("Guild emoji storage : {}", guildEmojiStore);
@@ -108,6 +112,10 @@ public final class StateHolder {
 
     public LongObjStore<GuildData> getGuildStore() {
         return guildStore;
+    }
+
+    public LongObjStore<StickerData> getGuildStickerStore() {
+        return guildStickerStore;
     }
 
     public LongObjStore<EmojiData> getGuildEmojiStore() {

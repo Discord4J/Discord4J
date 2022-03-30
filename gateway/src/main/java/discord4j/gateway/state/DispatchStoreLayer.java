@@ -52,6 +52,7 @@ public class DispatchStoreLayer {
         add(ChannelUpdate.class::isInstance, GatewayActions::channelUpdate);
         add(GuildCreate.class::isInstance, GatewayActions::guildCreate);
         add(GuildDelete.class::isInstance, GatewayActions::guildDelete);
+        add(GuildStickersUpdate.class::isInstance, GatewayActions::guildStickersUpdate);
         add(GuildEmojisUpdate.class::isInstance, GatewayActions::guildEmojisUpdate);
         add(GuildMemberAdd.class::isInstance, GatewayActions::guildMemberAdd);
         add(GuildMemberRemove.class::isInstance, GatewayActions::guildMemberRemove);

@@ -23,26 +23,10 @@ import discord4j.discordjson.json.StickerData;
 
 import java.util.*;
 
-public final class Sticker implements Entity {
-
-    /**
-     * The gateway associated to this object.
-     */
-    private final GatewayDiscordClient gateway;
-
-    /**
-     * The raw data as represented by Discord.
-     */
-    private final StickerData data;
+public class Sticker extends PartialSticker {
 
     public Sticker(final GatewayDiscordClient gateway, final StickerData data) {
-        this.gateway = Objects.requireNonNull(gateway);
-        this.data = Objects.requireNonNull(data);
-    }
-
-    @Override
-    public Snowflake getId() {
-        return Snowflake.of(data.id());
+        super(gateway, data);
     }
 
     /**
@@ -51,34 +35,25 @@ public final class Sticker implements Entity {
      * @return The data of the sticker.
      */
     public StickerData getData() {
-        return data;
+        return (StickerData) super.getStickerData();
     }
 
     /**
-     * Gets the ID of the pack the sticker is from.
+     * Gets the ID of the pack the sticker is from, if present.
      *
-     * @return The ID of the pack the sticker is from.
+     * @return The ID of the pack the sticker is from, if present.
      */
-    public Snowflake getPackId() {
-        return Snowflake.of(data.packId());
+    public Optional<Snowflake> getPackId() {
+        return getData().packId().toOptional().map(Snowflake::of);
     }
 
     /**
-     * Gets the name of the sticker.
+     * Gets the description of the sticker, if present.
      *
-     * @return The name of the sticker.
+     * @return The description of the sticker, if present.
      */
-    public String getName() {
-        return data.name();
-    }
-
-    /**
-     * Gets the description of the sticker.
-     *
-     * @return The description of the sticker;
-     */
-    public String getDescription() {
-        return data.description();
+    public Optional<String> getDescription() {
+        return getData().description();
     }
 
     /**
@@ -87,24 +62,29 @@ public final class Sticker implements Entity {
      * @return The list of tags for the sticker.
      */
     public List<String> getTags() {
-        return data.tags().toOptional()
+        return getData().tags().toOptional()
             .map(tags -> tags.split(", "))
             .map(Arrays::asList)
             .orElse(Collections.emptyList());
     }
 
     /**
-     * Gets the type of sticker format.
+     * Gets whether this sticker is available for use.
      *
-     * @return The type of sticker format.
+     * @return {@code true} if this sticker is available, {@code false} otherwise (due to loss of Server Boosts for example).
      */
-    public Format getFormatType() {
-        return Format.of(data.formatType());
+    public boolean isAvailable() {
+        return getData().available().toOptional()
+            .orElseThrow(IllegalStateException::new); // this should be safe
     }
 
-    @Override
-    public GatewayDiscordClient getClient() {
-        return gateway;
+    /**
+     * Gets the type of sticker.
+     *
+     * @return The type of sticker.
+     */
+    public Type getType() {
+        return Type.of(getData().type());
     }
 
     /**
@@ -164,6 +144,61 @@ public final class Sticker implements Entity {
                     return APNG;
                 case 3:
                     return LOTTIE;
+                default:
+                    return UNKNOWN;
+            }
+        }
+    }
+
+    /**
+     * The type of sticker.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-types">
+     *     Sticker Types</a>
+     */
+    public enum Type {
+        /**
+         * Unknown sticker type.
+         */
+        UNKNOWN(0),
+
+        /**
+         * Represents an official sticker in a pack, part of Nitro or in a removed purchasable pack.
+         */
+        STANDARD(1),
+
+        /**
+         * Represents a sticker uploaded to a Boosted guild for the guild's members.
+         */
+        GUILD(2);
+
+        /**
+         * The underlying value as represented by Discord.
+         */
+        private final int value;
+
+        /**
+         * Constructs a {@code Sticker.Type}.
+         */
+        Type(final int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        public static Type of(final int value) {
+            switch (value) {
+                case 1:
+                    return STANDARD;
+                case 2:
+                    return GUILD;
                 default:
                     return UNKNOWN;
             }
