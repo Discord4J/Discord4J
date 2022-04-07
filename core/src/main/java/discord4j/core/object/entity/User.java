@@ -201,7 +201,7 @@ public class User implements Entity {
      */
     public final Optional<String> getBannerUrl() {
         final boolean animated = hasAnimatedBanner();
-        return getAvatarUrl(animated ? GIF : PNG);
+        return getBannerUrl(animated ? GIF : PNG);
     }
 
     /**
