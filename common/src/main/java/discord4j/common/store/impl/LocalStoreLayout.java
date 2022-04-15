@@ -880,20 +880,20 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     private VoiceStateData saveOrRemoveVoiceState(long guildId, VoiceStateData voiceState) {
         Long2 voiceStateId = new Long2(guildId, voiceState.userId().asLong());
         GuildContent guildContent = computeGuildContent(guildId);
+        VoiceStateData old = voiceStates.remove(voiceStateId);
+        if (old != null && old.channelId().isPresent()) {
+            computeChannelContent(old.channelId().get().asLong()).voiceStateIds.remove(voiceStateId);
+        }
         if (voiceState.channelId().isPresent()) {
             guildContent.voiceStateIds.add(voiceStateId);
             computeChannelContent(voiceState.channelId().get().asLong()).voiceStateIds.add(voiceStateId);
-            return voiceStates.put(voiceStateId, ImmutableVoiceStateData.copyOf(voiceState)
+            voiceStates.put(voiceStateId, ImmutableVoiceStateData.copyOf(voiceState)
                     .withGuildId(guildId)
                     .withMember(Possible.absent()));
         } else {
             guildContent.voiceStateIds.remove(voiceStateId);
-            VoiceStateData old = voiceStates.remove(voiceStateId);
-            if (old != null && old.channelId().isPresent()) {
-                computeChannelContent(old.channelId().get().asLong()).voiceStateIds.remove(voiceStateId);
-            }
-            return old;
         }
+        return old;
     }
 
     @Nullable
