@@ -111,7 +111,7 @@ public class Integration implements Entity {
      * @return Whether the integration is enabled.
      */
     public boolean isEnabled() {
-        return data.enabled();
+        return data.enabled().toOptional().orElse(true);
     }
 
     /**
