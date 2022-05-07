@@ -64,7 +64,9 @@ public enum ActionType {
 
     AUTO_MODERATION_RULE_UPDATE(141),
 
-    AUTO_MODERATION_RULE_DELETE(142);
+    AUTO_MODERATION_RULE_DELETE(142),
+
+    AUTO_MODERATION_BLOCK_MESSAGE(143);
 
     /**
      * Gets the type of action. It is guaranteed that invoking {@link #getValue()} from the returned enum will equal
@@ -113,6 +115,7 @@ public enum ActionType {
             case 140: return AUTO_MODERATION_RULE_CREATE;
             case 141: return AUTO_MODERATION_RULE_UPDATE;
             case 142: return AUTO_MODERATION_RULE_DELETE;
+            case 143: return AUTO_MODERATION_BLOCK_MESSAGE;
             default: return UNKNOWN;
         }
     }
