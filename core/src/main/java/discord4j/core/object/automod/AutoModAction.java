@@ -23,7 +23,7 @@ public class AutoModAction {
     }
 
     public Type getType() {
-        return Type.of(data.actionType());
+        return Type.of(data.type());
     }
 
     public Object getMetadata() {

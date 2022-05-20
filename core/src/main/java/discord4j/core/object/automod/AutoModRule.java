@@ -2,13 +2,14 @@ package discord4j.core.object.automod;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Entity;
 import discord4j.discordjson.json.AutoModRuleData;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class AutoModRule {
+public class AutoModRule implements Entity {
 
     /**
      * The gateway associated to this object.
@@ -23,6 +24,24 @@ public class AutoModRule {
     public AutoModRule(final GatewayDiscordClient gateway, final AutoModRuleData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
+    }
+
+    @Override
+    public GatewayDiscordClient getClient() {
+        return gateway;
+    }
+
+    @Override
+    public Snowflake getId() {
+        return Snowflake.of(data.id());
+    }
+
+    public Snowflake getGuildId() {
+        return Snowflake.of(data.guildId());
+    }
+
+    public Snowflake getCreatorId() {
+        return Snowflake.of(data.creatorId());
     }
 
     /**
