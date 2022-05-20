@@ -77,7 +77,7 @@ public abstract class Routes {
     //////////////////////////////////////////////
 
     /**
-     * Returns an auto mod rule object for the guild. Requires the 'MANAGE_GUILD' permission.
+     * Returns a list of auto mod rule object for the guild. Requires the 'MANAGE_GUILD' permission.
      *
      * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#list-auto-moderation-rules-for-guild">
      * https://discord.com/developers/docs/resources/auto-moderation#list-auto-moderation-rules-for-guild</a>
