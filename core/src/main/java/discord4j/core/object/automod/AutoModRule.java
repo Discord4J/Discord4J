@@ -61,6 +61,10 @@ public class AutoModRule implements Entity {
         return TriggerType.of(data.triggerType());
     }
 
+    public AutoModRuleTriggerMetaData getTriggerMetaData() {
+        return new AutoModRuleTriggerMetaData(gateway, data.triggerMetadata());
+    }
+
     public EventType getEventType() {
         return EventType.of(data.eventType());
     }
@@ -86,13 +90,13 @@ public class AutoModRule implements Entity {
          */
         UNKNOWN(-1),
 
-        KEYWORDS(1),
+        KEYWORD(1),
 
-        HARMFUL_LINKS(2),
+        HARMFUL_LINK(2),
 
         SPAM(3),
 
-        DEFAULT_KEYWORD_LIST(4);
+        KEYWORD_PRESET(4);
 
         /**
          * The underlying value as represented by Discord.
@@ -126,10 +130,10 @@ public class AutoModRule implements Entity {
          */
         public static AutoModRule.TriggerType of(final int value) {
             switch (value) {
-                case 1: return KEYWORDS;
-                case 2: return HARMFUL_LINKS;
+                case 1: return KEYWORD;
+                case 2: return HARMFUL_LINK;
                 case 3: return SPAM;
-                case 4: return DEFAULT_KEYWORD_LIST;
+                case 4: return KEYWORD_PRESET;
                 default: return UNKNOWN;
             }
         }
