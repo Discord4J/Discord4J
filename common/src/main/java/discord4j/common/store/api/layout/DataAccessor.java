@@ -46,6 +46,7 @@ public interface DataAccessor {
      * Counts the number of stickers present in the store.
      *
      * @return A {@link Mono} emitting the sticker count
+     * @since 3.2.3
      */
     Mono<Long> countStickers();
 
@@ -54,6 +55,7 @@ public interface DataAccessor {
      *
      * @param guildId the guild ID
      * @return A {@link Mono} emitting the sticker count
+     * @since 3.2.3
      */
     Mono<Long> countStickersInGuild(long guildId);
 
@@ -206,6 +208,7 @@ public interface DataAccessor {
      * Retrieves data for all stickers present in the store.
      *
      * @return A {@link Flux} emitting the stickers, or empty if none is present
+     * @since 3.2.3
      */
     Flux<StickerData> getStickers();
 
@@ -214,6 +217,7 @@ public interface DataAccessor {
      *
      * @param guildId the guild ID
      * @return A {@link Flux} emitting the stickers, or empty if none is present
+     * @since 3.2.3
      */
     Flux<StickerData> getStickersInGuild(long guildId);
 
@@ -223,6 +227,7 @@ public interface DataAccessor {
      * @param guildId the guild ID
      * @param stickerId the sticker ID
      * @return A {@link Mono} emitting the sticker, or empty if not found
+     * @since 3.2.3
      */
     Mono<StickerData> getStickerById(long guildId, long stickerId);
 

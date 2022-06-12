@@ -18,13 +18,11 @@ package discord4j.core.object.component;
 
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.json.ComponentData;
-import discord4j.discordjson.json.ImmutableComponentData;
 import discord4j.discordjson.json.SelectOptionData;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 /**
@@ -71,6 +69,15 @@ public class SelectMenu extends ActionComponent {
      */
     public String getCustomId() {
         return getData().customId().toOptional().orElseThrow(IllegalStateException::new);
+    }
+
+    /**
+     * Gets the select menu values, if any. Can be present with an empty list if no value was selected.
+     *
+     * @return the select menu's value
+     */
+    public Optional<List<String>> getValues() {
+        return getData().values().toOptional();
     }
 
     /**
