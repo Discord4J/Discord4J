@@ -77,12 +77,44 @@ public abstract class Routes {
     //////////////////////////////////////////////
 
     /**
-     * Returns a list of auto mod rule object for the guild. Requires the 'MANAGE_GUILD' permission.
+     * Get a list of all rules currently configured for guild. Returns a list of auto moderation rule objects for the given guild. Requires the 'MANAGE_GUILD' permission.
      *
      * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#list-auto-moderation-rules-for-guild">
      * https://discord.com/developers/docs/resources/auto-moderation#list-auto-moderation-rules-for-guild</a>
      */
-    public static final Route AUTO_MOD_RULES_GET = Route.get("/guilds/{guild.id}/auto-moderation/rules/");
+    public static final Route AUTO_MOD_RULES_GET = Route.get("/guilds/{guild.id}/auto-moderation/rules");
+
+    /**
+     * Get a single rule. Returns an auto moderation rule object. Requires the 'MANAGE_GUILD' permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#get-auto-moderation-rule">
+     * https://discord.com/developers/docs/resources/auto-moderation#get-auto-moderation-rule</a>
+     */
+    public static final Route AUTO_MOD_RULE_GET = Route.get("/guilds/{guild.id}/auto-moderation/rules/{auto_moderation_rule.id}");
+
+    /**
+     * Create a new rule. Returns an auto moderation rule on success. Requires the 'MANAGE_GUILD' permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#create-auto-moderation-rule">
+     * https://discord.com/developers/docs/resources/auto-moderation#create-auto-moderation-rule</a>
+     */
+    public static final Route AUTO_MOD_RULE_CREATE = Route.post("/guilds/{guild.id}/auto-moderation/rules");
+
+    /**
+     * Modify an existing rule. Returns an auto moderation rule on success. Requires the 'MANAGE_GUILD' permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#modify-auto-moderation-rule">
+     * https://discord.com/developers/docs/resources/auto-moderation#modify-auto-moderation-rule</a>
+     */
+    public static final Route AUTO_MOD_RULE_MODIFY = Route.patch("/guilds/{guild.id}/auto-moderation/rules/{auto_moderation_rule.id}");
+
+    /**
+     * Delete a rule. Returns a 204 on success. Requires the 'MANAGE_GUILD' permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#delete-auto-moderation-rule">
+     * https://discord.com/developers/docs/resources/auto-moderation#delete-auto-moderation-rule</a>
+     */
+    public static final Route AUTO_MOD_RULE_DELETE = Route.patch("/guilds/{guild.id}/auto-moderation/rules/{auto_moderation_rule.id}");
 
     //////////////////////////////////////////////
     ////////////// Channel Resource //////////////
