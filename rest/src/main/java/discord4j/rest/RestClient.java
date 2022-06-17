@@ -51,6 +51,7 @@ public class RestClient {
     private final VoiceService voiceService;
     private final WebhookService webhookService;
     private final Mono<Long> applicationIdMono;
+    private final AutoModService autoModService;
 
     /**
      * Create a {@link RestClient} with default options, using the given token for authentication.
@@ -94,6 +95,7 @@ public class RestClient {
         this.userService = new UserService(router);
         this.voiceService = new VoiceService(router);
         this.webhookService = new WebhookService(router);
+        this.autoModService = new AutoModService(router);
 
         this.applicationIdMono = getApplicationInfo()
                 .map(app -> Snowflake.asLong(app.id()))
