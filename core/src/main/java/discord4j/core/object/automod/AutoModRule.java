@@ -3,7 +3,9 @@ package discord4j.core.object.automod;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
+import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.AutoModRuleData;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Objects;
@@ -42,6 +44,16 @@ public class AutoModRule implements Entity {
 
     public Snowflake getCreatorId() {
         return Snowflake.of(data.creatorId());
+    }
+
+    /**
+     * Requests to retrieve the {@link User} who has created this rule.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User} that has started typing.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<User> getCreatorUser() {
+        return getClient().getUserById(getCreatorId());
     }
 
     /**
@@ -129,13 +141,12 @@ public class AutoModRule implements Entity {
          * @return The type of message.
          */
         public static AutoModRule.TriggerType of(final int value) {
-            switch (value) {
-                case 1: return KEYWORD;
-                case 2: return HARMFUL_LINK;
-                case 3: return SPAM;
-                case 4: return KEYWORD_PRESET;
-                default: return UNKNOWN;
+            for (AutoModRule.TriggerType type : values()) {
+                if (type.getValue() == value) {
+                    return type;
+                }
             }
+            return UNKNOWN;
         }
     }
 
@@ -148,6 +159,9 @@ public class AutoModRule implements Entity {
          */
         UNKNOWN(-1),
 
+        /**
+         * When a member sends or edits a message in the guild
+         */
         MESSAGE_SEND(1);
 
         /**
