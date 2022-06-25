@@ -17,7 +17,6 @@
 package discord4j.rest.service;
 
 import discord4j.discordjson.json.*;
-import discord4j.rest.request.DiscordWebResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import discord4j.rest.util.WebhookMultipartRequest;
@@ -89,18 +88,13 @@ public class WebhookService extends RestService {
      */
     @Deprecated
     public Mono<MessageData> executeWebhook(long webhookId, String token, boolean wait, WebhookMultipartRequest request) {
-        DiscordWebResponse response = Routes.WEBHOOK_EXECUTE
+        return Routes.WEBHOOK_EXECUTE
             .newRequest(webhookId, token)
             .query("wait", wait)
             .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
             .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getExecuteRequest() : request))
-            .exchange(getRouter());
-
-        if (wait) {
-            return response.bodyToMono(MessageData.class);
-        } else {
-            return response.bodyToMono(Void.class).cast(MessageData.class);
-        }
+            .exchange(getRouter())
+            .bodyToMono(MessageData.class);
     }
 
     public Mono<MessageData> getWebhookMessage(long webhookId, String webhookToken, String messageId) {
