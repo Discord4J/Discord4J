@@ -17,6 +17,7 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.object.entity.Webhook;
+import discord4j.core.spec.StartThreadWithoutMessageSpec;
 import discord4j.core.spec.WebhookCreateMono;
 import discord4j.core.spec.WebhookCreateSpec;
 import discord4j.core.spec.legacy.LegacyWebhookCreateSpec;
@@ -96,5 +97,18 @@ public interface TopLevelGuildMessageChannel extends CategorizableChannel, Guild
         return getClient().getRestClient().getWebhookService()
                 .getChannelWebhooks(getId().asLong())
                 .map(data -> new Webhook(getClient(), data));
+    }
+
+    /**
+     * Creates a new thread that is not connected to an existing message.
+     *
+     * @param spec an immutable object that specifies how to create the thread
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link ThreadChannel}.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    default Mono<ThreadChannel> startThread(StartThreadWithoutMessageSpec spec) {
+        return getClient().getRestClient().getChannelService()
+                .startThreadWithoutMessage(getId().asLong(), spec.asRequest())
+                .map(data -> new ThreadChannel(getClient(), data));
     }
 }
