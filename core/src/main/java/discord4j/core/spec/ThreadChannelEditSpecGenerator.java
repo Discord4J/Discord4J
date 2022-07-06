@@ -37,17 +37,7 @@ interface ThreadChannelEditSpecGenerator extends AuditSpec<ThreadModifyRequest> 
 
     Possible<String> name();
 
-    Possible<Integer> position();
-
-    Possible<String> topic();
-
     Possible<Integer> rateLimitPerUser();
-
-    Possible<Boolean> nsfw();
-
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
-
-    Possible<Optional<Snowflake>> parentId();
 
     Possible<Boolean> archived();
 
@@ -61,14 +51,7 @@ interface ThreadChannelEditSpecGenerator extends AuditSpec<ThreadModifyRequest> 
     default ThreadModifyRequest asRequest() {
         return ThreadModifyRequest.builder()
             .name(name())
-            .position(position())
-            .topic(topic())
             .rateLimitPerUser(rateLimitPerUser())
-            .nsfw(nsfw())
-            .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
-                .map(PermissionOverwrite::getData)
-                .collect(Collectors.toList())))
-            .parentId(mapPossibleOptional(parentId(), Snowflake::asString))
             .archived(archived())
             .autoArchiveDuration(mapPossible(autoArchiveDuration(), ThreadChannel.AutoArchiveDuration::getValue))
             .locked(locked())
