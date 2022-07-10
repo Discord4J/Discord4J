@@ -22,11 +22,9 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.discordjson.json.ApplicationCommandData;
+import discord4j.rest.util.PermissionSet;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -70,6 +68,24 @@ public class ApplicationCommand implements DiscordObject {
     }
 
     /**
+     * Gets the version of the command.
+     *
+     * @return The version of the command
+     */
+    public Snowflake getVersion() {
+        return Snowflake.of(data.version());
+    }
+
+    /**
+     * Gets the id of the guild if the command is guild scoped.
+     *
+     * @return The id of the guild
+     */
+    public Optional<Snowflake> getGuildId() {
+        return data.guildId().toOptional().map(Snowflake::of);
+    }
+
+    /**
      * Gets the type of the command.
      *
      * @return The type of the command.
@@ -100,12 +116,41 @@ public class ApplicationCommand implements DiscordObject {
     }
 
     /**
+     * Gets the Locale and name of the command.
+     *
+     * @return The locales and names of the command.
+     */
+    public Map<Locale, String> getLocalizedNames() {
+        return data.nameLocalizations().toOptional().orElse(new HashMap<>())
+                .entrySet().stream().collect(Collectors.toMap(entry -> new Locale.Builder().setLanguageTag(entry.getKey()).build(), Map.Entry::getValue));
+    }
+
+    /**
      * Gets description of the command.
      *
      * @return The description of the command.
      */
     public String getDescription() {
         return data.description();
+    }
+
+    /**
+     * Gets the Locale and description of the command.
+     *
+     * @return The locales and descriptions of the command.
+     */
+    public Map<Locale, String> getLocalizedDescriptions() {
+        return data.descriptionLocalizations().toOptional().orElse(new HashMap<>())
+                .entrySet().stream().collect(Collectors.toMap(entry -> new Locale.Builder().setLanguageTag(entry.getKey()).build(), Map.Entry::getValue));
+    }
+
+    /**
+     * Gets the default permissions assigned to this Application Command for member.
+     *
+     * @return The permissions assigned to this Application Command.
+     */
+    public PermissionSet getDefaultMemberPermissions() {
+        return data.defaultMemberPermissions().map(Long::parseLong).map(PermissionSet::of).orElse(PermissionSet.none());
     }
 
     /**
@@ -129,6 +174,15 @@ public class ApplicationCommand implements DiscordObject {
         return getOptions().stream()
                 .filter(option -> option.getName().equals(name))
                 .findFirst();
+    }
+
+    /**
+     * Gets if the command is available in DM, this only for global commands.
+     *
+     * @return {@code true} if the command is available in DM, {@code false} otherwise.
+     */
+    public boolean isAvailableInDM() {
+        return data.dmPermission().toOptional().orElse(this.getGuildId().isEmpty());
     }
 
     @Override
