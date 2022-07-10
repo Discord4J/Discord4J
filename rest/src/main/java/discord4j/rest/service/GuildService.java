@@ -118,12 +118,12 @@ public class GuildService extends RestService {
                 .bodyToMono(MemberData.class);
     }
 
-    public Mono<Void> modifyGuildMember(long guildId, long userId, GuildMemberModifyRequest request, @Nullable String reason) {
+    public Mono<MemberData> modifyGuildMember(long guildId, long userId, GuildMemberModifyRequest request, @Nullable String reason) {
         return Routes.GUILD_MEMBER_MODIFY.newRequest(guildId, userId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
-                .bodyToMono(Void.class);
+                .bodyToMono(MemberData.class);
     }
 
     public Mono<NicknameModifyData> modifyOwnNickname(long guildId, NicknameModifyData request) {
@@ -273,15 +273,6 @@ public class GuildService extends RestService {
             .flatMapMany(Flux::fromArray);
     }
 
-    @Deprecated
-    public Flux<IntegrationData> getGuildIntegrations(long guildId, boolean includeApplications) {
-        return Routes.GUILD_INTEGRATIONS_GET.newRequest(guildId)
-                .query("include_applications", includeApplications)
-                .exchange(getRouter())
-                .bodyToMono(IntegrationData[].class)
-                .flatMapMany(Flux::fromArray);
-    }
-
     public Mono<Void> createGuildIntegration(long guildId, IntegrationCreateRequest request) {
         return Routes.GUILD_INTEGRATION_CREATE.newRequest(guildId)
                 .body(request)
@@ -308,31 +299,10 @@ public class GuildService extends RestService {
                 .bodyToMono(Void.class);
     }
 
-    /**
-     * @deprecated Use {@code GuildService#getGuildWidget} instead.
-     */
-    @Deprecated
-    public Mono<GuildEmbedData> getGuildEmbed(long guildId) {
-        return Routes.GUILD_EMBED_GET.newRequest(guildId)
-                .exchange(getRouter())
-                .bodyToMono(GuildEmbedData.class);
-    }
-
     public Mono<GuildWidgetData> getGuildWidget(long guildId) {
         return Routes.GUILD_WIDGET_GET.newRequest(guildId)
                 .exchange(getRouter())
                 .bodyToMono(GuildWidgetData.class);
-    }
-
-    /**
-     * @deprecated Use {@code GuildService#modifyGuildEmbed} instead.
-     */
-    @Deprecated
-    public Mono<GuildEmbedData> modifyGuildEmbed(long guildId, GuildEmbedModifyRequest request) {
-        return Routes.GUILD_EMBED_MODIFY.newRequest(guildId)
-                .body(request)
-                .exchange(getRouter())
-                .bodyToMono(GuildEmbedData.class);
     }
 
     public Mono<GuildWidgetData> modifyGuildWidget(long guildId, GuildWidgetModifyRequest request) {

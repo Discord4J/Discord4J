@@ -95,7 +95,8 @@ public class ReactorResources {
         }
 
         /**
-         * Sets the underlying {@link HttpClient} to use.
+         * Sets the underlying {@link HttpClient} to use. A default can be created from
+         * {@link ReactorResources#DEFAULT_HTTP_CLIENT}.
          *
          * @return This builder, for chaining.
          */
@@ -105,7 +106,8 @@ public class ReactorResources {
         }
 
         /**
-         * Sets the time-capable {@link Scheduler} to use.
+         * Sets the time-capable {@link Scheduler} to use. A default can be created from
+         * {@link ReactorResources#DEFAULT_TIMER_TASK_SCHEDULER}.
          *
          * @return This builder, for chaining.
          */
@@ -115,7 +117,8 @@ public class ReactorResources {
         }
 
         /**
-         * Sets the {@link Scheduler} to use for potentially blocking tasks.
+         * Sets the {@link Scheduler} to use for potentially blocking tasks. A default can be created from
+         * {@link ReactorResources#DEFAULT_BLOCKING_TASK_SCHEDULER}.
          *
          * @return This builder, for chaining.
          */
@@ -163,17 +166,27 @@ public class ReactorResources {
     }
 
     /**
+     * Create a Reactor Netty {@link HttpClient} using the given connection pool.
+     * <p>Use this in case you want dedicated resources for a particular client or clients instead of the global
+     * default.
+     *
+     * @param provider the connection pool provider to use
+     * @return an {@link HttpClient} configured with custom resources
+     */
+    public static HttpClient newHttpClient(ConnectionProvider provider) {
+        return HttpClient.create(provider).compress(true).followRedirect(true).secure();
+    }
+
+    /**
      * Create a Reactor Netty {@link HttpClient} using the given connection pool and event loop threads.
      * <p>Use this in case you want dedicated resources for a particular client or clients instead of the global
-     * default. Requires externally disposing of the given parameters on
-     * application shutdown, through {@link ConnectionProvider#dispose()} and
-     * {@link LoopResources#dispose()}.
+     * default.
      *
      * @param provider the connection pool provider to use
      * @param resources the set of event loop threads to use
      * @return an {@link HttpClient} configured with custom resources
      */
     public static HttpClient newHttpClient(ConnectionProvider provider, LoopResources resources) {
-        return HttpClient.create(provider).tcpConfiguration(tcpClient -> tcpClient.runOn(resources));
+        return HttpClient.create(provider).runOn(resources).compress(true).followRedirect(true).secure();
     }
 }

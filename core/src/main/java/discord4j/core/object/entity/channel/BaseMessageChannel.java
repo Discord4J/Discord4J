@@ -21,6 +21,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.core.spec.legacy.LegacyMessageCreateSpec;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.possible.Possible;
@@ -34,6 +35,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -74,15 +76,31 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     }
 
     @Override
-    public final Mono<Message> createMessage(final Consumer<? super MessageCreateSpec> spec) {
+    public final Mono<Message> createMessage(final Consumer<? super LegacyMessageCreateSpec> spec) {
         return Mono.defer(
                 () -> {
-                    MessageCreateSpec mutatedSpec = new MessageCreateSpec();
+                    LegacyMessageCreateSpec mutatedSpec = new LegacyMessageCreateSpec();
                     getClient().getRestClient().getRestResources()
                             .getAllowedMentions()
                             .ifPresent(mutatedSpec::setAllowedMentions);
                     spec.accept(mutatedSpec);
                     return getRestChannel().createMessage(mutatedSpec.asRequest());
+                })
+                .map(data -> new Message(getClient(), data));
+    }
+
+    @Override
+    public Mono<Message> createMessage(MessageCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> {
+                    MessageCreateSpec actualSpec = getClient().getRestClient()
+                            .getRestResources()
+                            .getAllowedMentions()
+                            .filter(allowedMentions -> !spec.isAllowedMentionsPresent())
+                            .map(spec::withAllowedMentions)
+                            .orElse(spec);
+                    return getRestChannel().createMessage(actualSpec.asRequest());
                 })
                 .map(data -> new Message(getClient(), data));
     }

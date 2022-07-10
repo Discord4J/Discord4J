@@ -69,10 +69,10 @@ public class ChannelService extends RestService {
                 .bodyToMono(MessageData.class);
     }
 
-    public Mono<MessageData> createMessage(long channelId, MultipartRequest request) {
+    public Mono<MessageData> createMessage(long channelId, MultipartRequest<MessageCreateRequest> request) {
         return Routes.MESSAGE_CREATE.newRequest(channelId)
                 .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
-                .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getCreateRequest() : request))
+                .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
                 .exchange(getRouter())
                 .bodyToMono(MessageData.class);
     }
@@ -116,9 +116,10 @@ public class ChannelService extends RestService {
                 .bodyToMono(Void.class);
     }
 
-    public Mono<MessageData> editMessage(long channelId, long messageId, MessageEditRequest request) {
+    public Mono<MessageData> editMessage(long channelId, long messageId, MultipartRequest<MessageEditRequest> request) {
         return Routes.MESSAGE_EDIT.newRequest(channelId, messageId)
-                .body(request)
+                .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
+                .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
                 .exchange(getRouter())
                 .bodyToMono(MessageData.class);
     }

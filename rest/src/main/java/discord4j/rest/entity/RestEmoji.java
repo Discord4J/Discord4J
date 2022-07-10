@@ -25,6 +25,8 @@ import discord4j.rest.util.Permission;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.Objects;
+
 /**
  * Represents a guild emoji entity in Discord.
  */
@@ -59,7 +61,7 @@ public class RestEmoji {
     /**
      * Returns the ID of the guild this emoji belongs to.
      *
-     * @return The ID of the the guild this emoji belongs to.
+     * @return The ID of the guild this emoji belongs to.
      */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
@@ -115,5 +117,18 @@ public class RestEmoji {
      */
     public Mono<Void> delete(@Nullable String reason) {
         return restClient.getEmojiService().deleteGuildEmoji(guildId, id, reason);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RestEmoji restEmoji = (RestEmoji) o;
+        return guildId == restEmoji.guildId && id == restEmoji.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(guildId, id);
     }
 }

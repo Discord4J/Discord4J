@@ -17,20 +17,22 @@
 
 package discord4j.core;
 
-import discord4j.core.command.CommandListener;
-import discord4j.core.support.Commands;
+import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 public class ExampleLogin {
 
+    private static final Logger log = Loggers.getLogger(ExampleLogin.class);
+
     public static void main(String[] args) {
         GatewayDiscordClient client = DiscordClient.create(System.getenv("token"))
+                .gateway()
+                .withEventDispatcher(d -> d.on(ReadyEvent.class)
+                        .doOnNext(readyEvent -> log.info("Ready: {}", readyEvent.getShardInfo())))
                 .login()
                 .block();
 
-        client.on(CommandListener.createWithPrefix("!!")
-                .on("echo", Commands::echo)
-                .on("exit", ctx -> ctx.getClient().logout())
-                .on("status", Commands::status))
-                .blockLast();
+        client.onDisconnect().block();
     }
 }

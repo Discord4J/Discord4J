@@ -16,13 +16,13 @@
  */
 package discord4j.gateway.json.jackson;
 
-import discord4j.discordjson.json.gateway.*;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import discord4j.discordjson.json.gateway.*;
 import discord4j.gateway.json.GatewayPayload;
-import discord4j.gateway.json.dispatch.*;
+import discord4j.gateway.json.dispatch.EventNames;
 import reactor.util.annotation.Nullable;
 
 import java.io.IOException;
@@ -86,6 +86,7 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         dispatchTypes.put(EventNames.INTEGRATION_CREATE, null);
         dispatchTypes.put(EventNames.INTEGRATION_UPDATE, null);
         dispatchTypes.put(EventNames.INTEGRATION_DELETE, null);
+        dispatchTypes.put(EventNames.GUILD_JOIN_REQUEST_DELETE, null);
     }
 
     public PayloadDeserializer() {

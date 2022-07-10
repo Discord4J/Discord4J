@@ -33,42 +33,6 @@ import java.util.stream.Collectors;
 
 public class Activity {
 
-    public static ActivityUpdateRequest playing(String name) {
-        return ActivityUpdateRequest.builder()
-                .name(name)
-                .type(Type.PLAYING.getValue())
-                .build();
-    }
-
-    public static ActivityUpdateRequest streaming(String name, String url) {
-        return ActivityUpdateRequest.builder()
-                .name(name)
-                .type(Type.STREAMING.getValue())
-                .url(url)
-                .build();
-    }
-
-    public static ActivityUpdateRequest listening(String name) {
-        return ActivityUpdateRequest.builder()
-                .name(name)
-                .type(Type.LISTENING.getValue())
-                .build();
-    }
-
-    public static ActivityUpdateRequest watching(String name) {
-        return ActivityUpdateRequest.builder()
-                .name(name)
-                .type(Type.WATCHING.getValue())
-                .build();
-    }
-
-    public static ActivityUpdateRequest competing(String name) {
-        return ActivityUpdateRequest.builder()
-            .name(name)
-            .type(Type.COMPETING.getValue())
-            .build();
-    }
-
     private final ActivityData data;
 
     Activity(final ActivityData data) {
@@ -376,12 +340,17 @@ public class Activity {
 
     public enum Flag {
 
-        INSTANCE(1),
-        JOIN(2),
-        SPECTATE(4),
-        JOIN_REQUEST(8),
-        SYNC(16),
-        PLAY(32);
+        UNKNOWN(0),
+
+        INSTANCE(1 << 0),
+        JOIN(1 << 1),
+        SPECTATE(1 << 2),
+        JOIN_REQUEST(1 << 3),
+        SYNC(1 << 4),
+        PLAY(1 << 5),
+        PARTY_PRIVACY_FRIENDS(1 << 6),
+        PARTY_PRIVACY_VOICE_CHANNEL(1 << 7),
+        EMBEDDED(1 << 8),;
 
         private final int value;
 
@@ -395,13 +364,16 @@ public class Activity {
 
         public static Flag of(final int value) {
             switch (value) {
-                case 1: return INSTANCE;
-                case 2: return JOIN;
-                case 4: return SPECTATE;
-                case 8: return JOIN_REQUEST;
-                case 16: return SYNC;
-                case 32: return PLAY;
-                default: return EntityUtil.throwUnsupportedDiscordValue(value);
+                case 1 << 0: return INSTANCE;
+                case 1 << 1: return JOIN;
+                case 1 << 2: return SPECTATE;
+                case 1 << 3: return JOIN_REQUEST;
+                case 1 << 4: return SYNC;
+                case 1 << 5: return PLAY;
+                case 1 << 6: return PARTY_PRIVACY_FRIENDS;
+                case 1 << 7: return PARTY_PRIVACY_VOICE_CHANNEL;
+                case 1 << 8: return EMBEDDED;
+                default: return UNKNOWN;
             }
         }
     }

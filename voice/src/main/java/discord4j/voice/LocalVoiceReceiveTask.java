@@ -27,6 +27,7 @@ import reactor.util.Loggers;
 /**
  * A receive task that can locally consume audio packets and pass them to an {@link AudioReceiver}.
  */
+@SuppressWarnings("deprecation")
 public class LocalVoiceReceiveTask implements Disposable {
 
     private static final Logger log = Loggers.getLogger(LocalVoiceReceiveTask.class);
@@ -36,16 +37,19 @@ public class LocalVoiceReceiveTask implements Disposable {
     public LocalVoiceReceiveTask(Scheduler scheduler, Flux<ByteBuf> in, PacketTransformer transformer,
                                  AudioReceiver receiver) {
         this.task = in
-                .flatMap(packet -> Mono.justOrEmpty(transformer.nextReceive(packet)))
-                .map(buf -> {
-                    if (receiver != AudioReceiver.NO_OP) {
-                        receiver.getBuffer().put(buf);
-                        receiver.getBuffer().flip();
-                        receiver.receive();
-                    }
-                    return buf;
-                })
-                .onErrorContinue((t, o) -> log.error("Error while receiving audio", t))
+                .flatMap(packet -> Mono.fromCallable(() -> transformer.nextReceive(packet))
+                        .map(buf -> {
+                            if (receiver != AudioReceiver.NO_OP) {
+                                receiver.getBuffer().put(buf);
+                                receiver.getBuffer().flip();
+                                receiver.receive();
+                            }
+                            return buf;
+                        })
+                        .onErrorResume(t -> {
+                            log.error("Error while receiving audio", t);
+                            return Mono.empty();
+                        }))
                 .subscribeOn(scheduler)
                 .subscribe();
     }

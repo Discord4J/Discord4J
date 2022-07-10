@@ -18,7 +18,7 @@
 package discord4j.core;
 
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
-import discord4j.core.object.presence.Presence;
+import discord4j.core.object.presence.ClientPresence;
 import discord4j.gateway.intent.IntentSet;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -31,7 +31,7 @@ public class ExampleGatewayErrors {
         GatewayDiscordClient client = DiscordClient.create(System.getenv("token"))
                 .gateway()
                 .setEnabledIntents(IntentSet.all())
-                .setInitialPresence(s -> Presence.invisible())
+                .setInitialPresence(s -> ClientPresence.invisible())
                 .setAwaitConnections(false)
                 .login()
                 .doOnError(e -> log.error("Failed to authenticate with Discord", e))

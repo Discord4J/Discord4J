@@ -23,11 +23,21 @@ import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.Interaction;
 import discord4j.gateway.ShardInfo;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 /**
  * Dispatched when a user uses a chat input command (formerly "slash command").
+ * <p>
+ * You are required to respond to this interaction within a three-second window by using one of the following:
+ * <ul>
+ *     <li>{@link #reply()} to directly include a message</li>
+ *     <li>{@link #deferReply()} to acknowledge without a message, typically to perform a background task and give the
+ *     user a loading state until it is edited</li>
+ *     <li>{@link #presentModal(String, String, Collection)} to pop a modal for the user to interact with</li>
+ * </ul>
+ * See {@link InteractionCreateEvent} for more details about valid operations.
  * <p>
  * This is not directly dispatched by Discord, but is a utility specialization of
  * {@link ApplicationCommandInteractionEvent}.

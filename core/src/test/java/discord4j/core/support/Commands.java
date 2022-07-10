@@ -24,8 +24,9 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.command.CommandContext;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.object.presence.Presence;
+import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.rest.util.Image;
 import org.slf4j.LoggerFactory;
@@ -63,26 +64,26 @@ public class Commands {
     public static Mono<Void> status(CommandContext context) {
         String params = context.parameters();
         if (params.equalsIgnoreCase("online")) {
-            return context.getClient().updatePresence(Presence.online());
+            return context.getClient().updatePresence(ClientPresence.online());
         } else if (params.equalsIgnoreCase("dnd")) {
-            return context.getClient().updatePresence(Presence.doNotDisturb());
+            return context.getClient().updatePresence(ClientPresence.doNotDisturb());
         } else if (params.equalsIgnoreCase("idle")) {
-            return context.getClient().updatePresence(Presence.idle());
+            return context.getClient().updatePresence(ClientPresence.idle());
         } else if (params.equalsIgnoreCase("invisible")) {
-            return context.getClient().updatePresence(Presence.invisible());
+            return context.getClient().updatePresence(ClientPresence.invisible());
         } else {
             // showing you can block too
             return context.withScheduler(Schedulers.boundedElastic())
-                    .sendEmbed(spec -> {
-                        spec.setThumbnail(context.getClient().getSelf()
-                                .blockOptional()
-                                .orElseThrow(RuntimeException::new)
-                                .getAvatarUrl());
-                        spec.addField("Servers", context.getClient().getGuilds().count()
-                                .blockOptional()
-                                .orElse(-1L)
-                                .toString(), false);
-                    });
+                    .sendEmbed(EmbedCreateSpec.builder()
+                            .thumbnail(context.getClient().getSelf()
+                                    .blockOptional()
+                                    .orElseThrow(RuntimeException::new)
+                                    .getAvatarUrl())
+                            .addField("Servers", context.getClient().getGuilds().count()
+                                    .blockOptional()
+                                    .orElse(-1L)
+                                    .toString(), false)
+                            .build());
         }
     }
 
@@ -153,8 +154,7 @@ public class Commands {
                     .get()
                     .uri(attachment.getUrl())
                     .responseSingle((res, mono) -> mono.asByteArray())
-                    .flatMap(input -> context.getClient()
-                            .edit(spec -> spec.setAvatar(Image.ofRaw(input, Image.Format.PNG))))
+                    .flatMap(input -> context.getClient().edit().withAvatar(Image.ofRaw(input, Image.Format.PNG)))
                     .then();
         }
         return Mono.empty();
@@ -183,10 +183,11 @@ public class Commands {
         String params = context.parameters();
         return message.getClient().getUserById(Snowflake.of(params))
                 .flatMap(user -> message.getChannel()
-                        .flatMap(channel -> channel.createEmbed(embed -> embed
+                        .flatMap(channel -> channel.createEmbed(EmbedCreateSpec.builder()
                                 .addField("Name", user.getUsername(), false)
                                 .addField("Avatar URL", user.getAvatarUrl(), false)
-                                .setImage(user.getAvatarUrl()))))
+                                .image(user.getAvatarUrl())
+                                .build())))
                 .switchIfEmpty(Mono.just("Not found")
                         .flatMap(reason -> message.getChannel()
                                 .flatMap(channel -> channel.createMessage(reason))))

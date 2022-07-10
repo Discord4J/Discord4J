@@ -23,25 +23,21 @@ public class ExampleAllowedMentions {
         final User author = event.getMessage().getAuthor().get();
         return event.getMessage().getChannel()
                 .flatMap(channel ->
-                        channel.createMessage(spec -> {
-                            spec.setContent("Hello " + author.getMention() + ", get pinged!");
-                            spec.setAllowedMentions(AllowedMentions.builder()
-                                    .allowUser(author.getId())
-                                    .build());
-                        }).thenReturn(channel))
+                        channel.createMessage("Hello " + author.getMention() + ", get pinged!")
+                                .withAllowedMentions(AllowedMentions.builder()
+                                        .allowUser(author.getId())
+                                        .build())
+                                .thenReturn(channel))
                 .flatMap(channel ->
-                        channel.createMessage(spec -> {
-                            spec.setContent("Hello " + author.getMention() + ", get (not) pinged!");
-                            spec.setAllowedMentions(AllowedMentions.builder().build());
-                        }).thenReturn(channel))
+                        channel.createMessage("Hello " + author.getMention() + ", get (not) pinged!")
+                                .withAllowedMentions(AllowedMentions.builder().build())
+                                .thenReturn(channel))
                 .flatMap(channel ->
-                        channel.createMessage(spec -> {
-                            spec.setContent("This is invalid")
-                                    .setAllowedMentions(AllowedMentions.builder()
-                                            .parseType(AllowedMentions.Type.USER)
-                                            .allowUser(author.getId())
-                                            .build());
-                        }));
+                        channel.createMessage("This is invalid")
+                                .withAllowedMentions(AllowedMentions.builder()
+                                        .parseType(AllowedMentions.Type.USER)
+                                        .allowUser(author.getId())
+                                        .build()));
     }
 
 }

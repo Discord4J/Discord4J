@@ -19,10 +19,8 @@ package discord4j.core.object.entity.channel;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.User;
-import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.UserData;
-import reactor.core.publisher.Flux;
 
 import java.util.Collections;
 import java.util.Set;
@@ -56,31 +54,16 @@ public final class PrivateChannel extends BaseMessageChannel {
     }
 
     /**
-     * Requests to retrieve the recipients for this private channel.
+     * Gets the recipients for this private channel.
      *
-     * @return A {@link Flux} that continually emits the {@link User recipients} for this private channel. If an error
-     * is received, it is emitted through the {@code Flux}.
-     * @deprecated this method will return {@link Set} in v3.2.0, as the recipient Users can be accessed directly. see
-     * <a href="https://github.com/Discord4J/Discord4J/pull/898">this pull request</a> for details
+     * @return The recipients for this private channel.
      */
-    @Deprecated
-    public Flux<User> getRecipients() {
-        return Flux.fromIterable(getRecipientIds()).flatMap(getClient()::getUserById);
-    }
-
-    /**
-     * Requests to retrieve the recipients for this private channel, using the given retrieval strategy.
-     *
-     * @param retrievalStrategy the strategy to use to get the recipients
-     * @return A {@link Flux} that continually emits the {@link User recipients} for this private channel. If an error
-     * is received, it is emitted through the {@code Flux}.
-     * @deprecated this method will be removed in v3.2.0, as the recipient Users can be accessed directly. see
-     * <a href="https://github.com/Discord4J/Discord4J/pull/898">this pull request</a> for details
-     */
-    @Deprecated
-    public Flux<User> getRecipients(EntityRetrievalStrategy retrievalStrategy) {
-        return Flux.fromIterable(getRecipientIds())
-                .flatMap(id -> getClient().withRetrievalStrategy(retrievalStrategy).getUserById(id));
+    public Set<User> getRecipients() {
+        return getData().recipients().toOptional()
+                .map(recipients -> recipients.stream()
+                        .map(data -> new User(getClient(), data))
+                        .collect(Collectors.toSet()))
+                .orElse(Collections.emptySet());
     }
 
     @Override

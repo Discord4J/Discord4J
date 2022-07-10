@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
@@ -27,7 +28,6 @@ import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.PermissionsEditRequest;
 import discord4j.rest.util.PermissionSet;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -97,10 +97,13 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     @Override
     public Mono<PermissionSet> getEffectivePermissions(Snowflake memberId) {
-        Mono<Member> getMember = getClient().getMemberById(getGuildId(), memberId);
-        Mono<PermissionSet> getBasePerms = getMember.flatMap(Member::getBasePermissions);
+        return getClient().getMemberById(getGuildId(), memberId)
+            .flatMap(this::getEffectivePermissions);
+    }
 
-        return Mono.zip(getMember, getBasePerms, (member, basePerms) -> {
+    @Override
+    public Mono<PermissionSet> getEffectivePermissions(Member member) {
+        return member.getBasePermissions().map(basePerms -> {
             PermissionOverwrite everyoneOverwrite = getOverwriteForRole(getGuildId()).orElse(null);
 
             List<PermissionOverwrite> roleOverwrites = member.getRoleIds().stream()
@@ -141,7 +144,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
         PermissionsEditRequest request = PermissionsEditRequest.builder()
                 .allow(allow.getRawValue())
                 .deny(deny.getRawValue())
-                .type("member")
+                .type(PermissionOverwrite.Type.MEMBER.getValue())
                 .build();
 
         return getClient().getRestClient().getChannelService()
@@ -155,7 +158,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
         PermissionsEditRequest request = PermissionsEditRequest.builder()
                 .allow(allow.getRawValue())
                 .deny(deny.getRawValue())
-                .type("role")
+                .type(PermissionOverwrite.Type.ROLE.getValue())
                 .build();
 
         return getClient().getRestClient().getChannelService()

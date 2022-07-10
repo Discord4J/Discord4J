@@ -19,20 +19,19 @@ package discord4j.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
+import discord4j.common.sinks.EmissionStrategy;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.request.*;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Route;
+import discord4j.rest.route.Routes;
 import discord4j.rest.util.AllowedMentions;
-import reactor.core.publisher.EmitterProcessor;
-import reactor.core.publisher.FluxSink;
 import reactor.netty.http.client.HttpClient;
 import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Builder suited for creating a {@link RestClient}. To acquire an instance, see {@link #createRest(String)}.
@@ -197,13 +196,13 @@ public class RestClientBuilder<C, O extends RouterOptions> {
      * Sets the {@link RequestQueueFactory} that will provide {@link RequestQueue} instances for the router.
      *
      * <p>
-     * If not set, it will use a {@link RequestQueueFactory} providing request queues backed by an
-     * {@link EmitterProcessor} with buffering overflow strategy.
+     * If not set, it will use a {@link RequestQueueFactory} providing request queues backed by a sink with
+     * reasonable buffering capacity, delaying overflowing requests.
      * </p>
      *
      * @param requestQueueFactory the factory that will provide {@link RequestQueue} instances for the router
      * @return this builder
-     * @see RequestQueueFactory#backedByProcessor(Supplier, FluxSink.OverflowStrategy)
+     * @see RequestQueueFactory#createFromSink(Function, EmissionStrategy)
      */
     public RestClientBuilder<C, O> setRequestQueueFactory(RequestQueueFactory requestQueueFactory) {
         this.requestQueueFactory = requestQueueFactory;
@@ -251,7 +250,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
 
     private O buildOptions(ReactorResources reactor, JacksonResources jackson) {
         RouterOptions options = new RouterOptions(token, reactor, initExchangeStrategies(jackson),
-                responseTransformers, initGlobalRateLimiter(reactor), initRequestQueueFactory());
+                responseTransformers, initGlobalRateLimiter(reactor), initRequestQueueFactory(), Routes.BASE_URL);
         return this.optionsModifier.apply(options);
     }
 

@@ -23,6 +23,7 @@ import discord4j.core.support.AddRandomReaction;
 import discord4j.core.support.Commands;
 import discord4j.core.support.VoiceSupport;
 import discord4j.discordjson.json.ApplicationInfoData;
+import discord4j.gateway.intent.IntentSet;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -35,6 +36,8 @@ public class ExampleVoice {
 
     public static void main(String[] args) {
         GatewayDiscordClient client = DiscordClient.create(System.getenv("token"))
+                .gateway()
+                .setEnabledIntents(IntentSet.all())
                 .login()
                 .block();
 

@@ -3,7 +3,21 @@ dependencies {
     api project(':gateway')
     api project(':voice')
 
-    api "$storesArtifact:$jdkstores_version"
+    api "com.discord4j:stores-jdk:$storesVersion"
+
+    compileOnly "$immutables_group:value:$immutables_version"
+    compileOnly "$immutables_group:builder:$immutables_version"
+    annotationProcessor "$immutables_group:value:$immutables_version"
+
+    compileOnly "com.discord4j:discord-json-encoding:$discordJsonVersion"
+
+    if (JavaVersion.current().isJava8()) {
+        compileOnly "com.google.code.findbugs:annotations:3.0.1"
+        testCompileOnly "com.google.code.findbugs:annotations:3.0.1"
+    } else {
+        compileOnly "javax.annotation:javax.annotation-api:1.3.2"
+        testCompileOnly "javax.annotation:javax.annotation-api:1.3.2"
+    }
 
     testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_version"
     testImplementation "org.mockito:mockito-core:$mockito_version"
@@ -30,4 +44,8 @@ jar {
                 'Implementation-Version': archiveVersion,
                 'Automatic-Module-Name': 'discord4j.core'
     }
+}
+
+sourcesJar {
+    from "build/generated/sources/annotationProcessor/java/main"
 }

@@ -85,6 +85,9 @@ public enum Permission {
     /** Allows the usage of custom emojis from other servers. */
     USE_EXTERNAL_EMOJIS(0x00040000, false),
 
+    /** Allows the usage of custom stickers from other servers. */
+    USE_EXTERNAL_STICKERS(0x00000020000000, false),
+
     /** Allows for viewing guild insights. */
     VIEW_GUILD_INSIGHTS(0x00080000, false),
 
@@ -118,8 +121,16 @@ public enum Permission {
     /** Allows management and editing of webhooks. */
     MANAGE_WEBHOOKS(0x20000000, true),
 
-    /** Allows management and editing of emojis. */
+    /**
+     * Allows management and editing of emojis.
+     *
+     * @deprecated Deprecated in favor of {@link Permission#MANAGE_EMOJIS_AND_STICKERS}
+     */
+    @Deprecated
     MANAGE_EMOJIS(0x40000000, true),
+
+    /** Allows management and editing of emojis and stickers. */
+    MANAGE_EMOJIS_AND_STICKERS(0x40000000, true),
 
     /** Allows members to use slash commands in text channels. */
     USE_SLASH_COMMANDS(0x80000000L, false),
@@ -128,7 +139,12 @@ public enum Permission {
      * Allows for requesting to speak in stage channels.
      */
     @Experimental
-    REQUEST_TO_SPEAK(0x100000000L, false);
+    REQUEST_TO_SPEAK(0x100000000L, false),
+
+    /**
+     * Allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from speaking in voice and stage channels.
+     */
+    MODERATE_MEMBERS(0x0000010000000000L, false);
 
     /** Whether MFA is required. */
     private final boolean mfa;

@@ -33,8 +33,6 @@ public class IdentifyOptions {
     private final StatusUpdate initialStatus;
     @Nullable
     private final IntentSet intents;
-    @Nullable
-    private final Boolean guildSubscriptions;
     private final int largeThreshold;
     @Nullable
     private final SessionInfo resumeSession;
@@ -48,7 +46,6 @@ public class IdentifyOptions {
         this.shardInfo = builder.shardInfo;
         this.initialStatus = builder.initialStatus;
         this.intents = builder.intents;
-        this.guildSubscriptions = builder.guildSubscriptions;
         this.largeThreshold = builder.largeThreshold;
         this.resumeSession = builder.resumeSession;
     }
@@ -103,7 +100,6 @@ public class IdentifyOptions {
         private final ShardInfo shardInfo;
         private StatusUpdate initialStatus;
         private IntentSet intents;
-        private Boolean guildSubscriptions;
         private int largeThreshold = 250;
         private SessionInfo resumeSession;
 
@@ -135,20 +131,6 @@ public class IdentifyOptions {
          */
         public Builder intents(@Nullable IntentSet intents) {
             this.intents = intents;
-            return this;
-        }
-
-        /**
-         * Set whether to enable presence and typing events while identifying.
-         *
-         * @param guildSubscriptions {@code true} if enabling this feature, {@code false} to disable it, or {@code
-         * null} if this attribute should be ignored when authenticating
-         * @return this builder
-         * @deprecated for removal in 3.2.0, migrate to Gateway Intents feature
-         */
-        @Deprecated
-        public Builder guildSubscriptions(@Nullable Boolean guildSubscriptions) {
-            this.guildSubscriptions = guildSubscriptions;
             return this;
         }
 
@@ -194,7 +176,6 @@ public class IdentifyOptions {
         return new Builder(shardInfo)
                 .initialStatus(initialStatus)
                 .intents(intents)
-                .guildSubscriptions(guildSubscriptions)
                 .largeThreshold(largeThreshold)
                 .resumeSession(resumeSession);
     }
@@ -210,7 +191,6 @@ public class IdentifyOptions {
         return new Builder(shardInfo)
                 .initialStatus(initialStatus)
                 .intents(intents)
-                .guildSubscriptions(guildSubscriptions)
                 .largeThreshold(largeThreshold)
                 .resumeSession(resumeSession);
     }
@@ -243,17 +223,6 @@ public class IdentifyOptions {
     }
 
     /**
-     * Retrieve whether to enable presence and typing events when identifying.
-     *
-     * @return {@code true} if guild subscriptions should be enabled, {@code false} otherwise
-     * @deprecated for removal in 3.2.0, migrate to Gateway Intents feature
-     */
-    @Deprecated
-    public Optional<Boolean> getGuildSubscriptions() {
-        return Optional.ofNullable(guildSubscriptions);
-    }
-
-    /**
      * Retrieve the number of members used to determine if a guild is "large". Gateway will not send offline member
      * information for a large guild member list.
      *
@@ -278,7 +247,6 @@ public class IdentifyOptions {
                 "shardInfo=" + shardInfo +
                 ", initialStatus=" + initialStatus +
                 ", intents=" + intents +
-                ", guildSubscriptions=" + guildSubscriptions +
                 ", largeThreshold=" + largeThreshold +
                 ", resumeSession=" + resumeSession +
                 '}';

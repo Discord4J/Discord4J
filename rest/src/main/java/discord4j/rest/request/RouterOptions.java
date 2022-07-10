@@ -35,16 +35,18 @@ public class RouterOptions {
     private final List<ResponseFunction> responseTransformers;
     private final GlobalRateLimiter globalRateLimiter;
     private final RequestQueueFactory requestQueueFactory;
+    private final String discordBaseUrl;
 
     public RouterOptions(String token, ReactorResources reactorResources, ExchangeStrategies exchangeStrategies,
                          List<ResponseFunction> responseTransformers, GlobalRateLimiter globalRateLimiter,
-                         RequestQueueFactory requestQueueFactory) {
+                         RequestQueueFactory requestQueueFactory, String discordBaseUrl) {
         this.token = Objects.requireNonNull(token, "token");
         this.reactorResources = Objects.requireNonNull(reactorResources, "reactorResources");
         this.exchangeStrategies = Objects.requireNonNull(exchangeStrategies, "exchangeStrategies");
         this.responseTransformers = Objects.requireNonNull(responseTransformers, "responseTransformers");
         this.globalRateLimiter = Objects.requireNonNull(globalRateLimiter, "globalRateLimiter");
         this.requestQueueFactory = Objects.requireNonNull(requestQueueFactory, "requestQueueFactory");
+        this.discordBaseUrl = Objects.requireNonNull(discordBaseUrl, "discordBaseUrl");
     }
 
     /**
@@ -100,5 +102,14 @@ public class RouterOptions {
      */
     public RequestQueueFactory getRequestQueueFactory() {
         return requestQueueFactory;
+    }
+
+    /**
+     * Returns the base url of the Discord API.
+     *
+     * @return the configured discord api base url
+     */
+    public String getDiscordBaseUrl() {
+        return discordBaseUrl;
     }
 }

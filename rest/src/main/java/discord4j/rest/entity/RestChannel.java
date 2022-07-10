@@ -29,10 +29,7 @@ import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -183,7 +180,7 @@ public class RestChannel {
      * @see <a href="https://discord.com/developers/docs/resources/channel#create-message">Create Message</a>
      */
     public Mono<MessageData> createMessage(MessageCreateRequest request) {
-        return restClient.getChannelService().createMessage(id, new MultipartRequest(request));
+        return restClient.getChannelService().createMessage(id, MultipartRequest.ofRequest(request));
     }
 
     /**
@@ -195,7 +192,7 @@ public class RestChannel {
      * error is received, it is emitted through the {@code Mono}.
      * @see <a href="https://discord.com/developers/docs/resources/channel#create-message">Create Message</a>
      */
-    public Mono<MessageData> createMessage(MultipartRequest request) {
+    public Mono<MessageData> createMessage(MultipartRequest<MessageCreateRequest> request) {
         // TODO: improve API to create MultipartRequest objects
         return restClient.getChannelService().createMessage(id, request);
     }
@@ -470,5 +467,18 @@ public class RestChannel {
 
     public Flux<WebhookData> getWebhooks() {
         return restClient.getWebhookService().getChannelWebhooks(id);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RestChannel that = (RestChannel) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

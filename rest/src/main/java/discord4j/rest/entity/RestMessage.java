@@ -21,8 +21,11 @@ import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.rest.RestClient;
+import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
+
+import java.util.Objects;
 
 /**
  * Represents a message within Discord.
@@ -161,7 +164,7 @@ public class RestMessage {
      * @see <a href="https://discord.com/developers/docs/resources/channel#edit-message">Edit Message</a>
      */
     public Mono<MessageData> edit(MessageEditRequest request) {
-        return restClient.getChannelService().editMessage(channelId, id, request);
+        return restClient.getChannelService().editMessage(channelId, id, MultipartRequest.ofRequest(request));
     }
 
     /**
@@ -186,5 +189,18 @@ public class RestMessage {
      */
     public Mono<MessageData> publish() {
         return restClient.getChannelService().publishMessage(channelId, id);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RestMessage that = (RestMessage) o;
+        return channelId == that.channelId && id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(channelId, id);
     }
 }

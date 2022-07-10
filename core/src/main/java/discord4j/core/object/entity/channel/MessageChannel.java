@@ -16,11 +16,14 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.common.util.Snowflake;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.MessageCreateMono;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.core.spec.legacy.LegacyEmbedCreateSpec;
+import discord4j.core.spec.legacy.LegacyMessageCreateSpec;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,7 +33,9 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-/** A Discord channel that can utilize messages. */
+/**
+ * A Discord channel that can utilize messages.
+ */
 public interface MessageChannel extends Channel {
 
     /**
@@ -67,42 +72,85 @@ public interface MessageChannel extends Channel {
     /**
      * Requests to create a message.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link MessageCreateSpec} to be operated on.
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyMessageCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
      * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createMessage(MessageCreateSpec)} or {@link #createMessage(String)} which offer an
+     * immutable approach to build specs
      */
-    Mono<Message> createMessage(Consumer<? super MessageCreateSpec> spec);
+    @Deprecated
+    Mono<Message> createMessage(Consumer<? super LegacyMessageCreateSpec> spec);
 
     /**
-     * Requests to create a message with only {@link MessageCreateSpec#setContent(String) content}.
+     * Requests to create a message.
      *
-     * @param message A string message to populate the message with.
+     * @param spec an immutable object that specifies how to create the message
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
      * received, it is emitted through the {@code Mono}.
-     *
-     * @see MessageCreateSpec#setContent(String)
+     * @see MessageCreateSpec#builder()
      */
-    default Mono<Message> createMessage(final String message) {
-        return createMessage(spec -> spec.setContent(message));
+    Mono<Message> createMessage(MessageCreateSpec spec);
+
+    /**
+     * Requests to create a message with a content. Other properties specifying how to create the message can be set via
+     * the {@code withXxx} methods of the returned {@link MessageCreateMono}.
+     *
+     * @param message A string message to populate the message with.
+     * @return A {@link MessageCreateMono} where, upon successful completion, emits the created {@link Message}. If an
+     * error is received, it is emitted through the {@code MessageCreateMono}.
+     * @see #createMessage(MessageCreateSpec)
+     */
+    default MessageCreateMono createMessage(String message) {
+        return MessageCreateMono.of(this).withContent(message);
     }
 
     /**
-     * Requests to create a message with only an {@link MessageCreateSpec#setEmbed(Consumer)}.
+     * Requests to create a message with embeds. Other properties specifying how to create the message can be set via
+     * the {@code withXxx} methods of the returned {@link MessageCreateMono}.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link EmbedCreateSpec} to be operated on.
+     * @param embeds immutable objects that specify how to create the embeds
+     * @return A {@link MessageCreateMono} where, upon successful completion, emits the created {@link Message}. If an
+     * error is received, it is emitted through the {@code MessageCreateMono}.
+     * @see #createMessage(MessageCreateSpec)
+     */
+    default MessageCreateMono createMessage(EmbedCreateSpec... embeds) {
+        return MessageCreateMono.of(this).withEmbeds(embeds);
+    }
+
+    /**
+     * Requests to create a message with an embed.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyEmbedCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
      * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createEmbed(EmbedCreateSpec)} which offers an immutable approach to build specs
      */
-    default Mono<Message> createEmbed(final Consumer<? super EmbedCreateSpec> spec) {
+    @Deprecated
+    default Mono<Message> createEmbed(final Consumer<? super LegacyEmbedCreateSpec> spec) {
         return createMessage(messageSpec -> messageSpec.setEmbed(spec));
+    }
+
+    /**
+     * Requests to create a message with an embed. Other properties specifying how to create the message can be set via
+     * the {@code withXxx} methods of the returned {@link MessageCreateMono}.
+     *
+     * @param embed an immutable object that specifies how to create the embed
+     * @return A {@link MessageCreateMono} where, upon successful completion, emits the created {@link Message}. If an
+     * error is received, it is emitted through the {@code MessageCreateMono}.
+     * @see #createMessage(MessageCreateSpec)
+     * @deprecated Use {@link #createMessage(EmbedCreateSpec...)}.
+     */
+    @Deprecated
+    default MessageCreateMono createEmbed(EmbedCreateSpec embed) {
+        return MessageCreateMono.of(this).withEmbeds(embed);
     }
 
     /**
      * Requests to trigger the typing indicator in this channel. A single invocation of this method will trigger the
      * indicator for 10 seconds or until the bot sends a message in this channel.
      *
-     * @return A {@link Mono} which completes upon successful triggering of the typing indicator in this channel. If
-     * an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} which completes upon successful triggering of the typing indicator in this channel. If an
+     * error is received, it is emitted through the {@code Mono}.
      */
     Mono<Void> type();
 
@@ -130,7 +178,6 @@ public interface MessageChannel extends Channel {
      * @param until The companion {@link Publisher} that signals when to stop triggering the typing indicator.
      * @return A {@link Flux} which continually emits each time the typing indicator is triggered and completes when it
      * will no longer be triggered. If an error is received, it is emitted through the {@code Flux}.
-     *
      * @implNote The default implementation actually sends a typing request every 8 seconds so it appears continuous.
      */
     Flux<Long> typeUntil(Publisher<?> until);
@@ -142,11 +189,11 @@ public interface MessageChannel extends Channel {
      * recommended to limit the emitted items by invoking either {@link Flux#takeWhile(Predicate)} (to retrieve IDs
      * within a specified range) or {@link Flux#take(long)} (to retrieve a specific amount of IDs).
      * <p>
-     * The following example will get <i>all</i> messages from {@code messageId} to {@code myOtherMessageId}:
-     * {@code getMessagesBefore(messageId).takeWhile(message -> message.getId().compareTo(myOtherMessageId) >= 0)}
+     * The following example will get <i>all</i> messages from {@code messageId} to {@code myOtherMessageId}: {@code
+     * getMessagesBefore(messageId).takeWhile(message -> message.getId().compareTo(myOtherMessageId) >= 0)}
      *
      * @param messageId The ID of the <i>newest</i> message to retrieve. Use {@link Snowflake#of(Instant)} to retrieve a
-     * time-based ID.
+     *                  time-based ID.
      * @return A {@link Flux} that continually emits <i>all</i> {@link Message messages} <i>before</i> the specified ID.
      * If an error is received, it is emitted through the {@code Flux}.
      */
@@ -159,11 +206,11 @@ public interface MessageChannel extends Channel {
      * the emitted items by invoking either {@link Flux#takeWhile(Predicate)} (to retrieve IDs within a specified range)
      * or {@link Flux#take(long)} (to retrieve a specific amount of IDs).
      * <p>
-     * The following example will get <i>all</i> messages from {@code messageId} to {@code myOtherMessageId}:
-     * {@code getMessagesAfter(messageId).takeWhile(message -> message.getId().compareTo(myOtherMessageId) <= 0)}
+     * The following example will get <i>all</i> messages from {@code messageId} to {@code myOtherMessageId}: {@code
+     * getMessagesAfter(messageId).takeWhile(message -> message.getId().compareTo(myOtherMessageId) <= 0)}
      *
      * @param messageId The ID of the <i>oldest</i> message to retrieve. Use {@link Snowflake#of(Instant)} to retrieve a
-     * time-based ID.
+     *                  time-based ID.
      * @return A {@link Flux} that continually emits <i>all</i> {@link Message messages} <i>after</i> the specified ID.
      * If an error is received, it is emitted through the {@code Flux}.
      */
@@ -181,7 +228,7 @@ public interface MessageChannel extends Channel {
     /**
      * Requests to retrieve the message as represented by the supplied ID, using the given retrieval strategy.
      *
-     * @param id The ID of the message.
+     * @param id                The ID of the message.
      * @param retrievalStrategy the strategy to use to get the message
      * @return A {@link Mono} where, upon successful completion, emits the {@link Message} as represented by the
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.

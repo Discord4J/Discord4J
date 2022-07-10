@@ -22,13 +22,16 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
 import discord4j.core.object.MessageInteraction;
 import discord4j.core.object.MessageReference;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.core.spec.MessageEditMono;
 import discord4j.core.spec.MessageEditSpec;
+import discord4j.core.spec.legacy.LegacyMessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.SuppressEmbedsRequest;
@@ -36,6 +39,7 @@ import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.entity.RestChannel;
 import discord4j.rest.entity.RestMessage;
+import discord4j.rest.util.MultipartRequest;
 import discord4j.rest.util.PaginationUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -59,6 +63,12 @@ public final class Message implements Entity {
      * The maximum amount of characters that can be in the contents of a message.
      */
     public static final int MAX_CONTENT_LENGTH = 2000;
+
+    /**
+     * The maximum amount of characters that can be present when combining all title, description, field.name,
+     * field.value, footer.text, and author.name fields of all embeds for this message.
+     */
+    public static final int MAX_TOTAL_EMBEDS_CHARACTER_LENGTH = 6000;
 
     /**
      * The gateway associated to this object.
@@ -241,51 +251,60 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the IDs of the users specifically mentioned in this message, with the same order as in the message.
+     * Gets the IDs of the users specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      *
-     * @return The IDs of the users specifically mentioned in this message, with the same order as in the message.
+     * @return The IDs of the users specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      */
-    public Set<Snowflake> getUserMentionIds() {
-        // TODO FIXME we throw away member data here
+    public List<Snowflake> getUserMentionIds() {
         return data.mentions().stream()
                 .map(UserData::id)
                 .map(Snowflake::of)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+                .collect(Collectors.toList());
     }
 
     /**
-     * Requests to retrieve the users specifically mentioned in this message.
+     * Gets the partial members specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      *
-     * @return A {@link Flux} that continually emits {@link User users} specifically mentioned in this message. If an
-     * error is received, it is emitted through the {@code Flux}.
-     * @deprecated this method will have its return type changed to List in v3.2.0
+     * @return The partial members specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      */
-    public Flux<User> getUserMentions() {
-        return Flux.fromIterable(getUserMentionIds()).flatMap(gateway::getUserById);
+    public List<PartialMember> getMemberMentions() {
+        if (data.guildId().isAbsent()) {
+            return Collections.emptyList();
+        }
+        long guildId = data.guildId().get().asLong();
+        return data.mentions().stream()
+            .map(data -> new PartialMember(gateway, data, data.member().get(), guildId))
+            .collect(Collectors.toList());
     }
 
     /**
-     * Requests to retrieve the users specifically mentioned in this message, using the given retrieval strategy.
+     * Gets the users specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      *
-     * @param retrievalStrategy the strategy to use to get the users
-     * @return A {@link Flux} that continually emits {@link User users} specifically mentioned in this message. If an
-     * error is received, it is emitted through the {@code Flux}.
-     * @deprecated for removal in v3.2.0, as entity retrieval is not used for user mentions anymore
+     * @return The users specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      */
-    public Flux<User> getUserMentions(EntityRetrievalStrategy retrievalStrategy) {
-        return Flux.fromIterable(getUserMentionIds())
-                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getUserById(id));
+    public List<User> getUserMentions() {
+        return data.mentions().stream()
+                .map(data -> new User(gateway, data))
+                .collect(Collectors.toList());
     }
 
     /**
-     * Gets the IDs of the roles specifically mentioned in this message, with the same order as in the message.
+     * Gets the IDs of the roles specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      *
-     * @return The IDs of the roles specifically mentioned in this message, with the same order as in the message.
+     * @return The IDs of the roles specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      */
-    public Set<Snowflake> getRoleMentionIds() {
+    public List<Snowflake> getRoleMentionIds() {
         return data.mentionRoles().stream()
                 .map(Snowflake::of)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+                .collect(Collectors.toList());
     }
 
     /**
@@ -321,10 +340,10 @@ public final class Message implements Entity {
      *
      * @return Any attached files, with the same order as in the message.
      */
-    public Set<Attachment> getAttachments() {
+    public List<Attachment> getAttachments() {
         return data.attachments().stream()
                 .map(data -> new Attachment(gateway, data))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+                .collect(Collectors.toList());
     }
 
     /**
@@ -343,12 +362,12 @@ public final class Message implements Entity {
      *
      * @return The reactions to this message, the order is the same as in the message.
      */
-    public Set<Reaction> getReactions() {
+    public List<Reaction> getReactions() {
         return data.reactions().toOptional()
                 .map(reactions -> reactions.stream()
                         .map(data -> new Reaction(gateway, data))
-                        .collect(Collectors.toCollection(LinkedHashSet::new)))
-                .orElse(new LinkedHashSet<>());
+                        .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
 
     }
 
@@ -452,16 +471,31 @@ public final class Message implements Entity {
     }
 
     /**
+     * Gets the partial stickers sent with the message.
+     *
+     * @return The partial stickers sent with the message.
+     */
+    @Experimental
+    public List<PartialSticker> getStickersItems() {
+        return data.stickerItems().toOptional()
+            .map(partialStickers -> partialStickers.stream()
+                .map(data -> new PartialSticker(gateway, data))
+                .collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
+    }
+
+    /**
      * Gets the stickers sent with the message.
      *
      * @return The stickers sent with the message.
      */
+    @Deprecated
     public List<Sticker> getStickers() {
         return data.stickers().toOptional()
-            .orElse(Collections.emptyList())
-            .stream()
-            .map(data -> new Sticker(gateway, data))
-            .collect(Collectors.toList());
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(data -> new Sticker(gateway, data))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -471,7 +505,7 @@ public final class Message implements Entity {
      */
     public Optional<Message> getReferencedMessage() {
         return Possible.flatOpt(data.referencedMessage())
-            .map(data -> new Message(gateway, data));
+                .map(data -> new Message(gateway, data));
     }
 
     /**
@@ -484,33 +518,79 @@ public final class Message implements Entity {
                 .map(data -> new MessageInteraction(gateway, data));
     }
 
-    public List<MessageComponent> getComponents() {
+    /**
+     * Gets the components on the message.
+     *
+     * @return The components on the message.
+     */
+    public List<LayoutComponent> getComponents() {
         return data.components().toOptional()
                 .map(components -> components.stream()
-                    .map(MessageComponent::fromData)
-                    .collect(Collectors.toList()))
+                        .map(MessageComponent::fromData)
+                        // top level message components should only be LayoutComponents
+                        .filter(component -> component instanceof LayoutComponent)
+                        .map(component -> (LayoutComponent) component)
+                        .collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
     }
 
     /**
      * Requests to edit this message.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link MessageEditSpec} to be operated on.
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyMessageEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(MessageEditSpec)}  or {@link #edit()} which offer an immutable approach to build
+     * specs
+     */
+    @Deprecated
+    public Mono<Message> edit(final Consumer<? super LegacyMessageEditSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyMessageEditSpec mutatedSpec = new LegacyMessageEditSpec();
+                    getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .ifPresent(mutatedSpec::setAllowedMentions);
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getChannelService()
+                            .editMessage(getChannelId().asLong(), getId().asLong(),
+                                    MultipartRequest.ofRequest(mutatedSpec.asRequest()));
+                })
+                .map(data -> new Message(gateway, data));
+    }
+
+    /**
+     * Requests to edit this message.
+     *
+     * @param spec an immutable object that specifies how to edit the message
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Message}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Message> edit(final Consumer<? super MessageEditSpec> spec) {
+    public Mono<Message> edit(MessageEditSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> {
-                    MessageEditSpec mutatedSpec = new MessageEditSpec();
-                    getClient().getRestClient().getRestResources()
-                        .getAllowedMentions()
-                        .ifPresent(mutatedSpec::setAllowedMentions);
-                    spec.accept(mutatedSpec);
+                    MessageEditSpec actualSpec = getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .filter(allowedMentions -> !spec.isAllowedMentionsPresent())
+                            .map(spec::withAllowedMentionsOrNull)
+                            .orElse(spec);
                     return gateway.getRestClient().getChannelService()
-                            .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest());
+                            .editMessage(getChannelId().asLong(), getId().asLong(), actualSpec.asRequest());
                 })
                 .map(data -> new Message(gateway, data));
+    }
+
+    /**
+     * Requests to edit this message. Properties specifying how to edit this message can be set via the {@code
+     * withXxx} methods of the returned {@link MessageEditMono}.
+     *
+     * @return A {@link MessageEditMono} where, upon successful completion, emits the edited {@link Message}. If an
+     * error is received, it is emitted through the {@code MessageEditMono}.
+     * @see #edit(MessageEditSpec)
+     */
+    public MessageEditMono edit() {
+        return MessageEditMono.of(this);
     }
 
     /**
@@ -677,6 +757,9 @@ public final class Message implements Entity {
         /** This message came from the urgent message system. */
         URGENT(4),
 
+        /** This message has an associated thread, with the same id as the message. */
+        HAS_THREAD(5),
+
         /** This message is an ephemeral interaction response. */
         EPHEMERAL(6),
 
@@ -820,14 +903,34 @@ public final class Message implements Entity {
         /** A message created when the Guild is requalified for Discovery Feature **/
         GUILD_DISCOVERY_REQUALIFIED(15),
 
+        /** A message created for warning about the grace period of Guild Discovery **/
         GUILD_DISCOVERY_GRACE_PERIOD_INITIAL_WARNING(16),
 
+        /** A message created for last warning about the grace period of Guild Discovery **/
         GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING(17),
 
-        /** A message created with a reply */
-        REPLY(0),
+        /**
+         * A message created when a Thread is started ( <a href="https://support.discord.com/hc/es/articles/4403205878423-Threads">Threads</a> )
+         */
+        THREAD_CREATED(18),
 
-        APPLICATION_COMMAND(0);
+        /** A message created with a reply */
+        REPLY(19),
+
+        /** A message created using an application (like slash commands) **/
+        APPLICATION_COMMAND(20),
+
+        /**
+         * The first message in a thread pointing to a related message in the parent channel from which the thread was started
+         * <br>
+         * <b>Note: </b> Only supported from v9 of API
+        **/
+        THREAD_STARTER_MESSAGE(21),
+
+        /** A message created for notice the servers owners about invite new users (only in new servers) **/
+        GUILD_INVITE_REMINDER(22),
+
+        CONTEXT_MENU_COMMAND(23);
 
         /**
          * The underlying value as represented by Discord.
@@ -878,6 +981,12 @@ public final class Message implements Entity {
                 case 15: return GUILD_DISCOVERY_REQUALIFIED;
                 case 16: return GUILD_DISCOVERY_GRACE_PERIOD_INITIAL_WARNING;
                 case 17: return GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING;
+                case 18: return THREAD_CREATED;
+                case 19: return REPLY;
+                case 20: return APPLICATION_COMMAND;
+                case 21: return THREAD_STARTER_MESSAGE;
+                case 22: return GUILD_INVITE_REMINDER;
+                case 23: return CONTEXT_MENU_COMMAND;
                 default: return UNKNOWN;
             }
         }

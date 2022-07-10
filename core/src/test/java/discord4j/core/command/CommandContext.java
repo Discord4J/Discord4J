@@ -31,7 +31,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 public interface CommandContext {
 
@@ -70,7 +69,7 @@ public interface CommandContext {
 
     CommandContext withScheduler(Scheduler scheduler);
 
-    Mono<Void> sendMessage(Consumer<? super MessageCreateSpec> spec);
+    Mono<Void> sendMessage(MessageCreateSpec spec);
 
-    Mono<Void> sendEmbed(Consumer<? super EmbedCreateSpec> spec);
+    Mono<Void> sendEmbed(EmbedCreateSpec spec);
 }

@@ -22,21 +22,31 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Message;
-import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
 import discord4j.rest.interaction.InteractionResponse;
 import discord4j.rest.util.InteractionResponseType;
-import discord4j.rest.util.WebhookMultipartRequest;
+import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
-import java.util.function.Consumer;
-
 /**
- * Dispatched when a user in a guild interacts with an application command or component.
+ * Dispatched when a user in a guild interacts with an application command, component, or other interaction based UI
+ * element. It is recommended you use a subclass in your event listeners to access interaction-specific methods.
+ * See a diagram below for the current event hierarchy for interactions.
+ * <p>
+ * You should use one of the following interaction-specific events to access interaction-specific methods:
+ * <ul>
+ *     <li>{@link ChatInputInteractionEvent} dispatched when a user types a chat input (slash) command</li>
+ *     <li>{@link UserInteractionEvent} dispatched when a user uses a context menu command on a user</li>
+ *     <li>{@link MessageInteractionEvent} dispatched when a user uses a context menu command on a message</li>
+ *     <li>{@link ButtonInteractionEvent} dispatched when a user clicks a button component</li>
+ *     <li>{@link SelectMenuInteractionEvent} dispatched when a user confirms a selection in a select menu component</li>
+ *     <li>{@link ChatInputAutoCompleteEvent} dispatched when a user starts chat command auto complete</li>
+ *     <li>{@link ModalSubmitInteractionEvent} dispatched when a user submits a previously presented modal</li>
+ * </ul>
  * <p>
  * This event is dispatched by Discord.
  *
@@ -48,12 +58,10 @@ import java.util.function.Consumer;
 public class InteractionCreateEvent extends Event {
 
     private final Interaction interaction;
-    private final EventInteractionResponse response;
 
     public InteractionCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo);
         this.interaction = interaction;
-        this.response = new EventInteractionResponse(getClient().rest(), interaction.getData());
     }
 
     /**
@@ -65,6 +73,7 @@ public class InteractionCreateEvent extends Event {
         return interaction;
     }
 
+    @Deprecated
     protected Mono<Void> createInteractionResponse(InteractionResponseType responseType,
                                                    @Nullable InteractionApplicationCommandCallbackData data) {
         InteractionResponseData responseData = InteractionResponseData.builder()
@@ -79,97 +88,18 @@ public class InteractionCreateEvent extends Event {
                 .createInteractionResponse(id, token, responseData);
     }
 
-    /**
-     * Acknowledges the interaction indicating a response will be edited later. The user sees a loading state, visible
-     * to all participants in the invoking channel. For a "only you can see this" response, see
-     * {@link #acknowledgeEphemeral()}, or to include a message, {@link #replyEphemeral(String)}
-     *
-     * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction
-     * and indicating a response will be edited later. The user sees a loading state. If an error is received, it
-     * is emitted through the {@code Mono}.
-     */
-    public Mono<Void> acknowledge() {
-        return createInteractionResponse(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, null);
-    }
-
-    /**
-     * Acknowledges the interaction indicating a response will be edited later. Only the invoking user sees a loading
-     * state.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits nothing, acknowledging the interaction
-     * and indicating a response will be edited later. If an error is received, it is emitted through the {@code Mono}.
-     */
-    // TODO: with new specs, this could be acknowledge().ephemeral() instead
-    public Mono<Void> acknowledgeEphemeral() {
-        InteractionApplicationCommandCallbackData data = InteractionApplicationCommandCallbackData.builder()
-                .flags(Message.Flag.EPHEMERAL.getFlag())
+    protected Mono<Void> createInteractionResponse(InteractionResponseType responseType,
+                                                   MultipartRequest<InteractionApplicationCommandCallbackData> data) {
+        InteractionResponseData responseData = InteractionResponseData.builder()
+                .type(responseType.getValue())
+                .data(Possible.of(data.getJsonPayload()))
                 .build();
 
-        return createInteractionResponse(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, data);
-    }
+        long id = interaction.getId().asLong();
+        String token = interaction.getToken();
 
-    /**
-     * Requests to respond to the interaction with only
-     * {@link InteractionApplicationCommandCallbackSpec#setContent(String) content}.
-     *
-     * @param content A string message to populate the message with.
-     * @return A {@link Mono} where, upon successful completion, emits nothing, indicating the interaction response has
-     * been sent. If an error is received, it is emitted through the {@code Mono}.
-     * @see InteractionApplicationCommandCallbackSpec#setContent(String)
-     */
-    public Mono<Void> reply(final String content) {
-        return reply(spec -> spec.setContent(content));
-    }
-
-    /**
-     * Requests to respond to the interaction with only
-     * {@link InteractionApplicationCommandCallbackSpec#setContent(String) content} and
-     * {@link InteractionApplicationCommandCallbackSpec#setEphemeral(boolean) ephemeral set to true}. Only the invoking
-     * user can see it.
-     *
-     * @param content A string message to populate the message with.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the ephemeral interaction
-     * response has been sent. If an error is received, it is emitted through the {@code Mono}.
-     * @see InteractionApplicationCommandCallbackSpec#setContent(String)
-     * @see InteractionApplicationCommandCallbackSpec#setEphemeral(boolean)
-     */
-    // TODO: with new specs, this could be reply().ephemeral() instead
-    public Mono<Void> replyEphemeral(final String content) {
-        return reply(spec -> spec.setContent(content).setEphemeral(true));
-    }
-
-    /**
-     * Requests to respond to the interaction with a message.
-     *
-     * @param spec A {@link Consumer} that provides a "blank" {@link InteractionApplicationCommandCallbackSpec} to be
-     * operated on.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
-     * been sent. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Void> reply(final Consumer<? super InteractionApplicationCommandCallbackSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    InteractionApplicationCommandCallbackSpec mutatedSpec =
-                            new InteractionApplicationCommandCallbackSpec();
-
-                    getClient().getRestClient().getRestResources()
-                            .getAllowedMentions()
-                            .ifPresent(mutatedSpec::setAllowedMentions);
-
-                    spec.accept(mutatedSpec);
-
-                    return createInteractionResponse(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                            mutatedSpec.asRequest());
-                });
-    }
-
-    /**
-     * Gets a handler for common operations related to an interaction followup response associated with this event.
-     *
-     * @return A handler for common operations related to an interaction followup response associated with this event.
-     */
-    public InteractionResponse getInteractionResponse() {
-        return response;
+        return getClient().rest().getInteractionService()
+                .createInteractionResponse(id, token, data.withRequest(responseData));
     }
 
     static class EventInteractionResponse implements InteractionResponse {
@@ -197,6 +127,12 @@ public class InteractionCreateEvent extends Event {
         }
 
         @Override
+        public Mono<MessageData> editInitialResponse(MultipartRequest<WebhookMessageEditRequest> request) {
+            return restClient.getWebhookService()
+                    .modifyWebhookMessage(applicationId, interactionData.token(), "@original", request);
+        }
+
+        @Override
         public Mono<Void> deleteInitialResponse() {
             return restClient.getWebhookService()
                     .deleteWebhookMessage(applicationId, interactionData.token(), "@original");
@@ -205,13 +141,12 @@ public class InteractionCreateEvent extends Event {
         @Override
         public Mono<MessageData> createFollowupMessage(String content) {
             FollowupMessageRequest body = FollowupMessageRequest.builder().content(content).build();
-            WebhookMultipartRequest request = new WebhookMultipartRequest(body);
             return restClient.getWebhookService()
-                    .executeWebhook(applicationId, interactionData.token(), true, request);
+                    .executeWebhook(applicationId, interactionData.token(), true, MultipartRequest.ofRequest(body));
         }
 
         @Override
-        public Mono<MessageData> createFollowupMessage(WebhookMultipartRequest request) {
+        public Mono<MessageData> createFollowupMessage(MultipartRequest<? extends WebhookExecuteRequest> request) {
             return restClient.getWebhookService()
                     .executeWebhook(applicationId, interactionData.token(), true, request);
         }
@@ -222,25 +157,29 @@ public class InteractionCreateEvent extends Event {
                     .content(content)
                     .flags(Message.Flag.EPHEMERAL.getFlag())
                     .build();
-            WebhookMultipartRequest request = new WebhookMultipartRequest(body);
             return restClient.getWebhookService()
-                    .executeWebhook(applicationId, interactionData.token(), true, request);
+                    .executeWebhook(applicationId, interactionData.token(), true, MultipartRequest.ofRequest(body));
         }
 
         @Override
-        public Mono<MessageData> createFollowupMessageEphemeral(WebhookMultipartRequest request) {
+        public Mono<MessageData> createFollowupMessageEphemeral(MultipartRequest<WebhookExecuteRequest> request) {
             FollowupMessageRequest newBody = FollowupMessageRequest.builder()
-                    .from(request.getExecuteRequest())
+                    .from(request.getJsonPayload())
                     .flags(Message.Flag.EPHEMERAL.getFlag())
                     .build();
-            WebhookMultipartRequest newRequest = new WebhookMultipartRequest(newBody, request.getFiles());
-
             return restClient.getWebhookService()
-                    .executeWebhook(applicationId, interactionData.token(), true, newRequest);
+                    .executeWebhook(applicationId, interactionData.token(), true, MultipartRequest.ofRequest(newBody));
         }
 
         @Override
         public Mono<MessageData> editFollowupMessage(long messageId, WebhookMessageEditRequest request, boolean wait) {
+            return restClient.getWebhookService()
+                    .modifyWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId), request);
+        }
+
+        @Override
+        public Mono<MessageData> editFollowupMessage(long messageId,
+                                                     MultipartRequest<WebhookMessageEditRequest> request) {
             return restClient.getWebhookService()
                     .modifyWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId), request);
         }

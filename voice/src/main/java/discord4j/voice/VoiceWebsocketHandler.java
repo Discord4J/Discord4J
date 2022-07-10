@@ -19,6 +19,7 @@ package discord4j.voice;
 
 import discord4j.common.close.CloseStatus;
 import discord4j.common.close.DisconnectBehavior;
+import discord4j.common.sinks.EmissionStrategy;
 import discord4j.voice.retry.PartialDisconnectException;
 import discord4j.voice.retry.VoiceGatewayException;
 import io.netty.buffer.ByteBuf;
@@ -28,15 +29,18 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.netty.http.websocket.WebsocketInbound;
 import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 import reactor.util.function.Tuple2;
 
+import java.time.Duration;
+
 import static discord4j.common.LogUtil.format;
+import static reactor.core.publisher.Sinks.EmitFailureHandler.FAIL_FAST;
 
 /**
  * Represents a WebSocket handler specialized for Discord voice gateway operations.
@@ -53,23 +57,25 @@ public class VoiceWebsocketHandler {
 
     private static final Logger log = Loggers.getLogger(VoiceWebsocketHandler.class);
 
-    private final FluxSink<ByteBuf> inbound;
+    private final Sinks.Many<ByteBuf> inbound;
     private final Flux<ByteBuf> outbound;
-    private final MonoProcessor<DisconnectBehavior> sessionClose;
-    private final Context context;
+    private final Sinks.One<DisconnectBehavior> sessionClose;
+    private final ContextView context;
+    private final EmissionStrategy emissionStrategy;
 
     /**
      * Create a new handler with the given data pipelines.
      *
-     * @param inbound the {@link FluxSink} of {@link ByteBuf} to process inbound payloads
+     * @param inbound the {@link Sinks.Many} of {@link ByteBuf} to process inbound payloads
      * @param outbound the {@link Flux} of {@link ByteBuf} to process outbound payloads
-     * @param context the Reactor {@link Context} that owns this handler, to enrich logging
+     * @param context the Reactor {@link ContextView} that owns this handler, to enrich logging
      */
-    public VoiceWebsocketHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound, Context context) {
+    public VoiceWebsocketHandler(Sinks.Many<ByteBuf> inbound, Flux<ByteBuf> outbound, ContextView context) {
         this.inbound = inbound;
         this.outbound = outbound;
-        this.sessionClose = MonoProcessor.create();
+        this.sessionClose = Sinks.one();
         this.context = context;
+        this.emissionStrategy = EmissionStrategy.park(Duration.ofNanos(10));
     }
 
     /**
@@ -85,7 +91,7 @@ public class VoiceWebsocketHandler {
      * {@link CloseStatus}.
      */
     public Mono<Tuple2<DisconnectBehavior, CloseStatus>> handle(WebsocketInbound in, WebsocketOutbound out) {
-        Mono<CloseWebSocketFrame> outboundClose = sessionClose
+        Mono<CloseWebSocketFrame> outboundClose = sessionClose.asMono()
                 .doOnNext(behavior -> log.debug(format(context, "Closing session with behavior: {}"), behavior))
                 .flatMap(behavior -> {
                     switch (behavior.getAction()) {
@@ -118,13 +124,17 @@ public class VoiceWebsocketHandler {
         Mono<Void> inboundEvents = in.aggregateFrames()
                 .receiveFrames()
                 .map(WebSocketFrame::content)
-                .doOnNext(inbound::next)
+                .doOnNext(this::emitInbound)
                 .then();
 
         return Mono.zip(outboundEvents, inboundEvents)
                 .doOnError(this::error)
                 .onErrorResume(t -> t.getCause() instanceof VoiceGatewayException, t -> Mono.empty())
-                .then(Mono.zip(sessionClose, inboundClose.defaultIfEmpty(CloseStatus.ABNORMAL_CLOSE)));
+                .then(Mono.zip(sessionClose.asMono(), inboundClose.defaultIfEmpty(CloseStatus.ABNORMAL_CLOSE)));
+    }
+
+    private void emitInbound(ByteBuf value) {
+        emissionStrategy.emitNext(inbound, value);
     }
 
     /**
@@ -141,7 +151,7 @@ public class VoiceWebsocketHandler {
      * @param behavior the {@link DisconnectBehavior} to follow after the close sequence starts
      */
     public void close(DisconnectBehavior behavior) {
-        sessionClose.onNext(behavior);
+        sessionClose.emitValue(behavior, FAIL_FAST);
     }
 
     /**

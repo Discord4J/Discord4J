@@ -32,11 +32,10 @@ import java.util.stream.Collectors;
 
 class LifecycleDispatchHandlers {
 
-    static Mono<ReadyEvent> ready(DispatchContext<Ready> context) {
+    static Mono<ReadyEvent> ready(DispatchContext<Ready, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         Ready dispatch = context.getDispatch();
         UserData userData = dispatch.user();
-        long userId = Snowflake.asLong(userData.id());
 
         User self = new User(gateway, userData);
         Set<ReadyEvent.Guild> guilds = dispatch.guilds()
@@ -44,19 +43,15 @@ class LifecycleDispatchHandlers {
                 .map(g -> new ReadyEvent.Guild(Snowflake.asLong(g.id()), !g.unavailable().get()))
                 .collect(Collectors.toSet());
 
-        Mono<Void> saveUser = context.getStateHolder().getUserStore()
-                .save(userId, userData);
-
-        return saveUser
-                .thenReturn(new ReadyEvent(gateway, context.getShardInfo(), dispatch, self, guilds));
+        return Mono.just(new ReadyEvent(gateway, context.getShardInfo(), dispatch, self, guilds));
     }
 
-    static Mono<ResumeEvent> resumed(DispatchContext<Resumed> context) {
+    static Mono<ResumeEvent> resumed(DispatchContext<Resumed, Void> context) {
         return Mono.just(new ResumeEvent(context.getGateway(), context.getShardInfo(),
                 context.getDispatch().trace()));
     }
 
-    static Mono<? extends GatewayLifecycleEvent> gatewayStateChanged(DispatchContext<GatewayStateChange> context) {
+    static Mono<? extends GatewayLifecycleEvent> gatewayStateChanged(DispatchContext<GatewayStateChange, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         GatewayStateChange dispatch = context.getDispatch();
         switch (dispatch.getState()) {
@@ -73,6 +68,8 @@ class LifecycleDispatchHandlers {
             case DISCONNECTED_RESUME:
                 ClosingStateChange c = (ClosingStateChange) context.getDispatch();
                 return Mono.just(new DisconnectEvent(gateway, context.getShardInfo(), c.getStatus(), c.getBehavior().getCause()));
+            case SESSION_INVALIDATED:
+                return Mono.just(new SessionInvalidatedEvent(gateway, context.getShardInfo()));
         }
         return Mono.empty();
     }

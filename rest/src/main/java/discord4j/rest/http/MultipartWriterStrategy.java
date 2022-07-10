@@ -16,7 +16,6 @@
  */
 package discord4j.rest.http;
 
-import discord4j.discordjson.json.MessageCreateRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.rest.util.MultipartRequest;
@@ -38,7 +37,7 @@ import java.util.List;
  *
  * @see HttpClientForm
  */
-public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest> {
+public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest<?>> {
 
     private static final Logger log = Loggers.getLogger(MultipartWriterStrategy.class);
 
@@ -50,15 +49,15 @@ public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest>
 
     @Override
     public boolean canWrite(@Nullable Class<?> type, @Nullable String contentType) {
-        return contentType != null && contentType.equals("multipart/form-data") && type == null || type == MultipartRequest.class;
+        return contentType != null && contentType.equals("multipart/form-data");
     }
 
     @Override
-    public Mono<HttpClient.ResponseReceiver<?>> write(HttpClient.RequestSender send, @Nullable MultipartRequest body) {
+    public Mono<HttpClient.ResponseReceiver<?>> write(HttpClient.RequestSender send, @Nullable MultipartRequest<?> body) {
         if (body == null) {
             return Mono.empty(); // or .error() ?
         }
-        final MessageCreateRequest createRequest = body.getCreateRequest();
+        final Object createRequest = body.getJsonPayload();
         final List<Tuple2<String, InputStream>> files = body.getFiles();
         return Mono.fromCallable(() -> send.sendForm((request, form) -> {
             form.multipart(true);

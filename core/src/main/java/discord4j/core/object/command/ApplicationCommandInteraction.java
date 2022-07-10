@@ -145,6 +145,16 @@ public class ApplicationCommandInteraction implements DiscordObject {
     }
 
     /**
+     * Gets the converted users + roles + channels + attachments.
+     *
+     * @return The converted users + roles + channels + attachments.
+     */
+    public Optional<ApplicationCommandInteractionResolved> getResolved() {
+        return data.resolved().toOptional()
+                .map(data -> new ApplicationCommandInteractionResolved(gateway, data, guildId));
+    }
+
+    /**
      * Gets the ID of the user or message targeted by a user or message command.
      *
      * @return The id of the user or message targeted.
@@ -154,8 +164,27 @@ public class ApplicationCommandInteraction implements DiscordObject {
                 .map(Snowflake::of);
     }
 
+    /**
+     * Gets the components of the submitted modal.
+     *
+     * @return The components of the submitted modal.
+     */
+    public List<MessageComponent> getComponents() {
+        return data.components().toOptional().orElse(Collections.emptyList()).stream()
+                .map(MessageComponent::fromData)
+                .collect(Collectors.toList());
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
+    }
+
+    @Override
+    public String toString() {
+        return "ApplicationCommandInteraction{" +
+                "data=" + data +
+                ", guildId=" + guildId +
+                '}';
     }
 }

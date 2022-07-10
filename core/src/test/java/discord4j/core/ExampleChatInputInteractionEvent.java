@@ -17,21 +17,21 @@
 
 package discord4j.core;
 
-import discord4j.common.util.Snowflake;
 import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.core.support.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.RestClient;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import java.util.Collections;
 import java.util.Random;
 
 public class ExampleChatInputInteractionEvent {
@@ -39,7 +39,7 @@ public class ExampleChatInputInteractionEvent {
     private static final Logger log = Loggers.getLogger(ExampleChatInputInteractionEvent.class);
 
     private static final String token = System.getenv("token");
-    private static final String guildId = System.getenv("guildId");
+    private static final long guildId = Long.parseLong(System.getenv("guildId"));
 
     public static void main(String[] args) {
         GatewayDiscordClient client = DiscordClient.create(token)
@@ -57,15 +57,11 @@ public class ExampleChatInputInteractionEvent {
                         .build())
                 .build();
 
-        RestClient restClient = client.getRestClient();
-
-        long applicationId = restClient.getApplicationId().block();
-
-        restClient.getApplicationService()
-                .createGuildApplicationCommand(applicationId, Snowflake.asLong(guildId), randomCommand)
+        GuildCommandRegistrar.create(client.getRestClient(), guildId, Collections.singletonList(randomCommand))
+                .registerCommands()
                 .doOnError(e -> log.warn("Unable to create guild command", e))
                 .onErrorResume(e -> Mono.empty())
-                .block();
+                .blockLast();
 
         client.on(new ReactiveEventAdapter() {
 

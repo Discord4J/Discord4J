@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.ExtendedPermissionOverwrite;
@@ -28,12 +29,14 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.WebhookCreateSpec;
+import discord4j.core.spec.legacy.LegacyInviteCreateSpec;
+import discord4j.core.spec.legacy.LegacyMessageCreateSpec;
+import discord4j.core.spec.legacy.LegacyWebhookCreateSpec;
 import discord4j.discordjson.json.BulkDeleteRequest;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
-import discord4j.common.util.Snowflake;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -106,6 +109,11 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     @Override
+    public Mono<PermissionSet> getEffectivePermissions(Member member) {
+        return guildChannel.getEffectivePermissions(member);
+    }
+
+    @Override
     public String getName() {
         return guildChannel.getName();
     }
@@ -152,7 +160,12 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     @Override
-    public Mono<Message> createMessage(final Consumer<? super MessageCreateSpec> spec) {
+    public Mono<Message> createMessage(final Consumer<? super LegacyMessageCreateSpec> spec) {
+        return messageChannel.createMessage(spec);
+    }
+
+    @Override
+    public Mono<Message> createMessage(MessageCreateSpec spec) {
         return messageChannel.createMessage(spec);
     }
 
@@ -207,7 +220,12 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     @Override
-    public Mono<ExtendedInvite> createInvite(final Consumer<? super InviteCreateSpec> spec) {
+    public Mono<ExtendedInvite> createInvite(final Consumer<? super LegacyInviteCreateSpec> spec) {
+        return categorizableChannel.createInvite(spec);
+    }
+
+    @Override
+    public Mono<ExtendedInvite> createInvite(InviteCreateSpec spec) {
         return categorizableChannel.createInvite(spec);
     }
 
@@ -273,18 +291,11 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
             });
     }
 
-    /**
-     * Requests to create a webhook.
-     *
-     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookCreateSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error
-     * is received, it is emitted through the {@code Mono}.
-     */
     @Override
-    public Mono<Webhook> createWebhook(final Consumer<? super WebhookCreateSpec> spec) {
+    public Mono<Webhook> createWebhook(final Consumer<? super LegacyWebhookCreateSpec> spec) {
         return Mono.defer(
                 () -> {
-                    WebhookCreateSpec mutatedSpec = new WebhookCreateSpec();
+                    LegacyWebhookCreateSpec mutatedSpec = new LegacyWebhookCreateSpec();
                     spec.accept(mutatedSpec);
                     return getClient().getRestClient().getWebhookService()
                             .createWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
@@ -292,8 +303,17 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
                 .map(data -> new Webhook(getClient(), data));
     }
 
+    @Override
+    public Mono<Webhook> createWebhook(WebhookCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> getClient().getRestClient().getWebhookService()
+                        .createWebhook(getId().asLong(), spec.asRequest(), spec.reason()))
+                .map(data -> new Webhook(getClient(), data));
+    }
+
     /**
-     * Requests to retrieve the webhooks of the channel.
+     * Requests to retrieve the webhooks of the channel. Requires the MANAGE_WEBHOOKS permission.
      *
      * @return A {@link Flux} that continually emits the {@link Webhook webhooks} of the channel. If an error is
      * received, it is emitted through the {@code Flux}.

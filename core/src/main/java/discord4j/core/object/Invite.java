@@ -148,32 +148,13 @@ public class Invite implements DiscordObject {
     }
 
     /**
-     * Requests to retrieve the user who created the invite.
+     * Gets the user who created the invite, if present.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link User user} who created the invite. If
-     * an error is received, it is emitted through the {@code Mono}.
-     * @deprecated this method will return {@link Optional} in v3.2.0, as the inviter User can be accessed directly. see
-     * <a href="https://github.com/Discord4J/Discord4J/pull/898">this pull request</a> for details
+     * @return The user who created the invite, if present.
      */
-    @Deprecated
-    public final Mono<User> getInviter() {
-        return getInviterId().map(gateway::getUserById).orElse(Mono.empty());
-    }
-
-    /**
-     * Requests to retrieve the user who created the invite, using the given retrieval strategy.
-     *
-     * @param retrievalStrategy the strategy to use to get the inviter
-     * @return A {@link Mono} where, upon successful completion, emits the {@link User user} who created the invite. If
-     * an error is received, it is emitted through the {@code Mono}.
-     * @deprecated this method will be removed in v3.2.0, as the inviter User can be accessed directly. see
-     * <a href="https://github.com/Discord4J/Discord4J/pull/898">this pull request</a> for details
-     */
-    @Deprecated
-    public final Mono<User> getInviter(EntityRetrievalStrategy retrievalStrategy) {
-        return getInviterId()
-                .map(id -> gateway.withRetrievalStrategy(retrievalStrategy).getUserById(id))
-                .orElse(Mono.empty());
+    public final Optional<User> getInviter() {
+        return data.inviter().toOptional()
+                .map(data -> new User(gateway, data));
     }
 
     /**
@@ -188,32 +169,13 @@ public class Invite implements DiscordObject {
     }
 
     /**
-     * Requests to retrieve the target user this invite is associated to.
+     * Gets the target user this invite is associated to, if present.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link User target user} this invite is
-     * associated to. If an error is received, it is emitted through the {@code Mono}.
-     * @deprecated this method will return {@link Optional} in v3.2.0, as the inviter User can be accessed directly. see
-     * <a href="https://github.com/Discord4J/Discord4J/pull/898">this pull request</a> for details
+     * @return The target user this invite is associated to, if present.
      */
-    @Deprecated
-    public final Mono<User> getTargetUser() {
-        return getTargetUserId().map(gateway::getUserById).orElse(Mono.empty());
-    }
-
-    /**
-     * Requests to retrieve the target user this invite is associated to, using the given retrieval strategy.
-     *
-     * @param retrievalStrategy the strategy to use to get the target user
-     * @return A {@link Mono} where, upon successful completion, emits the {@link User target user} this invite is
-     * associated to. If an error is received, it is emitted through the {@code Mono}.
-     * @deprecated this method will be removed in v3.2.0, as the inviter User can be accessed directly. see
-     * <a href="https://github.com/Discord4J/Discord4J/pull/898">this pull request</a> for details
-     */
-    @Deprecated
-    public final Mono<User> getTargetUser(EntityRetrievalStrategy retrievalStrategy) {
-        return getTargetUserId()
-                .map(id -> gateway.withRetrievalStrategy(retrievalStrategy).getUserById(id))
-                .orElse(Mono.empty());
+    public final Optional<User> getTargetUser() {
+        return data.targetUser().toOptional()
+                .map(data -> new User(gateway, data));
     }
 
     /**

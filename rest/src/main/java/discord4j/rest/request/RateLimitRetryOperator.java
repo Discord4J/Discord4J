@@ -59,7 +59,7 @@ public class RateLimitRetryOperator {
                 String retryAfter = headers.get("Retry-After");
                 String resetAfter = headers.get("X-RateLimit-Reset-After");
                 if (global) {
-                    Duration fixedBackoff = Duration.ofMillis(Long.parseLong(retryAfter));
+                    Duration fixedBackoff = Duration.ofSeconds(Long.parseLong(retryAfter));
                     return retryMono(fixedBackoff).thenReturn(context);
                 } else if (resetAfter != null) {
                     long resetAt = (long) (Double.parseDouble(resetAfter) * 1000);

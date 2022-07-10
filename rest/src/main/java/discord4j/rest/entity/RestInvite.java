@@ -22,6 +22,8 @@ import discord4j.rest.RestClient;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.Objects;
+
 /**
  * Represents a code that can be used to add a user to a guild.
  */
@@ -63,4 +65,16 @@ public class RestInvite {
         return restClient.getInviteService().deleteInvite(code, reason);
     }
 
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RestInvite that = (RestInvite) o;
+        return code.equals(that.code);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(code);
+    }
 }

@@ -31,7 +31,7 @@ public abstract class Routes {
      * @see <a href="https://discord.com/developers/docs/reference#base-url">
      * https://discord.com/developers/docs/reference#base-url</a>
      */
-    public static final String BASE_URL = "https://discord.com/api/v6";
+    public static final String BASE_URL = "https://discord.com/api/v8";
 
     //////////////////////////////////////////////
     ////////////// Gateway Resource //////////////
@@ -250,7 +250,8 @@ public abstract class Routes {
     /**
      * Crosspost a Message into all guilds what follow the news channel indicated. This endpoint requires the
      * 'DISCOVERY' feature to be present for the guild and requires the 'SEND_MESSAGES' permission, if the current user
-     * sent the message, or additionally the 'MANAGE_MESSAGES' permission, for all other messages, to be present for the current user.
+     * sent the message, or additionally the 'MANAGE_MESSAGES' permission, for all other messages, to be present for
+     * the current user.
      * <p>
      * Returns a 204 empty response on success.
      *
@@ -358,6 +359,66 @@ public abstract class Routes {
      * https://discord.com/developers/docs/resources/channel#group-dm-remove-recipient</a>
      */
     public static final Route GROUP_DM_RECIPIENT_DELETE = Route.delete("/channels/{channel.id}/recipients/{user.id}");
+
+    ////////////////////////////////////////////
+    ////////////// Sticker Resource //////////////
+    ////////////////////////////////////////////
+
+    /**
+     * Returns a sticker object for the given sticker ID.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#get-sticker">
+     * https://discord.com/developers/docs/resources/sticker#get-sticker</a>
+     */
+    public static final Route STICKER_GET = Route.get("/stickers/{sticker.id}");
+
+    /**
+     * Returns the list of sticker packs available to Nitro subscribers.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs">
+     * https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs</a>
+     */
+    public static final Route NITRO_STICKER_PACKS_GET = Route.get("/sticker-packs");
+
+    /**
+     * Returns an array of sticker objects for the given guild. Includes user fields if the bot has the MANAGE_EMOJIS_AND_STICKERS permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#list-guild-stickers">
+     * https://discord.com/developers/docs/resources/sticker#list-guild-stickers</a>
+     */
+    public static final Route GUILD_STICKERS_GET = Route.get("/guilds/{guild.id}/stickers");
+
+    /**
+     * Returns a sticker object for the given guild and sticker IDs. Includes the user field if the bot has the MANAGE_EMOJIS_AND_STICKERS permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#get-guild-sticker">
+     * https://discord.com/developers/docs/resources/sticker#get-guild-sticker</a>
+     */
+    public static final Route GUILD_STICKER_GET = Route.get("/guilds/{guild.id}/stickers/{sticker.id}");
+
+    /**
+     * Create a new sticker for the guild. Send a multipart/form-data body. Requires the MANAGE_EMOJIS_AND_STICKERS permission. Returns the new sticker object on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#create-guild-sticker">
+     * https://discord.com/developers/docs/resources/sticker#create-guild-sticker</a>
+     */
+    public static final Route GUILD_STICKER_CREATE = Route.post("/guilds/{guild.id}/stickers");
+
+    /**
+     * Modify the given sticker. Requires the MANAGE_EMOJIS_AND_STICKERS permission. Returns the updated sticker object on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#modify-guild-sticker">
+     * https://discord.com/developers/docs/resources/sticker#modify-guild-sticker</a>
+     */
+    public static final Route GUILD_STICKER_MODIFY = Route.patch("/guilds/{guild.id}/stickers/{sticker.id}");
+
+    /**
+     * Delete the given sticker. Requires the MANAGE_EMOJIS_AND_STICKERS permission. Returns 204 No Content on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#delete-guild-sticker">
+     * https://discord.com/developers/docs/resources/sticker#delete-guild-sticker</a>
+     */
+    public static final Route GUILD_STICKER_DELETE = Route.delete("/guilds/{guild.id}/stickers/{sticker.id}");
 
     ////////////////////////////////////////////
     ////////////// Emoji Resource //////////////
@@ -505,8 +566,8 @@ public abstract class Routes {
     public static final Route GUILD_MEMBER_ADD = Route.put("/guilds/{guild.id}/members/{user.id}");
 
     /**
-     * Modify attributes of a guild member. Returns a 204 empty response on success. Fires a Guild Member Update
-     * Gateway event.
+     * Modify attributes of a guild member. Returns a 200 OK with the guild member on success. Fires a Guild Member
+     * Update Gateway event.
      *
      * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-member">
      * https://discord.com/developers/docs/resources/guild#modify-guild-member</a>
@@ -708,33 +769,12 @@ public abstract class Routes {
     public static final Route GUILD_INTEGRATION_SYNC = Route.post("/guilds/{guild.id}/integrations/{integration.id}/sync");
 
     /**
-     * Returns the guild embed object. Requires the 'MANAGE_GUILD' permission.
-     *
-     * @see <a href="https://discord.com/developers/docs/resources/guild#get-guild-embed">
-     * https://discord.com/developers/docs/resources/guild#get-guild-embed</a>
-     * @deprecated Use {@code Routes.GUILD_WIDGET_GET} instead.
-     */
-    @Deprecated
-    public static final Route GUILD_EMBED_GET = Route.get("/guilds/{guild.id}/embed");
-
-    /**
      * Returns the guild widget object. Requires the 'MANAGE_GUILD' permission.
      *
      * @see <a href="https://discord.com/developers/docs/resources/guild#get-guild-widget">
      * https://discord.com/developers/docs/resources/guild#get-guild-widget</a>
      */
     public static final Route GUILD_WIDGET_GET = Route.get("/guilds/{guild.id}/widget");
-
-    /**
-     * Modify a guild embed object for the guild. All attributes may be passed in with JSON and modified. Requires the
-     * 'MANAGE_GUILD' permission. Returns the updated guild embed object.
-     *
-     * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-embed">
-     * https://discord.com/developers/docs/resources/guild#modify-guild-embed</a>
-     * @deprecated Use {@code Routes.GUILD_WIDGET_MODIFY} instead.
-     */
-    @Deprecated
-    public static final Route GUILD_EMBED_MODIFY = Route.patch("/guilds/{guild.id}/embed");
 
     /**
      * Modify a guild widget object for the guild. All attributes may be passed in with JSON and modified. Requires the
@@ -904,15 +944,6 @@ public abstract class Routes {
      * https://discord.com/developers/docs/resources/user#leave-guild</a>
      */
     public static final Route GUILD_LEAVE = Route.delete("/users/@me/guilds/{guild.id}");
-
-    /**
-     * Returns a list of DM channel objects.
-     *
-     * @see <a href="https://discord.com/developers/docs/resources/user#get-user-dms">
-     * https://discord.com/developers/docs/resources/user#get-user-dms</a>
-     */
-    @Deprecated
-    public static final Route USER_DMS_GET = Route.get("/users/@me/channels");
 
     /**
      * Create a new DM channel with a user. Returns a DM channel object.

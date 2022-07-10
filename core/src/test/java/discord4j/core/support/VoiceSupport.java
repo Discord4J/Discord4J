@@ -169,7 +169,7 @@ public class VoiceSupport {
                         .flatMap(channel -> {
                             GuildVoiceSupport voice = voiceMap.computeIfAbsent(channel.getGuildId(),
                                     k -> new GuildVoiceSupport());
-                            return channel.join(spec -> spec.setProvider(voice.provider));
+                            return channel.join().withProvider(voice.provider);
                         })
                         .retryWhen(Retry.backoff(2, Duration.ofSeconds(2)))
                         .doFinally(s -> log.info("Finalized join request after {}", s))

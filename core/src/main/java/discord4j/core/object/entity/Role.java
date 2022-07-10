@@ -16,17 +16,22 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.RoleTags;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.core.spec.RoleEditMono;
 import discord4j.core.spec.RoleEditSpec;
+import discord4j.core.spec.legacy.LegacyRoleEditSpec;
 import discord4j.core.util.EntityUtil;
+import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.entity.RestRole;
 import discord4j.rest.util.Color;
+import discord4j.rest.util.Image;
 import discord4j.rest.util.PermissionSet;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -44,6 +49,9 @@ public final class Role implements Entity {
 
     /** The default {@link Color} of a {@code Role}. */
     public static final Color DEFAULT_COLOR = Color.of(0);
+
+    /** The path for role icon image URLs. */
+    private static final String ICON_IMAGE_PATH = "role-icons/%s/%s";
 
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
@@ -165,6 +173,26 @@ public final class Role implements Entity {
     }
 
     /**
+     * Gets the icon URL of the role, if present.
+     *
+     * @param format The format for the URL.
+     * @return The icon URL of the role, if present.
+     */
+    public Optional<String> getIconUrl(final Image.Format format) {
+        return Possible.flatOpt(data.icon())
+            .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
+    }
+
+    /**
+     * Gets the Unicode Emoji of the role, if present.
+     *
+     * @return The Unicode Emoji of the role, if present.
+     */
+    public Optional<String> getUnicodeEmoji() {
+        return Possible.flatOpt(data.unicodeEmoji());
+    }
+
+    /**
      * Gets the role name.
      *
      * @return The role name.
@@ -264,6 +292,9 @@ public final class Role implements Entity {
      * @return The <i>raw</i> mention.
      */
     public String getMention() {
+        if (isEveryone()) {
+            return "@everyone";
+        }
         return "<@&" + getId().asString() + ">";
     }
 
@@ -284,18 +315,44 @@ public final class Role implements Entity {
     /**
      * Requests to edit this role.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link RoleEditSpec} to be operated on.
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyRoleEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Role}. If an error is received,
      * it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(RoleEditSpec)} or {@link #edit()} which offer an immutable approach to build specs
      */
-    public Mono<Role> edit(final Consumer<? super RoleEditSpec> spec) {
+    @Deprecated
+    public Mono<Role> edit(final Consumer<? super LegacyRoleEditSpec> spec) {
         return Mono.defer(
                 () -> {
-                    RoleEditSpec mutatedSpec = new RoleEditSpec();
+                    LegacyRoleEditSpec mutatedSpec = new LegacyRoleEditSpec();
                     spec.accept(mutatedSpec);
                     return rest.edit(mutatedSpec.asRequest(), mutatedSpec.getReason())
                             .map(bean -> new Role(gateway, bean, getGuildId().asLong()));
                 });
+    }
+
+    /**
+     * Requests to edit this role. Properties specifying how to edit this role can be set via the {@code withXxx}
+     * methods of the returned {@link RoleEditMono}.
+     *
+     * @return A {@link RoleEditMono} where, upon successful completion, emits the edited {@link Role}. If an error is
+     * received, it is emitted through the {@code RoleEditMono}.
+     */
+    public RoleEditMono edit() {
+        return RoleEditMono.of(this);
+    }
+
+    /**
+     * Requests to edit this role.
+     *
+     * @param spec an immutable object that specifies how to edit this role
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Role}. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    public Mono<Role> edit(RoleEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> rest.edit(spec.asRequest(), spec.reason())
+                .map(bean -> new Role(gateway, bean, getGuildId().asLong())));
     }
 
     /**

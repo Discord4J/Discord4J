@@ -21,8 +21,10 @@ import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.InteractionResponseType;
-import discord4j.rest.util.WebhookMultipartRequest;
+import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
+
+import java.util.Collections;
 
 class InteractionOperations implements RestInteraction, InteractionResponse, GuildInteraction, DirectInteraction {
 
@@ -143,6 +145,12 @@ class InteractionOperations implements RestInteraction, InteractionResponse, Gui
     }
 
     @Override
+    public Mono<MessageData> editInitialResponse(MultipartRequest<WebhookMessageEditRequest> request) {
+        return restClient.getWebhookService()
+                .modifyWebhookMessage(applicationId, interactionData.token(), "@original", request);
+    }
+
+    @Override
     public Mono<Void> deleteInitialResponse() {
         return restClient.getWebhookService()
                 .deleteWebhookMessage(applicationId, interactionData.token(), "@original");
@@ -151,13 +159,13 @@ class InteractionOperations implements RestInteraction, InteractionResponse, Gui
     @Override
     public Mono<MessageData> createFollowupMessage(String content) {
         FollowupMessageRequest body = FollowupMessageRequest.builder().content(content).build();
-        WebhookMultipartRequest request = new WebhookMultipartRequest(body);
         return restClient.getWebhookService()
-                .executeWebhook(applicationId, interactionData.token(), true, request);
+                .executeWebhook(applicationId, interactionData.token(), true,
+                        MultipartRequest.ofRequestAndFiles(body, Collections.emptyList()));
     }
 
     @Override
-    public Mono<MessageData> createFollowupMessage(WebhookMultipartRequest request) {
+    public Mono<MessageData> createFollowupMessage(MultipartRequest<? extends WebhookExecuteRequest> request) {
         return restClient.getWebhookService()
                 .executeWebhook(applicationId, interactionData.token(), true, request);
     }
@@ -168,25 +176,28 @@ class InteractionOperations implements RestInteraction, InteractionResponse, Gui
                 .content(content)
                 .flags(1 << 6)
                 .build();
-        WebhookMultipartRequest request = new WebhookMultipartRequest(body);
         return restClient.getWebhookService()
-                .executeWebhook(applicationId, interactionData.token(), true, request);
+                .executeWebhook(applicationId, interactionData.token(), true, MultipartRequest.ofRequest(body));
     }
 
     @Override
-    public Mono<MessageData> createFollowupMessageEphemeral(WebhookMultipartRequest request) {
+    public Mono<MessageData> createFollowupMessageEphemeral(MultipartRequest<WebhookExecuteRequest> request) {
         FollowupMessageRequest newBody = FollowupMessageRequest.builder()
-                .from(request.getExecuteRequest())
+                .from(request.getJsonPayload())
                 .flags(1 << 6)
                 .build();
-        WebhookMultipartRequest newRequest = new WebhookMultipartRequest(newBody, request.getFiles());
-
         return restClient.getWebhookService()
-                .executeWebhook(applicationId, interactionData.token(), true, newRequest);
+                .executeWebhook(applicationId, interactionData.token(), true, MultipartRequest.ofRequest(newBody));
     }
 
     @Override
     public Mono<MessageData> editFollowupMessage(long messageId, WebhookMessageEditRequest request, boolean wait) {
+        return restClient.getWebhookService()
+                .modifyWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId), request);
+    }
+
+    @Override
+    public Mono<MessageData> editFollowupMessage(long messageId, MultipartRequest<WebhookMessageEditRequest> request) {
         return restClient.getWebhookService()
                 .modifyWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId), request);
     }

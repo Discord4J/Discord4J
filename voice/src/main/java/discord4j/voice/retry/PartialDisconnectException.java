@@ -17,11 +17,11 @@
 
 package discord4j.voice.retry;
 
-import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 public class PartialDisconnectException extends VoiceGatewayException {
 
-    public PartialDisconnectException(Context context) {
+    public PartialDisconnectException(ContextView context) {
         super(context);
     }
 }

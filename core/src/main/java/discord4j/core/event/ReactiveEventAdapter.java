@@ -296,6 +296,17 @@ public abstract class ReactiveEventAdapter {
     }
 
     /**
+     * Invoked when a sticker is added, deleted or edited in a guild. The emojis set includes ALL stickers of the guild.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onStickersUpdate(StickersUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
      * Invoked when a user is banned from a guild.
      *
      * @param event the event instance
@@ -508,19 +519,6 @@ public abstract class ReactiveEventAdapter {
     }
 
     /**
-     * Invoked when a DM channel is created.
-     *
-     * @param event the event instance
-     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
-     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
-     * @deprecated event scheduled for removal in v3.2 after being deprecated by Discord in Gateway v8.
-     */
-    @Deprecated
-    public Publisher<?> onPrivateChannelCreate(PrivateChannelCreateEvent event) {
-        return Mono.empty();
-    }
-
-    /**
      * Invoked when a user has started typing a message.
      *
      * @param event the event instance
@@ -706,6 +704,17 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    /**
+     * Invoked when a gateway session has been invalidated.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onSessionInvalidated(SessionInvalidatedEvent event) {
+        return Mono.empty();
+    }
+
     // ================= Interactions events ================= //
 
     /**
@@ -716,6 +725,16 @@ public abstract class ReactiveEventAdapter {
      * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
      */
     public Publisher<?> onInteractionCreate(InteractionCreateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a user starts a deferrable interaction
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onDeferrableInteraction(DeferrableInteractionEvent event) {
         return Mono.empty();
     }
 
@@ -796,6 +815,38 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    /**
+     * Invoked when a user starts an auto-complete interaction.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onAutoCompleteInteraction(AutoCompleteInteractionEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a user is typing a chat input command option that has auto-complete enabled.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onChatInputAutoCompleteInteraction(ChatInputAutoCompleteEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a user starts a modal supported interaction
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onModalSubmitInteraction(ModalSubmitInteractionEvent event) {
+        return Mono.empty();
+    }
+
     // ================= Integration related events ================= //
 
     /**
@@ -864,6 +915,7 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof MemberUpdateEvent) compatibleHooks.add(onMemberUpdate((MemberUpdateEvent) event));
         if (event instanceof MemberChunkEvent) compatibleHooks.add(onMemberChunk((MemberChunkEvent) event));
         if (event instanceof EmojisUpdateEvent) compatibleHooks.add(onEmojisUpdate((EmojisUpdateEvent) event));
+        if (event instanceof StickersUpdateEvent) compatibleHooks.add(onStickersUpdate((StickersUpdateEvent) event));
         if (event instanceof BanEvent) compatibleHooks.add(onBan((BanEvent) event));
         if (event instanceof UnbanEvent) compatibleHooks.add(onUnban((UnbanEvent) event));
         if (event instanceof IntegrationsUpdateEvent) compatibleHooks.add(onIntegrationsUpdate((IntegrationsUpdateEvent) event));
@@ -883,7 +935,6 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof StoreChannelCreateEvent) compatibleHooks.add(onStoreChannelCreate((StoreChannelCreateEvent) event));
         if (event instanceof StoreChannelDeleteEvent) compatibleHooks.add(onStoreChannelDelete((StoreChannelDeleteEvent) event));
         if (event instanceof StoreChannelUpdateEvent) compatibleHooks.add(onStoreChannelUpdate((StoreChannelUpdateEvent) event));
-        if (event instanceof PrivateChannelCreateEvent) compatibleHooks.add(onPrivateChannelCreate((PrivateChannelCreateEvent) event));
         if (event instanceof TypingStartEvent) compatibleHooks.add(onTypingStart((TypingStartEvent) event));
         if (event instanceof PinsUpdateEvent) compatibleHooks.add(onPinsUpdate((PinsUpdateEvent) event));
         if (event instanceof RoleCreateEvent) compatibleHooks.add(onRoleCreate((RoleCreateEvent) event));
@@ -900,6 +951,7 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof DisconnectEvent) compatibleHooks.add(onDisconnect((DisconnectEvent) event));
         if (event instanceof ReconnectStartEvent) compatibleHooks.add(onReconnectStart((ReconnectStartEvent) event));
         if (event instanceof ReconnectFailEvent) compatibleHooks.add(onReconnectFail((ReconnectFailEvent) event));
+        if (event instanceof SessionInvalidatedEvent) compatibleHooks.add(onSessionInvalidated((SessionInvalidatedEvent) event));
         if (event instanceof ApplicationCommandInteractionEvent) compatibleHooks.add(onApplicationCommandInteraction((ApplicationCommandInteractionEvent) event));
         if (event instanceof ChatInputInteractionEvent) compatibleHooks.add(onChatInputInteraction((ChatInputInteractionEvent) event));
         if (event instanceof MessageInteractionEvent) compatibleHooks.add(onMessageInteraction((MessageInteractionEvent) event));
@@ -907,6 +959,10 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof ButtonInteractionEvent) compatibleHooks.add(onButtonInteraction((ButtonInteractionEvent) event));
         if (event instanceof SelectMenuInteractionEvent) compatibleHooks.add(onSelectMenuInteraction((SelectMenuInteractionEvent) event));
         if (event instanceof ComponentInteractionEvent) compatibleHooks.add(onComponentInteraction((ComponentInteractionEvent) event));
+        if (event instanceof AutoCompleteInteractionEvent) compatibleHooks.add(onAutoCompleteInteraction((AutoCompleteInteractionEvent) event));
+        if (event instanceof ChatInputAutoCompleteEvent) compatibleHooks.add(onChatInputAutoCompleteInteraction((ChatInputAutoCompleteEvent) event));
+        if (event instanceof ModalSubmitInteractionEvent) compatibleHooks.add(onModalSubmitInteraction((ModalSubmitInteractionEvent) event));
+        if (event instanceof DeferrableInteractionEvent) compatibleHooks.add(onDeferrableInteraction((DeferrableInteractionEvent) event));
         if (event instanceof InteractionCreateEvent) compatibleHooks.add(onInteractionCreate((InteractionCreateEvent) event));
         if (event instanceof ApplicationCommandCreateEvent) compatibleHooks.add(onApplicationCommandCreate((ApplicationCommandCreateEvent) event));
         if (event instanceof ApplicationCommandUpdateEvent) compatibleHooks.add(onApplicationCommandUpdate((ApplicationCommandUpdateEvent) event));

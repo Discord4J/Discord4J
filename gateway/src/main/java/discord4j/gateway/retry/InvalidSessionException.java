@@ -17,15 +17,15 @@
 
 package discord4j.gateway.retry;
 
-import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 public class InvalidSessionException extends GatewayException {
 
-    public InvalidSessionException(Context context) {
+    public InvalidSessionException(ContextView context) {
         super(context);
     }
 
-    public InvalidSessionException(Context context, String message) {
+    public InvalidSessionException(ContextView context, String message) {
         super(context, message);
     }
 }

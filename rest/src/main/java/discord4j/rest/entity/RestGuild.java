@@ -26,10 +26,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -91,7 +88,7 @@ public class RestGuild {
      * entity. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildUpdateData> getData() {
-        return getData(null);
+        return getData(true);
     }
 
     /**
@@ -199,7 +196,7 @@ public class RestGuild {
         return restClient.getGuildService().addGuildMember(id, userId.asLong(), request);
     }
 
-    public Mono<Void> modifyMember(Snowflake userId, GuildMemberModifyRequest request, @Nullable String reason) {
+    public Mono<MemberData> modifyMember(Snowflake userId, GuildMemberModifyRequest request, @Nullable String reason) {
         return restClient.getGuildService().modifyGuildMember(id, userId.asLong(), request, reason);
     }
 
@@ -285,11 +282,6 @@ public class RestGuild {
         return restClient.getGuildService().getGuildIntegrations(id);
     }
 
-    @Deprecated
-    public Flux<IntegrationData> getIntegrations(boolean includeApplications) {
-        return restClient.getGuildService().getGuildIntegrations(id, includeApplications);
-    }
-
     public Mono<Void> createIntegration(IntegrationCreateRequest request) {
         return restClient.getGuildService().createGuildIntegration(id, request);
     }
@@ -304,22 +296,6 @@ public class RestGuild {
 
     public Mono<Void> syncIntegration(Snowflake integrationId) {
         return restClient.getGuildService().syncGuildIntegration(id, integrationId.asLong());
-    }
-
-    /**
-     * @deprecated Use {RestGuild#getWidget} instead.
-     */
-    @Deprecated
-    public Mono<GuildEmbedData> getEmbed() {
-        return restClient.getGuildService().getGuildEmbed(id);
-    }
-
-    /**
-     * @deprecated Use {RestGuild#modifyWidget} instead.
-     */
-    @Deprecated
-    public Mono<GuildEmbedData> modifyEmbed(GuildEmbedModifyRequest request) {
-        return restClient.getGuildService().modifyGuildEmbed(id, request);
     }
 
     public Mono<GuildWidgetData> getWidget() {
@@ -351,6 +327,19 @@ public class RestGuild {
 
     public Flux<TemplateData> getTemplates() {
         return restClient.getTemplateService().getTemplates(id);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RestGuild restGuild = (RestGuild) o;
+        return id == restGuild.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
 }

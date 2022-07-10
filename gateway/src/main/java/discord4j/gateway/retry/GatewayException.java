@@ -17,22 +17,22 @@
 
 package discord4j.gateway.retry;
 
-import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 public class GatewayException extends RuntimeException {
 
-    private final Context context;
+    private final ContextView context;
 
-    public GatewayException(Context context) {
+    public GatewayException(ContextView context) {
         this.context = context;
     }
 
-    public GatewayException(Context context, String message) {
+    public GatewayException(ContextView context, String message) {
         super(message);
         this.context = context;
     }
 
-    public Context getContext() {
+    public ContextView getContext() {
         return context;
     }
 }

@@ -174,6 +174,41 @@ public class Interaction implements DiscordObject {
                 .map(data -> new Message(gateway, data));
     }
 
+    /**
+     * Gets the ID of the message associated with the interaction.
+     *
+     * @return The message associated with the interaction.
+     */
+    public Optional<Snowflake> getMessageId() {
+        return data.message().toOptional()
+                .map(data -> Snowflake.of(data.id()));
+    }
+
+    /**
+     * Gets the invoking user's client locale.
+     * <br>
+     * This is not present on {@code PING} interactions and will therefore default to {@code en-US}
+     *
+     * @see <a href="https://discord.com/developers/docs/reference#locales">Discord Locales</a>
+     * @return The invoking user's client locale.
+     */
+    public String getUserLocale() {
+        return data.locale().toOptional().orElse("en-US");
+    }
+
+    /**
+     * Gets the guild's locale if the interaction was invoked from a guild.
+     * Defaults to {@code en-US} for non-community guilds.
+     * <br>
+     * This is not present on {@code PING} interactions
+     *
+     * @see <a href="https://discord.com/developers/docs/reference#locales">Discord Locales</a>
+     * @return The locale of the guild where the interaction was invoked, otherwise {@link Optional#empty()}
+     */
+    public Optional<String> getGuildLocale() {
+        return data.guildLocale().toOptional();
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
@@ -185,7 +220,9 @@ public class Interaction implements DiscordObject {
         UNKNOWN(-1),
         PING(1),
         APPLICATION_COMMAND(2),
-        MESSAGE_COMPONENT(3);
+        MESSAGE_COMPONENT(3),
+        APPLICATION_COMMAND_AUTOCOMPLETE(4),
+        MODAL_SUBMIT(5);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -220,6 +257,8 @@ public class Interaction implements DiscordObject {
                 case 1: return PING;
                 case 2: return APPLICATION_COMMAND;
                 case 3: return MESSAGE_COMPONENT;
+                case 4: return APPLICATION_COMMAND_AUTOCOMPLETE;
+                case 5: return MODAL_SUBMIT;
                 default: return UNKNOWN;
             }
         }
