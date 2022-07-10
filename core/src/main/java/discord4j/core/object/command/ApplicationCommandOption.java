@@ -24,7 +24,6 @@ import discord4j.core.object.entity.channel.Channel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -32,7 +31,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * A Discord application command option.
@@ -47,8 +45,6 @@ public class ApplicationCommandOption implements DiscordObject {
     public static final int MAX_NAME_LENGTH = 32;
     /** The maximum amount of characters that can be in an application command option description. */
     public static final int MAX_DESCRIPTION_LENGTH = 100;
-    /** The maximum amount of choices that can be in an application command option. */
-    public static final int MAX_CHOICES = 25;
 
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
@@ -74,20 +70,6 @@ public class ApplicationCommandOption implements DiscordObject {
      */
     public Type getType() {
         return Type.of(data.type());
-    }
-
-    /**
-     * Gets the channel types for what this option is designed.
-     *
-     * @return a EnumSet with all the {@link Channel.Type} in the class.
-     */
-    public EnumSet<Channel. Type> getChannelTypes() {
-        EnumSet<Channel.Type> presets = EnumSet.noneOf(Channel.Type.class);
-        if (data.channelTypes().isAbsent()) {
-            return presets;
-        }
-        presets.addAll(data.channelTypes().toOptional().map(presetValues -> presetValues.stream().map(Channel.Type::of)).orElse(Stream.empty()).collect(Collectors.toList()));
-        return presets;
     }
 
     /**
@@ -188,50 +170,67 @@ public class ApplicationCommandOption implements DiscordObject {
     }
 
     /**
-     * Gets the minimum number of options that must be chosen for {@link Type#NUMBER} or {@link Type#INTEGER}.
-     *
-     * @return The minimum number of options that must be chosen.
+     * Returns a list of acceptable channel types the user may pick
+     * </p>
+     * Only applies to CHANNEL type options, if empty, no restriction on channel types is placed.
+     * @return A list of channel types a user may pick. Empty list means no restriction is applied.
      */
-    public double getMinValues() {
-        return data.minValue().toOptional().orElse(1D);
+    public List<Channel.Type> getAllowedChannelTypes() {
+        return data.channelTypes().toOptional()
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(Channel.Type::of)
+                .collect(Collectors.toList());
     }
 
     /**
-     * Gets the maximum value allowed for {@link Type#NUMBER} or {@link Type#INTEGER}.
-     *
-     * @return The maximum value allowed.
+     * Whether this option supports auto-complete or not. Default is false.
+     * </p>
+     * Autocomplete cannot be enabled on options that have choices.
+     * @return Whether this option supports auto-complete or not.
      */
-    public double getMaxValues() {
-        return data.maxValue().toOptional().orElse(Double.MAX_VALUE);
+    public boolean hasAutocompleteEnabled() {
+        return data.autocomplete().toOptional().orElse(false);
     }
 
     /**
-     * Gets the minimum allowed length for {@link Type#STRING}.
-     *
-     * @return The minimum allowed length.
+     * Returns the minimum value a user is allowed to input, represented as a {@link Double}.
+     * </p>
+     * This is only applicable to {@link Type#INTEGER} and {@link Type#NUMBER} types.
+     * @return The minimum value a user is allowed to input if present, otherwise {@link Optional#empty()}.
      */
-    public int getMinLength() {
-        return data.minLength().toOptional().orElse(0);
+    public Optional<Double> getMinimumValue() {
+        return data.minValue().toOptional();
     }
 
     /**
-     * Gets the maximum allowed length for {@link Type#STRING}.
-     *
-     * @return The maximum allowed length.
+     * Returns the maximum value a user is allowed to input, represented as a {@link Double}.
+     * </p>
+     * This is only applicable to {@link Type#INTEGER} and {@link Type#NUMBER} types.
+     * @return The maximum value a user is allowed to input if present, otherwise {@link Optional#empty()}.
      */
-    public int getMaxLength() {
-        return data.maxLength().toOptional().orElse(Integer.MAX_VALUE);
+    public Optional<Double> getMaximumValue() {
+        return data.maxValue().toOptional();
     }
 
     /**
-     * Gets if autocomplete interactions are enabled for {@link Type#STRING}, {@link Type#INTEGER}, or {@link Type#NUMBER}
-     * <br>
-     * <b>Note:</b> may not be set to true if {@link #getChoices()} has elements.
-     *
-     * @return {@code true} if the option has autocomplete, {@code false} otherwise.
+     * Returns the minimum length a user is allowed to input, represented as a {@link Integer}.
+     * </p>
+     * This is only applicable to {@link Type#STRING} type.
+     * @return The minimum length a user is allowed to input if present, otherwise {@link Optional#empty()}.
      */
-    public boolean hasAutocomplete() {
-        return data.autocomplete().toOptional().orElse(!getChoices().isEmpty());
+    public Optional<Integer> getMinimumLength() {
+        return data.minLength().toOptional();
+    }
+
+    /**
+     * Returns the maximum length a user is allowed to input, represented as a {@link Integer}.
+     * </p>
+     * This is only applicable to {@link Type#STRING} type.
+     * @return The maximum length a user is allowed to input if present, otherwise {@link Optional#empty()}.
+     */
+    public Optional<Integer> getMaximumLength() {
+        return data.maxLength().toOptional();
     }
 
     @Override
