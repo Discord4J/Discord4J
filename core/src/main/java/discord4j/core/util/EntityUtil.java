@@ -22,10 +22,14 @@ import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.common.util.Snowflake;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
 
-/** An utility class for entity processing. */
+/** A utility class for entity processing. */
 public final class EntityUtil {
+
+    private static final Logger log = Loggers.getLogger(EntityUtil.class);
 
     /**
      * The UNIX time that represents Discord's epoch (January 1, 2015).
@@ -45,7 +49,7 @@ public final class EntityUtil {
     }
 
     /**
-     * An utility that converts some instance of {@code ChannelData} to its associated {@code Channel}
+     * A utility that converts some instance of {@code ChannelData} to its associated {@code Channel}
      * {@link Channel.Type type}. That is to say, {@code data.getType() == Channel#getType().getValue()}.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
@@ -62,7 +66,9 @@ public final class EntityUtil {
             case GUILD_CATEGORY: return new Category(gateway, data);
             case GUILD_NEWS: return new NewsChannel(gateway, data);
             case GUILD_STORE: return new StoreChannel(gateway, data);
-            default: return throwUnsupportedDiscordValue(data);
+            default:
+                log.info("Unknown channel type {} with data: {}", data.type(), data);
+                return new UnknownChannel(gateway, data);
         }
     }
 
@@ -73,13 +79,15 @@ public final class EntityUtil {
      * @param value The unknown Discord value.
      * @param <T> The return type. Used to simulate bottom type.
      * @return Diverging function, never returns.
+     * @deprecated for removal in 3.3.0, no longer used
      */
+    @Deprecated
     public static <T> T throwUnsupportedDiscordValue(final Object value) {
         throw new UnsupportedOperationException("Unknown Value: " + value);
     }
 
     /**
-     * An utility that checks for equality between an entity and a generic object.
+     * A utility that checks for equality between an entity and a generic object.
      *
      * @param entity The entity to compare to.
      * @param obj The object to compare to.
@@ -90,7 +98,7 @@ public final class EntityUtil {
     }
 
     /**
-     * An utility that gets the hash code of an entity.
+     * A utility that gets the hash code of an entity.
      *
      * @param entity The entity to get a hash code from.
      * @return The hash code of the entity.
