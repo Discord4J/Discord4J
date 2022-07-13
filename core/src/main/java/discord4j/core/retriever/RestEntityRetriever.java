@@ -138,7 +138,7 @@ public class RestEntityRetriever implements EntityRetriever {
         return rest.getGuildService()
                 .getGuildChannels(guildId.asLong())
                 .map(data -> EntityUtil.getChannel(gateway, data))
-                .cast(GuildChannel.class);
+                .ofType(GuildChannel.class);
     }
 
     @Override

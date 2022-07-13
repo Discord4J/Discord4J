@@ -119,7 +119,7 @@ public class StoreEntityRetriever implements EntityRetriever {
     public Flux<GuildChannel> getGuildChannels(Snowflake guildId) {
         return Flux.from(store.execute(ReadActions.getChannelsInGuild(guildId.asLong())))
                 .map(channelData -> EntityUtil.getChannel(gateway, channelData))
-                .cast(GuildChannel.class);
+                .ofType(GuildChannel.class);
     }
 
     @Override
