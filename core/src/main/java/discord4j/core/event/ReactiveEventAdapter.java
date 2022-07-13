@@ -519,6 +519,42 @@ public abstract class ReactiveEventAdapter {
     }
 
     /**
+     * Invoked when a guild channel is created, but its {@link discord4j.core.object.entity.channel.Channel.Type type}
+     * is not supported or implemented.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onUnknownChannelCreate(UnknownChannelCreateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a guild channel is deleted, but its {@link discord4j.core.object.entity.channel.Channel.Type type}
+     * is not supported or implemented.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onUnknownChannelDelete(UnknownChannelDeleteEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a guild channel is updated, but its {@link discord4j.core.object.entity.channel.Channel.Type type}
+     * is not supported or implemented.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onUnknownChannelUpdate(UnknownChannelUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
      * Invoked when a user has started typing a message.
      *
      * @param event the event instance
@@ -935,6 +971,9 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof StoreChannelCreateEvent) compatibleHooks.add(onStoreChannelCreate((StoreChannelCreateEvent) event));
         if (event instanceof StoreChannelDeleteEvent) compatibleHooks.add(onStoreChannelDelete((StoreChannelDeleteEvent) event));
         if (event instanceof StoreChannelUpdateEvent) compatibleHooks.add(onStoreChannelUpdate((StoreChannelUpdateEvent) event));
+        if (event instanceof UnknownChannelCreateEvent) compatibleHooks.add(onUnknownChannelCreate((UnknownChannelCreateEvent) event));
+        if (event instanceof UnknownChannelDeleteEvent) compatibleHooks.add(onUnknownChannelDelete((UnknownChannelDeleteEvent) event));
+        if (event instanceof UnknownChannelUpdateEvent) compatibleHooks.add(onUnknownChannelUpdate((UnknownChannelUpdateEvent) event));
         if (event instanceof TypingStartEvent) compatibleHooks.add(onTypingStart((TypingStartEvent) event));
         if (event instanceof PinsUpdateEvent) compatibleHooks.add(onPinsUpdate((PinsUpdateEvent) event));
         if (event instanceof RoleCreateEvent) compatibleHooks.add(onRoleCreate((RoleCreateEvent) event));
