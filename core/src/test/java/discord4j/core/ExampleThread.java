@@ -138,6 +138,7 @@ public class ExampleThread {
                                             .type(ApplicationCommandOption.Type.STRING.getValue())
                                             .name(TITLE_OPTION)
                                             .description("the thread title")
+                                            .required(true)
                                             .build())
                                     .addOption(ApplicationCommandOptionData.builder()
                                             .type(ApplicationCommandOption.Type.CHANNEL.getValue())

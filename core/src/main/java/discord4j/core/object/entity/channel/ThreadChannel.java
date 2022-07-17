@@ -189,18 +189,23 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
         Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> getClient().getRestClient().getChannelService()
-                    .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+                    .modifyThread(getId().asLong(), spec.asRequest(), spec.reason()))
             .map(data -> EntityUtil.getChannel(getClient(), data))
             .cast(ThreadChannel.class);
     }
 
+    /** Duration in minutes to automatically archive the thread after recent activity. */
     public enum AutoArchiveDuration {
 
         // TODO naming
         UNKNOWN(-1),
+        /** 1 hour */
         DURATION1(60),
+        /** 1 day */
         DURATION2(1440),
+        /** 3 days */
         DURATION3(4320),
+        /** 7 days */
         DURATION4(10080);
 
         private final int value;
