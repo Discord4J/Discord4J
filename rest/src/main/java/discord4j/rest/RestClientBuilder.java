@@ -21,6 +21,7 @@ import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
 import discord4j.common.sinks.EmissionStrategy;
 import discord4j.rest.http.ExchangeStrategies;
+import discord4j.rest.http.client.AuthorizationScheme;
 import discord4j.rest.request.*;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Route;
@@ -63,6 +64,16 @@ public class RestClientBuilder<C, O extends RouterOptions> {
             return new RestClient(restResources);
         };
         return new RestClientBuilder<>(token, clientFactory, Function.identity());
+    }
+
+    public static RestClientBuilder<RestClient, RouterOptions> createRestApplication() {
+        Function<Config, RestClient> clientFactory = config -> {
+            RestResources restResources = new RestResources(AuthorizationScheme.NONE, "",
+                    config.getReactorResources(), config.getJacksonResources(), config.getRouter(),
+                    config.getAllowedMentions().orElse(null));
+            return new RestClient(restResources);
+        };
+        return new RestClientBuilder<>("", clientFactory, Function.identity());
     }
 
     protected RestClientBuilder(String token,

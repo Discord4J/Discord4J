@@ -1149,4 +1149,14 @@ public abstract class Routes {
     ///////////////////////////////////////////
 
     public static final Route INTERACTION_RESPONSE_CREATE = Route.post("/interactions/{interaction.id}/{interaction.token}/callback");
+
+    ///////////////////////////////////////////
+    ///////////// OAuth2 Resource /////////////
+    ///////////////////////////////////////////
+
+    public static final Route TOKEN = Route.post("/oauth2/token");
+
+    public static final Route TOKEN_REVOKE = Route.post("/oauth2/token/revoke");
+
+    public static final Route AUTHORIZATION_INFO_GET = Route.get("/oauth2/@me");
 }
