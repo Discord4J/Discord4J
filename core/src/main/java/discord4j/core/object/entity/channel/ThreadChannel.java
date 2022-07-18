@@ -22,6 +22,9 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.core.spec.ThreadChannelEditMono;
+import discord4j.core.spec.ThreadChannelEditSpec;
+import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.ThreadMetadata;
 import discord4j.rest.util.PermissionSet;
@@ -30,6 +33,7 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -163,13 +167,45 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
                 .removeThreadMember(getId().asLong(), user.getId().asLong());
     }
 
+    /**
+     * Requests to edit this thread channel. Properties specifying how to edit this thread channel can be set via the {@code
+     * withXxx} methods of the returned {@link ThreadChannelEditMono}.
+     *
+     * @return A {@link ThreadChannelEditMono} where, upon successful completion, emits the edited {@link ThreadChannel}. If
+     * an error is received, it is emitted through the {@code ThreadChannelEditMono}.
+     */
+    public ThreadChannelEditMono edit() {
+        return ThreadChannelEditMono.of(this);
+    }
+
+    /**
+     * Requests to edit this thread channel.
+     *
+     * @param spec an immutable object that specifies how to edit this thread channel
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link ThreadChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ThreadChannel> edit(ThreadChannelEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> getClient().getRestClient().getChannelService()
+                    .modifyThread(getId().asLong(), spec.asRequest(), spec.reason()))
+            .map(data -> EntityUtil.getChannel(getClient(), data))
+            .cast(ThreadChannel.class);
+    }
+
+    /** Duration in minutes to automatically archive the thread after recent activity. */
     public enum AutoArchiveDuration {
 
         // TODO naming
         UNKNOWN(-1),
+        /** 1 hour */
         DURATION1(60),
+        /** 1 day */
         DURATION2(1440),
+        /** 3 days */
         DURATION3(4320),
+        /** 7 days */
         DURATION4(10080);
 
         private final int value;

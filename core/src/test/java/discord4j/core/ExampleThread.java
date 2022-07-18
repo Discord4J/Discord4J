@@ -29,6 +29,7 @@ import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.core.object.entity.channel.TopLevelGuildMessageChannel;
 import discord4j.core.spec.StartThreadSpec;
 import discord4j.core.spec.StartThreadWithoutMessageSpec;
+import discord4j.core.spec.ThreadChannelEditSpec;
 import discord4j.core.support.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -55,6 +56,7 @@ public class ExampleThread {
     private static final String LEAVE = "leave";
     private static final String ADD = "add";
     private static final String REMOVE = "remove";
+    private static final String EDIT = "edit";
 
     private static final String TITLE_OPTION = "title";
     private static final String THREAD_OPTION = "thread";
@@ -120,6 +122,22 @@ public class ExampleThread {
                                             .type(ApplicationCommandOption.Type.USER.getValue())
                                             .name(MEMBER_OPTION)
                                             .description("the member to remove")
+                                            .required(true)
+                                            .build())
+                                    .addOption(ApplicationCommandOptionData.builder()
+                                            .type(ApplicationCommandOption.Type.CHANNEL.getValue())
+                                            .name(THREAD_OPTION)
+                                            .description("the target thread")
+                                            .required(true)
+                                            .build())
+                                    .build(),
+                            ApplicationCommandRequest.builder()
+                                    .name(EDIT)
+                                    .description("Edit a thread")
+                                    .addOption(ApplicationCommandOptionData.builder()
+                                            .type(ApplicationCommandOption.Type.STRING.getValue())
+                                            .name(TITLE_OPTION)
+                                            .description("the thread title")
                                             .required(true)
                                             .build())
                                     .addOption(ApplicationCommandOptionData.builder()
@@ -221,6 +239,26 @@ public class ExampleThread {
                                     .then(event.editReply("Done!"))
                                     .onErrorResume(ex -> event.editReply("Error: " + ex).then(Mono.error(ex)));
 
+                        } else if (EDIT.equals(event.getCommandName())) {
+                            String title = event.getOption(TITLE_OPTION)
+                                    .flatMap(ApplicationCommandInteractionOption::getValue)
+                                    .map(ApplicationCommandInteractionOptionValue::asString)
+                                    .orElse("Thread at " + LocalDateTime.now());
+
+                            Snowflake id = event.getOption(THREAD_OPTION)
+                                    .flatMap(ApplicationCommandInteractionOption::getValue)
+                                    .map(ApplicationCommandInteractionOptionValue::asSnowflake)
+                                    .orElseThrow(RuntimeException::new);
+                            Mono<ThreadChannel> thread = event.getClient().getChannelById(id).cast(ThreadChannel.class);
+
+                            return event.deferReply()
+                                    .withEphemeral(true)
+                                    .then(thread)
+                                    .flatMap(ch -> ch.edit(ThreadChannelEditSpec.builder()
+                                            .name(title)
+                                            .build()))
+                                    .then(event.editReply("Done!"))
+                                    .onErrorResume(ex -> event.editReply("Error: " + ex).then(Mono.error(ex)));
                         }
                         return Mono.empty();
                     });
