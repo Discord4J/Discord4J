@@ -22,21 +22,21 @@ import java.util.List;
 
 class DefaultExchangeStrategies implements ExchangeStrategies {
 
-    private final List<WriterStrategy<?>> writers;
-    private final List<ReaderStrategy<?>> readers;
+    private final /*~~>*/List<WriterStrategy<?>> writers;
+    private final /*~~>*/List<ReaderStrategy<?>> readers;
 
-    DefaultExchangeStrategies(List<WriterStrategy<?>> writers, List<ReaderStrategy<?>> readers) {
-        this.writers = Collections.unmodifiableList(writers);
-        this.readers = Collections.unmodifiableList(readers);
+    DefaultExchangeStrategies(/*~~>*/List<WriterStrategy<?>> writers, /*~~>*/List<ReaderStrategy<?>> readers) {
+        /*~~>*/this.writers = Collections.unmodifiableList(writers);
+        /*~~>*/this.readers = Collections.unmodifiableList(readers);
     }
 
     @Override
-    public List<WriterStrategy<?>> writers() {
+    public /*~~>*/List<WriterStrategy<?>> writers() {
         return writers;
     }
 
     @Override
-    public List<ReaderStrategy<?>> readers() {
+    public /*~~>*/List<ReaderStrategy<?>> readers() {
         return readers;
     }
 }

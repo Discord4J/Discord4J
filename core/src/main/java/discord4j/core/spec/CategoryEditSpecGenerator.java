@@ -35,7 +35,7 @@ interface CategoryEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
 
     Possible<Integer> position();
 
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
+    Possible</*~~>*/List<PermissionOverwrite>> permissionOverwrites();
 
     @Override
     default ChannelModifyRequest asRequest() {

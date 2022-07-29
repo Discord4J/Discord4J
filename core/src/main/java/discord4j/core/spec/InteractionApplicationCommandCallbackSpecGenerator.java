@@ -45,21 +45,21 @@ interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<Multip
 
     Possible<Boolean> ephemeral();
 
-    Possible<List<EmbedCreateSpec>> embeds();
+    Possible</*~~>*/List<EmbedCreateSpec>> embeds();
 
     @Value.Default
-    default List<MessageCreateFields.File> files() {
+    default /*~~>*/List<MessageCreateFields.File> files() {
         return Collections.emptyList();
     }
 
     @Value.Default
-    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
+    default /*~~>*/List<MessageCreateFields.FileSpoiler> fileSpoilers() {
         return Collections.emptyList();
     }
 
     Possible<AllowedMentions> allowedMentions();
 
-    Possible<List<LayoutComponent>> components();
+    Possible</*~~>*/List<LayoutComponent>> components();
 
     @Override
     default MultipartRequest<InteractionApplicationCommandCallbackData> asRequest() {

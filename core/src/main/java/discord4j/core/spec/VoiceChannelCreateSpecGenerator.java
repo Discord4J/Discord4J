@@ -44,7 +44,7 @@ interface VoiceChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest
 
     Possible<Integer> position();
 
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
+    Possible</*~~>*/List<PermissionOverwrite>> permissionOverwrites();
 
     Possible<Snowflake> parentId();
 

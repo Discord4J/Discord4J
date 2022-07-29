@@ -27,9 +27,9 @@ import java.util.function.BiConsumer;
  * @param <K> the key type
  * @param <V> the value type
  */
-public class Multimap<K, V> implements Map<K, List<V>> {
+public class Multimap<K, V> implements Map<K, /*~~>*/List<V>> {
 
-    private final Map<K, List<V>> map;
+    private final Map<K, /*~~>*/List<V>> map;
 
     /**
      * Create an empty Multimap.
@@ -83,7 +83,7 @@ public class Multimap<K, V> implements Map<K, List<V>> {
      * @param value the value to set
      */
     public void set(K key, V value) {
-        List<V> list = new LinkedList<>();
+        /*~~>*/List<V> list = new LinkedList<>();
         list.add(value);
         map.put(key, list);
     }
@@ -120,7 +120,7 @@ public class Multimap<K, V> implements Map<K, List<V>> {
      */
     public void forEachElement(BiConsumer<? super K, ? super V> action) {
         Objects.requireNonNull(action);
-        for (Map.Entry<K, List<V>> entry : entrySet()) {
+        for (Map.Entry<K, /*~~>*/List<V>> entry : entrySet()) {
             K k;
             try {
                 for (V v : entry.getValue()) {
@@ -154,22 +154,22 @@ public class Multimap<K, V> implements Map<K, List<V>> {
     }
 
     @Override
-    public List<V> get(Object key) {
+    public /*~~>*/List<V> get(Object key) {
         return map.get(key);
     }
 
     @Override
-    public List<V> put(K key, List<V> value) {
+    public /*~~>*/List<V> put(K key, /*~~>*/List<V> value) {
         return map.put(key, value);
     }
 
     @Override
-    public List<V> remove(Object key) {
+    public /*~~>*/List<V> remove(Object key) {
         return map.remove(key);
     }
 
     @Override
-    public void putAll(Map<? extends K, ? extends List<V>> m) {
+    public void putAll(Map<? extends K, ? extends /*~~>*/List<V>> m) {
         map.putAll(m);
     }
 
@@ -184,12 +184,12 @@ public class Multimap<K, V> implements Map<K, List<V>> {
     }
 
     @Override
-    public Collection<List<V>> values() {
+    public Collection</*~~>*/List<V>> values() {
         return map.values();
     }
 
     @Override
-    public Set<Entry<K, List<V>>> entrySet() {
+    public Set<Entry<K, /*~~>*/List<V>>> entrySet() {
         return map.entrySet();
     }
 }

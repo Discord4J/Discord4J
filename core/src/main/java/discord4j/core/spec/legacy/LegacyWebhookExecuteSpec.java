@@ -44,8 +44,8 @@ public class LegacyWebhookExecuteSpec implements LegacySpec<MultipartRequest<Web
     private Possible<String> username = Possible.absent();
     private Possible<String> avatarUrl = Possible.absent();
     private Possible<Boolean> tts = Possible.absent();
-    private List<Tuple2<String, InputStream>> files = null;
-    private List<EmbedData> embeds = null;
+    private /*~~>*/List<Tuple2<String, InputStream>> files = null;
+    private /*~~>*/List<EmbedData> embeds = null;
     private Possible<AllowedMentionsData> allowedMentions = Possible.absent();
 
     /**

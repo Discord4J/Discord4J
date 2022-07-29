@@ -68,15 +68,15 @@ class ImplUtils {
                 .build();
     }
 
-    static <T> List<T> add(List<T> list, T element) {
+    static <T> /*~~>*/List<T> add(/*~~>*/List<T> list, T element) {
         return Stream.concat(list.stream(), Stream.of(element)).collect(Collectors.toList());
     }
 
-    static <T> List<T> remove(List<T> list, T element) {
+    static <T> /*~~>*/List<T> remove(/*~~>*/List<T> list, T element) {
         return list.stream().filter(x -> !x.equals(element)).collect(Collectors.toList());
     }
 
-    static List<Id> removeAllIds(List<Id> list, Set<Long> elements) {
+    static /*~~>*/List<Id> removeAllIds(/*~~>*/List<Id> list, Set<Long> elements) {
         return list.stream().filter(x -> !elements.contains(x.asLong())).collect(Collectors.toList());
     }
 }

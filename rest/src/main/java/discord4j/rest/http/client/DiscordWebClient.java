@@ -50,7 +50,7 @@ public class DiscordWebClient {
     private final HttpClient httpClient;
     private final HttpHeaders defaultHeaders;
     private final ExchangeStrategies exchangeStrategies;
-    private final List<ResponseFunction> responseFunctions;
+    private final /*~~>*/List<ResponseFunction> responseFunctions;
 
     /**
      * Create a new {@link DiscordWebClient} wrapping HTTP, Discord and encoding/decoding resources.
@@ -63,7 +63,7 @@ public class DiscordWebClient {
      */
     public DiscordWebClient(HttpClient httpClient, ExchangeStrategies exchangeStrategies,
                             String authorizationScheme, String token,
-                            List<ResponseFunction> responseFunctions, String discordBaseUrl) {
+                            /*~~>*/List<ResponseFunction> responseFunctions, String discordBaseUrl) {
         final Properties properties = GitProperties.getProperties();
         final String version = properties.getProperty(GitProperties.APPLICATION_VERSION, "3");
         final String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
@@ -76,7 +76,7 @@ public class DiscordWebClient {
         this.httpClient = configureHttpClient(httpClient.baseUrl(discordBaseUrl));
         this.defaultHeaders = defaultHeaders;
         this.exchangeStrategies = exchangeStrategies;
-        this.responseFunctions = responseFunctions;
+        /*~~>*/this.responseFunctions = responseFunctions;
     }
 
     private HttpClient configureHttpClient(HttpClient httpClient) {

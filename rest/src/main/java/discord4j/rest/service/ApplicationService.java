@@ -50,7 +50,7 @@ public class ApplicationService extends RestService {
             .bodyToMono(ApplicationCommandData.class);
     }
 
-    public Flux<ApplicationCommandData> bulkOverwriteGlobalApplicationCommand(long applicationId, List<ApplicationCommandRequest> requests) {
+    public Flux<ApplicationCommandData> bulkOverwriteGlobalApplicationCommand(long applicationId, /*~~>*/List<ApplicationCommandRequest> requests) {
         return Routes.GLOBAL_APPLICATION_COMMANDS_BULK_OVERWRITE.newRequest(applicationId)
                 .body(requests)
                 .exchange(getRouter())
@@ -94,7 +94,7 @@ public class ApplicationService extends RestService {
     }
 
     public Flux<ApplicationCommandData> bulkOverwriteGuildApplicationCommand(long applicationId, long guildId,
-                                                                             List<ApplicationCommandRequest> requests) {
+                                                                             /*~~>*/List<ApplicationCommandRequest> requests) {
         return Routes.GUILD_APPLICATION_COMMANDS_BULK_OVERWRITE.newRequest(applicationId, guildId)
                 .body(requests)
                 .exchange(getRouter())
@@ -147,7 +147,7 @@ public class ApplicationService extends RestService {
     }
 
     public Flux<GuildApplicationCommandPermissionsData> bulkModifyApplicationCommandPermissions(long applicationId, long guildId,
-                                                              List<PartialGuildApplicationCommandPermissionsData> permissions) {
+                                                              /*~~>*/List<PartialGuildApplicationCommandPermissionsData> permissions) {
         return Routes.APPLICATION_COMMAND_PERMISSIONS_BULK_MODIFY.newRequest(applicationId, guildId)
             .body(permissions)
             .exchange(getRouter())

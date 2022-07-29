@@ -110,7 +110,7 @@ public class ChatInputAutoCompleteEvent extends AutoCompleteInteractionEvent {
      *
      * @return The options of the invoked command.
      */
-    public List<ApplicationCommandInteractionOption> getOptions() {
+    public /*~~>*/List<ApplicationCommandInteractionOption> getOptions() {
         return getInteraction().getCommandInteraction()
                 .orElseThrow(IllegalStateException::new) // should always be present for app command auto-complete
                 .getOptions();

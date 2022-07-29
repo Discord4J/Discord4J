@@ -72,7 +72,7 @@ interface GuildEditSpecGenerator extends AuditSpec<GuildModifyRequest> {
     
     Possible<Optional<Locale>> preferredLocale();
     
-    Possible<List<String>> features();
+    Possible</*~~>*/List<String>> features();
     
     Possible<Optional<String>> description();
 

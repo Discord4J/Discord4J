@@ -50,23 +50,23 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
     }
 
     @Value.Default
-    default List<MessageCreateFields.File> files() {
+    default /*~~>*/List<MessageCreateFields.File> files() {
         return Collections.emptyList();
     }
 
     @Value.Default
-    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
+    default /*~~>*/List<MessageCreateFields.FileSpoiler> fileSpoilers() {
         return Collections.emptyList();
     }
 
     @Value.Default
-    default List<EmbedCreateSpec> embeds() {
+    default /*~~>*/List<EmbedCreateSpec> embeds() {
         return Collections.emptyList();
     }
 
     Possible<AllowedMentions> allowedMentions();
 
-    Possible<List<LayoutComponent>> components();
+    Possible</*~~>*/List<LayoutComponent>> components();
 
     @Override
     default MultipartRequest<WebhookExecuteRequest> asRequest() {

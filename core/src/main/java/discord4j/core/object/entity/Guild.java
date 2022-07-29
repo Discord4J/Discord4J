@@ -1737,7 +1737,7 @@ public final class Guild implements Entity {
                     .flux();
         };
         final ToLongFunction<AuditLogData> getLastEntryId = response -> {
-            final List<AuditLogEntryData> entries = response.auditLogEntries();
+            final /*~~>*/List<AuditLogEntryData> entries = response.auditLogEntries();
             return (entries.isEmpty()) ? Long.MAX_VALUE :
                     Snowflake.asLong(entries.get(entries.size() - 1).id());
         };
@@ -1792,7 +1792,7 @@ public final class Guild implements Entity {
         };
 
         final ToLongFunction<AuditLogData> getLastEntryId = response -> {
-            final List<AuditLogEntryData> entries = response.auditLogEntries();
+            final /*~~>*/List<AuditLogEntryData> entries = response.auditLogEntries();
             return (entries.isEmpty()) ? Long.MAX_VALUE :
                     Snowflake.asLong(entries.get(entries.size() - 1).id());
         };

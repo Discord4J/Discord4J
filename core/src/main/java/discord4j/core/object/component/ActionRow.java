@@ -45,7 +45,7 @@ public class ActionRow extends LayoutComponent {
      * @param components The child components of the row.
      * @return An {@code ActionRow} containing the given components.
      */
-    public static ActionRow of(List<? extends ActionComponent> components) {
+    public static ActionRow of(/*~~>*/List<? extends ActionComponent> components) {
         return new ActionRow(ComponentData.builder()
                 .type(Type.ACTION_ROW.getValue())
                 .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))

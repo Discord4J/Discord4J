@@ -38,10 +38,10 @@ import java.util.stream.Collectors;
 public class LegacyMessageEditSpec implements LegacySpec<MessageEditRequest> {
 
     private Possible<Optional<String>> content = Possible.absent();
-    private Possible<Optional<List<EmbedData>>> embeds = Possible.absent();
+    private Possible<Optional</*~~>*/List<EmbedData>>> embeds = Possible.absent();
     private Possible<Optional<AllowedMentionsData>> allowedMentions = Possible.absent();
     private Possible<Optional<Integer>> flags = Possible.absent();
-    private Possible<Optional<List<ComponentData>>> components = Possible.absent();
+    private Possible<Optional</*~~>*/List<ComponentData>>> components = Possible.absent();
 
     /**
      * Sets the new contents for the edited {@link Message}.
@@ -152,7 +152,7 @@ public class LegacyMessageEditSpec implements LegacySpec<MessageEditRequest> {
      * @param components The message components.
      * @return This spec.
      */
-    public LegacyMessageEditSpec setComponents(List<LayoutComponent> components) {
+    public LegacyMessageEditSpec setComponents(/*~~>*/List<LayoutComponent> components) {
         this.components = Possible.of(Optional.of(components.stream().map(LayoutComponent::getData).collect(Collectors.toList())));
         return this;
     }

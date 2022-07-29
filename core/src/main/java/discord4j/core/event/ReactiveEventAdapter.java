@@ -932,7 +932,7 @@ public abstract class ReactiveEventAdapter {
 
     public Publisher<?> hookOnEvent(Event event) {
         // @formatter:off
-        final List<Publisher<?>> compatibleHooks = new ArrayList<>();
+        final /*~~>*/List<Publisher<?>> compatibleHooks = new ArrayList<>();
         if (event instanceof ReadyEvent) compatibleHooks.add(onReady((ReadyEvent) event));
         if (event instanceof ResumeEvent) compatibleHooks.add(onResume((ResumeEvent) event));
         if (event instanceof MessageCreateEvent) compatibleHooks.add(onMessageCreate((MessageCreateEvent) event));

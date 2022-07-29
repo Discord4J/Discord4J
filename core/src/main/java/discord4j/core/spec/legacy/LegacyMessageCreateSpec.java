@@ -55,11 +55,11 @@ public class LegacyMessageCreateSpec implements LegacySpec<MultipartRequest<Mess
     @Nullable
     private String nonce;
     private boolean tts;
-    private List<EmbedData> embeds;
-    private List<Tuple2<String, InputStream>> files;
+    private /*~~>*/List<EmbedData> embeds;
+    private /*~~>*/List<Tuple2<String, InputStream>> files;
     private AllowedMentionsData allowedMentionsData;
     private MessageReferenceData messageReferenceData;
-    private List<LayoutComponent> components;
+    private /*~~>*/List<LayoutComponent> components;
 
     /**
      * Sets the created {@link Message} contents, up to 2000 characters.
@@ -197,7 +197,7 @@ public class LegacyMessageCreateSpec implements LegacySpec<MultipartRequest<Mess
      * @param components The message components.
      * @return This spec.
      */
-    public LegacyMessageCreateSpec setComponents(List<LayoutComponent> components) {
+    public LegacyMessageCreateSpec setComponents(/*~~>*/List<LayoutComponent> components) {
         this.components = components;
         return this;
     }

@@ -50,7 +50,7 @@ public class SelectMenu extends ActionComponent {
      * @param options The options that can be selected in the menu.
      * @return A select menu with the given data.
      */
-    public static SelectMenu of(String customId, List<Option> options) {
+    public static SelectMenu of(String customId, /*~~>*/List<Option> options) {
         return new SelectMenu(ComponentData.builder()
                 .type(Type.SELECT_MENU.getValue())
                 .customId(customId)
@@ -76,7 +76,7 @@ public class SelectMenu extends ActionComponent {
      *
      * @return the select menu's value
      */
-    public Optional<List<String>> getValues() {
+    public Optional</*~~>*/List<String>> getValues() {
         return getData().values().toOptional();
     }
 
@@ -112,7 +112,7 @@ public class SelectMenu extends ActionComponent {
      *
      * @return The options that can be selected in the menu.
      */
-    public List<Option> getOptions() {
+    public /*~~>*/List<Option> getOptions() {
         // should always be present for select menus
         List<SelectOptionData> options = getData().options().toOptional().orElseThrow(IllegalStateException::new);
 

@@ -52,7 +52,7 @@ final class InternalSpecUtils {
         }
     }
 
-    static void addAllIfNotNull(Multimap<String, Object> map, String key, @Nullable List<Object> values) {
+    static void addAllIfNotNull(Multimap<String, Object> map, String key, @Nullable /*~~>*/List<Object> values) {
         if (values != null) {
             map.addAll(key, values);
         }

@@ -47,7 +47,7 @@ public class ExampleButtonAttachment {
                             .name(exampleName)
                             .description("Create a button that adds an attachment to the initial response")
                             .build();
-                    List<ApplicationCommandRequest> commands = Collections.singletonList(example);
+                    /*~~>*/List<ApplicationCommandRequest> commands = Collections.singletonList(example);
 
                     // a button row we'll use later
                     String editAttach = "edit-attach";

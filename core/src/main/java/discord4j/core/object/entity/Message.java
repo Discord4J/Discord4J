@@ -259,7 +259,7 @@ public final class Message implements Entity {
      * @return The IDs of the users specifically mentioned in this message, without duplication and with the same order
      * as in the message.
      */
-    public List<Snowflake> getUserMentionIds() {
+    public /*~~>*/List<Snowflake> getUserMentionIds() {
         return data.mentions().stream()
                 .map(UserData::id)
                 .map(Snowflake::of)
@@ -273,7 +273,7 @@ public final class Message implements Entity {
      * @return The partial members specifically mentioned in this message, without duplication and with the same order
      * as in the message.
      */
-    public List<PartialMember> getMemberMentions() {
+    public /*~~>*/List<PartialMember> getMemberMentions() {
         if (data.guildId().isAbsent()) {
             return Collections.emptyList();
         }
@@ -290,7 +290,7 @@ public final class Message implements Entity {
      * @return The users specifically mentioned in this message, without duplication and with the same order
      * as in the message.
      */
-    public List<User> getUserMentions() {
+    public /*~~>*/List<User> getUserMentions() {
         return data.mentions().stream()
                 .map(data -> new User(gateway, data))
                 .collect(Collectors.toList());
@@ -303,7 +303,7 @@ public final class Message implements Entity {
      * @return The IDs of the roles specifically mentioned in this message, without duplication and with the same order
      * as in the message.
      */
-    public List<Snowflake> getRoleMentionIds() {
+    public /*~~>*/List<Snowflake> getRoleMentionIds() {
         return data.mentionRoles().stream()
                 .map(Snowflake::of)
                 .collect(Collectors.toList());
@@ -342,7 +342,7 @@ public final class Message implements Entity {
      *
      * @return Any attached files, with the same order as in the message.
      */
-    public List<Attachment> getAttachments() {
+    public /*~~>*/List<Attachment> getAttachments() {
         return data.attachments().stream()
                 .map(data -> new Attachment(gateway, data))
                 .collect(Collectors.toList());
@@ -353,7 +353,7 @@ public final class Message implements Entity {
      *
      * @return Any embedded content.
      */
-    public List<Embed> getEmbeds() {
+    public /*~~>*/List<Embed> getEmbeds() {
         return data.embeds().stream()
                 .map(data -> new Embed(gateway, data))
                 .collect(Collectors.toList());
@@ -364,7 +364,7 @@ public final class Message implements Entity {
      *
      * @return The reactions to this message, the order is the same as in the message.
      */
-    public List<Reaction> getReactions() {
+    public /*~~>*/List<Reaction> getReactions() {
         return data.reactions().toOptional()
                 .map(reactions -> reactions.stream()
                         .map(data -> new Reaction(gateway, data))
@@ -478,7 +478,7 @@ public final class Message implements Entity {
      * @return The partial stickers sent with the message.
      */
     @Experimental
-    public List<PartialSticker> getStickersItems() {
+    public /*~~>*/List<PartialSticker> getStickersItems() {
         return data.stickerItems().toOptional()
             .map(partialStickers -> partialStickers.stream()
                 .map(data -> new PartialSticker(gateway, data))
@@ -492,7 +492,7 @@ public final class Message implements Entity {
      * @return The stickers sent with the message.
      */
     @Deprecated
-    public List<Sticker> getStickers() {
+    public /*~~>*/List<Sticker> getStickers() {
         return data.stickers().toOptional()
                 .orElse(Collections.emptyList())
                 .stream()
@@ -525,7 +525,7 @@ public final class Message implements Entity {
      *
      * @return The components on the message.
      */
-    public List<LayoutComponent> getComponents() {
+    public /*~~>*/List<LayoutComponent> getComponents() {
         return data.components().toOptional()
                 .map(components -> components.stream()
                         .map(MessageComponent::fromData)

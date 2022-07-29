@@ -92,7 +92,7 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
      *
      * @return The options, present if this option is a group or subcommand.
      */
-    public List<ApplicationCommandInteractionOption> getOptions() {
+    public /*~~>*/List<ApplicationCommandInteractionOption> getOptions() {
         return data.options().toOptional().orElse(Collections.emptyList()).stream()
                 .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId))
                 .collect(Collectors.toList());

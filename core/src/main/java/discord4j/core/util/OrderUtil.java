@@ -106,7 +106,7 @@ public final class OrderUtil {
         return roles.sort(OrderUtil.ROLE_ORDER);
     }
 
-    private static List<GuildChannel> orderGuildChannels(Map<Snowflake, GuildChannel> channels) {
+    private static /*~~>*/List<GuildChannel> orderGuildChannels(Map<Snowflake, GuildChannel> channels) {
         // associate channels to their parent category
         // sorted by raw position then ID
         // channels not in a category always appear before all other channels, so nulls are first

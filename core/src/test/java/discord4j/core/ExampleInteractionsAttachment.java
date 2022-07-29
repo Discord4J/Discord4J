@@ -44,7 +44,7 @@ public class ExampleInteractionsAttachment {
     public static void main(String[] args) {
         DiscordClient.create(token)
                 .withGateway(client -> {
-                    List<ApplicationCommandRequest> commands = Collections.singletonList(
+                    /*~~>*/List<ApplicationCommandRequest> commands = Collections.singletonList(
                             ApplicationCommandRequest.builder()
                                     .name(CHAT_INPUT_COMMAND_NAME)
                                     .description("Example command to submit an attachment")

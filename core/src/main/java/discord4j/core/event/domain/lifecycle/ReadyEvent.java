@@ -95,7 +95,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
      *
      * @return The trace provided by Discord.
      */
-    public List<String> getTrace() {
+    public /*~~>*/List<String> getTrace() {
         return data.trace();
     }
 

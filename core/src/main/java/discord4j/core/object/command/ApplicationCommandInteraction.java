@@ -117,7 +117,7 @@ public class ApplicationCommandInteraction implements DiscordObject {
      *
      * @return The options of the invoked command.
      */
-    public List<ApplicationCommandInteractionOption> getOptions() {
+    public /*~~>*/List<ApplicationCommandInteractionOption> getOptions() {
         return data.options().toOptional().orElse(Collections.emptyList()).stream()
                 .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId))
                 .collect(Collectors.toList());
@@ -140,7 +140,7 @@ public class ApplicationCommandInteraction implements DiscordObject {
      *
      * @return The select menu values selected.
      */
-    public Optional<List<String>> getValues() {
+    public Optional</*~~>*/List<String>> getValues() {
         return data.values().toOptional();
     }
 
@@ -169,7 +169,7 @@ public class ApplicationCommandInteraction implements DiscordObject {
      *
      * @return The components of the submitted modal.
      */
-    public List<MessageComponent> getComponents() {
+    public /*~~>*/List<MessageComponent> getComponents() {
         return data.components().toOptional().orElse(Collections.emptyList()).stream()
                 .map(MessageComponent::fromData)
                 .collect(Collectors.toList());

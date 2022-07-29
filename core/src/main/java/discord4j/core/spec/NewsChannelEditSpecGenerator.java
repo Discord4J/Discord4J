@@ -43,7 +43,7 @@ interface NewsChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
 
     Possible<Boolean> nsfw();
 
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
+    Possible</*~~>*/List<PermissionOverwrite>> permissionOverwrites();
 
     Possible<Optional<Snowflake>> parentId();
 

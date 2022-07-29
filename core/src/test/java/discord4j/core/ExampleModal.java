@@ -51,7 +51,7 @@ public class ExampleModal {
                             .description("A command example")
                             .build();
 
-                    List<ApplicationCommandRequest> commands = Collections.singletonList(example);
+                    /*~~>*/List<ApplicationCommandRequest> commands = Collections.singletonList(example);
 
                     Publisher<?> onChatInput = client.on(ChatInputInteractionEvent.class, event -> {
                         if (CHAT_INPUT_COMMAND_NAME.equals(event.getCommandName())) {

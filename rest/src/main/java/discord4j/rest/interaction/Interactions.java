@@ -71,8 +71,8 @@ public class Interactions {
 
     private static final Logger log = Loggers.getLogger(Interactions.class);
 
-    private final List<ApplicationCommandDefinition> commands;
-    private final List<ApplicationCommandRequestDefinition> createRequests;
+    private final /*~~>*/List<ApplicationCommandDefinition> commands;
+    private final /*~~>*/List<ApplicationCommandRequestDefinition> createRequests;
 
     /**
      * Create a new builder to work with Discord Interactions feature.
@@ -84,8 +84,8 @@ public class Interactions {
     }
 
     Interactions() {
-        this.commands = new CopyOnWriteArrayList<>();
-        this.createRequests = new CopyOnWriteArrayList<>();
+        /*~~>*/this.commands = new CopyOnWriteArrayList<>();
+        /*~~>*/this.createRequests = new CopyOnWriteArrayList<>();
     }
 
     /**

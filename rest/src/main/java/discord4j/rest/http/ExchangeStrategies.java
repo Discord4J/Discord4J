@@ -32,14 +32,14 @@ public interface ExchangeStrategies {
      *
      * @return a list of writer strategies
      */
-    List<WriterStrategy<?>> writers();
+    /*~~>*/List<WriterStrategy<?>> writers();
 
     /**
      * Retrieve the list of reader strategies to convert a response body.
      *
      * @return a list of reader strategies
      */
-    List<ReaderStrategy<?>> readers();
+    /*~~>*/List<ReaderStrategy<?>> readers();
 
     /**
      * Return an {@link discord4j.rest.http.ExchangeStrategies} using the defaults for processing JSON requests using
@@ -49,11 +49,11 @@ public interface ExchangeStrategies {
      * @return the built strategies
      */
     static ExchangeStrategies jackson(ObjectMapper mapper) {
-        List<WriterStrategy<?>> writerStrategies = new ArrayList<>();
+        /*~~>*/List<WriterStrategy<?>> writerStrategies = new ArrayList<>();
         writerStrategies.add(new MultipartWriterStrategy(mapper));
         writerStrategies.add(new JacksonWriterStrategy(mapper));
         writerStrategies.add(new EmptyWriterStrategy());
-        List<ReaderStrategy<?>> readerStrategies = new ArrayList<>();
+        /*~~>*/List<ReaderStrategy<?>> readerStrategies = new ArrayList<>();
         readerStrategies.add(new JacksonReaderStrategy<>(mapper));
         readerStrategies.add(new EmptyReaderStrategy());
         readerStrategies.add(new FallbackReaderStrategy());
@@ -65,8 +65,8 @@ public interface ExchangeStrategies {
      */
     class Builder {
 
-        private final List<WriterStrategy<?>> writerStrategies = new ArrayList<>();
-        private final List<ReaderStrategy<?>> readerStrategies = new ArrayList<>();
+        private final /*~~>*/List<WriterStrategy<?>> writerStrategies = new ArrayList<>();
+        private final /*~~>*/List<ReaderStrategy<?>> readerStrategies = new ArrayList<>();
 
         /**
          * Add a new writer strategy for request body conversion.

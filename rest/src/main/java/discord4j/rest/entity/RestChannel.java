@@ -322,7 +322,7 @@ public class RestChannel {
             .distinct()
             .buffer(100)
             .flatMap(ids -> {
-                final List<String> eligibleIds = new ArrayList<>(0);
+                final /*~~>*/List<String> eligibleIds = new ArrayList<>(0);
                 final Collection<Snowflake> ineligibleIds = new ArrayList<>(0);
 
                 for (final Snowflake id : ids) {

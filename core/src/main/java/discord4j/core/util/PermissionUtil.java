@@ -36,7 +36,7 @@ public final class PermissionUtil {
      *
      * @see discord4j.core.object.entity.Member#getBasePermissions() Member#getBasePermissions()
      */
-    public static PermissionSet computeBasePermissions(PermissionSet everyonePerms, List<PermissionSet> rolePerms) {
+    public static PermissionSet computeBasePermissions(PermissionSet everyonePerms, /*~~>*/List<PermissionSet> rolePerms) {
         return rolePerms.stream().reduce(everyonePerms, PermissionSet::or);
     }
 
@@ -53,7 +53,7 @@ public final class PermissionUtil {
      * GuildChannel#getEffectivePermissions(Snowflake)
      */
     public static PermissionSet computePermissions(PermissionSet base, @Nullable PermissionOverwrite everyoneOverwrite,
-                                                   List<PermissionOverwrite> roleOverwrites,
+                                                   /*~~>*/List<PermissionOverwrite> roleOverwrites,
                                                    @Nullable PermissionOverwrite memberOverwrite) {
         if (base.contains(Permission.ADMINISTRATOR)) {
             return PermissionSet.all();

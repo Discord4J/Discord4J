@@ -58,7 +58,7 @@ public class SelectMenuInteractionEvent extends ComponentInteractionEvent {
      * @return The values selected in the menu.
      * @see SelectMenu.Option#getValue()
      */
-    public List<String> getValues() {
+    public /*~~>*/List<String> getValues() {
         return getInteraction().getCommandInteraction()
                 .flatMap(ApplicationCommandInteraction::getValues)
                 .orElseThrow(IllegalStateException::new); // should always be present for select menus

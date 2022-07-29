@@ -26,7 +26,7 @@ import java.util.List;
 
 public class ExampleIntents {
     public static void main(String[] args) {
-        List<Member> members = DiscordClient.create(System.getenv("token"))
+        /*~~>*/List<Member> members = DiscordClient.create(System.getenv("token"))
             .gateway()
             .setEnabledIntents(IntentSet.of(Intent.GUILD_MEMBERS))
             .login()

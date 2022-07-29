@@ -45,7 +45,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
     protected ReactorResources reactorResources;
     protected JacksonResources jacksonResources;
     protected ExchangeStrategies exchangeStrategies;
-    protected List<ResponseFunction> responseTransformers = new ArrayList<>();
+    protected /*~~>*/List<ResponseFunction> responseTransformers = new ArrayList<>();
     protected GlobalRateLimiter globalRateLimiter;
     protected RequestQueueFactory requestQueueFactory;
     @Nullable
@@ -83,7 +83,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         this.reactorResources = source.reactorResources;
         this.jacksonResources = source.jacksonResources;
         this.exchangeStrategies = source.exchangeStrategies;
-        this.responseTransformers = source.responseTransformers;
+        /*~~>*/this.responseTransformers = /*~~>*/source.responseTransformers;
         this.globalRateLimiter = source.globalRateLimiter;
         this.requestQueueFactory = source.requestQueueFactory;
     }
@@ -295,19 +295,19 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         private final ReactorResources reactorResources;
         private final JacksonResources jacksonResources;
         private final ExchangeStrategies exchangeStrategies;
-        private final List<ResponseFunction> responseTransformers;
+        private final /*~~>*/List<ResponseFunction> responseTransformers;
         private final GlobalRateLimiter globalRateLimiter;
         private final Router router;
         private final AllowedMentions allowedMentions;
 
         public Config(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
-                      ExchangeStrategies exchangeStrategies, List<ResponseFunction> responseTransformers,
+                      ExchangeStrategies exchangeStrategies, /*~~>*/List<ResponseFunction> responseTransformers,
                       GlobalRateLimiter globalRateLimiter, Router router, @Nullable AllowedMentions allowedMentions) {
             this.token = token;
             this.reactorResources = reactorResources;
             this.jacksonResources = jacksonResources;
             this.exchangeStrategies = exchangeStrategies;
-            this.responseTransformers = responseTransformers;
+            /*~~>*/this.responseTransformers = responseTransformers;
             this.globalRateLimiter = globalRateLimiter;
             this.router = router;
             this.allowedMentions = allowedMentions;
@@ -329,7 +329,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
             return exchangeStrategies;
         }
 
-        public List<ResponseFunction> getResponseTransformers() {
+        public /*~~>*/List<ResponseFunction> getResponseTransformers() {
             return responseTransformers;
         }
 

@@ -435,12 +435,12 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return Mono.fromRunnable(() -> {
             long guildId = dispatch.guild().id().asLong();
             GuildCreateData createData = dispatch.guild();
-            List<RoleData> roles = createData.roles();
-            List<EmojiData> emojis = createData.emojis();
-            List<MemberData> members = createData.members();
-            List<ChannelData> channels = createData.channels();
-            List<PresenceData> presences = createData.presences();
-            List<VoiceStateData> voiceStates = createData.voiceStates();
+            /*~~>*/List<RoleData> roles = createData.roles();
+            /*~~>*/List<EmojiData> emojis = createData.emojis();
+            /*~~>*/List<MemberData> members = createData.members();
+            /*~~>*/List<ChannelData> channels = createData.channels();
+            /*~~>*/List<PresenceData> presences = createData.presences();
+            /*~~>*/List<VoiceStateData> voiceStates = createData.voiceStates();
             ImmutableGuildData guild = ImmutableGuildData.builder()
                     .from(createData)
                     .roles(Collections.emptyList())
@@ -906,7 +906,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     private ImmutableMessageData addReaction(ImmutableMessageData message, MessageReactionAdd dispatch) {
         boolean me = dispatch.userId().asLong() == selfUser.get().id().asLong();
-        List<ReactionData> reactions = message.reactions().toOptional().orElse(Collections.emptyList());
+        /*~~>*/List<ReactionData> reactions = message.reactions().toOptional().orElse(Collections.emptyList());
         if (reactions.stream().anyMatch(EmojiKey.predicateEquals(dispatch.emoji()))) {
             return message.withReactions(Possible.of(reactions.stream()
                     .map(r -> EmojiKey.predicateEquals(dispatch.emoji()).test(r) ? ImmutableReactionData.builder()
@@ -922,7 +922,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     private ImmutableMessageData removeReaction(ImmutableMessageData message, MessageReactionRemove dispatch) {
         boolean me = dispatch.userId().asLong() == selfUser.get().id().asLong();
-        List<ReactionData> reactions = message.reactions().toOptional().orElse(Collections.emptyList());
+        /*~~>*/List<ReactionData> reactions = message.reactions().toOptional().orElse(Collections.emptyList());
         return message.withReactions(Possible.of(reactions.stream()
                 .map(r -> EmojiKey.predicateEquals(dispatch.emoji()).test(r) ? ImmutableReactionData.builder()
                         .from(r)

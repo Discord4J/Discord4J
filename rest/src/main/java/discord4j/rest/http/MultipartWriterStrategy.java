@@ -58,7 +58,7 @@ public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest<
             return Mono.empty(); // or .error() ?
         }
         final Object createRequest = body.getJsonPayload();
-        final List<Tuple2<String, InputStream>> files = body.getFiles();
+        final /*~~>*/List<Tuple2<String, InputStream>> files = body.getFiles();
         return Mono.fromCallable(() -> send.sendForm((request, form) -> {
             form.multipart(true);
             if (body.getFiles().size() == 1) {

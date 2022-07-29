@@ -49,12 +49,12 @@ public class MemberChunkEvent extends GuildEvent {
     private final Set<Member> members;
     private final int chunkIndex;
     private final int chunkCount;
-    private final List<Snowflake> notFound;
+    private final /*~~>*/List<Snowflake> notFound;
     @Nullable
     private final String nonce;
 
     public MemberChunkEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<Member> members,
-                            int chunkIndex, int chunkCount, List<Snowflake> notFound, @Nullable String nonce) {
+                            int chunkIndex, int chunkCount, /*~~>*/List<Snowflake> notFound, @Nullable String nonce) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.members = members;
@@ -116,7 +116,7 @@ public class MemberChunkEvent extends GuildEvent {
      *
      * @return Gets invalid id passed to `REQUEST_GUILD_MEMBERS`, if any.
      */
-    public List<Snowflake> getNotFound() {
+    public /*~~>*/List<Snowflake> getNotFound() {
         return notFound;
     }
 

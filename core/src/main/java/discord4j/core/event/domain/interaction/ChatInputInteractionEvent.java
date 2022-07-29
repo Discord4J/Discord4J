@@ -60,7 +60,7 @@ public class ChatInputInteractionEvent extends ApplicationCommandInteractionEven
      *
      * @return The options of the invoked command.
      */
-    public List<ApplicationCommandInteractionOption> getOptions() {
+    public /*~~>*/List<ApplicationCommandInteractionOption> getOptions() {
         return getInteraction().getCommandInteraction()
                 .orElseThrow(IllegalStateException::new) // should always be present for chat input commands
                 .getOptions();

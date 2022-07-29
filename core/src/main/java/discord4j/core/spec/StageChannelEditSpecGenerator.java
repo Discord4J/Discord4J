@@ -42,7 +42,7 @@ interface StageChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> 
 
     Possible<Integer> position();
 
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
+    Possible</*~~>*/List<PermissionOverwrite>> permissionOverwrites();
 
     Possible<Optional<Snowflake>> parentId();
 

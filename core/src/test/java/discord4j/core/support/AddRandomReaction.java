@@ -33,7 +33,7 @@ import java.util.Random;
 public class AddRandomReaction implements Command {
 
     private final Random random = new Random();
-    private final List<String> emoji = new ArrayList<>(Arrays.asList(
+    private final /*~~>*/List<String> emoji = new ArrayList<>(Arrays.asList(
             "😀", "😬", "😂", "😄", "😅", "😇", "☺", "😋", "😘", "😚", "😜", "🤑", "😎", "🤗", "😳", "🙄", "😤",
             "😱", "😨", "😰", "😥", "🤒", "😭", "💩", "👹", "💀", "👻", "👽", "🤖", "😺", "😹", "😻", "😼", "😽",
             "🙀", "😿", "😾", "🙌", "👏", "👋", "👍", "👊", "✊", "✌", "👌", "✋", "👐", "💪", "☝", "🙏", "👆",
@@ -86,8 +86,8 @@ public class AddRandomReaction implements Command {
                 .then();
     }
 
-    private List<String> fetch(int count) {
-        List<String> reactions = new ArrayList<>();
+    private /*~~>*/List<String> fetch(int count) {
+        /*~~>*/List<String> reactions = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             int index = random.nextInt(emoji.size());
             reactions.add(emoji.get(index));

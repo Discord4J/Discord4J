@@ -61,7 +61,7 @@ public class Sticker extends PartialSticker {
      *
      * @return The list of tags for the sticker.
      */
-    public List<String> getTags() {
+    public /*~~>*/List<String> getTags() {
         return getData().tags().toOptional()
             .map(tags -> tags.split(", "))
             .map(Arrays::asList)

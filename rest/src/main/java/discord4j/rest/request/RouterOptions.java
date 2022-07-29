@@ -32,18 +32,18 @@ public class RouterOptions {
     private final String token;
     private final ReactorResources reactorResources;
     private final ExchangeStrategies exchangeStrategies;
-    private final List<ResponseFunction> responseTransformers;
+    private final /*~~>*/List<ResponseFunction> responseTransformers;
     private final GlobalRateLimiter globalRateLimiter;
     private final RequestQueueFactory requestQueueFactory;
     private final String discordBaseUrl;
 
     public RouterOptions(String token, ReactorResources reactorResources, ExchangeStrategies exchangeStrategies,
-                         List<ResponseFunction> responseTransformers, GlobalRateLimiter globalRateLimiter,
+                         /*~~>*/List<ResponseFunction> responseTransformers, GlobalRateLimiter globalRateLimiter,
                          RequestQueueFactory requestQueueFactory, String discordBaseUrl) {
         this.token = Objects.requireNonNull(token, "token");
         this.reactorResources = Objects.requireNonNull(reactorResources, "reactorResources");
         this.exchangeStrategies = Objects.requireNonNull(exchangeStrategies, "exchangeStrategies");
-        this.responseTransformers = Objects.requireNonNull(responseTransformers, "responseTransformers");
+        /*~~>*/this.responseTransformers = Objects.requireNonNull(responseTransformers, "responseTransformers");
         this.globalRateLimiter = Objects.requireNonNull(globalRateLimiter, "globalRateLimiter");
         this.requestQueueFactory = Objects.requireNonNull(requestQueueFactory, "requestQueueFactory");
         this.discordBaseUrl = Objects.requireNonNull(discordBaseUrl, "discordBaseUrl");
@@ -82,7 +82,7 @@ public class RouterOptions {
      *
      * @return a list of {@link ResponseFunction} objects.
      */
-    public List<ResponseFunction> getResponseTransformers() {
+    public /*~~>*/List<ResponseFunction> getResponseTransformers() {
         return responseTransformers;
     }
 

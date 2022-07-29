@@ -38,7 +38,7 @@ interface GuildEmojiCreateSpecGenerator extends AuditSpec<GuildEmojiCreateReques
     Image image();
 
     @Value.Default
-    default List<Snowflake> roles() {
+    default /*~~>*/List<Snowflake> roles() {
         return Collections.emptyList();
     }
 

@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class LegacyGuildEmojiEditSpec implements LegacyAuditSpec<GuildEmojiModifyRequest> {
 
     private Possible<String> name = Possible.absent();
-    private Possible<List<String>> roles = Possible.absent();
+    private Possible</*~~>*/List<String>> roles = Possible.absent();
     @Nullable
     private String reason;
 

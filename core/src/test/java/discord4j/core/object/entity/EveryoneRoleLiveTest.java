@@ -27,7 +27,7 @@ public class EveryoneRoleLiveTest {
 
     @Test
     public void testEveryoneRolesLive() {
-        List<Guild> guilds = client.getGuilds().collectList().block();
+        /*~~>*/List<Guild> guilds = client.getGuilds().collectList().block();
 
         assert guilds != null;
         for (Guild g : guilds) {
@@ -39,7 +39,7 @@ public class EveryoneRoleLiveTest {
             assertEquals(g.getId(), everyoneRole.getId());
 
             // Get everyone role via Role#isEveryone
-            List<Role> everyoneRoles = g.getRoles().filter(Role::isEveryone).collectList().block();
+            /*~~>*/List<Role> everyoneRoles = g.getRoles().filter(Role::isEveryone).collectList().block();
 
             assert everyoneRoles != null;
             assertEquals(1, everyoneRoles.size());

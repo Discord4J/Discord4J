@@ -31,10 +31,10 @@ import java.util.function.Function;
 @Experimental
 public class CompositeTransformer implements ResponseFunction {
 
-    private final List<ResponseFunction> responseFunctions;
+    private final /*~~>*/List<ResponseFunction> responseFunctions;
 
-    public CompositeTransformer(List<ResponseFunction> responseFunctions) {
-        this.responseFunctions = responseFunctions;
+    public CompositeTransformer(/*~~>*/List<ResponseFunction> responseFunctions) {
+        /*~~>*/this.responseFunctions = responseFunctions;
     }
 
     @Override

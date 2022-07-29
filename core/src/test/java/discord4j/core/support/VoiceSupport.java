@@ -62,7 +62,7 @@ public class VoiceSupport {
 
         Map<Snowflake, GuildVoiceSupport> voiceGuildMap = new ConcurrentHashMap<>();
 
-        List<EventHandler> eventHandlers = new ArrayList<>();
+        /*~~>*/List<EventHandler> eventHandlers = new ArrayList<>();
         eventHandlers.add(new Join(voiceGuildMap));
         eventHandlers.add(new Leave(client));
         eventHandlers.add(new Reconnect(client));

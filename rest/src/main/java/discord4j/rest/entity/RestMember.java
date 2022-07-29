@@ -195,7 +195,7 @@ public class RestMember {
                 .transform(OrderUtil::orderRoles)
                 .collectList()
                 .flatMap(guildRoles -> { // Get the sorted list of guild roles
-                    Mono<List<Snowflake>> thisRoleIds = this.getData()
+                    Mono</*~~>*/List<Snowflake>> thisRoleIds = this.getData()
                             .map(MemberData::roles)
                             .flatMapMany(Flux::fromIterable)
                             .map(Snowflake::of)

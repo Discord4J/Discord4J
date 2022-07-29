@@ -113,7 +113,7 @@ public class ClientPresence {
      * @return A presence with the given status and activity.
      */
     public static ClientPresence of(Status status, @Nullable ClientActivity activity) {
-        List<ActivityUpdateRequest> activities = Optional.ofNullable(activity)
+        /*~~>*/List<ActivityUpdateRequest> activities = Optional.ofNullable(activity)
                 .map(ClientActivity::getActivityUpdateRequest)
                 .map(Collections::singletonList)
                 .orElse(Collections.emptyList());

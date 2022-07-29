@@ -101,7 +101,7 @@ public class ApplicationCommandOption implements DiscordObject {
      *
      * @return The choices for {@code string} and {@code int} types for the user to pick from.
      */
-    public List<ApplicationCommandOptionChoice> getChoices() {
+    public /*~~>*/List<ApplicationCommandOptionChoice> getChoices() {
         return data.choices().toOptional().orElse(Collections.emptyList())
                 .stream()
                 .map(data -> new ApplicationCommandOptionChoice(gateway, data))
@@ -125,7 +125,7 @@ public class ApplicationCommandOption implements DiscordObject {
      *
      * @return The options, if the option is a subcommand or subcommand group type.
      */
-    public List<ApplicationCommandOption> getOptions() {
+    public /*~~>*/List<ApplicationCommandOption> getOptions() {
         return data.options().toOptional().orElse(Collections.emptyList())
                 .stream()
                 .map(data -> new ApplicationCommandOption(gateway, data))
@@ -152,7 +152,7 @@ public class ApplicationCommandOption implements DiscordObject {
      * Only applies to CHANNEL type options, if empty, no restriction on channel types is placed.
      * @return A list of channel types a user may pick. Empty list means no restriction is applied.
      */
-    public List<Channel.Type> getAllowedChannelTypes() {
+    public /*~~>*/List<Channel.Type> getAllowedChannelTypes() {
         return data.channelTypes().toOptional()
                 .orElse(Collections.emptyList())
                 .stream()

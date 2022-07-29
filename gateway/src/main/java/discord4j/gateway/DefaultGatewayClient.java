@@ -521,7 +521,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private Mono<CloseStatus> handleClose(DisconnectBehavior sourceBehavior, CloseStatus closeStatus) {
         return Mono.deferContextual(ctx -> {
             DisconnectBehavior behavior;
-            if (GatewayRetrySpec.NON_RETRYABLE_STATUS_CODES.contains(closeStatus.getCode())) {
+            if (/*~~>*/GatewayRetrySpec.NON_RETRYABLE_STATUS_CODES.contains(closeStatus.getCode())) {
                 // non-retryable close codes are non-transient errors therefore stopping is the only choice
                 behavior = DisconnectBehavior.stop(sourceBehavior.getCause());
             } else {

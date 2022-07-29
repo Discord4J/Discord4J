@@ -48,7 +48,7 @@ import java.util.function.Consumer;
 public class LegacyGuildCreateSpec implements LegacySpec<GuildCreateRequest> {
 
     private final ImmutableGuildCreateRequest.Builder builder = GuildCreateRequest.builder();
-    private final List<RoleCreateRequest> roles = new ArrayList<>();
+    private final /*~~>*/List<RoleCreateRequest> roles = new ArrayList<>();
 
     /**
      * Sets the name for the created {@link Guild}.

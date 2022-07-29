@@ -59,7 +59,7 @@ class RequestStream {
     private final RequestQueue<RequestCorrelation<ClientResponse>> requestQueue;
     private final GlobalRateLimiter globalRateLimiter;
     private final Scheduler timedTaskScheduler;
-    private final List<ResponseFunction> responseFunctions;
+    private final /*~~>*/List<ResponseFunction> responseFunctions;
     private final DiscordWebClient httpClient;
     private final RequestSubscriber requestSubscriber;
     private final RateLimitRetryOperator rateLimitRetryOperator;
@@ -72,7 +72,7 @@ class RequestStream {
         this.requestQueue = routerOptions.getRequestQueueFactory().create();
         this.globalRateLimiter = routerOptions.getGlobalRateLimiter();
         this.timedTaskScheduler = routerOptions.getReactorResources().getTimerTaskScheduler();
-        this.responseFunctions = routerOptions.getResponseTransformers();
+        /*~~>*/this.responseFunctions = routerOptions.getResponseTransformers();
         this.httpClient = httpClient;
         this.requestSubscriber = new RequestSubscriber(rateLimitStrategy, requestsInFlight::decrementAndGet);
         this.rateLimitRetryOperator = new RateLimitRetryOperator(timedTaskScheduler);

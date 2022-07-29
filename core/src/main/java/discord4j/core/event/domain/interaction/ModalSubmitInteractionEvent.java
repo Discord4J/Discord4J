@@ -92,7 +92,7 @@ public class ModalSubmitInteractionEvent extends ComponentInteractionEvent {
      *
      * @return The components from the modal
      */
-    public List<MessageComponent> getComponents() {
+    public /*~~>*/List<MessageComponent> getComponents() {
         return getInteraction().getCommandInteraction()
                 .map(ApplicationCommandInteraction::getComponents)
                 .orElse(Collections.emptyList()); // the list should never actually be empty, but just in case
@@ -104,7 +104,7 @@ public class ModalSubmitInteractionEvent extends ComponentInteractionEvent {
      * @param componentType the modal component type to return
      * @return The components from the modal
      */
-    public <T extends MessageComponent> List<T> getComponents(Class<T> componentType) {
+    public <T extends MessageComponent> /*~~>*/List<T> getComponents(Class<T> componentType) {
         return getComponents()
                 .stream()
                 .flatMap(it -> {

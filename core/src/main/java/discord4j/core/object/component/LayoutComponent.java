@@ -33,7 +33,7 @@ public abstract class LayoutComponent extends MessageComponent {
         super(data);
     }
 
-    public List<MessageComponent> getChildren() {
+    public /*~~>*/List<MessageComponent> getChildren() {
         return getData().components().toOptional()
                 .map(components -> components.stream()
                         .map(MessageComponent::fromData)

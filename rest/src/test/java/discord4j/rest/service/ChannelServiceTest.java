@@ -118,7 +118,7 @@ public class ChannelServiceTest {
 
             ByteArrayInputStream in0 = new ByteArrayInputStream(bytes);
             ByteArrayInputStream in1 = new ByteArrayInputStream(bytes);
-            List<Tuple2<String, InputStream>> files = Arrays.asList(Tuples.of("file0.txt", in0),
+            /*~~>*/List<Tuple2<String, InputStream>> files = Arrays.asList(Tuples.of("file0.txt", in0),
                     Tuples.of("file1.txt", in1));
 
             MultipartRequest<MessageCreateRequest> request = MultipartRequest.ofRequestAndFiles(req, files);

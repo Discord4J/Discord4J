@@ -84,8 +84,8 @@ public class AllowedMentions {
         this.repliedUser = repliedUser;
     }
 
-    private <T, U> List<T> mapSetToList(final Set<U> list, final Function<? super U, ? extends T> mapper) {
-        final List<T> data = new ArrayList<>(list.size());
+    private <T, U> /*~~>*/List<T> mapSetToList(final Set<U> list, final Function<? super U, ? extends T> mapper) {
+        final /*~~>*/List<T> data = new ArrayList<>(list.size());
         list.forEach(u -> data.add(mapper.apply(u)));
         return data;
     }

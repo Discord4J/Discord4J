@@ -38,11 +38,11 @@ import java.util.stream.Collectors;
 public class ThreadMembersUpdateEvent extends ThreadEvent {
 
     private final ThreadMembersUpdate dispatch;
-    private final List<ThreadMember> members;
-    private final List<ThreadMember> old;
+    private final /*~~>*/List<ThreadMember> members;
+    private final /*~~>*/List<ThreadMember> old;
 
     public ThreadMembersUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, ThreadMembersUpdate dispatch,
-                                    List<ThreadMember> members, @Nullable List<ThreadMember> old) {
+                                    /*~~>*/List<ThreadMember> members, @Nullable /*~~>*/List<ThreadMember> old) {
         super(gateway, shardInfo);
         this.dispatch = dispatch;
         this.members = members;
@@ -71,7 +71,7 @@ public class ThreadMembersUpdateEvent extends ThreadEvent {
      *
      * @return a list of {@link ThreadMember} added to the thread
      */
-    public List<ThreadMember> getMembers() {
+    public /*~~>*/List<ThreadMember> getMembers() {
         return members;
     }
 
@@ -80,7 +80,7 @@ public class ThreadMembersUpdateEvent extends ThreadEvent {
      *
      * @return a list of {@link ThreadMember} in the thread before the event, if present
      */
-    public Optional<List<ThreadMember>> getOld() {
+    public Optional</*~~>*/List<ThreadMember>> getOld() {
         return Optional.ofNullable(old);
     }
 
@@ -89,7 +89,7 @@ public class ThreadMembersUpdateEvent extends ThreadEvent {
      *
      * @return a list of {@link Snowflake} user IDs who were removed from the thread
      */
-    public List<Snowflake> getRemovedMemberIds() {
+    public /*~~>*/List<Snowflake> getRemovedMemberIds() {
         return dispatch.removedMemberIds().stream().map(Snowflake::of).collect(Collectors.toList());
     }
 

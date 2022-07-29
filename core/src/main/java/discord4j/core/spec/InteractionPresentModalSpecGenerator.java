@@ -37,7 +37,7 @@ interface InteractionPresentModalSpecGenerator extends Spec<InteractionApplicati
 
     Possible<String> customId();
 
-    Possible<List<LayoutComponent>> components();
+    Possible</*~~>*/List<LayoutComponent>> components();
 
     @Override
     default InteractionApplicationCommandCallbackData asRequest() {

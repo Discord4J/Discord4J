@@ -39,7 +39,7 @@ interface CategoryCreateSpecGenerator extends AuditSpec<ChannelCreateRequest> {
 
     Possible<Integer> position();
 
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
+    Possible</*~~>*/List<PermissionOverwrite>> permissionOverwrites();
 
     @Override
     default ChannelCreateRequest asRequest() {

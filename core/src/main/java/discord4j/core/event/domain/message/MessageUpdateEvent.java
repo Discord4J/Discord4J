@@ -54,11 +54,11 @@ public class MessageUpdateEvent extends MessageEvent {
     @Nullable
     private final String currentContent;
     private final boolean embedsChanged;
-    private final List<Embed> currentEmbeds;
+    private final /*~~>*/List<Embed> currentEmbeds;
 
     public MessageUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long messageId, long channelId, @Nullable Long guildId,
                               @Nullable Message old, boolean contentChanged, @Nullable String currentContent,
-                              boolean embedsChanged, List<Embed> currentEmbeds) {
+                              boolean embedsChanged, /*~~>*/List<Embed> currentEmbeds) {
         super(gateway, shardInfo);
         this.messageId = messageId;
         this.channelId = channelId;
@@ -169,7 +169,7 @@ public class MessageUpdateEvent extends MessageEvent {
      *
      * @return The current version of the {@link Message}'s {@link Embed}.
      */
-    public List<Embed> getCurrentEmbeds() {
+    public /*~~>*/List<Embed> getCurrentEmbeds() {
         return currentEmbeds;
     }
 

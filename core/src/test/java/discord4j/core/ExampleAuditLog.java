@@ -28,7 +28,7 @@ import java.util.List;
 public class ExampleAuditLog {
 
     public static void main(String[] args) {
-        List<AuditLogEntry> entries = DiscordClient.create(System.getenv("token"))
+        /*~~>*/List<AuditLogEntry> entries = DiscordClient.create(System.getenv("token"))
                 .login()
                 .flatMapMany(client -> client.on(GuildCreateEvent.class))
                 .filter(gce -> gce.getGuild().getId().equals(Snowflake.of(System.getenv("guildId"))))

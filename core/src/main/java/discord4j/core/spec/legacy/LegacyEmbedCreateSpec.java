@@ -34,7 +34,7 @@ import java.util.List;
 public class LegacyEmbedCreateSpec implements LegacySpec<EmbedData> {
 
     private final ImmutableEmbedData.Builder requestBuilder = EmbedData.builder();
-    private final List<EmbedFieldData> fields = new ArrayList<>();
+    private final /*~~>*/List<EmbedFieldData> fields = new ArrayList<>();
 
     /**
      * Sets the title of the embed.

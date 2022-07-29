@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class ThreadListSyncEvent extends ThreadEvent {
 
     private final ThreadListSync dispatch;
-    private final List<ThreadChannel> syncedThreads;
+    private final /*~~>*/List<ThreadChannel> syncedThreads;
 
     public ThreadListSyncEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, ThreadListSync dispatch) {
         super(gateway, shardInfo);
@@ -59,7 +59,7 @@ public class ThreadListSyncEvent extends ThreadEvent {
      * @return if present, a list of {@link Snowflake} channel IDs that are having their threads synced, otherwise if
      * absent, means this sync event is for the entire guild.
      */
-    public Optional<List<Snowflake>> getSyncedChannelIds() {
+    public Optional</*~~>*/List<Snowflake>> getSyncedChannelIds() {
         return dispatch.channelIds().toOptional().map(list -> list.stream().map(Snowflake::of).collect(Collectors.toList()));
     }
 
@@ -68,7 +68,7 @@ public class ThreadListSyncEvent extends ThreadEvent {
      *
      * @return a list of {@link ThreadChannel} with all active threads for the current user
      */
-    public List<ThreadChannel> getSyncedThreads() {
+    public /*~~>*/List<ThreadChannel> getSyncedThreads() {
         return syncedThreads;
     }
 
@@ -76,7 +76,7 @@ public class ThreadListSyncEvent extends ThreadEvent {
      * Returns all thread member objects from the synced threads for the current user, indicating which threads the
      * current user has been added to
      */
-    public List<ThreadMember> getThreadMembers() {
+    public /*~~>*/List<ThreadMember> getThreadMembers() {
         return dispatch.members().stream().map(data -> new ThreadMember(getClient(), data)).collect(Collectors.toList());
     }
 

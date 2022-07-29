@@ -37,7 +37,7 @@ public class AuditLogPart {
 
     private final Set<User> users;
 
-    private final List<AuditLogEntry> entries;
+    private final /*~~>*/List<AuditLogEntry> entries;
 
     public AuditLogPart(long guildId, GatewayDiscordClient gateway, AuditLogData data) {
         this.guildId = guildId;
@@ -55,7 +55,7 @@ public class AuditLogPart {
                 .collect(Collectors.toList());
     }
 
-    private AuditLogPart(long guildId, Set<Webhook> webhooks, Set<User> users, List<AuditLogEntry> entries) {
+    private AuditLogPart(long guildId, Set<Webhook> webhooks, Set<User> users, /*~~>*/List<AuditLogEntry> entries) {
         this.guildId = guildId;
         this.webhooks = webhooks;
         this.users = users;
@@ -85,7 +85,7 @@ public class AuditLogPart {
      *
      * @return The entries in this portion of the audit log.
      */
-    public List<AuditLogEntry> getEntries() {
+    public /*~~>*/List<AuditLogEntry> getEntries() {
         return entries;
     }
 

@@ -762,7 +762,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     @Override
     public Mono<Void> onGuildMembersChunk(int shardIndex, GuildMembersChunk dispatch) {
         long guildId = Snowflake.asLong(dispatch.guildId());
-        List<MemberData> members = dispatch.members();
+        /*~~>*/List<MemberData> members = dispatch.members();
 
         Flux<Tuple2<LongLongTuple2, MemberData>> memberPairs = Flux.fromIterable(members)
                 .map(data -> Tuples.of(LongLongTuple2.of(guildId, Snowflake.asLong(data.user().id())),
@@ -970,7 +970,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
     @Override
     public Mono<Set<MessageData>> onMessageDeleteBulk(int shardIndex, MessageDeleteBulk dispatch) {
-        List<Long> messageIds = dispatch.ids().stream()
+        /*~~>*/List<Long> messageIds = dispatch.ids().stream()
                 .map(Snowflake::asLong)
                 .collect(Collectors.toList());
 
@@ -1003,7 +1003,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                                 .emoji(dispatch.emoji())
                                 .build());
                     } else {
-                        List<ReactionData> reactions = oldMessage.reactions().get();
+                        /*~~>*/List<ReactionData> reactions = oldMessage.reactions().get();
                         int i = indexOfReactionByEmojiData(reactions, dispatch.emoji());
 
                         if (i < reactions.size()) {
@@ -1046,7 +1046,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                     boolean me = Objects.equals(userId, selfId);
                     ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
 
-                    List<ReactionData> reactions = oldMessage.reactions().get();
+                    /*~~>*/List<ReactionData> reactions = oldMessage.reactions().get();
                     int i = indexOfReactionByEmojiData(reactions, dispatch.emoji());
 
                     if (i < reactions.size()) {
@@ -1091,7 +1091,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .map(oldMessage -> {
                     ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
 
-                    List<ReactionData> reactions = oldMessage.reactions().get();
+                    /*~~>*/List<ReactionData> reactions = oldMessage.reactions().get();
                     int i = indexOfReactionByEmojiData(reactions, dispatch.emoji());
 
                     if (i < reactions.size()) {
@@ -1104,7 +1104,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .flatMap(message -> stateHolder.getMessageStore().save(messageId, message));
     }
 
-    private int indexOfReactionByEmojiData(List<ReactionData> reactions, EmojiData emojiData) {
+    private int indexOfReactionByEmojiData(/*~~>*/List<ReactionData> reactions, EmojiData emojiData) {
         int i;
         for (i = 0; i < reactions.size(); i++) {
             ReactionData r = reactions.get(i);

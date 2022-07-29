@@ -408,7 +408,7 @@ public class DefaultVoiceGatewayClient {
     private Mono<CloseStatus> handleClose(DisconnectBehavior sourceBehavior, CloseStatus closeStatus) {
         return Mono.deferContextual(ctx -> {
             DisconnectBehavior behavior;
-            if (VoiceGatewayRetrySpec.NON_RETRYABLE_STATUS_CODES.contains(closeStatus.getCode())) {
+            if (/*~~>*/VoiceGatewayRetrySpec.NON_RETRYABLE_STATUS_CODES.contains(closeStatus.getCode())) {
                 // non-retryable close codes are non-transient errors therefore stopping is the only choice
                 behavior = DisconnectBehavior.stop(sourceBehavior.getCause());
             } else {

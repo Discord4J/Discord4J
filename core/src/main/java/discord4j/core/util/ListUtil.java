@@ -22,19 +22,19 @@ import java.util.function.Predicate;
 
 public class ListUtil {
 
-    public static <T> List<T> add(List<T> source, T element) {
+    public static <T> /*~~>*/List<T> add(/*~~>*/List<T> source, T element) {
         List<T> list = new ArrayList<>(source);
         list.add(element);
         return Collections.unmodifiableList(list);
     }
 
-    public static <T> Collection<T> addAllDistinct(List<T> source, List<T> elements) {
+    public static <T> Collection<T> addAllDistinct(/*~~>*/List<T> source, /*~~>*/List<T> elements) {
         Set<T> set = new LinkedHashSet<>(source);
         set.addAll(elements);
         return Collections.unmodifiableCollection(set);
     }
 
-    public static <T> List<T> remove(List<T> source, Predicate<T> filter) {
+    public static <T> /*~~>*/List<T> remove(/*~~>*/List<T> source, Predicate<T> filter) {
         if (source.isEmpty()) {
             return source;
         } else {
@@ -44,7 +44,7 @@ public class ListUtil {
         }
     }
 
-    public static <T> List<T> replace(List<T> source, T old, T replacement) {
+    public static <T> /*~~>*/List<T> replace(/*~~>*/List<T> source, T old, T replacement) {
         List<T> list = new ArrayList<>(source);
         for (int i = 0; i < list.size(); i++) {
             if (Objects.equals(list.get(i), old)) {

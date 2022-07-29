@@ -113,7 +113,7 @@ public class ApplicationCommand implements DiscordObject {
      *
      * @return The options of the command.
      */
-    public List<ApplicationCommandOption> getOptions() {
+    public /*~~>*/List<ApplicationCommandOption> getOptions() {
         return data.options().toOptional().orElse(Collections.emptyList()).stream()
                 .map(data -> new ApplicationCommandOption(gateway, data))
                 .collect(Collectors.toList());

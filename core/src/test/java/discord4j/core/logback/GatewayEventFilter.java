@@ -28,9 +28,9 @@ import java.util.List;
 
 public class GatewayEventFilter extends TurboFilter {
 
-    private final List<String> loggers = new ArrayList<>();
-    private final List<String> includedEvents = new ArrayList<>();
-    private final List<String> excludedEvents = new ArrayList<>();
+    private final /*~~>*/List<String> loggers = new ArrayList<>();
+    private final /*~~>*/List<String> includedEvents = new ArrayList<>();
+    private final /*~~>*/List<String> excludedEvents = new ArrayList<>();
 
     @Override
     public FilterReply decide(Marker marker, Logger log, Level level, String format, Object[] params, Throwable t) {
@@ -49,15 +49,15 @@ public class GatewayEventFilter extends TurboFilter {
     }
 
     public void addLogger(String logger) {
-        this.loggers.add(logger);
+        /*~~>*/this.loggers.add(logger);
     }
 
     public void addInclude(String include) {
-        this.includedEvents.add(include);
+        /*~~>*/this.includedEvents.add(include);
     }
 
     public void addExclude(String exclude) {
-        this.excludedEvents.add(exclude);
+        /*~~>*/this.excludedEvents.add(exclude);
     }
 
 }

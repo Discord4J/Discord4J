@@ -62,7 +62,7 @@ interface GuildCreateSpecGenerator extends Spec<GuildCreateRequest> {
     }
 
     @Value.Default
-    default List<RoleCreateSpec> roles() {
+    default /*~~>*/List<RoleCreateSpec> roles() {
         return Collections.emptyList();
     }
 
@@ -70,7 +70,7 @@ interface GuildCreateSpecGenerator extends Spec<GuildCreateRequest> {
     RoleCreateSpec everyoneRole();
 
     @Value.Default
-    default List<GuildCreateFields.PartialChannel> channels() {
+    default /*~~>*/List<GuildCreateFields.PartialChannel> channels() {
         return Collections.emptyList();
     }
 

@@ -30,9 +30,9 @@ import java.util.List;
  */
 public class ResumeEvent extends GatewayLifecycleEvent {
 
-    private final List<String> trace;
+    private final /*~~>*/List<String> trace;
 
-    public ResumeEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, List<String> trace) {
+    public ResumeEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, /*~~>*/List<String> trace) {
         super(gateway, shardInfo);
         this.trace = trace;
     }
@@ -42,7 +42,7 @@ public class ResumeEvent extends GatewayLifecycleEvent {
      *
      * @return The trace provided by Discord, containing the guild the user is in.
      */
-    public List<String> getTrace() {
+    public /*~~>*/List<String> getTrace() {
         return trace;
     }
 

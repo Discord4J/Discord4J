@@ -74,7 +74,7 @@ public class ExampleInteractions {
                             .name(MESSAGE_COMMAND_NAME)
                             .type(ApplicationCommand.Type.MESSAGE.getValue())
                             .build();
-                    List<ApplicationCommandRequest> commands = Arrays.asList(example, userInfo, approve);
+                    /*~~>*/List<ApplicationCommandRequest> commands = Arrays.asList(example, userInfo, approve);
 
                     Map<Snowflake, String> modeByUser = new ConcurrentHashMap<>();
 

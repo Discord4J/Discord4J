@@ -58,7 +58,7 @@ interface EmbedCreateSpecGenerator extends Spec<EmbedData> {
     EmbedCreateFields.Author author();
 
     @Value.Default
-    default List<EmbedCreateFields.Field> fields() {
+    default /*~~>*/List<EmbedCreateFields.Field> fields() {
         return Collections.emptyList();
     }
 

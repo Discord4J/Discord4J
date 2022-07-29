@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 
 public class VoiceGatewayRetrySpec extends Retry {
 
-    public static final List<Integer> NON_RETRYABLE_STATUS_CODES = Arrays.asList(
+    public static final /*~~>*/List<Integer> NON_RETRYABLE_STATUS_CODES = Arrays.asList(
             4004, // Authentication failed
             4006, // Session no longer valid
             4016 // Unknown encryption mode

@@ -35,7 +35,7 @@ interface GuildEmojiEditSpecGenerator extends AuditSpec<GuildEmojiModifyRequest>
 
     Possible<String> name();
 
-    Possible<List<Snowflake>> roles();
+    Possible</*~~>*/List<Snowflake>> roles();
 
     @Override
     default GuildEmojiModifyRequest asRequest() {

@@ -39,10 +39,10 @@ public class LegacyInteractionApplicationCommandCallbackSpec implements LegacySp
     @Nullable
     private String content;
     private boolean tts;
-    private List<EmbedData> embeds;
+    private /*~~>*/List<EmbedData> embeds;
     private AllowedMentionsData allowedMentionsData;
     private int flags;
-    private List<LayoutComponent> components;
+    private /*~~>*/List<LayoutComponent> components;
 
     public LegacyInteractionApplicationCommandCallbackSpec setContent(String content) {
         this.content = content;
@@ -78,7 +78,7 @@ public class LegacyInteractionApplicationCommandCallbackSpec implements LegacySp
         return setComponents(Arrays.asList(components));
     }
 
-    public LegacyInteractionApplicationCommandCallbackSpec setComponents(List<LayoutComponent> components) {
+    public LegacyInteractionApplicationCommandCallbackSpec setComponents(/*~~>*/List<LayoutComponent> components) {
         this.components = components;
         return this;
     }

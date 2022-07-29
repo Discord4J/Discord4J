@@ -64,7 +64,7 @@ public final class ApplicationTeam implements Entity {
      *
      * @return The members of the team.
      */
-    public List<ApplicationTeamMember> getMembers() {
+    public /*~~>*/List<ApplicationTeamMember> getMembers() {
         return data.members().stream()
                 .map(data -> new ApplicationTeamMember(gateway, data))
                 .collect(Collectors.toList());

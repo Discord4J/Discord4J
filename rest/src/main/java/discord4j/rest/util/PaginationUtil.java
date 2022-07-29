@@ -62,7 +62,7 @@ public final class PaginationUtil {
     private static <T> Flux<T> paginate(final LongFunction<Flux<T>> nextPage, final ToLongFunction<T> keyExtractor,
                                         final long startAt, final boolean reverse) {
 
-        final ToLongFunction<List<T>> updateLast = list ->
+        final ToLongFunction</*~~>*/List<T>> updateLast = list ->
                 list.isEmpty() ? startAt : keyExtractor.applyAsLong(list.get(list.size() - 1));
 
         final Comparator<T> comparator = Comparator.comparingLong(keyExtractor);

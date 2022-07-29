@@ -438,7 +438,7 @@ public class PartialMember extends User {
     public Mono<PermissionSet> getBasePermissions() {
         Mono<Boolean> getIsOwner = getGuild().map(guild -> guild.getOwnerId().equals(getId()));
         Mono<PermissionSet> getEveryonePerms = getGuild().flatMap(Guild::getEveryoneRole).map(Role::getPermissions);
-        Mono<List<PermissionSet>> getRolePerms = getRoles().map(Role::getPermissions).collectList();
+        Mono</*~~>*/List<PermissionSet>> getRolePerms = getRoles().map(Role::getPermissions).collectList();
 
         return getIsOwner.filter(Predicate.isEqual(Boolean.TRUE))
             .flatMap(ignored -> Mono.just(PermissionSet.all()))

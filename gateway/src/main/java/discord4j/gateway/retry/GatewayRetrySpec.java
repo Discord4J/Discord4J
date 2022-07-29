@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 
 public class GatewayRetrySpec extends Retry {
 
-    public static final List<Integer> NON_RETRYABLE_STATUS_CODES = Arrays.asList(
+    public static final /*~~>*/List<Integer> NON_RETRYABLE_STATUS_CODES = Arrays.asList(
             4004, // Authentication failed
             4010, // Invalid shard
             4011, // Sharding required

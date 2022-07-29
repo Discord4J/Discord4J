@@ -166,7 +166,7 @@ public class RestGuild {
         return restClient.getGuildService().createGuildChannel(id, request, reason);
     }
 
-    public Flux<RoleData> modifyChannelPositions(List<PositionModifyRequest> requests) {
+    public Flux<RoleData> modifyChannelPositions(/*~~>*/List<PositionModifyRequest> requests) {
         return restClient.getGuildService()
                 .modifyGuildChannelPositions(id, requests.toArray(new PositionModifyRequest[0]));
     }
@@ -243,7 +243,7 @@ public class RestGuild {
         return restClient.getGuildService().createGuildRole(id, request, reason);
     }
 
-    public Flux<RoleData> modifyRolePositions(List<PositionModifyRequest> requests) {
+    public Flux<RoleData> modifyRolePositions(/*~~>*/List<PositionModifyRequest> requests) {
         return restClient.getGuildService().modifyGuildRolePositions(id,
                 requests.toArray(new PositionModifyRequest[0]));
     }

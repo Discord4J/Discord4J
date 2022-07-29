@@ -74,7 +74,7 @@ class ThreadDispatchHandlers {
                 oldData.map(old -> new ThreadMember(gateway, old)).orElse(null)));
     }
 
-    static Mono<? extends Event> threadMembersUpdate(DispatchContext<ThreadMembersUpdate, List<ThreadMemberData>> context) {
+    static Mono<? extends Event> threadMembersUpdate(DispatchContext<ThreadMembersUpdate, /*~~>*/List<ThreadMemberData>> context) {
         GatewayDiscordClient gateway = context.getGateway();
         List<ThreadMemberData> addedMembers = context.getDispatch().addedMembers();
         Optional<List<ThreadMemberData>> oldData = context.getOldState();

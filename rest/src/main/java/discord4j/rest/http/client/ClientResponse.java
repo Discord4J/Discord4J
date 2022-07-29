@@ -51,16 +51,16 @@ public class ClientResponse {
     private final NettyInbound inbound;
     private final ExchangeStrategies exchangeStrategies;
     private final ClientRequest clientRequest;
-    private final List<ResponseFunction> responseFunctions;
+    private final /*~~>*/List<ResponseFunction> responseFunctions;
     private final AtomicBoolean reject = new AtomicBoolean();
 
     ClientResponse(HttpClientResponse response, NettyInbound inbound, ExchangeStrategies exchangeStrategies,
-                   ClientRequest clientRequest, List<ResponseFunction> responseFunctions) {
+                   ClientRequest clientRequest, /*~~>*/List<ResponseFunction> responseFunctions) {
         this.response = response;
         this.inbound = inbound;
         this.exchangeStrategies = exchangeStrategies;
         this.clientRequest = clientRequest;
-        this.responseFunctions = responseFunctions;
+        /*~~>*/this.responseFunctions = responseFunctions;
     }
 
     /**

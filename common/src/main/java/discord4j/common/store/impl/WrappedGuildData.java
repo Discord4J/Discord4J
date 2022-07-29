@@ -27,11 +27,11 @@ import java.util.List;
 class WrappedGuildData {
 
     private final ImmutableGuildData guild;
-    private final List<Id> members;
-    private final List<Id> emojis;
-    private final List<Id> stickers;
-    private final List<Id> channels;
-    private final List<Id> roles;
+    private final /*~~>*/List<Id> members;
+    private final /*~~>*/List<Id> emojis;
+    private final /*~~>*/List<Id> stickers;
+    private final /*~~>*/List<Id> channels;
+    private final /*~~>*/List<Id> roles;
 
     WrappedGuildData(ImmutableGuildData guild) {
         this.guild = ImmutableGuildData.builder()
@@ -42,11 +42,11 @@ class WrappedGuildData {
                 .channels(Collections.emptyList())
                 .roles(Collections.emptyList())
                 .build();
-        this.members = new ArrayList<>(guild.members());
-        this.emojis = new ArrayList<>(guild.emojis());
-        this.stickers = new ArrayList<>(guild.stickers().toOptional().orElse(Collections.emptyList()));
-        this.channels = new ArrayList<>(guild.channels());
-        this.roles = new ArrayList<>(guild.roles());
+        /*~~>*/this.members = new ArrayList<>(guild.members());
+        /*~~>*/this.emojis = new ArrayList<>(guild.emojis());
+        /*~~>*/this.stickers = new ArrayList<>(guild.stickers().toOptional().orElse(Collections.emptyList()));
+        /*~~>*/this.channels = new ArrayList<>(guild.channels());
+        /*~~>*/this.roles = new ArrayList<>(guild.roles());
     }
 
     ImmutableGuildData unwrap() {
@@ -60,23 +60,23 @@ class WrappedGuildData {
                 .build();
     }
 
-    List<Id> getMembers() {
+    /*~~>*/List<Id> getMembers() {
         return members;
     }
 
-    List<Id> getEmojis() {
+    /*~~>*/List<Id> getEmojis() {
         return emojis;
     }
 
-    List<Id> getStickers() {
+    /*~~>*/List<Id> getStickers() {
         return stickers;
     }
 
-    List<Id> getChannels() {
+    /*~~>*/List<Id> getChannels() {
         return channels;
     }
 
-    List<Id> getRoles() {
+    /*~~>*/List<Id> getRoles() {
         return roles;
     }
 }

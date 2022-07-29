@@ -65,7 +65,7 @@ public class ExampleThread {
     public static void main(String[] args) {
         DiscordClient.create(TOKEN)
                 .withGateway(client -> {
-                    List<ApplicationCommandRequest> commands = Arrays.asList(
+                    /*~~>*/List<ApplicationCommandRequest> commands = Arrays.asList(
                             ApplicationCommandRequest.builder()
                                     .name(START)
                                     .description("Start a thread in this channel")

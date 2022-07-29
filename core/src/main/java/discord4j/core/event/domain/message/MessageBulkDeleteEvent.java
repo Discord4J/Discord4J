@@ -40,12 +40,12 @@ import java.util.stream.Collectors;
  */
 public class MessageBulkDeleteEvent extends MessageEvent {
 
-    private final List<Long> messageIds;
+    private final /*~~>*/List<Long> messageIds;
     private final long channelId;
     private final long guildId;
     private final Set<Message> messages;
 
-    public MessageBulkDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, List<Long> messageIds, long channelId, long guildId,
+    public MessageBulkDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, /*~~>*/List<Long> messageIds, long channelId, long guildId,
                                   Set<Message> messages) {
         super(gateway, shardInfo);
         this.messageIds = messageIds;

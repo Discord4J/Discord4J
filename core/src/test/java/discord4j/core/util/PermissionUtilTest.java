@@ -38,7 +38,7 @@ public class PermissionUtilTest {
     @Test
     public void testComputeBase() {
         PermissionSet everyonePerms = PermissionSet.of(SEND_MESSAGES);
-        List<PermissionSet> rolePerms = Arrays.asList(PermissionSet.of(BAN_MEMBERS, PRIORITY_SPEAKER), PermissionSet.of(MANAGE_ROLES));
+        /*~~>*/List<PermissionSet> rolePerms = Arrays.asList(PermissionSet.of(BAN_MEMBERS, PRIORITY_SPEAKER), PermissionSet.of(MANAGE_ROLES));
 
         PermissionSet actual = PermissionUtil.computeBasePermissions(everyonePerms, rolePerms);
         PermissionSet expected = PermissionSet.of(SEND_MESSAGES, BAN_MEMBERS, PRIORITY_SPEAKER, MANAGE_ROLES);
@@ -49,7 +49,7 @@ public class PermissionUtilTest {
     @Test
     public void testNoOverwritesYieldsOriginal() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
-        List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
+        /*~~>*/List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
 
         PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, null);
         PermissionSet expected = PermissionSet.of(SEND_MESSAGES);
@@ -60,7 +60,7 @@ public class PermissionUtilTest {
     @Test
     public void testRoleOverwriteAllows() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
-        List<PermissionOverwrite> roleOverwrites = Collections.singletonList(overwrite(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.none()));
+        /*~~>*/List<PermissionOverwrite> roleOverwrites = Collections.singletonList(overwrite(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.none()));
 
         PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, null);
         PermissionSet expected = PermissionSet.of(SEND_MESSAGES, PRIORITY_SPEAKER);
@@ -71,7 +71,7 @@ public class PermissionUtilTest {
     @Test
     public void testMemberOverwriteAllows() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
-        List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
+        /*~~>*/List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
         PermissionOverwrite memberOverwrite = overwrite(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.none());
 
         PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);
@@ -83,7 +83,7 @@ public class PermissionUtilTest {
     @Test
     public void testRoleOverwriteDenies() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
-        List<PermissionOverwrite> roleOverwrites = Collections.singletonList(overwrite(PermissionSet.none(), PermissionSet.of(SEND_MESSAGES)));
+        /*~~>*/List<PermissionOverwrite> roleOverwrites = Collections.singletonList(overwrite(PermissionSet.none(), PermissionSet.of(SEND_MESSAGES)));
 
         PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, null);
         PermissionSet expected = PermissionSet.none();
@@ -94,7 +94,7 @@ public class PermissionUtilTest {
     @Test
     public void testOverwriteAllowsAndDenies() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
-        List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
+        /*~~>*/List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
         PermissionOverwrite memberOverwrite = overwrite(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.of(SEND_MESSAGES));
 
         PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);
@@ -106,7 +106,7 @@ public class PermissionUtilTest {
     @Test
     public void testMemberOverwriteDenies() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
-        List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
+        /*~~>*/List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
         PermissionOverwrite memberOverwrite = overwrite(PermissionSet.none(), PermissionSet.of(SEND_MESSAGES));
 
         PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);
@@ -118,7 +118,7 @@ public class PermissionUtilTest {
     @Test
     public void testAdminGrantsAll() {
         PermissionSet base = PermissionSet.of(ADMINISTRATOR);
-        List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
+        /*~~>*/List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
 
         PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, null);
         PermissionSet expected = PermissionSet.all();
@@ -129,7 +129,7 @@ public class PermissionUtilTest {
     @Test
     public void testAdminBypassesOverwrites() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES, ADMINISTRATOR);
-        List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
+        /*~~>*/List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
         PermissionOverwrite memberOverwrite = overwrite(PermissionSet.none(), PermissionSet.of(SEND_MESSAGES));
 
         PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);

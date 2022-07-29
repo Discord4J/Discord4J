@@ -74,7 +74,7 @@ public class ExampleSoundboard {
         Map<Snowflake, GuildVoiceSupport> voiceGuildMap = new ConcurrentHashMap<>();
 
         // preemptively check for sources
-        List<LayoutComponent> buttons = getButtons();
+        /*~~>*/List<LayoutComponent> buttons = getButtons();
         if (buttons.isEmpty()) {
             return Mono.error(new RuntimeException("Please define at least 1 'sourceN' env variable (N up to 25)"));
         }
@@ -160,8 +160,8 @@ public class ExampleSoundboard {
                 .thenMany(Mono.when(onChatInputInteraction, onButtonInteraction));
     }
 
-    private static List<LayoutComponent> getButtons() {
-        List<Button> buttons = new ArrayList<>();
+    private static /*~~>*/List<LayoutComponent> getButtons() {
+        /*~~>*/List<Button> buttons = new ArrayList<>();
         for (int i = 1; i <= 25; i++) {
             String source = System.getenv("source" + i);
             if (source != null) {
@@ -170,7 +170,7 @@ public class ExampleSoundboard {
                 log.info("Source #{}: {}", i, source);
             }
         }
-        List<LayoutComponent> components = new ArrayList<>();
+        /*~~>*/List<LayoutComponent> components = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             int from = i * 5;
             int to = Math.min(buttons.size(), (i + 1) * 5);
@@ -181,7 +181,7 @@ public class ExampleSoundboard {
         return components;
     }
 
-    private static List<ApplicationCommandRequest> getCommandSources() {
+    private static /*~~>*/List<ApplicationCommandRequest> getCommandSources() {
         return Arrays.asList(
                 ApplicationCommandRequest.builder()
                         .name("join")

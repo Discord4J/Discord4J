@@ -202,7 +202,7 @@ public final class Embed implements DiscordObject {
      *
      * @return The field information.
      */
-    public List<Field> getFields() {
+    public /*~~>*/List<Field> getFields() {
         return data.fields().toOptional()
                 .map(fields -> fields.stream().map(Field::new).collect(Collectors.toList()))
                 .orElse(Collections.emptyList());

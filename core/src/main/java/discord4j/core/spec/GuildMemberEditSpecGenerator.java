@@ -45,7 +45,7 @@ interface GuildMemberEditSpecGenerator extends AuditSpec<GuildMemberModifyReques
 
     Possible<Optional<String>> nickname();
 
-    Possible<List<Snowflake>> roles();
+    Possible</*~~>*/List<Snowflake>> roles();
 
     Possible<Optional<Instant>> communicationDisabledUntil();
 
