@@ -182,7 +182,7 @@ public class ApplicationCommand implements DiscordObject {
      * @return {@code true} if the command is available in DM, {@code false} otherwise.
      */
     public boolean isAvailableInDM() {
-        return data.dmPermission().toOptional().orElse(this.getGuildId().isEmpty());
+        return data.dmPermission().toOptional().orElse(!this.getGuildId().isPresent());
     }
 
     @Override
