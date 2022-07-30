@@ -17,6 +17,7 @@
 
 package discord4j.core.event.dispatch;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.command.ApplicationCommandCreateEvent;
 import discord4j.core.event.domain.command.ApplicationCommandDeleteEvent;
@@ -34,7 +35,7 @@ class ApplicationCommandDispatchHandlers {
     static Mono<ApplicationCommandCreateEvent> applicationCommandCreate(DispatchContext<ApplicationCommandCreate, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         ShardInfo shardInfo = context.getShardInfo();
-        Long guildId = Long.parseLong(context.getDispatch().guildId());
+        Long guildId = Snowflake.asLong(context.getDispatch().guildId());
         ApplicationCommandData command = context.getDispatch().command();
 
         return Mono.just(new ApplicationCommandCreateEvent(gateway, shardInfo,
@@ -44,7 +45,7 @@ class ApplicationCommandDispatchHandlers {
     static Mono<ApplicationCommandUpdateEvent> applicationCommandUpdate(DispatchContext<ApplicationCommandUpdate, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         ShardInfo shardInfo = context.getShardInfo();
-        Long guildId = Long.parseLong(context.getDispatch().guildId());
+        Long guildId = Snowflake.asLong(context.getDispatch().guildId());
         ApplicationCommandData command = context.getDispatch().command();
 
         return Mono.just(new ApplicationCommandUpdateEvent(gateway, shardInfo,
@@ -54,7 +55,7 @@ class ApplicationCommandDispatchHandlers {
     static Mono<ApplicationCommandDeleteEvent> applicationCommandDelete(DispatchContext<ApplicationCommandDelete, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         ShardInfo shardInfo = context.getShardInfo();
-        Long guildId = Long.parseLong(context.getDispatch().guildId());
+        Long guildId = Snowflake.asLong(context.getDispatch().guildId());
         ApplicationCommandData command = context.getDispatch().command();
 
         return Mono.just(new ApplicationCommandDeleteEvent(gateway, shardInfo,
