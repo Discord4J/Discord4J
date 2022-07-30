@@ -244,7 +244,6 @@ public class DiscordOAuth2Server {
                         .stream().map(Cookie::value).findFirst().orElse("");
                 String state = query.parameters().getOrDefault("state", Collections.emptyList())
                         .stream().findFirst().orElse(null);
-                log.debug("{} vs {}", state, sessionToState.getOrDefault(sessionId, ""));
                 if (!Objects.equals(state, sessionToState.getOrDefault(sessionId, ""))) {
                     return res.status(HttpResponseStatus.BAD_REQUEST);
                 }
