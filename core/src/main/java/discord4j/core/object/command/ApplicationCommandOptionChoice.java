@@ -21,8 +21,13 @@ import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
+import discord4j.discordjson.possible.Possible;
 
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * A Discord application command option choice.
@@ -64,6 +69,19 @@ public class ApplicationCommandOptionChoice implements DiscordObject {
      */
     public String getName() {
         return data.name();
+    }
+
+    /**
+     * Gets the Locale and name of this choice.
+     *
+     * @return The locales and names of this choice.
+     */
+    public Map<Locale, String> getLocalizedNames() {
+        return Possible.flatOpt(data.nameLocalizations())
+                .orElse(Collections.emptyMap())
+                .entrySet().stream()
+                .collect(Collectors.toMap(entry -> new Locale.Builder().setLanguageTag(entry.getKey()).build(),
+                        Map.Entry::getValue));
     }
 
     /**

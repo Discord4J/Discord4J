@@ -22,14 +22,9 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.possible.Possible;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -87,8 +82,11 @@ public class ApplicationCommandOption implements DiscordObject {
      * @return The locales and names of the option.
      */
     public Map<Locale, String> getLocalizedNames() {
-        return data.nameLocalizations().toOptional().orElse(new HashMap<>())
-                .entrySet().stream().collect(Collectors.toMap(entry -> new Locale.Builder().setLanguageTag(entry.getKey()).build(), Map.Entry::getValue));
+        return Possible.flatOpt(data.nameLocalizations())
+                .orElse(Collections.emptyMap())
+                .entrySet().stream()
+                .collect(Collectors.toMap(entry -> new Locale.Builder().setLanguageTag(entry.getKey()).build(),
+                        Map.Entry::getValue));
     }
 
     /**
@@ -106,8 +104,11 @@ public class ApplicationCommandOption implements DiscordObject {
      * @return The locales and descriptions of the option.
      */
     public Map<Locale, String> getLocalizedDescriptions() {
-        return data.descriptionLocalizations().toOptional().orElse(new HashMap<>())
-                .entrySet().stream().collect(Collectors.toMap(entry -> new Locale.Builder().setLanguageTag(entry.getKey()).build(), Map.Entry::getValue));
+        return Possible.flatOpt(data.descriptionLocalizations())
+                .orElse(Collections.emptyMap())
+                .entrySet().stream()
+                .collect(Collectors.toMap(entry -> new Locale.Builder().setLanguageTag(entry.getKey()).build(),
+                        Map.Entry::getValue));
     }
 
     /**
