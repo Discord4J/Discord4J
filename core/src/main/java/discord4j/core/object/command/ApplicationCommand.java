@@ -22,6 +22,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.discordjson.json.ApplicationCommandData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.PermissionSet;
 
 import java.util.*;
@@ -121,8 +122,11 @@ public class ApplicationCommand implements DiscordObject {
      * @return The locales and names of the command.
      */
     public Map<Locale, String> getLocalizedNames() {
-        return data.nameLocalizations().toOptional().orElse(new HashMap<>())
-                .entrySet().stream().collect(Collectors.toMap(entry -> new Locale.Builder().setLanguageTag(entry.getKey()).build(), Map.Entry::getValue));
+        return Possible.flatOpt(data.nameLocalizations())
+                .orElse(Collections.emptyMap())
+                .entrySet().stream()
+                .collect(Collectors.toMap(entry -> new Locale.Builder().setLanguageTag(entry.getKey()).build(),
+                        Map.Entry::getValue));
     }
 
     /**
@@ -140,8 +144,11 @@ public class ApplicationCommand implements DiscordObject {
      * @return The locales and descriptions of the command.
      */
     public Map<Locale, String> getLocalizedDescriptions() {
-        return data.descriptionLocalizations().toOptional().orElse(new HashMap<>())
-                .entrySet().stream().collect(Collectors.toMap(entry -> new Locale.Builder().setLanguageTag(entry.getKey()).build(), Map.Entry::getValue));
+        return Possible.flatOpt(data.descriptionLocalizations())
+                .orElse(Collections.emptyMap())
+                .entrySet().stream()
+                .collect(Collectors.toMap(entry -> new Locale.Builder().setLanguageTag(entry.getKey()).build(),
+                        Map.Entry::getValue));
     }
 
     /**
