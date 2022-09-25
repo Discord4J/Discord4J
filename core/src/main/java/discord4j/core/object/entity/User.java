@@ -17,7 +17,6 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.Embed;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.util.EntityUtil;
@@ -32,7 +31,6 @@ import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.util.EnumSet;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
