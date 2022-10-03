@@ -21,6 +21,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.gateway.ShardInfo;
+import reactor.util.annotation.Nullable;
 
 @Experimental
 public class ThreadChannelDeleteEvent extends ThreadEvent {

@@ -176,6 +176,10 @@ public final class Store {
                         .getVoiceStateById(action.getGuildId(), action.getUserId()))
                 .map(GetStageInstanceByChannelIdAction.class, action -> dataAccessor
                         .getStageInstanceByChannelId(action.getChannelId()))
+                .map(GetThreadMemberByIdAction.class, action -> dataAccessor
+                        .getThreadMemberById(action.getThreadId(), action.getUserId()))
+                .map(GetMembersInThreadAction.class, action -> dataAccessor
+                        .getMembersInThread(action.getThreadId()))
                 .build();
     }
 

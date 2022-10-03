@@ -400,7 +400,7 @@ public interface GatewayDataUpdater {
 
     Mono<ChannelData> onThreadUpdate(int shardIndex, ThreadUpdate dispatch);
 
-    Mono<ChannelData> onThreadDelete(int shardIndex, ThreadDelete dispatch);
+    Mono<Void> onThreadDelete(int shardIndex, ThreadDelete dispatch);
 
     Mono<Void> onThreadListSync(int shardIndex, ThreadListSync dispatch);
 

@@ -15,20 +15,19 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.common.store.action.gateway;
+package discord4j.common.store.action.read;
 
+import discord4j.common.store.api.StoreAction;
 import discord4j.discordjson.json.ThreadMemberData;
-import discord4j.discordjson.json.gateway.ThreadMemberUpdate;
 
-public class ThreadMemberUpdateAction extends ShardAwareAction<ThreadMemberData> {
-    private final ThreadMemberUpdate threadMemberUpdate;
+public class GetMembersInThreadAction implements StoreAction<ThreadMemberData> {
+    private final long threadId;
 
-    ThreadMemberUpdateAction(int shardIndex, ThreadMemberUpdate threadMemberUpdate) {
-        super(shardIndex);
-        this.threadMemberUpdate = threadMemberUpdate;
+    GetMembersInThreadAction(long threadId) {
+        this.threadId = threadId;
     }
 
-    public ThreadMemberUpdate getThreadMemberUpdate() {
-        return threadMemberUpdate;
+    public long getThreadId() {
+        return threadId;
     }
 }

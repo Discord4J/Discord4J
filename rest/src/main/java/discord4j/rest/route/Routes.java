@@ -372,6 +372,8 @@ public abstract class Routes {
 
     public static final Route REMOVE_THREAD_MEMBER = Route.delete("/channels/{channel.id}/thread-members/{user.id}");
 
+    public static final Route GET_THREAD_MEMBER = Route.get("/channels/{channel.id}/thread-members/{user.id}");
+
     public static final Route LIST_THREAD_MEMBERS = Route.get("/channels/{channel.id}/thread-members");
 
     public static final Route LIST_ACTIVE_THREADS = Route.get("/channels/{channel.id}/threads/active");
@@ -1183,5 +1185,4 @@ public abstract class Routes {
     public static final Route MODIFY_STAGE_INSTANCE = Route.patch("/stage-instances/{channel.id}");
 
     public static final Route DELETE_STAGE_INSTANCE = Route.delete("/stage-instances/{channel.id}");
-
 }

@@ -341,6 +341,17 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         return stateHolder.getStageInstanceStore().find(channelId);
     }
 
+    @Override
+    public Mono<ThreadMemberData> getThreadMemberById(long threadId, long userId) {
+        return stateHolder.getThreadMemberStore().find(LongLongTuple2.of(threadId, userId));
+    }
+
+    @Override
+    public Flux<ThreadMemberData> getMembersInThread(long threadId) {
+        return stateHolder.getThreadMemberStore()
+                .findInRange(LongLongTuple2.of(threadId, 0), LongLongTuple2.of(threadId, Long.MAX_VALUE));
+    }
+
     /////////////////////////////////////////////////////////////////////////////
     //// Command model methods
     /////////////////////////////////////////////////////////////////////////////
@@ -609,6 +620,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                             .deleteInRange(LongLongTuple2.of(guildId, 0), LongLongTuple2.of(guildId, -1));
                     // TODO delete messages
                     // TODO delete no longer visible users
+                    // TODO delete thread members
                     Mono<Void> deleteVoiceStates = stateHolder.getVoiceStateStore()
                             .deleteInRange(LongLongTuple2.of(guildId, 0), LongLongTuple2.of(guildId, -1));
                     Mono<Void> deletePresences = stateHolder.getPresenceStore()
@@ -1277,8 +1289,15 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     }
 
     @Override
-    public Mono<ChannelData> onThreadDelete(int shardIndex, ThreadDelete dispatch) {
-        return deleteChannel(dispatch.thread());
+    public Mono<Void> onThreadDelete(int shardIndex, ThreadDelete dispatch) {
+        long threadId = Snowflake.asLong(dispatch.thread().id());
+        Mono<Void> deleteThread = stateHolder.getChannelStore()
+                .delete(threadId);
+
+        Mono<Void> deleteThreadMembers = stateHolder.getThreadMemberStore()
+                .deleteInRange(LongLongTuple2.of(threadId, 0), LongLongTuple2.of(threadId, -1));
+
+        return deleteThread.and(deleteThreadMembers);
     }
 
     @Override

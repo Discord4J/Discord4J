@@ -756,6 +756,18 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     }
 
     @Override
+    public Mono<ThreadMemberData> getThreadMemberById(long threadId, long userId) {
+        return Mono.fromSupplier(() -> threadMembers.get(new Long2(threadId, userId)));
+    }
+
+    @Override
+    public Flux<ThreadMemberData> getMembersInThread(long threadId) {
+        return Mono.fromSupplier(() -> contentByChannel.get(threadId))
+                .flatMapIterable(c -> c.threadMembersIds)
+                .map(threadMembers::get);
+    }
+
+    @Override
     public Mono<UserData> onUserUpdate(int shardIndex, UserUpdate dispatch) {
         return Mono.fromCallable(() -> ifNonNullMap(
                 users.get(dispatch.user().id().asLong()),
@@ -789,7 +801,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     }
 
     @Override
-    public Mono<ChannelData> onThreadDelete(int shardIndex, ThreadDelete dispatch) {
+    public Mono<Void> onThreadDelete(int shardIndex, ThreadDelete dispatch) {
         ChannelData data = dispatch.thread();
         return Mono.fromRunnable(() -> data.guildId().toOptional()
                 .map(Id::asLong)
@@ -799,7 +811,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                     guildContent.channelIds.remove(channelId.asLong());
                     ifNonNullDo(contentByChannel.get(channelId.asLong()), ChannelContent::dispose);
                     ifNonNullDo(guilds.get(guildId), guild -> guild.getChannels().remove(channelId));
-                })).thenReturn(data);
+                }));
     }
 
     @Override
