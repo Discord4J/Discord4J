@@ -288,13 +288,6 @@ public class ChannelService extends RestService {
                 .flatMapMany(Flux::fromArray);
     }
 
-    // TODO is this not paginated?
-    public Mono<ListThreadsData> listActiveThreads(long channelId) {
-        return Routes.LIST_ACTIVE_THREADS.newRequest(channelId)
-                .exchange(getRouter())
-                .bodyToMono(ListThreadsData.class);
-    }
-
     public Mono<ListThreadsData> listPublicArchivedThreads(long channelId, Map<String, Object> queryParams) {
         return Routes.LIST_PUBLIC_ARCHIVED_THREADS.newRequest(channelId)
                 .query(queryParams)

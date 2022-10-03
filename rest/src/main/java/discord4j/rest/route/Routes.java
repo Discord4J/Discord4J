@@ -376,8 +376,6 @@ public abstract class Routes {
 
     public static final Route LIST_THREAD_MEMBERS = Route.get("/channels/{channel.id}/thread-members");
 
-    public static final Route LIST_ACTIVE_THREADS = Route.get("/channels/{channel.id}/threads/active");
-
     public static final Route LIST_PUBLIC_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/threads/archived/public");
 
     public static final Route LIST_PRIVATE_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/threads/archived/private");
