@@ -245,6 +245,18 @@ public final class Store {
                         .onVoiceStateUpdateDispatch(action.getShardIndex(), action.getVoiceStateUpdateDispatch()))
                 .map(CompleteGuildMembersAction.class, action -> gatewayDataUpdater
                         .onGuildMembersCompletion(action.getGuildId()))
+                .map(ThreadCreateAction.class, action -> gatewayDataUpdater
+                        .onThreadCreate(action.getShardIndex(), action.getThreadCreate()))
+                .map(ThreadUpdateAction.class, action -> gatewayDataUpdater
+                        .onThreadUpdate(action.getShardIndex(), action.getThreadUpdate()))
+                .map(ThreadDeleteAction.class, action -> gatewayDataUpdater
+                        .onThreadDelete(action.getShardIndex(), action.getThreadDelete()))
+                .map(ThreadListSyncAction.class, action -> gatewayDataUpdater
+                        .onThreadListSync(action.getShardIndex(), action.getThreadListSync()))
+                .map(ThreadMemberUpdateAction.class, action -> gatewayDataUpdater
+                        .onThreadMemberUpdate(action.getShardIndex(), action.getThreadMemberUpdate()))
+                .map(ThreadMembersUpdateAction.class, action -> gatewayDataUpdater
+                        .onThreadMembersUpdate(action.getShardIndex(), action.getThreadMembersUpdate()))
                 .build();
     }
 

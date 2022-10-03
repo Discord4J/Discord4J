@@ -21,8 +21,10 @@ import discord4j.common.store.api.object.InvalidationCause;
 import discord4j.common.store.api.object.PresenceAndUserData;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -393,4 +395,16 @@ public interface GatewayDataUpdater {
      * @return a {@link Mono} completing when the operation is done
      */
     Mono<Void> onGuildMembersCompletion(long guildId);
+
+    Mono<Void> onThreadCreate(int shardIndex, ThreadCreate dispatch);
+
+    Mono<ChannelData> onThreadUpdate(int shardIndex, ThreadUpdate dispatch);
+
+    Mono<ChannelData> onThreadDelete(int shardIndex, ThreadDelete dispatch);
+
+    Mono<Void> onThreadListSync(int shardIndex, ThreadListSync dispatch);
+
+    Mono<ThreadMemberData> onThreadMemberUpdate(int shardIndex, ThreadMemberUpdate dispatch);
+
+    Mono<List<ThreadMemberData>> onThreadMembersUpdate(int shardIndex, ThreadMembersUpdate dispatch);
 }

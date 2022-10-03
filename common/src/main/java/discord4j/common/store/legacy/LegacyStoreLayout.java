@@ -354,16 +354,14 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_CATEGORY:
             case GUILD_NEWS:
             case GUILD_STORE:
-            case GUILD_STAGE_VOICE: return saveChannel(dispatch);
+            case GUILD_STAGE_VOICE: return saveChannel(dispatch.channel());
             case DM:
             case GROUP_DM: return Mono.empty();
             default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
         }
     }
 
-    private Mono<Void> saveChannel(ChannelCreate dispatch) {
-        ChannelData channel = dispatch.channel();
-
+    private Mono<Void> saveChannel(ChannelData channel) {
         Mono<Void> addChannelToGuild = stateHolder.getGuildStore()
                 .find(Snowflake.asLong(channel.guildId().get()))
                 .map(guildData -> GuildData.builder()
@@ -387,16 +385,14 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_CATEGORY:
             case GUILD_NEWS:
             case GUILD_STORE:
-            case GUILD_STAGE_VOICE: return deleteChannel(dispatch);
+            case GUILD_STAGE_VOICE: return deleteChannel(dispatch.channel());
             case DM:
             case GROUP_DM: return Mono.empty();
             default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
         }
     }
 
-    private Mono<ChannelData> deleteChannel(ChannelDelete dispatch) {
-        ChannelData channel = dispatch.channel();
-
+    private Mono<ChannelData> deleteChannel(ChannelData channel) {
         Mono<Void> removeChannelFromGuild = stateHolder.getGuildStore()
                 .find(Snowflake.asLong(channel.guildId().get()))
                 .map(guildData -> GuildData.builder()
@@ -420,7 +416,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_CATEGORY:
             case GUILD_NEWS:
             case GUILD_STORE:
-            case GUILD_STAGE_VOICE: return updateChannel(dispatch);
+            case GUILD_STAGE_VOICE: return updateChannel(dispatch.channel());
             case DM:
             case GROUP_DM: return Mono.empty();
             default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
@@ -463,9 +459,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         }
     }
 
-    private Mono<ChannelData> updateChannel(ChannelUpdate dispatch) {
-        ChannelData channel = dispatch.channel();
-
+    private Mono<ChannelData> updateChannel(ChannelData channel) {
         Mono<Void> saveNew = stateHolder.getChannelStore().save(Snowflake.asLong(channel.id()), channel);
 
         return stateHolder.getChannelStore()
@@ -1270,5 +1264,70 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     public Mono<Void> onGuildMembersCompletion(long guildId) {
         // TODO needs implementation
         return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> onThreadCreate(int shardIndex, ThreadCreate dispatch) {
+        return Mono.fromRunnable(() -> saveChannel(dispatch.thread()));
+    }
+
+    @Override
+    public Mono<ChannelData> onThreadUpdate(int shardIndex, ThreadUpdate dispatch) {
+        return updateChannel(dispatch.thread());
+    }
+
+    @Override
+    public Mono<ChannelData> onThreadDelete(int shardIndex, ThreadDelete dispatch) {
+        return deleteChannel(dispatch.thread());
+    }
+
+    @Override
+    public Mono<Void> onThreadListSync(int shardIndex, ThreadListSync dispatch) {
+
+        Mono<Void> saveThreads = Flux.fromIterable(dispatch.threads())
+                .flatMap(this::saveChannel)
+                .then();
+
+        Mono<Void> saveThreadMembers = Flux.fromIterable(dispatch.members())
+                .flatMap(this::updateThreadMember)
+                .then();
+
+        return saveThreads.and(saveThreadMembers);
+    }
+
+    @Override
+    public Mono<ThreadMemberData> onThreadMemberUpdate(int shardIndex, ThreadMemberUpdate dispatch) {
+        return updateThreadMember(dispatch.member());
+    }
+
+    @Override
+    public Mono<List<ThreadMemberData>> onThreadMembersUpdate(int shardIndex, ThreadMembersUpdate dispatch) {
+        Mono<Void> addThreadMembers = Flux.fromIterable(dispatch.addedMembers())
+                .flatMap(this::updateThreadMember)
+                .then();
+
+        long threadId = dispatch.id().asLong();
+        Mono<List<ThreadMemberData>> removeThreadMembers = Flux.fromIterable(dispatch.removedMemberIds())
+                .map(id -> LongLongTuple2.of(threadId, id.asLong()))
+                .flatMap(id -> {
+                    Mono<Void> delete = stateHolder.getThreadMemberStore().delete(id);
+
+                    return stateHolder.getThreadMemberStore().find(id)
+                            .flatMap(delete::thenReturn)
+                            .switchIfEmpty(delete.then(Mono.empty()));
+                })
+                .collectList();
+
+        return addThreadMembers.then(removeThreadMembers);
+    }
+
+    private Mono<ThreadMemberData> updateThreadMember(ThreadMemberData data) {
+
+        LongLongTuple2 id = LongLongTuple2.of(data.id().get().asLong(), data.userId().get().asLong());
+        Mono<Void> saveNew = stateHolder.getThreadMemberStore().save(id, data);
+
+        return stateHolder.getThreadMemberStore().find(id)
+                .flatMap(saveNew::thenReturn)
+                .switchIfEmpty(saveNew.then(Mono.empty()));
     }
 }
