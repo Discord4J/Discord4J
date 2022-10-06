@@ -457,7 +457,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             emojis.forEach(emoji -> saveEmoji(guildId, emoji));
             members.forEach(member -> saveMember(guildId, member));
             channels.forEach(channel -> saveChannel(guildId, channel));
-            threads.forEach(channel -> saveChannel(guildId, channel));
+            threads.forEach(channel -> this.channels.put(guildId, ImmutableChannelData.copyOf(channel)));
             presences.forEach(presence -> savePresence(guildId, presence));
             voiceStates.forEach(voiceState -> saveOrRemoveVoiceState(guildId, voiceState));
         });
@@ -757,12 +757,12 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<ThreadMemberData> getThreadMemberById(long threadId, long userId) {
-        return Mono.fromSupplier(() -> threadMembers.get(new Long2(threadId, userId)));
+        return Mono.justOrEmpty(threadMembers.get(new Long2(threadId, userId)));
     }
 
     @Override
     public Flux<ThreadMemberData> getMembersInThread(long threadId) {
-        return Mono.fromSupplier(() -> contentByChannel.get(threadId))
+        return Mono.justOrEmpty(contentByChannel.get(threadId))
                 .flatMapIterable(c -> c.threadMembersIds)
                 .map(threadMembers::get);
     }
@@ -789,36 +789,26 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<Void> onThreadCreate(int shardIndex, ThreadCreate dispatch) {
-        return Mono.fromRunnable(() -> dispatch.thread().guildId().toOptional()
-                .ifPresent(guildId -> saveChannel(guildId.asLong(), dispatch.thread())));
+        long channelId = dispatch.thread().id().asLong();
+        return Mono.fromRunnable(() -> channels.put(channelId, ImmutableChannelData.copyOf(dispatch.thread())));
     }
 
     @Override
     public Mono<ChannelData> onThreadUpdate(int shardIndex, ThreadUpdate dispatch) {
-        return Mono.fromCallable(() -> dispatch.thread().guildId().toOptional()
-                .map(guildId -> saveChannel(guildId.asLong(), dispatch.thread()))
-                .orElse(null));
+        long channelId = dispatch.thread().id().asLong();
+        return Mono.justOrEmpty(channels.put(channelId, ImmutableChannelData.copyOf(dispatch.thread())));
     }
 
     @Override
     public Mono<Void> onThreadDelete(int shardIndex, ThreadDelete dispatch) {
-        ChannelData data = dispatch.thread();
-        return Mono.fromRunnable(() -> data.guildId().toOptional()
-                .map(Id::asLong)
-                .ifPresent(guildId -> {
-                    Id channelId = data.id();
-                    GuildContent guildContent = computeGuildContent(guildId);
-                    guildContent.channelIds.remove(channelId.asLong());
-                    ifNonNullDo(contentByChannel.get(channelId.asLong()), ChannelContent::dispose);
-                    ifNonNullDo(guilds.get(guildId), guild -> guild.getChannels().remove(channelId));
-                }));
+        long channelId = dispatch.thread().id().asLong();
+        return Mono.fromRunnable(() -> ifNonNullDo(contentByChannel.get(channelId), ChannelContent::dispose));
     }
 
     @Override
     public Mono<Void> onThreadListSync(int shardIndex, ThreadListSync dispatch) {
         return Mono.fromRunnable(() -> {
-            long guildId = dispatch.guildId().asLong();
-            dispatch.threads().forEach(thread -> saveChannel(guildId, thread));
+            dispatch.threads().forEach(thread -> channels.put(thread.id().asLong(), ImmutableChannelData.copyOf(thread)));
             dispatch.members().forEach(member -> saveThreadMember(member));
         });
     }
