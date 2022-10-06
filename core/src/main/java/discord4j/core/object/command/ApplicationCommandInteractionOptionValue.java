@@ -21,9 +21,11 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
+import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
+import discord4j.discordjson.json.ApplicationCommandInteractionResolvedData;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -41,13 +43,17 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
     private final Long guildId;
     private final int type;
     private final String value;
+    @Nullable
+    private final ApplicationCommandInteractionResolvedData resolved;
 
     public ApplicationCommandInteractionOptionValue(final GatewayDiscordClient gateway, @Nullable final Long guildId,
-                                                    final int type, final String value) {
+                                                    final int type, final String value,
+                                                    @Nullable final ApplicationCommandInteractionResolvedData resolved) {
         this.gateway = gateway;
         this.guildId = guildId;
         this.value = value;
         this.type = type;
+        this.resolved = resolved;
     }
 
     public String getRaw() {
@@ -94,6 +100,13 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
         return getValueAs("channel",
                 value -> getClient().getChannelById(Snowflake.of(value)),
                 ApplicationCommandOption.Type.CHANNEL);
+    }
+
+    public Attachment asAttachment() {
+        return getValueAs("attachment",
+                value -> new Attachment(getClient(), Objects.requireNonNull(resolved)
+                        .attachments().get().get(value)),
+                ApplicationCommandOption.Type.ATTACHMENT);
     }
 
     private <T> T getValueAs(String parsedTypeName, Function<String, T> parser,

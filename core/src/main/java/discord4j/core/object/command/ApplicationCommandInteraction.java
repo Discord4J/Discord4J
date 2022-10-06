@@ -119,7 +119,8 @@ public class ApplicationCommandInteraction implements DiscordObject {
      */
     public List<ApplicationCommandInteractionOption> getOptions() {
         return data.options().toOptional().orElse(Collections.emptyList()).stream()
-                .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId))
+                .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId,
+                        this.data.resolved().toOptional().orElse(null)))
                 .collect(Collectors.toList());
     }
 
