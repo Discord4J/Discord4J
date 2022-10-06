@@ -831,6 +831,8 @@ public abstract class Routes {
      */
     public static final Route OTHERS_VOICE_STATE_MODIFY = Route.patch("/guilds/{guild.id}/voice-states/{user.id}");
 
+    public static final Route LIST_ACTIVE_GUILD_THREADS = Route.get("/guilds/{guild.id}/threads/active");
+
     /////////////////////////////////////////////
     ////////////// Invite Resource //////////////
     /////////////////////////////////////////////

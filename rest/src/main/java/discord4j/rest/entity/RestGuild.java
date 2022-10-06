@@ -329,6 +329,10 @@ public class RestGuild {
         return restClient.getTemplateService().getTemplates(id);
     }
 
+    public Mono<ListThreadsData> getActiveThreads() {
+        return restClient.getGuildService().listActiveGuildThreads(id);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
