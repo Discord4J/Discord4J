@@ -300,7 +300,7 @@ public class User implements Entity {
      * @return A {@code EnumSet} with the public flags of this user.
      */
     public EnumSet<Flag> getPublicFlags() {
-        int publicFlags = data.publicFlags().toOptional().orElse(0);
+        long publicFlags = data.publicFlags().toOptional().orElse(0L);
         if (publicFlags != 0) {
             return Flag.of(publicFlags);
         }
@@ -388,7 +388,7 @@ public class User implements Entity {
          * @param value The flags value as represented by Discord.
          * @return The {@link EnumSet} of flags.
          */
-        public static EnumSet<Flag> of(final int value) {
+        public static EnumSet<Flag> of(final long value) {
             final EnumSet<Flag> userFlags = EnumSet.noneOf(Flag.class);
             for (Flag flag : Flag.values()) {
                 long flagValue = flag.getFlag();
