@@ -365,14 +365,16 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_CATEGORY:
             case GUILD_NEWS:
             case GUILD_STORE:
-            case GUILD_STAGE_VOICE: return saveChannel(dispatch.channel());
+            case GUILD_STAGE_VOICE: return saveChannel(dispatch);
             case DM:
             case GROUP_DM: return Mono.empty();
             default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
         }
     }
 
-    private Mono<Void> saveChannel(ChannelData channel) {
+    private Mono<Void> saveChannel(ChannelCreate data) {
+        ChannelData channel = data.channel();
+
         Mono<Void> addChannelToGuild = stateHolder.getGuildStore()
                 .find(Snowflake.asLong(channel.guildId().get()))
                 .map(guildData -> GuildData.builder()
@@ -396,14 +398,16 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_CATEGORY:
             case GUILD_NEWS:
             case GUILD_STORE:
-            case GUILD_STAGE_VOICE: return deleteChannel(dispatch.channel());
+            case GUILD_STAGE_VOICE: return deleteChannel(dispatch);
             case DM:
             case GROUP_DM: return Mono.empty();
             default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
         }
     }
 
-    private Mono<ChannelData> deleteChannel(ChannelData channel) {
+    private Mono<ChannelData> deleteChannel(ChannelDelete data) {
+        ChannelData channel = data.channel();
+
         Mono<Void> removeChannelFromGuild = stateHolder.getGuildStore()
                 .find(Snowflake.asLong(channel.guildId().get()))
                 .map(guildData -> GuildData.builder()
@@ -443,6 +447,9 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         GUILD_CATEGORY(4),
         GUILD_NEWS(5),
         GUILD_STORE(6),
+        GUILD_NEWS_THREAD(10),
+        GUILD_PUBLIC_THREAD(11),
+        GUILD_PRIVATE_THREAD(12),
         GUILD_STAGE_VOICE(13);
 
         private final int value;
@@ -464,6 +471,9 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 case 4: return GUILD_CATEGORY;
                 case 5: return GUILD_NEWS;
                 case 6: return GUILD_STORE;
+                case 10: return GUILD_NEWS_THREAD;
+                case 11: return GUILD_PUBLIC_THREAD;
+                case 12: return GUILD_PRIVATE_THREAD;
                 case 13: return GUILD_STAGE_VOICE;
                 default: return UNKNOWN;
             }
@@ -549,6 +559,10 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                                         .guildId(guild.id())
                                         .build())));
 
+        Mono<Void> saveThreads = stateHolder.getChannelStore()
+                .save(Flux.fromIterable(createData.threads())
+                        .map(thread -> Tuples.of(Snowflake.asLong(thread.id()), thread)));
+
         Mono<Void> savePresences = stateHolder.getPresenceStore()
                 .save(Flux.fromIterable(createData.presences())
                         .map(presence -> Tuples.of(LongLongTuple2.of(guildId,
@@ -571,6 +585,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .and(saveMembers)
                 .and(saveUsers)
                 .and(saveVoiceStates)
+                .and(saveThreads)
                 .and(savePresences)
                 .and(saveOfflinePresences);
     }
@@ -1280,7 +1295,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
     @Override
     public Mono<Void> onThreadCreate(int shardIndex, ThreadCreate dispatch) {
-        return Mono.fromRunnable(() -> saveChannel(dispatch.thread()));
+        return stateHolder.getChannelStore()
+                .save(dispatch.thread().id().asLong(), dispatch.thread());
     }
 
     @Override
@@ -1304,11 +1320,14 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     public Mono<Void> onThreadListSync(int shardIndex, ThreadListSync dispatch) {
 
         Mono<Void> saveThreads = Flux.fromIterable(dispatch.threads())
-                .flatMap(this::saveChannel)
+                .flatMap(thread -> stateHolder.getChannelStore().save(thread.id().asLong(), thread))
                 .then();
 
         Mono<Void> saveThreadMembers = Flux.fromIterable(dispatch.members())
-                .flatMap(this::updateThreadMember)
+                .flatMap(threadMember -> {
+                    LongLongTuple2 id = LongLongTuple2.of(threadMember.id().get().asLong(), threadMember.userId().get().asLong());
+                    return stateHolder.getThreadMemberStore().save(id, threadMember);
+                })
                 .then();
 
         return saveThreads.and(saveThreadMembers);
@@ -1316,13 +1335,23 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
     @Override
     public Mono<ThreadMemberData> onThreadMemberUpdate(int shardIndex, ThreadMemberUpdate dispatch) {
-        return updateThreadMember(dispatch.member());
+        ThreadMemberData member = dispatch.member();
+        LongLongTuple2 id = LongLongTuple2.of(member.id().get().asLong(), member.userId().get().asLong());
+
+        Mono<Void> saveNew = stateHolder.getThreadMemberStore().save(id, member);
+
+        return stateHolder.getThreadMemberStore().find(id)
+                .flatMap(saveNew::thenReturn)
+                .switchIfEmpty(saveNew.then(Mono.empty()));
     }
 
     @Override
     public Mono<List<ThreadMemberData>> onThreadMembersUpdate(int shardIndex, ThreadMembersUpdate dispatch) {
         Mono<Void> addThreadMembers = Flux.fromIterable(dispatch.addedMembers())
-                .flatMap(this::updateThreadMember)
+                .flatMap(threadMember -> {
+                    LongLongTuple2 id = LongLongTuple2.of(threadMember.id().get().asLong(), threadMember.userId().get().asLong());
+                    return stateHolder.getThreadMemberStore().save(id, threadMember);
+                })
                 .then();
 
         long threadId = dispatch.id().asLong();
@@ -1338,15 +1367,5 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .collectList();
 
         return addThreadMembers.then(removeThreadMembers);
-    }
-
-    private Mono<ThreadMemberData> updateThreadMember(ThreadMemberData data) {
-
-        LongLongTuple2 id = LongLongTuple2.of(data.id().get().asLong(), data.userId().get().asLong());
-        Mono<Void> saveNew = stateHolder.getThreadMemberStore().save(id, data);
-
-        return stateHolder.getThreadMemberStore().find(id)
-                .flatMap(saveNew::thenReturn)
-                .switchIfEmpty(saveNew.then(Mono.empty()));
     }
 }
