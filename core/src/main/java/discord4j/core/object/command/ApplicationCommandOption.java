@@ -139,9 +139,10 @@ public class ApplicationCommandOption implements DiscordObject {
      * @return The choice corresponding to the provided name, if present.
      */
     public Optional<ApplicationCommandOptionChoice> getChoice(final String name) {
-        return getChoices().stream()
-                .filter(choice -> choice.getName().equals(name))
-                .findFirst();
+        return data.choices().toOptional().orElse(Collections.emptyList()).stream()
+                .filter(choice -> choice.name().equals(name))
+                .findFirst()
+                .map(data -> new ApplicationCommandOptionChoice(gateway, data));
     }
 
     /**
@@ -165,9 +166,10 @@ public class ApplicationCommandOption implements DiscordObject {
      * subcommand group type.
      */
     public Optional<ApplicationCommandOption> getOption(final String name) {
-        return getOptions().stream()
-                .filter(option -> option.getName().equals(name))
-                .findFirst();
+        return data.options().toOptional().orElse(Collections.emptyList()).stream()
+                .filter(option -> option.name().equals(name))
+                .findFirst()
+                .map(data -> new ApplicationCommandOption(gateway, data));
     }
 
     /**
