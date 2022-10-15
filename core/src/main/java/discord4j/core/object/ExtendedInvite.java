@@ -66,11 +66,11 @@ public final class ExtendedInvite extends Invite {
     /**
      * Gets the instant this invite expires, if possible.
      *
-     * @return The instant this invite expires, if possible.
+     * @return The instant this invite expires, if empty, invite is never expiring.
      */
     public Optional<Instant> getExpiration() {
         final int maxAge = getData().maxAge().toOptional().orElseThrow(IllegalStateException::new);
-        return Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS));
+        return maxAge > 0 ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)): Optional.empty();
     }
 
     /**
