@@ -69,10 +69,17 @@ public final class ExtendedInvite extends Invite {
      * @return The instant this invite expires, if possible.
      */
     public Optional<Instant> getExpiration() {
-        final boolean temporary = getData().temporary().toOptional().orElse(false);
         final int maxAge = getData().maxAge().toOptional().orElseThrow(IllegalStateException::new);
+        return Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS));
+    }
 
-        return temporary ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)) : Optional.empty();
+    /**
+     * Gets the temporary member status of the joined user
+     * @return true if the invite only grant temporary membership
+     */
+    public boolean isTemporary() {
+        return getData().temporary().toOptional()
+            .orElseThrow(IllegalStateException::new);
     }
 
     /**
