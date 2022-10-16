@@ -274,6 +274,10 @@ public class DispatchHandlers implements DispatchEventMapper {
                     case BUTTON:
                         return Mono.just(new ButtonInteractionEvent(gateway, context.getShardInfo(), interaction));
                     case SELECT_MENU:
+                    case SELECT_MENU_ROLE:
+                    case SELECT_MENU_USER:
+                    case SELECT_MENU_MENTIONABLE:
+                    case SELECT_MENU_CHANNEL:
                         return Mono.just(new SelectMenuInteractionEvent(gateway, context.getShardInfo(), interaction));
                     default:
                         return Mono.just(new ComponentInteractionEvent(gateway, context.getShardInfo(), interaction));

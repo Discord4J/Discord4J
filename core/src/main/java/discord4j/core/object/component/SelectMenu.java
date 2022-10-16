@@ -16,14 +16,16 @@
  */
 package discord4j.core.object.component;
 
+import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.json.ImmutableComponentData;
 import discord4j.discordjson.json.SelectOptionData;
+import reactor.util.annotation.Nullable;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * A message select menu.
@@ -33,29 +35,85 @@ import java.util.stream.Collectors;
 public class SelectMenu extends ActionComponent {
 
     /**
-     * Creates a select menu.
+     * Creates a string select menu.
      *
      * @param customId A developer-defined identifier for the select menu.
      * @param options The options that can be selected in the menu.
      * @return A select menu with the given data.
      */
     public static SelectMenu of(String customId, Option... options) {
-        return of(customId, Arrays.asList(options));
+        return of(Type.SELECT_MENU, customId, Arrays.asList(options), null);
     }
 
     /**
-     * Creates a select menu.
+     * Creates a string select menu.
      *
      * @param customId A developer-defined identifier for the select menu.
      * @param options The options that can be selected in the menu.
      * @return A select menu with the given data.
      */
     public static SelectMenu of(String customId, List<Option> options) {
-        return new SelectMenu(ComponentData.builder()
-                .type(Type.SELECT_MENU.getValue())
-                .customId(customId)
-                .options(options.stream().map(opt -> opt.data).collect(Collectors.toList()))
-                .build());
+        Objects.requireNonNull(options);
+        return of(Type.SELECT_MENU, customId, options, null);
+    }
+
+    /**
+     * Creates a role select menu.
+     *
+     * @param customId A developer-defined identifier for the select menu.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofRole(String customId) {
+        return of(Type.SELECT_MENU_ROLE, customId, null, null);
+    }
+
+    /**
+     * Creates a user select menu.
+     *
+     * @param customId A developer-defined identifier for the select menu.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofUser(String customId) {
+        return of(Type.SELECT_MENU_USER, customId, null, null);
+    }
+
+    /**
+     * Creates a mentionable select menu.
+     *
+     * @param customId A developer-defined identifier for the select menu.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofMentionable(String customId) {
+        return of(Type.SELECT_MENU_MENTIONABLE, customId, null, null);
+    }
+
+    /**
+     * Creates a channel select menu.
+     *
+     * @param customId A developer-defined identifier for the select menu.
+     * @param channelTypes The allowed channel types.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofChannel(String customId, List<Channel.Type> channelTypes) {
+        return of(Type.SELECT_MENU_CHANNEL, customId, null, channelTypes);
+    }
+
+    private static SelectMenu of(Type type, String customId, @Nullable List<Option> options, @Nullable List<Channel.Type> channelTypes) {
+        ImmutableComponentData.Builder builder = ComponentData.builder()
+                .type(type.getValue())
+                .customId(customId);
+
+        if (options != null) {
+            builder.options(options.stream().map(opt -> opt.data).collect(Collectors.toList()));
+        }
+
+        if (channelTypes != null) {
+            builder.channelTypes(channelTypes.stream()
+                    .map(Channel.Type::getValue)
+                    .collect(Collectors.toList()));
+        }
+
+        return new SelectMenu(builder.build());
     }
 
     SelectMenu(ComponentData data) {
@@ -78,6 +136,20 @@ public class SelectMenu extends ActionComponent {
      */
     public Optional<List<String>> getValues() {
         return getData().values().toOptional();
+    }
+
+    /**
+     * Returns a set of acceptable channel types the user may select.
+     * Only applies to {@link Type#SELECT_MENU_CHANNEL} type menus, if empty, no restriction on channel types is placed.
+     *
+     * @return A set of channel types a user may select. Empty set means no restriction is applied.
+     */
+    public Set<Channel.Type> getAllowedChannelTypes() {
+        return getData().channelTypes().toOptional()
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(Channel.Type::of)
+                .collect(Collectors.toCollection(() -> EnumSet.noneOf(Channel.Type.class)));
     }
 
     /**
@@ -108,15 +180,14 @@ public class SelectMenu extends ActionComponent {
     }
 
     /**
-     * Gets the options that can be selected in the menu.
+     * Gets the options that can be selected in the menu. List can be empty
+     * if {@link #getType() type} of select menu is not {@link MessageComponent.Type#SELECT_MENU}
      *
      * @return The options that can be selected in the menu.
      */
     public List<Option> getOptions() {
-        // should always be present for select menus
-        List<SelectOptionData> options = getData().options().toOptional().orElseThrow(IllegalStateException::new);
-
-        return options.stream()
+        return getData().options().toOptional()
+                .orElse(Collections.emptyList()).stream()
                 .map(Option::new)
                 .collect(Collectors.toList());
     }
@@ -178,6 +249,42 @@ public class SelectMenu extends ActionComponent {
      */
     public SelectMenu withMaxValues(int maxValues) {
         return new SelectMenu(ComponentData.builder().from(getData()).maxValues(maxValues).build());
+    }
+
+    /**
+     * Creates a new select menu with the same data as this one, but with the given allowed channel types.
+     *
+     * @param types The new allowed channel types.
+     * @return A new select menu with the given allowed channel types.
+     */
+    public SelectMenu withAllowedChannelTypes(Iterable<Channel.Type> types) {
+        if (getType() != Type.SELECT_MENU_CHANNEL) {
+            throw new IllegalArgumentException("Select menu with type " + getType() + " can't have channel types restriction");
+        }
+
+        return new SelectMenu(ComponentData.builder().from(getData())
+                .channelTypes(StreamSupport.stream(types.spliterator(), false)
+                        .map(Channel.Type::getValue)
+                        .collect(Collectors.toList()))
+                .build());
+    }
+
+    /**
+     * Creates a new select menu with the same data as this one, but with the given allowed channel types.
+     *
+     * @param types The new allowed channel types.
+     * @return A new select menu with the given allowed channel types.
+     */
+    public SelectMenu withAllowedChannelTypes(Channel.Type... types) {
+        if (getType() != Type.SELECT_MENU_CHANNEL) {
+            throw new IllegalArgumentException("Select menu with type " + getType() + " can't have channel types restriction");
+        }
+
+        return new SelectMenu(ComponentData.builder().from(getData())
+                .channelTypes(Arrays.stream(types)
+                        .map(Channel.Type::getValue)
+                        .collect(Collectors.toList()))
+                .build());
     }
 
     /**

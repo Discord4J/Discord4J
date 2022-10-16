@@ -20,6 +20,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
+import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.component.SelectMenu;
 import discord4j.gateway.ShardInfo;
 
@@ -53,9 +54,10 @@ public class SelectMenuInteractionEvent extends ComponentInteractionEvent {
     }
 
     /**
-     * Get the values selected in the menu.
+     * Get the string values selected in the menu.
+     * If type of select menu is not {@link MessageComponent.Type#SELECT_MENU} then ids of entities will be returned.
      *
-     * @return The values selected in the menu.
+     * @return The string values selected in the menu.
      * @see SelectMenu.Option#getValue()
      */
     public List<String> getValues() {
