@@ -94,6 +94,17 @@ public class SelectMenu extends ActionComponent {
      * @param channelTypes The allowed channel types.
      * @return A select menu with the given data.
      */
+    public static SelectMenu ofChannel(String customId, Channel.Type... channelTypes) {
+        return of(Type.SELECT_MENU_CHANNEL, customId, null, Arrays.asList(channelTypes));
+    }
+
+    /**
+     * Creates a channel select menu.
+     *
+     * @param customId A developer-defined identifier for the select menu.
+     * @param channelTypes The allowed channel types.
+     * @return A select menu with the given data.
+     */
     public static SelectMenu ofChannel(String customId, List<Channel.Type> channelTypes) {
         return of(Type.SELECT_MENU_CHANNEL, customId, null, channelTypes);
     }
