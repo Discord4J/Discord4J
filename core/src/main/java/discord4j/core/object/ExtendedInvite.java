@@ -74,8 +74,9 @@ public final class ExtendedInvite extends Invite {
     }
 
     /**
-     * Gets the temporary member status of the joined user
-     * @return true if the invite only grant temporary membership
+     * Gets whether this invite only grants temporary membership.
+     *
+     * @return {@code true} if this invite only grants temporary membership
      */
     public boolean isTemporary() {
         return getData().temporary().toOptional()
