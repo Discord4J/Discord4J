@@ -111,9 +111,10 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
      * @return The option corresponding to the provided name, if present.
      */
     public Optional<ApplicationCommandInteractionOption> getOption(final String name) {
-        return getOptions().stream()
-                .filter(data -> data.getName().equals(name))
-                .findFirst();
+        return data.options().toOptional().orElse(Collections.emptyList()).stream()
+                .filter(data -> data.name().equals(name))
+                .findFirst()
+                .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId, resolved));
     }
 
     /**
