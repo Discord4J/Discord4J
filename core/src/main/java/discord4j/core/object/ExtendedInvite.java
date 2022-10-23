@@ -66,13 +66,21 @@ public final class ExtendedInvite extends Invite {
     /**
      * Gets the instant this invite expires, if possible.
      *
-     * @return The instant this invite expires, if possible.
+     * @return The instant this invite expires, if empty, invite is never expiring.
      */
     public Optional<Instant> getExpiration() {
-        final boolean temporary = getData().temporary().toOptional().orElse(false);
         final int maxAge = getData().maxAge().toOptional().orElseThrow(IllegalStateException::new);
+        return maxAge > 0 ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)): Optional.empty();
+    }
 
-        return temporary ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)) : Optional.empty();
+    /**
+     * Gets whether this invite only grants temporary membership.
+     *
+     * @return {@code true} if this invite only grants temporary membership
+     */
+    public boolean isTemporary() {
+        return getData().temporary().toOptional()
+            .orElseThrow(IllegalStateException::new);
     }
 
     /**
