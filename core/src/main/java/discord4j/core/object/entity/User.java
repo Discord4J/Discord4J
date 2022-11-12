@@ -317,7 +317,9 @@ public class User implements Entity {
         return EntityUtil.hashCode(this);
     }
 
-    /** Describes the flags of a user. */
+    /** Describes the flags of a user.
+     * @see <a href="https://discord.com/developers/docs/resources/user#user-object-user-flags">Discord Docs - User Flags</a>
+     **/
     public enum Flag {
         DISCORD_EMPLOYEE(0),
 
@@ -347,7 +349,9 @@ public class User implements Entity {
         
         DISCORD_CERTIFIED_MODERATOR(18),
 
-        BOT_HTTP_INTERACTIONS(19);
+        BOT_HTTP_INTERACTIONS(19),
+
+        ACTIVE_DEVELOPER(22);
 
         /** The underlying value as represented by Discord. */
         private final int value;
