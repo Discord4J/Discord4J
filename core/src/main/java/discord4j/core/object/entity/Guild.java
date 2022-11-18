@@ -1439,6 +1439,21 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create an AutoMod Rule.
+     *
+     * @param spec an immutable object that specifies how to create the emoji
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link AutoModRule}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<AutoModRule> createAutoModRule(AutoModRuleCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                        () -> gateway.getRestClient().getAutoModService()
+                                .createAutoModRule(getId().asLong(), spec.asRequest(), spec.reason()))
+                .map(data -> new AutoModRule(gateway, data));
+    }
+
+    /**
      * Requests to delete this guild.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the guild has been deleted.

@@ -6,6 +6,7 @@ import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.AutoModRuleData;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -91,6 +92,55 @@ public class AutoModRule implements Entity {
         return data.exemptChannels().stream()
                 .map(Snowflake::of)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Requests to edit this AutoMod rule. Properties specifying how to edit this emoji can be set via the {@code
+     * withXxx} methods of the returned {@link AutoModRuleEditMono}.
+     *
+     * @return A {@link AutoModRuleEditMono} where, upon successful completion, emits the edited {@link AutoModRule}. If
+     * an error is received, it is emitted through the {@code AutoModRuleEditMono}.
+     */
+    public AutoModRuleEditMono edit() {
+        return AutoModRuleEditMono.of(this);
+    }
+
+    /**
+     * Requests to edit this AutoMod rule.
+     *
+     * @param spec an immutable object that specifies how to edit this AutoMod Rule
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link AutoModRule}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<AutoModRule> edit(AutoModRuleEditMono spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                        () -> gateway.getRestClient().getAutoModService()
+                                .modifyAutoModRule(getGuildId().asLong(), getId().asLong(), spec.asRequest(),
+                                        spec.reason()))
+                .map(data -> new AutoModRule(gateway, data));
+    }
+
+    /**
+     * Requests to delete this rule.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the rule has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete() {
+        return delete(null);
+    }
+
+    /**
+     * Requests to delete this rule while optionally specifying a reason.
+     *
+     * @param reason The reason, if present.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the rule has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete(@Nullable final String reason) {
+        return gateway.getRestClient().getAutoModService()
+                .deleteAutoModRule(getGuildId().asLong(), getId().asLong(), reason);
     }
 
     /**
