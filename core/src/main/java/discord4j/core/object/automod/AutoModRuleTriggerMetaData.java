@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,6 +41,36 @@ public class AutoModRuleTriggerMetaData {
     public List<String> getKeywordFilter() {
         return data.keywordFilter().toOptional()
                 .orElse(Collections.emptyList());
+    }
+
+    /**
+     * Gets substrings which will be exempt from triggering the preset trigger type
+     *
+     * @return a list of words
+     */
+    public List<String> getAllowedFilter() {
+        return data.allowList().toOptional()
+                .orElse(Collections.emptyList());
+    }
+
+    /**
+     * Gets Regular expression patterns which will be matched against content
+     *
+     * @return a list of regex
+     */
+    public List<Pattern> getRegexPatterns() {
+        return data.regexPatterns().toOptional()
+                .map(listRegexPatterns -> listRegexPatterns.stream().map(Pattern::compile).collect(Collections.emptyList()))
+                .orElse(Collections.emptyList());
+    }
+
+    /**
+     * Gets the total number of unique role and user mentions allowed per message if set
+     *
+     * @return the mention limit if available
+     */
+    public Optional<Integer> getMentionLimit() {
+        return data.mentionTotalLimit().toOptional();
     }
 
     /**

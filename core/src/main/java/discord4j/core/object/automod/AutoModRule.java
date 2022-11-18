@@ -108,7 +108,9 @@ public class AutoModRule implements Entity {
 
         SPAM(3),
 
-        KEYWORD_PRESET(4);
+        KEYWORD_PRESET(4),
+
+        MENTION_SPAM(5);
 
         /**
          * The underlying value as represented by Discord.
