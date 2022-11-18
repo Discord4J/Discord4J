@@ -60,7 +60,7 @@ public class AutoModRuleTriggerMetaData {
      */
     public List<Pattern> getRegexPatterns() {
         return data.regexPatterns().toOptional()
-                .map(listRegexPatterns -> listRegexPatterns.stream().map(Pattern::compile).collect(Collections.emptyList()))
+                .map(listRegexPatterns -> listRegexPatterns.stream().map(Pattern::compile).collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
     }
 
