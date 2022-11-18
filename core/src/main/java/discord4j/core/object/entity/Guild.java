@@ -21,6 +21,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.*;
 import discord4j.core.object.audit.AuditLogPart;
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -1850,6 +1851,18 @@ public final class Guild implements Entity {
      */
     public Mono<VoiceConnection> getVoiceConnection() {
         return gateway.getVoiceConnectionRegistry().getVoiceConnection(getId());
+    }
+
+    /**
+     * Requests to retrieve the automod rules of the guild. Requires the MANAGE_GUILD permission.
+     *
+     * @return A {@link Flux} that continually emits the {@link AutoModRule automod rules} of the guild. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<AutoModRule> getAutoModRules() {
+        return gateway.getRestClient().getAutoModService()
+                .getAutoModRules(getId().asLong())
+                .map(data -> new AutoModRule(gateway, data));
     }
 
     @Override

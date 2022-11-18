@@ -542,6 +542,15 @@ public class RestClient {
         return webhookService;
     }
 
+    /**
+     * Access a low-level representation of the API endpoints for the AutoMod resource.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
+    public AutoModService getAutoModService() {
+        return autoModService;
+    }
+
     public Mono<Long> getApplicationId() {
         return applicationIdMono;
     }
