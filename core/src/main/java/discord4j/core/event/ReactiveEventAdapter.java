@@ -307,6 +307,17 @@ public abstract class ReactiveEventAdapter {
     }
 
     /**
+     * Invoked when a new entry in Audit Log is created in a guild.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onAuditLogEntryCreate(AuditLogEntryCreateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
      * Invoked when a user is banned from a guild.
      *
      * @param event the event instance
@@ -952,6 +963,7 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof MemberChunkEvent) compatibleHooks.add(onMemberChunk((MemberChunkEvent) event));
         if (event instanceof EmojisUpdateEvent) compatibleHooks.add(onEmojisUpdate((EmojisUpdateEvent) event));
         if (event instanceof StickersUpdateEvent) compatibleHooks.add(onStickersUpdate((StickersUpdateEvent) event));
+        if (event instanceof AuditLogEntryCreateEvent) compatibleHooks.add(onAuditLogEntryCreate((AuditLogEntryCreateEvent) event));
         if (event instanceof BanEvent) compatibleHooks.add(onBan((BanEvent) event));
         if (event instanceof UnbanEvent) compatibleHooks.add(onUnban((UnbanEvent) event));
         if (event instanceof IntegrationsUpdateEvent) compatibleHooks.add(onIntegrationsUpdate((IntegrationsUpdateEvent) event));
