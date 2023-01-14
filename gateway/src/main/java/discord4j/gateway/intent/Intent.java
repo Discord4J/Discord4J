@@ -52,12 +52,24 @@ public enum Intent {
     GUILD_MEMBERS(1),
 
     /**
+     * Events which will be received by subscribing to GUILD_MODERATION
+     * <ul>
+     *     <li>GUILD_AUDIT_LOG_ENTRY_CREATE</li>
+     *     <li>GUILD_BAN_ADD</li>
+     *     <li>GUILD_BAN_REMOVE</li>
+     * </ul>
+     */
+    GUILD_MODERATION(2),
+
+    /**
      * Events which will be received by subscribing to GUILD_BANS
      * <ul>
      *     <li>GUILD_BAN_ADD</li>
      *     <li>GUILD_BAN_REMOVE</li>
      * </ul>
+     * @deprecated deprecated in favor of {@link #GUILD_MODERATION}
      */
+    @Deprecated()
     GUILD_BANS(2),
 
     /**
