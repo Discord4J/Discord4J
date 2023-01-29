@@ -88,7 +88,7 @@ class EmptyUser implements UserData {
     }
 
     @Override
-    public Possible<Integer> flags() {
+    public Possible<Long> flags() {
         return Possible.absent();
     }
 
@@ -98,7 +98,7 @@ class EmptyUser implements UserData {
     }
 
     @Override
-    public Possible<Integer> publicFlags() {
+    public Possible<Long> publicFlags() {
         return Possible.absent();
     }
 }

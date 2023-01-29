@@ -22,8 +22,11 @@ import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.SelectMenu;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.TextChannel;
 import reactor.core.publisher.Mono;
+
+import java.util.Collections;
 
 public class ExampleSelectMenu {
 
@@ -39,18 +42,18 @@ public class ExampleSelectMenu {
                             .next()
                             .flatMap(e -> e.getGuild().getChannelById(Snowflake.of(channelId)))
                             .ofType(TextChannel.class)
-                            .flatMap(channel -> channel.createMessage(msg -> {
-                                msg.setContent("Select some options!");
-                                msg.setComponents(
-                                        ActionRow.of(
-                                                SelectMenu.of("mySelectMenu",
-                                                        SelectMenu.Option.of("option 1", "foo"),
-                                                        SelectMenu.Option.of("option 2", "bar"),
-                                                        SelectMenu.Option.of("option 3", "baz"))
-                                                        .withMaxValues(2)
-                                        )
-                                );
-                            }));
+                            .flatMap(channel -> channel.createMessage("Select some string options!")
+                                    .withComponents(ActionRow.of(
+                                            SelectMenu.of("mySelectMenu1",
+                                                            SelectMenu.Option.of("option 1", "foo"),
+                                                            SelectMenu.Option.of("option 2", "bar"),
+                                                            SelectMenu.Option.of("option 3", "baz"))
+                                                    .withMaxValues(2)))
+                                    .then(channel.createMessage("Select some user options!")
+                                            .withComponents(ActionRow.of(SelectMenu.ofUser("mySelectMenu2"))))
+                                    .then(channel.createMessage("Select some channel options!")
+                                            .withComponents(ActionRow.of(SelectMenu.ofChannel("mySelectMenu3",
+                                                    Collections.singletonList(Channel.Type.GUILD_TEXT))))));
 
                     return sendMessage
                             .map(Message::getId)

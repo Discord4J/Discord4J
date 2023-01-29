@@ -16,6 +16,8 @@
  */
 package discord4j.rest.util;
 
+import discord4j.common.annotations.Experimental;
+
 /**
  * Permissions are a way to limit and grant certain abilities to users.
  *
@@ -83,9 +85,6 @@ public enum Permission {
     /** Allows the usage of custom emojis from other servers. */
     USE_EXTERNAL_EMOJIS(0x00040000, false),
 
-    /** Allows the usage of custom stickers from other servers. */
-    USE_EXTERNAL_STICKERS(0x00000020000000, false),
-
     /** Allows for viewing guild insights. */
     VIEW_GUILD_INSIGHTS(0x00080000, false),
 
@@ -122,7 +121,7 @@ public enum Permission {
     /**
      * Allows management and editing of emojis.
      *
-     * @deprecated Deprecated in favor of {@link Permission#MANAGE_EMOJIS_AND_STICKERS}
+     * @deprecated use the official permission name: {@link #MANAGE_EMOJIS_AND_STICKERS}
      */
     @Deprecated
     MANAGE_EMOJIS(0x40000000, true),
@@ -130,20 +129,59 @@ public enum Permission {
     /** Allows management and editing of emojis and stickers. */
     MANAGE_EMOJIS_AND_STICKERS(0x40000000, true),
 
-    /** Allows members to use slash commands in text channels. */
+    /** Allows members to use slash commands in text channels.
+     *
+     *  @deprecated use the official permission name: {@link #USE_APPLICATION_COMMANDS}
+     */
+    @Deprecated
     USE_SLASH_COMMANDS(0x80000000L, false),
 
-    /** Allows for requesting to speak in stage channels. */
-    REQUEST_TO_SPEAK(0x100000000L, false),
+    /** Allows members to use application commands, including slash commands and context menu commands. */
+    USE_APPLICATION_COMMANDS(0x80000000L, false),
 
-    /** Allows for deleting and archiving threads, and viewing all private threads */
-    MANAGE_THREADS(0x0400000000L, true),
+    /**
+     * Allows for requesting to speak in stage channels. Marked as experimental since Discord treats this feature as
+     * "under active development and may be changed or removed"
+     */
+    @Experimental
+    REQUEST_TO_SPEAK(0x0000000100000000L, false),
 
-    /** Allows for creating and participating in threads */
-    USE_PUBLIC_THREADS(0x0800000000L, false),
+    /** Allows for creating, editing, and deleting scheduled events. */
+    MANAGE_EVENTS(0x0000000200000000L, false),
 
-    /** Allows for creating and participating in private threads */
-    USE_PRIVATE_THREADS(0x1000000000L, false),
+    /** Allows for deleting and archiving threads, and viewing all private threads. */
+    MANAGE_THREADS(0x0000000400000000L, true),
+
+    /** Allows for creating public and announcement threads. */
+    CREATE_PUBLIC_THREADS(0x0000000800000000L, false),
+
+    /**
+     * Allows for creating and participating in threads.
+     *
+     * @deprecated use the official permission name: {@link #CREATE_PUBLIC_THREADS}
+     */
+    @Deprecated
+    USE_PUBLIC_THREADS(0x0000000800000000L, false),
+
+    /** Allows for creating private threads. */
+    CREATE_PRIVATE_THREADS(0x0000001000000000L, false),
+
+    /**
+     * Allows for creating and participating in private threads
+     *
+     * @deprecated use the official permission name: {@link #CREATE_PRIVATE_THREADS}
+     */
+    @Deprecated
+    USE_PRIVATE_THREADS(0x0000001000000000L, false),
+
+    /** Allows the usage of custom stickers from other servers. */
+    USE_EXTERNAL_STICKERS(0x0000002000000000L, false),
+
+    /** Allows for sending messages in threads */
+    SEND_MESSAGES_IN_THREADS(0x0000004000000000L, false),
+
+    /** Allows for using Activities (applications with the EMBEDDED flag) in a voice channel. */
+    USE_EMBEDDED_ACTIVITIES(0x0000008000000000L, false),
 
     /**
      * Allows for timing out users to prevent them from sending or reacting to messages in chat and threads,
