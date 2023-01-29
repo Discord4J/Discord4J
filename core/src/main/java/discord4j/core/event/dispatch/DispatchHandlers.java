@@ -26,6 +26,7 @@ import discord4j.core.event.domain.integration.IntegrationDeleteEvent;
 import discord4j.core.event.domain.integration.IntegrationUpdateEvent;
 import discord4j.core.event.domain.interaction.*;
 import discord4j.core.object.VoiceState;
+import discord4j.core.object.audit.AuditLogEntry;
 import discord4j.core.object.command.ApplicationCommand;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
@@ -34,6 +35,7 @@ import discord4j.core.object.entity.Integration;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
+import discord4j.discordjson.json.AuditLogEntryData;
 import discord4j.discordjson.json.PartialUserData;
 import discord4j.discordjson.json.PresenceData;
 import discord4j.discordjson.json.UserData;
@@ -61,6 +63,7 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(ChannelDelete.class, ChannelDispatchHandlers::channelDelete);
         addHandler(ChannelPinsUpdate.class, ChannelDispatchHandlers::channelPinsUpdate);
         addHandler(ChannelUpdate.class, ChannelDispatchHandlers::channelUpdate);
+        addHandler(AuditLogEntryCreate.class, DispatchHandlers::auditLogEntryCreate);
         addHandler(GuildBanAdd.class, GuildDispatchHandlers::guildBanAdd);
         addHandler(GuildBanRemove.class, GuildDispatchHandlers::guildBanRemove);
         addHandler(GuildCreate.class, GuildDispatchHandlers::guildCreate);
@@ -214,6 +217,13 @@ public class DispatchHandlers implements DispatchEventMapper {
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
 
         return Mono.just(new WebhooksUpdateEvent(context.getGateway(), context.getShardInfo(), guildId, channelId));
+    }
+
+    private static Mono<AuditLogEntryCreateEvent> auditLogEntryCreate(DispatchContext<AuditLogEntryCreate, Void> context) {
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        AuditLogEntry auditLogEntry = new AuditLogEntry(context.getGateway(), context.getDispatch());
+
+        return Mono.just(new AuditLogEntryCreateEvent(context.getGateway(), context.getShardInfo(), guildId, auditLogEntry));
     }
 
     private static Mono<InviteCreateEvent> inviteCreate(DispatchContext<InviteCreate, Void> context) {
