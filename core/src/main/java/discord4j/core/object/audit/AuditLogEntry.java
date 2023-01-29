@@ -18,10 +18,12 @@ package discord4j.core.object.audit;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.event.domain.AuditLogEntryCreateEvent;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.User;
 import discord4j.core.util.AuditLogUtil;
 import discord4j.discordjson.json.AuditLogEntryData;
+import reactor.util.annotation.Nullable;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -56,9 +58,15 @@ public class AuditLogEntry implements Entity {
     private final AuditLogEntryData data;
 
     AuditLogEntry(final GatewayDiscordClient gateway, final AuditLogPart auditLogPart,
-                  final AuditLogEntryData data) {
+                         final AuditLogEntryData data) {
         this.gateway = gateway;
         this.auditLogPart = auditLogPart;
+        this.data = data;
+    }
+
+    public AuditLogEntry(final GatewayDiscordClient gateway, final AuditLogEntryData data) {
+        this.gateway = gateway;
+        this.auditLogPart = null;
         this.data = data;
     }
 
@@ -161,8 +169,9 @@ public class AuditLogEntry implements Entity {
     /**
      * Gets the {@link AuditLogPart audit log part} that this entry belongs to.
      *
-     * @return The audit log part that this entry belongs to.
+     * @return The audit log part that this entry belongs to. or null if the entry get from the {@link AuditLogEntryCreateEvent}
      */
+    @Nullable
     public AuditLogPart getParent() {
         return auditLogPart;
     }

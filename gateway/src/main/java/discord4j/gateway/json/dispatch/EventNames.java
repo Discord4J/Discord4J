@@ -67,6 +67,7 @@ public abstract class EventNames {
     public static final String STAGE_INSTANCE_CREATE = "STAGE_INSTANCE_CREATE";
     public static final String STAGE_INSTANCE_UPDATE = "STAGE_INSTANCE_UPDATE";
     public static final String STAGE_INSTANCE_DELETE = "STAGE_INSTANCE_DELETE";
+    public static final String GUILD_AUDIT_LOG_ENTRY_CREATE = "GUILD_AUDIT_LOG_ENTRY_CREATE";
 
     // Ignored
     public static final String PRESENCES_REPLACE = "PRESENCES_REPLACE";

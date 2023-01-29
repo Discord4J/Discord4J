@@ -88,6 +88,7 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         dispatchTypes.put(EventNames.STAGE_INSTANCE_CREATE, StageInstanceCreate.class);
         dispatchTypes.put(EventNames.STAGE_INSTANCE_UPDATE, StageInstanceUpdate.class);
         dispatchTypes.put(EventNames.STAGE_INSTANCE_DELETE, StageInstanceDelete.class);
+        dispatchTypes.put(EventNames.GUILD_AUDIT_LOG_ENTRY_CREATE, AuditLogEntryCreate.class);
 
         // Ignored
         dispatchTypes.put(EventNames.PRESENCES_REPLACE, null);
