@@ -23,8 +23,9 @@ ext {
     }
 
     // Dependencies
-    reactor_bom_version = '2020.0.24'
-    jackson_version = '2.12.7'
+    reactor_bom_version = '2020.0.27'
+    jackson_databind_version = '2.12.7.1'
+    jackson_datatype_jdk8_version = '2.12.7'
     caffeine_version = '2.8.8'
     immutables_group = 'org.immutables'
     immutables_version = '2.9.0'
@@ -85,11 +86,11 @@ allprojects {
             // adding links to javadocs for filling specific classes when not existing inside current javadoc
             links = [
                     jdk_javadoc,
-                    "https://fasterxml.github.io/jackson-databind/javadoc/2.10/",
-                    "http://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
-                    "https://projectreactor.io/docs/core/release/api/",
-                    "https://projectreactor.io/docs/netty/release/api/",
-                    "https://projectreactor.io/docs/extra/release/api/",
+                    "https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/2.12.7/",
+                    "http://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
+                    "https://projectreactor.io/docs/core/3.4.26/api/",
+                    "https://projectreactor.io/docs/netty/1.0.27/api/",
+                    "https://projectreactor.io/docs/extra/3.4.9/api/",
                     "https://netty.io/4.1/api/"
             ]
         }
