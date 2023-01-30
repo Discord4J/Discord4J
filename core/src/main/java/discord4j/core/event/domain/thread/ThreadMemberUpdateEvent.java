@@ -17,7 +17,6 @@
 
 package discord4j.core.event.domain.thread;
 
-import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.ThreadMember;
 import discord4j.gateway.ShardInfo;
@@ -25,7 +24,12 @@ import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 
-@Experimental
+/**
+ * Sent when the thread member object for the current user is updated. This event is documented for completeness, but
+ * unlikely to be used by most bots. For bots, this event largely is just a signal that you are a member of the thread.
+ *
+ * @see <a href="https://discord.com/developers/docs/topics/gateway-events#thread-member-update">Discord Docs</a>
+ */
 public class ThreadMemberUpdateEvent extends ThreadEvent {
 
     private final ThreadMember member;

@@ -20,6 +20,7 @@ package discord4j.core;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.MessageInteractionEvent;
+import discord4j.core.event.domain.thread.ThreadEvent;
 import discord4j.core.object.command.ApplicationCommand;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
@@ -35,6 +36,8 @@ import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -46,6 +49,8 @@ import static reactor.function.TupleUtils.function;
  * Showcase some thread operations under a given test guild. Requires TOKEN and GUILD_ID environment variables.
  */
 public class ExampleThread {
+
+    private static final Logger log = Loggers.getLogger(ExampleThread.class);
 
     private static final String TOKEN = System.getenv("TOKEN");
     private static final long GUILD_ID = Long.parseLong(System.getenv("GUILD_ID"));
@@ -277,7 +282,13 @@ public class ExampleThread {
                         return Mono.empty();
                     });
 
-                    return createCommands.then(Mono.when(onChatInput, onMessage));
+                    // Listen to new thread events
+                    Publisher<?> listenThreadEvents = client.on(ThreadEvent.class, event -> {
+                        log.info("Thread event: {}", event);
+                        return Mono.empty();
+                    });
+
+                    return createCommands.then(Mono.when(onChatInput, onMessage, listenThreadEvents));
                 })
                 .block();
     }

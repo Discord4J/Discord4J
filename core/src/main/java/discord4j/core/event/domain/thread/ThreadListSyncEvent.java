@@ -17,7 +17,6 @@
 
 package discord4j.core.event.domain.thread;
 
-import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.ThreadMember;
@@ -29,7 +28,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Experimental
+/**
+ * Sent when the current user gains access to a channel.
+ *
+ * @see <a href="https://discord.com/developers/docs/topics/gateway-events#thread-list-sync">Discord Docs</a>
+ */
 public class ThreadListSyncEvent extends ThreadEvent {
 
     private final ThreadListSync dispatch;

@@ -141,7 +141,19 @@ public class StoreEntityRetriever implements EntityRetriever {
     @Override
     public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
         return Flux.from(store.execute(ReadActions.getStickersInGuild(guildId.asLong())))
-            .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
+                .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
+    }
+
+    @Override
+    public Mono<ThreadMember> getThreadMemberById(Snowflake threadId, Snowflake userId) {
+        return Mono.from(store.execute(ReadActions.getThreadMemberById(threadId.asLong(), userId.asLong())))
+                .map(data -> new ThreadMember(gateway, data));
+    }
+
+    @Override
+    public Flux<ThreadMember> getThreadMembers(Snowflake threadId) {
+        return Flux.from(store.execute(ReadActions.getMembersInThread(threadId.asLong())))
+                .map(data -> new ThreadMember(gateway, data));
     }
 
     @Override
