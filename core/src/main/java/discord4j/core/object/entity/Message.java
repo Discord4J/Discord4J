@@ -930,7 +930,9 @@ public final class Message implements Entity {
         /** A message created for notice the servers owners about invite new users (only in new servers) **/
         GUILD_INVITE_REMINDER(22),
 
-        CONTEXT_MENU_COMMAND(23);
+        CONTEXT_MENU_COMMAND(23),
+
+        AUTO_MODERATION_ACTION(24);
 
         /**
          * The underlying value as represented by Discord.
@@ -987,6 +989,7 @@ public final class Message implements Entity {
                 case 21: return THREAD_STARTER_MESSAGE;
                 case 22: return GUILD_INVITE_REMINDER;
                 case 23: return CONTEXT_MENU_COMMAND;
+                case 24: return AUTO_MODERATION_ACTION;
                 default: return UNKNOWN;
             }
         }
