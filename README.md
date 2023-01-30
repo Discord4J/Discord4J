@@ -4,9 +4,8 @@
 
 [![Support Server Invite](https://img.shields.io/discord/208023865127862272.svg?color=7289da&label=Discord4J&logo=discord&style=flat-square)](https://discord.gg/d4j)
 [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core/3.2.svg?style=flat-square)](https://search.maven.org/artifact/com.discord4j/discord4j-core)
-[![Javadocs](https://javadoc.io/badge2/com.discord4j/discord4j-core/3.2.3/javadoc.svg?color=blue&style=flat-square)](https://javadoc.io/doc/com.discord4j/discord4j-core/3.2.3)
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Discord4J/Discord4J/Java%20CI/master?logo=github&style=flat-square)](https://github.com/Discord4J/Discord4J/actions)
-
+[![Javadocs](https://javadoc.io/badge2/com.discord4j/discord4j-core/3.2.2/javadoc.svg?color=blue&style=flat-square)](https://javadoc.io/doc/com.discord4j/discord4j-core/3.2.2)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/Discord4J/Discord4J/gradle.yml?branch=master&logo=github&style=flat-square)](https://github.com/Discord4J/Discord4J/actions)
 Discord4J is a fast, powerful, unopinionated, reactive library to enable quick and easy development of Discord bots for Java, Kotlin, and other JVM languages using the official [Discord Bot API](https://discord.com/developers/docs/intro).
 
 ## 🏃 Quick Example
