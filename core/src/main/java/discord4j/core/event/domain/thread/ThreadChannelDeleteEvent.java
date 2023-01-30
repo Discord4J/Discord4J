@@ -17,13 +17,15 @@
 
 package discord4j.core.event.domain.thread;
 
-import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
 
-@Experimental
+/**
+ * Sent when a thread relevant to the current user is deleted.
+ *
+ * @see <a href="https://discord.com/developers/docs/topics/gateway-events#thread-delete">Discord Docs</a>
+ */
 public class ThreadChannelDeleteEvent extends ThreadEvent {
 
     private final ThreadChannel channel;
