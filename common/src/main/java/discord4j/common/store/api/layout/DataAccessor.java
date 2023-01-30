@@ -431,4 +431,27 @@ public interface DataAccessor {
      * @return A {@link Mono} emitting the stage instance data, or empty if not found
      */
     Mono<StageInstanceData> getStageInstanceByChannelId(long channelId);
+
+    /**
+     * Retrieves data for the thread member corresponding to the given thread ID and user ID.
+     *
+     * @param threadId the thread ID
+     * @param userId the user ID
+     * @return A {@link Mono} emitting the thread member data, or empty if not found
+     * @since 3.3.0
+     */
+    default Mono<ThreadMemberData> getThreadMemberById(long threadId, long userId) {
+        return Mono.empty();
+    }
+
+    /**
+     * Retrieves data for all thread members present in the store for the given thread ID.
+     *
+     * @param threadId the thread ID
+     * @return A {@link Flux} emitting the thread members, or empty if none is present
+     * @since 3.3.0
+     */
+    default Flux<ThreadMemberData> getMembersInThread(long threadId) {
+        return Flux.empty();
+    }
 }

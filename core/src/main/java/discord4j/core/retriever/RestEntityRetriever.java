@@ -167,6 +167,18 @@ public class RestEntityRetriever implements EntityRetriever {
             .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
     }
 
+    @Override
+    public Mono<ThreadMember> getThreadMemberById(Snowflake threadId, Snowflake userId) {
+        return rest.getChannelService().getThreadMember(threadId.asLong(), userId.asLong())
+                .map(data -> new ThreadMember(gateway, data));
+    }
+
+    @Override
+    public Flux<ThreadMember> getThreadMembers(Snowflake threadId) {
+        return rest.getChannelService().listThreadMembers(threadId.asLong())
+                .map(data -> new ThreadMember(gateway, data));
+    }
+
     private GuildData toGuildData(GuildUpdateData guild) {
         return GuildData.builder()
                 .from(guild)

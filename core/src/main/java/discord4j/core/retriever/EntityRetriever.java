@@ -16,14 +16,7 @@
  */
 package discord4j.core.retriever;
 
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.GuildEmoji;
-import discord4j.core.object.entity.GuildSticker;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.StageInstance;
-import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.util.OrderUtil;
@@ -165,6 +158,7 @@ public interface EntityRetriever {
      * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderRoles(Flux)}
      * to consistently order roles.
      *
+     * @param guildId The ID of the guild.
      * @return A {@link Flux} that continually emits the guild's {@link Role roles}. If an error is received, it is
      * emitted through the {@code Flux}.
      */
@@ -173,6 +167,7 @@ public interface EntityRetriever {
     /**
      * Requests to retrieve the guild's emojis.
      *
+     * @param guildId The ID of the guild.
      * @return A {@link Flux} that continually emits the guild's {@link GuildEmoji emojis}. If an error is received,
      * it is emitted through the {@code Flux}.
      */
@@ -190,8 +185,28 @@ public interface EntityRetriever {
     /**
      * Requests to retrieve the guild's stickers.
      *
+     * @param guildId The ID of the guild.
      * @return A {@link Flux} that continually emits the guild's {@link GuildSticker stickers}. If an error is received,
      * it is emitted through the {@code Flux}.
      */
     Flux<GuildSticker> getGuildStickers(Snowflake guildId);
+
+    /**
+     * Requests to retrieve the thread member associated to the supplied thread ID and user ID.
+     *
+     * @param threadId The ID of the thread.
+     * @param userId The ID of the user.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link ThreadMember} associated to the supplied
+     *         thread ID and user ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<ThreadMember> getThreadMemberById(Snowflake threadId, Snowflake userId);
+
+    /**
+     * Requests to retrieve the thread's members.
+     *
+     * @param threadId The ID of the thread.
+     * @return A {@link Flux} that continually emits the thread's {@link ThreadMember members}. If an error is received,
+     * it is emitted through the {@code Flux}.
+     */
+    Flux<ThreadMember> getThreadMembers(Snowflake threadId);
 }

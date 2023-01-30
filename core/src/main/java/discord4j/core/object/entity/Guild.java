@@ -1869,6 +1869,27 @@ public final class Guild implements Entity {
         return gateway.getVoiceConnectionRegistry().getVoiceConnection(getId());
     }
 
+    /**
+     * Requests to retrieve the active threads of the guild.
+     * <p>
+     * The audit log parts can be {@link ThreadListPart#combine(ThreadListPart) combined} for easier querying. For example,
+     * <pre>
+     * {@code
+     * guild.getActiveThreads()
+     *     .take(10)
+     *     .reduce(ThreadListPart::combine)
+     * }
+     * </pre>
+     *
+     * @return A {@link Flux} that continually emits the {@link ThreadListPart threads} of the guild. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Mono<ThreadListPart> getActiveThreads() {
+        return gateway.getRestClient().getGuildService()
+                .listActiveGuildThreads(data.id().asLong())
+                .map(data -> new ThreadListPart(gateway, data));
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);

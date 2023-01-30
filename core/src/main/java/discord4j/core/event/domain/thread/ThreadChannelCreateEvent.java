@@ -17,12 +17,15 @@
 
 package discord4j.core.event.domain.thread;
 
-import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.gateway.ShardInfo;
 
-@Experimental
+/**
+ * Sent when a thread is created, relevant to the current user, or when the current user is added to a thread.
+ *
+ * @see <a href="https://discord.com/developers/docs/topics/gateway-events#thread-create">Discord Docs</a>
+ */
 public class ThreadChannelCreateEvent extends ThreadEvent {
 
     private final ThreadChannel channel;

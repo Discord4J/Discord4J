@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.core.object.ThreadListPart;
 import discord4j.core.object.entity.Webhook;
 import discord4j.core.spec.StartThreadWithoutMessageSpec;
 import discord4j.core.spec.WebhookCreateMono;
@@ -110,5 +111,65 @@ public interface TopLevelGuildMessageChannel extends CategorizableChannel, Guild
         return getClient().getRestClient().getChannelService()
                 .startThreadWithoutMessage(getId().asLong(), spec.asRequest())
                 .map(data -> new ThreadChannel(getClient(), data));
+    }
+
+    /**
+     * Requests to retrieve the public archived threads for this channel.
+     * <p>
+     * The audit log parts can be {@link ThreadListPart#combine(ThreadListPart) combined} for easier querying. For example,
+     * <pre>
+     * {@code
+     * channel.getPublicArchivedThreads()
+     *     .take(10)
+     *     .reduce(ThreadListPart::combine)
+     * }
+     * </pre>
+     *
+     * @return A {@link Flux} that continually parts of this channel's thread list. If an error is received, it is emitted
+     * through the {@code Flux}.
+     */
+    default Flux<ThreadListPart> getPublicArchivedThreads() {
+        return getRestChannel().getPublicArchivedThreads()
+                .map(data -> new ThreadListPart(getClient(), data));
+    }
+
+    /**
+     * Requests to retrieve the private archived threads for this channel.
+     * <p>
+     * The thread list parts can be {@link ThreadListPart#combine(ThreadListPart) combined} for easier querying. For example,
+     * <pre>
+     * {@code
+     * channel.getPrivateArchivedThreads()
+     *     .take(10)
+     *     .reduce(ThreadListPart::combine)
+     * }
+     * </pre>
+     *
+     * @return A {@link Flux} that continually parts of this channel's thread list. If an error is received, it is emitted
+     * through the {@code Flux}.
+     */
+    default Flux<ThreadListPart> getPrivateArchivedThreads() {
+        return getRestChannel().getPrivateArchivedThreads()
+                .map(data -> new ThreadListPart(getClient(), data));
+    }
+
+    /**
+     * Requests to retrieve the joined private archived threads for this channel.
+     * <p>
+     * The thread list parts can be {@link ThreadListPart#combine(ThreadListPart) combined} for easier querying. For example,
+     * <pre>
+     * {@code
+     * channel.getJoinedPrivateArchivedThreads()
+     *     .take(10)
+     *     .reduce(ThreadListPart::combine)
+     * }
+     * </pre>
+     *
+     * @return A {@link Flux} that continually parts of this channel's thread list. If an error is received, it is emitted
+     * through the {@code Flux}.
+     */
+    default Flux<ThreadListPart> getJoinedPrivateArchivedThreads() {
+        return getRestChannel().getJoinedPrivateArchivedThreads()
+                .map(data -> new ThreadListPart(getClient(), data));
     }
 }

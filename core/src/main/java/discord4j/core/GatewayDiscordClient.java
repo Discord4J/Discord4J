@@ -827,4 +827,14 @@ public class GatewayDiscordClient implements EntityRetriever {
     public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
         return entityRetriever.getGuildStickers(guildId);
     }
+
+    @Override
+    public Mono<ThreadMember> getThreadMemberById(Snowflake threadId, Snowflake userId) {
+        return entityRetriever.getThreadMemberById(threadId, userId);
+    }
+
+    @Override
+    public Flux<ThreadMember> getThreadMembers(Snowflake threadId) {
+        return entityRetriever.getThreadMembers(threadId);
+    }
 }

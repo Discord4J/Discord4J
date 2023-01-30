@@ -32,6 +32,7 @@ import discord4j.core.event.domain.message.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.core.event.domain.role.RoleUpdateEvent;
+import discord4j.core.event.domain.thread.*;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -530,6 +531,76 @@ public abstract class ReactiveEventAdapter {
     }
 
     /**
+     * Invoked when a thread is created, relevant to the current user, or when the current user is added to a thread.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onThreadChannelCreateEvent(ThreadChannelCreateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a thread relevant to the current user is deleted.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onThreadChannelDeleteEvent(ThreadChannelDeleteEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a thread relevant to the current user is updated.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onThreadChannelUpdateEvent(ThreadChannelUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when the current user gains access to a thread channel.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onThreadListSyncEvent(ThreadListSyncEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when anyone is added to or removed from a thread. If the current user does not have the
+     * {@link discord4j.gateway.intent.Intent#GUILD_MEMBERS} Gateway Intent, then this event will only be sent if the
+     * current user was added to or removed from the thread.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onThreadMembersUpdateEvent(ThreadMembersUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when the thread member object for the current user is updated. This event is documented for completeness,
+     * but unlikely to be used by most bots. For bots, this event largely is just a signal that you are a member of the
+     * thread.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onThreadMemberUpdateEvent(ThreadMemberUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
      * Invoked when a guild channel is created, but its {@link discord4j.core.object.entity.channel.Channel.Type type}
      * is not supported or implemented.
      *
@@ -983,6 +1054,12 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof StoreChannelCreateEvent) compatibleHooks.add(onStoreChannelCreate((StoreChannelCreateEvent) event));
         if (event instanceof StoreChannelDeleteEvent) compatibleHooks.add(onStoreChannelDelete((StoreChannelDeleteEvent) event));
         if (event instanceof StoreChannelUpdateEvent) compatibleHooks.add(onStoreChannelUpdate((StoreChannelUpdateEvent) event));
+        if (event instanceof ThreadChannelCreateEvent) compatibleHooks.add(onThreadChannelCreateEvent((ThreadChannelCreateEvent) event));
+        if (event instanceof ThreadChannelDeleteEvent) compatibleHooks.add(onThreadChannelDeleteEvent((ThreadChannelDeleteEvent) event));
+        if (event instanceof ThreadChannelUpdateEvent) compatibleHooks.add(onThreadChannelUpdateEvent((ThreadChannelUpdateEvent) event));
+        if (event instanceof ThreadListSyncEvent) compatibleHooks.add(onThreadListSyncEvent((ThreadListSyncEvent) event));
+        if (event instanceof ThreadMembersUpdateEvent) compatibleHooks.add(onThreadMembersUpdateEvent((ThreadMembersUpdateEvent) event));
+        if (event instanceof ThreadMemberUpdateEvent) compatibleHooks.add(onThreadMemberUpdateEvent((ThreadMemberUpdateEvent) event));
         if (event instanceof UnknownChannelCreateEvent) compatibleHooks.add(onUnknownChannelCreate((UnknownChannelCreateEvent) event));
         if (event instanceof UnknownChannelDeleteEvent) compatibleHooks.add(onUnknownChannelDelete((UnknownChannelDeleteEvent) event));
         if (event instanceof UnknownChannelUpdateEvent) compatibleHooks.add(onUnknownChannelUpdate((UnknownChannelUpdateEvent) event));

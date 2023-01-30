@@ -505,4 +505,25 @@ public class ReadActions {
     public static GetStageInstanceByChannelIdAction getStageInstanceByChannelId(long channelId) {
         return new GetStageInstanceByChannelIdAction(channelId);
     }
+
+    /**
+     * Creates an action to retrieve data for the thread member corresponding to the given thread ID and user ID.
+     *
+     * @param threadId the thread ID
+     * @param userId the user ID
+     * @return a new {@link GetThreadMemberByIdAction}
+     */
+    public static GetThreadMemberByIdAction getThreadMemberById(long threadId, long userId) {
+        return new GetThreadMemberByIdAction(threadId, userId);
+    }
+
+    /**
+     * Creates an action to retrieve data for all thread members present in a store for the given thread ID.
+     *
+     * @param threadId the thread ID
+     * @return a new {@link GetMembersInThreadAction}
+     */
+    public static GetMembersInThreadAction getMembersInThread(long threadId) {
+        return new GetMembersInThreadAction(threadId);
+    }
 }

@@ -275,18 +275,17 @@ public class ChannelService extends RestService {
                 .bodyToMono(Void.class);
     }
 
+    public Mono<ThreadMemberData> getThreadMember(long channelId, long userId) {
+        return Routes.GET_THREAD_MEMBER.newRequest(channelId, userId)
+                .exchange(getRouter())
+                .bodyToMono(ThreadMemberData.class);
+    }
+
     public Flux<ThreadMemberData> listThreadMembers(long channelId) {
         return Routes.LIST_THREAD_MEMBERS.newRequest(channelId)
                 .exchange(getRouter())
                 .bodyToMono(ThreadMemberData[].class)
                 .flatMapMany(Flux::fromArray);
-    }
-
-    // TODO is this not paginated?
-    public Mono<ListThreadsData> listActiveThreads(long channelId) {
-        return Routes.LIST_ACTIVE_THREADS.newRequest(channelId)
-                .exchange(getRouter())
-                .bodyToMono(ListThreadsData.class);
     }
 
     public Mono<ListThreadsData> listPublicArchivedThreads(long channelId, Map<String, Object> queryParams) {
