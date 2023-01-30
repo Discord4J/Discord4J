@@ -131,6 +131,50 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
                 .getThreadMembers(getId());
     }
 
+    /**
+     * Requests to retrieve the member of this thread.
+     *
+     * @param userId The ID of the user.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link ThreadMember member} of this thread. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ThreadMember> getMember(Snowflake userId) {
+        return getClient().getThreadMemberById(getId(), userId);
+    }
+
+    /**
+     * Requests to retrieve the member of this thread, using the given retrieval strategy.
+     *
+     * @param userId The ID of the user.
+     * @param retrievalStrategy the strategy to use to get the thread member
+     * @return A {@link Mono} where, upon successful completion, emits the {@link ThreadMember member} of this thread. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ThreadMember> getMember(Snowflake userId, EntityRetrievalStrategy retrievalStrategy) {
+        return getClient().withRetrievalStrategy(retrievalStrategy)
+                .getThreadMemberById(getId(), userId);
+    }
+
+    /**
+     * Returns all members of this thread.
+     *
+     * @return A {@link Flux} that continually emits all {@link ThreadMember members} of this thread.
+     */
+    public Flux<ThreadMember> getThreadMembers() {
+        return getClient().getThreadMembers(getId());
+    }
+
+    /**
+     * Returns all members of this thread, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the thread members
+     * @return A {@link Flux} that continually emits all {@link ThreadMember members} of this thread.
+     */
+    public Flux<ThreadMember> getThreadMembers(EntityRetrievalStrategy retrievalStrategy) {
+        return getClient().withRetrievalStrategy(retrievalStrategy)
+                .getThreadMembers(getId());
+    }
+
     public int getApproximateMessageCount() {
         return getData().messageCount().toOptional()
                 .orElseThrow(IllegalStateException::new); // should always be present for threads
