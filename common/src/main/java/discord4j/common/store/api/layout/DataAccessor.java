@@ -438,14 +438,20 @@ public interface DataAccessor {
      * @param threadId the thread ID
      * @param userId the user ID
      * @return A {@link Mono} emitting the thread member data, or empty if not found
+     * @since 3.3.0
      */
-    Mono<ThreadMemberData> getThreadMemberById(long threadId, long userId);
+    default Mono<ThreadMemberData> getThreadMemberById(long threadId, long userId) {
+        return Mono.empty();
+    }
 
     /**
      * Retrieves data for all thread members present in the store for the given thread ID.
      *
      * @param threadId the thread ID
      * @return A {@link Flux} emitting the thread members, or empty if none is present
+     * @since 3.3.0
      */
-    Flux<ThreadMemberData> getMembersInThread(long threadId);
+    default Flux<ThreadMemberData> getMembersInThread(long threadId) {
+        return Flux.empty();
+    }
 }
