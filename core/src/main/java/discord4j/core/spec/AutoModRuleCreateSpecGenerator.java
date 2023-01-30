@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
-@Value.Immutable
+@Value.Immutable(singleton = true)
 interface AutoModRuleCreateSpecGenerator extends AuditSpec<AutoModRuleCreateRequest> {
 
     String name();
