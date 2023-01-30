@@ -28,7 +28,7 @@ import java.util.Optional;
  * Sent when the thread member object for the current user is updated. This event is documented for completeness, but
  * unlikely to be used by most bots. For bots, this event largely is just a signal that you are a member of the thread.
  *
- * @see <a href="https://discord.com/developers/docs/topics/gateway-events#thread-member-update>Discord Docs</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway-events#thread-member-update">Discord Docs</a>
  */
 public class ThreadMemberUpdateEvent extends ThreadEvent {
 
