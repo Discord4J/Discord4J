@@ -1880,6 +1880,17 @@ public final class Guild implements Entity {
                 .map(data -> new AutoModRule(gateway, data));
     }
 
+    /**
+     * Requests to retrieve the automod rule of the guild using the ID. Requires the MANAGE_GUILD permission.
+     *
+     * @return A {@link Mono} of {@link AutoModRule} for this guild if present, or empty otherwise.
+     */
+    public Mono<AutoModRule> getAutoModRule(Snowflake autoModRuleId) {
+        return gateway.getRestClient().getAutoModService()
+            .getAutoModRule(getId().asLong(), autoModRuleId.asLong())
+            .map(data -> new AutoModRule(gateway, data));
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);

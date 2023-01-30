@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-@Value.Immutable(singleton = true)
+@Value.Immutable
 public interface AutoModRuleEditSpecGenerator extends AuditSpec<AutoModRuleModifyRequest> {
 
     String name();

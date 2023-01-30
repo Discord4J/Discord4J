@@ -4,6 +4,8 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.User;
+import discord4j.core.spec.AutoModRuleEditMono;
+import discord4j.core.spec.AutoModRuleEditSpec;
 import discord4j.discordjson.json.AutoModRuleData;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -102,7 +104,7 @@ public class AutoModRule implements Entity {
      * an error is received, it is emitted through the {@code AutoModRuleEditMono}.
      */
     public AutoModRuleEditMono edit() {
-        return AutoModRuleEditMono.of(this);
+        return AutoModRuleEditSpec.of(this);
     }
 
     /**
@@ -112,7 +114,7 @@ public class AutoModRule implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link AutoModRule}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<AutoModRule> edit(AutoModRuleEditMono spec) {
+    public Mono<AutoModRule> edit(AutoModRuleEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
                         () -> gateway.getRestClient().getAutoModService()

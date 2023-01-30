@@ -2,13 +2,14 @@ package discord4j.core.object.automod;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.DiscordObject;
 import discord4j.discordjson.json.AutoModActionData;
 import discord4j.discordjson.json.AutoModActionMetaData;
 
 import java.util.Objects;
 import java.util.Optional;
 
-public class AutoModRuleAction {
+public class AutoModRuleAction implements DiscordObject {
 
     /**
      * The gateway associated to this object.
@@ -29,12 +30,16 @@ public class AutoModRuleAction {
         return Type.of(data.type());
     }
 
-    public Object getMetadata() {
-        //TODO: Waiting for the PR def
-        return null;
+    public Optional<AutoModRuleActionMetaData> getMetadata() {
+        return this.data.metadata().toOptional().map(data -> new AutoModRuleActionMetaData(gateway, data));
     }
 
-    public class AutoModRuleActionMetaData {
+    @Override
+    public GatewayDiscordClient getClient() {
+        return this.gateway;
+    }
+
+    public static class AutoModRuleActionMetaData implements DiscordObject {
         /**
          * The gateway associated to this object.
          */
@@ -66,6 +71,11 @@ public class AutoModRuleAction {
          */
         public Optional<Integer> getDurationTimeout() {
             return data.duration().toOptional();
+        }
+
+        @Override
+        public GatewayDiscordClient getClient() {
+            return this.gateway;
         }
     }
 

@@ -16,6 +16,7 @@
  */
 package discord4j.core.retriever;
 
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.entity.GuildSticker;
@@ -117,5 +118,10 @@ public class FallbackEntityRetriever implements EntityRetriever {
     @Override
     public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
         return first.getGuildStickers(guildId).switchIfEmpty(fallback.getGuildStickers(guildId));
+    }
+
+    @Override
+    public Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId) {
+        return first.getGuildAutoModRules(guildId).switchIfEmpty(fallback.getGuildAutoModRules(guildId));
     }
 }

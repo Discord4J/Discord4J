@@ -21,6 +21,7 @@ import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.store.api.object.ExactResultNotAvailableException;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -138,5 +139,11 @@ public class StoreEntityRetriever implements EntityRetriever {
     public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
         return Flux.from(store.execute(ReadActions.getStickersInGuild(guildId.asLong())))
             .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
+    }
+
+    @Override
+    public Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId) {
+        return Flux.from(store.execute(ReadActions.getAutoModRulesInGuild(guildId.asLong())))
+            .map(data -> new AutoModRule(gateway, data));
     }
 }

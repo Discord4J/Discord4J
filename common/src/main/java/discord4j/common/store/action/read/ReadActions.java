@@ -256,6 +256,27 @@ public class ReadActions {
     }
 
     /**
+     * Creates an action to retrieve data for all automod rules present in a store for the given guild ID.
+     *
+     * @param guildId the guild ID
+     * @return a new {@link GetAutoModRulesInGuildAction}
+     */
+    public static GetAutoModRulesInGuildAction getAutoModRulesInGuild(long guildId) {
+        return new GetAutoModRulesInGuildAction(guildId);
+    }
+
+    /**
+     * Creates an action to retrieve data for the automod rule corresponding to the given guild ID and automod rule ID.
+     *
+     * @param guildId the guild ID
+     * @param autoModRuleId the automod rule ID
+     * @return a new {@link GetAutoModRuleByIdAction}
+     */
+    public static GetAutoModRuleByIdAction getAutoModRuleById(long guildId, long autoModRuleId) {
+        return new GetAutoModRuleByIdAction(guildId, autoModRuleId);
+    }
+
+    /**
      * Creates an action to retrieve data for all emojis present in a store.
      *
      * @return a new {@link GetEmojisAction}
