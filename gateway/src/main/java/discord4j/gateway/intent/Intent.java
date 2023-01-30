@@ -79,7 +79,7 @@ public enum Intent {
      * </ul>
      * @deprecated deprecated in favor of {@link #GUILD_MODERATION}
      */
-    @Deprecated()
+    @Deprecated
     GUILD_BANS(2),
 
     /**
