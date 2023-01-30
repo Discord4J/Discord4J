@@ -104,7 +104,7 @@ public class AutoModRule implements Entity {
      * an error is received, it is emitted through the {@code AutoModRuleEditMono}.
      */
     public AutoModRuleEditMono edit() {
-        return AutoModRuleEditSpec.of(this);
+        return AutoModRuleEditMono.of(this);
     }
 
     /**
