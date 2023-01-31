@@ -17,6 +17,7 @@
 
 package discord4j.core.spec;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.AutoModActionData;
@@ -27,7 +28,9 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Value.Immutable(singleton = true)
 public interface AutoModRuleEditSpecGenerator extends AuditSpec<AutoModRuleModifyRequest> {
@@ -42,9 +45,15 @@ public interface AutoModRuleEditSpecGenerator extends AuditSpec<AutoModRuleModif
 
     boolean enabled();
 
-    List<Id> exemptRoles();
+    @Value.Default
+    default List<Snowflake> exemptRoles() {
+        return Collections.emptyList();
+    }
 
-    List<Id> exemptChannels();
+    @Value.Default
+    default List<Snowflake> exemptChannels() {
+        return Collections.emptyList();
+    }
 
     @Override
     default AutoModRuleModifyRequest asRequest() {
@@ -54,8 +63,8 @@ public interface AutoModRuleEditSpecGenerator extends AuditSpec<AutoModRuleModif
                 .triggerMetadata(triggerMetaData())
                 .actions(actions())
                 .enabled(enabled())
-                .exemptRoles(exemptRoles())
-                .exemptChannels(exemptChannels())
+                .exemptRoles(exemptRoles().stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList()))
+                .exemptChannels(exemptChannels().stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList()))
                 .build();
     }
 
