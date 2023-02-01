@@ -32,7 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Value.Immutable(singleton = true)
+@Value.Immutable
 public interface AutoModRuleEditSpecGenerator extends AuditSpec<AutoModRuleModifyRequest> {
 
     String name();
@@ -41,7 +41,10 @@ public interface AutoModRuleEditSpecGenerator extends AuditSpec<AutoModRuleModif
 
     Possible<AutoModTriggerMetaData> triggerMetaData();
 
-    List<AutoModActionData> actions();
+    @Value.Default
+    default List<AutoModActionData> actions() {
+        return Collections.emptyList();
+    }
 
     boolean enabled();
 

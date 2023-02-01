@@ -29,12 +29,13 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
-@Value.Immutable(singleton = true)
+@Value.Immutable
 interface AutoModRuleCreateSpecGenerator extends AuditSpec<AutoModRuleCreateRequest> {
 
     String name();
@@ -45,7 +46,10 @@ interface AutoModRuleCreateSpecGenerator extends AuditSpec<AutoModRuleCreateRequ
 
     Possible<AutoModTriggerMetaData> triggerMetaData();
 
-    List<AutoModActionData> actions();
+    @Value.Default
+    default List<AutoModActionData> actions() {
+        return Collections.emptyList();
+    }
 
     Possible<Boolean> enabled();
 

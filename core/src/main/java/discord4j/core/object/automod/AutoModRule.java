@@ -31,6 +31,15 @@ public class AutoModRule implements Entity {
         this.data = Objects.requireNonNull(data);
     }
 
+    /**
+     * Gets the data of the rule.
+     *
+     * @return The data of the rule.
+     */
+    public AutoModRuleData getData() {
+        return data;
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
@@ -45,6 +54,11 @@ public class AutoModRule implements Entity {
         return Snowflake.of(data.guildId());
     }
 
+    /**
+     * Gets the {@link Snowflake} of the creator of the rule.
+     *
+     * @return The {@link Snowflake} of the creator
+     */
     public Snowflake getCreatorId() {
         return Snowflake.of(data.creatorId());
     }
@@ -68,10 +82,20 @@ public class AutoModRule implements Entity {
         return data.enabled();
     }
 
+    /**
+     * Gets the name of the rule
+     *
+     * @return the name of the rule
+     */
     public String getName() {
         return data.name();
     }
 
+    /**
+     * Gets the type of trigger used in the rule.
+     *
+     * @return The type of trigger used in the rule.
+     */
     public TriggerType getTriggerType() {
         return TriggerType.of(data.triggerType());
     }
@@ -97,14 +121,17 @@ public class AutoModRule implements Entity {
     }
 
     /**
-     * Requests to edit this AutoMod rule. Properties specifying how to edit this emoji can be set via the {@code
+     * Requests to edit this AutoMod rule. Properties specifying how to edit this rule can be set via the {@code
      * withXxx} methods of the returned {@link AutoModRuleEditMono}.
      *
+     * @param name new name to set
+     * @param eventType type of event to set
+     * @param enabled status of the rule
      * @return A {@link AutoModRuleEditMono} where, upon successful completion, emits the edited {@link AutoModRule}. If
      * an error is received, it is emitted through the {@code AutoModRuleEditMono}.
      */
-    public AutoModRuleEditMono edit() {
-        return AutoModRuleEditMono.of(this);
+    public AutoModRuleEditMono edit(String name, EventType eventType, boolean enabled) {
+        return AutoModRuleEditMono.of(name, eventType.value, enabled, this);
     }
 
     /**

@@ -1439,6 +1439,20 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create an automod rule. Properties specifying how to create the rule can be set via the
+     * {@code withXxx} methods of the returned {@link AutoModRuleCreateMono}.
+     *
+     * @param name new name to set
+     * @param eventType type of event to set
+     * @param triggerType type of trigger to set
+     * @return A {@link AutoModRuleCreateMono} where, upon successful completion, emits the created {@link
+     * AutoModRule}. If an error is received, it is emitted through the {@code AutoModRuleCreateMono}.
+     */
+    public AutoModRuleCreateMono createAutoModRule(String name, AutoModRule.EventType eventType, AutoModRule.TriggerType triggerType) {
+        return AutoModRuleCreateMono.of(name, eventType.getValue(), triggerType.getValue(), this);
+    }
+
+    /**
      * Requests to create an AutoMod Rule.
      *
      * @param spec an immutable object that specifies how to create the emoji
