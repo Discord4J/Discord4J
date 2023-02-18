@@ -57,6 +57,7 @@ public abstract class EventNames {
     public static final String APPLICATION_COMMAND_CREATE = "APPLICATION_COMMAND_CREATE";
     public static final String APPLICATION_COMMAND_UPDATE = "APPLICATION_COMMAND_UPDATE";
     public static final String APPLICATION_COMMAND_DELETE = "APPLICATION_COMMAND_DELETE";
+    public static final String APPLICATION_COMMAND_PERMISSIONS_UPDATE = "APPLICATION_COMMAND_PERMISSIONS_UPDATE";
     public static final String INTERACTION_CREATE = "INTERACTION_CREATE";
 
     // Ignored
