@@ -26,14 +26,12 @@ import discord4j.core.event.domain.command.ApplicationCommandUpdateEvent;
 import discord4j.core.object.command.ApplicationCommand;
 import discord4j.core.object.command.ApplicationCommandGuildPermissions;
 import discord4j.discordjson.json.ApplicationCommandData;
-import discord4j.discordjson.json.ApplicationCommandGuildPermissionsData;
-import discord4j.discordjson.json.ApplicationCommandPermissionsData;
+import discord4j.discordjson.json.GuildApplicationCommandPermissionsData;
 import discord4j.discordjson.json.gateway.ApplicationCommandCreate;
 import discord4j.discordjson.json.gateway.ApplicationCommandDelete;
 import discord4j.discordjson.json.gateway.ApplicationCommandPermissionUpdate;
 import discord4j.discordjson.json.gateway.ApplicationCommandUpdate;
 import discord4j.gateway.ShardInfo;
-import java.util.List;
 import reactor.core.publisher.Mono;
 
 class ApplicationCommandDispatchHandlers {
@@ -73,7 +71,7 @@ class ApplicationCommandDispatchHandlers {
         DispatchContext<ApplicationCommandPermissionUpdate, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         ShardInfo shardInfo = context.getShardInfo();
-        ApplicationCommandGuildPermissionsData data = context.getDispatch().data();
+        GuildApplicationCommandPermissionsData data = context.getDispatch().data();
 
         return Mono.just(new ApplicationCommandPermissionUpdateEvent(gateway, shardInfo,
             new ApplicationCommandGuildPermissions(gateway, data)));

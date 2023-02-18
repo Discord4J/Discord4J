@@ -21,8 +21,8 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
-import discord4j.discordjson.json.ApplicationCommandGuildPermissionsData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsData;
+import discord4j.discordjson.json.GuildApplicationCommandPermissionsData;
 import java.util.List;
 import java.util.Objects;
 
@@ -49,7 +49,7 @@ public class ApplicationCommandGuildPermissions implements DiscordObject {
     /**
      * The raw data as represented by Discord.
      */
-    private final ApplicationCommandGuildPermissionsData data;
+    private final GuildApplicationCommandPermissionsData data;
 
     /**
      * Constructs an {@code ApplicationCommandGuildPermissions} with an associated
@@ -59,7 +59,7 @@ public class ApplicationCommandGuildPermissions implements DiscordObject {
      * @param data    The raw data as represented by Discord, must be non-null.
      */
     public ApplicationCommandGuildPermissions(final GatewayDiscordClient gateway,
-        final ApplicationCommandGuildPermissionsData data) {
+        final GuildApplicationCommandPermissionsData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
