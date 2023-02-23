@@ -457,7 +457,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             emojis.forEach(emoji -> saveEmoji(guildId, emoji));
             members.forEach(member -> saveMember(guildId, member));
             channels.forEach(channel -> saveChannel(guildId, channel));
-            threads.forEach(channel -> this.channels.put(guildId, ImmutableChannelData.copyOf(channel)));
+            threads.forEach(channel -> this.channels.put(channel.id().asLong(), ImmutableChannelData.copyOf(channel)));
             presences.forEach(presence -> savePresence(guildId, presence));
             voiceStates.forEach(voiceState -> saveOrRemoveVoiceState(guildId, voiceState));
         });
