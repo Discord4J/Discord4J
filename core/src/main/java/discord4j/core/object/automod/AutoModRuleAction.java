@@ -26,7 +26,7 @@ public class AutoModRuleAction implements DiscordObject {
      */
     private final AutoModActionData data;
 
-    public AutoModRuleAction(final GatewayDiscordClient gateway, final AutoModActionData data, final AutoModRule) {
+    public AutoModRuleAction(final GatewayDiscordClient gateway, final AutoModActionData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
