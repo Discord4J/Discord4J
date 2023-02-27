@@ -683,7 +683,7 @@ public class PartialMember extends User {
             "} " + super.toString();
     }
 
-    /** Describes the flags of a member.
+    /** Describes the flags of a member in a guild.
      * @see <a href="https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags">Discord Docs - Guild Member Flags</a>
      **/
     public enum Flag {
