@@ -12,6 +12,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * An Auto Moderation Trigger MetaData
+ *
+ * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-metadata">Auto Moderation Trigger MetaData</a>
+ */
 public class AutoModRuleTriggerMetaData {
 
     /**
@@ -33,10 +38,14 @@ public class AutoModRuleTriggerMetaData {
         return gateway;
     }
 
+    public AutoModTriggerMetaData getData() {
+        return data;
+    }
+
     /**
-     * Gets substrings which will be searched for in content
+     * Gets substrings which will be searched for in content.
      *
-     * @return a list of words
+     * @return a list of words.
      */
     public List<String> getKeywordFilter() {
         return data.keywordFilter().toOptional()
@@ -44,9 +53,9 @@ public class AutoModRuleTriggerMetaData {
     }
 
     /**
-     * Gets substrings which will be exempt from triggering the preset trigger type
+     * Gets substrings which will be exempt from triggering the preset trigger type.
      *
-     * @return a list of words
+     * @return a list of words.
      */
     public List<String> getAllowedFilter() {
         return data.allowList().toOptional()
@@ -54,9 +63,9 @@ public class AutoModRuleTriggerMetaData {
     }
 
     /**
-     * Gets Regular expression patterns which will be matched against content
+     * Gets Regular expression patterns which will be matched against content.
      *
-     * @return a list of regex
+     * @return a list of regex.
      */
     public List<Pattern> getRegexPatterns() {
         return data.regexPatterns().toOptional()
@@ -65,18 +74,18 @@ public class AutoModRuleTriggerMetaData {
     }
 
     /**
-     * Gets the total number of unique role and user mentions allowed per message if set
+     * Gets the total number of unique role and user mentions allowed per message if set.
      *
-     * @return the mention limit if available
+     * @return the mention limit if available.
      */
     public Optional<Integer> getMentionLimit() {
         return data.mentionTotalLimit().toOptional();
     }
 
     /**
-     * Gets the internally pre-defined wordsets which will be searched for in content
+     * Gets the internally pre-defined wordsets which will be searched for in content.
      *
-     * @return a EnumSet with all the presets in the class
+     * @return a EnumSet with all the presets in the class.
      */
     public EnumSet<Preset> getPresets() {
         EnumSet<Preset> presets = EnumSet.noneOf(Preset.class);
@@ -97,17 +106,17 @@ public class AutoModRuleTriggerMetaData {
         UNKNOWN(-1),
 
         /**
-         * Words that may be considered forms of swearing or cursing
+         * Words that may be considered forms of swearing or cursing.
          */
         PROFANITY(1),
 
         /**
-         * Words that refer to sexually explicit behavior or activity
+         * Words that refer to sexually explicit behavior or activity.
          */
         SEXUAL_CONTENT(2),
 
         /**
-         * Personal insults or words that may be considered hate speech
+         * Personal insults or words that may be considered hate speech.
          */
         SLURS(3);
 

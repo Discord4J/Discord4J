@@ -9,6 +9,11 @@ import discord4j.discordjson.json.AutoModActionMetaData;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * An Auto Moderation Rule Action
+ *
+ * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-action-object">Auto Moderation Rule Action</a>
+ */
 public class AutoModRuleAction implements DiscordObject {
 
     /**
@@ -21,15 +26,29 @@ public class AutoModRuleAction implements DiscordObject {
      */
     private final AutoModActionData data;
 
-    public AutoModRuleAction(final GatewayDiscordClient gateway, final AutoModActionData data) {
+    public AutoModRuleAction(final GatewayDiscordClient gateway, final AutoModActionData data, final AutoModRule) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
+    public AutoModActionData getData() {
+        return data;
+    }
+
+    /**
+     * Gets the type of this action.
+     *
+     * @return A {@link Type}
+     */
     public Type getType() {
         return Type.of(data.type());
     }
 
+    /**
+     * Gets the MetaData of the action if set.
+     *
+     * @return the MetaData of the action if available.
+     */
     public Optional<AutoModRuleActionMetaData> getMetadata() {
         return this.data.metadata().toOptional().map(data -> new AutoModRuleActionMetaData(gateway, data));
     }
@@ -39,6 +58,11 @@ public class AutoModRuleAction implements DiscordObject {
         return this.gateway;
     }
 
+    /**
+     * An Auto Moderation Rule Action MetaData
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-action-object-action-metadata">Auto Moderation Rule Action MetaData</a>
+     */
     public static class AutoModRuleActionMetaData implements DiscordObject {
         /**
          * The gateway associated to this object.
@@ -56,21 +80,36 @@ public class AutoModRuleAction implements DiscordObject {
         }
 
         /**
-         * Gets the channel´s id to which user content should be logged
+         * Gets the channel´s id to which user content should be logged.
+         * <br>
+         * <b>Note:</b> This is mostly present the action is of type {@link Type#SEND_ALERT_MESSAGE}.
          *
-         * @return an Optional id
+         * @return The ID of the channel involved, if present.
          */
         public Optional<Snowflake> getChannelId() {
             return data.channelId().toOptional().map(Snowflake::of);
         }
 
         /**
-         * Gets the timeout duration
+         * Gets the timeout duration.
+         * <br>
+         * <b>Note:</b> This is mostly present the action is of type {@link Type#TIMEOUT}.
          *
-         * @return an Optional duration in seconds
+         * @return The duration in seconds, if present.
          */
         public Optional<Integer> getDurationTimeout() {
             return data.duration().toOptional();
+        }
+
+        /**
+         * Gets the custom message to show when the action is executed.
+         * <br>
+         * <b>Note:</b> This is mostly present the action is of type {@link Type#BLOCK_MESSAGE}.
+         *
+         * @return The custom message, if present.
+         */
+        public Optional<String> getCustomMessage() {
+            return data.customMessage().toOptional();
         }
 
         @Override

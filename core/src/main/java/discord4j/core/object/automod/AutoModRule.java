@@ -14,6 +14,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * An Auto Moderation Rule
+ *
+ * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object">Auto Moderation Rule</a>
+ */
 public class AutoModRule implements Entity {
 
     /**
@@ -31,11 +36,6 @@ public class AutoModRule implements Entity {
         this.data = Objects.requireNonNull(data);
     }
 
-    /**
-     * Gets the data of the rule.
-     *
-     * @return The data of the rule.
-     */
     public AutoModRuleData getData() {
         return data;
     }
@@ -100,8 +100,24 @@ public class AutoModRule implements Entity {
         return TriggerType.of(data.triggerType());
     }
 
+    /**
+     * Gets the Trigger MetaData related to this rule.
+     *
+     * @return A {@link AutoModRuleTriggerMetaData}
+     */
     public AutoModRuleTriggerMetaData getTriggerMetaData() {
         return new AutoModRuleTriggerMetaData(gateway, data.triggerMetadata());
+    }
+
+    /**
+     * Gets the actions which will execute when the rule is triggered
+     *
+     * @return A list of {@link AutoModRuleAction}
+     */
+    public List<AutoModRuleAction> getActions() {
+        return data.actions().stream()
+            .map(data -> new AutoModRuleAction(gateway, data))
+            .collect(Collectors.toList());
     }
 
     public EventType getEventType() {
@@ -174,6 +190,7 @@ public class AutoModRule implements Entity {
 
     /**
      * Represents a Trigger Type of AutoMod Rule.
+     * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-types">Auto Moderation - Trigger Types</a>
      */
     public enum TriggerType {
         /**
@@ -181,14 +198,26 @@ public class AutoModRule implements Entity {
          */
         UNKNOWN(-1),
 
+        /**
+         * Check if content contains words from a user defined list of keywords
+         */
         KEYWORD(1),
 
         HARMFUL_LINK(2),
 
+        /**
+         * Check if content represents generic spam
+         */
         SPAM(3),
 
+        /**
+         * Check if content contains words from internal pre-defined wordsets
+         */
         KEYWORD_PRESET(4),
 
+        /**
+         * Check if content contains more unique mentions than allowed
+         */
         MENTION_SPAM(5);
 
         /**

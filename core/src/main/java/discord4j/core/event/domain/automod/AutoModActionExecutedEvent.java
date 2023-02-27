@@ -132,7 +132,7 @@ public class AutoModActionExecutedEvent extends Event {
      * Gets the {@link Snowflake} ID of the {@link MessageChannel} involved in this event, if present.
      * {@link discord4j.core.object.entity.Message} is in.
      *
-     * @return the ID of the {@link MessageChannel} involved, if present.
+     * @return The ID of the {@link MessageChannel} involved, if present.
      */
     public Optional<Snowflake> getChannelId() {
         return this.data.channelId().toOptional().map(Snowflake::of);
