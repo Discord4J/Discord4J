@@ -136,6 +136,13 @@ public abstract class ReactionEmoji {
     }
 
     /**
+     * Gets the formatted version of this emoji (i.e., to display in the client).
+     *
+     * @return The formatted version of this emoji (i.e., to display in the client).
+     */
+    public abstract String asFormat();
+
+    /**
      * Gets this emoji as downcasted to {@link Custom a custom reaction emoji}.
      *
      * @return This emoji downcasted to a custom emoji, if possible.
@@ -208,11 +215,7 @@ public abstract class ReactionEmoji {
                     .build();
         }
 
-        /**
-         * Gets the formatted version of this emoji (i.e., to display in the client).
-         *
-         * @return The formatted version of this emoji (i.e., to display in the client).
-         */
+        @Override
         public String asFormat() {
             return '<' + (this.isAnimated() ? "a" : "") + ':' + this.getName() + ':' + this.getId().asString() + '>';
         }
@@ -261,6 +264,11 @@ public abstract class ReactionEmoji {
             return EmojiData.builder()
                     .name(raw)
                     .build();
+        }
+
+        @Override
+        public String asFormat() {
+            return this.getRaw();
         }
 
         @Override
