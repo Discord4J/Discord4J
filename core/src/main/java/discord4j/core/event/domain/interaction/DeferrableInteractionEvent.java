@@ -315,6 +315,42 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      * initial response method chosen: if {@link #deferReply()} or {@link #reply()} was used, the <strong>new</strong>
      * message created with the reply; if {@link ComponentInteractionEvent#edit()} or
      * {@link ComponentInteractionEvent#deferEdit()} was used, this method will modify the message the component is on.
+     * <p>
+     * By default, this method will append any file added through {@code withFiles}. To replace or remove individual
+     * attachments, use {@code withAttachments} along with {@link discord4j.core.object.entity.Attachment} objects from
+     * the original message you want to keep. It is not required to include the new files as {@code Attachment} objects.
+     * <p>
+     * For example, to replace all previous attachments, provide an empty {@code withAttachments} and your files:
+     * <pre>{@code
+     *  event.editReply()
+     *     .withContentOrNull("Replaced all attachments")
+     *     .withFiles(getFile())
+     *     .withComponents(row)
+     *     .withAttachments();
+     * }</pre>
+     * <p>
+     * To replace a specific attachment, you need to pass the attachment details you want to keep. You could work from
+     * the original {@link Message#getAttachments()} list and pass it to {@code withAttachments} and your files.
+     * The following example removes only the first attachment:
+     * <pre>{@code
+     *  event.getReply()
+     *     .flatMap(reply -> event.editReply()
+     *             .withContentOrNull("Replaced the first attachment")
+     *             .withFiles(getFile())
+     *             .withComponents(row)
+     *             .withAttachmentsOrNull(reply.getAttachments()
+     *                     .stream()
+     *                     .skip(1)
+     *                     .collect(Collectors.toList())));
+     * }</pre>
+     * <p>
+     * To clear all attachments, provide an empty {@code withAttachments}:
+     * <pre>{@code
+     *  event.editReply()
+     *     .withContentOrNull("Removed all attachments")
+     *     .withComponents(row)
+     *     .withAttachments();
+     * }</pre>
      *
      * @return a {@link InteractionReplyEditMono} where, upon successful completion, emits the updated message. If an
      * error is received, it is emitted through the {@code InteractionReplyEditMono}.
@@ -330,6 +366,12 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      * initial response method chosen: if {@link #deferReply()} or {@link #reply()} was used, the <strong>new</strong>
      * message created with the reply; if {@link ComponentInteractionEvent#edit()} or
      * {@link ComponentInteractionEvent#deferEdit()} was used, this method will modify the message the component is on.
+     * <p>
+     * By default, this method will append any file added through {@code withFiles}. To replace or remove individual
+     * attachments, use {@code withAttachment} along with {@link discord4j.core.object.entity.Attachment} objects from
+     * the original message you want to keep. It is not required to include the new files as {@code Attachment} objects.
+     * <p>
+     * See the docs for {@link #editReply()} for examples and adapt them to a standalone spec.
      *
      * @param spec an immutable object that specifies how to edit the initial reply
      * @return a {@link Mono} where, upon successful completion, emits the updated message. If an error is received,

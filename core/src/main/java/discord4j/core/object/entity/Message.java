@@ -561,6 +561,9 @@ public final class Message implements Entity {
 
     /**
      * Requests to edit this message.
+     * <p>
+     * To partially or completely replace attachments, see the docs for {@link #edit()} for examples and adapt them to
+     * a standalone spec.
      *
      * @param spec an immutable object that specifies how to edit the message
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Message}. If an error is
@@ -584,6 +587,41 @@ public final class Message implements Entity {
     /**
      * Requests to edit this message. Properties specifying how to edit this message can be set via the {@code
      * withXxx} methods of the returned {@link MessageEditMono}.
+     * <p>
+     * By default, this method will append any file added through {@code withFiles}. To replace or remove individual
+     * attachments, use {@code withAttachments} along with {@link discord4j.core.object.entity.Attachment} objects from
+     * the original message you want to keep. It is not required to include the new files as {@code Attachment} objects.
+     * <p>
+     * For example, to replace all previous attachments, provide an empty {@code withAttachments} and your files:
+     * <pre>{@code
+     *  message.edit()
+     *     .withContentOrNull("Replaced all attachments")
+     *     .withFiles(getFile())
+     *     .withComponents(row)
+     *     .withAttachments();
+     * }</pre>
+     * <p>
+     * To replace a specific attachment, you need to pass the attachment details you want to keep. You could work from
+     * the original {@link Message#getAttachments()} list and pass it to {@code withAttachments} and your files.
+     * The following example removes only the first attachment:
+     * <pre>{@code
+     *  message.edit()
+     *         .withContentOrNull("Replaced the first attachment")
+     *         .withFiles(getFile())
+     *         .withComponents(row)
+     *         .withAttachmentsOrNull(message.getAttachments()
+     *                 .stream()
+     *                 .skip(1)
+     *                 .collect(Collectors.toList()));
+     * }</pre>
+     * <p>
+     * To clear all attachments, provide an empty {@code withAttachments}:
+     * <pre>{@code
+     *  message.edit()
+     *     .withContentOrNull("Removed all attachments")
+     *     .withComponents(row)
+     *     .withAttachments();
+     * }</pre>
      *
      * @return A {@link MessageEditMono} where, upon successful completion, emits the edited {@link Message}. If an
      * error is received, it is emitted through the {@code MessageEditMono}.
