@@ -217,7 +217,19 @@ public abstract class ReactionEmoji {
 
         @Override
         public String asFormat() {
-            return '<' + (this.isAnimated() ? "a" : "") + ':' + this.getName() + ':' + this.getId().asString() + '>';
+            return asFormat(this.isAnimated(), this.getName(), this.getId());
+        }
+
+        /**
+         * Gets the formatted version of this emoji (i.e., to display in the client).
+         *
+         * @param isAnimated Whether the emoji is animated.
+         * @param id The ID of the custom emoji.
+         * @param name The name of the custom emoji.
+         * @return The formatted version of this emoji (i.e., to display in the client).
+         */
+        public static String asFormat(final boolean isAnimated, final String name, final Snowflake id) {
+            return '<' + (isAnimated ? "a" : "") + ':' + Objects.requireNonNull(name) + ':' + Objects.requireNonNull(id).asString() + '>';
         }
 
         @Override
