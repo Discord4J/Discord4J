@@ -52,6 +52,7 @@ public class DispatchStoreLayer {
         add(ChannelUpdate.class::isInstance, GatewayActions::channelUpdate);
         add(GuildCreate.class::isInstance, GatewayActions::guildCreate);
         add(GuildDelete.class::isInstance, GatewayActions::guildDelete);
+        add(GuildStickersUpdate.class::isInstance, GatewayActions::guildStickersUpdate);
         add(GuildEmojisUpdate.class::isInstance, GatewayActions::guildEmojisUpdate);
         add(GuildMemberAdd.class::isInstance, GatewayActions::guildMemberAdd);
         add(GuildMemberRemove.class::isInstance, GatewayActions::guildMemberRemove);
@@ -61,6 +62,12 @@ public class DispatchStoreLayer {
         add(GuildRoleDelete.class::isInstance, GatewayActions::guildRoleDelete);
         add(GuildRoleUpdate.class::isInstance, GatewayActions::guildRoleUpdate);
         add(GuildUpdate.class::isInstance, GatewayActions::guildUpdate);
+        add(ThreadCreate.class::isInstance, GatewayActions::threadCreate);
+        add(ThreadUpdate.class::isInstance, GatewayActions::threadUpdate);
+        add(ThreadDelete.class::isInstance, GatewayActions::threadDelete);
+        add(ThreadListSync.class::isInstance, GatewayActions::threadListSync);
+        add(ThreadMemberUpdate.class::isInstance, GatewayActions::threadMemberUpdate);
+        add(ThreadMembersUpdate.class::isInstance, GatewayActions::threadMembersUpdate);
         add(MessageCreate.class::isInstance, GatewayActions::messageCreate);
         add(MessageDelete.class::isInstance, GatewayActions::messageDelete);
         add(MessageDeleteBulk.class::isInstance, GatewayActions::messageDeleteBulk);

@@ -59,6 +59,9 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     private final ConcurrentMap<Long, WithUser<ImmutableEmojiData>> emojis =
             new ConcurrentHashMap<>();
 
+    private final ConcurrentMap<Long, ImmutableStickerData> stickers =
+        new ConcurrentHashMap<>();
+
     private final ConcurrentMap<Long, WrappedGuildData> guilds = new ConcurrentHashMap<>();
 
     private final ConcurrentMap<Long2, WithUser<ImmutableMemberData>> members =
@@ -77,6 +80,9 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             StorageBackend.caffeine(Caffeine::weakValues).newMap();
 
     private final ConcurrentMap<Long2, ImmutableVoiceStateData> voiceStates =
+            new ConcurrentHashMap<>();
+
+    private final ConcurrentMap<Long2, ImmutableThreadMemberData> threadMembers =
             new ConcurrentHashMap<>();
 
     private final Set<Integer> shardsConnected = new HashSet<>();
@@ -111,6 +117,17 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     public Mono<Long> countChannelsInGuild(long guildId) {
         return Mono.justOrEmpty(contentByGuild.get(guildId))
                 .map(content -> (long) content.channelIds.size());
+    }
+
+    @Override
+    public Mono<Long> countStickers() {
+        return Mono.just((long) stickers.size());
+    }
+
+    @Override
+    public Mono<Long> countStickersInGuild(long guildId) {
+        return Mono.justOrEmpty(contentByGuild.get(guildId))
+            .map(content -> (long) content.stickerIds.size());
     }
 
     @Override
@@ -220,6 +237,23 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     @Override
     public Mono<ChannelData> getChannelById(long channelId) {
         return Mono.justOrEmpty(channels.get(channelId));
+    }
+
+    @Override
+    public Flux<StickerData> getStickers() {
+        return Flux.fromIterable(stickers.values());
+    }
+
+    @Override
+    public Flux<StickerData> getStickersInGuild(long guildId) {
+        return Mono.justOrEmpty(contentByGuild.get(guildId))
+            .flatMapIterable(content -> content.stickerIds)
+            .flatMap(id -> Mono.justOrEmpty(stickers.get(id)));
+    }
+
+    @Override
+    public Mono<StickerData> getStickerById(long guildId, long stickerId) {
+        return Mono.justOrEmpty(stickers.get(stickerId));
     }
 
     @Override
@@ -408,6 +442,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             List<EmojiData> emojis = createData.emojis();
             List<MemberData> members = createData.members();
             List<ChannelData> channels = createData.channels();
+            List<ChannelData> threads = createData.threads();
             List<PresenceData> presences = createData.presences();
             List<VoiceStateData> voiceStates = createData.voiceStates();
             ImmutableGuildData guild = ImmutableGuildData.builder()
@@ -422,6 +457,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             emojis.forEach(emoji -> saveEmoji(guildId, emoji));
             members.forEach(member -> saveMember(guildId, member));
             channels.forEach(channel -> saveChannel(guildId, channel));
+            threads.forEach(channel -> this.channels.put(channel.id().asLong(), ImmutableChannelData.copyOf(channel)));
             presences.forEach(presence -> savePresence(guildId, presence));
             voiceStates.forEach(voiceState -> saveOrRemoveVoiceState(guildId, voiceState));
         });
@@ -431,6 +467,23 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     public Mono<GuildData> onGuildDelete(int shardIndex, GuildDelete dispatch) {
         long guildId = dispatch.guild().id().asLong();
         return Mono.fromCallable(() -> ifNonNullMap(contentByGuild.get(guildId), GuildContent::dispose));
+    }
+
+    @Override
+    public Mono<Set<StickerData>> onGuildStickersUpdate(int shardIndex, GuildStickersUpdate dispatch) {
+        long guildId = dispatch.guildId().asLong();
+        return Mono.fromCallable(() -> {
+            GuildContent content = computeGuildContent(guildId);
+            Set<StickerData> old = content.stickerIds.stream()
+                .map(stickers::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+            stickers.keySet().removeAll(content.stickerIds);
+            ifNonNullDo(guilds.get(guildId), guild -> guild.getStickers().clear());
+            content.stickerIds.clear();
+            dispatch.stickers().forEach(sticker -> saveSticker(guildId, sticker));
+            return old;
+        });
     }
 
     @Override
@@ -703,6 +756,18 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     }
 
     @Override
+    public Mono<ThreadMemberData> getThreadMemberById(long threadId, long userId) {
+        return Mono.justOrEmpty(threadMembers.get(new Long2(threadId, userId)));
+    }
+
+    @Override
+    public Flux<ThreadMemberData> getMembersInThread(long threadId) {
+        return Mono.justOrEmpty(contentByChannel.get(threadId))
+                .flatMapIterable(c -> c.threadMembersIds)
+                .map(threadMembers::get);
+    }
+
+    @Override
     public Mono<UserData> onUserUpdate(int shardIndex, UserUpdate dispatch) {
         return Mono.fromCallable(() -> ifNonNullMap(
                 users.get(dispatch.user().id().asLong()),
@@ -720,6 +785,63 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     @Override
     public Mono<Void> onGuildMembersCompletion(long guildId) {
         return Mono.fromRunnable(() -> ifNonNullDo(contentByGuild.get(guildId), GuildContent::completeMemberList));
+    }
+
+    @Override
+    public Mono<Void> onThreadCreate(int shardIndex, ThreadCreate dispatch) {
+        long channelId = dispatch.thread().id().asLong();
+        return Mono.fromRunnable(() -> channels.put(channelId, ImmutableChannelData.copyOf(dispatch.thread())));
+    }
+
+    @Override
+    public Mono<ChannelData> onThreadUpdate(int shardIndex, ThreadUpdate dispatch) {
+        long channelId = dispatch.thread().id().asLong();
+        return Mono.justOrEmpty(channels.put(channelId, ImmutableChannelData.copyOf(dispatch.thread())));
+    }
+
+    @Override
+    public Mono<Void> onThreadDelete(int shardIndex, ThreadDelete dispatch) {
+        long channelId = dispatch.thread().id().asLong();
+        return Mono.fromRunnable(() -> ifNonNullDo(contentByChannel.get(channelId), ChannelContent::dispose));
+    }
+
+    @Override
+    public Mono<Void> onThreadListSync(int shardIndex, ThreadListSync dispatch) {
+        return Mono.fromRunnable(() -> {
+            dispatch.threads().forEach(thread -> channels.put(thread.id().asLong(), ImmutableChannelData.copyOf(thread)));
+            dispatch.members().forEach(member -> saveThreadMember(member));
+        });
+    }
+
+    @Override
+    public Mono<ThreadMemberData> onThreadMemberUpdate(int shardIndex, ThreadMemberUpdate dispatch) {
+        return Mono.fromCallable(() -> saveThreadMember(dispatch.member()));
+    }
+
+    @Override
+    public Mono<List<ThreadMemberData>> onThreadMembersUpdate(int shardIndex, ThreadMembersUpdate dispatch) {
+        long threadId = dispatch.id().asLong();
+        return Mono.fromCallable(() -> {
+            ChannelContent content = computeChannelContent(threadId);
+            List<ThreadMemberData> old = content.threadMembersIds.stream()
+                    .map(threadMembers::get)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            dispatch.addedMembers().forEach(threadMember -> {
+                Long2 id = new Long2(threadId, threadMember.userId().get().asLong());
+                content.threadMembersIds.add(id);
+                threadMembers.put(id, ImmutableThreadMemberData.copyOf(threadMember));
+            });
+
+            dispatch.removedMemberIds().forEach(id -> {
+                Long2 key = new Long2(threadId, id.asLong());
+                content.threadMembersIds.remove(key);
+                threadMembers.remove(key);
+            });
+
+            return old;
+        });
     }
 
     @Override
@@ -760,6 +882,13 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return roles.put(roleId, ImmutableRoleData.copyOf(role));
     }
 
+    private void saveSticker(long guildId, StickerData sticker) {
+        long stickerId = sticker.id().asLong();
+        computeGuildContent(guildId).stickerIds.add(stickerId);
+        ifNonNullDo(guilds.get(guildId), guild -> guild.getStickers().add(Id.of(stickerId)));
+        stickers.put(stickerId, ImmutableStickerData.copyOf(sticker));
+    }
+
     private void saveEmoji(long guildId, EmojiData emoji) {
         emoji.id().map(Id::asLong).ifPresent(emojiId -> {
             computeGuildContent(guildId).emojiIds.add(emojiId);
@@ -781,6 +910,15 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                 (m, u) -> ImmutableUserData.copyOf(m.user()));
         members.put(memberId, new WithUser<>(ImmutableMemberData.copyOf(member).withUser(EmptyUser.INSTANCE), userRef,
                 ImmutableMemberData::withUser));
+    }
+
+    @Nullable
+    private ThreadMemberData saveThreadMember(ThreadMemberData threadMember) {
+        long threadId = threadMember.id().get().asLong();
+        ChannelContent content = computeChannelContent(threadId);
+        Long2 id = new Long2(threadId, threadMember.userId().get().asLong());
+        content.threadMembersIds.add(id);
+        return threadMembers.put(id, ImmutableThreadMemberData.copyOf(threadMember));
     }
 
     @Nullable
@@ -825,20 +963,20 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     private VoiceStateData saveOrRemoveVoiceState(long guildId, VoiceStateData voiceState) {
         Long2 voiceStateId = new Long2(guildId, voiceState.userId().asLong());
         GuildContent guildContent = computeGuildContent(guildId);
+        VoiceStateData old = voiceStates.remove(voiceStateId);
+        if (old != null && old.channelId().isPresent()) {
+            computeChannelContent(old.channelId().get().asLong()).voiceStateIds.remove(voiceStateId);
+        }
         if (voiceState.channelId().isPresent()) {
             guildContent.voiceStateIds.add(voiceStateId);
             computeChannelContent(voiceState.channelId().get().asLong()).voiceStateIds.add(voiceStateId);
-            return voiceStates.put(voiceStateId, ImmutableVoiceStateData.copyOf(voiceState)
+            voiceStates.put(voiceStateId, ImmutableVoiceStateData.copyOf(voiceState)
                     .withGuildId(guildId)
                     .withMember(Possible.absent()));
         } else {
             guildContent.voiceStateIds.remove(voiceStateId);
-            VoiceStateData old = voiceStates.remove(voiceStateId);
-            if (old != null && old.channelId().isPresent()) {
-                computeChannelContent(old.channelId().get().asLong()).voiceStateIds.remove(voiceStateId);
-            }
-            return old;
         }
+        return old;
     }
 
     @Nullable
@@ -967,6 +1105,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         private final long guildId;
         private final Set<Long> channelIds = new HashSet<>();
         private final Set<Long> emojiIds = new HashSet<>();
+        private final Set<Long> stickerIds = new HashSet<>();
         private final Set<Long2> memberIds = new HashSet<>();
         private final Set<Long2> presenceIds = new HashSet<>();
         private final Set<Long> roleIds = new HashSet<>();
@@ -994,6 +1133,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                     .collect(Collectors.toSet())
                     .forEach(ChannelContent::dispose);
             emojis.keySet().removeAll(emojiIds);
+            stickers.keySet().removeAll(stickerIds);
             members.keySet().removeAll(memberIds);
             presences.keySet().removeAll(presenceIds);
             roles.keySet().removeAll(roleIds);
@@ -1006,6 +1146,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
         private final long channelId;
         private final Set<Long2> messageIds = new HashSet<>();
+        private final Set<Long2> threadMembersIds = new HashSet<>();
         private final Set<Long2> voiceStateIds = new HashSet<>();
 
         public ChannelContent(long channelId) {
@@ -1015,6 +1156,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         private void dispose() {
             channels.remove(channelId);
             contentByChannel.remove(channelId);
+            threadMembers.keySet().removeAll(threadMembersIds);
             messages.keySet().removeAll(messageIds);
         }
     }

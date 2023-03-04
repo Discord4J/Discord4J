@@ -332,4 +332,9 @@ public class GuildService extends RestService {
             .bodyToMono(Void.class);
     }
 
+    public Mono<ListThreadsData> listActiveGuildThreads(long guildId) {
+        return Routes.LIST_ACTIVE_GUILD_THREADS.newRequest(guildId)
+                .exchange(getRouter())
+                .bodyToMono(ListThreadsData.class);
+    }
 }

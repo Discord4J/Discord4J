@@ -22,11 +22,9 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.possible.Possible;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -79,12 +77,38 @@ public class ApplicationCommandOption implements DiscordObject {
     }
 
     /**
+     * Gets the Locale and name of the option.
+     *
+     * @return The locales and names of the option.
+     */
+    public Map<Locale, String> getLocalizedNames() {
+        return Possible.flatOpt(data.nameLocalizations())
+                .orElse(Collections.emptyMap())
+                .entrySet().stream()
+                .collect(Collectors.toMap(entry -> new Locale.Builder().setLanguageTag(entry.getKey()).build(),
+                        Map.Entry::getValue));
+    }
+
+    /**
      * Gets the description of the option.
      *
      * @return The description of the option.
      */
     public String getDescription() {
         return data.description();
+    }
+
+    /**
+     * Gets the Locale and description of the option.
+     *
+     * @return The locales and descriptions of the option.
+     */
+    public Map<Locale, String> getLocalizedDescriptions() {
+        return Possible.flatOpt(data.descriptionLocalizations())
+                .orElse(Collections.emptyMap())
+                .entrySet().stream()
+                .collect(Collectors.toMap(entry -> new Locale.Builder().setLanguageTag(entry.getKey()).build(),
+                        Map.Entry::getValue));
     }
 
     /**
@@ -115,9 +139,10 @@ public class ApplicationCommandOption implements DiscordObject {
      * @return The choice corresponding to the provided name, if present.
      */
     public Optional<ApplicationCommandOptionChoice> getChoice(final String name) {
-        return getChoices().stream()
-                .filter(choice -> choice.getName().equals(name))
-                .findFirst();
+        return data.choices().toOptional().orElse(Collections.emptyList()).stream()
+                .filter(choice -> choice.name().equals(name))
+                .findFirst()
+                .map(data -> new ApplicationCommandOptionChoice(gateway, data));
     }
 
     /**
@@ -141,9 +166,10 @@ public class ApplicationCommandOption implements DiscordObject {
      * subcommand group type.
      */
     public Optional<ApplicationCommandOption> getOption(final String name) {
-        return getOptions().stream()
-                .filter(option -> option.getName().equals(name))
-                .findFirst();
+        return data.options().toOptional().orElse(Collections.emptyList()).stream()
+                .filter(option -> option.name().equals(name))
+                .findFirst()
+                .map(data -> new ApplicationCommandOption(gateway, data));
     }
 
     /**
@@ -188,6 +214,26 @@ public class ApplicationCommandOption implements DiscordObject {
      */
     public Optional<Double> getMaximumValue() {
         return data.maxValue().toOptional();
+    }
+
+    /**
+     * Returns the minimum length a user is allowed to input, represented as a {@link Integer}.
+     * </p>
+     * This is only applicable to {@link Type#STRING} type.
+     * @return The minimum length a user is allowed to input if present, otherwise {@link Optional#empty()}.
+     */
+    public Optional<Integer> getMinimumLength() {
+        return data.minLength().toOptional();
+    }
+
+    /**
+     * Returns the maximum length a user is allowed to input, represented as a {@link Integer}.
+     * </p>
+     * This is only applicable to {@link Type#STRING} type.
+     * @return The maximum length a user is allowed to input if present, otherwise {@link Optional#empty()}.
+     */
+    public Optional<Integer> getMaximumLength() {
+        return data.maxLength().toOptional();
     }
 
     @Override

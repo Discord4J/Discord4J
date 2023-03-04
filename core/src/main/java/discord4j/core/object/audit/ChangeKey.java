@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Sticker;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.PermissionSet;
@@ -150,6 +151,22 @@ public final class ChangeKey<T> {
     public static final ChangeKey<Integer> USER_LIMIT = changeKey("user_limit", INTEGER_PARSER);
     /** New user date for expire a timeout */
     public static final ChangeKey<Instant> COMMUNICATION_DISABLED_UNTIL = changeKey("communication_disabled_until", INSTANT_PARSER);
+    /** The role unicode emoji changed */
+    public static final ChangeKey<String> ROLE_ICON = changeKey("unicode_emoji", STRING_PARSER);
+    /** The related emoji of sticker changed */
+    public static final ChangeKey<String> STICKER_TAGS = changeKey("tags", STRING_PARSER);
+    /** The format type of sticker changed */
+    public static final ChangeKey<Sticker.Format> STICKER_FORMAT_TYPE = changeKey("format_type", INTEGER_PARSER.andThen(Sticker.Format::of));
+    /** Guild sticker is in changed */
+    public static final ChangeKey<Snowflake> STICKER_GUILD_ID = changeKey("guild_id", SNOWFLAKE_PARSER);
+    /** Availability of sticker changed */
+    public static final ChangeKey<Boolean> STICKER_AVAILABLE = changeKey("available", BOOLEAN_PARSER);
+    /** Thread is now archived/unarchived */
+    public static final ChangeKey<Boolean> THREAD_ARCHIVED = changeKey("archived", BOOLEAN_PARSER);
+    /** Auto archive duration changed */
+    public static final ChangeKey<Integer> THREAD_AUTO_ARCHIVE_DURATION = changeKey("auto_archive_duration", INTEGER_PARSER);
+    /** Thread is now locked/unlocked */
+    public static final ChangeKey<Boolean> THREAD_LOCKED = changeKey("locked", BOOLEAN_PARSER);
 
     private static <T> ChangeKey<T> changeKey(String name, BiFunction<AuditLogEntry, JsonNode, T> parser) {
         return new ChangeKey<>(name, parser);

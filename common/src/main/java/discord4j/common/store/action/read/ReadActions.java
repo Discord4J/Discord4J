@@ -235,6 +235,27 @@ public class ReadActions {
     }
 
     /**
+     * Creates an action to retrieve data for all stickers present in a store for the given guild ID.
+     *
+     * @param guildId the guild ID
+     * @return a new {@link GetStickersInGuildAction}
+     */
+    public static GetStickersInGuildAction getStickersInGuild(long guildId) {
+        return new GetStickersInGuildAction(guildId);
+    }
+
+    /**
+     * Creates an action to retrieve data for the sticker corresponding to the given guild ID and sticker ID.
+     *
+     * @param guildId the guild ID
+     * @param stickerId the sticker ID
+     * @return a new {@link GetStickerByIdAction}
+     */
+    public static GetStickerByIdAction getStickerById(long guildId, long stickerId) {
+        return new GetStickerByIdAction(guildId, stickerId);
+    }
+
+    /**
      * Creates an action to retrieve data for all emojis present in a store.
      *
      * @return a new {@link GetEmojisAction}
@@ -483,5 +504,26 @@ public class ReadActions {
      */
     public static GetStageInstanceByChannelIdAction getStageInstanceByChannelId(long channelId) {
         return new GetStageInstanceByChannelIdAction(channelId);
+    }
+
+    /**
+     * Creates an action to retrieve data for the thread member corresponding to the given thread ID and user ID.
+     *
+     * @param threadId the thread ID
+     * @param userId the user ID
+     * @return a new {@link GetThreadMemberByIdAction}
+     */
+    public static GetThreadMemberByIdAction getThreadMemberById(long threadId, long userId) {
+        return new GetThreadMemberByIdAction(threadId, userId);
+    }
+
+    /**
+     * Creates an action to retrieve data for all thread members present in a store for the given thread ID.
+     *
+     * @param threadId the thread ID
+     * @return a new {@link GetMembersInThreadAction}
+     */
+    public static GetMembersInThreadAction getMembersInThread(long threadId) {
+        return new GetMembersInThreadAction(threadId);
     }
 }

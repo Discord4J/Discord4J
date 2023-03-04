@@ -119,7 +119,8 @@ public class ApplicationCommandInteraction implements DiscordObject {
      */
     public List<ApplicationCommandInteractionOption> getOptions() {
         return data.options().toOptional().orElse(Collections.emptyList()).stream()
-                .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId))
+                .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId,
+                        this.data.resolved().toOptional().orElse(null)))
                 .collect(Collectors.toList());
     }
 
@@ -130,9 +131,11 @@ public class ApplicationCommandInteraction implements DiscordObject {
      * @return The option corresponding to the provided name, if present.
      */
     public Optional<ApplicationCommandInteractionOption> getOption(final String name) {
-        return getOptions().stream()
-                .filter(option -> option.getName().equals(name))
-                .findFirst();
+        return data.options().toOptional().orElse(Collections.emptyList()).stream()
+                .filter(option -> option.name().equals(name))
+                .findFirst()
+                .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId,
+                        this.data.resolved().toOptional().orElse(null)));
     }
 
     /**

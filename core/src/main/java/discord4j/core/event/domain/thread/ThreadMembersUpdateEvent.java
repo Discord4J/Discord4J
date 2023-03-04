@@ -17,7 +17,6 @@
 
 package discord4j.core.event.domain.thread;
 
-import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.ThreadMember;
@@ -33,8 +32,9 @@ import java.util.stream.Collectors;
  * Sent when anyone is added to or removed from a thread. If the current user does not have the
  * {@link discord4j.gateway.intent.Intent#GUILD_MEMBERS} Gateway Intent, then this event will only be sent if the
  * current user was added to or removed from the thread.
+ *
+ * @see <a href="https://discord.com/developers/docs/topics/gateway-events#thread-members-update">Discord Docs</a>
  */
-@Experimental
 public class ThreadMembersUpdateEvent extends ThreadEvent {
 
     private final ThreadMembersUpdate dispatch;

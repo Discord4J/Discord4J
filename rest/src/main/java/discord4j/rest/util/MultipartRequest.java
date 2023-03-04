@@ -45,6 +45,10 @@ public class MultipartRequest<T> {
         return new MultipartRequest<>(body, files);
     }
 
+    public <R> MultipartRequest<R> withRequest(R body) {
+        return new MultipartRequest<>(body, files);
+    }
+
     public MultipartRequest<T> addFile(String fileName, InputStream file) {
         List<Tuple2<String, InputStream>> list = new ArrayList<>(this.files);
         list.add(Tuples.of(fileName, file));
@@ -66,7 +70,6 @@ public class MultipartRequest<T> {
         return (MessageCreateRequest) jsonPayload;
     }
 
-    @Nullable
     public T getJsonPayload() { return jsonPayload; }
 
     public List<Tuple2<String, InputStream>> getFiles() {

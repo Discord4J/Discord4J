@@ -53,6 +53,12 @@ public class StoreEntityRetriever implements EntityRetriever {
     }
 
     @Override
+    public Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId) {
+        return Mono.from(store.execute(ReadActions.getStickerById(guildId.asLong(), stickerId.asLong())))
+            .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
+    }
+
+    @Override
     public Mono<GuildEmoji> getGuildEmojiById(Snowflake guildId, Snowflake emojiId) {
         return Mono.from(store.execute(ReadActions.getEmojiById(guildId.asLong(), emojiId.asLong())))
                 .map(data -> new GuildEmoji(gateway, data, guildId.asLong()));
@@ -113,7 +119,7 @@ public class StoreEntityRetriever implements EntityRetriever {
     public Flux<GuildChannel> getGuildChannels(Snowflake guildId) {
         return Flux.from(store.execute(ReadActions.getChannelsInGuild(guildId.asLong())))
                 .map(channelData -> EntityUtil.getChannel(gateway, channelData))
-                .cast(GuildChannel.class);
+                .ofType(GuildChannel.class);
     }
 
     @Override
@@ -132,5 +138,23 @@ public class StoreEntityRetriever implements EntityRetriever {
     public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId) {
         return Mono.from(store.execute(ReadActions.getStageInstanceByChannelId(channelId.asLong())))
                 .map(data -> new StageInstance(gateway, data));
+    }
+
+    @Override
+    public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
+        return Flux.from(store.execute(ReadActions.getStickersInGuild(guildId.asLong())))
+                .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
+    }
+
+    @Override
+    public Mono<ThreadMember> getThreadMemberById(Snowflake threadId, Snowflake userId) {
+        return Mono.from(store.execute(ReadActions.getThreadMemberById(threadId.asLong(), userId.asLong())))
+                .map(data -> new ThreadMember(gateway, data));
+    }
+
+    @Override
+    public Flux<ThreadMember> getThreadMembers(Snowflake threadId) {
+        return Flux.from(store.execute(ReadActions.getMembersInThread(threadId.asLong())))
+                .map(data -> new ThreadMember(gateway, data));
     }
 }

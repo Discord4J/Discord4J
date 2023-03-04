@@ -154,7 +154,10 @@ public final class Image {
         WEB_P("webp"),
 
         /** Represents the Graphics Interchange Format format. */
-        GIF("gif");
+        GIF("gif"),
+
+        /** Represents the Lottie format. */
+        LOTTIE("json");
 
         /** The file extension associated with this format. */
         private final String extension;

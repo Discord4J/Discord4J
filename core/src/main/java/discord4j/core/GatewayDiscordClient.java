@@ -29,15 +29,7 @@ import discord4j.core.event.domain.Event;
 import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
-import discord4j.core.object.entity.ApplicationInfo;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.GuildEmoji;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.StageInstance;
-import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.Webhook;
+import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.StageChannel;
@@ -767,6 +759,11 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     @Override
+    public Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId) {
+        return entityRetriever.getGuildStickerById(guildId, stickerId);
+    }
+
+    @Override
     public Mono<GuildEmoji> getGuildEmojiById(Snowflake guildId, Snowflake emojiId) {
         return entityRetriever.getGuildEmojiById(guildId, emojiId);
     }
@@ -824,5 +821,20 @@ public class GatewayDiscordClient implements EntityRetriever {
     @Override
     public Flux<GuildEmoji> getGuildEmojis(Snowflake guildId) {
         return entityRetriever.getGuildEmojis(guildId);
+    }
+
+    @Override
+    public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
+        return entityRetriever.getGuildStickers(guildId);
+    }
+
+    @Override
+    public Mono<ThreadMember> getThreadMemberById(Snowflake threadId, Snowflake userId) {
+        return entityRetriever.getThreadMemberById(threadId, userId);
+    }
+
+    @Override
+    public Flux<ThreadMember> getThreadMembers(Snowflake threadId) {
+        return entityRetriever.getThreadMembers(threadId);
     }
 }

@@ -16,13 +16,7 @@
  */
 package discord4j.core.retriever;
 
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.GuildEmoji;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.StageInstance;
-import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.common.util.Snowflake;
@@ -47,6 +41,11 @@ public class FallbackEntityRetriever implements EntityRetriever {
     @Override
     public Mono<Guild> getGuildById(Snowflake guildId) {
         return first.getGuildById(guildId).switchIfEmpty(fallback.getGuildById(guildId));
+    }
+
+    @Override
+    public Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId) {
+        return first.getGuildStickerById(guildId, stickerId).switchIfEmpty(fallback.getGuildStickerById(guildId, stickerId));
     }
 
     @Override
@@ -114,4 +113,18 @@ public class FallbackEntityRetriever implements EntityRetriever {
         return first.getStageInstanceByChannelId(channelId).switchIfEmpty(fallback.getStageInstanceByChannelId(channelId));
     }
 
+    @Override
+    public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
+        return first.getGuildStickers(guildId).switchIfEmpty(fallback.getGuildStickers(guildId));
+    }
+
+    @Override
+    public Mono<ThreadMember> getThreadMemberById(Snowflake threadId, Snowflake userId) {
+        return first.getThreadMemberById(threadId, userId).switchIfEmpty(fallback.getThreadMemberById(threadId, userId));
+    }
+
+    @Override
+    public Flux<ThreadMember> getThreadMembers(Snowflake threadId) {
+        return first.getThreadMembers(threadId).switchIfEmpty(fallback.getThreadMembers(threadId));
+    }
 }

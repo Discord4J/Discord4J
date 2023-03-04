@@ -388,7 +388,7 @@ public final class Webhook implements Entity {
      */
     @Deprecated
     public Mono<Void> execute(final Consumer<? super LegacyWebhookExecuteSpec> spec) {
-        return execute(false, spec).cast(Void.class);
+        return execute(false, spec).then();
     }
 
     /**
@@ -412,7 +412,7 @@ public final class Webhook implements Entity {
      * error IS NOT emitted through the {@code Mono}.
      */
     public Mono<Void> execute(WebhookExecuteSpec spec) {
-        return execute(false, spec).cast(Void.class);
+        return execute(false, spec).then();
     }
 
     /**

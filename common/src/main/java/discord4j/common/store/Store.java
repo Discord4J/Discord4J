@@ -89,6 +89,8 @@ public final class Store {
                     switch (action.getEntity()) {
                         case CHANNELS:
                             return dataAccessor.countChannelsInGuild(action.getGuildId());
+                        case STICKERS:
+                            return dataAccessor.countStickersInGuild(action.getGuildId());
                         case EMOJIS:
                             return dataAccessor.countEmojisInGuild(action.getGuildId());
                         case MEMBERS:
@@ -109,6 +111,8 @@ public final class Store {
                     switch (action.getEntity()) {
                         case CHANNELS:
                             return dataAccessor.countChannels();
+                        case STICKERS:
+                            return dataAccessor.countStickers();
                         case EMOJIS:
                             return dataAccessor.countEmojis();
                         case GUILDS:
@@ -132,6 +136,10 @@ public final class Store {
                 .map(GetChannelsAction.class, action -> dataAccessor.getChannels())
                 .map(GetChannelsInGuildAction.class, action -> dataAccessor.getChannelsInGuild(action.getGuildId()))
                 .map(GetChannelByIdAction.class, action -> dataAccessor.getChannelById(action.getChannelId()))
+                .map(GetStickersAction.class, action -> dataAccessor.getStickers())
+                .map(GetStickersInGuildAction.class, action -> dataAccessor.getStickersInGuild(action.getGuildId()))
+                .map(GetStickerByIdAction.class, action -> dataAccessor
+                    .getStickerById(action.getGuildId(), action.getStickerId()))
                 .map(GetEmojisAction.class, action -> dataAccessor.getEmojis())
                 .map(GetEmojisInGuildAction.class, action -> dataAccessor.getEmojisInGuild(action.getGuildId()))
                 .map(GetEmojiByIdAction.class, action -> dataAccessor
@@ -168,6 +176,10 @@ public final class Store {
                         .getVoiceStateById(action.getGuildId(), action.getUserId()))
                 .map(GetStageInstanceByChannelIdAction.class, action -> dataAccessor
                         .getStageInstanceByChannelId(action.getChannelId()))
+                .map(GetThreadMemberByIdAction.class, action -> dataAccessor
+                        .getThreadMemberById(action.getThreadId(), action.getUserId()))
+                .map(GetMembersInThreadAction.class, action -> dataAccessor
+                        .getMembersInThread(action.getThreadId()))
                 .build();
     }
 
@@ -184,6 +196,8 @@ public final class Store {
                         .onGuildCreate(action.getShardIndex(), action.getGuildCreate()))
                 .map(GuildDeleteAction.class, action -> gatewayDataUpdater
                         .onGuildDelete(action.getShardIndex(), action.getGuildDelete()))
+                .map(GuildStickersUpdateAction.class, action -> gatewayDataUpdater
+                    .onGuildStickersUpdate(action.getShardIndex(), action.getGuildStickersUpdate()))
                 .map(GuildEmojisUpdateAction.class, action -> gatewayDataUpdater
                         .onGuildEmojisUpdate(action.getShardIndex(), action.getGuildEmojisUpdate()))
                 .map(GuildMemberAddAction.class, action -> gatewayDataUpdater
@@ -235,6 +249,18 @@ public final class Store {
                         .onVoiceStateUpdateDispatch(action.getShardIndex(), action.getVoiceStateUpdateDispatch()))
                 .map(CompleteGuildMembersAction.class, action -> gatewayDataUpdater
                         .onGuildMembersCompletion(action.getGuildId()))
+                .map(ThreadCreateAction.class, action -> gatewayDataUpdater
+                        .onThreadCreate(action.getShardIndex(), action.getThreadCreate()))
+                .map(ThreadUpdateAction.class, action -> gatewayDataUpdater
+                        .onThreadUpdate(action.getShardIndex(), action.getThreadUpdate()))
+                .map(ThreadDeleteAction.class, action -> gatewayDataUpdater
+                        .onThreadDelete(action.getShardIndex(), action.getThreadDelete()))
+                .map(ThreadListSyncAction.class, action -> gatewayDataUpdater
+                        .onThreadListSync(action.getShardIndex(), action.getThreadListSync()))
+                .map(ThreadMemberUpdateAction.class, action -> gatewayDataUpdater
+                        .onThreadMemberUpdate(action.getShardIndex(), action.getThreadMemberUpdate()))
+                .map(ThreadMembersUpdateAction.class, action -> gatewayDataUpdater
+                        .onThreadMembersUpdate(action.getShardIndex(), action.getThreadMembersUpdate()))
                 .build();
     }
 

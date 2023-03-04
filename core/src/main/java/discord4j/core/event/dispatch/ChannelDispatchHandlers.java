@@ -28,12 +28,16 @@ import discord4j.discordjson.json.gateway.ChannelPinsUpdate;
 import discord4j.discordjson.json.gateway.ChannelUpdate;
 import discord4j.discordjson.possible.Possible;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 class ChannelDispatchHandlers {
+
+    private static final Logger log = Loggers.getLogger(ChannelDispatchHandlers.class);
 
     static Mono<? extends Event> channelCreate(DispatchContext<ChannelCreate, Void> context) {
         Channel.Type type = Channel.Type.of(context.getDispatch().channel().type());
@@ -52,7 +56,9 @@ class ChannelDispatchHandlers {
                 case GUILD_CATEGORY: return new CategoryCreateEvent(gateway, context.getShardInfo(), new Category(gateway, channel));
                 case GUILD_NEWS: return new NewsChannelCreateEvent(gateway, context.getShardInfo(), new NewsChannel(gateway, channel));
                 case GUILD_STORE: return new StoreChannelCreateEvent(gateway, context.getShardInfo(), new StoreChannel(gateway, channel));
-                default: throw new IllegalArgumentException("Unhandled channel type " + context.getDispatch().channel().type());
+                default:
+                    log.info("Received unknown channel create: {}", channel);
+                    return new UnknownChannelCreateEvent(gateway, context.getShardInfo(), new UnknownChannel(gateway, channel));
             }
         });
     }
@@ -74,7 +80,9 @@ class ChannelDispatchHandlers {
                 case GUILD_CATEGORY: return new CategoryDeleteEvent(gateway, context.getShardInfo(), new Category(gateway, channel));
                 case GUILD_NEWS: return new NewsChannelDeleteEvent(gateway, context.getShardInfo(), new NewsChannel(gateway, channel));
                 case GUILD_STORE: return new StoreChannelDeleteEvent(gateway, context.getShardInfo(), new StoreChannel(gateway, channel));
-                default: throw new IllegalArgumentException("Unhandled channel type " + context.getDispatch().channel().type());
+                default:
+                    log.info("Received unknown channel delete: {}", channel);
+                    return new UnknownChannelDeleteEvent(gateway, context.getShardInfo(), new UnknownChannel(gateway, channel));
             }
         });
     }
@@ -122,7 +130,11 @@ class ChannelDispatchHandlers {
                 case GUILD_STORE: return new StoreChannelUpdateEvent(gateway, context.getShardInfo(),
                         new StoreChannel(gateway, channel),
                         oldData.map(old -> new StoreChannel(gateway, old)).orElse(null));
-                default: throw new IllegalArgumentException("Unhandled channel type " + context.getDispatch().channel().type());
+                default:
+                    log.info("Received unknown channel update: {}", channel);
+                    return new UnknownChannelUpdateEvent(gateway, context.getShardInfo(),
+                        new UnknownChannel(gateway, channel),
+                        oldData.map(old -> new UnknownChannel(gateway, old)).orElse(null));
             }
         });
     }

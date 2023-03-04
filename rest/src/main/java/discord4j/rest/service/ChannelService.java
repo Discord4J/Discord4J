@@ -25,7 +25,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -42,6 +41,14 @@ public class ChannelService extends RestService {
     }
 
     public Mono<ChannelData> modifyChannel(long channelId, ChannelModifyRequest request, @Nullable String reason) {
+        return Routes.CHANNEL_MODIFY_PARTIAL.newRequest(channelId)
+                .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
+                .exchange(getRouter())
+                .bodyToMono(ChannelData.class);
+    }
+
+    public Mono<ChannelData> modifyThread(long channelId, ThreadModifyRequest request, @Nullable String reason) {
         return Routes.CHANNEL_MODIFY_PARTIAL.newRequest(channelId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
@@ -237,7 +244,7 @@ public class ChannelService extends RestService {
                 .bodyToMono(ChannelData.class);
     }
 
-    public Mono<ChannelData> startThreadWithoutMessage(long channelId, StartThreadRequest request) {
+    public Mono<ChannelData> startThreadWithoutMessage(long channelId, StartThreadWithoutMessageRequest request) {
         return Routes.START_THREAD_WITHOUT_MESSAGE.newRequest(channelId)
                 .body(request)
                 .exchange(getRouter())
@@ -268,18 +275,17 @@ public class ChannelService extends RestService {
                 .bodyToMono(Void.class);
     }
 
+    public Mono<ThreadMemberData> getThreadMember(long channelId, long userId) {
+        return Routes.GET_THREAD_MEMBER.newRequest(channelId, userId)
+                .exchange(getRouter())
+                .bodyToMono(ThreadMemberData.class);
+    }
+
     public Flux<ThreadMemberData> listThreadMembers(long channelId) {
         return Routes.LIST_THREAD_MEMBERS.newRequest(channelId)
                 .exchange(getRouter())
                 .bodyToMono(ThreadMemberData[].class)
                 .flatMapMany(Flux::fromArray);
-    }
-
-    // TODO is this not paginated?
-    public Mono<ListThreadsData> listActiveThreads(long channelId) {
-        return Routes.LIST_ACTIVE_THREADS.newRequest(channelId)
-                .exchange(getRouter())
-                .bodyToMono(ListThreadsData.class);
     }
 
     public Mono<ListThreadsData> listPublicArchivedThreads(long channelId, Map<String, Object> queryParams) {

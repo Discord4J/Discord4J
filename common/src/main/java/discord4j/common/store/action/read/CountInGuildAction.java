@@ -24,6 +24,7 @@ public class CountInGuildAction implements StoreAction<Long> {
     public enum InGuildEntity {
         CHANNELS,
         EMOJIS,
+        STICKERS,
         MEMBERS,
         MEMBERS_EXACT,
         PRESENCES,

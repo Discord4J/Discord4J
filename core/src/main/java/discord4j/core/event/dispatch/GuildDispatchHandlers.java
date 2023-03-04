@@ -118,6 +118,24 @@ class GuildDispatchHandlers {
         return Mono.just(new GuildDeleteEvent(gateway, context.getShardInfo(), guildId, guild, unavailable));
     }
 
+    static Mono<StickersUpdateEvent> guildStickersUpdate(DispatchContext<GuildStickersUpdate, Set<StickerData>> context) {
+        GatewayDiscordClient gateway = context.getGateway();
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
+
+        Set<GuildSticker> stickers = context.getDispatch().stickers()
+            .stream()
+            .map(sticker -> new GuildSticker(gateway, sticker, guildId))
+            .collect(Collectors.toSet());
+
+        Set<GuildSticker> oldStickers = context.getOldState()
+            .map(oldState -> oldState.stream()
+                .map(data -> new GuildSticker(gateway, data, guildId))
+                .collect(Collectors.toSet()))
+            .orElse(Collections.emptySet());
+
+        return Mono.just(new StickersUpdateEvent(gateway, context.getShardInfo(), guildId, stickers, oldStickers));
+    }
+
     static Mono<EmojisUpdateEvent> guildEmojisUpdate(DispatchContext<GuildEmojisUpdate, Set<EmojiData>> context) {
         GatewayDiscordClient gateway = context.getGateway();
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
@@ -193,15 +211,18 @@ class GuildDispatchHandlers {
                 .map(Snowflake::asLong)
                 .collect(Collectors.toSet());
         String currentNick = Possible.flatOpt(context.getDispatch().nick()).orElse(null);
+        String currentAvatar = context.getDispatch().avatar().orElse(null);
         String currentJoinedAt = context.getDispatch().joinedAt().orElse(null);
         String currentPremiumSince = Possible.flatOpt(context.getDispatch().premiumSince()).orElse(null);
         Boolean currentPending = context.getDispatch().pending().toOptional().orElse(null);
+        String communicationDisabledUntil = Possible.flatOpt(context.getDispatch().communicationDisabledUntil()).orElse(null);
         Member oldMember = context.getOldState()
                 .map(data -> new Member(gateway, data, guildId))
                 .orElse(null);
 
         return Mono.just(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, oldMember,
-                currentRoleIds, currentNick, currentJoinedAt, currentPremiumSince, currentPending));
+                currentRoleIds, currentNick, currentAvatar, currentJoinedAt,
+                currentPremiumSince, currentPending, communicationDisabledUntil));
     }
 
     static Mono<RoleCreateEvent> guildRoleCreate(DispatchContext<GuildRoleCreate, Void> context) {
