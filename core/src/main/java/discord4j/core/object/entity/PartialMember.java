@@ -46,6 +46,7 @@ import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -547,6 +548,19 @@ public class PartialMember extends User {
     }
 
     /**
+     * Returns the flags of this {@link PartialMember}.
+     *
+     * @return A {@code EnumSet} with the flags of this member.
+     */
+    public EnumSet<Flag> getFlags() {
+        long memberFlags = data.flags();
+        if (memberFlags != 0) {
+            return Flag.of(memberFlags);
+        }
+        return EnumSet.noneOf(Flag.class);
+    }
+
+    /**
      * Requests to ban this user.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link LegacyBanQuerySpec} to be operated on.
@@ -667,5 +681,79 @@ public class PartialMember extends User {
             "data=" + data +
             ", guildId=" + guildId +
             "} " + super.toString();
+    }
+
+    /** Describes the flags of a member in a guild.
+     * @see <a href="https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags">Discord Docs - Guild Member Flags</a>
+     **/
+    public enum Flag {
+        /**
+         * Member has left and rejoined the guild
+         */
+        DID_REJOIN(0),
+        /**
+         * Member has completed onboarding
+         */
+        COMPLETED_ONBOARDING(1),
+        /**
+         * Member has completed onboarding
+         * <br>
+         * <b>Note:</b> this flag allows a member who does not meet verification requirements to participate in a server.
+         */
+        BYPASSES_VERIFICATION(2),
+        /**
+         * Member has started onboarding
+         */
+        STARTED_ONBOARDING(3);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /** The flag value as represented by Discord. */
+        private final int flag;
+
+        /**
+         * Constructs a {@code PartialMember.Flag}.
+         */
+        Flag(final int value) {
+            this.value = value;
+            this.flag = 1 << value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the flags of member. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
+         * equal ({@code ==}) to the supplied {@code value}.
+         *
+         * @param value The flags value as represented by Discord.
+         * @return The {@link EnumSet} of flags.
+         */
+        public static EnumSet<PartialMember.Flag> of(final long value) {
+            final EnumSet<PartialMember.Flag> memberFlags = EnumSet.noneOf(PartialMember.Flag.class);
+            for (PartialMember.Flag flag : PartialMember.Flag.values()) {
+                long flagValue = flag.getFlag();
+                if ((flagValue & value) == flagValue) {
+                    memberFlags.add(flag);
+                }
+            }
+            return memberFlags;
+        }
     }
 }
