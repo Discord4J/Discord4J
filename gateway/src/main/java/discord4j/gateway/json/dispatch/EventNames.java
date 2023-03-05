@@ -68,6 +68,10 @@ public abstract class EventNames {
     public static final String STAGE_INSTANCE_UPDATE = "STAGE_INSTANCE_UPDATE";
     public static final String STAGE_INSTANCE_DELETE = "STAGE_INSTANCE_DELETE";
     public static final String GUILD_AUDIT_LOG_ENTRY_CREATE = "GUILD_AUDIT_LOG_ENTRY_CREATE";
+    public static final String AUTO_MODERATION_RULE_CREATE = "AUTO_MODERATION_RULE_CREATE";
+    public static final String AUTO_MODERATION_RULE_UPDATE = "AUTO_MODERATION_RULE_UPDATE";
+    public static final String AUTO_MODERATION_RULE_DELETE = "AUTO_MODERATION_RULE_DELETE";
+    public static final String AUTO_MODERATION_ACTION_EXECUTION = "AUTO_MODERATION_ACTION_EXECUTION";
 
     // Ignored
     public static final String PRESENCES_REPLACE = "PRESENCES_REPLACE";

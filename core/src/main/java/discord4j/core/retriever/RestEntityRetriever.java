@@ -18,6 +18,7 @@ package discord4j.core.retriever;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -177,6 +178,13 @@ public class RestEntityRetriever implements EntityRetriever {
     public Flux<ThreadMember> getThreadMembers(Snowflake threadId) {
         return rest.getChannelService().listThreadMembers(threadId.asLong())
                 .map(data -> new ThreadMember(gateway, data));
+    }
+
+    @Override
+    public Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId) {
+        return rest.getAutoModService()
+            .getAutoModRules(guildId.asLong())
+            .map(data -> new AutoModRule(gateway, data));
     }
 
     private GuildData toGuildData(GuildUpdateData guild) {

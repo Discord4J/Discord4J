@@ -16,11 +16,12 @@
  */
 package discord4j.core.retriever;
 
+import discord4j.common.util.Snowflake;
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.util.OrderUtil;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -209,4 +210,12 @@ public interface EntityRetriever {
      * it is emitted through the {@code Flux}.
      */
     Flux<ThreadMember> getThreadMembers(Snowflake threadId);
+
+    /**
+     * Requests to retrieve the guild's automod rules.
+     *
+     * @return A {@link Flux} that continually emits the guild's {@link AutoModRule AutoModRule}. If an error is received,
+     * it is emitted through the {@code Flux}.
+     */
+    Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId);
 }

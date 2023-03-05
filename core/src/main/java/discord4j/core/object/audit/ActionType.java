@@ -58,7 +58,19 @@ public enum ActionType {
     MESSAGE_UNPIN(75),
     INTEGRATION_CREATE(80),
     INTEGRATION_UPDATE(81),
-    INTEGRATION_DELETE(82);
+    INTEGRATION_DELETE(82),
+
+    AUTO_MODERATION_RULE_CREATE(140),
+
+    AUTO_MODERATION_RULE_UPDATE(141),
+
+    AUTO_MODERATION_RULE_DELETE(142),
+
+    AUTO_MODERATION_BLOCK_MESSAGE(143),
+
+    AUTO_MODERATION_FLAG_TO_CHANNEL(144),
+
+    AUTO_MODERATION_USER_COMMUNICATION_DISABLED(145);
 
     /**
      * Gets the type of action. It is guaranteed that invoking {@link #getValue()} from the returned enum will equal
@@ -104,6 +116,12 @@ public enum ActionType {
             case 80: return INTEGRATION_CREATE;
             case 81: return INTEGRATION_UPDATE;
             case 82: return INTEGRATION_DELETE;
+            case 140: return AUTO_MODERATION_RULE_CREATE;
+            case 141: return AUTO_MODERATION_RULE_UPDATE;
+            case 142: return AUTO_MODERATION_RULE_DELETE;
+            case 143: return AUTO_MODERATION_BLOCK_MESSAGE;
+            case 144: return AUTO_MODERATION_FLAG_TO_CHANNEL;
+            case 145: return AUTO_MODERATION_USER_COMMUNICATION_DISABLED;
             default: return UNKNOWN;
         }
     }

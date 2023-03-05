@@ -20,6 +20,10 @@ import discord4j.common.store.api.object.PresenceAndUserData;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.*;
+import discord4j.core.event.domain.automod.AutoModActionExecutedEvent;
+import discord4j.core.event.domain.automod.AutoModRuleCreateEvent;
+import discord4j.core.event.domain.automod.AutoModRuleDeleteEvent;
+import discord4j.core.event.domain.automod.AutoModRuleUpdateEvent;
 import discord4j.core.event.domain.channel.TypingStartEvent;
 import discord4j.core.event.domain.integration.IntegrationCreateEvent;
 import discord4j.core.event.domain.integration.IntegrationDeleteEvent;
@@ -27,6 +31,7 @@ import discord4j.core.event.domain.integration.IntegrationUpdateEvent;
 import discord4j.core.event.domain.interaction.*;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.audit.AuditLogEntry;
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.command.ApplicationCommand;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
@@ -35,7 +40,6 @@ import discord4j.core.object.entity.Integration;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
-import discord4j.discordjson.json.AuditLogEntryData;
 import discord4j.discordjson.json.PartialUserData;
 import discord4j.discordjson.json.PresenceData;
 import discord4j.discordjson.json.UserData;
@@ -113,6 +117,10 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(StageInstanceCreate.class, StageInstanceDispatchHandlers::stageInstanceCreate);
         addHandler(StageInstanceUpdate.class, StageInstanceDispatchHandlers::stageInstanceUpdate);
         addHandler(StageInstanceDelete.class, StageInstanceDispatchHandlers::stageInstanceDelete);
+        addHandler(AutoModRuleCreate.class, DispatchHandlers::autoModRuleCreate);
+        addHandler(AutoModRuleUpdate.class, DispatchHandlers::autoModRuleUpdate);
+        addHandler(AutoModRuleDelete.class, DispatchHandlers::autoModRuleDelete);
+        addHandler(AutoModActionExecution.class, DispatchHandlers::autoModActionExecute);
 
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
 
@@ -346,5 +354,27 @@ public class DispatchHandlers implements DispatchEventMapper {
         Integration integration = new Integration(context.getGateway(), context.getDispatch().integration(), guildId);
 
         return Mono.just(new IntegrationCreateEvent(context.getGateway(), context.getShardInfo(), guildId, integration));
+    }
+
+    private static Mono<AutoModRuleCreateEvent> autoModRuleCreate(DispatchContext<AutoModRuleCreate,Void> context) {
+        AutoModRule autoModRule = new AutoModRule(context.getGateway(), context.getDispatch().automodrule());
+
+        return Mono.just(new AutoModRuleCreateEvent(context.getGateway(), context.getShardInfo(), autoModRule));
+    }
+
+    private static Mono<AutoModRuleUpdateEvent> autoModRuleUpdate(DispatchContext<AutoModRuleUpdate, Void> context) {
+        AutoModRule autoModRule = new AutoModRule(context.getGateway(), context.getDispatch().automodrule());
+
+        return Mono.just(new AutoModRuleUpdateEvent(context.getGateway(), context.getShardInfo(), autoModRule));
+    }
+
+    private static Mono<AutoModRuleDeleteEvent> autoModRuleDelete(DispatchContext<AutoModRuleDelete, Void> context) {
+        AutoModRule autoModRule = new AutoModRule(context.getGateway(), context.getDispatch().automodrule());
+
+        return Mono.just(new AutoModRuleDeleteEvent(context.getGateway(), context.getShardInfo(), autoModRule));
+    }
+
+    private static Mono<AutoModActionExecutedEvent> autoModActionExecute(DispatchContext<AutoModActionExecution, Void> context) {
+        return Mono.just(new AutoModActionExecutedEvent(context.getGateway(), context.getShardInfo(), context.getDispatch()));
     }
 }

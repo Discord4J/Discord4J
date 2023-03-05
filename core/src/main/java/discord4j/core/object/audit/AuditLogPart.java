@@ -18,6 +18,7 @@ package discord4j.core.object.audit;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.Webhook;
 import discord4j.discordjson.json.AuditLogData;
@@ -33,6 +34,8 @@ public class AuditLogPart {
 
     private final long guildId;
 
+    private final List<AutoModRule> autoModRules;
+
     private final Set<Webhook> webhooks;
 
     private final Set<User> users;
@@ -41,6 +44,10 @@ public class AuditLogPart {
 
     public AuditLogPart(long guildId, GatewayDiscordClient gateway, AuditLogData data) {
         this.guildId = guildId;
+
+        this.autoModRules = data.autoModerationRules().stream()
+                .map(autoModRuleData -> new AutoModRule(gateway, autoModRuleData))
+                .collect(Collectors.toList());
 
         this.webhooks = data.webhooks().stream()
                 .map(webhookData -> new Webhook(gateway, webhookData))
@@ -55,11 +62,21 @@ public class AuditLogPart {
                 .collect(Collectors.toList());
     }
 
-    private AuditLogPart(long guildId, Set<Webhook> webhooks, Set<User> users, List<AuditLogEntry> entries) {
+    private AuditLogPart(long guildId, List<AutoModRule> autoModRules, Set<Webhook> webhooks, Set<User> users, List<AuditLogEntry> entries) {
         this.guildId = guildId;
+        this.autoModRules = autoModRules;
         this.webhooks = webhooks;
         this.users = users;
         this.entries = entries;
+    }
+
+    /**
+     * Get the auto mod rules that are involved in the entries of this portion of the audit log.
+     *
+     * @return The auto mod rules that are involved in the entries of this portion of the audit log.
+     */
+    public List<AutoModRule> getAutoModRules() {
+        return autoModRules;
     }
 
     /**
@@ -145,6 +162,10 @@ public class AuditLogPart {
         combinedEntries.addAll(this.entries);
         combinedEntries.addAll(other.entries);
 
-        return new AuditLogPart(guildId, combinedWebhooks, combinedUsers, combinedEntries);
+        List<AutoModRule> combinedAutoModRules = new ArrayList<>(this.autoModRules.size() + other.autoModRules.size());
+        combinedAutoModRules.addAll(this.autoModRules);
+        combinedAutoModRules.addAll(other.autoModRules);
+
+        return new AuditLogPart(guildId, combinedAutoModRules, combinedWebhooks, combinedUsers, combinedEntries);
     }
 }

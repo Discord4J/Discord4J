@@ -16,10 +16,11 @@
  */
 package discord4j.core.retriever;
 
+import discord4j.common.util.Snowflake;
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -126,5 +127,10 @@ public class FallbackEntityRetriever implements EntityRetriever {
     @Override
     public Flux<ThreadMember> getThreadMembers(Snowflake threadId) {
         return first.getThreadMembers(threadId).switchIfEmpty(fallback.getThreadMembers(threadId));
+    }
+
+    @Override
+    public Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId) {
+        return first.getGuildAutoModRules(guildId).switchIfEmpty(fallback.getGuildAutoModRules(guildId));
     }
 }
