@@ -87,7 +87,7 @@ allprojects {
             links = [
                     jdk_javadoc,
                     "https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/2.12.7/",
-                    "http://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
+                    "https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
                     "https://projectreactor.io/docs/core/3.4.26/api/",
                     "https://projectreactor.io/docs/netty/1.0.27/api/",
                     "https://projectreactor.io/docs/extra/3.4.9/api/",
