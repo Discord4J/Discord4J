@@ -70,13 +70,10 @@ public class DefaultRouter implements Router {
                     Sinks.One<ClientResponse> callback = Sinks.one();
                     housekeepIfNecessary();
                     BucketKey bucketKey = BucketKey.of(request);
-                    streamMap.compute(bucketKey, (key, value) -> {
-                        RequestStream stream = value != null ? value : createStream(key, request);
-                        if (!stream.push(new RequestCorrelation<>(request, callback, ctx))) {
-                            callback.emitError(new DiscardedRequestException(request), FAIL_FAST);
-                        }
-                        return stream;
-                    });
+                    RequestStream stream = streamMap.computeIfAbsent(bucketKey, key -> createStream(key, request));
+                    if (!stream.push(new RequestCorrelation<>(request, callback, ctx))) {
+                        callback.emitError(new DiscardedRequestException(request), FAIL_FAST);
+                    }
                     return callback.asMono();
                 })
                 .checkpoint("Request to " + request.getDescription() + " [DefaultRouter]"), reactorResources);

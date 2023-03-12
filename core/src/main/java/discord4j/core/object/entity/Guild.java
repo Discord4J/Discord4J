@@ -21,6 +21,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.*;
 import discord4j.core.object.audit.AuditLogPart;
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -1438,6 +1439,35 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create an automod rule. Properties specifying how to create the rule can be set via the
+     * {@code withXxx} methods of the returned {@link AutoModRuleCreateMono}.
+     *
+     * @param name new name to set
+     * @param eventType type of event to set
+     * @param triggerType type of trigger to set
+     * @return A {@link AutoModRuleCreateMono} where, upon successful completion, emits the created {@link
+     * AutoModRule}. If an error is received, it is emitted through the {@code AutoModRuleCreateMono}.
+     */
+    public AutoModRuleCreateMono createAutoModRule(String name, AutoModRule.EventType eventType, AutoModRule.TriggerType triggerType) {
+        return AutoModRuleCreateMono.of(name, eventType.getValue(), triggerType.getValue(), this);
+    }
+
+    /**
+     * Requests to create an AutoMod Rule.
+     *
+     * @param spec an immutable object that specifies how to create the emoji
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link AutoModRule}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<AutoModRule> createAutoModRule(AutoModRuleCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                        () -> gateway.getRestClient().getAutoModService()
+                                .createAutoModRule(getId().asLong(), spec.asRequest(), spec.reason()))
+                .map(data -> new AutoModRule(gateway, data));
+    }
+
+    /**
      * Requests to delete this guild.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the guild has been deleted.
@@ -1850,6 +1880,29 @@ public final class Guild implements Entity {
      */
     public Mono<VoiceConnection> getVoiceConnection() {
         return gateway.getVoiceConnectionRegistry().getVoiceConnection(getId());
+    }
+
+    /**
+     * Requests to retrieve the automod rules of the guild. Requires the MANAGE_GUILD permission.
+     *
+     * @return A {@link Flux} that continually emits the {@link AutoModRule automod rules} of the guild. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<AutoModRule> getAutoModRules() {
+        return gateway.getRestClient().getAutoModService()
+                .getAutoModRules(getId().asLong())
+                .map(data -> new AutoModRule(gateway, data));
+    }
+
+    /**
+     * Requests to retrieve the automod rule of the guild using the ID. Requires the MANAGE_GUILD permission.
+     *
+     * @return A {@link Mono} of {@link AutoModRule} for this guild if present, or empty otherwise.
+     */
+    public Mono<AutoModRule> getAutoModRule(Snowflake autoModRuleId) {
+        return gateway.getRestClient().getAutoModService()
+            .getAutoModRule(getId().asLong(), autoModRuleId.asLong())
+            .map(data -> new AutoModRule(gateway, data));
     }
 
     @Override

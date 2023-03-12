@@ -29,6 +29,7 @@ import discord4j.core.event.domain.Event;
 import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -769,5 +770,10 @@ public class GatewayDiscordClient implements EntityRetriever {
     @Override
     public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
         return entityRetriever.getGuildStickers(guildId);
+    }
+
+    @Override
+    public Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId) {
+        return entityRetriever.getGuildAutoModRules(guildId);
     }
 }

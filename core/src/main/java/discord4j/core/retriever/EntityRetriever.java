@@ -16,6 +16,7 @@
  */
 package discord4j.core.retriever;
 
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.entity.GuildSticker;
@@ -184,4 +185,12 @@ public interface EntityRetriever {
      * it is emitted through the {@code Flux}.
      */
     Flux<GuildSticker> getGuildStickers(Snowflake guildId);
+
+    /**
+     * Requests to retrieve the guild's automod rules.
+     *
+     * @return A {@link Flux} that continually emits the guild's {@link AutoModRule AutoModRule}. If an error is received,
+     * it is emitted through the {@code Flux}.
+     */
+    Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId);
 }

@@ -18,6 +18,10 @@
 package discord4j.core.event;
 
 import discord4j.core.event.domain.*;
+import discord4j.core.event.domain.automod.AutoModActionExecutedEvent;
+import discord4j.core.event.domain.automod.AutoModRuleCreateEvent;
+import discord4j.core.event.domain.automod.AutoModRuleDeleteEvent;
+import discord4j.core.event.domain.automod.AutoModRuleUpdateEvent;
 import discord4j.core.event.domain.channel.*;
 import discord4j.core.event.domain.command.ApplicationCommandCreateEvent;
 import discord4j.core.event.domain.command.ApplicationCommandDeleteEvent;
@@ -303,6 +307,17 @@ public abstract class ReactiveEventAdapter {
      * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
      */
     public Publisher<?> onStickersUpdate(StickersUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a new entry in Audit Log is created in a guild.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onAuditLogEntryCreate(AuditLogEntryCreateEvent event) {
         return Mono.empty();
     }
 
@@ -918,6 +933,52 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    // ================= AutoMod related events ================= //
+
+    /**
+     * Invoked when an automod rule has been created.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onAutoModRuleCreate(AutoModRuleCreateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when an automod rule has been updated.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onAutoModRuleUpdate(AutoModRuleUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when an automod rule has been deleted.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onAutoModRuleDelete(AutoModRuleDeleteEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when an automod rule action has been executed.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onAutoModActionExecution(AutoModActionExecutedEvent event) {
+        return Mono.empty();
+    }
+
     // ================= Core methods ================= //
 
     /**
@@ -952,6 +1013,7 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof MemberChunkEvent) compatibleHooks.add(onMemberChunk((MemberChunkEvent) event));
         if (event instanceof EmojisUpdateEvent) compatibleHooks.add(onEmojisUpdate((EmojisUpdateEvent) event));
         if (event instanceof StickersUpdateEvent) compatibleHooks.add(onStickersUpdate((StickersUpdateEvent) event));
+        if (event instanceof AuditLogEntryCreateEvent) compatibleHooks.add(onAuditLogEntryCreate((AuditLogEntryCreateEvent) event));
         if (event instanceof BanEvent) compatibleHooks.add(onBan((BanEvent) event));
         if (event instanceof UnbanEvent) compatibleHooks.add(onUnban((UnbanEvent) event));
         if (event instanceof IntegrationsUpdateEvent) compatibleHooks.add(onIntegrationsUpdate((IntegrationsUpdateEvent) event));
@@ -1009,6 +1071,10 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof IntegrationCreateEvent) compatibleHooks.add(onIntegrationCreate((IntegrationCreateEvent) event));
         if (event instanceof IntegrationUpdateEvent) compatibleHooks.add(onIntegrationUpdate((IntegrationUpdateEvent) event));
         if (event instanceof IntegrationDeleteEvent) compatibleHooks.add(onIntegrationDelete((IntegrationDeleteEvent) event));
+        if (event instanceof AutoModRuleCreateEvent) compatibleHooks.add(onAutoModRuleCreate((AutoModRuleCreateEvent) event));
+        if (event instanceof AutoModRuleUpdateEvent) compatibleHooks.add(onAutoModRuleUpdate((AutoModRuleUpdateEvent) event));
+        if (event instanceof AutoModRuleDeleteEvent) compatibleHooks.add(onAutoModRuleDelete((AutoModRuleDeleteEvent) event));
+        if (event instanceof AutoModActionExecutedEvent) compatibleHooks.add(onAutoModActionExecution((AutoModActionExecutedEvent) event));
         // @formatter:on
         return Mono.whenDelayError(compatibleHooks);
     }

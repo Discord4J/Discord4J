@@ -37,6 +37,15 @@ public enum Intent {
      *     <li>CHANNEL_UPDATE</li>
      *     <li>CHANNEL_DELETE</li>
      *     <li>CHANNEL_PINS_UPDATE</li>
+     *     <li>THREAD_CREATE</li>
+     *     <li>THREAD_UPDATE</li>
+     *     <li>THREAD_DELETE</li>
+     *     <li>THREAD_LIST_SYNC</li>
+     *     <li>THREAD_MEMBER_UPDATE</li>
+     *     <li>THREAD_MEMBERS_UPDATE</li>
+     *     <li>STAGE_INSTANCE_CREATE</li>
+     *     <li>STAGE_INSTANCE_UPDATE</li>
+     *     <li>STAGE_INSTANCE_DELETE</li>
      * </ul>
      */
     GUILDS(0),
@@ -47,9 +56,20 @@ public enum Intent {
      *     <li>GUILD_MEMBER_ADD</li>
      *     <li>GUILD_MEMBER_UPDATE</li>
      *     <li>GUILD_MEMBER_REMOVE</li>
+     *     <li>THREAD_MEMBERS_UPDATE</li>
      * </ul>
      */
     GUILD_MEMBERS(1),
+
+    /**
+     * Events which will be received by subscribing to GUILD_MODERATION
+     * <ul>
+     *     <li>GUILD_AUDIT_LOG_ENTRY_CREATE</li>
+     *     <li>GUILD_BAN_ADD</li>
+     *     <li>GUILD_BAN_REMOVE</li>
+     * </ul>
+     */
+    GUILD_MODERATION(2),
 
     /**
      * Events which will be received by subscribing to GUILD_BANS
@@ -57,21 +77,37 @@ public enum Intent {
      *     <li>GUILD_BAN_ADD</li>
      *     <li>GUILD_BAN_REMOVE</li>
      * </ul>
+     * @deprecated deprecated in favor of {@link #GUILD_MODERATION}
      */
+    @Deprecated
     GUILD_BANS(2),
+
+    /**
+     * Events which will be received by subscribing to GUILD_EMOJIS_AND_STICKERS
+     * <ul>
+     *     <li>GUILD_EMOJIS_UPDATE</li>
+     *     <li>GUILD_STICKERS_UPDATE</li>
+     * </ul>
+     */
+    GUILD_EMOJIS_AND_STICKERS(3),
 
     /**
      * Events which will be received by subscribing to GUILD_EMOJIS
      * <ul>
      *     <li>GUILD_EMOJIS_UPDATE</li>
+     *     <li>GUILD_STICKERS_UPDATE</li>
      * </ul>
      */
+    @Deprecated
     GUILD_EMOJIS(3),
 
     /**
      * Events which will be received by subscribing to GUILD_INTEGRATIONS
      * <ul>
      *     <li>GUILD_INTEGRATIONS_UPDATE</li>
+     *     <li>INTEGRATION_CREATE</li>
+     *     <li>INTEGRATION_UPDATE</li>
+     *     <li>INTEGRATION_DELETE</li>
      * </ul>
      */
     GUILD_INTEGRATIONS(4),
@@ -167,7 +203,45 @@ public enum Intent {
      *     <li>TYPING_START</li>
      * </ul>
      */
-    DIRECT_MESSAGE_TYPING(14);
+    DIRECT_MESSAGE_TYPING(14),
+
+    /**
+     * MESSAGE_CONTENT does not represent individual events, but rather affects what data is present for
+     * events that could contain message content fields.
+     *
+     * @see <a href="https://discord.com/developers/docs/topics/gateway#message-content-intent">Message Content Intent</a>
+     */
+    MESSAGE_CONTENT(15),
+
+    /**
+     * Events which will be received by subscribing to GUILD_SCHEDULED_EVENTS
+     * <ul>
+     *     <li>GUILD_SCHEDULED_EVENT_CREATE</li>
+     *     <li>GUILD_SCHEDULED_EVENT_UPDATE</li>
+     *     <li>GUILD_SCHEDULED_EVENT_DELETE</li>
+     *     <li>GUILD_SCHEDULED_EVENT_USER_ADD</li>
+     *     <li>GUILD_SCHEDULED_EVENT_USER_REMOVE</li>
+     * </ul>
+     */
+    GUILD_SCHEDULED_EVENTS(16),
+
+    /**
+     * Events which will be received by subscribing to AUTO_MODERATION_CONFIGURATION
+     * <ul>
+     *     <li>AUTO_MODERATION_RULE_CREATE</li>
+     *     <li>AUTO_MODERATION_RULE_UPDATE</li>
+     *     <li>AUTO_MODERATION_RULE_DELETE</li>
+     * </ul>
+     */
+    AUTO_MODERATION_CONFIGURATION(20),
+
+    /**
+     * Events which will be received by subscribing to AUTO_MODERATION_EXECUTION
+     * <ul>
+     *     <li>AUTO_MODERATION_ACTION_EXECUTION</li>
+     * </ul>
+     */
+    AUTO_MODERATION_EXECUTION(21);
 
     private final int value;
 

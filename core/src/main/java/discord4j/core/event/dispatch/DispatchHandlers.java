@@ -20,12 +20,18 @@ import discord4j.common.store.api.object.PresenceAndUserData;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.*;
+import discord4j.core.event.domain.automod.AutoModActionExecutedEvent;
+import discord4j.core.event.domain.automod.AutoModRuleCreateEvent;
+import discord4j.core.event.domain.automod.AutoModRuleDeleteEvent;
+import discord4j.core.event.domain.automod.AutoModRuleUpdateEvent;
 import discord4j.core.event.domain.channel.TypingStartEvent;
 import discord4j.core.event.domain.integration.IntegrationCreateEvent;
 import discord4j.core.event.domain.integration.IntegrationDeleteEvent;
 import discord4j.core.event.domain.integration.IntegrationUpdateEvent;
 import discord4j.core.event.domain.interaction.*;
 import discord4j.core.object.VoiceState;
+import discord4j.core.object.audit.AuditLogEntry;
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.command.ApplicationCommand;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
@@ -34,6 +40,7 @@ import discord4j.core.object.entity.Integration;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
+import discord4j.discordjson.json.AuditLogEntryData;
 import discord4j.discordjson.json.PartialUserData;
 import discord4j.discordjson.json.PresenceData;
 import discord4j.discordjson.json.UserData;
@@ -61,6 +68,7 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(ChannelDelete.class, ChannelDispatchHandlers::channelDelete);
         addHandler(ChannelPinsUpdate.class, ChannelDispatchHandlers::channelPinsUpdate);
         addHandler(ChannelUpdate.class, ChannelDispatchHandlers::channelUpdate);
+        addHandler(AuditLogEntryCreate.class, DispatchHandlers::auditLogEntryCreate);
         addHandler(GuildBanAdd.class, GuildDispatchHandlers::guildBanAdd);
         addHandler(GuildBanRemove.class, GuildDispatchHandlers::guildBanRemove);
         addHandler(GuildCreate.class, GuildDispatchHandlers::guildCreate);
@@ -100,6 +108,10 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(IntegrationCreate.class, DispatchHandlers::integrationCreate);
         addHandler(IntegrationUpdate.class, DispatchHandlers::integrationUpdate);
         addHandler(IntegrationDelete.class, DispatchHandlers::integrationDelete);
+        addHandler(AutoModRuleCreate.class, DispatchHandlers::autoModRuleCreate);
+        addHandler(AutoModRuleUpdate.class, DispatchHandlers::autoModRuleUpdate);
+        addHandler(AutoModRuleDelete.class, DispatchHandlers::autoModRuleDelete);
+        addHandler(AutoModActionExecution.class, DispatchHandlers::autoModActionExecute);
 
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
 
@@ -216,6 +228,13 @@ public class DispatchHandlers implements DispatchEventMapper {
         return Mono.just(new WebhooksUpdateEvent(context.getGateway(), context.getShardInfo(), guildId, channelId));
     }
 
+    private static Mono<AuditLogEntryCreateEvent> auditLogEntryCreate(DispatchContext<AuditLogEntryCreate, Void> context) {
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        AuditLogEntry auditLogEntry = new AuditLogEntry(context.getGateway(), context.getDispatch());
+
+        return Mono.just(new AuditLogEntryCreateEvent(context.getGateway(), context.getShardInfo(), guildId, auditLogEntry));
+    }
+
     private static Mono<InviteCreateEvent> inviteCreate(DispatchContext<InviteCreate, Void> context) {
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
@@ -274,6 +293,10 @@ public class DispatchHandlers implements DispatchEventMapper {
                     case BUTTON:
                         return Mono.just(new ButtonInteractionEvent(gateway, context.getShardInfo(), interaction));
                     case SELECT_MENU:
+                    case SELECT_MENU_ROLE:
+                    case SELECT_MENU_USER:
+                    case SELECT_MENU_MENTIONABLE:
+                    case SELECT_MENU_CHANNEL:
                         return Mono.just(new SelectMenuInteractionEvent(gateway, context.getShardInfo(), interaction));
                     default:
                         return Mono.just(new ComponentInteractionEvent(gateway, context.getShardInfo(), interaction));
@@ -311,5 +334,27 @@ public class DispatchHandlers implements DispatchEventMapper {
         Integration integration = new Integration(context.getGateway(), context.getDispatch().integration(), guildId);
 
         return Mono.just(new IntegrationCreateEvent(context.getGateway(), context.getShardInfo(), guildId, integration));
+    }
+
+    private static Mono<AutoModRuleCreateEvent> autoModRuleCreate(DispatchContext<AutoModRuleCreate,Void> context) {
+        AutoModRule autoModRule = new AutoModRule(context.getGateway(), context.getDispatch().automodrule());
+
+        return Mono.just(new AutoModRuleCreateEvent(context.getGateway(), context.getShardInfo(), autoModRule));
+    }
+
+    private static Mono<AutoModRuleUpdateEvent> autoModRuleUpdate(DispatchContext<AutoModRuleUpdate, Void> context) {
+        AutoModRule autoModRule = new AutoModRule(context.getGateway(), context.getDispatch().automodrule());
+
+        return Mono.just(new AutoModRuleUpdateEvent(context.getGateway(), context.getShardInfo(), autoModRule));
+    }
+
+    private static Mono<AutoModRuleDeleteEvent> autoModRuleDelete(DispatchContext<AutoModRuleDelete, Void> context) {
+        AutoModRule autoModRule = new AutoModRule(context.getGateway(), context.getDispatch().automodrule());
+
+        return Mono.just(new AutoModRuleDeleteEvent(context.getGateway(), context.getShardInfo(), autoModRule));
+    }
+
+    private static Mono<AutoModActionExecutedEvent> autoModActionExecute(DispatchContext<AutoModActionExecution, Void> context) {
+        return Mono.just(new AutoModActionExecutedEvent(context.getGateway(), context.getShardInfo(), context.getDispatch()));
     }
 }
