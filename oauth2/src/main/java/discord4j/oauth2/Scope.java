@@ -95,7 +95,10 @@ public enum Scope {
     APPLICATIONS_COMMANDS("applications.commands", false),
 
     /** Allows updating slash commands using an {@link AccessToken} exchanged via a client credentials grant. **/
-    APPLICATIONS_COMMANDS_UPDATE("applications.commands.update", false);
+    APPLICATIONS_COMMANDS_UPDATE("applications.commands.update", false),
+
+    /** Allows your app to update permissions for its commands in a guild a user has permissions to. **/
+    APPLICATIONS_COMMANDS_PERMISSIONS_UPDATE("applications.commands.permissions.update", false);
 
     private final String value;
     private final boolean requiresDiscordApproval;
@@ -146,6 +149,7 @@ public enum Scope {
             case "activities.write": return ACTIVITIES_WRITE;
             case "applications.commands": return APPLICATIONS_COMMANDS;
             case "applications.commands.update": return APPLICATIONS_COMMANDS_UPDATE;
+            case "applications.commands.permissions.update": return APPLICATIONS_COMMANDS_PERMISSIONS_UPDATE;
             default: throw new IllegalArgumentException();
         }
     }

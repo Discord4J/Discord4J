@@ -18,6 +18,7 @@
 package discord4j.oauth2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.common.annotations.Experimental;
 import discord4j.discordjson.json.AuthorizationCodeGrantRequest;
 import discord4j.oauth2.object.AccessToken;
 import discord4j.oauth2.service.OAuth2Service;
@@ -48,9 +49,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * A server capable of exchanging an OAuth2 authorization code received by the frontend via a query parameter for an
- * {@link discord4j.oauth2.object.AccessToken} encoded as JSON.
+ * A simple server capable of exchanging an OAuth2 authorization code received by the frontend via a query parameter for
+ * an {@link discord4j.oauth2.object.AccessToken} encoded as JSON.
  */
+@Experimental
 public class DiscordOAuth2Server {
 
     private static final Logger log = Loggers.getLogger(DiscordOAuth2Server.class);
@@ -88,7 +90,7 @@ public class DiscordOAuth2Server {
         this.redirectUris = Collections.unmodifiableList(builder.redirectUris);
         this.scope = builder.scope.toString();
         this.objectMapper = Objects.requireNonNull(builder.objectMapper, "objectMapper");
-        Consumer<HttpServerRoutes> loginRoute = route -> route.get("/", new OAuth2ServerHandler());
+        Consumer<HttpServerRoutes> loginRoute = route -> route.get(builder.loginPath, new OAuth2ServerHandler());
         Function<HttpServer, HttpServer> initializer = httpServer ->
                 httpServer.route(builder.routesCustomizer == null ? loginRoute : loginRoute.andThen(builder.routesCustomizer));
         this.httpServer = initializer.apply(Objects.requireNonNull(builder.httpServer, "httpServer"));
@@ -116,6 +118,7 @@ public class DiscordOAuth2Server {
         private final StringBuilder scope = new StringBuilder();
         private DiscordOAuth2SuccessHandler successHandler;
         private Consumer<HttpServerRoutes> routesCustomizer;
+        private String loginPath = "/";
 
         protected Builder(RestClient restClient) {
             this.restClient = restClient;
@@ -189,11 +192,37 @@ public class DiscordOAuth2Server {
             return this;
         }
 
+        /**
+         * Add a handler to be called once authorization succeeds allowing a {@link DiscordOAuth2Client} to be
+         * saved.
+         *
+         * @param successHandler a handler invoked every time a user authorization succeeds
+         * @return this builder
+         */
         public Builder onAuthSuccess(DiscordOAuth2SuccessHandler successHandler) {
             this.successHandler = successHandler;
             return this;
         }
 
+        /**
+         * Override the route path this server uses to register the authorization handler. By default, it's the root
+         * path ('/')
+         *
+         * @param path the new login path to use
+         * @return the builder
+         */
+        public Builder loginPath(String path) {
+            this.loginPath = Objects.requireNonNull(path);
+            return this;
+        }
+
+        /**
+         * Set the route customization for the reactor-netty HTTP server. By default, this server only registers a path
+         * to process incoming authorization requests.
+         *
+         * @param routesCustomizer a lambda to include additional HTTP routes to the server
+         * @return this builder
+         */
         public Builder route(Consumer<HttpServerRoutes> routesCustomizer) {
             if (this.routesCustomizer == null) {
                 this.routesCustomizer = routesCustomizer;

@@ -18,6 +18,7 @@
 package discord4j.oauth2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.common.annotations.Experimental;
 import discord4j.discordjson.json.*;
 import discord4j.oauth2.object.AccessToken;
 import discord4j.oauth2.service.OAuth2Service;
@@ -37,6 +38,7 @@ import java.util.function.Function;
  * A client registration capable of making requests to the Discord API on behalf of a single user using their OAuth2
  * access token.
  */
+@Experimental
 public class DiscordOAuth2Client {
 
     private static final Logger log = Loggers.getLogger(DiscordOAuth2Client.class);
@@ -96,6 +98,13 @@ public class DiscordOAuth2Client {
                 .flatMapMany(Flux::fromArray);
     }
 
+    /**
+     * Prepare a given {@link DiscordWebRequest} on behalf of a user, using the credentials stored under this client.
+     * The token fetching, refreshing and underlying API request are run once this Mono is subscribed.
+     *
+     * @param request the compiled Discord REST API request to be run on behalf of a user
+     * @return a Mono of a request including required steps to include proper authorization
+     */
     public Mono<DiscordWebRequest> withAuthorizedClient(DiscordWebRequest request) {
         return Mono.fromCallable(accessToken::get)
                 .flatMap(token -> {

@@ -72,6 +72,11 @@ public class DiscordWebRequest {
         this.authorizationValue = other.authorizationValue;
     }
 
+    /**
+     * Create a new instance using the values from this one.
+     *
+     * @return a new request
+     */
     public DiscordWebRequest copy() {
         return new DiscordWebRequest(this);
     }
@@ -206,18 +211,35 @@ public class DiscordWebRequest {
         return (value == null) ? this : header(key, value);
     }
 
+    /**
+     * Use the given token as authentication value using the Bearer prefix.
+     *
+     * @param accessToken the bearer token to use
+     * @return this request
+     */
     public DiscordWebRequest bearerAuth(String accessToken) {
         this.authorizationScheme = AuthorizationScheme.BEARER;
         this.authorizationValue = accessToken;
         return this;
     }
 
+    /**
+     * Use the given value as basic authentication.
+     *
+     * @param base64EncodedValue the base64 encoded value to use
+     * @return this request
+     */
     public DiscordWebRequest basicAuth(String base64EncodedValue) {
         this.authorizationScheme = AuthorizationScheme.BASIC;
         this.authorizationValue = base64EncodedValue;
         return this;
     }
 
+    /**
+     * Use no authorization mechanism with this request.
+     *
+     * @return this request
+     */
     public DiscordWebRequest unauthenticated() {
         this.authorizationScheme = AuthorizationScheme.NONE;
         this.authorizationValue = null;
