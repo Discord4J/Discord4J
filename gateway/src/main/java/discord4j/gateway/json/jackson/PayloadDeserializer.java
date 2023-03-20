@@ -78,6 +78,7 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         dispatchTypes.put(EventNames.APPLICATION_COMMAND_CREATE, ApplicationCommandCreate.class);
         dispatchTypes.put(EventNames.APPLICATION_COMMAND_UPDATE, ApplicationCommandUpdate.class);
         dispatchTypes.put(EventNames.APPLICATION_COMMAND_DELETE, ApplicationCommandDelete.class);
+        dispatchTypes.put(EventNames.APPLICATION_COMMAND_PERMISSIONS_UPDATE, ApplicationCommandPermissionUpdate.class);
         dispatchTypes.put(EventNames.INTERACTION_CREATE, InteractionCreate.class);
         dispatchTypes.put(EventNames.GUILD_AUDIT_LOG_ENTRY_CREATE, AuditLogEntryCreate.class);
         dispatchTypes.put(EventNames.AUTO_MODERATION_RULE_CREATE, AutoModRuleCreate.class);
