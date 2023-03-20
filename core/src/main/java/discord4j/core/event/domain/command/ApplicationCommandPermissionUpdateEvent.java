@@ -20,11 +20,12 @@ package discord4j.core.event.domain.command;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandGuildPermissions;
+import discord4j.core.object.command.ApplicationCommandPermission;
 import discord4j.core.object.entity.Guild;
-import discord4j.discordjson.json.ApplicationCommandPermissionsData;
 import discord4j.gateway.ShardInfo;
-import java.util.List;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 /**
  * Dispatched when an application command permission relevant to the current user is updated. This
@@ -36,12 +37,13 @@ import reactor.core.publisher.Mono;
  */
 public class ApplicationCommandPermissionUpdateEvent extends ApplicationCommandEvent {
 
-    private final ApplicationCommandGuildPermissions data;
+    private final ApplicationCommandGuildPermissions permissions;
 
     public ApplicationCommandPermissionUpdateEvent(GatewayDiscordClient gateway,
-        ShardInfo shardInfo, ApplicationCommandGuildPermissions data) {
+                                                   ShardInfo shardInfo,
+                                                   ApplicationCommandGuildPermissions permissions) {
         super(gateway, shardInfo);
-        this.data = data;
+        this.permissions = permissions;
     }
 
     /**
@@ -50,7 +52,7 @@ public class ApplicationCommandPermissionUpdateEvent extends ApplicationCommandE
      * @return The unique id of the command.
      */
     public Snowflake getId() {
-        return data.getId();
+        return permissions.getId();
     }
 
     /**
@@ -59,7 +61,7 @@ public class ApplicationCommandPermissionUpdateEvent extends ApplicationCommandE
      * @return The ID of the guild involved.
      */
     public Snowflake getGuildId() {
-        return data.getGuildId();
+        return permissions.getGuildId();
     }
 
     /**
@@ -70,24 +72,24 @@ public class ApplicationCommandPermissionUpdateEvent extends ApplicationCommandE
      * the event. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(data.getGuildId());
+        return getClient().getGuildById(permissions.getGuildId());
     }
 
     /**
-     * Gets the unique id of the parent application.
+     * Gets the ID of the application the command belongs to.
      *
-     * @return The unique id of the parent application.
+     * @return th ID of the application the command belongs to
      */
     public Snowflake getApplicationId() {
-        return data.getApplicationId();
+        return permissions.getApplicationId();
     }
 
     /**
-     * Get all permissions for this command on given guild
+     * Returns the permissions for the command in the guild.
      *
-     * @return Set permissions for this application command
+     * @return the permissions for the command in the guild.
      */
-    public List<ApplicationCommandPermissionsData> getPermissions() {
-        return data.getPermissions();
+    public List<ApplicationCommandPermission> getPermissions() {
+        return permissions.getPermissions();
     }
 }

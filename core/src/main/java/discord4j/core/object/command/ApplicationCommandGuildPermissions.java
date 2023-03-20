@@ -17,23 +17,23 @@
 
 package discord4j.core.object.command;
 
-import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
-import discord4j.discordjson.json.ApplicationCommandPermissionsData;
 import discord4j.discordjson.json.GuildApplicationCommandPermissionsData;
+
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
- * A Discord application command.
+ * Represents a guild application command permissions. Includes information about the command, the application, the
+ * guild and a list of all permissions created for the command in the guild.
  *
  * @see <a
- * href="https://discord.com/developers/docs/interactions/slash-commands#applicationcommand">
- * Application Command Object</a>
+ * href="https://discord.com/developers/docs/interactions/application-commands#permissions">
+ * Application Command Permissions</a>
  */
-@Experimental
 public class ApplicationCommandGuildPermissions implements DiscordObject {
 
     /**
@@ -59,15 +59,15 @@ public class ApplicationCommandGuildPermissions implements DiscordObject {
      * @param data    The raw data as represented by Discord, must be non-null.
      */
     public ApplicationCommandGuildPermissions(final GatewayDiscordClient gateway,
-        final GuildApplicationCommandPermissionsData data) {
+                                              final GuildApplicationCommandPermissionsData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     /**
-     * Gets unique id of the command.
+     * Returns the ID of the command or the application ID.
      *
-     * @return The unique id of the command.
+     * @return the ID of the command or the application ID
      */
     public Snowflake getId() {
         return Snowflake.of(data.id());
@@ -75,34 +75,44 @@ public class ApplicationCommandGuildPermissions implements DiscordObject {
 
 
     /**
-     * Gets the id of the guild if the command is guild scoped.
+     * Returns the id of the guild.
      *
-     * @return The id of the guild
+     * @return the id of the guild
      */
     public Snowflake getGuildId() {
         return Snowflake.of(data.guildId());
     }
 
     /**
-     * Gets the unique id of the parent application.
+     * Returns the ID of the application the command belongs to.
      *
-     * @return The unique id of the parent application.
+     * @return the ID of the application the command belongs to
      */
     public Snowflake getApplicationId() {
         return Snowflake.of(data.applicationId());
     }
 
     /**
-     * Gets the name of the command.
+     * Returns the permissions for the command in the guild.
      *
-     * @return The name of the command.
+     * @return the permissions for the command in the guild.
      */
-    public List<ApplicationCommandPermissionsData> getPermissions() {
-        return data.permissions();
+    public List<ApplicationCommandPermission> getPermissions() {
+        return data.permissions()
+                .stream()
+                .map(data -> new ApplicationCommandPermission(gateway, getGuildId(), data))
+                .collect(Collectors.toList());
     }
 
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
+    }
+
+    @Override
+    public String toString() {
+        return "ApplicationCommandGuildPermissions{" +
+                "data=" + data +
+                '}';
     }
 }
