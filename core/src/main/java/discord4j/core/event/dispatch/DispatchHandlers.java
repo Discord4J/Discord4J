@@ -105,6 +105,7 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(ApplicationCommandCreate.class, ApplicationCommandDispatchHandlers::applicationCommandCreate);
         addHandler(ApplicationCommandUpdate.class, ApplicationCommandDispatchHandlers::applicationCommandUpdate);
         addHandler(ApplicationCommandDelete.class, ApplicationCommandDispatchHandlers::applicationCommandDelete);
+        addHandler(ApplicationCommandPermissionUpdate.class, ApplicationCommandDispatchHandlers::applicationCommandPermissionUpdate);
         addHandler(IntegrationCreate.class, DispatchHandlers::integrationCreate);
         addHandler(IntegrationUpdate.class, DispatchHandlers::integrationUpdate);
         addHandler(IntegrationDelete.class, DispatchHandlers::integrationDelete);

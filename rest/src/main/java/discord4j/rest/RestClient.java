@@ -25,8 +25,10 @@ import discord4j.rest.service.*;
 import discord4j.rest.util.PaginationUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -390,6 +392,27 @@ public class RestClient {
      */
     public Mono<InviteData> getInvite(final String inviteCode) {
         return inviteService.getInvite(inviteCode);
+    }
+
+    /**
+     * Requests to retrieve an invite.
+     *
+     * @param inviteCode The code for the invite (e.g. "xdYkpp").
+     * @param withCounts whether the invite should contain approximate member counts
+     * @param withExpiration whether the invite should contain the expiration date
+     * @param guildScheduledEventId the guild scheduled event to include with the invite, can be {@code null}
+     * @return A {@link Mono} where, upon successful completion, emits the {@link InviteData} as represented by the
+     * supplied invite code. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<InviteData> getInvite(String inviteCode, boolean withCounts, boolean withExpiration,
+                                      @Nullable Snowflake guildScheduledEventId) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("with_counts", withCounts);
+        queryParams.put("with_expiration", withExpiration);
+        if (guildScheduledEventId != null) {
+            queryParams.put("guild_scheduled_event_id", guildScheduledEventId.asString());
+        }
+        return inviteService.getInvite(inviteCode, queryParams);
     }
 
     /**
