@@ -68,14 +68,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -88,7 +86,7 @@ import static discord4j.common.LogUtil.format;
  * Gateway. Maintains a set of connections to every shard logged in from the same {@link GatewayBootstrap} and therefore
  * tracks state updates from all connected shards.
  * <p>
- * The following are some of the resources available through this aggregate:
+ * The following are some resources available through this aggregate:
  * <ul>
  *     <li>Access to the base {@link DiscordClient} for direct REST API operations through {@link #rest()}.</li>
  *     <li>Access to {@link CoreResources} like the {@link RestClient} used to perform API requests.</li>
@@ -398,6 +396,29 @@ public class GatewayDiscordClient implements EntityRetriever {
     public Mono<Invite> getInvite(final String inviteCode) {
         return getRestClient().getInviteService()
                 .getInvite(inviteCode)
+                .map(data -> new Invite(this, data));
+    }
+
+    /**
+     * Requests to retrieve an invite.
+     *
+     * @param inviteCode the code for the invite (e.g. "xdYkpp").
+     * @param withCounts whether the invite should contain approximate member counts
+     * @param withExpiration whether the invite should contain the expiration date
+     * @param guildScheduledEventId the guild scheduled event to include with the invite, can be {@code null}
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Invite} as represented by the
+     * supplied invite code. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Invite> getInvite(String inviteCode, boolean withCounts, boolean withExpiration,
+                                  @Nullable Snowflake guildScheduledEventId) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("with_counts", withCounts);
+        queryParams.put("with_expiration", withExpiration);
+        if (guildScheduledEventId != null) {
+            queryParams.put("guild_scheduled_event_id", guildScheduledEventId.asString());
+        }
+        return getRestClient().getInviteService()
+                .getInvite(inviteCode, queryParams)
                 .map(data -> new Invite(this, data));
     }
 
