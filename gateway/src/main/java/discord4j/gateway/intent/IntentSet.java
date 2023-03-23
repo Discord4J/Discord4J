@@ -54,7 +54,7 @@ public final class IntentSet extends AbstractSet<Intent> {
      * Common instance for {@code nonPrivileged()}.
      */
     private static final IntentSet NON_PRIVILEGED =
-            ALL.andNot(IntentSet.of(Intent.GUILD_PRESENCES, Intent.GUILD_MEMBERS));
+            ALL.andNot(IntentSet.of(Intent.GUILD_PRESENCES, Intent.GUILD_MEMBERS, Intent.MESSAGE_CONTENT));
 
     /**
      * Returns a {@code IntentSet} containing all intents.
