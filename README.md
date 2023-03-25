@@ -162,22 +162,26 @@ public class ExampleBot {
 Discord4J also provides several methods to aid in better reactive chain compositions, such as `GatewayDiscordClient#withGateway` and `EventDispatcher#on` with an [error handling](https://docs.discord4j.com/error-handling) overload.
 
 ```java
-String token = args[0];
-DiscordClient client = DiscordClient.create(token);
+public class ExampleBot {
 
-client.withGateway(gateway -> {
-  Publisher<?> pingPong = gateway.on(MessageCreateEvent.class, event ->
-    Mono.just(event.getMessage())
-      .filter(message -> "!ping".equals(message.getContent()))
-      .flatMap(Message::getChannel)
-      .flatMap(channel -> channel.createMessage("Pong!")));
-            
-    Publisher<?> onDisconnect = gateway.onDisconnect()
-      .doOnTerminate(() -> System.out.println("Disconnected!"));
+    public static void main(String[] args) {
+        String token = args[0];
+        DiscordClient client = DiscordClient.create(token);
 
-    return Mono.when(pingPong, onDisconnect);
-  })
-  .block();
+        client.withGateway(gateway -> {
+            Publisher<?> pingPong = gateway.on(MessageCreateEvent.class, event ->
+                    Mono.just(event.getMessage())
+                            .filter(message -> "!ping".equals(message.getContent()))
+                            .flatMap(Message::getChannel)
+                            .flatMap(channel -> channel.createMessage("Pong!")));
+
+            Publisher<?> onDisconnect = gateway.onDisconnect()
+                    .doOnTerminate(() -> System.out.println("Disconnected!"));
+
+            return Mono.when(pingPong, onDisconnect);
+        }).block();
+    }
+}
 ```
 
 ## 🧵 Kotlin
@@ -282,7 +286,7 @@ static {
 Next, we need to allow Discord4J to read from an `AudioPlayer` to an `AudioProvider`.
 
 ```java
-public final class LavaPlayerAudioProvider extends AudioProvider {
+public class LavaPlayerAudioProvider extends AudioProvider {
 
   private final AudioPlayer player;
   private final MutableAudioFrame frame;
@@ -299,7 +303,7 @@ public final class LavaPlayerAudioProvider extends AudioProvider {
   @Override
   public boolean provide() {
     // AudioPlayer writes audio data to the AudioFrame
-    final boolean didProvide = player.provide(frame);
+    boolean didProvide = player.provide(frame);
 
     if (didProvide) {
       getBuffer().flip();
@@ -334,7 +338,7 @@ public class AudioTrackScheduler extends AudioEventAdapter {
   }
 
   public boolean play(AudioTrack track, boolean force) {
-    final boolean playing = player.startTrack(track, !force);
+    boolean playing = player.startTrack(track, !force);
 
     if (!playing) {
       queue.add(track);
@@ -364,7 +368,7 @@ public class GuildAudioManager {
 
   private static final Map<Snowflake, GuildAudioManager> MANAGERS = new ConcurrentHashMap<>();
 
-  public static GuildAudioManager of(final Snowflake id) {
+  public static GuildAudioManager of(Snowflake id) {
     return MANAGERS.computeIfAbsent(id, ignored -> new GuildAudioManager());
   }
 
