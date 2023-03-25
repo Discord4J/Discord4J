@@ -828,13 +828,13 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
-            dispatch.addedMembers().forEach(threadMember -> {
+            dispatch.addedMembers().toOptional().orElse(Collections.emptyList()).forEach(threadMember -> {
                 Long2 id = new Long2(threadId, threadMember.userId().get().asLong());
                 content.threadMembersIds.add(id);
                 threadMembers.put(id, ImmutableThreadMemberData.copyOf(threadMember));
             });
 
-            dispatch.removedMemberIds().forEach(id -> {
+            dispatch.removedMemberIds().toOptional().orElse(Collections.emptyList()).forEach(id -> {
                 Long2 key = new Long2(threadId, id.asLong());
                 content.threadMembersIds.remove(key);
                 threadMembers.remove(key);
