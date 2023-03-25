@@ -31,9 +31,9 @@ import discord4j.core.object.entity.channel.TopLevelGuildMessageChannel;
 import discord4j.core.spec.StartThreadSpec;
 import discord4j.core.spec.StartThreadWithoutMessageSpec;
 import discord4j.core.spec.ThreadChannelEditSpec;
-import discord4j.core.support.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.interaction.GuildCommandRegistrar;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
@@ -153,8 +153,9 @@ public class ExampleThread {
                                             .build())
                                     .build()
                     );
-                    Mono<Void> createCommands = GuildCommandRegistrar.create(
-                            client.getRestClient(), GUILD_ID, commands).registerCommands().then();
+                    Mono<Void> createCommands = GuildCommandRegistrar.create(client.getRestClient(), commands)
+                        .registerCommands(Snowflake.of(GUILD_ID))
+                        .then();
 
                     Publisher<?> onChatInput = client.on(ChatInputInteractionEvent.class, event -> {
                         if (START.equals(event.getCommandName())) {
