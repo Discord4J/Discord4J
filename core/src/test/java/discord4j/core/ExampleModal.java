@@ -17,13 +17,14 @@
 
 package discord4j.core;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.ModalSubmitInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.SelectMenu;
 import discord4j.core.object.component.TextInput;
 import discord4j.core.spec.InteractionPresentModalSpec;
-import discord4j.core.support.GuildCommandRegistrar;
+import discord4j.rest.interaction.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -91,8 +92,8 @@ public class ExampleModal {
                         return Mono.empty();
                     });
 
-                    return GuildCommandRegistrar.create(client.getRestClient(), guildId, commands)
-                            .registerCommands()
+                    return GuildCommandRegistrar.create(client.getRestClient(), commands)
+                            .registerCommands(Snowflake.of(guildId))
                             .thenMany(Mono.when(onChatInput, onModal));
                 })
                 .block();
