@@ -17,13 +17,14 @@
 
 package discord4j.core;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.MessageCreateFields;
-import discord4j.core.support.GuildCommandRegistrar;
+import discord4j.rest.interaction.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -118,8 +119,8 @@ public class ExampleButtonAttachment {
                     });
 
                     // register the command and then subscribe to multiple listeners, using Mono.when
-                    return GuildCommandRegistrar.create(client.getRestClient(), guildId, commands)
-                            .registerCommands()
+                    return GuildCommandRegistrar.create(client.getRestClient(), commands)
+                            .registerCommands(Snowflake.of(guildId))
                             .thenMany(Mono.when(onChatInputInteraction, onButtonInteraction));
                 })
                 .block();

@@ -15,7 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core.support;
+package discord4j.rest.interaction;
 
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -27,6 +27,10 @@ import reactor.util.Loggers;
 
 import java.util.List;
 
+/**
+ * A simple way to register a set of application command definitions globally. Use {@link #create(RestClient, List)}
+ * to build one.
+ */
 public class GlobalCommandRegistrar {
 
     private static final Logger log = Loggers.getLogger(GlobalCommandRegistrar.class);
@@ -41,17 +45,31 @@ public class GlobalCommandRegistrar {
         this.applicationId = restClient.getApplicationId().cache();
     }
 
-    public static GlobalCommandRegistrar create(RestClient restClient, List<ApplicationCommandRequest> commandRequests) {
+    /**
+     * Create a registrar using a list of {@link ApplicationCommandRequest} entries. Run the command registration
+     * process by subscribing to {@link #registerCommands()}.
+     *
+     * @param restClient a Discord web client to perform API requests
+     * @param commandRequests a list of command definitions
+     * @return a registrar that can register application commands by subscribing to {@link #registerCommands()}
+     */
+    public static GlobalCommandRegistrar create(RestClient restClient,
+                                                List<ApplicationCommandRequest> commandRequests) {
         return new GlobalCommandRegistrar(restClient, commandRequests);
     }
 
+    /**
+     * Submit the command definitions to Discord to register each application command globally.
+     *
+     * @return a Flux with each command registration response from Discord if successful
+     */
     public Flux<ApplicationCommandData> registerCommands() {
         return bulkOverwriteCommands(commandRequests);
     }
 
     private Flux<ApplicationCommandData> bulkOverwriteCommands(List<ApplicationCommandRequest> requests) {
         return applicationId.flatMapMany(id -> restClient.getApplicationService()
-                .bulkOverwriteGlobalApplicationCommand(id, requests)
-                .doOnNext(it -> log.info("Registered command {} globally", it.name())));
+            .bulkOverwriteGlobalApplicationCommand(id, requests)
+            .doOnNext(it -> log.debug("Registered command {} globally", it.name())));
     }
 }

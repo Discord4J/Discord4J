@@ -38,7 +38,7 @@ import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Member;
-import discord4j.core.support.GuildCommandRegistrar;
+import discord4j.rest.interaction.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.voice.AudioProvider;
 import discord4j.voice.VoiceConnection;
@@ -173,8 +173,8 @@ public class ExampleSoundboard {
         });
 
         // register the command and then subscribe to multiple listeners, using Mono.when
-        return GuildCommandRegistrar.create(client.getRestClient(), guildId, getCommandSources())
-                .registerCommands()
+        return GuildCommandRegistrar.create(client.getRestClient(), getCommandSources())
+                .registerCommands(Snowflake.of(guildId))
                 .thenMany(Mono.when(onChatInputInteraction, onButtonInteraction, onPermsUpdate));
     }
 

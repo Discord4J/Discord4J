@@ -17,13 +17,14 @@
 
 package discord4j.core;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.core.object.command.ApplicationCommandOption;
-import discord4j.core.support.GuildCommandRegistrar;
+import discord4j.rest.interaction.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import org.reactivestreams.Publisher;
@@ -57,8 +58,8 @@ public class ExampleChatInputInteractionEvent {
                         .build())
                 .build();
 
-        GuildCommandRegistrar.create(client.getRestClient(), guildId, Collections.singletonList(randomCommand))
-                .registerCommands()
+        GuildCommandRegistrar.create(client.getRestClient(), Collections.singletonList(randomCommand))
+                .registerCommands(Snowflake.of(guildId))
                 .doOnError(e -> log.warn("Unable to create guild command", e))
                 .onErrorResume(e -> Mono.empty())
                 .blockLast();
