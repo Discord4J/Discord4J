@@ -1428,7 +1428,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
     @Override
     public Mono<List<ThreadMemberData>> onThreadMembersUpdate(int shardIndex, ThreadMembersUpdate dispatch) {
-        Mono<Void> addThreadMembers = Flux.fromIterable(dispatch.addedMembers())
+        Mono<Void> addThreadMembers = Mono.justOrEmpty(dispatch.addedMembers().toOptional())
+                .flatMapIterable(it -> it)
                 .flatMap(threadMember -> {
                     LongLongTuple2 id = LongLongTuple2.of(threadMember.id().get().asLong(), threadMember.userId().get().asLong());
                     return stateHolder.getThreadMemberStore().save(id, threadMember);
@@ -1436,7 +1437,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .then();
 
         long threadId = dispatch.id().asLong();
-        Mono<List<ThreadMemberData>> removeThreadMembers = Flux.fromIterable(dispatch.removedMemberIds())
+        Mono<List<ThreadMemberData>> removeThreadMembers = Mono.justOrEmpty(dispatch.removedMemberIds().toOptional())
+                .flatMapIterable(it -> it)
                 .map(id -> LongLongTuple2.of(threadId, id.asLong()))
                 .flatMap(id -> {
                     Mono<Void> delete = stateHolder.getThreadMemberStore().delete(id);

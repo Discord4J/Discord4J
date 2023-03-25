@@ -10,6 +10,7 @@ import discord4j.discordjson.json.ThreadMemberData;
 import discord4j.discordjson.json.gateway.*;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,7 +61,7 @@ class ThreadDispatchHandlers {
 
     static Mono<? extends Event> threadMembersUpdate(DispatchContext<ThreadMembersUpdate, List<ThreadMemberData>> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        List<ThreadMemberData> addedMembers = context.getDispatch().addedMembers();
+        List<ThreadMemberData> addedMembers = context.getDispatch().addedMembers().toOptional().orElse(Collections.emptyList());
         Optional<List<ThreadMemberData>> oldData = context.getOldState();
 
         return Mono.just(new ThreadMembersUpdateEvent(gateway, context.getShardInfo(), context.getDispatch(),
