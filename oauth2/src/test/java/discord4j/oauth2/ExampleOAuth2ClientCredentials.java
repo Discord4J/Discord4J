@@ -17,8 +17,8 @@
 
 package discord4j.oauth2;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import discord4j.discordjson.json.ClientCredentialsGrantRequest;
+import discord4j.discordjson.json.GuildApplicationCommandPermissionsData;
 import discord4j.rest.RestClient;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.request.Router;
@@ -47,10 +47,10 @@ public class ExampleOAuth2ClientCredentials {
                         .build());
         Router router = restClient.getRestResources().getRouter();
         // fetch the current permissions for COMMAND_ID in GUILD_ID
-        JsonNode permissions = oAuth2Client.withAuthorizedClient(Routes.APPLICATION_COMMAND_PERMISSIONS_GET
-                        .newRequest(APPLICATION_ID, GUILD_ID, COMMAND_ID))
+        GuildApplicationCommandPermissionsData permissions = oAuth2Client.withAuthorizedClient(
+                        Routes.APPLICATION_COMMAND_PERMISSIONS_GET.newRequest(APPLICATION_ID, GUILD_ID, COMMAND_ID))
                 .map(request -> request.exchange(router))
-                .flatMap(response -> response.bodyToMono(JsonNode.class))
+                .flatMap(response -> response.bodyToMono(GuildApplicationCommandPermissionsData.class))
                 // ignore 404 if no perms were set for COMMAND_ID in GUILD_ID
                 .onErrorResume(ClientException.isStatusCode(404), error -> Mono.empty())
                 .block();
