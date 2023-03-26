@@ -20,7 +20,6 @@ package discord4j.oauth2;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.annotations.Experimental;
 import discord4j.discordjson.json.AuthorizationCodeGrantRequest;
-import discord4j.oauth2.object.AccessToken;
 import discord4j.oauth2.service.OAuth2Service;
 import discord4j.rest.RestClient;
 import discord4j.rest.RestClientBuilder;
@@ -92,7 +91,8 @@ public class DiscordOAuth2Server {
         this.objectMapper = Objects.requireNonNull(builder.objectMapper, "objectMapper");
         Consumer<HttpServerRoutes> loginRoute = route -> route.get(builder.loginPath, new OAuth2ServerHandler());
         Function<HttpServer, HttpServer> initializer = httpServer ->
-                httpServer.route(builder.routesCustomizer == null ? loginRoute : loginRoute.andThen(builder.routesCustomizer));
+                httpServer.route(builder.routesCustomizer == null ? loginRoute :
+                        loginRoute.andThen(builder.routesCustomizer));
         this.httpServer = initializer.apply(Objects.requireNonNull(builder.httpServer, "httpServer"));
         this.successHandler = Objects.requireNonNull(builder.successHandler, "successHandler");
     }
@@ -257,8 +257,7 @@ public class DiscordOAuth2Server {
                 res.addHeader("access-control-allow-origin", origin);
             }
             if (code == null) {
-                QueryStringEncoder encoder = new QueryStringEncoder(
-                        "https://discord.com/api/oauth2/authorize");
+                QueryStringEncoder encoder = new QueryStringEncoder("https://discord.com/api/oauth2/authorize");
                 encoder.addParam("client_id", String.valueOf(clientId));
                 encoder.addParam("redirect_uri", origin == null ? redirectUris.get(0) : origin);
                 encoder.addParam("response_type", "code");
@@ -288,11 +287,14 @@ public class DiscordOAuth2Server {
                                         .redirectUri(origin == null ? redirectUris.get(0) : origin)
                                         .build())
                                 .flatMap(data -> {
-                                    DiscordOAuth2Client client = DiscordOAuth2Client.createFromData(
+                                    DiscordOAuth2Client client = DiscordOAuth2Client.createFromToken(
                                             restClient, clientId, clientSecret, data);
 
-                                    return successHandler.onAuthSuccess(client, new AccessToken(data), sessionId)
-                                            .onErrorResume(ex -> Mono.empty())
+                                    return Mono.defer(() -> successHandler.onAuthSuccess(client, sessionId))
+                                            .onErrorResume(e -> {
+                                                log.error("Unable to run success handler", e);
+                                                return Mono.empty();
+                                            })
                                             .then(Mono.fromCallable(() -> objectMapper.writeValueAsString(data)));
                                 }));
             }

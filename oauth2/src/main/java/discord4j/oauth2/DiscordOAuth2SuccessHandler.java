@@ -17,9 +17,21 @@
 
 package discord4j.oauth2;
 
-import discord4j.oauth2.object.AccessToken;
 import reactor.core.publisher.Mono;
 
+/**
+ * An interface to work with authorized users within a {@link DiscordOAuth2Server}. Allows retrieving details once
+ * a user completes an authorization code grant request.
+ */
 public interface DiscordOAuth2SuccessHandler {
-    Mono<Void> onAuthSuccess(DiscordOAuth2Client client, AccessToken token, String id);
+
+    /**
+     * Invoked once a user completes an authorization code grant request for your OAuth2 application.
+     *
+     * @param client the authorized user client registration, allowing to perform API request on behalf of this user
+     * @param sessionId a session identifier used by the server
+     * @return a Mono signaling completion of the success handler, errors thrown are logged and discarded by the server
+     */
+    Mono<?> onAuthSuccess(DiscordOAuth2Client client, String sessionId);
+
 }

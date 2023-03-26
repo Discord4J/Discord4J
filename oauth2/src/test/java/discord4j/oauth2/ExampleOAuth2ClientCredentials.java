@@ -40,8 +40,6 @@ public class ExampleOAuth2ClientCredentials {
     public static void main(String[] args) {
         RestClient restClient = RestClient.create(TOKEN);
         DiscordOAuth2Client oAuth2Client = DiscordOAuth2Client.createFromCredentials(restClient,
-                CLIENT_ID,
-                CLIENT_SECRET,
                 ClientCredentialsGrantRequest.builder()
                         .clientId(CLIENT_ID)
                         .clientSecret(CLIENT_SECRET)

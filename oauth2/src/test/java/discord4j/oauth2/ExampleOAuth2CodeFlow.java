@@ -37,8 +37,8 @@ public class ExampleOAuth2CodeFlow {
                 .addScope(Scope.IDENTIFY)
                 .addScope(Scope.CONNECTIONS)
                 .addRedirectUri("http://localhost:" + SERVER_PORT)
-                .onAuthSuccess((client, token, id) -> {
-                    CLIENTS.put(id, client);
+                .onAuthSuccess((client, sessionId) -> {
+                    CLIENTS.put(sessionId, client);
                     return Mono.empty();
                 })
                 .route(r -> r

@@ -982,6 +982,13 @@ public abstract class Routes {
     public static final Route CURRENT_USER_GUILDS_GET = Route.get("/users/@me/guilds");
 
     /**
+     * Returns a guild member object for the current user. Requires the guilds.members.read OAuth2 scope.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/user#get-current-user-guild-member">Discord</a>
+     */
+    public static final Route CURRENT_USER_GUILD_MEMBER_GET = Route.get("/users/@me/guilds/{guild.id}/member");
+
+    /**
      * Leave a guild. Returns a 204 empty response on success.
      *
      * @see <a href="https://discord.com/developers/docs/resources/user#leave-guild">
