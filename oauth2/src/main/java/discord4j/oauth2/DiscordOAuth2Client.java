@@ -150,9 +150,7 @@ public class DiscordOAuth2Client {
      * error Mono in case any request fails
      */
     public Mono<AuthorizationInfoData> getAuthorizationInfo() {
-        return withAuthorizedClient(Routes.AUTHORIZATION_INFO_GET.newRequest())
-                .map(request -> request.exchange(getRouter()))
-                .flatMap(response -> response.bodyToMono(AuthorizationInfoData.class));
+        return exchange(Routes.AUTHORIZATION_INFO_GET.newRequest(), AuthorizationInfoData.class);
     }
 
     /**
@@ -163,9 +161,7 @@ public class DiscordOAuth2Client {
      * @return a Mono with user details if successful, otherwise an error Mono
      */
     public Mono<UserData> getCurrentUser() {
-        return withAuthorizedClient(Routes.CURRENT_USER_GET.newRequest())
-                .map(request -> request.exchange(getRouter()))
-                .flatMap(response -> response.bodyToMono(UserData.class));
+        return exchange(Routes.CURRENT_USER_GET.newRequest(), UserData.class);
     }
 
     /**
@@ -177,10 +173,7 @@ public class DiscordOAuth2Client {
      * @return a Flux with partial guild information for the user, otherwise an error Flux
      */
     public Flux<UserGuildData> getCurrentUserGuilds(Map<String, Object> queryParams) {
-        return withAuthorizedClient(Routes.CURRENT_USER_GUILDS_GET.newRequest()
-                .query(queryParams))
-                .map(request -> request.exchange(getRouter()))
-                .flatMap(response -> response.bodyToMono(UserGuildData[].class))
+        return exchange(Routes.CURRENT_USER_GUILDS_GET.newRequest().query(queryParams), UserGuildData[].class)
                 .flatMapMany(Flux::fromArray);
     }
 
@@ -192,9 +185,7 @@ public class DiscordOAuth2Client {
      * @return a Mono with member information, otherwise an error Mono
      */
     public Mono<MemberData> getCurrentUserGuildMember(long guildId) {
-        return withAuthorizedClient(Routes.CURRENT_USER_GUILD_MEMBER_GET.newRequest(guildId))
-                .map(request -> request.exchange(getRouter()))
-                .flatMap(response -> response.bodyToMono(MemberData.class));
+        return exchange(Routes.CURRENT_USER_GUILD_MEMBER_GET.newRequest(guildId), MemberData.class);
     }
 
     /**
@@ -205,10 +196,59 @@ public class DiscordOAuth2Client {
      * @return a Mono with user connections, or an error Mono in case any request fails
      */
     public Flux<ConnectionData> getUserConnections() {
-        return withAuthorizedClient(Routes.USER_CONNECTIONS_GET.newRequest())
-                .map(request -> request.exchange(getRouter()))
-                .flatMap(response -> response.bodyToMono(ConnectionData[].class))
+        return exchange(Routes.USER_CONNECTIONS_GET.newRequest(), ConnectionData[].class)
                 .flatMapMany(Flux::fromArray);
+    }
+
+    /**
+     * Fetches permissions for a specific command for your application in a guild. Returns a guild application command
+     * permissions object.
+     *
+     * @param applicationId your application ID
+     * @param guildId the guild ID
+     * @param commandId the command ID
+     * @return a Mono with command permissions object for the requested guild, or an error Mono in case a request fails
+     */
+    public Mono<GuildApplicationCommandPermissionsData> getApplicationCommandPermissions(long applicationId,
+                                                                                         long guildId,
+                                                                                         long commandId) {
+        return exchange(Routes.APPLICATION_COMMAND_PERMISSIONS_GET.newRequest(applicationId, guildId, commandId),
+                GuildApplicationCommandPermissionsData.class);
+    }
+
+    /**
+     * Edits command permissions for a specific command for your application in a guild and returns a guild
+     * application command permissions object. You can add up to 100 permission overwrites for a command.
+     *
+     * @param applicationId your application ID
+     * @param guildId the guild ID
+     * @param commandId the command ID
+     * @param request a request body containing the permissions to be set
+     * @return a Mono with command permissions object for the requested guild, or an error Mono in case a request fails
+     */
+    public Mono<GuildApplicationCommandPermissionsData> modifyApplicationCommandPermissions(long applicationId,
+                                                                                            long guildId,
+                                                                                            long commandId,
+                                                                                            ApplicationCommandPermissionsRequest request) {
+        return exchange(Routes.APPLICATION_COMMAND_PERMISSIONS_MODIFY.newRequest(applicationId, guildId, commandId),
+                GuildApplicationCommandPermissionsData.class);
+    }
+
+    /**
+     * Execute a given {@link DiscordWebRequest} on behalf of a user and mapping the response to the given type, using
+     * the credentials stored under this client. The token fetching, refreshing (if required) and API request are run
+     * once this Mono is subscribed. For more control on the authorized request and response see
+     * {@link #withAuthorizedClient(DiscordWebRequest)}.
+     *
+     * @param request the compiled Discord REST API request to be run on behalf of a user
+     * @param responseType the expected response type from the API
+     * @param <T> the response type
+     * @return a Mono with the mapped response if successful, otherwise an error Mono
+     */
+    public <T> Mono<T> exchange(DiscordWebRequest request, Class<T> responseType) {
+        return withAuthorizedClient(request)
+                .map(it -> it.exchange(getRouter()))
+                .flatMap(res -> res.bodyToMono(responseType));
     }
 
     /**
@@ -219,6 +259,10 @@ public class DiscordOAuth2Client {
      * @return a Mono of a request including required steps to include proper authorization
      */
     public Mono<DiscordWebRequest> withAuthorizedClient(DiscordWebRequest request) {
+        return getBearerToken().map(token -> request.copy().bearerAuth(token));
+    }
+
+    private Mono<String> getBearerToken() {
         return Mono.fromCallable(accessToken::get)
                 .flatMap(token -> {
                     if (token.hasExpired()) {
@@ -229,15 +273,15 @@ public class DiscordOAuth2Client {
                                         .build())
                                 .map(data -> {
                                     accessToken.set(new AccessToken(data));
-                                    return request.copy().bearerAuth(data.accessToken());
+                                    return data.accessToken();
                                 });
                     }
-                    return Mono.just(request.copy().bearerAuth(token.getAccessToken()));
+                    return Mono.just(token.getAccessToken());
                 })
                 .switchIfEmpty(Mono.defer(() -> tokenFactory.apply(oAuth2Service)
                         .map(newToken -> {
                             accessToken.set(newToken);
-                            return request.copy().bearerAuth(newToken.getAccessToken());
+                            return newToken.getAccessToken();
                         })))
                 .onErrorResume(ex -> {
                     accessToken.set(null);

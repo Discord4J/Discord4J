@@ -18,11 +18,9 @@
 package discord4j.oauth2;
 
 import discord4j.discordjson.json.ClientCredentialsGrantRequest;
-import discord4j.discordjson.json.GuildApplicationCommandPermissionsData;
 import discord4j.rest.RestClient;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.request.Router;
-import discord4j.rest.route.Routes;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -33,9 +31,9 @@ public class ExampleOAuth2ClientCredentials {
     private static final String TOKEN = System.getenv("TOKEN");
     private static final Long CLIENT_ID = Long.parseLong(System.getenv("CLIENT_ID"));
     private static final String CLIENT_SECRET = System.getenv("CLIENT_SECRET");
-    private static final String APPLICATION_ID = System.getenv("APPLICATION_ID");
-    private static final String GUILD_ID = System.getenv("GUILD_ID");
-    private static final String COMMAND_ID = System.getenv("COMMAND_ID");
+    private static final Long APPLICATION_ID = Long.parseLong(System.getenv("APPLICATION_ID"));
+    private static final Long GUILD_ID = Long.parseLong(System.getenv("GUILD_ID"));
+    private static final Long COMMAND_ID = Long.parseLong(System.getenv("COMMAND_ID"));
 
     public static void main(String[] args) {
         RestClient restClient = RestClient.create(TOKEN);
@@ -47,13 +45,16 @@ public class ExampleOAuth2ClientCredentials {
                         .build());
         Router router = restClient.getRestResources().getRouter();
         // fetch the current permissions for COMMAND_ID in GUILD_ID
-        GuildApplicationCommandPermissionsData permissions = oAuth2Client.withAuthorizedClient(
-                        Routes.APPLICATION_COMMAND_PERMISSIONS_GET.newRequest(APPLICATION_ID, GUILD_ID, COMMAND_ID))
-                .map(request -> request.exchange(router))
-                .flatMap(response -> response.bodyToMono(GuildApplicationCommandPermissionsData.class))
-                // ignore 404 if no perms were set for COMMAND_ID in GUILD_ID
+        // ignore 404 if no perms were set for COMMAND_ID in GUILD_ID
+        oAuth2Client.getApplicationCommandPermissions(APPLICATION_ID, GUILD_ID, COMMAND_ID)
                 .onErrorResume(ClientException.isStatusCode(404), error -> Mono.empty())
+                .doOnSuccess(data -> {
+                    if (data == null) {
+                        log.info("No permissions set");
+                    } else {
+                        log.info("{}", data);
+                    }
+                })
                 .block();
-        log.info("{}", permissions);
     }
 }
