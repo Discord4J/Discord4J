@@ -136,6 +136,13 @@ public abstract class ReactionEmoji {
     }
 
     /**
+     * Gets the formatted version of this emoji (i.e., to display in the client).
+     *
+     * @return The formatted version of this emoji (i.e., to display in the client).
+     */
+    public abstract String asFormat();
+
+    /**
      * Gets this emoji as downcasted to {@link Custom a custom reaction emoji}.
      *
      * @return This emoji downcasted to a custom emoji, if possible.
@@ -208,13 +215,21 @@ public abstract class ReactionEmoji {
                     .build();
         }
 
+        @Override
+        public String asFormat() {
+            return asFormat(this.isAnimated(), this.getName(), this.getId());
+        }
+
         /**
          * Gets the formatted version of this emoji (i.e., to display in the client).
          *
+         * @param isAnimated Whether the emoji is animated.
+         * @param id The ID of the custom emoji.
+         * @param name The name of the custom emoji.
          * @return The formatted version of this emoji (i.e., to display in the client).
          */
-        public String asFormat() {
-            return '<' + (this.isAnimated() ? "a" : "") + ':' + this.getName() + ':' + this.getId().asString() + '>';
+        public static String asFormat(final boolean isAnimated, final String name, final Snowflake id) {
+            return '<' + (isAnimated ? "a" : "") + ':' + Objects.requireNonNull(name) + ':' + Objects.requireNonNull(id).asString() + '>';
         }
 
         @Override
@@ -261,6 +276,11 @@ public abstract class ReactionEmoji {
             return EmojiData.builder()
                     .name(raw)
                     .build();
+        }
+
+        @Override
+        public String asFormat() {
+            return this.getRaw();
         }
 
         @Override
