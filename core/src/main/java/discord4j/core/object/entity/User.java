@@ -21,6 +21,7 @@ import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
+import discord4j.core.util.MentionUtil;
 import discord4j.discordjson.json.DMCreateRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
@@ -250,7 +251,7 @@ public class User implements Entity {
      * @return The <i>raw</i> mention.
      */
     public final String getMention() {
-        return "<@" + getId().asString() + ">";
+        return MentionUtil.forUser(getId());
     }
 
     @Override
@@ -346,7 +347,7 @@ public class User implements Entity {
         VERIFIED_BOT(16),
 
         VERIFIED_BOT_DEVELOPER(17),
-        
+
         DISCORD_CERTIFIED_MODERATOR(18),
 
         BOT_HTTP_INTERACTIONS(19),

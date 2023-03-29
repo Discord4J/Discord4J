@@ -155,7 +155,9 @@ public class ResolvedMember implements DiscordObject {
      * user exists in context of the mention).
      *
      * @return The <i>raw</i> nickname mention.
+     * @deprecated This type of ping has been deprecated in the Discord API.
      */
+    @Deprecated
     public String getNicknameMention() {
         return "<@!" + getId().asString() + ">";
     }
