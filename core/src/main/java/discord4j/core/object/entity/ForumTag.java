@@ -71,4 +71,13 @@ public class ForumTag implements Entity {
         return data.emojiName();
     }
 
+    /**
+     * Gets the associated {@link ForumTagData} wrapped by this object
+     *
+     * @return the wrapped {@link ForumTagData} object
+     */
+    public ForumTagData getData() {
+        return data;
+    }
+
 }

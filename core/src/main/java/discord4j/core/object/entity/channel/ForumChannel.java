@@ -4,10 +4,15 @@ import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.ForumTag;
 import discord4j.core.object.reaction.DefaultReaction;
+import discord4j.core.spec.ForumChannelEditSpec;
+import discord4j.core.spec.StartThreadInForumChannelSpec;
+import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
+import reactor.core.publisher.Mono;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -41,7 +46,6 @@ public final class ForumChannel extends BaseTopLevelGuildChannel implements Cate
     }
 
     /* Represents guild forum channels flags */
-    //TODO Should we create a special "Unknown flag" or warn about unknown flags ? Do they change frequently enough ?
     @Experimental
     public enum ForumChannelFlag {
         PINNED(1),
@@ -88,6 +92,20 @@ public final class ForumChannel extends BaseTopLevelGuildChannel implements Cate
                 }
             }
             return returnSet;
+        }
+
+        /**
+         * Translates an {@link EnumSet<ForumChannelFlag>} to a binary bitfield
+         *
+         * @param flags Set of known forum channel flags
+         * @return An integer representing the given set as an integer
+         */
+        public static int toBitfield(EnumSet<ForumChannelFlag> flags) {
+            int bitfield = 0;
+            for (ForumChannelFlag flag : flags) {
+                bitfield |= flag.getBitValue();
+            }
+            return bitfield;
         }
 
     }
@@ -264,4 +282,31 @@ public final class ForumChannel extends BaseTopLevelGuildChannel implements Cate
             .map(LayoutType::valueOf)
             .orElseThrow(IllegalStateException::new); // Mandatory for Forum channels
     }
+
+    /**
+     * Starts a new {@link ThreadChannel} in this forum channel
+     *
+     * @param request an immutable object that specifies how to create the thread
+     * @return A {@link Mono} that, upon completion, emits a {@link ThreadChannel} object
+     */
+    public Mono<ThreadChannel> startThread(StartThreadInForumChannelSpec request) {
+        return getClient().getRestClient().getChannelService().startThreadInForumChannel(getId().asLong(), request.asRequest())
+            .map(channelData -> new ThreadChannel(getClient(), channelData));
+    }
+
+    /**
+     * Requests to edit the current forum channel object
+     *
+     * @param spec an immutable object that specifies the modifications requested
+     * @return A {@link Mono} that, upon completion, emits the updated {@link ForumChannel} object
+     */
+    public Mono<ForumChannel> edit(ForumChannelEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> getClient().getRestClient().getChannelService()
+                    .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+            .map(data -> EntityUtil.getChannel(getClient(), data))
+            .cast(ForumChannel.class);
+    }
+
 }

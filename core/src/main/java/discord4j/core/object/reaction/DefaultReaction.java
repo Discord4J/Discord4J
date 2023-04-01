@@ -42,4 +42,13 @@ public final class DefaultReaction implements DiscordObject {
         return data.emojiName();
     }
 
+    /**
+     * Gets the {@link DefaultReactionData} associated to this wrapper
+     *
+     * @return the {@link DefaultReactionData} object wrapped by this object
+     */
+    public DefaultReactionData getData() {
+        return data;
+    }
+
 }
