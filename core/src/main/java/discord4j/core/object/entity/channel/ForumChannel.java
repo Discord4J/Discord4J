@@ -45,80 +45,15 @@ public final class ForumChannel extends BaseTopLevelGuildChannel implements Cate
         return getData().nsfw().toOptional().orElse(false);
     }
 
-    /* Represents guild forum channels flags */
-    @Experimental
-    public enum ForumChannelFlag {
-        PINNED(1),
-        REQUIRE_TAG(4);
-
-        private final int shiftValue;
-        private final int bitValue;
-
-        ForumChannelFlag(int shiftValue) {
-            this.shiftValue = shiftValue;
-            this.bitValue = 1 << shiftValue;
-        }
-
-        /**
-         * Gets the shift amount associated to this bit value
-         *
-         * @return N in 1 << N that is the bit value for this flag
-         */
-        public int getShiftValue() {
-            return shiftValue;
-        }
-
-        /**
-         * Gets the bit value associated to this flag
-         *
-         * @return The bit field value associated to this flag
-         */
-        public int getBitValue() {
-            return bitValue;
-        }
-
-        /**
-         * Translate a bitfield value into an {@link EnumSet< ForumChannelFlag >} related to known flags
-         *
-         * @param bitfield An integer representing the flags, one per bit
-         * @return An {@link EnumSet< ForumChannelFlag >} of known flags associated to this bit field
-         * @implNote This implementation ignores unknown flags
-         */
-        public static EnumSet<ForumChannelFlag> valueOf(final int bitfield) {
-            EnumSet<ForumChannelFlag> returnSet = EnumSet.noneOf(ForumChannelFlag.class);
-            for (ForumChannelFlag flag : ForumChannelFlag.values()) {
-                if ((bitfield & flag.getBitValue()) != 0) {
-                    returnSet.add(flag);
-                }
-            }
-            return returnSet;
-        }
-
-        /**
-         * Translates an {@link EnumSet<ForumChannelFlag>} to a binary bitfield
-         *
-         * @param flags Set of known forum channel flags
-         * @return An integer representing the given set as an integer
-         */
-        public static int toBitfield(EnumSet<ForumChannelFlag> flags) {
-            int bitfield = 0;
-            for (ForumChannelFlag flag : flags) {
-                bitfield |= flag.getBitValue();
-            }
-            return bitfield;
-        }
-
-    }
-
     /**
-     * Gets the {@link ForumChannelFlag} flags associated to this forum channel
+     * Gets the channels {@link Flag} associated to this forum channel
      * Unknown flags are currently ignored.
      *
      * @return An {@link EnumSet} representing the <b>known flags</b> for this forum channel.
      */
-    public EnumSet<ForumChannelFlag> getFlags() {
+    public EnumSet<Flag> getFlags() {
         return getData().flags().toOptional()
-            .map(ForumChannelFlag::valueOf)
+            .map(Flag::valueOf)
             .orElseThrow(IllegalStateException::new); // Mandatory for Forum Channels
     }
 

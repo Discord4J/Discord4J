@@ -19,6 +19,7 @@ package discord4j.core.spec;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.ForumTag;
+import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.ForumChannel;
 import discord4j.core.object.reaction.DefaultReaction;
 import discord4j.discordjson.json.ChannelModifyRequest;
@@ -51,7 +52,7 @@ public interface ForumChannelEditSpecGenerator extends AuditSpec<ChannelModifyRe
 
     Possible<Boolean> nsfw();
 
-    Possible<EnumSet<ForumChannel.ForumChannelFlag>> flags();
+    Possible<EnumSet<Channel.Flag>> flags();
 
     Possible<Integer> defaultAutoArchiveDuration();
 
@@ -73,7 +74,7 @@ public interface ForumChannelEditSpecGenerator extends AuditSpec<ChannelModifyRe
             .parentId(mapPossible(parentId(), snowflake -> Optional.of(snowflake.asString())))
             .nsfw(nsfw())
             .defaultAutoArchiveDuration(defaultAutoArchiveDuration())
-            .flags(mapPossible(flags(), ForumChannel.ForumChannelFlag::toBitfield))
+            .flags(mapPossible(flags(), Channel.Flag::toBitfield))
             .defaultReactionEmoji(mapPossible(defaultReactionEmoji(), DefaultReaction::getData))
             .availableTags(mapPossible(availableTags(), list -> list.stream().map(ForumTag::getData).collect(Collectors.toList())))
             .defaultSortOrder(defaultSortOrder())

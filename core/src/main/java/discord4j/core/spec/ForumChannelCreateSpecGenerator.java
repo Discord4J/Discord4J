@@ -54,7 +54,7 @@ public interface ForumChannelCreateSpecGenerator extends AuditSpec<ChannelCreate
 
     Possible<Integer> defaultAutoArchiveDuration();
 
-    Possible<EnumSet<ForumChannel.ForumChannelFlag>> flags();
+    Possible<EnumSet<Channel.Flag>> flags();
 
     Possible<DefaultReaction> defaultReactionEmoji();
 
@@ -75,7 +75,7 @@ public interface ForumChannelCreateSpecGenerator extends AuditSpec<ChannelCreate
             .parentId(mapPossible(parentId(), Snowflake::asString))
             .nsfw(nsfw())
             .defaultAutoArchiveDuration(defaultAutoArchiveDuration())
-            .flags(mapPossible(flags(), ForumChannel.ForumChannelFlag::toBitfield))
+            .flags(mapPossible(flags(), Channel.Flag::toBitfield))
             .defaultReactionEmoji(mapPossible(defaultReactionEmoji(), DefaultReaction::getData))
             .availableTags(availableTags().stream().map(ForumTag::getData).collect(Collectors.toList()))
             .defaultSortOrder(defaultSortOrder())

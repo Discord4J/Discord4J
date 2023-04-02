@@ -16,12 +16,15 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Entity;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.rest.entity.RestChannel;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
+
+import java.util.EnumSet;
 
 /**
  * A Discord channel.
@@ -169,5 +172,70 @@ public interface Channel extends Entity {
                 default: return UNKNOWN;
             }
         }
+    }
+
+    /* Represents channels flags : currently only used in forum channels */
+    @Experimental
+    enum Flag {
+        PINNED(1),
+        REQUIRE_TAG(4);
+
+        private final int shiftValue;
+        private final int bitValue;
+
+        Flag(int shiftValue) {
+            this.shiftValue = shiftValue;
+            this.bitValue = 1 << shiftValue;
+        }
+
+        /**
+         * Gets the shift amount associated to this bit value
+         *
+         * @return N in 1 << N that is the bit value for this flag
+         */
+        public int getShiftValue() {
+            return shiftValue;
+        }
+
+        /**
+         * Gets the bit value associated to this flag
+         *
+         * @return The bit field value associated to this flag
+         */
+        public int getBitValue() {
+            return bitValue;
+        }
+
+        /**
+         * Translate a bitfield value into an {@link EnumSet < ForumChannelFlag >} related to known flags
+         *
+         * @param bitfield An integer representing the flags, one per bit
+         * @return An {@link EnumSet<  Flag  >} of known flags associated to this bit field
+         * @implNote This implementation ignores unknown flags
+         */
+        public static EnumSet<Flag> valueOf(final int bitfield) {
+            EnumSet<Flag> returnSet = EnumSet.noneOf(Flag.class);
+            for (Flag flag : Flag.values()) {
+                if ((bitfield & flag.getBitValue()) != 0) {
+                    returnSet.add(flag);
+                }
+            }
+            return returnSet;
+        }
+
+        /**
+         * Translates an {@link EnumSet< Flag >} to a binary bitfield
+         *
+         * @param flags Set of known forum channel flags
+         * @return An integer representing the given set as an integer
+         */
+        public static int toBitfield(EnumSet<Flag> flags) {
+            int bitfield = 0;
+            for (Flag flag : flags) {
+                bitfield |= flag.getBitValue();
+            }
+            return bitfield;
+        }
+
     }
 }
