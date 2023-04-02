@@ -24,6 +24,7 @@ import discord4j.core.object.component.MessageComponent;
 import discord4j.discordjson.json.ForumThreadMessageParamsData;
 import discord4j.rest.util.AllowedMentions;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
@@ -55,59 +56,64 @@ public final class ForumThreadMessage implements DiscordObject {
     /**
      * Gets the optional embeds list for this forum thread message
      *
-     * @return An {@link Optional<List>} embed list
+     * @return An {@link Embed} list
      */
-    public Optional<List<Embed>> getEmbeds() {
+    public List<Embed> getEmbeds() {
         return data.embeds().toOptional()
             .map(list -> list.stream()
                 .map(embedData -> new Embed(client, embedData))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
     }
 
     /**
      * Gets allowed mentions object for this forum thread message
      *
-     * @return The {@link AllowedMentions} object, wrapped in an {@link Optional}
+     * @return A {@link AllowedMentions} list
      */
-    public Optional<List<AllowedMentions>> getAllowedMentions() {
+    public List<AllowedMentions> getAllowedMentions() {
         return data.allowedMentions().toOptional()
             .map(list -> list.stream()
                 .map(AllowedMentions::from)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
     }
 
     /**
      * Gets message components used in this forum thread message
      *
-     * @return An {@link Optional} list of message components
+     * @return A list of {@link MessageComponent}
      */
-    public Optional<List<MessageComponent>> getComponents() {
+    public List<MessageComponent> getComponents() {
         return data.components().toOptional()
             .map(list -> list.stream()
                 .map(MessageComponent::fromData)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
     }
 
     /**
      * Gets sticker ids used in this forum thread message
      *
-     * @return An {@link Optional} list of sticker identifiers in {@link Snowflake} format
+     * @return A list of sticker identifiers in {@link Snowflake} format
      */
-    public Optional<List<Snowflake>> getStickerIds() {
+    public List<Snowflake> getStickerIds() {
         return data.stickerIds().toOptional()
             .map(list -> list.stream()
                 .map(Snowflake::of)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
     }
 
     /**
      * Gets flags associated to the thread forum message
      *
-     * @return An {@link Optional} {@link EnumSet} representing the message flags
+     * @return An {@link EnumSet} representing the message flags
      */
-    public Optional<EnumSet<Message.Flag>> getFlags() {
+    public EnumSet<Message.Flag> getFlags() {
         return data.flags().toOptional()
-            .map(Message.Flag::of);
+            .map(Message.Flag::of)
+            .orElse(EnumSet.noneOf(Message.Flag.class));
     }
 
     @Override
