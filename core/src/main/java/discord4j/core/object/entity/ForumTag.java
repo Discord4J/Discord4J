@@ -43,7 +43,7 @@ public class ForumTag implements Entity {
     }
 
     /**
-     * Gets weather this tag is moderated, meaning only members with the MANAGE_THREADS permission can use it
+     * Gets whether this tag is moderated, meaning only members with the MANAGE_THREADS permission can use it
      *
      * @return {@code true} if this tag is moderated
      */
