@@ -54,13 +54,15 @@ public interface ForumChannelEditSpecGenerator extends AuditSpec<ChannelModifyRe
 
     Possible<EnumSet<Channel.Flag>> flags();
 
-    Possible<Integer> defaultAutoArchiveDuration();
+    Possible<Optional<Integer>> defaultAutoArchiveDuration();
 
-    Possible<DefaultReaction> defaultReactionEmoji();
+    Possible<Optional<DefaultReaction>> defaultReactionEmoji();
 
     Possible<List<ForumTag>> availableTags();
 
-    Possible<Integer> defaultSortOrder();
+    Possible<Optional<Integer>> defaultSortOrder();
+
+    Possible<Optional<Integer>> defaultForumLayout();
 
     @Override
     default ChannelModifyRequest asRequest() {
@@ -75,7 +77,8 @@ public interface ForumChannelEditSpecGenerator extends AuditSpec<ChannelModifyRe
             .nsfw(nsfw())
             .defaultAutoArchiveDuration(defaultAutoArchiveDuration())
             .flags(mapPossible(flags(), Channel.Flag::toBitfield))
-            .defaultReactionEmoji(mapPossible(defaultReactionEmoji(), DefaultReaction::getData))
+            .defaultReactionEmoji(mapPossible(defaultReactionEmoji(), opt -> opt.map(DefaultReaction::getData)))
+            .defaultForumLayout(defaultForumLayout())
             .availableTags(mapPossible(availableTags(), list -> list.stream().map(ForumTag::getData).collect(Collectors.toList())))
             .defaultSortOrder(defaultSortOrder())
             .build();

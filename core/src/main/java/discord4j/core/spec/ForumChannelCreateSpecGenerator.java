@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
@@ -52,15 +53,17 @@ public interface ForumChannelCreateSpecGenerator extends AuditSpec<ChannelCreate
 
     Possible<Boolean> nsfw();
 
-    Possible<Integer> defaultAutoArchiveDuration();
+    Possible<Optional<Integer>> defaultAutoArchiveDuration();
 
     Possible<EnumSet<Channel.Flag>> flags();
 
-    Possible<DefaultReaction> defaultReactionEmoji();
+    Possible<Optional<DefaultReaction>> defaultReactionEmoji();
 
     List<ForumTag> availableTags();
 
-    Possible<Integer> defaultSortOrder();
+    Possible<Optional<Integer>> defaultSortOrder();
+
+    Possible<Optional<Integer>> defaultForumLayout();
 
     @Override
     default ChannelCreateRequest asRequest() {
@@ -76,7 +79,8 @@ public interface ForumChannelCreateSpecGenerator extends AuditSpec<ChannelCreate
             .nsfw(nsfw())
             .defaultAutoArchiveDuration(defaultAutoArchiveDuration())
             .flags(mapPossible(flags(), Channel.Flag::toBitfield))
-            .defaultReactionEmoji(mapPossible(defaultReactionEmoji(), DefaultReaction::getData))
+            .defaultReactionEmoji(mapPossible(defaultReactionEmoji(), opt -> opt.map(DefaultReaction::getData)))
+            .defaultForumLayout(defaultForumLayout())
             .availableTags(availableTags().stream().map(ForumTag::getData).collect(Collectors.toList()))
             .defaultSortOrder(defaultSortOrder())
             .build();

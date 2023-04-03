@@ -7,6 +7,10 @@ import discord4j.discordjson.json.DefaultReactionData;
 
 import java.util.Optional;
 
+/**
+ * DefaultReaction is used by {@link discord4j.core.object.entity.channel.ForumChannel} as an emoji shown as a quick reaction button on the thread in a forum channel.
+ * When selecting an emoji, the user can use it from the forum channel page.
+ */
 public final class DefaultReaction implements DiscordObject {
 
     private final GatewayDiscordClient gateway;

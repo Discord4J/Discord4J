@@ -51,6 +51,8 @@ public interface StartThreadInForumChannelSpecGenerator extends AuditSpec<StartT
 
     String name();
 
+    ForumThreadMessageCreateSpec message();
+
     Possible<ThreadChannel.AutoArchiveDuration> autoArchiveDuration();
 
     Possible<Optional<Integer>> rateLimitPerUser();
@@ -61,6 +63,7 @@ public interface StartThreadInForumChannelSpecGenerator extends AuditSpec<StartT
     default StartThreadInForumChannelRequest asRequest() {
         return StartThreadInForumChannelRequest.builder()
             .name(name())
+            .message(message().asRequest())
             .autoArchiveDuration(mapPossible(autoArchiveDuration(), ThreadChannel.AutoArchiveDuration::getValue))
             .rateLimitPerUser(rateLimitPerUser())
             .appliedTags()
