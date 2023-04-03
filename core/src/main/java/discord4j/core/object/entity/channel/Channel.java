@@ -179,12 +179,12 @@ public interface Channel extends Entity {
     @Experimental
     enum Flag {
         /**
-         * this thread is pinned to the top of its parent GUILD_FORUM channel
+         * This {@link ThreadChannel} is pinned to the top of its parent {@link ForumChannel}
          */
         PINNED(1),
 
         /**
-         * Whether a tag is required to be specified when creating a thread in a GUILD_FORUM channel. Tags are specified in the applied_tags field.
+         * Whether a tag is required to be specified when creating a {@link ThreadChannel} in a {@link ForumChannel}. Tags are specified in the applied_tags field.
          */
         REQUIRE_TAG(4);
 
