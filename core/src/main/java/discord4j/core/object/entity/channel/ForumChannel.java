@@ -176,11 +176,10 @@ public final class ForumChannel extends BaseTopLevelGuildChannel implements Cate
     /**
      * Gets the default auto archive duration for threads in this forum channel
      *
-     * @return Default client auto archive duration in minutes
+     * @return Default client auto archive duration in minutes wrapped in an {@link Optional} object
      */
-    public int getDefaultAutoArchiveDuration() {
-        return getData().defaultAutoArchiveDuration().toOptional()
-            .orElseThrow(IllegalStateException::new); // Mandatory for Forum channels
+    public Optional<Integer> getDefaultAutoArchiveDuration() {
+        return getData().defaultAutoArchiveDuration().toOptional();
     }
 
     /**
