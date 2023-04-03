@@ -174,7 +174,7 @@ public interface Channel extends Entity {
         }
     }
 
-    /* Represents channels flags : currently only used in forum channels */
+    /** Represent channel flags : <a href="https://discord.com/developers/docs/resources/channel#channel-object-channel-flags">https://discord.com/developers/docs/resources/channel#channel-object-channel-flags</a> */
     @Experimental
     enum Flag {
         /**
@@ -217,7 +217,7 @@ public interface Channel extends Entity {
          * Translate a bitfield value into an {@link EnumSet < ForumChannelFlag >} related to known flags
          *
          * @param bitfield An integer representing the flags, one per bit
-         * @return An {@link EnumSet<  Flag  >} of known flags associated to this bit field
+         * @return An {@link EnumSet<Flag>} of known flags associated to this bit field
          * @implNote This implementation ignores unknown flags
          */
         public static EnumSet<Flag> valueOf(final int bitfield) {
