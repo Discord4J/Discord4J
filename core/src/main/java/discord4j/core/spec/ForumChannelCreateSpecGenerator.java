@@ -59,7 +59,7 @@ public interface ForumChannelCreateSpecGenerator extends AuditSpec<ChannelCreate
 
     Possible<Optional<DefaultReaction>> defaultReactionEmoji();
 
-    List<ForumTag> availableTags();
+    List<ForumTagCreateSpec> availableTags();
 
     Possible<Optional<Integer>> defaultSortOrder();
 
@@ -81,7 +81,7 @@ public interface ForumChannelCreateSpecGenerator extends AuditSpec<ChannelCreate
             .flags(mapPossible(flags(), Channel.Flag::toBitfield))
             .defaultReactionEmoji(mapPossible(defaultReactionEmoji(), opt -> opt.map(DefaultReaction::getData)))
             .defaultForumLayout(defaultForumLayout())
-            .availableTags(availableTags().stream().map(ForumTag::getData).collect(Collectors.toList()))
+            .availableTags(availableTags().stream().map(ForumTagCreateSpec::asRequest).collect(Collectors.toList()))
             .defaultSortOrder(defaultSortOrder())
             .build();
     }

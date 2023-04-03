@@ -18,8 +18,10 @@
 package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
+import discord4j.core.object.Region;
 import discord4j.core.object.entity.channel.ForumChannel;
 import discord4j.core.object.entity.channel.ThreadChannel;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.StartThreadInForumChannelRequest;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
@@ -28,6 +30,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
@@ -66,7 +69,7 @@ public interface StartThreadInForumChannelSpecGenerator extends AuditSpec<StartT
             .message(message().asRequest())
             .autoArchiveDuration(mapPossible(autoArchiveDuration(), ThreadChannel.AutoArchiveDuration::getValue))
             .rateLimitPerUser(rateLimitPerUser())
-            .appliedTags()
+            .appliedTags(mapPossible(appliedTags(), list -> list.stream().map(snowflake -> Id.of(snowflake.asLong())).collect(Collectors.toList())))
             .build();
     }
 }

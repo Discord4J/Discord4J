@@ -18,7 +18,6 @@ package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.entity.ForumTag;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.ForumChannel;
 import discord4j.core.object.reaction.DefaultReaction;
@@ -58,7 +57,7 @@ public interface ForumChannelEditSpecGenerator extends AuditSpec<ChannelModifyRe
 
     Possible<Optional<DefaultReaction>> defaultReactionEmoji();
 
-    Possible<List<ForumTag>> availableTags();
+    Possible<List<ForumTagCreateSpec>> availableTags();
 
     Possible<Optional<Integer>> defaultSortOrder();
 
@@ -79,7 +78,7 @@ public interface ForumChannelEditSpecGenerator extends AuditSpec<ChannelModifyRe
             .flags(mapPossible(flags(), Channel.Flag::toBitfield))
             .defaultReactionEmoji(mapPossible(defaultReactionEmoji(), opt -> opt.map(DefaultReaction::getData)))
             .defaultForumLayout(defaultForumLayout())
-            .availableTags(mapPossible(availableTags(), list -> list.stream().map(ForumTag::getData).collect(Collectors.toList())))
+            .availableTags(mapPossible(availableTags(), list -> list.stream().map(ForumTagCreateSpecGenerator::asRequest).collect(Collectors.toList())))
             .defaultSortOrder(defaultSortOrder())
             .build();
     }

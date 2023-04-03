@@ -71,6 +71,8 @@ public final class EntityUtil {
             case GUILD_PUBLIC_THREAD:
             case GUILD_PRIVATE_THREAD:
                 return new ThreadChannel(gateway, data);
+            case GUILD_FORUM:
+                return new ForumChannel(gateway, data);
             default:
                 log.info("Unknown channel type {} with data: {}", data.type(), data);
                 return new UnknownChannel(gateway, data);

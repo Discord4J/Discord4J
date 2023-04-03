@@ -169,6 +169,7 @@ public interface Channel extends Entity {
                 case 11: return GUILD_PUBLIC_THREAD;
                 case 12: return GUILD_PRIVATE_THREAD;
                 case 13: return GUILD_STAGE_VOICE;
+                case 15: return GUILD_FORUM;
                 default: return UNKNOWN;
             }
         }
