@@ -196,7 +196,7 @@ public final class ApplicationInfo implements Entity {
      * @return A {@code EnumSet} with the public flags of this interaction.
      */
     public EnumSet<Flag> getFlags() {
-        long publicFlags = data.flags().toOptional().orElse(0L);
+        int publicFlags = data.flags().toOptional().orElse(0);
         if (publicFlags != 0) {
             return Flag.of(publicFlags);
         }
@@ -267,7 +267,7 @@ public final class ApplicationInfo implements Entity {
          * @param value The flags value as represented by Discord.
          * @return The {@link EnumSet} of flags.
          */
-        public static EnumSet<Flag> of(final long value) {
+        public static EnumSet<Flag> of(final int value) {
             final EnumSet<Flag> userFlags = EnumSet.noneOf(Flag.class);
             for (Flag flag : Flag.values()) {
                 long flagValue = flag.getFlag();
