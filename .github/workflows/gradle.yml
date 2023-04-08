@@ -41,7 +41,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java }}
-          distribution: 'corretto'
+          distribution: 'temurin'
       - name: Build with Gradle
         run: ./gradlew build
   release:
@@ -73,7 +73,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: 11
-          distribution: 'corretto'
+          distribution: 'temurin'
       - name: Publish with Gradle
         if: ${{ env.HAVE_SONAR_DATA == 'true' }}
         run: ./gradlew -x test publish
