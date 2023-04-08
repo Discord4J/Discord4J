@@ -52,9 +52,11 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'pull_request' && github.repository != 'Discord4J/Discord4J' }}
     needs: build
+    env:
+        HAVE_SONAR_DATA: ${{ secrets.signingKey != '' && secrets.signingPassword != '' && secrets.sonatypeUsername != '' && secrets.sonatypePassword != '' }}
     steps:
       - name: Validate repository secrets for publish
-        if: ${{ (secrets.signingKey != '' && secrets.signingPassword != '' && secrets.sonatypeUsername != '' && secrets.sonatypePassword != '') != 'true' }}
+        if: ${{ env.HAVE_SONAR_DATA != 'true' }}
         run: "::error::The repository not has the required tokens set (signingKey, signingPassword, sonatypeUsername ir sonatypePassword)."
       - uses: actions/checkout@v3
         with:
