@@ -32,9 +32,7 @@ jobs:
     steps:
       - name: PR Check (PR Blocked by Dependency)
         if: ${{ contains(toJson(github.event.pull_request.labels.*.name), 'PR depends on PR') }}
-        run: |
-            echo "This PR is marked blocked because depends in another PR."
-            exit 0
+        run: "::error::This PR is marked blocked because depends in another PR."
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
@@ -54,33 +52,25 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'pull_request' && github.repository != 'Discord4J/Discord4J' }}
     needs: build
-    env:
-      HAVE_SONAR_DATA: ${{ secrets.signingKey != '' && secrets.signingPassword != '' && secrets.sonatypeUsername != '' && secrets.sonatypePassword != '' }}
     steps:
-      - name: Validate publish secrets
-        if: ${{ env.HAVE_SONAR_TOKEN != 'true' }}
-        run: |
-          echo "The secrets for publish are not set."
-          exit 0
+      - name: Validate repository secrets for publish
+        if: ${{ (secrets.signingKey != '' && secrets.signingPassword != '' && secrets.sonatypeUsername != '' && secrets.sonatypePassword != '') != 'true' }}
+        run: "::error::The repository not has the required tokens set (signingKey, signingPassword, sonatypeUsername ir sonatypePassword)."
       - uses: actions/checkout@v3
-        if: ${{ env.HAVE_SONAR_DATA == 'true' }}
         with:
           fetch-depth: 0
       - uses: actions/cache@v3
-        if: ${{ env.HAVE_SONAR_DATA == 'true' }}
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Set up JDK
-        if: ${{ env.HAVE_SONAR_DATA == 'true' }}
         uses: actions/setup-java@v3
         with:
           java-version: 11
           distribution: 'temurin'
       - name: Publish with Gradle
-        if: ${{ env.HAVE_SONAR_DATA == 'true' }}
         run: ./gradlew -x test publish
         env:
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.signingKey }}
