@@ -54,7 +54,7 @@ jobs:
   release:
     name: Publish artifacts
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' && github.repository != 'Discord4J/Discord4J' }}
+    if: ${{ github.event_name != 'pull_request' && github.repository == 'Discord4J/Discord4J' }}
     needs: build
     env:
         HAVE_SONAR_DATA: ${{ secrets.signingKey != '' && secrets.signingPassword != '' && secrets.sonatypeUsername != '' && secrets.sonatypePassword != '' }}
