@@ -190,6 +190,19 @@ public final class ApplicationInfo implements Entity {
         return data.team().map(data -> new ApplicationTeam(gateway, data));
     }
 
+    /**
+     * Returns the public flags of this {@link InteractionInfo}.
+     *
+     * @return A {@code EnumSet} with the public flags of this interaction.
+     */
+    public EnumSet<Flag> getFlags() {
+        long publicFlags = data.flags().toOptional().orElse(0L);
+        if (publicFlags != 0) {
+            return Flag.of(publicFlags);
+        }
+        return EnumSet.noneOf(Flag.class);
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
@@ -198,6 +211,72 @@ public final class ApplicationInfo implements Entity {
     @Override
     public int hashCode() {
         return EntityUtil.hashCode(this);
+    }
+
+    /** Describes the flags of a interaction.
+     * @see <a href="https://discord.com/developers/docs/resources/application#application-object-application-flags">Discord Docs - Interaction Flags</a>
+     **/
+    public enum Flag {
+        APPLICATION_AUTO_MODERATION_RULE_CREATE_BADGE(6),
+        GATEWAY_PRESENCE(12),
+        GATEWAY_PRESENCE_LIMITED(13),
+        GATEWAY_GUILD_MEMBERS(14),
+        GATEWAY_GUILD_MEMBERS_LIMITED(15),
+        VERIFICATION_PENDING_GUILD_LIMIT(16),
+        EMBEDDED(17),
+        GATEWAY_MESSAGE_CONTENT(18),
+        GATEWAY_MESSAGE_CONTENT_LIMITED(19),
+        APPLICATION_COMMAND_BADGE(23);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /** The flag value as represented by Discord. */
+        private final int flag;
+
+        /**
+         * Constructs a {@code InteractionInfo.Flag}.
+         */
+        Flag(final int value) {
+            this.value = value;
+            this.flag = 1 << value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the flags of interaction. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
+         * equal ({@code ==}) to the supplied {@code value}.
+         *
+         * @param value The flags value as represented by Discord.
+         * @return The {@link EnumSet} of flags.
+         */
+        public static EnumSet<Flag> of(final long value) {
+            final EnumSet<Flag> userFlags = EnumSet.noneOf(Flag.class);
+            for (Flag flag : Flag.values()) {
+                long flagValue = flag.getFlag();
+                if ((flagValue & value) == flagValue) {
+                    userFlags.add(flag);
+                }
+            }
+            return userFlags;
+        }
     }
 
     @Override
