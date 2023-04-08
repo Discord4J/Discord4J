@@ -33,9 +33,8 @@ jobs:
       - name: PR Check (PR Blocked by Dependency)
         if: ${{ contains(toJson(github.event.pull_request.labels.*.name), 'PR depends on PR') }}
         run: |
-            echo '### ¡Build Failed! ❌' >> $GITHUB_STEP_SUMMARY
-            echo 'This PR depends of another PR to build correctly.' >> $GITHUB_STEP_SUMMARY
-            echo "::error::This PR is marked blocked because depends in another PR."
+            echo "::error::This PR is blocked to build because depends in another PR."
+            exit -1
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
@@ -60,10 +59,9 @@ jobs:
     steps:
       - name: Validate repository secrets for publish
         if: ${{ env.HAVE_SONAR_DATA != 'true' }}
-        run:  |
-            echo '### ¡Release Failed! ❌' >> $GITHUB_STEP_SUMMARY
-            echo 'The repository not has the required tokens set (signingKey, signingPassword, sonatypeUsername ir sonatypePassword).' >> $GITHUB_STEP_SUMMARY
-            "::error::The repository not has the required tokens set (signingKey, signingPassword, sonatypeUsername ir sonatypePassword)."
+        run: |
+            echo "::error::The repository not has the required tokens set (signingKey, signingPassword, sonatypeUsername ir sonatypePassword)."
+            exit -1
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
