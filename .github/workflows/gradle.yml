@@ -25,11 +25,16 @@ jobs:
   build:
     name: Build for JDK ${{ matrix.java }}
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' || (github.event.pull_request.head.repo.full_name != 'Discord4J/Discord4J' && !contains(toJson(github.event.pull_request.labels.*.name), 'PR depends on PR')) }}
+    if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name != 'Discord4J/Discord4J' }}
     strategy:
       matrix:
         java: [ 8, 11 ]
     steps:
+      - name: PR Check (PR Blocked by Dependency)
+        if: ${{ contains(toJson(github.event.pull_request.labels.*.name), 'PR depends on PR') }}
+        run: |
+            echo "This PR is marked blocked because depends in another PR."
+            exit 0
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
