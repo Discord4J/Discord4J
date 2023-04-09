@@ -53,14 +53,14 @@ jobs:
     if: ${{ github.event_name != 'pull_request' && ( (vars.runReleaseOnPush || 'true') == 'true' || contains(github.event.head_commit.message, '[release]') ) }}
     needs: build
     env:
-        HAVE_SONAR_DATA: ${{ secrets.signingKey != '' && secrets.signingPassword != '' && secrets.sonatypeUsername != '' && secrets.sonatypePassword != '' }}
+        HAS_CREDENTIALS: ${{ secrets.signingKey != '' && secrets.signingPassword != '' && secrets.sonatypeUsername != '' && secrets.sonatypePassword != '' }}
     steps:
       - name: Validate repository secrets for publish
-        if: ${{ env.HAVE_SONAR_DATA != 'true' }}
+        if: ${{ env.HAS_CREDENTIALS != 'true' }}
         run: |
-            echo '### ¡Release Failed! ❌' >> $GITHUB_STEP_SUMMARY
-            echo 'The repository not has the required tokens set (signingKey, signingPassword, sonatypeUsername ir sonatypePassword).' >> $GITHUB_STEP_SUMMARY
-            echo "::error::The repository not has the required tokens set (signingKey, signingPassword, sonatypeUsername ir sonatypePassword)."
+            echo '### Release Failed ❌' >> $GITHUB_STEP_SUMMARY
+            echo 'This repository does not have all required secrets: signingKey, signingPassword, sonatypeUsername or sonatypePassword).' >> $GITHUB_STEP_SUMMARY
+            echo "::error::This repository does not have all required secrets: signingKey, signingPassword, sonatypeUsername or sonatypePassword)."
             exit -1
       - uses: actions/checkout@v3
         with:
