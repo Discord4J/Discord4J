@@ -32,11 +32,7 @@ jobs:
     steps:
       - name: PR Check (PR Blocked by Dependency)
         if: ${{ contains(toJson(github.event.pull_request.labels.*.name), 'PR depends on PR') }}
-        run: |
-            echo '### ¡Build Failed! ❌' >> $GITHUB_STEP_SUMMARY
-            echo 'This PR depends of another PR to build correctly.' >> $GITHUB_STEP_SUMMARY
-            echo "::error::This PR is blocked to build because depends in another PR."
-            exit -1
+        run: echo "::warning::This PR was marked with the label 'PR depends on PR' this can cause issues in building"
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
