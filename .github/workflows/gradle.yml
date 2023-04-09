@@ -50,14 +50,13 @@ jobs:
   release:
     name: Publish artifacts
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' }}
+    if: ${{ github.event_name != 'pull_request' && ( (vars.runReleaseOnPush || 'true') == 'true' || contains(github.event.head_commit.message, '[release]') ) }}
     needs: build
     env:
-        RUN_RELEASE_ON_PUSH: ${{ vars.runReleaseOnPush || 'true' }}
         HAVE_SONAR_DATA: ${{ secrets.signingKey != '' && secrets.signingPassword != '' && secrets.sonatypeUsername != '' && secrets.sonatypePassword != '' }}
     steps:
       - name: Validate repository secrets for publish
-        if: ${{ ( env.RUN_RELEASE_ON_PUSH == 'true' || contains(github.event.head_commit.message, '[release]') ) && env.HAVE_SONAR_DATA != 'true' }}
+        if: ${{ env.HAVE_SONAR_DATA != 'true' }}
         run: |
             echo '### ¡Release Failed! ❌' >> $GITHUB_STEP_SUMMARY
             echo 'The repository not has the required tokens set (signingKey, signingPassword, sonatypeUsername ir sonatypePassword).' >> $GITHUB_STEP_SUMMARY
@@ -66,23 +65,19 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-        if: ${{ env.RUN_RELEASE_ON_PUSH == 'true' || contains(github.event.head_commit.message, '[release]') }}
       - uses: actions/cache@v3
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-        if: ${{ env.RUN_RELEASE_ON_PUSH == 'true' || contains(github.event.head_commit.message, '[release]') }}
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           java-version: 11
           distribution: 'temurin'
-        if: ${{ env.RUN_RELEASE_ON_PUSH == 'true' || contains(github.event.head_commit.message, '[release]') }}
       - name: Publish with Gradle
         run: ./gradlew -x test publish
-        if: ${{ env.RUN_RELEASE_ON_PUSH == 'true' || contains(github.event.head_commit.message, '[release]') }}
         env:
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.signingKey }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.signingPassword }}
