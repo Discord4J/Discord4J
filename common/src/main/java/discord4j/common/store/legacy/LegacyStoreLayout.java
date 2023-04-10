@@ -231,6 +231,12 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     }
 
     @Override
+    public Flux<GuildScheduledEventData> getGuildScheduledEvents(long guildId) {
+        return stateHolder.getGuildEventsStore()
+            .findInRange(LongLongTuple2.of(guildId, 0), LongLongTuple2.of(guildId, Long.MAX_VALUE));
+    }
+
+    @Override
     public Flux<MemberData> getMembers() {
         return stateHolder.getMemberStore().values();
     }
@@ -922,6 +928,37 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .find(roleId)
                 .flatMap(saveNew::thenReturn)
                 .switchIfEmpty(saveNew.then(Mono.empty()));
+    }
+
+    @Override
+    public Mono<Void> onGuildScheduledEventCreate(int shardIndex, GuildScheduledEventCreate dispatch) {
+        LongLongTuple2 key = LongLongTuple2.of(dispatch.scheduledEvent().guildId().asLong(), dispatch.scheduledEvent().id().asLong());
+
+        return stateHolder.getGuildEventsStore().save(key, dispatch.scheduledEvent());
+    }
+
+    @Override
+    public Mono<GuildScheduledEventData> onGuildScheduledEventUpdate(int shardIndex, GuildScheduledEventUpdate dispatch) {
+        LongLongTuple2 key = LongLongTuple2.of(dispatch.scheduledEvent().guildId().asLong(), dispatch.scheduledEvent().id().asLong());
+
+        Mono<Void> saveNew = stateHolder.getGuildEventsStore().save(key, dispatch.scheduledEvent());
+
+        return stateHolder.getGuildEventsStore()
+            .find(key)
+            .flatMap(saveNew::thenReturn)
+            .switchIfEmpty(saveNew.then(Mono.empty()));
+    }
+
+    @Override
+    public Mono<GuildScheduledEventData> onGuildScheduledEventDelete(int shardIndex, GuildScheduledEventDelete dispatch) {
+        LongLongTuple2 key = LongLongTuple2.of(dispatch.scheduledEvent().guildId().asLong(), dispatch.scheduledEvent().id().asLong());
+
+        Mono<Void> deletion = stateHolder.getGuildEventsStore().delete(key);
+
+        return stateHolder.getGuildEventsStore()
+            .find(key)
+            .flatMap(deletion::thenReturn)
+            .switchIfEmpty(deletion.then(Mono.empty()));
     }
 
     @Override

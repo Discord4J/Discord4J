@@ -61,6 +61,9 @@ public class DispatchStoreLayer {
         add(GuildRoleCreate.class::isInstance, GatewayActions::guildRoleCreate);
         add(GuildRoleDelete.class::isInstance, GatewayActions::guildRoleDelete);
         add(GuildRoleUpdate.class::isInstance, GatewayActions::guildRoleUpdate);
+        add(GuildScheduledEventCreate.class::isInstance, GatewayActions::guildScheduledEventCreate);
+        add(GuildScheduledEventUpdate.class::isInstance, GatewayActions::guildScheduledEventUpdate);
+        add(GuildScheduledEventDelete.class::isInstance, GatewayActions::guildScheduledEventDelete);
         add(GuildUpdate.class::isInstance, GatewayActions::guildUpdate);
         add(ThreadCreate.class::isInstance, GatewayActions::threadCreate);
         add(ThreadUpdate.class::isInstance, GatewayActions::threadUpdate);

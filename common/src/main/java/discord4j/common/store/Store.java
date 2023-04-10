@@ -214,6 +214,12 @@ public final class Store {
                         .onGuildRoleDelete(action.getShardIndex(), action.getGuildRoleDelete()))
                 .map(GuildRoleUpdateAction.class, action -> gatewayDataUpdater
                         .onGuildRoleUpdate(action.getShardIndex(), action.getGuildRoleUpdate()))
+                .map(GuildScheduledEventCreateAction.class, action -> gatewayDataUpdater
+                        .onGuildScheduledEventCreate(action.getShardIndex(), action.getGuildScheduledEventCreate()))
+                .map(GuildScheduledEventUpdateAction.class, action -> gatewayDataUpdater
+                        .onGuildScheduledEventUpdate(action.getShardIndex(), action.getGuildScheduledEventUpdate()))
+                 .map(GuildScheduledEventDeleteAction.class, action -> gatewayDataUpdater
+                        .onGuildScheduledEventDelete(action.getShardIndex(), action.getGuildScheduledEventDelete()))
                 .map(GuildUpdateAction.class, action -> gatewayDataUpdater
                         .onGuildUpdate(action.getShardIndex(), action.getGuildUpdate()))
                 .map(InvalidateShardAction.class, action -> gatewayDataUpdater

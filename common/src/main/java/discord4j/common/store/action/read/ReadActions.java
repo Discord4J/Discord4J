@@ -316,6 +316,16 @@ public class ReadActions {
     }
 
     /**
+     * Creates an action to retrieve data associated to scheduled events in a given guild
+     *
+     * @param guildId the related events guild id
+     * @return a new {@link GetGuildScheduledEventsAction}
+     */
+    public static GetGuildScheduledEventsAction getGuildScheduledEventsAction(long guildId) {
+        return new GetGuildScheduledEventsAction(guildId);
+    }
+
+    /**
      * Creates an action to retrieve data for the guild corresponding to the given guild ID.
      *
      * @param guildId the guild ID

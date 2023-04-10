@@ -37,6 +37,8 @@ import java.util.Collections;
  * <ul>
  * <li>Channel store: {@code long} keys and {@link ChannelData} values.</li>
  * <li>Guild store: {@code long} keys and {@link GuildData} values.</li>
+ * <li>Guild scheduled event store: {@code long} pair keys and {@link GuildScheduledEventData} values.</li>
+ * <li>Guild sticker store: {@code long} keys and {@link StickerData} values.</li>
  * <li>Guild emoji store: {@code long} keys and {@link EmojiData} values.</li>
  * <li>Member store: {@code long} pair keys and {@link MemberData} values.</li>
  * <li>Message store: {@code long} keys and {@link MessageData} values.</li>
@@ -55,6 +57,7 @@ public final class StateHolder {
     private final StoreService storeService;
     private final LongObjStore<ChannelData> channelStore;
     private final LongObjStore<GuildData> guildStore;
+    private final Store<LongLongTuple2, GuildScheduledEventData> guildEventsStore;
     private final LongObjStore<EmojiData> guildEmojiStore;
     private final LongObjStore<StickerData> guildStickerStore;
     private final Store<LongLongTuple2, MemberData> memberStore;
@@ -76,6 +79,9 @@ public final class StateHolder {
 
         guildStore = service.provideLongObjStore(GuildData.class);
         log.debug("Guild storage       : {}", guildStore);
+
+        guildEventsStore = service.provideGenericStore(LongLongTuple2.class, GuildScheduledEventData.class);
+        log.debug("Guild event storage : {}", guildEventsStore);
 
         guildStickerStore = service.provideLongObjStore(StickerData.class);
         log.debug("Guild sticker storage : {}", guildStickerStore);
@@ -118,6 +124,10 @@ public final class StateHolder {
 
     public LongObjStore<GuildData> getGuildStore() {
         return guildStore;
+    }
+
+    public Store<LongLongTuple2, GuildScheduledEventData> getGuildEventsStore() {
+        return guildEventsStore;
     }
 
     public LongObjStore<StickerData> getGuildStickerStore() {
@@ -164,11 +174,13 @@ public final class StateHolder {
         return channelStore.invalidate()
                 .and(guildStore.invalidate())
                 .and(guildEmojiStore.invalidate())
+                .and(guildEventsStore.invalidate())
                 .and(memberStore.invalidate())
                 .and(messageStore.invalidate())
                 .and(presenceStore.invalidate())
                 .and(roleStore.invalidate())
                 .and(stageInstanceStore.invalidate())
+                .and(guildStickerStore.invalidate())
                 .and(userStore.invalidate())
                 .and(voiceStateStore.invalidate())
                 .and(threadMemberStore.invalidate());

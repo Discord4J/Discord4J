@@ -271,6 +271,14 @@ public interface DataAccessor {
     Mono<GuildData> getGuildById(long guildId);
 
     /**
+     * Retrieves data for the scheduled events associated to the given guild ID.
+     *
+     * @param guildId the guild ID
+     * @return A {@link Flux} which, during completion, emits associated {@link GuildScheduledEventData}
+     */
+    Flux<GuildScheduledEventData> getGuildScheduledEvents(long guildId);
+
+    /**
      * Retrieves data for all members present in the store.
      *
      * @return A {@link Flux} emitting the members, or empty if none is present
