@@ -186,6 +186,64 @@ public class GatewayActions {
     }
 
     /**
+     * Creates an action to execute when a {@link GuildScheduledEventCreate} is received from the gateway.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a new {@link GuildScheduledEventCreate}
+     */
+    public static GuildScheduledEventCreateAction guildScheduledEventCreate(int shardIndex, GuildScheduledEventCreate dispatch) {
+        return new GuildScheduledEventCreateAction(shardIndex, dispatch);
+    }
+
+    /**
+     * Creates an action to execute when a {@link GuildScheduledEventUpdate} is received from the gateway.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a new {@link GuildScheduledEventUpdate}
+     */
+    public static GuildScheduledEventUpdateAction guildScheduledEventUpdate(int shardIndex, GuildScheduledEventUpdate dispatch) {
+        return new GuildScheduledEventUpdateAction(shardIndex, dispatch);
+    }
+
+    /**
+     * Creates an action to execute when a {@link GuildScheduledEventDelete} is received from the gateway.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a new {@link GuildScheduledEventDelete}
+     */
+    public static GuildScheduledEventDeleteAction guildScheduledEventDelete(int shardIndex, GuildScheduledEventDelete dispatch) {
+        return new GuildScheduledEventDeleteAction(shardIndex, dispatch);
+    }
+
+
+    /**
+     * Creates an action to execute when a {@link GuildScheduledEventUserAdd} is received from the gateway.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a new {@link GuildScheduledEventUserAddAction}
+     */
+    public static GuildScheduledEventUserAddAction guildScheduledEventUserAdd(int shardIndex,
+                                                                              GuildScheduledEventUserAdd dispatch) {
+        return new GuildScheduledEventUserAddAction(shardIndex, dispatch);
+    }
+
+    /**
+     * Creates an action to execute when a {@link GuildScheduledEventUserRemove} is received from the gateway.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a new {@link GuildScheduledEventUserRemoveAction}
+     */
+    public static GuildScheduledEventUserRemoveAction guildScheduledEventUserRemove(int shardIndex,
+                                                                                    GuildScheduledEventUserRemove dispatch) {
+        return new GuildScheduledEventUserRemoveAction(shardIndex, dispatch);
+    }
+
+    /**
      * Creates an action to execute when a {@link GuildUpdate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
@@ -351,63 +409,4 @@ public class GatewayActions {
         return new CompleteGuildMembersAction(guildId);
     }
 
-    /**
-     * Creates an action to execute when a {@link GuildScheduledEventCreate} is received from the gateway.
-     *
-     * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
-     * @return a new {@link GuildScheduledEventCreateAction}
-     */
-    public static GuildScheduledEventCreateAction guildScheduledEventCreate(int shardIndex,
-                                                                            GuildScheduledEventCreate dispatch) {
-        return new GuildScheduledEventCreateAction(shardIndex, dispatch);
-    }
-
-    /**
-     * Creates an action to execute when a {@link GuildScheduledEventUpdate} is received from the gateway.
-     *
-     * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
-     * @return a new {@link GuildScheduledEventUpdateAction}
-     */
-    public static GuildScheduledEventUpdateAction guildScheduledEventUpdate(int shardIndex,
-                                                                            GuildScheduledEventUpdate dispatch) {
-        return new GuildScheduledEventUpdateAction(shardIndex, dispatch);
-    }
-
-    /**
-     * Creates an action to execute when a {@link GuildScheduledEventDelete} is received from the gateway.
-     *
-     * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
-     * @return a new {@link GuildScheduledEventDeleteAction}
-     */
-    public static GuildScheduledEventDeleteAction guildScheduledEventDelete(int shardIndex,
-                                                                            GuildScheduledEventDelete dispatch) {
-        return new GuildScheduledEventDeleteAction(shardIndex, dispatch);
-    }
-
-    /**
-     * Creates an action to execute when a {@link GuildScheduledEventUserAdd} is received from the gateway.
-     *
-     * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
-     * @return a new {@link GuildScheduledEventUserAddAction}
-     */
-    public static GuildScheduledEventUserAddAction guildScheduledEventUserAdd(int shardIndex,
-                                                                              GuildScheduledEventUserAdd dispatch) {
-        return new GuildScheduledEventUserAddAction(shardIndex, dispatch);
-    }
-
-    /**
-     * Creates an action to execute when a {@link GuildScheduledEventUserRemove} is received from the gateway.
-     *
-     * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
-     * @return a new {@link GuildScheduledEventUserRemoveAction}
-     */
-    public static GuildScheduledEventUserRemoveAction guildScheduledEventUserRemove(int shardIndex,
-                                                                                    GuildScheduledEventUserRemove dispatch) {
-        return new GuildScheduledEventUserRemoveAction(shardIndex, dispatch);
-    }
 }

@@ -1,0 +1,66 @@
+package discord4j.core.spec;
+
+import discord4j.common.util.Snowflake;
+import discord4j.core.object.entity.ScheduledEvent;
+import discord4j.discordjson.Id;
+import discord4j.discordjson.json.GuildScheduledEventModifyRequest;
+import discord4j.discordjson.possible.Possible;
+import org.immutables.value.Value;
+import reactor.core.CoreSubscriber;
+import reactor.core.publisher.Mono;
+
+import java.time.Instant;
+import java.util.Optional;
+
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
+
+@Value.Immutable
+public interface ScheduledEventEditSpecGenerator extends AuditSpec<GuildScheduledEventModifyRequest> {
+
+    /* Possible for events with entity type external */
+    Possible<Optional<Snowflake>> channelId();
+
+    Possible<ScheduledEventEntityMetadataSpec> entityMetadata();
+
+    Possible<String> name();
+
+    Possible<Integer> privacyLevel();
+
+    Possible<Instant> scheduledStartTime();
+
+    Possible<Instant> scheduledEndTime();
+
+    Possible<String> description();
+
+    Possible<Integer> entityType();
+
+    //TODO Add image support
+
+    @Override
+    default GuildScheduledEventModifyRequest asRequest() {
+        return GuildScheduledEventModifyRequest.builder()
+            .channelId(mapPossible(channelId(), optional -> optional.map(snowflake -> Id.of(snowflake.asLong()))))
+            .entityMetadata(mapPossible(entityMetadata(), ScheduledEventEntityMetadataSpecGenerator::asRequest))
+            .name(name())
+            .privacyLevel(privacyLevel())
+            .scheduledStartTime(scheduledStartTime())
+            .scheduledEndTime(scheduledEndTime())
+            .description(description())
+            .entityType(entityType())
+            .build();
+    }
+}
+
+@Value.Immutable(builder = false)
+abstract class ScheduledEventEditMonoGenerator extends Mono<ScheduledEvent> implements ScheduledEventEditSpecGenerator {
+
+    abstract ScheduledEvent event();
+
+    @Override
+    public void subscribe(CoreSubscriber<? super ScheduledEvent> actual) {
+        event().edit(ScheduledEventEditSpec.copyOf(this)).subscribe(actual);
+    }
+
+    @Override
+    public abstract String toString();
+}

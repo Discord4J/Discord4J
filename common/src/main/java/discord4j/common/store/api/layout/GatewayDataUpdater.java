@@ -195,6 +195,62 @@ public interface GatewayDataUpdater {
     Mono<RoleData> onGuildRoleUpdate(int shardIndex, GuildRoleUpdate dispatch);
 
     /**
+     * Updates the internal state of the store according to the {@link GuildScheduledEventCreate} gateway dispatch. This
+     * will typically perform an insert operation on a new {@link GuildScheduledEventData} in the store.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done
+     */
+    Mono<Void> onGuildScheduledEventCreate(int shardIndex, GuildScheduledEventCreate dispatch);
+
+    /**
+     * Updates the internal state of the store according to the {@link GuildScheduledEventUpdate} gateway dispatch. This
+     * will typically perform an update operation on a related {@link GuildScheduledEventData} already present in the
+     * store.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done, optionally returning {@link GuildScheduledEventData}
+     * in a state before the update
+     */
+    Mono<GuildScheduledEventData> onGuildScheduledEventUpdate(int shardIndex, GuildScheduledEventUpdate dispatch);
+
+    /**
+     * Updates the internal state of the store according to the {@link GuildScheduledEventCreate} gateway dispatch. This
+     * will typically perform a delete operation on a related {@link GuildScheduledEventData} in the store,
+     * if present.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done, optionally returning the
+     * {@link GuildScheduledEventData} in a state before the deletion.
+     */
+    Mono<GuildScheduledEventData> onGuildScheduledEventDelete(int shardIndex, GuildScheduledEventDelete dispatch);
+
+    /**
+     * Updates the internal state of the store according to the {@link GuildScheduledEventUserAdd} gateway dispatch.
+     * This will typically perform an insert operation on a related {@link java.util.List} handling a relationship
+     * between a {@link GuildScheduledEventData} and the provided {@link GuildScheduledEventUserData}.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done
+     */
+    Mono<Void> onGuildScheduledEventUserAdd(int shardIndex, GuildScheduledEventUserAdd dispatch);
+
+    /**
+     * Updates the internal state of the store according to the {@link GuildScheduledEventUserAdd} gateway dispatch.
+     * This will typically perform a delete operation on a related {@link java.util.List} handling a relationship
+     * between a {@link GuildScheduledEventData} and the provided {@link GuildScheduledEventUserData}.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done
+     */
+    Mono<Void> onGuildScheduledEventUserRemove(int shardIndex, GuildScheduledEventUserRemove dispatch);
+
+    /**
      * Updates the internal state of the store according to the given {@link GuildUpdate} gateway dispatch. This will
      * typically perform an update operation on a related {@link GuildData} that is already present in the store.
      *

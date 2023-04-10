@@ -458,6 +458,38 @@ public class ReadActions {
     }
 
     /**
+     * Creates an action to retrieve data associated to scheduled events in a given guild
+     *
+     * @param guildId the related events guild id
+     * @return a new {@link GetGuildScheduledEventsInGuildAction}
+     */
+    public static GetGuildScheduledEventsInGuildAction getScheduledEventsInGuild(long guildId) {
+        return new GetGuildScheduledEventsInGuildAction(guildId);
+    }
+
+    /**
+     * Creates an action to retrieve data for the scheduled event corresponding to the given guild ID and event ID.
+     *
+     * @param guildId the guild ID
+     * @param eventId the event ID
+     * @return a new {@link GetGuildScheduledEventByIdAction}
+     */
+    public static GetGuildScheduledEventByIdAction getScheduledEventById(long guildId, long eventId) {
+        return new GetGuildScheduledEventByIdAction(guildId, eventId);
+    }
+
+    /**
+     * Creates an action to retrieve data for the scheduled event users corresponding to the given guild ID and event ID.
+     *
+     * @param guildId the guild ID
+     * @param eventId the event ID
+     * @return a new {@link GetGuildScheduledEventUsersAction}
+     */
+    public static GetGuildScheduledEventUsersInEventAction getScheduledEventsUsers(long guildId, long eventId) {
+        return new GetGuildScheduledEventUsersInEventAction(guildId, eventId);
+    }
+
+    /**
      * Creates an action to retrieve data for all users present in a store.
      *
      * @return a new {@link GetUsersAction}
@@ -517,53 +549,4 @@ public class ReadActions {
         return new GetVoiceStateByIdAction(guildId, userId);
     }
 
-    /**
-     * Creates an action to retrieve data for all scheduled events in a store.
-     *
-     * @return a new {@link GetGuildScheduledEventsAction}
-     */
-    public static GetGuildScheduledEventsAction getEvents() {
-        return new GetGuildScheduledEventsAction();
-    }
-
-    /**
-     * Creates an action to retrieve data for all scheduled events in a store for the given guild ID.
-     *
-     * @param guildId the guild ID
-     * @return a new {@link GetGuildScheduledEventsAction}
-     */
-    public static GetGuildScheduledEventsInGuildAction getEvents(long guildId) {
-        return new GetGuildScheduledEventsInGuildAction(guildId);
-    }
-
-    /**
-     * Creates an action to retrieve data for the scheduled event corresponding to the given guild ID and event ID.
-     *
-     * @param guildId the guild ID
-     * @param eventId the event ID
-     * @return a new {@link GetGuildScheduledEventByIdAction}
-     */
-    public static GetGuildScheduledEventByIdAction getEvent(long guildId, long eventId) {
-        return new GetGuildScheduledEventByIdAction(guildId, eventId);
-    }
-
-    /**
-     * Creates an action to retrieve all data for scheduled event users in a store.
-     *
-     * @return a new {@link GetGuildScheduledEventUsersAction}
-     */
-    public static GetGuildScheduledEventUsersAction getEventUsers() {
-        return new GetGuildScheduledEventUsersAction();
-    }
-
-    /**
-     * Creates an action to retrieve data for the scheduled event users corresponding to the given guild ID and event ID.
-     *
-     * @param guildId the guild ID
-     * @param eventId the event ID
-     * @return a new {@link GetGuildScheduledEventUsersAction}
-     */
-    public static GetGuildScheduledEventUsersInEventAction getEventUsers(long guildId, long eventId) {
-        return new GetGuildScheduledEventUsersInEventAction(guildId, eventId);
-    }
 }

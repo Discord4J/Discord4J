@@ -61,6 +61,11 @@ public class DispatchStoreLayer {
         add(GuildRoleCreate.class::isInstance, GatewayActions::guildRoleCreate);
         add(GuildRoleDelete.class::isInstance, GatewayActions::guildRoleDelete);
         add(GuildRoleUpdate.class::isInstance, GatewayActions::guildRoleUpdate);
+        add(GuildScheduledEventCreate.class::isInstance, GatewayActions::guildScheduledEventCreate);
+        add(GuildScheduledEventUpdate.class::isInstance, GatewayActions::guildScheduledEventUpdate);
+        add(GuildScheduledEventDelete.class::isInstance, GatewayActions::guildScheduledEventDelete);
+        add(GuildScheduledEventUserAdd.class::isInstance, GatewayActions::guildScheduledEventUserAdd);
+        add(GuildScheduledEventUserRemove.class::isInstance, GatewayActions::guildScheduledEventUserRemove);
         add(GuildUpdate.class::isInstance, GatewayActions::guildUpdate);
         add(MessageCreate.class::isInstance, GatewayActions::messageCreate);
         add(MessageDelete.class::isInstance, GatewayActions::messageDelete);
@@ -74,11 +79,6 @@ public class DispatchStoreLayer {
         add(Ready.class::isInstance, (Integer shard, Ready dispatch) -> GatewayActions.ready(dispatch));
         add(UserUpdate.class::isInstance, GatewayActions::userUpdate);
         add(VoiceStateUpdateDispatch.class::isInstance, GatewayActions::voiceStateUpdateDispatch);
-        add(GuildScheduledEventCreate.class::isInstance, GatewayActions::guildScheduledEventCreate);
-        add(GuildScheduledEventUpdate.class::isInstance, GatewayActions::guildScheduledEventUpdate);
-        add(GuildScheduledEventDelete.class::isInstance, GatewayActions::guildScheduledEventDelete);
-        add(GuildScheduledEventUserAdd.class::isInstance, GatewayActions::guildScheduledEventUserAdd);
-        add(GuildScheduledEventUserRemove.class::isInstance, GatewayActions::guildScheduledEventUserRemove);
         add(dispatch -> dispatch instanceof GatewayStateChange
                         && ((GatewayStateChange) dispatch).getState() == GatewayStateChange.State.DISCONNECTED,
                 (shard, dispatch) -> GatewayActions.invalidateShard(shard, InvalidationCause.LOGOUT));

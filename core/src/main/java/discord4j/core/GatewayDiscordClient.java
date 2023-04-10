@@ -29,6 +29,7 @@ import discord4j.core.event.domain.Event;
 import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
+import discord4j.core.object.ScheduledEventUser;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
@@ -788,12 +789,6 @@ public class GatewayDiscordClient implements EntityRetriever {
         return entityRetriever.getGuildEmojis(guildId);
     }
 
-    //TODO: get guild scheduled events
-    //TODO: get guild scheduled events with retrieval strategy
-
-    //TODO: get guild scheduled event by ID
-    //TODO: get guild scheduled event by ID with retrieval strategy
-
     @Override
     public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
         return entityRetriever.getGuildStickers(guildId);
@@ -803,4 +798,20 @@ public class GatewayDiscordClient implements EntityRetriever {
     public Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId) {
         return entityRetriever.getGuildAutoModRules(guildId);
     }
+
+    @Override
+    public Mono<ScheduledEvent> getScheduledEventById(Snowflake guildId, Snowflake eventId) {
+        return entityRetriever.getScheduledEventById(guildId, eventId);
+    }
+
+    @Override
+    public Flux<ScheduledEvent> getScheduledEvents(Snowflake guildId) {
+        return entityRetriever.getScheduledEvents(guildId);
+    }
+
+    @Override
+    public Flux<ScheduledEventUser> getScheduledEventUsers(Snowflake guildId, Snowflake eventId) {
+        return entityRetriever.getScheduledEventUsers(guildId, eventId);
+    }
+
 }

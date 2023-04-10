@@ -1905,13 +1905,56 @@ public final class Guild implements Entity {
             .map(data -> new AutoModRule(gateway, data));
     }
 
-    //TODO: get scheduled events
-    //TODO: get scheduled events with retrieval strat
+    /**
+     * Requests to retrieve the scheduled event using the provided ID.
+     *
+     * @param eventId the event ID
+     * @param withUserCount Requests to fetch the enrolled user count to Discord or not
+     * @return A {@link Mono} which, upon completion, emits an associated {@link ScheduledEvent} if found.
+     */
+    public Mono<ScheduledEvent> getScheduledEventById(Snowflake eventId, boolean withUserCount) {
+        return gateway.getRestClient().getScheduledEventById(getId(), eventId).getData(withUserCount)
+            .map(data -> new ScheduledEvent(gateway, data));
+    }
 
-    //TODO: get scheduled event
-    //TODO: get scheduled event with retrieval strat
+    /**
+     * Requests to retrieve all the scheduled events associated to this guild.
+     *
+     * @param withUserCount Requests to fetch the enrolled user count to Discord or not
+     * @return A {@link Flux} which emits {@link ScheduledEvent} objects.
+     */
+    public Flux<ScheduledEvent> getScheduledEvents(boolean withUserCount) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("with_user_count", withUserCount);
 
-    //TODO: create scheduled event
+        return gateway.getRestClient().getGuildService().getScheduledEvents(getId().asLong(), queryParams)
+            .map(data -> new ScheduledEvent(gateway, data));
+    }
+
+    /**
+     * Requests to create a guild scheduled event with the provided spec on this guild
+     *
+     * @param spec spec specifying {@link ScheduledEvent} parameters
+     * @return A {@link Mono} which, upon completion, emits the created {@link ScheduledEvent} object. Any error, if occurs,
+     * is emitted through the {@link Mono}.
+     */
+    public Mono<ScheduledEvent> createScheduledEvent(ScheduledEventCreateSpec spec) {
+        return gateway.getRestClient().getGuildService().createScheduledEvent(getId().asLong(), spec.asRequest())
+            .map(data -> new ScheduledEvent(gateway, data));
+    }
+
+    /**
+     * Requests to create a guild scheduled event with the provided mandatory parameters
+     *
+     * @param name The name of the scheduled event
+     * @param privacyLevel the {@link discord4j.core.object.entity.ScheduledEvent.PrivacyLevel} to set
+     * @param scheduledStartTime the scheduled start time of the event
+     * @param entityType the {@link discord4j.core.object.entity.ScheduledEvent.EntityType} where the event will take place
+     * @return A {@link ScheduledEventCreateMono} which, upon completion, returns the created {@link ScheduledEvent}
+     */
+    public ScheduledEventCreateMono createScheduledEvent(String name, int privacyLevel, Instant scheduledStartTime, int entityType) {
+        return ScheduledEventCreateMono.of(name, privacyLevel, scheduledStartTime, entityType, this);
+    }
 
     @Override
     public boolean equals(@Nullable final Object obj) {
