@@ -29,7 +29,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
- * A single action recorded by an {@link AuditLogPart}.
+ * A single action recorded who can be part of {@link AuditLogPart}.
  * <p>
  * Use {@link #getActionType()} to determine what kind of action occurred, and then {@link #getChange(ChangeKey)} to
  * get information about what changed. For example,
@@ -51,7 +51,7 @@ public class AuditLogEntry implements Entity {
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
 
-    /** The audit log part this entry belongs to. */
+    /** The audit log part if available for this entry belongs to. */
     private final AuditLogPart auditLogPart;
 
     /** The raw data as represented by Discord. */
@@ -103,8 +103,12 @@ public class AuditLogEntry implements Entity {
      * Gets the user who made the changes, if present.
      *
      * @return The user who made the changes, if present.
+     * @throws NoSuchElementException if the {@link AuditLogEntry#getParent()} not contains the {@link #getResponsibleUserId()} or is null.
      */
     public Optional<User> getResponsibleUser() {
+        if (auditLogPart == null) {
+            throw new NoSuchElementException("The AuditLogPart is not available for this Audit log.");
+        }
         return getResponsibleUserId()
                 .map(id -> auditLogPart.getUserById(id)
                         .orElseThrow(() -> new NoSuchElementException("Audit log users does not contain responsible user ID.")));
