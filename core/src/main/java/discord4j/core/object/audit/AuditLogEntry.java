@@ -104,7 +104,8 @@ public class AuditLogEntry implements Entity {
      * Gets the user who made the changes, if present.
      *
      * @return The user who made the changes, if present.
-     * @throws NoSuchElementException if the {@link AuditLogEntry#getParent()} not contains the {@link #getResponsibleUserId()} or is null.
+     * @throws NoSuchElementException if {@link AuditLogEntry#getParent()} does not contain the
+     * {@link #getResponsibleUserId()} or if this entry was created from a gateway event.
      */
     public Optional<User> getResponsibleUser() {
         if (auditLogPart == null) {
