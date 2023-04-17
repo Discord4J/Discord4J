@@ -112,7 +112,7 @@ public class AuditLogEntry implements Entity {
         }
         return getResponsibleUserId()
                 .map(id -> auditLogPart.getUserById(id)
-                        .orElseThrow(() -> new NoSuchElementException("Audit log users does not contain responsible user ID.")));
+                        .orElseThrow(() -> new NoSuchElementException("Audit log user data does not contain responsible user ID")));
     }
 
     /**
