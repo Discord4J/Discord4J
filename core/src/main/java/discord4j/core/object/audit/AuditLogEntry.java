@@ -51,7 +51,7 @@ public class AuditLogEntry implements Entity {
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
 
-    /** The audit log part if available for this entry belongs to. */
+    /** The audit log part this entry belongs to. Can be {@code null} */
     private final AuditLogPart auditLogPart;
 
     /** The raw data as represented by Discord. */
