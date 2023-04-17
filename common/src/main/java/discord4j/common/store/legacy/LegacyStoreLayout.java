@@ -245,8 +245,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     @Override
     public Flux<Id> getScheduledEventUsersInEvent(long guildId, long eventId) {
         return stateHolder.getGuildEventsUsersStore().find(LongLongTuple2.of(guildId, eventId))
-            .<Long>flatMapIterable(list -> list)
-            .map(Id::of);
+            .flatMapIterable(list -> list)
+            .map(value -> Id.of((Long) value));
     }
 
     @Override
