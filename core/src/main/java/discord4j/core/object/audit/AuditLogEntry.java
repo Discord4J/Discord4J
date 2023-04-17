@@ -58,8 +58,7 @@ public class AuditLogEntry implements Entity {
     /** The raw data as represented by Discord. */
     private final AuditLogEntryData data;
 
-    AuditLogEntry(final GatewayDiscordClient gateway, final AuditLogPart auditLogPart,
-                         final AuditLogEntryData data) {
+    AuditLogEntry(final GatewayDiscordClient gateway, final AuditLogPart auditLogPart, final AuditLogEntryData data) {
         this.gateway = gateway;
         this.auditLogPart = auditLogPart;
         this.data = data;
@@ -175,7 +174,8 @@ public class AuditLogEntry implements Entity {
     /**
      * Gets the {@link AuditLogPart audit log part} that this entry belongs to.
      *
-     * @return The audit log part that this entry belongs to. or null if the entry get from the {@link AuditLogEntryCreateEvent}
+     * @return The audit log part that this entry belongs to, or {@code null} if the entry originated from a
+     * {@link AuditLogEntryCreateEvent}
      */
     @Nullable
     public AuditLogPart getParent() {
