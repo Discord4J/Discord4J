@@ -109,7 +109,7 @@ public class AuditLogEntry implements Entity {
      */
     public Optional<User> getResponsibleUser() {
         if (auditLogPart == null) {
-            throw new NoSuchElementException("The AuditLogPart is not available for this Audit log.");
+            throw new NoSuchElementException("User is not available for audit log entries created by gateway events");
         }
         return getResponsibleUserId()
                 .map(id -> auditLogPart.getUserById(id)
