@@ -29,7 +29,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
- * A single action recorded who can be part of {@link AuditLogPart}.
+ * A single action recorded who can be part of {@link AuditLogPart} if is not related to a Gateway event.
  * <p>
  * Use {@link #getActionType()} to determine what kind of action occurred, and then {@link #getChange(ChangeKey)} to
  * get information about what changed. For example,
