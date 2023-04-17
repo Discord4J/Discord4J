@@ -245,7 +245,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     @Override
     public Flux<Id> getScheduledEventUsersInEvent(long guildId, long eventId) {
         return stateHolder.getGuildEventsUsersStore().find(LongLongTuple2.of(guildId, eventId))
-            .flatMapIterable(list -> list);
+            .<Long>flatMapIterable(list -> list)
+            .map(Id::of);
     }
 
     @Override
@@ -954,9 +955,9 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         LongLongTuple2 key = LongLongTuple2.of(dispatch.guildId().asLong(), dispatch.scheduledEventId().asLong());
 
         return stateHolder.getGuildEventsUsersStore().find(key)
-            .defaultIfEmpty(new HashSet<Id>())
+            .defaultIfEmpty(new HashSet<Long>())
             .map(set -> {
-                set.add(dispatch.userId());
+                set.add(dispatch.userId().asLong());
                 return set;
             })
             .flatMap(set -> stateHolder.getGuildEventsUsersStore().save(key, set));
@@ -967,9 +968,9 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         LongLongTuple2 key = LongLongTuple2.of(dispatch.guildId().asLong(), dispatch.scheduledEventId().asLong());
 
         return stateHolder.getGuildEventsUsersStore().find(key)
-            .defaultIfEmpty(new HashSet<Id>())
+            .defaultIfEmpty(new HashSet<Long>())
             .map(set -> {
-                set.remove(dispatch.userId());
+                set.remove(dispatch.userId().asLong());
                 return set;
             })
             .flatMap(set -> stateHolder.getGuildEventsUsersStore().save(key, set));
