@@ -208,7 +208,7 @@ public class ScheduledEvent implements Entity {
     /**
      * Gets the location of the event, if present.
      * <p>
-     * Note: This location is pulled from {@link #getEntityMetadata().getLocation()} if present.
+     * Note: This location is pulled from {@link ScheduledEventEntityMetadata#getLocation} if present.
      *
      * @return The location of the event, if present.
      */
