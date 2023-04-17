@@ -287,7 +287,9 @@ public interface DataAccessor {
      * @param guildId the guild ID
      * @return A {@link Flux} emitting the scheduled events, or empty if none is present
      */
-    Flux<GuildScheduledEventData> getScheduledEventsInGuild(long guildId);
+    default Flux<GuildScheduledEventData> getScheduledEventsInGuild(long guildId) {
+        return Flux.empty();
+    }
 
     /**
      * Retrieves data for the guild scheduled event corresponding to the given guild ID and event ID.
@@ -296,7 +298,9 @@ public interface DataAccessor {
      * @param eventId the event ID
      * @return A {@link Mono} emitting the scheduled event, or empty if not found
      */
-    Mono<GuildScheduledEventData> getScheduledEventById(long guildId, long eventId);
+    default Mono<GuildScheduledEventData> getScheduledEventById(long guildId, long eventId) {
+        return Mono.empty();
+    }
 
     /**
      * Retrieves data for all guild scheduled event users corresponding to the given guild ID and event ID.
@@ -305,7 +309,9 @@ public interface DataAccessor {
      * @param eventId the event ID
      * @return A {@link Flux} emitting the scheduled event users ids, or empty if none is present
      */
-    Flux<Id> getScheduledEventUsersInEvent(long guildId, long eventId);
+    default Flux<Id> getScheduledEventUsersInEvent(long guildId, long eventId) {
+        return Flux.empty();
+    }
 
     /**
      * Retrieves data for all members present in the store.
