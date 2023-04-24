@@ -47,15 +47,42 @@ public final class ThreadMember {
         this.data = Objects.requireNonNull(data);
     }
 
+    /**
+     * Gets the data of the thread member.
+     *
+     * @return The data of the thread member.
+     */
+    public ThreadMemberData getData() {
+        return data;
+    }
+
+    /**
+     * Gets the ID of thread which member is associated.
+     *
+     * @return The ID of thread channel.
+     */
     public Snowflake getThreadId() {
-        return Snowflake.of(data.id());
+        // ThreadMemberData#id is absent in GUILD_CREATE (threads self is part of)
+        // TODO D4J should be able to include the missing value with the outer thread id when creating ThreadMember
+        return Snowflake.of(data.id().toOptional().orElseThrow(IllegalStateException::new));
     }
 
+    /**
+     * Gets the ID of user.
+     *
+     * @return The ID of user.
+     */
     public Snowflake getUserId() {
-        // TODO: handle guild_create thread member objects, meaning threads visible by self
-        return Snowflake.of(data.userId());
+        // ThreadMemberData#userId is absent in GUILD_CREATE (threads self is part of)
+        // TODO D4J should be able to include the missing value with the self id when creating ThreadMember
+        return Snowflake.of(data.userId().toOptional().orElseThrow(IllegalStateException::new));
     }
 
+    /**
+     * Gets when the user joined the thread.
+     *
+     * @return When the user joined the thread.
+     */
     public Instant getJoinTimestamp() {
         return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.joinTimestamp(), Instant::from);
     }

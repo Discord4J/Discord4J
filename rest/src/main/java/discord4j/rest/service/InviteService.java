@@ -22,6 +22,9 @@ import discord4j.rest.route.Routes;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.Collections;
+import java.util.Map;
+
 public class InviteService extends RestService {
 
     public InviteService(Router router) {
@@ -29,7 +32,12 @@ public class InviteService extends RestService {
     }
 
     public Mono<InviteData> getInvite(String inviteCode) {
+        return getInvite(inviteCode, Collections.emptyMap());
+    }
+
+    public Mono<InviteData> getInvite(String inviteCode, Map<String, Object> queryParams) {
         return Routes.INVITE_GET.newRequest(inviteCode)
+                .query(queryParams)
                 .exchange(getRouter())
                 .bodyToMono(InviteData.class);
     }

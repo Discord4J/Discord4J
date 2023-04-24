@@ -21,6 +21,7 @@ import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
+import discord4j.core.util.MentionUtil;
 import discord4j.discordjson.json.DMCreateRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
@@ -201,7 +202,7 @@ public class User implements Entity {
      */
     public final Optional<String> getBannerUrl() {
         final boolean animated = hasAnimatedBanner();
-        return getAvatarUrl(animated ? GIF : PNG);
+        return getBannerUrl(animated ? GIF : PNG);
     }
 
     /**
@@ -250,7 +251,7 @@ public class User implements Entity {
      * @return The <i>raw</i> mention.
      */
     public final String getMention() {
-        return "<@" + getId().asString() + ">";
+        return MentionUtil.forUser(getId());
     }
 
     @Override
@@ -300,7 +301,7 @@ public class User implements Entity {
      * @return A {@code EnumSet} with the public flags of this user.
      */
     public EnumSet<Flag> getPublicFlags() {
-        int publicFlags = data.publicFlags().toOptional().orElse(0);
+        long publicFlags = data.publicFlags().toOptional().orElse(0L);
         if (publicFlags != 0) {
             return Flag.of(publicFlags);
         }
@@ -317,7 +318,9 @@ public class User implements Entity {
         return EntityUtil.hashCode(this);
     }
 
-    /** Describes the flags of a user. */
+    /** Describes the flags of a user.
+     * @see <a href="https://discord.com/developers/docs/resources/user#user-object-user-flags">Discord Docs - User Flags</a>
+     **/
     public enum Flag {
         DISCORD_EMPLOYEE(0),
 
@@ -344,8 +347,12 @@ public class User implements Entity {
         VERIFIED_BOT(16),
 
         VERIFIED_BOT_DEVELOPER(17),
-        
-        DISCORD_CERTIFIED_MODERATOR(18);
+
+        DISCORD_CERTIFIED_MODERATOR(18),
+
+        BOT_HTTP_INTERACTIONS(19),
+
+        ACTIVE_DEVELOPER(22);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -386,7 +393,7 @@ public class User implements Entity {
          * @param value The flags value as represented by Discord.
          * @return The {@link EnumSet} of flags.
          */
-        public static EnumSet<Flag> of(final int value) {
+        public static EnumSet<Flag> of(final long value) {
             final EnumSet<Flag> userFlags = EnumSet.noneOf(Flag.class);
             for (Flag flag : Flag.values()) {
                 long flagValue = flag.getFlag();

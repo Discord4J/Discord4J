@@ -16,15 +16,21 @@
  */
 package discord4j.core.retriever;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.util.EntityUtil;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.EmojiData;
+import discord4j.discordjson.json.GuildData;
+import discord4j.discordjson.json.GuildUpdateData;
+import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.UserGuildData;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -57,6 +63,13 @@ public class RestEntityRetriever implements EntityRetriever {
                 .getGuild(guildId.asLong())
                 .map(this::toGuildData)
                 .map(data -> new Guild(gateway, data));
+    }
+
+    @Override
+    public Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId) {
+        return rest.getStickerService()
+            .getGuildSticker(guildId.asLong(), stickerId.asLong())
+            .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
     }
 
     @Override
@@ -131,7 +144,7 @@ public class RestEntityRetriever implements EntityRetriever {
         return rest.getGuildService()
                 .getGuildChannels(guildId.asLong())
                 .map(data -> EntityUtil.getChannel(gateway, data))
-                .cast(GuildChannel.class);
+                .ofType(GuildChannel.class);
     }
 
     @Override
@@ -146,6 +159,32 @@ public class RestEntityRetriever implements EntityRetriever {
         return rest.getEmojiService()
                 .getGuildEmojis(guildId.asLong())
                 .map(data -> new GuildEmoji(gateway, data, guildId.asLong()));
+    }
+
+    @Override
+    public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
+        return rest.getStickerService()
+            .getGuildStickers(guildId.asLong())
+            .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
+    }
+
+    @Override
+    public Mono<ThreadMember> getThreadMemberById(Snowflake threadId, Snowflake userId) {
+        return rest.getChannelService().getThreadMember(threadId.asLong(), userId.asLong())
+                .map(data -> new ThreadMember(gateway, data));
+    }
+
+    @Override
+    public Flux<ThreadMember> getThreadMembers(Snowflake threadId) {
+        return rest.getChannelService().listThreadMembers(threadId.asLong())
+                .map(data -> new ThreadMember(gateway, data));
+    }
+
+    @Override
+    public Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId) {
+        return rest.getAutoModService()
+            .getAutoModRules(guildId.asLong())
+            .map(data -> new AutoModRule(gateway, data));
     }
 
     private GuildData toGuildData(GuildUpdateData guild) {
@@ -165,5 +204,12 @@ public class RestEntityRetriever implements EntityRetriever {
                 .large(false) // unable to retrieve this data
                 .memberCount(0) // unable to retrieve this data
                 .build();
+    }
+
+    @Override
+    public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId) {
+        return rest.getStageInstanceService()
+            .getStageInstance(channelId.asLong())
+            .map(data -> new StageInstance(gateway, data));
     }
 }

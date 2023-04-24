@@ -18,6 +18,7 @@
 package discord4j.core.spec;
 
 import discord4j.core.object.component.LayoutComponent;
+import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.discordjson.possible.Possible;
@@ -58,6 +59,8 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
 
     Possible<Optional<List<LayoutComponent>>> components();
 
+    Possible<Optional<List<Attachment>>> attachments();
+
     @Override
     default MultipartRequest<MessageEditRequest> asRequest() {
         MessageEditRequest json = MessageEditRequest.builder()
@@ -71,6 +74,10 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
                         .reduce(0, (left, right) -> left | right)))
                 .components(mapPossibleOptional(components(), components -> components.stream()
                         .map(LayoutComponent::getData)
+                        .collect(Collectors.toList())))
+                // TODO upon v10 upgrade, it is required to also include new files as attachment here
+                .attachments(mapPossibleOptional(attachments(), attachments -> attachments.stream()
+                        .map(Attachment::getData)
                         .collect(Collectors.toList())))
                 .build();
         return MultipartRequest.ofRequestAndFiles(json, Stream.concat(files().stream(), fileSpoilers().stream())

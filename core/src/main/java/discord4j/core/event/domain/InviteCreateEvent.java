@@ -139,9 +139,9 @@ public class InviteCreateEvent extends Event {
     }
 
     /**
-     * Gets whether or not the invite is temporary (invited users will be kicked on disconnect unless they're assigned a role).
+     * Gets whether this invite only grants temporary membership.
      *
-     * @return Whether or not the invite is temporary.
+     * @return {@code true} if this invite only grants temporary membership
      */
     public boolean isTemporary() {
         return temporary;
@@ -162,10 +162,7 @@ public class InviteCreateEvent extends Event {
      * @return The instant this invite expires, if possible.
      */
     public Optional<Instant> getExpiration() {
-        final boolean temporary = isTemporary();
-        final int maxAge = getMaxAge();
-
-        return temporary ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)) : Optional.empty();
+        return maxAge > 0 ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)): Optional.empty();
     }
 
     /**

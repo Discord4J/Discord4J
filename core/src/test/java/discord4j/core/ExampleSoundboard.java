@@ -29,14 +29,16 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;
 import com.sedmelluq.discord.lavaplayer.track.playback.NonAllocatingAudioFrameBuffer;
 import discord4j.common.util.Snowflake;
+import discord4j.core.event.domain.command.ApplicationCommandPermissionUpdateEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.VoiceState;
+import discord4j.core.object.command.ApplicationCommandPermission;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Member;
-import discord4j.core.support.GuildCommandRegistrar;
+import discord4j.rest.interaction.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.voice.AudioProvider;
 import discord4j.voice.VoiceConnection;
@@ -154,10 +156,26 @@ public class ExampleSoundboard {
             return Mono.empty();
         });
 
+        Publisher<?> onPermsUpdate = client.on(ApplicationCommandPermissionUpdateEvent.class, event -> {
+            log.info("Permission update for command {}, application {}, guild {}",
+                    event.getId(), event.getApplicationId(), event.getGuildId());
+            for (ApplicationCommandPermission permission : event.getPermissions()) {
+                log.info("*** {} {} {} ***",
+                        permission.isAllowed() ? "Allows" : "Disallows",
+                        permission.getType(),
+                        permission.appliesToEveryone() ? "everyone"
+                                : (permission.appliesToAllChannels() ? "all channels" : permission.getId()));
+            }
+            if (event.getPermissions().isEmpty()) {
+                log.info("*** No permissions overridden ***");
+            }
+            return Mono.empty();
+        });
+
         // register the command and then subscribe to multiple listeners, using Mono.when
-        return GuildCommandRegistrar.create(client.getRestClient(), guildId, getCommandSources())
-                .registerCommands()
-                .thenMany(Mono.when(onChatInputInteraction, onButtonInteraction));
+        return GuildCommandRegistrar.create(client.getRestClient(), getCommandSources())
+                .registerCommands(Snowflake.of(guildId))
+                .thenMany(Mono.when(onChatInputInteraction, onButtonInteraction, onPermsUpdate));
     }
 
     private static List<LayoutComponent> getButtons() {

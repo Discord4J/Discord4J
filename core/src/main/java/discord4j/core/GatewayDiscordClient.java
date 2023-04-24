@@ -29,9 +29,11 @@ import discord4j.core.event.domain.Event;
 import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.entity.channel.StageChannel;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -48,6 +50,7 @@ import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.GuildData;
 import discord4j.discordjson.json.GuildUpdateData;
 import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.UpdateCurrentUserVoiceStateRequest;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.discordjson.possible.Possible;
@@ -67,14 +70,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -87,7 +88,7 @@ import static discord4j.common.LogUtil.format;
  * Gateway. Maintains a set of connections to every shard logged in from the same {@link GatewayBootstrap} and therefore
  * tracks state updates from all connected shards.
  * <p>
- * The following are some of the resources available through this aggregate:
+ * The following are some resources available through this aggregate:
  * <ul>
  *     <li>Access to the base {@link DiscordClient} for direct REST API operations through {@link #rest()}.</li>
  *     <li>Access to {@link CoreResources} like the {@link RestClient} used to perform API requests.</li>
@@ -401,6 +402,29 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
+     * Requests to retrieve an invite.
+     *
+     * @param inviteCode the code for the invite (e.g. "xdYkpp").
+     * @param withCounts whether the invite should contain approximate member counts
+     * @param withExpiration whether the invite should contain the expiration date
+     * @param guildScheduledEventId the guild scheduled event to include with the invite, can be {@code null}
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Invite} as represented by the
+     * supplied invite code. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Invite> getInvite(String inviteCode, boolean withCounts, boolean withExpiration,
+                                  @Nullable Snowflake guildScheduledEventId) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("with_counts", withCounts);
+        queryParams.put("with_expiration", withExpiration);
+        if (guildScheduledEventId != null) {
+            queryParams.put("guild_scheduled_event_id", guildScheduledEventId.asString());
+        }
+        return getRestClient().getInviteService()
+                .getInvite(inviteCode, queryParams)
+                .map(data -> new Invite(this, data));
+    }
+
+    /**
      * Requests to edit this client (i.e., modify the current bot user).
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link LegacyUserEditSpec} to be operated on.
@@ -441,6 +465,61 @@ public class GatewayDiscordClient implements EntityRetriever {
         Objects.requireNonNull(spec);
         return Mono.defer(() -> getRestClient().getUserService().modifyCurrentUser(spec.asRequest()))
                 .map(data -> new User(this, data));
+    }
+
+    /**
+     * Requests to retrieve a {@link StageInstance}.
+     *
+     * @param channelId The channel ID associated to the {@link StageInstance}.
+     * @param retrievalStrategy The retreival strategy to use
+     * @return A {@link Mono} where, upon successful completion, emits the {@link StageInstance} associated to the
+     * supplied channel ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId, EntityRetrievalStrategy retrievalStrategy) {
+        Objects.requireNonNull(channelId);
+        Objects.requireNonNull(retrievalStrategy);
+        return withRetrievalStrategy(retrievalStrategy).getStageInstanceByChannelId(channelId);
+    }
+
+    /**
+     * Requests to retrieve a {@link StageInstance}.
+     *
+     * @param channelId The channel ID associated to the {@link StageInstance}.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link StageInstance} associated to the
+     * supplied channel ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Override
+    public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId) {
+        Objects.requireNonNull(channelId);
+        return entityRetriever.getStageInstanceByChannelId(channelId);
+    }
+
+    /**
+     * Move the {@link Member} represented by this {@link GatewayDiscordClient} to the stage speakers.
+     * Requires the {@link Member} to be connected to a {@link StageChannel}
+     *
+     * @return A {@link Mono} that upon subscription, will move the {@link Member} represented by this
+     * {@link GatewayDiscordClient} to the stage speakers.
+     */
+    public Mono<Void> joinStageSpeakers(Snowflake guildId) {
+        Objects.requireNonNull(guildId);
+        return Mono.defer(() -> getRestClient().getGuildService()
+                .modifySelfVoiceState(guildId.asLong(),
+                        UpdateCurrentUserVoiceStateRequest.builder().suppress(false).build()));
+    }
+
+    /**
+     * Move the {@link Member} represented by this {@link GatewayDiscordClient} to the stage audience.
+     * Requires the {@link Member} to be connected to a {@link StageChannel}
+     *
+     * @return A {@link Mono} that upon subscription, will move the {@link Member} represented by this
+     * {@link GatewayDiscordClient} to the stage audience.
+     */
+    public Mono<Void> joinStageAudience(Snowflake guildId) {
+        Objects.requireNonNull(guildId);
+        return Mono.defer(() -> getRestClient().getGuildService()
+                .modifySelfVoiceState(guildId.asLong(),
+                        UpdateCurrentUserVoiceStateRequest.builder().suppress(true).build()));
     }
 
     /**
@@ -490,7 +569,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      * </pre>
      * <p>
      * For more alternatives to handling errors, please see
-     * <a href="https://github.com/Discord4J/Discord4J/wiki/Error-Handling">Error Handling</a> wiki page.
+     * <a href="https://docs.discord4j.com/error-handling">Error Handling</a> docs page.
      *
      * @param eventClass the event class to obtain events from
      * @param <E> the type of the event class
@@ -702,6 +781,11 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     @Override
+    public Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId) {
+        return entityRetriever.getGuildStickerById(guildId, stickerId);
+    }
+
+    @Override
     public Mono<GuildEmoji> getGuildEmojiById(Snowflake guildId, Snowflake emojiId) {
         return entityRetriever.getGuildEmojiById(guildId, emojiId);
     }
@@ -759,5 +843,25 @@ public class GatewayDiscordClient implements EntityRetriever {
     @Override
     public Flux<GuildEmoji> getGuildEmojis(Snowflake guildId) {
         return entityRetriever.getGuildEmojis(guildId);
+    }
+
+    @Override
+    public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
+        return entityRetriever.getGuildStickers(guildId);
+    }
+
+    @Override
+    public Mono<ThreadMember> getThreadMemberById(Snowflake threadId, Snowflake userId) {
+        return entityRetriever.getThreadMemberById(threadId, userId);
+    }
+
+    @Override
+    public Flux<ThreadMember> getThreadMembers(Snowflake threadId) {
+        return entityRetriever.getThreadMembers(threadId);
+    }
+
+    @Override
+    public Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId) {
+        return entityRetriever.getGuildAutoModRules(guildId);
     }
 }

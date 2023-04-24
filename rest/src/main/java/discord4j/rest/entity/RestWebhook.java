@@ -25,6 +25,8 @@ import discord4j.rest.util.Permission;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.Objects;
+
 /**
  * Represents a webhook entity in Discord. Webhooks are a low-effort way to post messages to channels in Discord.
  */
@@ -95,5 +97,18 @@ public class RestWebhook {
      */
     public Mono<Void> delete(@Nullable String reason) {
         return restClient.getWebhookService().deleteWebhook(id, reason);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RestWebhook that = (RestWebhook) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

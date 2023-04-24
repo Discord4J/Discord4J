@@ -25,6 +25,8 @@ import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
 import discord4j.gateway.ShardInfo;
 
+import java.util.Collection;
+
 /**
  * Dispatched when a user uses an Application Command.
  * <p>
@@ -33,6 +35,7 @@ import discord4j.gateway.ShardInfo;
  *     <li>{@link #reply()} to directly include a message</li>
  *     <li>{@link #deferReply()} to acknowledge without a message, typically to perform a background task and give the
  *     user a loading state until it is edited</li>
+ *     <li>{@link #presentModal(String, String, Collection)} to pop a modal for the user to interact with</li>
  * </ul>
  * See {@link InteractionCreateEvent} for more details about valid operations.
  * <p>
@@ -41,7 +44,7 @@ import discord4j.gateway.ShardInfo;
  * <img src="doc-files/InteractionCreateEvent.png">
  */
 @Experimental
-public class ApplicationCommandInteractionEvent extends InteractionCreateEvent {
+public class ApplicationCommandInteractionEvent extends DeferrableInteractionEvent {
 
     public ApplicationCommandInteractionEvent(GatewayDiscordClient gateway, ShardInfo shardInfo,
                                               Interaction interaction) {

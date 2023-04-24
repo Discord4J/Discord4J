@@ -26,11 +26,13 @@ import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageEditMono;
 import discord4j.core.spec.MessageEditSpec;
+import discord4j.core.spec.StartThreadSpec;
 import discord4j.core.spec.legacy.LegacyMessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
@@ -471,10 +473,25 @@ public final class Message implements Entity {
     }
 
     /**
+     * Gets the partial stickers sent with the message.
+     *
+     * @return The partial stickers sent with the message.
+     */
+    @Experimental
+    public List<PartialSticker> getStickersItems() {
+        return data.stickerItems().toOptional()
+            .map(partialStickers -> partialStickers.stream()
+                .map(data -> new PartialSticker(gateway, data))
+                .collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
+    }
+
+    /**
      * Gets the stickers sent with the message.
      *
      * @return The stickers sent with the message.
      */
+    @Deprecated
     public List<Sticker> getStickers() {
         return data.stickers().toOptional()
                 .orElse(Collections.emptyList())
@@ -546,6 +563,9 @@ public final class Message implements Entity {
 
     /**
      * Requests to edit this message.
+     * <p>
+     * To partially or completely replace attachments, see the docs for {@link #edit()} for examples and adapt them to
+     * a standalone spec.
      *
      * @param spec an immutable object that specifies how to edit the message
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Message}. If an error is
@@ -569,6 +589,41 @@ public final class Message implements Entity {
     /**
      * Requests to edit this message. Properties specifying how to edit this message can be set via the {@code
      * withXxx} methods of the returned {@link MessageEditMono}.
+     * <p>
+     * By default, this method will append any file added through {@code withFiles}. To replace or remove individual
+     * attachments, use {@code withAttachments} along with {@link discord4j.core.object.entity.Attachment} objects from
+     * the original message you want to keep. It is not required to include the new files as {@code Attachment} objects.
+     * <p>
+     * For example, to replace all previous attachments, provide an empty {@code withAttachments} and your files:
+     * <pre>{@code
+     *  message.edit()
+     *     .withContentOrNull("Replaced all attachments")
+     *     .withFiles(getFile())
+     *     .withComponents(row)
+     *     .withAttachments();
+     * }</pre>
+     * <p>
+     * To replace a specific attachment, you need to pass the attachment details you want to keep. You could work from
+     * the original {@link Message#getAttachments()} list and pass it to {@code withAttachments} and your files.
+     * The following example removes only the first attachment:
+     * <pre>{@code
+     *  message.edit()
+     *         .withContentOrNull("Replaced the first attachment")
+     *         .withFiles(getFile())
+     *         .withComponents(row)
+     *         .withAttachmentsOrNull(message.getAttachments()
+     *                 .stream()
+     *                 .skip(1)
+     *                 .collect(Collectors.toList()));
+     * }</pre>
+     * <p>
+     * To clear all attachments, provide an empty {@code withAttachments}:
+     * <pre>{@code
+     *  message.edit()
+     *     .withContentOrNull("Removed all attachments")
+     *     .withComponents(row)
+     *     .withAttachments();
+     * }</pre>
      *
      * @return A {@link MessageEditMono} where, upon successful completion, emits the edited {@link Message}. If an
      * error is received, it is emitted through the {@code MessageEditMono}.
@@ -712,6 +767,19 @@ public final class Message implements Entity {
                 .map(data -> new Message(gateway, data));
     }
 
+    /**
+     * Creates a new thread from an existing message.
+     *
+     * @param spec an immutable object that specifies how to create the thread
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link ThreadChannel}.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ThreadChannel> startThread(StartThreadSpec spec) {
+        return gateway.getRestClient().getChannelService()
+                .startThreadWithMessage(getChannelId().asLong(), getId().asLong(), spec.asRequest())
+                .map(data -> new ThreadChannel(gateway, data));
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
@@ -741,6 +809,9 @@ public final class Message implements Entity {
 
         /** This message came from the urgent message system. */
         URGENT(4),
+
+        /** This message has an associated thread, with the same id as the message. */
+        HAS_THREAD(5),
 
         /** This message is an ephemeral interaction response. */
         EPHEMERAL(6),
@@ -885,20 +956,36 @@ public final class Message implements Entity {
         /** A message created when the Guild is requalified for Discovery Feature **/
         GUILD_DISCOVERY_REQUALIFIED(15),
 
+        /** A message created for warning about the grace period of Guild Discovery **/
         GUILD_DISCOVERY_GRACE_PERIOD_INITIAL_WARNING(16),
 
+        /** A message created for last warning about the grace period of Guild Discovery **/
         GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING(17),
 
+        /**
+         * A message created when a Thread is started ( <a href="https://support.discord.com/hc/es/articles/4403205878423-Threads">Threads</a> )
+         */
         THREAD_CREATED(18),
 
         /** A message created with a reply */
         REPLY(19),
 
+        /** A message created using an application (like slash commands) **/
         APPLICATION_COMMAND(20),
 
+        /**
+         * The first message in a thread pointing to a related message in the parent channel from which the thread was started
+         * <br>
+         * <b>Note: </b> Only supported from v9 of API
+        **/
         THREAD_STARTER_MESSAGE(21),
 
-        GUILD_INVITE_REMINDER(22);
+        /** A message created for notice the servers owners about invite new users (only in new servers) **/
+        GUILD_INVITE_REMINDER(22),
+
+        CONTEXT_MENU_COMMAND(23),
+
+        AUTO_MODERATION_ACTION(24);
 
         /**
          * The underlying value as represented by Discord.
@@ -954,6 +1041,8 @@ public final class Message implements Entity {
                 case 20: return APPLICATION_COMMAND;
                 case 21: return THREAD_STARTER_MESSAGE;
                 case 22: return GUILD_INVITE_REMINDER;
+                case 23: return CONTEXT_MENU_COMMAND;
+                case 24: return AUTO_MODERATION_ACTION;
                 default: return UNKNOWN;
             }
         }

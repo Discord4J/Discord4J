@@ -388,7 +388,7 @@ public final class Webhook implements Entity {
      */
     @Deprecated
     public Mono<Void> execute(final Consumer<? super LegacyWebhookExecuteSpec> spec) {
-        return execute(false, spec).cast(Void.class);
+        return execute(false, spec).then();
     }
 
     /**
@@ -412,7 +412,7 @@ public final class Webhook implements Entity {
      * error IS NOT emitted through the {@code Mono}.
      */
     public Mono<Void> execute(WebhookExecuteSpec spec) {
-        return execute(false, spec).cast(Void.class);
+        return execute(false, spec).then();
     }
 
     /**
@@ -486,6 +486,83 @@ public final class Webhook implements Entity {
      */
     public Mono<Message> executeAndWait(WebhookExecuteSpec spec) {
         return execute(true, spec);
+    }
+
+    /**
+     * Executes this webhook to get a message.
+     *
+     * @param messageId The ID of the message to get
+     * @return A {@link Mono} where, upon successful webhook execution, emits a Message. If the message get fails, an
+     * error is emitted through the {@code Mono}.
+     */
+    public Mono<Message> getMessage(Snowflake messageId) {
+        Objects.requireNonNull(messageId);
+        return Mono.defer(
+            () -> {
+                if (!getToken().isPresent()) {
+                    throw new IllegalArgumentException("Can't get message with this webhook.");
+                }
+                return gateway.getRestClient().getWebhookService()
+                    .getWebhookMessage(getId().asLong(), getToken().get(), messageId.asString())
+                    .map(data -> new Message(gateway, data));
+            }
+        );
+    }
+
+    /**
+     * Executes this webhook to edit a message. Properties specifying how to execute this webhook, including the ID of
+     * the message being edited, can be set via the {@code withXxx} methods of the returned {@link
+     * WebhookMessageEditMono}.
+     *
+     * @param messageId The ID of the message to edit
+     * @return A {@link WebhookMessageEditMono} where, upon successful webhook execution, emits a Message. If the
+     * message edit fails, an error is emitted through the {@link WebhookMessageEditMono}.
+     */
+    public WebhookMessageEditMono editMessage(Snowflake messageId) {
+        return WebhookMessageEditMono.of(messageId,this);
+    }
+
+    /**
+     * Executes this webhook to edit a message.
+     *
+     * @param messageId The ID of the message to edit
+     * @param spec an immutable object that specifies how to edit the message
+     * @return A {@link Mono} where, upon successful webhook execution, emits a Message. If the message edit fails, an
+     * error is emitted through the {@code Mono}.
+     */
+    public Mono<Message> editMessage(Snowflake messageId, WebhookMessageEditSpec spec) {
+        Objects.requireNonNull(messageId);
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+            () -> {
+                if (!getToken().isPresent()) {
+                    throw new IllegalArgumentException("Can't edit message with this webhook.");
+                }
+                return gateway.getRestClient().getWebhookService()
+                    .modifyWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(), spec.asRequest())
+                    .map(data -> new Message(gateway, data));
+            }
+        );
+    }
+
+    /**
+     * Executes this webhook to delete a message.
+     *
+     * @param messageId The ID of the message to delete
+     * @return A {@link Mono} where, upon successful webhook execution, emits nothing; indicating the message has been
+     * deleted. If the message delete fails, an error is emitted through the {@code Mono}.
+     */
+    public Mono<Void> deleteMessage(Snowflake messageId) {
+        Objects.requireNonNull(messageId);
+        return Mono.defer(
+            () -> {
+                if (!getToken().isPresent()) {
+                    throw new IllegalArgumentException("Can't delete message with this webhook.");
+                }
+                return gateway.getRestClient().getWebhookService()
+                    .deleteWebhookMessage(getId().asLong(), getToken().get(), messageId.asString());
+            }
+        );
     }
 
     @Override

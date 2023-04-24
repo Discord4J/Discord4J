@@ -17,7 +17,6 @@
 
 package discord4j.core.event.domain.thread;
 
-import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.ThreadMember;
@@ -25,6 +24,7 @@ import discord4j.discordjson.json.gateway.ThreadMembersUpdate;
 import discord4j.gateway.ShardInfo;
 import reactor.util.annotation.Nullable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,8 +33,9 @@ import java.util.stream.Collectors;
  * Sent when anyone is added to or removed from a thread. If the current user does not have the
  * {@link discord4j.gateway.intent.Intent#GUILD_MEMBERS} Gateway Intent, then this event will only be sent if the
  * current user was added to or removed from the thread.
+ *
+ * @see <a href="https://discord.com/developers/docs/topics/gateway-events#thread-members-update">Discord Docs</a>
  */
-@Experimental
 public class ThreadMembersUpdateEvent extends ThreadEvent {
 
     private final ThreadMembersUpdate dispatch;
@@ -90,7 +91,8 @@ public class ThreadMembersUpdateEvent extends ThreadEvent {
      * @return a list of {@link Snowflake} user IDs who were removed from the thread
      */
     public List<Snowflake> getRemovedMemberIds() {
-        return dispatch.removedMemberIds().stream().map(Snowflake::of).collect(Collectors.toList());
+        return dispatch.removedMemberIds().toOptional().orElse(Collections.emptyList()).stream()
+                .map(Snowflake::of).collect(Collectors.toList());
     }
 
     @Override

@@ -17,19 +17,25 @@
 
 package discord4j.core;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
+import discord4j.core.object.entity.Message;
 import discord4j.core.spec.MessageCreateFields;
-import discord4j.core.support.GuildCommandRegistrar;
+import discord4j.rest.interaction.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Example to showcase how to update an initial response through a button that also includes an attachment.
@@ -50,8 +56,15 @@ public class ExampleButtonAttachment {
                     List<ApplicationCommandRequest> commands = Collections.singletonList(example);
 
                     // a button row we'll use later
-                    String editAttach = "edit-attach";
-                    ActionRow row = ActionRow.of(Button.success(editAttach, "Edit with attachment"));
+                    String append = "append";
+                    String replace = "replace";
+                    String replaceFirst = "replace-first";
+                    String clear = "clear";
+                    ActionRow row = ActionRow.of(
+                            Button.success(append, "Append attachment"),
+                            Button.success(replace, "Replace all attachments"),
+                            Button.success(replaceFirst, "Replace 1st attachment"),
+                            Button.danger(clear, "Clear attachments"));
 
                     // a listener that captures our slash command interactions
                     // replies with content and a button
@@ -67,26 +80,55 @@ public class ExampleButtonAttachment {
                     // a listener that captures button presses
                     // to update an interaction initial response with a new attachment
                     Publisher<?> onButtonInteraction = client.on(ButtonInteractionEvent.class, press -> {
-                        if (editAttach.equals(press.getCustomId())) {
-                            Mono<?> edit = press.editReply()
-                                    .withContentOrNull("Wow, a new attachment!")
+                        if (append.equals(press.getCustomId())) {
+                            Mono<Message> edit = press.editReply()
+                                    .withContentOrNull("Added a new attachment")
                                     .withFiles(getFile())
                                     .withComponents(row);
                             return press.deferEdit().then(edit);
+
+                        } else if (replace.equals(press.getCustomId())) {
+                            Mono<Message> edit = press.editReply()
+                                    .withContentOrNull("Replaced all attachments")
+                                    .withFiles(getFile())
+                                    .withComponents(row)
+                                    .withAttachments();
+                            return press.deferEdit().then(edit);
+
+                        } else if (replaceFirst.equals(press.getCustomId())) {
+                            Mono<Message> edit = press.getReply()
+                                    .flatMap(reply -> press.editReply()
+                                            .withContentOrNull("Replaced the first attachment")
+                                            .withFiles(getFile())
+                                            .withComponents(row)
+                                            .withAttachmentsOrNull(reply.getAttachments()
+                                                    .stream()
+                                                    .skip(1)
+                                                    .collect(Collectors.toList())));
+                            return press.deferEdit().then(edit);
+
+                        } else if (clear.equals(press.getCustomId())) {
+                            Mono<Message> edit = press.editReply()
+                                    .withContentOrNull("Removed all attachments")
+                                    .withComponents(row)
+                                    .withAttachments();
+                            return press.deferEdit().then(edit);
+
                         }
                         return Mono.empty();
                     });
 
                     // register the command and then subscribe to multiple listeners, using Mono.when
-                    return GuildCommandRegistrar.create(client.getRestClient(), guildId, commands)
-                            .registerCommands()
+                    return GuildCommandRegistrar.create(client.getRestClient(), commands)
+                            .registerCommands(Snowflake.of(guildId))
                             .thenMany(Mono.when(onChatInputInteraction, onButtonInteraction));
                 })
                 .block();
     }
 
     private static MessageCreateFields.File getFile() {
-        InputStream stream = ExampleButtonAttachment.class.getClassLoader().getResourceAsStream("logback.xml");
-        return MessageCreateFields.File.of("logback.xml", stream);
+        String content = "This is a text file created at " + LocalDateTime.now();
+        InputStream stream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+        return MessageCreateFields.File.of("content.txt", stream);
     }
 }

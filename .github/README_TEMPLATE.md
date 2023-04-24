@@ -5,7 +5,7 @@
 [![Support Server Invite](https://img.shields.io/discord/208023865127862272.svg?color=7289da&label=Discord4J&logo=discord&style=flat-square)](https://discord.gg/d4j)
 [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core/3.2.svg?style=flat-square)](https://search.maven.org/artifact/com.discord4j/discord4j-core)
 [![Javadocs](https://javadoc.io/badge2/com.discord4j/discord4j-core/$version/javadoc.svg?color=blue&style=flat-square)](https://javadoc.io/doc/com.discord4j/discord4j-core/$version)
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Discord4J/Discord4J/Java%20CI/master?logo=github&style=flat-square)](https://github.com/Discord4J/Discord4J/actions)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/Discord4J/Discord4J/gradle.yml?branch=master&logo=github&style=flat-square)](https://github.com/Discord4J/Discord4J/actions)
 
 Discord4J is a fast, powerful, unopinionated, reactive library to enable quick and easy development of Discord bots for Java, Kotlin, and other JVM languages using the official [Discord Bot API](https://discord.com/developers/docs/intro).
 
@@ -13,18 +13,20 @@ Discord4J is a fast, powerful, unopinionated, reactive library to enable quick a
 
 In this example for v3.2, whenever a user sends a `!ping` message the bot will immediately respond with `Pong!`.
 
-```java
-public final class ExampleBot {
+Make sure your bot has the **Message Content** intent enabled in your [developer portal](https://discord.com/developers/applications).
 
-  public static void main(final String[] args) {
-    final String token = args[0];
-    final DiscordClient client = DiscordClient.create(token);
-    final GatewayDiscordClient gateway = client.login().block();
+```java
+public class ExampleBot {
+
+  public static void main(String[] args) {
+    String token = args[0];
+    DiscordClient client = DiscordClient.create(token);
+    GatewayDiscordClient gateway = client.login().block();
 
     gateway.on(MessageCreateEvent.class).subscribe(event -> {
-      final Message message = event.getMessage();
+      Message message = event.getMessage();
       if ("!ping".equals(message.getContent())) {
-        final MessageChannel channel = message.getChannel().block();
+        MessageChannel channel = message.getChannel().block();
         channel.createMessage("Pong!").block();
       }
     });
@@ -41,6 +43,8 @@ For a full project example, check out our example projects repository [here](htt
 * [Javadocs](https://www.javadoc.io/doc/com.discord4j/discord4j-core)
 * [Documentation](https://docs.discord4j.com)
 * [Example Projects](https://github.com/Discord4J/example-projects)
+* [More examples](https://docs.discord4j.com/examples)
+* [Gateway Intents](https://discord.com/developers/docs/topics/gateway#gateway-intents)
 * [Discord](https://discord.gg/d4j)
 
 ## 💎 Benefits
@@ -118,7 +122,7 @@ See [our docs](https://docs.discord4j.com/versions) for more details about compa
 
 We would like to give a special thanks to all of our sponsors for providing us the funding to continue developing and hosting repository resources as well as driving forward initiatives for community programs. In particular, we would like to give a special shoutout to these wonderful individuals:
 
-* [decyg](https://github.com/decyg)
+* [decyg](https://github.com/d-g-n)
 * [nikammerlaan](https://github.com/nikammerlaan)
 * [ByteAlex](https://github.com/ByteAlex)
 * [Shadorc](https://github.com/Shadorc)
@@ -139,11 +143,11 @@ Do you own a large bot using Discord4J? Ask an admin in our Discord or submit a 
 Discord4J uses [Project Reactor](https://projectreactor.io/) as the foundation for our asynchronous framework. Reactor provides a simple yet extremely powerful API that enables users to reduce resources and increase performance.
 
 ```java
-public final class ExampleBot {
+public class ExampleBot {
 
-  public static void main(final String[] args) {
-    final String token = args[0];
-    final DiscordClient client = DiscordClient.create(token);
+  public static void main(String[] args) {
+    String token = args[0];
+    DiscordClient client = DiscordClient.create(token);
 
     client.login().flatMapMany(gateway -> gateway.on(MessageCreateEvent.class))
       .map(MessageCreateEvent::getMessage)
@@ -155,24 +159,29 @@ public final class ExampleBot {
 }
 ```
 
-Discord4J also provides several methods to aide in better reactive chain compositions, such as `GatewayDiscordClient#withGateway` and `EventDispatcher#on` with an [error handling](https://docs.discord4j.com/error-handling) overload.
+Discord4J also provides several methods to aid in better reactive chain compositions, such as `GatewayDiscordClient#withGateway` and `EventDispatcher#on` with an [error handling](https://docs.discord4j.com/error-handling) overload.
 
 ```java
-final String token = args[0];
-final DiscordClient client = DiscordClient.create(token);
+public class ExampleBot {
 
-client.withGateway(gateway -> {
-  final Publisher<?> pingPong = gateway.on(MessageCreateEvent.class, event ->
-    Mono.just(event.getMessage())
-      .filter(message -> "!ping".equals(message.getContent()))
-      .flatMap(Message::getChannel)
-      .flatMap(channel -> channel.createMessage("Pong!")));
-            
-    final Publisher<?> onDisconnect = gateway.onDisconnect()
-      .doOnTerminate(() -> System.out.println("Disconnected!"));
+    public static void main(String[] args) {
+      String token = args[0];
+      DiscordClient client = DiscordClient.create(token);
 
-    return Mono.when(pingPong, onDisconnect);
-  }).block();
+      client.withGateway(gateway -> {
+        Publisher<?> pingPong = gateway.on(MessageCreateEvent.class, event ->
+          Mono.just(event.getMessage())
+            .filter(message -> "!ping".equals(message.getContent()))
+            .flatMap(Message::getChannel)
+            .flatMap(channel -> channel.createMessage("Pong!")));
+
+        Publisher<?> onDisconnect = gateway.onDisconnect()
+          .doOnTerminate(() -> System.out.println("Disconnected!"));
+
+        return Mono.when(pingPong, onDisconnect);
+      }).block();
+    }
+}
 ```
 
 ## 🧵 Kotlin
@@ -208,24 +217,23 @@ client.withGateway {
 ```java
 // IMAGE_URL = https://cdn.betterttv.net/emote/55028cd2135896936880fdd7/3x
 // ANY_URL = https://www.youtube.com/watch?v=5zwY50-necw
-final MessageChannel channel = ...
-channel.createEmbed(spec -> 
-  spec.setColor(Color.RED)
-    .setAuthor("setAuthor", ANY_URL, IMAGE_URL)
-    .setImage(IMAGE_URL)
-    .setTitle("setTitle/setUrl")
-    .setUrl(ANY_URL)
-    .setDescription("setDescription\\n" +
-      "big D: is setImage\\n" +
-      "small D: is setThumbnail\\n" +
-      "<-- setColor")
-    .addField("addField", "inline = true", true)
-    .addField("addFIeld", "inline = true", true)
-    .addField("addFile", "inline = false", false)
-    .setThumbnail(IMAGE_URL)
-    .setFooter("setFooter --> setTimestamp", IMAGE_URL)
-    .setTimestamp(Instant.now())
-).block();
+MessageChannel channel = ...
+EmbedCreateSpec.Builder builder = EmbedCreateSpec.builder();
+builder.author("setAuthor", ANY_URL, IMAGE_URL);
+builder.image(IMAGE_URL);
+builder.title("setTitle/setUrl");
+builder.url(ANY_URL);
+builder.description("setDescription\n" +
+      "big D: is setImage\n" +
+      "small D: is setThumbnail\n" +
+      "<-- setColor");
+builder.addField("addField", "inline = true", true);
+builder.addField("addFIeld", "inline = true", true);
+builder.addField("addFile", "inline = false", false);
+builder.thumbnail(IMAGE_URL);
+builder.footer("setFooter --> setTimestamp", IMAGE_URL);
+builder.timestamp(Instant.now());
+channel.createMessage(builder.build()).block();
 ```
 
 ### 🏷️ Find Members by Role Name
@@ -233,11 +241,11 @@ channel.createEmbed(spec ->
 Users typically prefer working with names instead of IDs. This example will demonstrate how to search for all members that have a role with a specific name.
 
 ```java
-final Guild guild = ...
-final Set<Member> roleMembers = new HashSet<>();
+Guild guild = ...
+Set<Member> roleMembers = new HashSet<>();
 
-for (final Member member : guild.getMembers().toIterable()) {
-  for (final Role role : member.getRoles().toIterable()) {
+for (Member member : guild.getMembers().toIterable()) {
+  for (Role role : member.getRoles().toIterable()) {
     if ("Developers".equalsIgnoreCase(role.getName())) {
       roleMembers.add(member);
       break;
@@ -250,7 +258,7 @@ return roleMembers;
 
 Alternatively, using Reactor:
 ```java
-final Guild guild = ...
+Guild guild = ...
 return guild.getMembers()
   .filterWhen(member -> member.getRoles()
     .map(Role::getName)
@@ -278,12 +286,12 @@ static {
 Next, we need to allow Discord4J to read from an `AudioPlayer` to an `AudioProvider`.
 
 ```java
-public final class LavaPlayerAudioProvider extends AudioProvider {
+public class LavaPlayerAudioProvider extends AudioProvider {
 
   private final AudioPlayer player;
   private final MutableAudioFrame frame;
 
-  public LavaPlayerAudioProvider(final AudioPlayer player) {
+  public LavaPlayerAudioProvider(AudioPlayer player) {
     // Allocate a ByteBuffer for Discord4J's AudioProvider to hold audio data for Discord
     super(ByteBuffer.allocate(StandardAudioDataFormats.DISCORD_OPUS.maximumChunkSize()));
     // Set LavaPlayer's AudioFrame to use the same buffer as Discord4J's
@@ -295,7 +303,7 @@ public final class LavaPlayerAudioProvider extends AudioProvider {
   @Override
   public boolean provide() {
     // AudioPlayer writes audio data to the AudioFrame
-    final boolean didProvide = player.provide(frame);
+    boolean didProvide = player.provide(frame);
 
     if (didProvide) {
       getBuffer().flip();
@@ -309,12 +317,12 @@ public final class LavaPlayerAudioProvider extends AudioProvider {
 Typically, audio players will have queues or internal playlists for users to be able to automatically cycle through songs as they are finished or requested to be skipped over. We can manage this queue externally and pass it to other areas of our code to allow tracks to be viewed, queued, or skipped over by creating an `AudioTrackScheduler`.
 
 ```java
-public final class AudioTrackScheduler extends AudioEventAdapter {
+public class AudioTrackScheduler extends AudioEventAdapter {
 
   private final List<AudioTrack> queue;
   private final AudioPlayer player;
 
-  public AudioTrackScheduler(final AudioPlayer player) {
+  public AudioTrackScheduler(AudioPlayer player) {
     // The queue may be modifed by different threads so guarantee memory safety
     // This does not, however, remove several race conditions currently present
     queue = Collections.synchronizedList(new LinkedList<>());
@@ -325,12 +333,12 @@ public final class AudioTrackScheduler extends AudioEventAdapter {
     return queue;
   }
 
-  public boolean play(final AudioTrack track) {
+  public boolean play(AudioTrack track) {
     return play(track, false);
   }
 
-  public boolean play(final AudioTrack track, final boolean force) {
-    final boolean playing = player.startTrack(track, !force);
+  public boolean play(AudioTrack track, boolean force) {
+    boolean playing = player.startTrack(track, !force);
 
     if (!playing) {
       queue.add(track);
@@ -344,7 +352,7 @@ public final class AudioTrackScheduler extends AudioEventAdapter {
   }
 
   @Override
-  public void onTrackEnd(final AudioPlayer player, final AudioTrack track, final AudioTrackEndReason endReason) {
+  public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
     // Advance the player if the track completed naturally (FINISHED) or if the track cannot play (LOAD_FAILED)
     if (endReason.mayStartNext) {
       skip();
@@ -356,11 +364,11 @@ public final class AudioTrackScheduler extends AudioEventAdapter {
 Currently, Discord only allows 1 voice connection per server. Working within this limitation, it is logical to think of the 3 components we have worked with thus far (`AudioPlayer`, `LavaPlayerAudioProvider`, and `AudioTrackScheduler`) to be correlated to a specific `Guild`, naturally unique by some `Snowflake`. Logically, it makes sense to combine these objects into one, so that they can be put into a `Map` for easier retrieval when connecting to a voice channel or when working with commands.
 
 ```java
-public final class GuildAudioManager {
+public class GuildAudioManager {
 
   private static final Map<Snowflake, GuildAudioManager> MANAGERS = new ConcurrentHashMap<>();
 
-  public static GuildAudioManager of(final Snowflake id) {
+  public static GuildAudioManager of(Snowflake id) {
     return MANAGERS.computeIfAbsent(id, ignored -> new GuildAudioManager());
   }
 
@@ -383,9 +391,9 @@ public final class GuildAudioManager {
 Finally, we need to connect to the voice channel. After connecting you are given a `VoiceConnection` object where you can utilize it later to disconnect from the voice channel by calling `VoiceConnection#disconnect`.
 
 ```java
-final VoiceChannel channel = ...
-final AudioProvider provider = GuildAudioManager.of(channel.getGuildId()).getProvider();
-final VoiceConnection connection = channel.join(spec -> spec.setProvider(provider)).block();
+VoiceChannel channel = ...
+AudioProvider provider = GuildAudioManager.of(channel.getGuildId()).getProvider();
+VoiceConnection connection = channel.join(spec -> spec.setProvider(provider)).block();
 
 // In the AudioLoadResultHandler, add AudioTrack instances to the AudioTrackScheduler (and send notifications to users)
 PLAYER_MANAGER.loadItem("https://www.youtube.com/watch?v=dQw4w9WgXcQ", new AudioLoadResultHandler() { /* overrides */ })
@@ -396,24 +404,24 @@ PLAYER_MANAGER.loadItem("https://www.youtube.com/watch?v=dQw4w9WgXcQ", new Audio
 Typically, after everyone has left a voice channel, the bot should disconnect automatically as users typically forget to disconnect the bot manually. This problem can be solved rather elegantly using a reactive approach over an imperative one as the example below demonstrates.
 
 ```java
-final VoiceChannel channel = ...
-final Mono<Void> onDisconnect = channel.join(spec -> { /* TODO Initialize */ })
+VoiceChannel channel = ...
+Mono<Void> onDisconnect = channel.join(spec -> { /* TODO Initialize */ })
   .flatMap(connection -> {
     // The bot itself has a VoiceState; 1 VoiceState signals bot is alone
-    final Publisher<Boolean> voiceStateCounter = channel.getVoiceStates()
+    Publisher<Boolean> voiceStateCounter = channel.getVoiceStates()
       .count()
       .map(count -> 1L == count);
 
     // After 10 seconds, check if the bot is alone. This is useful if
     // the bot joined alone, but no one else joined since connecting
-    final Mono<Void> onDelay = Mono.delay(Duration.ofSeconds(10L))
+    Mono<Void> onDelay = Mono.delay(Duration.ofSeconds(10L))
       .filterWhen(ignored -> voiceStateCounter)
       .switchIfEmpty(Mono.never())
       .then();
 
     // As people join and leave `channel`, check if the bot is alone.
     // Note the first filter is not strictly necessary, but it does prevent many unnecessary cache calls
-    final Mono<Void> onEvent = channel.getClient().getEventDispatcher().on(VoiceStateUpdateEvent.class)
+    Mono<Void> onEvent = channel.getClient().getEventDispatcher().on(VoiceStateUpdateEvent.class)
       .filter(event -> event.getOld().flatMap(VoiceState::getChannelId).map(channel.getId()::equals).orElse(false))
       .filterWhen(ignored -> voiceStateCounter)
       .next()

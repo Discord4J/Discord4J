@@ -26,8 +26,7 @@ import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-
-import static discord4j.core.spec.InternalSpecUtils.mapPossibleOverwrites;
+import java.util.stream.Collectors;
 
 @Value.Immutable(singleton = true)
 interface CategoryEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
@@ -43,7 +42,9 @@ interface CategoryEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
         return ChannelModifyRequest.builder()
                 .name(name())
                 .position(position())
-                .permissionOverwrites(mapPossibleOverwrites(permissionOverwrites()))
+                .permissionOverwrites(InternalSpecUtils.mapPossible(permissionOverwrites(), po -> po.stream()
+                        .map(PermissionOverwrite::getData)
+                        .collect(Collectors.toList())))
                 .build();
     }
 }

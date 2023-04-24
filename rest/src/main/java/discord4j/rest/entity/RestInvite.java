@@ -17,10 +17,15 @@
 
 package discord4j.rest.entity;
 
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.InviteData;
 import discord4j.rest.RestClient;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents a code that can be used to add a user to a guild.
@@ -55,12 +60,54 @@ public class RestInvite {
         return code;
     }
 
+    /**
+     * Retrieve the contents of this REST entity from Discord API.
+     *
+     * @return a Mono with the {@link InviteData} contents if successful, otherwise an error Mono
+     */
     public Mono<InviteData> getData() {
         return restClient.getInviteService().getInvite(code);
     }
 
+    /**
+     * Retrieve the contents of this REST entity from Discord API.
+     *
+     * @param withCounts whether the invite should contain approximate member counts
+     * @param withExpiration whether the invite should contain the expiration date
+     * @param guildScheduledEventId the guild scheduled event to include with the invite, can be {@code null}
+     * @return a Mono with the {@link InviteData} contents if successful, otherwise an error Mono
+     */
+    public Mono<InviteData> getData(boolean withCounts, boolean withExpiration,
+                                    @Nullable Snowflake guildScheduledEventId) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("with_counts", withCounts);
+        queryParams.put("with_expiration", withExpiration);
+        if (guildScheduledEventId != null) {
+            queryParams.put("guild_scheduled_event_id", guildScheduledEventId.asString());
+        }
+        return restClient.getInviteService().getInvite(code, queryParams);
+    }
+
+    /**
+     * Delete this resource from the Discord API.
+     *
+     * @param reason include a reason for audit log purposes, can be {@code null}
+     * @return a Mono with the {@link InviteData} contents if successful, otherwise an empty Mono
+     */
     public Mono<InviteData> delete(@Nullable String reason) {
         return restClient.getInviteService().deleteInvite(code, reason);
     }
 
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RestInvite that = (RestInvite) o;
+        return code.equals(that.code);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(code);
+    }
 }

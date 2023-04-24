@@ -17,7 +17,7 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.event.domain.interaction.InteractionCreateEvent;
+import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.FollowupMessageRequest;
@@ -80,8 +80,8 @@ interface InteractionFollowupCreateSpecGenerator extends Spec<MultipartRequest<F
                 .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
                 .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
                 .components(mapPossible(components(), components -> components.stream()
-                    .map(LayoutComponent::getData)
-                    .collect(Collectors.toList())))
+                        .map(LayoutComponent::getData)
+                        .collect(Collectors.toList())))
                 .flags(mapPossible(ephemeral(), eph -> eph ? Message.Flag.EPHEMERAL.getFlag() : 0))
                 .build();
         return MultipartRequest.ofRequestAndFiles(request, Stream.concat(files().stream(), fileSpoilers().stream())
@@ -94,7 +94,7 @@ interface InteractionFollowupCreateSpecGenerator extends Spec<MultipartRequest<F
 @Value.Immutable(builder = false)
 abstract class InteractionFollowupCreateMonoGenerator extends Mono<Message> implements InteractionFollowupCreateSpecGenerator {
 
-    abstract InteractionCreateEvent event();
+    abstract DeferrableInteractionEvent event();
 
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {

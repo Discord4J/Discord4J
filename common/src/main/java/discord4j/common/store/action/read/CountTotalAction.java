@@ -23,6 +23,7 @@ public class CountTotalAction implements StoreAction<Long> {
 
     public enum CountableEntity {
         CHANNELS,
+        STICKERS,
         EMOJIS,
         GUILDS,
         MEMBERS,

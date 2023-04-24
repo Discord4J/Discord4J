@@ -18,7 +18,7 @@
 package discord4j.core.spec;
 
 import discord4j.core.event.domain.interaction.ComponentInteractionEvent;
-import discord4j.core.event.domain.interaction.InteractionCreateEvent;
+import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.discordjson.possible.Possible;
@@ -46,7 +46,7 @@ interface InteractionCallbackSpecGenerator extends Spec<InteractionApplicationCo
 abstract class InteractionCallbackSpecDeferReplyMonoGenerator extends Mono<Void>
         implements InteractionCallbackSpecGenerator {
 
-    abstract InteractionCreateEvent event();
+    abstract DeferrableInteractionEvent event();
 
     @Override
     public void subscribe(CoreSubscriber<? super Void> actual) {

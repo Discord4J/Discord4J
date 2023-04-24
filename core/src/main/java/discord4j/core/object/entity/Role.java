@@ -24,10 +24,14 @@ import discord4j.core.spec.RoleEditMono;
 import discord4j.core.spec.RoleEditSpec;
 import discord4j.core.spec.legacy.LegacyRoleEditSpec;
 import discord4j.core.util.EntityUtil;
+import discord4j.core.util.ImageUtil;
+import discord4j.core.util.MentionUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.entity.RestRole;
 import discord4j.rest.util.Color;
+import discord4j.rest.util.Image;
 import discord4j.rest.util.PermissionSet;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -46,6 +50,9 @@ public final class Role implements Entity {
 
     /** The default {@link Color} of a {@code Role}. */
     public static final Color DEFAULT_COLOR = Color.of(0);
+
+    /** The path for role icon image URLs. */
+    private static final String ICON_IMAGE_PATH = "role-icons/%s/%s";
 
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
@@ -167,6 +174,26 @@ public final class Role implements Entity {
     }
 
     /**
+     * Gets the icon URL of the role, if present.
+     *
+     * @param format The format for the URL.
+     * @return The icon URL of the role, if present.
+     */
+    public Optional<String> getIconUrl(final Image.Format format) {
+        return Possible.flatOpt(data.icon())
+            .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
+    }
+
+    /**
+     * Gets the Unicode Emoji of the role, if present.
+     *
+     * @return The Unicode Emoji of the role, if present.
+     */
+    public Optional<String> getUnicodeEmoji() {
+        return Possible.flatOpt(data.unicodeEmoji());
+    }
+
+    /**
      * Gets the role name.
      *
      * @return The role name.
@@ -266,7 +293,10 @@ public final class Role implements Entity {
      * @return The <i>raw</i> mention.
      */
     public String getMention() {
-        return "<@&" + getId().asString() + ">";
+        if (isEveryone()) {
+            return MentionUtil.EVERYONE;
+        }
+        return MentionUtil.forRole(getId());
     }
 
     /**

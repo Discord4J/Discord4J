@@ -21,6 +21,7 @@ import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.store.api.object.ExactResultNotAvailableException;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -50,6 +51,12 @@ public class StoreEntityRetriever implements EntityRetriever {
     public Mono<Guild> getGuildById(Snowflake guildId) {
         return Mono.from(store.execute(ReadActions.getGuildById(guildId.asLong())))
                 .map(data -> new Guild(gateway, data));
+    }
+
+    @Override
+    public Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId) {
+        return Mono.from(store.execute(ReadActions.getStickerById(guildId.asLong(), stickerId.asLong())))
+            .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
     }
 
     @Override
@@ -113,7 +120,7 @@ public class StoreEntityRetriever implements EntityRetriever {
     public Flux<GuildChannel> getGuildChannels(Snowflake guildId) {
         return Flux.from(store.execute(ReadActions.getChannelsInGuild(guildId.asLong())))
                 .map(channelData -> EntityUtil.getChannel(gateway, channelData))
-                .cast(GuildChannel.class);
+                .ofType(GuildChannel.class);
     }
 
     @Override
@@ -126,5 +133,35 @@ public class StoreEntityRetriever implements EntityRetriever {
     public Flux<GuildEmoji> getGuildEmojis(Snowflake guildId) {
         return Flux.from(store.execute(ReadActions.getEmojisInGuild(guildId.asLong())))
                 .map(emojiData -> new GuildEmoji(gateway, emojiData, guildId.asLong()));
+    }
+
+    @Override
+    public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId) {
+        return Mono.from(store.execute(ReadActions.getStageInstanceByChannelId(channelId.asLong())))
+                .map(data -> new StageInstance(gateway, data));
+    }
+
+    @Override
+    public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
+        return Flux.from(store.execute(ReadActions.getStickersInGuild(guildId.asLong())))
+                .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
+    }
+
+    @Override
+    public Mono<ThreadMember> getThreadMemberById(Snowflake threadId, Snowflake userId) {
+        return Mono.from(store.execute(ReadActions.getThreadMemberById(threadId.asLong(), userId.asLong())))
+                .map(data -> new ThreadMember(gateway, data));
+    }
+
+    @Override
+    public Flux<ThreadMember> getThreadMembers(Snowflake threadId) {
+        return Flux.from(store.execute(ReadActions.getMembersInThread(threadId.asLong())))
+                .map(data -> new ThreadMember(gateway, data));
+    }
+
+    @Override
+    public Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId) {
+        return Flux.from(store.execute(ReadActions.getAutoModRulesInGuild(guildId.asLong())))
+            .map(data -> new AutoModRule(gateway, data));
     }
 }

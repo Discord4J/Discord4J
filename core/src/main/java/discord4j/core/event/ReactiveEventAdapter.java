@@ -18,6 +18,10 @@
 package discord4j.core.event;
 
 import discord4j.core.event.domain.*;
+import discord4j.core.event.domain.automod.AutoModActionExecutedEvent;
+import discord4j.core.event.domain.automod.AutoModRuleCreateEvent;
+import discord4j.core.event.domain.automod.AutoModRuleDeleteEvent;
+import discord4j.core.event.domain.automod.AutoModRuleUpdateEvent;
 import discord4j.core.event.domain.channel.*;
 import discord4j.core.event.domain.command.ApplicationCommandCreateEvent;
 import discord4j.core.event.domain.command.ApplicationCommandDeleteEvent;
@@ -32,6 +36,7 @@ import discord4j.core.event.domain.message.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.core.event.domain.role.RoleUpdateEvent;
+import discord4j.core.event.domain.thread.*;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -296,6 +301,28 @@ public abstract class ReactiveEventAdapter {
     }
 
     /**
+     * Invoked when a sticker is added, deleted or edited in a guild. The emojis set includes ALL stickers of the guild.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onStickersUpdate(StickersUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a new entry in Audit Log is created in a guild.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onAuditLogEntryCreate(AuditLogEntryCreateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
      * Invoked when a user is banned from a guild.
      *
      * @param event the event instance
@@ -508,6 +535,112 @@ public abstract class ReactiveEventAdapter {
     }
 
     /**
+     * Invoked when a thread is created, relevant to the current user, or when the current user is added to a thread.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onThreadChannelCreateEvent(ThreadChannelCreateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a thread relevant to the current user is deleted.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onThreadChannelDeleteEvent(ThreadChannelDeleteEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a thread relevant to the current user is updated.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onThreadChannelUpdateEvent(ThreadChannelUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when the current user gains access to a thread channel.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onThreadListSyncEvent(ThreadListSyncEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when anyone is added to or removed from a thread. If the current user does not have the
+     * {@link discord4j.gateway.intent.Intent#GUILD_MEMBERS} Gateway Intent, then this event will only be sent if the
+     * current user was added to or removed from the thread.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onThreadMembersUpdateEvent(ThreadMembersUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when the thread member object for the current user is updated. This event is documented for completeness,
+     * but unlikely to be used by most bots. For bots, this event largely is just a signal that you are a member of the
+     * thread.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onThreadMemberUpdateEvent(ThreadMemberUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a guild channel is created, but its {@link discord4j.core.object.entity.channel.Channel.Type type}
+     * is not supported or implemented.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onUnknownChannelCreate(UnknownChannelCreateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a guild channel is deleted, but its {@link discord4j.core.object.entity.channel.Channel.Type type}
+     * is not supported or implemented.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onUnknownChannelDelete(UnknownChannelDeleteEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a guild channel is updated, but its {@link discord4j.core.object.entity.channel.Channel.Type type}
+     * is not supported or implemented.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onUnknownChannelUpdate(UnknownChannelUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
      * Invoked when a user has started typing a message.
      *
      * @param event the event instance
@@ -693,6 +826,17 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    /**
+     * Invoked when a gateway session has been invalidated.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onSessionInvalidated(SessionInvalidatedEvent event) {
+        return Mono.empty();
+    }
+
     // ================= Interactions events ================= //
 
     /**
@@ -703,6 +847,16 @@ public abstract class ReactiveEventAdapter {
      * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
      */
     public Publisher<?> onInteractionCreate(InteractionCreateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a user starts a deferrable interaction
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onDeferrableInteraction(DeferrableInteractionEvent event) {
         return Mono.empty();
     }
 
@@ -783,6 +937,38 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    /**
+     * Invoked when a user starts an auto-complete interaction.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onAutoCompleteInteraction(AutoCompleteInteractionEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a user is typing a chat input command option that has auto-complete enabled.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onChatInputAutoCompleteInteraction(ChatInputAutoCompleteEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a user starts a modal supported interaction
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onModalSubmitInteraction(ModalSubmitInteractionEvent event) {
+        return Mono.empty();
+    }
+
     // ================= Integration related events ================= //
 
     /**
@@ -815,6 +1001,52 @@ public abstract class ReactiveEventAdapter {
      * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
      */
     public Publisher<?> onIntegrationDelete(IntegrationDeleteEvent event) {
+        return Mono.empty();
+    }
+
+    // ================= AutoMod related events ================= //
+
+    /**
+     * Invoked when an automod rule has been created.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onAutoModRuleCreate(AutoModRuleCreateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when an automod rule has been updated.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onAutoModRuleUpdate(AutoModRuleUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when an automod rule has been deleted.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onAutoModRuleDelete(AutoModRuleDeleteEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when an automod rule action has been executed.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onAutoModActionExecution(AutoModActionExecutedEvent event) {
         return Mono.empty();
     }
 
@@ -851,6 +1083,8 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof MemberUpdateEvent) compatibleHooks.add(onMemberUpdate((MemberUpdateEvent) event));
         if (event instanceof MemberChunkEvent) compatibleHooks.add(onMemberChunk((MemberChunkEvent) event));
         if (event instanceof EmojisUpdateEvent) compatibleHooks.add(onEmojisUpdate((EmojisUpdateEvent) event));
+        if (event instanceof StickersUpdateEvent) compatibleHooks.add(onStickersUpdate((StickersUpdateEvent) event));
+        if (event instanceof AuditLogEntryCreateEvent) compatibleHooks.add(onAuditLogEntryCreate((AuditLogEntryCreateEvent) event));
         if (event instanceof BanEvent) compatibleHooks.add(onBan((BanEvent) event));
         if (event instanceof UnbanEvent) compatibleHooks.add(onUnban((UnbanEvent) event));
         if (event instanceof IntegrationsUpdateEvent) compatibleHooks.add(onIntegrationsUpdate((IntegrationsUpdateEvent) event));
@@ -870,6 +1104,15 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof StoreChannelCreateEvent) compatibleHooks.add(onStoreChannelCreate((StoreChannelCreateEvent) event));
         if (event instanceof StoreChannelDeleteEvent) compatibleHooks.add(onStoreChannelDelete((StoreChannelDeleteEvent) event));
         if (event instanceof StoreChannelUpdateEvent) compatibleHooks.add(onStoreChannelUpdate((StoreChannelUpdateEvent) event));
+        if (event instanceof ThreadChannelCreateEvent) compatibleHooks.add(onThreadChannelCreateEvent((ThreadChannelCreateEvent) event));
+        if (event instanceof ThreadChannelDeleteEvent) compatibleHooks.add(onThreadChannelDeleteEvent((ThreadChannelDeleteEvent) event));
+        if (event instanceof ThreadChannelUpdateEvent) compatibleHooks.add(onThreadChannelUpdateEvent((ThreadChannelUpdateEvent) event));
+        if (event instanceof ThreadListSyncEvent) compatibleHooks.add(onThreadListSyncEvent((ThreadListSyncEvent) event));
+        if (event instanceof ThreadMembersUpdateEvent) compatibleHooks.add(onThreadMembersUpdateEvent((ThreadMembersUpdateEvent) event));
+        if (event instanceof ThreadMemberUpdateEvent) compatibleHooks.add(onThreadMemberUpdateEvent((ThreadMemberUpdateEvent) event));
+        if (event instanceof UnknownChannelCreateEvent) compatibleHooks.add(onUnknownChannelCreate((UnknownChannelCreateEvent) event));
+        if (event instanceof UnknownChannelDeleteEvent) compatibleHooks.add(onUnknownChannelDelete((UnknownChannelDeleteEvent) event));
+        if (event instanceof UnknownChannelUpdateEvent) compatibleHooks.add(onUnknownChannelUpdate((UnknownChannelUpdateEvent) event));
         if (event instanceof TypingStartEvent) compatibleHooks.add(onTypingStart((TypingStartEvent) event));
         if (event instanceof PinsUpdateEvent) compatibleHooks.add(onPinsUpdate((PinsUpdateEvent) event));
         if (event instanceof RoleCreateEvent) compatibleHooks.add(onRoleCreate((RoleCreateEvent) event));
@@ -886,6 +1129,7 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof DisconnectEvent) compatibleHooks.add(onDisconnect((DisconnectEvent) event));
         if (event instanceof ReconnectStartEvent) compatibleHooks.add(onReconnectStart((ReconnectStartEvent) event));
         if (event instanceof ReconnectFailEvent) compatibleHooks.add(onReconnectFail((ReconnectFailEvent) event));
+        if (event instanceof SessionInvalidatedEvent) compatibleHooks.add(onSessionInvalidated((SessionInvalidatedEvent) event));
         if (event instanceof ApplicationCommandInteractionEvent) compatibleHooks.add(onApplicationCommandInteraction((ApplicationCommandInteractionEvent) event));
         if (event instanceof ChatInputInteractionEvent) compatibleHooks.add(onChatInputInteraction((ChatInputInteractionEvent) event));
         if (event instanceof MessageInteractionEvent) compatibleHooks.add(onMessageInteraction((MessageInteractionEvent) event));
@@ -893,6 +1137,10 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof ButtonInteractionEvent) compatibleHooks.add(onButtonInteraction((ButtonInteractionEvent) event));
         if (event instanceof SelectMenuInteractionEvent) compatibleHooks.add(onSelectMenuInteraction((SelectMenuInteractionEvent) event));
         if (event instanceof ComponentInteractionEvent) compatibleHooks.add(onComponentInteraction((ComponentInteractionEvent) event));
+        if (event instanceof AutoCompleteInteractionEvent) compatibleHooks.add(onAutoCompleteInteraction((AutoCompleteInteractionEvent) event));
+        if (event instanceof ChatInputAutoCompleteEvent) compatibleHooks.add(onChatInputAutoCompleteInteraction((ChatInputAutoCompleteEvent) event));
+        if (event instanceof ModalSubmitInteractionEvent) compatibleHooks.add(onModalSubmitInteraction((ModalSubmitInteractionEvent) event));
+        if (event instanceof DeferrableInteractionEvent) compatibleHooks.add(onDeferrableInteraction((DeferrableInteractionEvent) event));
         if (event instanceof InteractionCreateEvent) compatibleHooks.add(onInteractionCreate((InteractionCreateEvent) event));
         if (event instanceof ApplicationCommandCreateEvent) compatibleHooks.add(onApplicationCommandCreate((ApplicationCommandCreateEvent) event));
         if (event instanceof ApplicationCommandUpdateEvent) compatibleHooks.add(onApplicationCommandUpdate((ApplicationCommandUpdateEvent) event));
@@ -900,6 +1148,10 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof IntegrationCreateEvent) compatibleHooks.add(onIntegrationCreate((IntegrationCreateEvent) event));
         if (event instanceof IntegrationUpdateEvent) compatibleHooks.add(onIntegrationUpdate((IntegrationUpdateEvent) event));
         if (event instanceof IntegrationDeleteEvent) compatibleHooks.add(onIntegrationDelete((IntegrationDeleteEvent) event));
+        if (event instanceof AutoModRuleCreateEvent) compatibleHooks.add(onAutoModRuleCreate((AutoModRuleCreateEvent) event));
+        if (event instanceof AutoModRuleUpdateEvent) compatibleHooks.add(onAutoModRuleUpdate((AutoModRuleUpdateEvent) event));
+        if (event instanceof AutoModRuleDeleteEvent) compatibleHooks.add(onAutoModRuleDelete((AutoModRuleDeleteEvent) event));
+        if (event instanceof AutoModActionExecutedEvent) compatibleHooks.add(onAutoModActionExecution((AutoModActionExecutedEvent) event));
         // @formatter:on
         return Mono.whenDelayError(compatibleHooks);
     }

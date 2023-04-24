@@ -126,7 +126,7 @@ public final class TweetNaclFast {
 
         public byte [] box(byte [] message, final int moff, final int mlen, byte [] theNonce) {
             if (!(message!=null && message.length>=(moff+mlen) &&
-                    theNonce!=null && theNonce.length==nonceLength))
+                theNonce!=null && theNonce.length==nonceLength))
                 return null;
 
             // prepare shared key
@@ -177,7 +177,7 @@ public final class TweetNaclFast {
          * */
         public byte [] open(byte [] box, byte [] theNonce) {
             if (!(box!=null &&
-                    theNonce!=null && theNonce.length==nonceLength))
+                theNonce!=null && theNonce.length==nonceLength))
                 return null;
 
             // prepare shared key
@@ -187,7 +187,7 @@ public final class TweetNaclFast {
         }
         public byte [] open(byte [] box, final int boxoff, byte [] theNonce) {
             if (!(box!=null && box.length>boxoff &&
-                    theNonce!=null && theNonce.length==nonceLength))
+                theNonce!=null && theNonce.length==nonceLength))
                 return null;
 
             // prepare shared key
@@ -197,7 +197,7 @@ public final class TweetNaclFast {
         }
         public byte [] open(byte [] box, final int boxoff, final int boxlen, byte [] theNonce) {
             if (!(box!=null && box.length>=(boxoff+boxlen) &&
-                    theNonce!=null && theNonce.length==nonceLength))
+                theNonce!=null && theNonce.length==nonceLength))
                 return null;
 
             // prepare shared key
@@ -237,7 +237,7 @@ public final class TweetNaclFast {
         public byte [] after(byte [] message, final int moff, final int mlen, byte [] theNonce) {
             // check message
             if (!(message!=null && message.length>=(moff+mlen) &&
-                    theNonce!=null && theNonce.length==nonceLength))
+                theNonce!=null && theNonce.length==nonceLength))
                 return null;
 
             // message buffer
@@ -472,7 +472,7 @@ public final class TweetNaclFast {
         public byte [] box(byte [] message, final int moff, final int mlen, byte [] theNonce) {
             // check message
             if (!(message!=null && message.length>=(moff+mlen) &&
-                    theNonce!=null && theNonce.length==nonceLength))
+                theNonce!=null && theNonce.length==nonceLength))
                 return null;
 
             // message buffer
@@ -535,7 +535,7 @@ public final class TweetNaclFast {
         public byte [] open(byte [] box, final int boxoff, final int boxlen, byte [] theNonce) {
             // check message
             if (!(box!=null && box.length>=(boxoff+boxlen) && boxlen>=boxzerobytesLength &&
-                    theNonce!=null && theNonce.length==nonceLength))
+                theNonce!=null && theNonce.length==nonceLength))
                 return null;
 
             // cipher buffer
@@ -908,34 +908,34 @@ public final class TweetNaclFast {
     }
 
     private static final long []  D = new long [] {
-            0x78a3, 0x1359, 0x4dca, 0x75eb,
-            0xd8ab, 0x4141, 0x0a4d, 0x0070,
-            0xe898, 0x7779, 0x4079, 0x8cc7,
-            0xfe73, 0x2b6f, 0x6cee, 0x5203
+        0x78a3, 0x1359, 0x4dca, 0x75eb,
+        0xd8ab, 0x4141, 0x0a4d, 0x0070,
+        0xe898, 0x7779, 0x4079, 0x8cc7,
+        0xfe73, 0x2b6f, 0x6cee, 0x5203
     };
     private static final long [] D2 = new long [] {
-            0xf159, 0x26b2, 0x9b94, 0xebd6,
-            0xb156, 0x8283, 0x149a, 0x00e0,
-            0xd130, 0xeef3, 0x80f2, 0x198e,
-            0xfce7, 0x56df, 0xd9dc, 0x2406
+        0xf159, 0x26b2, 0x9b94, 0xebd6,
+        0xb156, 0x8283, 0x149a, 0x00e0,
+        0xd130, 0xeef3, 0x80f2, 0x198e,
+        0xfce7, 0x56df, 0xd9dc, 0x2406
     };
     private static final long []  X = new long [] {
-            0xd51a, 0x8f25, 0x2d60, 0xc956,
-            0xa7b2, 0x9525, 0xc760, 0x692c,
-            0xdc5c, 0xfdd6, 0xe231, 0xc0a4,
-            0x53fe, 0xcd6e, 0x36d3, 0x2169
+        0xd51a, 0x8f25, 0x2d60, 0xc956,
+        0xa7b2, 0x9525, 0xc760, 0x692c,
+        0xdc5c, 0xfdd6, 0xe231, 0xc0a4,
+        0x53fe, 0xcd6e, 0x36d3, 0x2169
     };
     private static final long []  Y = new long [] {
-            0x6658, 0x6666, 0x6666, 0x6666,
-            0x6666, 0x6666, 0x6666, 0x6666,
-            0x6666, 0x6666, 0x6666, 0x6666,
-            0x6666, 0x6666, 0x6666, 0x6666
+        0x6658, 0x6666, 0x6666, 0x6666,
+        0x6666, 0x6666, 0x6666, 0x6666,
+        0x6666, 0x6666, 0x6666, 0x6666,
+        0x6666, 0x6666, 0x6666, 0x6666
     };
     private static final long []  I = new long [] {
-            0xa0b0, 0x4a0e, 0x1b27, 0xc4ee,
-            0xe478, 0xad2f, 0x1806, 0x2f43,
-            0xd7a7, 0x3dfb, 0x0099, 0x2b4d,
-            0xdf0b, 0x4fc1, 0x2480, 0x2b83
+        0xa0b0, 0x4a0e, 0x1b27, 0xc4ee,
+        0xe478, 0xad2f, 0x1806, 0x2f43,
+        0xd7a7, 0x3dfb, 0x0099, 0x2b4d,
+        0xdf0b, 0x4fc1, 0x2480, 0x2b83
     };
 
     private static void ts64(byte [] x, final int xoff, long u)
@@ -954,9 +954,9 @@ public final class TweetNaclFast {
     }
 
     private static int vn(
-            byte [] x, final int xoff,
-            byte [] y, final int yoff,
-            int n)
+        byte [] x, final int xoff,
+        byte [] y, final int yoff,
+        int n)
     {
         int i,d = 0;
         for (i = 0; i < n; i ++) d |= (x[i+xoff]^y[i+yoff]) & 0xff;
@@ -964,8 +964,8 @@ public final class TweetNaclFast {
     }
 
     private static int crypto_verify_16(
-            byte [] x, final int xoff,
-            byte [] y, final int yoff)
+        byte [] x, final int xoff,
+        byte [] y, final int yoff)
     {
         return vn(x,xoff,y,yoff,16);
     }
@@ -975,8 +975,8 @@ public final class TweetNaclFast {
     }
 
     private static int crypto_verify_32(
-            byte [] x, final int xoff,
-            byte [] y, final int yoff)
+        byte [] x, final int xoff,
+        byte [] y, final int yoff)
     {
         return vn(x,xoff,y,yoff,32);
     }
@@ -987,25 +987,25 @@ public final class TweetNaclFast {
 
     private static void core_salsa20(byte [] o, byte [] p, byte [] k, byte [] c) {
         int     j0  = c[ 0] & 0xff | (c[ 1] & 0xff)<<8 | (c[ 2] & 0xff)<<16 | (c[ 3] & 0xff)<<24,
-                j1  = k[ 0] & 0xff | (k[ 1] & 0xff)<<8 | (k[ 2] & 0xff)<<16 | (k[ 3] & 0xff)<<24,
-                j2  = k[ 4] & 0xff | (k[ 5] & 0xff)<<8 | (k[ 6] & 0xff)<<16 | (k[ 7] & 0xff)<<24,
-                j3  = k[ 8] & 0xff | (k[ 9] & 0xff)<<8 | (k[10] & 0xff)<<16 | (k[11] & 0xff)<<24,
-                j4  = k[12] & 0xff | (k[13] & 0xff)<<8 | (k[14] & 0xff)<<16 | (k[15] & 0xff)<<24,
-                j5  = c[ 4] & 0xff | (c[ 5] & 0xff)<<8 | (c[ 6] & 0xff)<<16 | (c[ 7] & 0xff)<<24,
-                j6  = p[ 0] & 0xff | (p[ 1] & 0xff)<<8 | (p[ 2] & 0xff)<<16 | (p[ 3] & 0xff)<<24,
-                j7  = p[ 4] & 0xff | (p[ 5] & 0xff)<<8 | (p[ 6] & 0xff)<<16 | (p[ 7] & 0xff)<<24,
-                j8  = p[ 8] & 0xff | (p[ 9] & 0xff)<<8 | (p[10] & 0xff)<<16 | (p[11] & 0xff)<<24,
-                j9  = p[12] & 0xff | (p[13] & 0xff)<<8 | (p[14] & 0xff)<<16 | (p[15] & 0xff)<<24,
-                j10 = c[ 8] & 0xff | (c[ 9] & 0xff)<<8 | (c[10] & 0xff)<<16 | (c[11] & 0xff)<<24,
-                j11 = k[16] & 0xff | (k[17] & 0xff)<<8 | (k[18] & 0xff)<<16 | (k[19] & 0xff)<<24,
-                j12 = k[20] & 0xff | (k[21] & 0xff)<<8 | (k[22] & 0xff)<<16 | (k[23] & 0xff)<<24,
-                j13 = k[24] & 0xff | (k[25] & 0xff)<<8 | (k[26] & 0xff)<<16 | (k[27] & 0xff)<<24,
-                j14 = k[28] & 0xff | (k[29] & 0xff)<<8 | (k[30] & 0xff)<<16 | (k[31] & 0xff)<<24,
-                j15 = c[12] & 0xff | (c[13] & 0xff)<<8 | (c[14] & 0xff)<<16 | (c[15] & 0xff)<<24;
+            j1  = k[ 0] & 0xff | (k[ 1] & 0xff)<<8 | (k[ 2] & 0xff)<<16 | (k[ 3] & 0xff)<<24,
+            j2  = k[ 4] & 0xff | (k[ 5] & 0xff)<<8 | (k[ 6] & 0xff)<<16 | (k[ 7] & 0xff)<<24,
+            j3  = k[ 8] & 0xff | (k[ 9] & 0xff)<<8 | (k[10] & 0xff)<<16 | (k[11] & 0xff)<<24,
+            j4  = k[12] & 0xff | (k[13] & 0xff)<<8 | (k[14] & 0xff)<<16 | (k[15] & 0xff)<<24,
+            j5  = c[ 4] & 0xff | (c[ 5] & 0xff)<<8 | (c[ 6] & 0xff)<<16 | (c[ 7] & 0xff)<<24,
+            j6  = p[ 0] & 0xff | (p[ 1] & 0xff)<<8 | (p[ 2] & 0xff)<<16 | (p[ 3] & 0xff)<<24,
+            j7  = p[ 4] & 0xff | (p[ 5] & 0xff)<<8 | (p[ 6] & 0xff)<<16 | (p[ 7] & 0xff)<<24,
+            j8  = p[ 8] & 0xff | (p[ 9] & 0xff)<<8 | (p[10] & 0xff)<<16 | (p[11] & 0xff)<<24,
+            j9  = p[12] & 0xff | (p[13] & 0xff)<<8 | (p[14] & 0xff)<<16 | (p[15] & 0xff)<<24,
+            j10 = c[ 8] & 0xff | (c[ 9] & 0xff)<<8 | (c[10] & 0xff)<<16 | (c[11] & 0xff)<<24,
+            j11 = k[16] & 0xff | (k[17] & 0xff)<<8 | (k[18] & 0xff)<<16 | (k[19] & 0xff)<<24,
+            j12 = k[20] & 0xff | (k[21] & 0xff)<<8 | (k[22] & 0xff)<<16 | (k[23] & 0xff)<<24,
+            j13 = k[24] & 0xff | (k[25] & 0xff)<<8 | (k[26] & 0xff)<<16 | (k[27] & 0xff)<<24,
+            j14 = k[28] & 0xff | (k[29] & 0xff)<<8 | (k[30] & 0xff)<<16 | (k[31] & 0xff)<<24,
+            j15 = c[12] & 0xff | (c[13] & 0xff)<<8 | (c[14] & 0xff)<<16 | (c[15] & 0xff)<<24;
 
         int     x0 = j0, x1 = j1, x2 = j2, x3 = j3, x4 = j4, x5 = j5, x6 = j6, x7 = j7,
-                x8 = j8, x9 = j9, x10 = j10, x11 = j11, x12 = j12, x13 = j13, x14 = j14,
-                x15 = j15, u;
+            x8 = j8, x9 = j9, x10 = j10, x11 = j11, x12 = j12, x13 = j13, x14 = j14,
+            x15 = j15, u;
 
         for (int i = 0; i < 20; i += 2) {
             u = x0 + x12 | 0;
@@ -1176,7 +1176,7 @@ public final class TweetNaclFast {
         o[61] = (byte) (x15 >>>  8 & 0xff);
         o[62] = (byte) (x15 >>> 16 & 0xff);
         o[63] = (byte) (x15 >>> 24 & 0xff);
-		
+
 		/*String dbgt = "";
 		for (int dbg = 0; dbg < o.length; dbg ++) dbgt += " "+o[dbg];
 		Log.d(TAG, "core_salsa20 -> "+dbgt);
@@ -1185,25 +1185,25 @@ public final class TweetNaclFast {
 
     private static void core_hsalsa20(byte [] o, byte [] p, byte [] k, byte [] c) {
         int     j0  = c[ 0] & 0xff | (c[ 1] & 0xff)<<8 | (c[ 2] & 0xff)<<16 | (c[ 3] & 0xff)<<24,
-                j1  = k[ 0] & 0xff | (k[ 1] & 0xff)<<8 | (k[ 2] & 0xff)<<16 | (k[ 3] & 0xff)<<24,
-                j2  = k[ 4] & 0xff | (k[ 5] & 0xff)<<8 | (k[ 6] & 0xff)<<16 | (k[ 7] & 0xff)<<24,
-                j3  = k[ 8] & 0xff | (k[ 9] & 0xff)<<8 | (k[10] & 0xff)<<16 | (k[11] & 0xff)<<24,
-                j4  = k[12] & 0xff | (k[13] & 0xff)<<8 | (k[14] & 0xff)<<16 | (k[15] & 0xff)<<24,
-                j5  = c[ 4] & 0xff | (c[ 5] & 0xff)<<8 | (c[ 6] & 0xff)<<16 | (c[ 7] & 0xff)<<24,
-                j6  = p[ 0] & 0xff | (p[ 1] & 0xff)<<8 | (p[ 2] & 0xff)<<16 | (p[ 3] & 0xff)<<24,
-                j7  = p[ 4] & 0xff | (p[ 5] & 0xff)<<8 | (p[ 6] & 0xff)<<16 | (p[ 7] & 0xff)<<24,
-                j8  = p[ 8] & 0xff | (p[ 9] & 0xff)<<8 | (p[10] & 0xff)<<16 | (p[11] & 0xff)<<24,
-                j9  = p[12] & 0xff | (p[13] & 0xff)<<8 | (p[14] & 0xff)<<16 | (p[15] & 0xff)<<24,
-                j10 = c[ 8] & 0xff | (c[ 9] & 0xff)<<8 | (c[10] & 0xff)<<16 | (c[11] & 0xff)<<24,
-                j11 = k[16] & 0xff | (k[17] & 0xff)<<8 | (k[18] & 0xff)<<16 | (k[19] & 0xff)<<24,
-                j12 = k[20] & 0xff | (k[21] & 0xff)<<8 | (k[22] & 0xff)<<16 | (k[23] & 0xff)<<24,
-                j13 = k[24] & 0xff | (k[25] & 0xff)<<8 | (k[26] & 0xff)<<16 | (k[27] & 0xff)<<24,
-                j14 = k[28] & 0xff | (k[29] & 0xff)<<8 | (k[30] & 0xff)<<16 | (k[31] & 0xff)<<24,
-                j15 = c[12] & 0xff | (c[13] & 0xff)<<8 | (c[14] & 0xff)<<16 | (c[15] & 0xff)<<24;
+            j1  = k[ 0] & 0xff | (k[ 1] & 0xff)<<8 | (k[ 2] & 0xff)<<16 | (k[ 3] & 0xff)<<24,
+            j2  = k[ 4] & 0xff | (k[ 5] & 0xff)<<8 | (k[ 6] & 0xff)<<16 | (k[ 7] & 0xff)<<24,
+            j3  = k[ 8] & 0xff | (k[ 9] & 0xff)<<8 | (k[10] & 0xff)<<16 | (k[11] & 0xff)<<24,
+            j4  = k[12] & 0xff | (k[13] & 0xff)<<8 | (k[14] & 0xff)<<16 | (k[15] & 0xff)<<24,
+            j5  = c[ 4] & 0xff | (c[ 5] & 0xff)<<8 | (c[ 6] & 0xff)<<16 | (c[ 7] & 0xff)<<24,
+            j6  = p[ 0] & 0xff | (p[ 1] & 0xff)<<8 | (p[ 2] & 0xff)<<16 | (p[ 3] & 0xff)<<24,
+            j7  = p[ 4] & 0xff | (p[ 5] & 0xff)<<8 | (p[ 6] & 0xff)<<16 | (p[ 7] & 0xff)<<24,
+            j8  = p[ 8] & 0xff | (p[ 9] & 0xff)<<8 | (p[10] & 0xff)<<16 | (p[11] & 0xff)<<24,
+            j9  = p[12] & 0xff | (p[13] & 0xff)<<8 | (p[14] & 0xff)<<16 | (p[15] & 0xff)<<24,
+            j10 = c[ 8] & 0xff | (c[ 9] & 0xff)<<8 | (c[10] & 0xff)<<16 | (c[11] & 0xff)<<24,
+            j11 = k[16] & 0xff | (k[17] & 0xff)<<8 | (k[18] & 0xff)<<16 | (k[19] & 0xff)<<24,
+            j12 = k[20] & 0xff | (k[21] & 0xff)<<8 | (k[22] & 0xff)<<16 | (k[23] & 0xff)<<24,
+            j13 = k[24] & 0xff | (k[25] & 0xff)<<8 | (k[26] & 0xff)<<16 | (k[27] & 0xff)<<24,
+            j14 = k[28] & 0xff | (k[29] & 0xff)<<8 | (k[30] & 0xff)<<16 | (k[31] & 0xff)<<24,
+            j15 = c[12] & 0xff | (c[13] & 0xff)<<8 | (c[14] & 0xff)<<16 | (c[15] & 0xff)<<24;
 
         int     x0 = j0, x1 = j1, x2 = j2, x3 = j3, x4 = j4, x5 = j5, x6 = j6, x7 = j7,
-                x8 = j8, x9 = j9, x10 = j10, x11 = j11, x12 = j12, x13 = j13, x14 = j14,
-                x15 = j15, u;
+            x8 = j8, x9 = j9, x10 = j10, x11 = j11, x12 = j12, x13 = j13, x14 = j14,
+            x15 = j15, u;
 
         for (int i = 0; i < 20; i += 2) {
             u = x0 + x12 | 0;
@@ -1352,7 +1352,7 @@ public final class TweetNaclFast {
 
     // "expand 32-byte k"
     private static final byte[] sigma = {101, 120, 112, 97, 110, 100, 32, 51, 50, 45, 98, 121, 116, 101, 32, 107};
-	
+
 	/*static {
 		try {
 			sigma = "expand 32-byte k".getBytes("utf-8");
@@ -1431,11 +1431,11 @@ public final class TweetNaclFast {
 
     public static int crypto_stream_xor(byte [] c,int cpos, byte [] m,int mpos, long d, byte [] n, byte [] k) {
         byte [] s = new byte[32];
-		
+
 		/*String dbgt = "";
 		for (int dbg = 0; dbg < n.length; dbg ++) dbgt += " "+n[dbg];
 		Log.d(TAG, "crypto_stream_xor, nonce -> "+dbgt);
-		
+
 		dbgt = "";
 		for (int dbg = 0; dbg < k.length; dbg ++) dbgt += " "+k[dbg];
 		Log.d(TAG, "crypto_stream_xor, shk -> "+dbgt);
@@ -1497,26 +1497,26 @@ public final class TweetNaclFast {
             int d0, d1, d2, d3, d4, d5, d6, d7, d8, d9;
 
             int     h0 = this.h[0],
-                    h1 = this.h[1],
-                    h2 = this.h[2],
-                    h3 = this.h[3],
-                    h4 = this.h[4],
-                    h5 = this.h[5],
-                    h6 = this.h[6],
-                    h7 = this.h[7],
-                    h8 = this.h[8],
-                    h9 = this.h[9];
+                h1 = this.h[1],
+                h2 = this.h[2],
+                h3 = this.h[3],
+                h4 = this.h[4],
+                h5 = this.h[5],
+                h6 = this.h[6],
+                h7 = this.h[7],
+                h8 = this.h[8],
+                h9 = this.h[9];
 
             int     r0 = this.r[0],
-                    r1 = this.r[1],
-                    r2 = this.r[2],
-                    r3 = this.r[3],
-                    r4 = this.r[4],
-                    r5 = this.r[5],
-                    r6 = this.r[6],
-                    r7 = this.r[7],
-                    r8 = this.r[8],
-                    r9 = this.r[9];
+                r1 = this.r[1],
+                r2 = this.r[2],
+                r3 = this.r[3],
+                r4 = this.r[4],
+                r5 = this.r[5],
+                r6 = this.r[6],
+                r7 = this.r[7],
+                r8 = this.r[8],
+                r9 = this.r[9];
 
             while (bytes >= 16) {
                 t0 = m[mpos+ 0] & 0xff | (m[mpos+ 1] & 0xff) << 8; h0 += ( t0                     ) & 0x1fff;
@@ -1746,9 +1746,9 @@ public final class TweetNaclFast {
                         /*
                         backport from tweetnacl-fast.js https://github.com/dchest/tweetnacl-js/releases/tag/v0.14.3
                         <<<
-                        "The issue was not properly detecting if st->h was >= 2^130 - 5, 
+                        "The issue was not properly detecting if st->h was >= 2^130 - 5,
                         coupled with [testing mistake] not catching the failure.
-                        The chance of the bug affecting anything in the real world is essentially zero luckily, 
+                        The chance of the bug affecting anything in the real world is essentially zero luckily,
                         but it's good to have it fixed."
                         >>>
                         */
@@ -1834,15 +1834,15 @@ public final class TweetNaclFast {
     }
 
     private static int crypto_onetimeauth(
-            byte[] out,final int outpos,
-            byte[] m,final int mpos,
-            int n,
-            byte [] k)
+        byte[] out,final int outpos,
+        byte[] m,final int mpos,
+        int n,
+        byte [] k)
     {
         poly1305 s = new poly1305(k);
         s.update(m, mpos, n);
         s.finish(out, outpos);
-		
+
 		/*String dbgt = "";
 		for (int dbg = 0; dbg < out.length-outpos; dbg ++) dbgt += " "+out[dbg+outpos];
 		Log.d(TAG, "crypto_onetimeauth -> "+dbgt);
@@ -1855,10 +1855,10 @@ public final class TweetNaclFast {
     }
 
     private static int crypto_onetimeauth_verify(
-            byte[] h,final int hoff,
-            byte[] m,final int moff,
-            int /*long*/ n,
-            byte [] k)
+        byte[] h,final int hoff,
+        byte[] m,final int moff,
+        int /*long*/ n,
+        byte [] k)
     {
         byte [] x = new byte[16];
         crypto_onetimeauth(x,0,m,moff,n,k);
@@ -1912,16 +1912,16 @@ public final class TweetNaclFast {
     }
 
     private static void sel25519(
-            long[] p,
-            long[] q,
-            int b)
+        long[] p,
+        long[] q,
+        int b)
     {
         sel25519(p,0, q,0, b);
     }
     private static void sel25519(
-            long[] p,final int poff,
-            long[] q,final int qoff,
-            int b)
+        long[] p,final int poff,
+        long[] q,final int qoff,
+        int b)
     {
         long t, c = ~(b-1);
         for (int i = 0; i < 16; i++) {
@@ -1986,70 +1986,70 @@ public final class TweetNaclFast {
     }
 
     private static void A(
-            long [] o,
-            long [] a,
-            long [] b)
+        long [] o,
+        long [] a,
+        long [] b)
     {
         A(o,0, a,0, b,0);
     }
     private static void A(
-            long [] o,final int ooff,
-            long [] a,final int aoff,
-            long [] b,final int boff)
+        long [] o,final int ooff,
+        long [] a,final int aoff,
+        long [] b,final int boff)
     {
         int i;
         for (i = 0; i < 16; i ++) o[i+ooff] = a[i+aoff] + b[i+boff];
     }
 
     private static void Z(
-            long [] o,
-            long [] a,
-            long [] b)
+        long [] o,
+        long [] a,
+        long [] b)
     {
         Z(o,0, a,0, b,0);
     }
     private static void Z(
-            long [] o,final int ooff,
-            long [] a,final int aoff,
-            long [] b,final int boff)
+        long [] o,final int ooff,
+        long [] a,final int aoff,
+        long [] b,final int boff)
     {
         int i;
         for (i = 0; i < 16; i ++) o[i+ooff] = a[i+aoff] - b[i+boff];
     }
 
     private static void M(
-            long [] o,
-            long [] a,
-            long [] b)
+        long [] o,
+        long [] a,
+        long [] b)
     {
         M(o,0, a,0, b,0);
     }
     private static void M(
-            long [] o,final int ooff,
-            long [] a,final int aoff,
-            long [] b,final int boff)
+        long [] o,final int ooff,
+        long [] a,final int aoff,
+        long [] b,final int boff)
     {
         long v, c,
-                t0 = 0,  t1 = 0,  t2 = 0,  t3 = 0,  t4 = 0,  t5 = 0,  t6 = 0,  t7 = 0,
-                t8 = 0,  t9 = 0, t10 = 0, t11 = 0, t12 = 0, t13 = 0, t14 = 0, t15 = 0,
-                t16 = 0, t17 = 0, t18 = 0, t19 = 0, t20 = 0, t21 = 0, t22 = 0, t23 = 0,
-                t24 = 0, t25 = 0, t26 = 0, t27 = 0, t28 = 0, t29 = 0, t30 = 0,
-                b0 = b[0 +boff],
-                b1 = b[1 +boff],
-                b2 = b[2 +boff],
-                b3 = b[3 +boff],
-                b4 = b[4 +boff],
-                b5 = b[5 +boff],
-                b6 = b[6 +boff],
-                b7 = b[7 +boff],
-                b8 = b[8 +boff],
-                b9 = b[9 +boff],
-                b10 = b[10 +boff],
-                b11 = b[11 +boff],
-                b12 = b[12 +boff],
-                b13 = b[13 +boff],
-                b14 = b[14 +boff],
-                b15 = b[15 +boff];
+            t0 = 0,  t1 = 0,  t2 = 0,  t3 = 0,  t4 = 0,  t5 = 0,  t6 = 0,  t7 = 0,
+            t8 = 0,  t9 = 0, t10 = 0, t11 = 0, t12 = 0, t13 = 0, t14 = 0, t15 = 0,
+            t16 = 0, t17 = 0, t18 = 0, t19 = 0, t20 = 0, t21 = 0, t22 = 0, t23 = 0,
+            t24 = 0, t25 = 0, t26 = 0, t27 = 0, t28 = 0, t29 = 0, t30 = 0,
+            b0 = b[0 +boff],
+            b1 = b[1 +boff],
+            b2 = b[2 +boff],
+            b3 = b[3 +boff],
+            b4 = b[4 +boff],
+            b5 = b[5 +boff],
+            b6 = b[6 +boff],
+            b7 = b[7 +boff],
+            b8 = b[8 +boff],
+            b9 = b[9 +boff],
+            b10 = b[10 +boff],
+            b11 = b[11 +boff],
+            b12 = b[12 +boff],
+            b13 = b[13 +boff],
+            b14 = b[14 +boff],
+            b15 = b[15 +boff];
 
         v = a[0 +aoff];
         t0 += v * b0;
@@ -2400,21 +2400,21 @@ public final class TweetNaclFast {
     }
 
     private static void S(
-            long [] o,
-            long [] a)
+        long [] o,
+        long [] a)
     {
         S(o,0, a,0);
     }
     private static void S(
-            long [] o,final int ooff,
-            long [] a,final int aoff)
+        long [] o,final int ooff,
+        long [] a,final int aoff)
     {
         M(o,ooff, a,aoff, a,aoff);
     }
 
     private static void inv25519(
-            long [] o,final int ooff,
-            long [] i,final int ioff)
+        long [] o,final int ooff,
+        long [] i,final int ioff)
     {
         long [] c = new long[16];
         int a;
@@ -2447,7 +2447,7 @@ public final class TweetNaclFast {
         long [] x = new long[80];
         int r, i;
         long [] a = new long[16], b = new long[16], c = new long[16],
-                d = new long[16], e = new long[16], f = new long[16];
+            d = new long[16], e = new long[16], f = new long[16];
         for (i = 0; i < 31; i++) z[i] = n[i];
         z[31]=(byte) (((n[31]&127)|64) & 0xff);
         z[0]&=248;
@@ -2514,7 +2514,7 @@ public final class TweetNaclFast {
 		/*String dbgt = "";
 		for (int dbg = 0; dbg < s.length; dbg ++) dbgt += " "+s[dbg];
 		Log.d(TAG, "crypto_box_beforenm -> "+dbgt);
-		
+
 	    dbgt = "";
 		for (int dbg = 0; dbg < x.length; dbg ++) dbgt += " "+x[dbg];
 		Log.d(TAG, "crypto_box_beforenm, x -> "+dbgt);
@@ -2555,26 +2555,26 @@ public final class TweetNaclFast {
     }
 
     private static final long K[] = {
-            0x428a2f98d728ae22L, 0x7137449123ef65cdL, 0xb5c0fbcfec4d3b2fL, 0xe9b5dba58189dbbcL,
-            0x3956c25bf348b538L, 0x59f111f1b605d019L, 0x923f82a4af194f9bL, 0xab1c5ed5da6d8118L,
-            0xd807aa98a3030242L, 0x12835b0145706fbeL, 0x243185be4ee4b28cL, 0x550c7dc3d5ffb4e2L,
-            0x72be5d74f27b896fL, 0x80deb1fe3b1696b1L, 0x9bdc06a725c71235L, 0xc19bf174cf692694L,
-            0xe49b69c19ef14ad2L, 0xefbe4786384f25e3L, 0x0fc19dc68b8cd5b5L, 0x240ca1cc77ac9c65L,
-            0x2de92c6f592b0275L, 0x4a7484aa6ea6e483L, 0x5cb0a9dcbd41fbd4L, 0x76f988da831153b5L,
-            0x983e5152ee66dfabL, 0xa831c66d2db43210L, 0xb00327c898fb213fL, 0xbf597fc7beef0ee4L,
-            0xc6e00bf33da88fc2L, 0xd5a79147930aa725L, 0x06ca6351e003826fL, 0x142929670a0e6e70L,
-            0x27b70a8546d22ffcL, 0x2e1b21385c26c926L, 0x4d2c6dfc5ac42aedL, 0x53380d139d95b3dfL,
-            0x650a73548baf63deL, 0x766a0abb3c77b2a8L, 0x81c2c92e47edaee6L, 0x92722c851482353bL,
-            0xa2bfe8a14cf10364L, 0xa81a664bbc423001L, 0xc24b8b70d0f89791L, 0xc76c51a30654be30L,
-            0xd192e819d6ef5218L, 0xd69906245565a910L, 0xf40e35855771202aL, 0x106aa07032bbd1b8L,
-            0x19a4c116b8d2d0c8L, 0x1e376c085141ab53L, 0x2748774cdf8eeb99L, 0x34b0bcb5e19b48a8L,
-            0x391c0cb3c5c95a63L, 0x4ed8aa4ae3418acbL, 0x5b9cca4f7763e373L, 0x682e6ff3d6b2b8a3L,
-            0x748f82ee5defb2fcL, 0x78a5636f43172f60L, 0x84c87814a1f0ab72L, 0x8cc702081a6439ecL,
-            0x90befffa23631e28L, 0xa4506cebde82bde9L, 0xbef9a3f7b2c67915L, 0xc67178f2e372532bL,
-            0xca273eceea26619cL, 0xd186b8c721c0c207L, 0xeada7dd6cde0eb1eL, 0xf57d4f7fee6ed178L,
-            0x06f067aa72176fbaL, 0x0a637dc5a2c898a6L, 0x113f9804bef90daeL, 0x1b710b35131c471bL,
-            0x28db77f523047d84L, 0x32caab7b40c72493L, 0x3c9ebe0a15c9bebcL, 0x431d67c49c100d4cL,
-            0x4cc5d4becb3e42b6L, 0x597f299cfc657e2aL, 0x5fcb6fab3ad6faecL, 0x6c44198c4a475817L
+        0x428a2f98d728ae22L, 0x7137449123ef65cdL, 0xb5c0fbcfec4d3b2fL, 0xe9b5dba58189dbbcL,
+        0x3956c25bf348b538L, 0x59f111f1b605d019L, 0x923f82a4af194f9bL, 0xab1c5ed5da6d8118L,
+        0xd807aa98a3030242L, 0x12835b0145706fbeL, 0x243185be4ee4b28cL, 0x550c7dc3d5ffb4e2L,
+        0x72be5d74f27b896fL, 0x80deb1fe3b1696b1L, 0x9bdc06a725c71235L, 0xc19bf174cf692694L,
+        0xe49b69c19ef14ad2L, 0xefbe4786384f25e3L, 0x0fc19dc68b8cd5b5L, 0x240ca1cc77ac9c65L,
+        0x2de92c6f592b0275L, 0x4a7484aa6ea6e483L, 0x5cb0a9dcbd41fbd4L, 0x76f988da831153b5L,
+        0x983e5152ee66dfabL, 0xa831c66d2db43210L, 0xb00327c898fb213fL, 0xbf597fc7beef0ee4L,
+        0xc6e00bf33da88fc2L, 0xd5a79147930aa725L, 0x06ca6351e003826fL, 0x142929670a0e6e70L,
+        0x27b70a8546d22ffcL, 0x2e1b21385c26c926L, 0x4d2c6dfc5ac42aedL, 0x53380d139d95b3dfL,
+        0x650a73548baf63deL, 0x766a0abb3c77b2a8L, 0x81c2c92e47edaee6L, 0x92722c851482353bL,
+        0xa2bfe8a14cf10364L, 0xa81a664bbc423001L, 0xc24b8b70d0f89791L, 0xc76c51a30654be30L,
+        0xd192e819d6ef5218L, 0xd69906245565a910L, 0xf40e35855771202aL, 0x106aa07032bbd1b8L,
+        0x19a4c116b8d2d0c8L, 0x1e376c085141ab53L, 0x2748774cdf8eeb99L, 0x34b0bcb5e19b48a8L,
+        0x391c0cb3c5c95a63L, 0x4ed8aa4ae3418acbL, 0x5b9cca4f7763e373L, 0x682e6ff3d6b2b8a3L,
+        0x748f82ee5defb2fcL, 0x78a5636f43172f60L, 0x84c87814a1f0ab72L, 0x8cc702081a6439ecL,
+        0x90befffa23631e28L, 0xa4506cebde82bde9L, 0xbef9a3f7b2c67915L, 0xc67178f2e372532bL,
+        0xca273eceea26619cL, 0xd186b8c721c0c207L, 0xeada7dd6cde0eb1eL, 0xf57d4f7fee6ed178L,
+        0x06f067aa72176fbaL, 0x0a637dc5a2c898a6L, 0x113f9804bef90daeL, 0x1b710b35131c471bL,
+        0x28db77f523047d84L, 0x32caab7b40c72493L, 0x3c9ebe0a15c9bebcL, 0x431d67c49c100d4cL,
+        0x4cc5d4becb3e42b6L, 0x597f299cfc657e2aL, 0x5fcb6fab3ad6faecL, 0x6c44198c4a475817L
     };
 
     private static int crypto_hashblocks_hl(int [] hh,int [] hl, byte [] m,final int moff, int n) {
@@ -2585,26 +2585,26 @@ public final class TweetNaclFast {
 
         int []  wh = new int[16], wl = new int[16];
         int     bh0, bh1, bh2, bh3, bh4, bh5, bh6, bh7,
-                bl0, bl1, bl2, bl3, bl4, bl5, bl6, bl7,
-                th, tl, h, l, i, j, a, b, c, d;
+            bl0, bl1, bl2, bl3, bl4, bl5, bl6, bl7,
+            th, tl, h, l, i, j, a, b, c, d;
 
         int     ah0 = hh[0],
-                ah1 = hh[1],
-                ah2 = hh[2],
-                ah3 = hh[3],
-                ah4 = hh[4],
-                ah5 = hh[5],
-                ah6 = hh[6],
-                ah7 = hh[7],
+            ah1 = hh[1],
+            ah2 = hh[2],
+            ah3 = hh[3],
+            ah4 = hh[4],
+            ah5 = hh[5],
+            ah6 = hh[6],
+            ah7 = hh[7],
 
-                al0 = hl[0],
-                al1 = hl[1],
-                al2 = hl[2],
-                al3 = hl[3],
-                al4 = hl[4],
-                al5 = hl[5],
-                al6 = hl[6],
-                al7 = hl[7];
+            al0 = hl[0],
+            al1 = hl[1],
+            al2 = hl[2],
+            al3 = hl[3],
+            al4 = hl[4],
+            al5 = hl[5],
+            al6 = hl[6],
+            al7 = hl[7];
 
         int pos = 0;
         while (n >= 128) {
@@ -2942,11 +2942,11 @@ public final class TweetNaclFast {
 
             pos += 128;
             n -= 128;
-				
+
 				/*dbgt = "";
 				for (int dbg = 0; dbg < hh.length; dbg ++) dbgt += " "+hh[dbg];
 				Log.d(TAG, "\ncrypto_hashblocks_hl hh -> "+dbgt);
-				
+
 				dbgt = "";
 				for (int dbg = 0; dbg < hl.length; dbg ++) dbgt += " "+hl[dbg];
 				Log.d(TAG, "\ncrypto_hashblocks_hl hl -> "+dbgt);*/
@@ -2960,7 +2960,7 @@ public final class TweetNaclFast {
     public static int crypto_hash(byte [] out, byte [] m,final int moff, int n)
     {
         int []  hh = new int[8],
-                hl = new int[8];
+            hl = new int[8];
         byte [] x = new byte[256];
         int     i, b = n;
         long    u;
@@ -3144,10 +3144,10 @@ public final class TweetNaclFast {
     }
 
     private static final long L[] = {
-            0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58,
-            0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14,
-            0,    0,    0,    0,    0,    0,    0,    0,
-            0,    0,    0,    0,    0,    0,    0,    0x10
+        0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58,
+        0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14,
+        0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0x10
     };
 
     private static void modL(byte[] r,final int roff, long x[])
@@ -3355,7 +3355,7 @@ public final class TweetNaclFast {
         System.arraycopy(b, 0, x, 0, len);
         return x;
     }
-	
+
 /*
   public static byte[] randombytes(byte [] x, int len) {
 		int ret = len % 8;
@@ -3374,7 +3374,7 @@ public final class TweetNaclFast {
 			x[i+7] = (byte) (rnd >>> 56);
 		}
 
-		if (ret > 0) {         
+		if (ret > 0) {
 			rnd = jrandom.nextLong();
 			for (int i = len-ret; i < len; i ++)
 				x[i] = (byte) (rnd >>> 8*i);
@@ -3396,7 +3396,7 @@ public final class TweetNaclFast {
         final StringBuilder hex = new StringBuilder( 2 * raw.length );
         for ( final byte b : raw ) {
             hex.append(HEXES.charAt((b & 0xF0) >> 4))
-                    .append(HEXES.charAt((b & 0x0F)));
+                .append(HEXES.charAt((b & 0x0F)));
         }
         return hex.toString();
     }
@@ -3405,7 +3405,7 @@ public final class TweetNaclFast {
         byte[] b = new byte[s.length() / 2];
         for (int i = 0; i < s.length(); i += 2) {
             b[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i+1), 16));
+                + Character.digit(s.charAt(i+1), 16));
         }
         return b;
     }

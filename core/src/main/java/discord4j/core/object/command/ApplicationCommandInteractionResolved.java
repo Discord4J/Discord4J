@@ -21,6 +21,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
+import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
@@ -83,7 +84,9 @@ public class ApplicationCommandInteractionResolved implements DiscordObject {
      * @return the resolved channel, if present
      */
     public Optional<ResolvedChannel> getChannel(Snowflake channelId) {
-        return Optional.ofNullable(getChannels().get(channelId));
+        return data.channels().toOptional()
+                .map(channels -> channels.get(channelId.asString()))
+                .map(data -> new ResolvedChannel(gateway, data));
     }
 
     /**
@@ -109,7 +112,9 @@ public class ApplicationCommandInteractionResolved implements DiscordObject {
      * @return the resolved user, if present
      */
     public Optional<User> getUser(Snowflake userId) {
-        return Optional.ofNullable(getUsers().get(userId));
+        return data.users().toOptional()
+                .map(users -> users.get(userId.asString()))
+                .map(data -> new User(gateway, data));
     }
 
     /**
@@ -134,7 +139,11 @@ public class ApplicationCommandInteractionResolved implements DiscordObject {
      * @return the resolved member, if present
      */
     public Optional<ResolvedMember> getMember(Snowflake memberId) {
-        return Optional.ofNullable(getMembers().get(memberId));
+        return data.members().toOptional()
+                .map(members -> members.get(memberId.asString()))
+                .map(memberData -> new ResolvedMember(gateway, memberData,
+                        getUser(memberId).map(User::getUserData).orElseThrow(IllegalStateException::new),
+                        Objects.requireNonNull(guildId)));
     }
 
     /**
@@ -149,7 +158,7 @@ public class ApplicationCommandInteractionResolved implements DiscordObject {
                             final Snowflake id = Snowflake.of(entry.getKey());
                             return Tuples.of(id, new ResolvedMember(gateway, entry.getValue(),
                                     getUser(id).map(User::getUserData).orElseThrow(IllegalStateException::new),
-                                    Optional.ofNullable(guildId).orElseThrow(IllegalStateException::new)));
+                                    Objects.requireNonNull(guildId)));
                         })
                         .collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2)))
                 .orElseGet(Collections::emptyMap);
@@ -162,7 +171,9 @@ public class ApplicationCommandInteractionResolved implements DiscordObject {
      * @return the resolved role, if present
      */
     public Optional<Role> getRole(Snowflake roleId) {
-        return Optional.ofNullable(getRoles().get(roleId));
+        return data.roles().toOptional()
+                .map(roles -> roles.get(roleId.asString()))
+                .map(data -> new Role(gateway, data, Objects.requireNonNull(guildId)));
     }
 
     /**
@@ -174,7 +185,7 @@ public class ApplicationCommandInteractionResolved implements DiscordObject {
         return data.roles().toOptional()
                 .map(map -> map.entrySet().stream()
                         .map(entry -> Tuples.of(Snowflake.of(entry.getKey()), new Role(gateway, entry.getValue(),
-                                Optional.ofNullable(guildId).orElseThrow(IllegalStateException::new))))
+                                Objects.requireNonNull(guildId))))
                         .collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2)))
                 .orElseGet(Collections::emptyMap);
     }
@@ -186,7 +197,9 @@ public class ApplicationCommandInteractionResolved implements DiscordObject {
      * @return the resolved message, if present
      */
     public Optional<Message> getMessage(Snowflake messageId) {
-        return Optional.ofNullable(getMessages().get(messageId));
+        return data.messages().toOptional()
+                .map(messages -> messages.get(messageId.asString()))
+                .map(data -> new Message(gateway, data));
     }
 
     /**
@@ -199,6 +212,32 @@ public class ApplicationCommandInteractionResolved implements DiscordObject {
                 .map(map -> map.entrySet().stream()
                         .map(entry -> Tuples.of(Snowflake.of(entry.getKey()),
                                 new Message(gateway, entry.getValue())))
+                        .collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2)))
+                .orElseGet(Collections::emptyMap);
+    }
+
+    /**
+     * Gets the resolved attachment with the given ID, if present.
+     *
+     * @param attachmentId the ID of the attachment to get
+     * @return the resolved attachment, if present
+     */
+    public Optional<Attachment> getAttachment(Snowflake attachmentId) {
+        return data.attachments().toOptional()
+                .map(attachments -> attachments.get(attachmentId.asString()))
+                .map(data -> new Attachment(gateway, data));
+    }
+
+    /**
+     * Gets a map containing the resolved attachments associated by their IDs
+     *
+     * @return the resolved attachments
+     */
+    public Map<Snowflake, Attachment> getAttachments() {
+        return data.attachments().toOptional()
+                .map(map -> map.entrySet().stream()
+                        .map(entry -> Tuples.of(Snowflake.of(entry.getKey()),
+                                new Attachment(gateway, entry.getValue())))
                         .collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2)))
                 .orElseGet(Collections::emptyMap);
     }

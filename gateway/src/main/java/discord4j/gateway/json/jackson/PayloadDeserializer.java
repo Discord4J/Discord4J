@@ -78,6 +78,7 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         dispatchTypes.put(EventNames.APPLICATION_COMMAND_CREATE, ApplicationCommandCreate.class);
         dispatchTypes.put(EventNames.APPLICATION_COMMAND_UPDATE, ApplicationCommandUpdate.class);
         dispatchTypes.put(EventNames.APPLICATION_COMMAND_DELETE, ApplicationCommandDelete.class);
+        dispatchTypes.put(EventNames.APPLICATION_COMMAND_PERMISSIONS_UPDATE, ApplicationCommandPermissionUpdate.class);
         dispatchTypes.put(EventNames.INTERACTION_CREATE, InteractionCreate.class);
         dispatchTypes.put(EventNames.THREAD_CREATE, ThreadCreate.class);
         dispatchTypes.put(EventNames.THREAD_UPDATE, ThreadUpdate.class);
@@ -85,6 +86,14 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         dispatchTypes.put(EventNames.THREAD_LIST_SYNC, ThreadListSync.class);
         dispatchTypes.put(EventNames.THREAD_MEMBER_UPDATE, ThreadMemberUpdate.class);
         dispatchTypes.put(EventNames.THREAD_MEMBERS_UPDATE, ThreadMembersUpdate.class);
+        dispatchTypes.put(EventNames.STAGE_INSTANCE_CREATE, StageInstanceCreate.class);
+        dispatchTypes.put(EventNames.STAGE_INSTANCE_UPDATE, StageInstanceUpdate.class);
+        dispatchTypes.put(EventNames.STAGE_INSTANCE_DELETE, StageInstanceDelete.class);
+        dispatchTypes.put(EventNames.GUILD_AUDIT_LOG_ENTRY_CREATE, AuditLogEntryCreate.class);
+        dispatchTypes.put(EventNames.AUTO_MODERATION_RULE_CREATE, AutoModRuleCreate.class);
+        dispatchTypes.put(EventNames.AUTO_MODERATION_RULE_UPDATE, AutoModRuleUpdate.class);
+        dispatchTypes.put(EventNames.AUTO_MODERATION_RULE_DELETE, AutoModRuleDelete.class);
+        dispatchTypes.put(EventNames.AUTO_MODERATION_ACTION_EXECUTION, AutoModActionExecution.class);
 
         // Ignored
         dispatchTypes.put(EventNames.PRESENCES_REPLACE, null);

@@ -42,8 +42,10 @@ import java.util.Collections;
  * <li>Message store: {@code long} keys and {@link MessageData} values.</li>
  * <li>Presence store: {@code long} pair keys and {@link PresenceUpdate} values.</li>
  * <li>Role store: {@code long} keys and {@link RoleData} values.</li>
+ * <li>Stage instance store: {@code long} keys and {@link StageInstanceData} values.</li>
  * <li>User store: {@code long} keys and {@link UserData} values.</li>
  * <li>Voice state store: {@code long} pair keys and {@link VoiceStateData} values.</li>
+ * <li>Thread member store: {@code long} pair keys and {@link ThreadMemberData} values.</li>
  * </ul>
  */
 public final class StateHolder {
@@ -54,12 +56,15 @@ public final class StateHolder {
     private final LongObjStore<ChannelData> channelStore;
     private final LongObjStore<GuildData> guildStore;
     private final LongObjStore<EmojiData> guildEmojiStore;
+    private final LongObjStore<StickerData> guildStickerStore;
     private final Store<LongLongTuple2, MemberData> memberStore;
     private final LongObjStore<MessageData> messageStore;
     private final Store<LongLongTuple2, PresenceData> presenceStore;
     private final LongObjStore<RoleData> roleStore;
+    private final LongObjStore<StageInstanceData> stageInstanceStore;
     private final LongObjStore<UserData> userStore;
     private final Store<LongLongTuple2, VoiceStateData> voiceStateStore;
+    private final Store<LongLongTuple2, ThreadMemberData> threadMemberStore;
 
     public StateHolder(final StoreService service) {
         storeService = service;
@@ -71,6 +76,9 @@ public final class StateHolder {
 
         guildStore = service.provideLongObjStore(GuildData.class);
         log.debug("Guild storage       : {}", guildStore);
+
+        guildStickerStore = service.provideLongObjStore(StickerData.class);
+        log.debug("Guild sticker storage : {}", guildStickerStore);
 
         guildEmojiStore = service.provideLongObjStore(EmojiData.class);
         log.debug("Guild emoji storage : {}", guildEmojiStore);
@@ -87,11 +95,17 @@ public final class StateHolder {
         roleStore = service.provideLongObjStore(RoleData.class);
         log.debug("Role storage        : {}", roleStore);
 
+        stageInstanceStore = service.provideLongObjStore(StageInstanceData.class);
+        log.debug("StageInstance storage        : {}", stageInstanceStore);
+
         userStore = service.provideLongObjStore(UserData.class);
-        log.debug("User storage        : {}", userStore);
+        log.debug("User storage          : {}", userStore);
 
         voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateData.class);
-        log.debug("Voice state storage : {}", voiceStateStore);
+        log.debug("Voice state storage   : {}", voiceStateStore);
+
+        threadMemberStore = service.provideGenericStore(LongLongTuple2.class, ThreadMemberData.class);
+        log.debug("Thread member storage : {}", voiceStateStore);
     }
 
     public StoreService getStoreService() {
@@ -104,6 +118,10 @@ public final class StateHolder {
 
     public LongObjStore<GuildData> getGuildStore() {
         return guildStore;
+    }
+
+    public LongObjStore<StickerData> getGuildStickerStore() {
+        return guildStickerStore;
     }
 
     public LongObjStore<EmojiData> getGuildEmojiStore() {
@@ -126,12 +144,20 @@ public final class StateHolder {
         return roleStore;
     }
 
+    public LongObjStore<StageInstanceData> getStageInstanceStore() {
+        return this.stageInstanceStore;
+    }
+
     public LongObjStore<UserData> getUserStore() {
         return userStore;
     }
 
     public Store<LongLongTuple2, VoiceStateData> getVoiceStateStore() {
         return voiceStateStore;
+    }
+
+    public Store<LongLongTuple2, ThreadMemberData> getThreadMemberStore() {
+        return threadMemberStore;
     }
 
     public Mono<Void> invalidateStores() {
@@ -142,7 +168,9 @@ public final class StateHolder {
                 .and(messageStore.invalidate())
                 .and(presenceStore.invalidate())
                 .and(roleStore.invalidate())
+                .and(stageInstanceStore.invalidate())
                 .and(userStore.invalidate())
-                .and(voiceStateStore.invalidate());
+                .and(voiceStateStore.invalidate())
+                .and(threadMemberStore.invalidate());
     }
 }

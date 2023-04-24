@@ -18,8 +18,9 @@
 package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.event.domain.interaction.InteractionCreateEvent;
+import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
 import discord4j.core.object.component.LayoutComponent;
+import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.WebhookMessageEditRequest;
 import discord4j.discordjson.possible.Possible;
@@ -59,6 +60,8 @@ interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<Webhoo
 
     Possible<Optional<List<LayoutComponent>>> components();
 
+    Possible<Optional<List<Attachment>>> attachments();
+
     @Override
     default MultipartRequest<WebhookMessageEditRequest> asRequest() {
         WebhookMessageEditRequest json = WebhookMessageEditRequest.builder()
@@ -72,6 +75,10 @@ interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<Webhoo
                                 .map(LayoutComponent::getData)
                                 .collect(Collectors.toList()))
                         .orElse(Collections.emptyList())))
+                // TODO upon v10 upgrade, it is required to also include new files as attachment here
+                .attachments(mapPossibleOptional(attachments(), attachments -> attachments.stream()
+                        .map(Attachment::getData)
+                        .collect(Collectors.toList())))
                 .build();
         return MultipartRequest.ofRequestAndFiles(json, Stream.concat(files().stream(), fileSpoilers().stream())
                 .map(MessageCreateFields.File::asRequest)
@@ -83,7 +90,7 @@ interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<Webhoo
 @Value.Immutable(builder = false)
 abstract class InteractionReplyEditMonoGenerator extends Mono<Message> implements InteractionReplyEditSpecGenerator {
 
-    abstract InteractionCreateEvent event();
+    abstract DeferrableInteractionEvent event();
 
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
@@ -100,7 +107,7 @@ abstract class InteractionFollowupEditMonoGenerator extends Mono<Message> implem
 
     abstract Snowflake messageId();
 
-    abstract InteractionCreateEvent event();
+    abstract DeferrableInteractionEvent event();
 
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {

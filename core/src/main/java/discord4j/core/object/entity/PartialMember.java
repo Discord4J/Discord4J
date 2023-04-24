@@ -32,6 +32,7 @@ import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.PartialMemberData;
+import discord4j.discordjson.json.UpdateUserVoiceStateRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.json.gateway.ImmutableRequestGuildMembers;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
@@ -46,6 +47,7 @@ import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -190,6 +192,16 @@ public class PartialMember extends User {
     }
 
     /**
+     * Gets when the user ends their timeout, if present.
+     *
+     * @return When the user ends their timeout in the server, if present.
+     */
+    public Optional<Instant> getCommunicationDisabledUntil() {
+        return Possible.flatOpt(data.communicationDisabledUntil())
+            .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+    }
+
+    /**
      * Gets the ID of the guild this user is associated to.
      *
      * @return The ID of the guild this user is associated to.
@@ -242,7 +254,9 @@ public class PartialMember extends User {
      * user exists in context of the mention).
      *
      * @return The <i>raw</i> nickname mention.
+     * @deprecated This type of ping has been deprecated in the Discord API.
      */
+    @Deprecated
     public String getNicknameMention() {
         return "<@!" + getId().asString() + ">";
     }
@@ -276,7 +290,7 @@ public class PartialMember extends User {
      */
     public final String getEffectiveAvatarUrl() {
         final boolean animated = hasAnimatedGuildAvatar();
-        return getGuildAvatarUrl(animated ? GIF : PNG).orElse(getDefaultAvatarUrl());
+        return getGuildAvatarUrl(animated ? GIF : PNG).orElse(getAvatarUrl());
     }
 
     /**
@@ -537,6 +551,19 @@ public class PartialMember extends User {
     }
 
     /**
+     * Returns the flags of this {@link PartialMember}.
+     *
+     * @return A {@code EnumSet} with the flags of this member.
+     */
+    public EnumSet<Flag> getFlags() {
+        long memberFlags = data.flags();
+        if (memberFlags != 0) {
+            return Flag.of(memberFlags);
+        }
+        return EnumSet.noneOf(Flag.class);
+    }
+
+    /**
      * Requests to ban this user.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link LegacyBanQuerySpec} to be operated on.
@@ -651,11 +678,123 @@ public class PartialMember extends User {
                 .map(data -> new Member(getClient(), data, getGuildId().asLong())));
     }
 
+    /**
+     * Requests to invite this member to the stage speakers. Require this user to be connected to
+     * a stage channel.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member
+     *         has been invited to the speakers. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> inviteToStageSpeakers() {
+        return getVoiceState().flatMap(voiceState ->
+                Mono.defer(() -> getClient().getRestClient().getGuildService()
+                        .modifyOthersVoiceState(getGuildId().asLong(), getUserData().id().asLong(),
+                                UpdateUserVoiceStateRequest.builder()
+                                        .channelId(voiceState.getChannelId()
+                                                .orElseThrow(IllegalStateException::new)
+                                                .asString())
+                                        .suppress(false)
+                                        .build())));
+    }
+
+    /**
+     * Requests to move this member to the stage audience. Require this user to be connected to
+     * a stage channel.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member
+     *         has been moved to the audience. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> moveToStageAudience() {
+        return getVoiceState().flatMap(voiceState ->
+                Mono.defer(() -> getClient().getRestClient().getGuildService()
+                        .modifyOthersVoiceState(getGuildId().asLong(), getUserData().id().asLong(),
+                                UpdateUserVoiceStateRequest.builder()
+                                        .channelId(voiceState.getChannelId()
+                                                .orElseThrow(IllegalStateException::new)
+                                                .asString())
+                                        .suppress(true)
+                                        .build())));
+    }
+
     @Override
     public String toString() {
         return "PartialMember{" +
             "data=" + data +
             ", guildId=" + guildId +
             "} " + super.toString();
+    }
+
+    /** Describes the flags of a member in a guild.
+     * @see <a href="https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags">Discord Docs - Guild Member Flags</a>
+     **/
+    public enum Flag {
+        /**
+         * Member has left and rejoined the guild
+         */
+        DID_REJOIN(0),
+        /**
+         * Member has completed onboarding
+         */
+        COMPLETED_ONBOARDING(1),
+        /**
+         * Member has completed onboarding
+         * <br>
+         * <b>Note:</b> this flag allows a member who does not meet verification requirements to participate in a server.
+         */
+        BYPASSES_VERIFICATION(2),
+        /**
+         * Member has started onboarding
+         */
+        STARTED_ONBOARDING(3);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /** The flag value as represented by Discord. */
+        private final int flag;
+
+        /**
+         * Constructs a {@code PartialMember.Flag}.
+         */
+        Flag(final int value) {
+            this.value = value;
+            this.flag = 1 << value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the flags of member. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
+         * equal ({@code ==}) to the supplied {@code value}.
+         *
+         * @param value The flags value as represented by Discord.
+         * @return The {@link EnumSet} of flags.
+         */
+        public static EnumSet<PartialMember.Flag> of(final long value) {
+            final EnumSet<PartialMember.Flag> memberFlags = EnumSet.noneOf(PartialMember.Flag.class);
+            for (PartialMember.Flag flag : PartialMember.Flag.values()) {
+                long flagValue = flag.getFlag();
+                if ((flagValue & value) == flagValue) {
+                    memberFlags.add(flag);
+                }
+            }
+            return memberFlags;
+        }
     }
 }

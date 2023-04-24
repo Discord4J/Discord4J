@@ -52,7 +52,8 @@ public class VoiceSocket {
 
     static final String PROTOCOL = "udp";
     static final String ENCRYPTION_MODE = "xsalsa20_poly1305";
-    private static final int DISCOVERY_PACKET_LENGTH = 70;
+    private static final int DISCOVERY_PACKET_LENGTH = 74;
+    private static final int TYPE_LENGTH_SSRC_LENGTH = Short.BYTES + Short.BYTES + Integer.BYTES;
 
     private final UdpClient udpClient;
     private final Sinks.Many<ByteBuf> inbound;
@@ -111,11 +112,18 @@ public class VoiceSocket {
     }
 
     Mono<InetSocketAddress> performIpDiscovery(int ssrc) {
-        // TODO validate this implementation
+        // https://discord.com/developers/docs/topics/voice-connections#ip-discovery
         Mono<Void> sendDiscoveryPacket = Mono.fromRunnable(() -> {
+            // Build request packet
+            // Type: Values 0x1 and 0x2 indicate request and response, respectively (2 bytes)
+            // Length: Message length excluding Type and Length fields (value 70) (2 bytes)
+            // SSRC: Unsigned integer (4 bytes)
+            // Remaining bytes are zero
             ByteBuf discoveryPacket = Unpooled.buffer(DISCOVERY_PACKET_LENGTH)
+                    .writeShort(1)
+                    .writeShort(70)
                     .writeInt(ssrc)
-                    .writeZero(DISCOVERY_PACKET_LENGTH - Integer.BYTES);
+                    .writeZero(DISCOVERY_PACKET_LENGTH - TYPE_LENGTH_SSRC_LENGTH);
 
             emissionStrategy.emitNext(outbound, discoveryPacket);
         });
@@ -123,8 +131,11 @@ public class VoiceSocket {
         Mono<InetSocketAddress> parseResponse = inbound.asFlux()
                 .next()
                 .map(buf -> {
-                    // undocumented: discord replies with the ssrc first, THEN the IP address
-                    String address = getNullTerminatedString(buf, Integer.BYTES);
+                    // Decode response packet
+                    // Skip Type, Length and SSRC fields (TYPE_LENGTH_SSRC_LENGTH)
+                    // Address: Null-terminated string in response (64 bytes)
+                    // Port: Unsigned short (2 bytes)
+                    String address = getNullTerminatedString(buf, TYPE_LENGTH_SSRC_LENGTH);
                     int port = buf.getUnsignedShortLE(DISCOVERY_PACKET_LENGTH - Short.BYTES);
                     buf.release();
                     return InetSocketAddress.createUnresolved(address, port);

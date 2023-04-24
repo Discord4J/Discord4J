@@ -18,6 +18,7 @@ package discord4j.core.object.entity.channel;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Entity;
+import discord4j.core.util.MentionUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.rest.entity.RestChannel;
 import reactor.core.publisher.Mono;
@@ -71,7 +72,7 @@ public interface Channel extends Entity {
      * @return The <i>raw</i> mention.
      */
     default String getMention() {
-        return "<#" + getId().asString() + '>';
+        return MentionUtil.forChannel(getId());
     }
 
     /**
@@ -119,7 +120,7 @@ public interface Channel extends Entity {
 
         GUILD_PRIVATE_THREAD(12),
 
-        /** Represents a {@link VoiceChannel} for hosting events with an audience. */
+        /** Represents a {@link StageChannel} for hosting events with an audience. */
         GUILD_STAGE_VOICE(13);
 
         /** The underlying value as represented by Discord. */

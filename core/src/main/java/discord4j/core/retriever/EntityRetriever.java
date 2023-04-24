@@ -16,16 +16,12 @@
  */
 package discord4j.core.retriever;
 
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.GuildEmoji;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.User;
+import discord4j.common.util.Snowflake;
+import discord4j.core.object.automod.AutoModRule;
+import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.util.OrderUtil;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -51,6 +47,16 @@ public interface EntityRetriever {
      *         ID. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<Guild> getGuildById(Snowflake guildId);
+
+    /**
+     * Requests to retrieve the guild sticker represented by the supplied IDs.
+     *
+     * @param guildId The ID of the guild.
+     * @param stickerId The ID of the sticker.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildSticker} as represented by the
+     *         supplied IDs. If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId);
 
     /**
      * Requests to retrieve the guild emoji represented by the supplied IDs.
@@ -153,6 +159,7 @@ public interface EntityRetriever {
      * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderRoles(Flux)}
      * to consistently order roles.
      *
+     * @param guildId The ID of the guild.
      * @return A {@link Flux} that continually emits the guild's {@link Role roles}. If an error is received, it is
      * emitted through the {@code Flux}.
      */
@@ -161,8 +168,54 @@ public interface EntityRetriever {
     /**
      * Requests to retrieve the guild's emojis.
      *
+     * @param guildId The ID of the guild.
      * @return A {@link Flux} that continually emits the guild's {@link GuildEmoji emojis}. If an error is received,
      * it is emitted through the {@code Flux}.
      */
     Flux<GuildEmoji> getGuildEmojis(Snowflake guildId);
+
+    /**
+     * Requests to retrieve the stage instance associated to the supplied channel ID.
+     *
+     * @param channelId The ID of the channel.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link StageInstance} associated to the supplied
+     *         channel ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId);
+
+    /**
+     * Requests to retrieve the guild's stickers.
+     *
+     * @param guildId The ID of the guild.
+     * @return A {@link Flux} that continually emits the guild's {@link GuildSticker stickers}. If an error is received,
+     * it is emitted through the {@code Flux}.
+     */
+    Flux<GuildSticker> getGuildStickers(Snowflake guildId);
+
+    /**
+     * Requests to retrieve the thread member associated to the supplied thread ID and user ID.
+     *
+     * @param threadId The ID of the thread.
+     * @param userId The ID of the user.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link ThreadMember} associated to the supplied
+     *         thread ID and user ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<ThreadMember> getThreadMemberById(Snowflake threadId, Snowflake userId);
+
+    /**
+     * Requests to retrieve the thread's members.
+     *
+     * @param threadId The ID of the thread.
+     * @return A {@link Flux} that continually emits the thread's {@link ThreadMember members}. If an error is received,
+     * it is emitted through the {@code Flux}.
+     */
+    Flux<ThreadMember> getThreadMembers(Snowflake threadId);
+
+    /**
+     * Requests to retrieve the guild's automod rules.
+     *
+     * @return A {@link Flux} that continually emits the guild's {@link AutoModRule AutoModRule}. If an error is received,
+     * it is emitted through the {@code Flux}.
+     */
+    Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId);
 }

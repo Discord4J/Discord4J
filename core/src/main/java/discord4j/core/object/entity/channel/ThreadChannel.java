@@ -20,16 +20,22 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.ThreadMember;
 import discord4j.core.object.entity.User;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.core.spec.ThreadChannelEditMono;
+import discord4j.core.spec.ThreadChannelEditSpec;
+import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.ThreadMetadata;
 import discord4j.rest.util.PermissionSet;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -71,6 +77,50 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
         return Mono.justOrEmpty(getParentId())
                 .flatMap(getClient().withRetrievalStrategy(retrievalStrategy)::getChannelById)
                 .cast(TopLevelGuildMessageChannel.class);
+    }
+
+    /**
+     * Requests to retrieve the member of this thread.
+     *
+     * @param userId The ID of the user.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link ThreadMember member} of this thread. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ThreadMember> getMember(Snowflake userId) {
+        return getClient().getThreadMemberById(getId(), userId);
+    }
+
+    /**
+     * Requests to retrieve the member of this thread, using the given retrieval strategy.
+     *
+     * @param userId The ID of the user.
+     * @param retrievalStrategy the strategy to use to get the thread member
+     * @return A {@link Mono} where, upon successful completion, emits the {@link ThreadMember member} of this thread. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ThreadMember> getMember(Snowflake userId, EntityRetrievalStrategy retrievalStrategy) {
+        return getClient().withRetrievalStrategy(retrievalStrategy)
+                .getThreadMemberById(getId(), userId);
+    }
+
+    /**
+     * Returns all members of this thread.
+     *
+     * @return A {@link Flux} that continually emits all {@link ThreadMember members} of this thread.
+     */
+    public Flux<ThreadMember> getThreadMembers() {
+        return getClient().getThreadMembers(getId());
+    }
+
+    /**
+     * Returns all members of this thread, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the thread members
+     * @return A {@link Flux} that continually emits all {@link ThreadMember members} of this thread.
+     */
+    public Flux<ThreadMember> getThreadMembers(EntityRetrievalStrategy retrievalStrategy) {
+        return getClient().withRetrievalStrategy(retrievalStrategy)
+                .getThreadMembers(getId());
     }
 
     public int getApproximateMessageCount() {
@@ -118,13 +168,90 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
         return getParent().flatMap(parent -> parent.getEffectivePermissions(member));
     }
 
+    /**
+     * Adds the bot to this thread. Requires that the thread is not archived.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits an empty {@code Mono}.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> join() {
+        return getClient().getRestClient().getChannelService().joinThread(getId().asLong());
+    }
+
+    /**
+     * Removes the bot from this thread. Requires that the thread is not archived.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits an empty {@code Mono}.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> leave() {
+        return getClient().getRestClient().getChannelService().leaveThread(getId().asLong());
+    }
+
+    /**
+     * Adds a given {@code user} to this thread. Requires the ability to send messages in the thread. Also requires the
+     * thread is not archived. Returns successfully if the user is already a member of this thread.
+     *
+     * @param user the member to add
+     * @return A {@link Mono} where, upon successful completion, emits an empty {@code Mono}.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> addMember(User user) {
+        return getClient().getRestClient().getChannelService().addThreadMember(getId().asLong(), user.getId().asLong());
+    }
+
+    /**
+     * Removes a given {@code user} from this thread. Requires permission to manage threads, or the creator of the
+     * thread if it is a guild private thread. Also requires the thread is not archived.
+     *
+     * @param user the member to remove
+     * @return A {@link Mono} where, upon successful completion, emits an empty {@code Mono}.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> removeMember(User user) {
+        return getClient().getRestClient().getChannelService()
+                .removeThreadMember(getId().asLong(), user.getId().asLong());
+    }
+
+    /**
+     * Requests to edit this thread channel. Properties specifying how to edit this thread channel can be set via the {@code
+     * withXxx} methods of the returned {@link ThreadChannelEditMono}.
+     *
+     * @return A {@link ThreadChannelEditMono} where, upon successful completion, emits the edited {@link ThreadChannel}. If
+     * an error is received, it is emitted through the {@code ThreadChannelEditMono}.
+     */
+    public ThreadChannelEditMono edit() {
+        return ThreadChannelEditMono.of(this);
+    }
+
+    /**
+     * Requests to edit this thread channel.
+     *
+     * @param spec an immutable object that specifies how to edit this thread channel
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link ThreadChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ThreadChannel> edit(ThreadChannelEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> getClient().getRestClient().getChannelService()
+                    .modifyThread(getId().asLong(), spec.asRequest(), spec.reason()))
+            .map(data -> EntityUtil.getChannel(getClient(), data))
+            .cast(ThreadChannel.class);
+    }
+
+    /** Duration in minutes to automatically archive the thread after recent activity. */
     public enum AutoArchiveDuration {
 
         // TODO naming
         UNKNOWN(-1),
+        /** 1 hour */
         DURATION1(60),
+        /** 1 day */
         DURATION2(1440),
+        /** 3 days */
         DURATION3(4320),
+        /** 7 days */
         DURATION4(10080);
 
         private final int value;
@@ -147,6 +274,52 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
                 case 1440: return DURATION2;
                 case 4320: return DURATION3;
                 case 10080: return DURATION4;
+                default: return UNKNOWN;
+            }
+        }
+    }
+
+    public enum Type {
+
+        /** Unknown type. */
+        UNKNOWN(-1),
+        GUILD_NEWS_THREAD(10),
+        GUILD_PUBLIC_THREAD(11),
+        GUILD_PRIVATE_THREAD(12);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /**
+         * Constructs a {@code ThreadChannel.Type}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        Type(final int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the type of channel. It is guaranteed that invoking {@link #getValue()} from the returned enum will
+         * equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The type of channel.
+         */
+        public static ThreadChannel.Type of(final int value) {
+            switch (value) {
+                case 10: return GUILD_NEWS_THREAD;
+                case 11: return GUILD_PUBLIC_THREAD;
+                case 12: return GUILD_PRIVATE_THREAD;
                 default: return UNKNOWN;
             }
         }

@@ -81,6 +81,7 @@ import discord4j.gateway.intent.Intent;
  *     <li>{@link MemberUpdateEvent}: a user had their nickname and/or roles change</li>
  *     <li>{@link MemberChunkEvent}: a batch of a guild's member details</li>
  *     <li>{@link EmojisUpdateEvent}: a guild's emoji list was updated</li>
+ *     <li>{@link StickersUpdateEvent}: a guild's sticker list was updated</li>
  *     <li>{@link BanEvent}: a user was banned from a guild</li>
  *     <li>{@link UnbanEvent}: a user's ban was removed from a guild</li>
  *     <li>{@link IntegrationsUpdateEvent}: a guild has updated their app integrations</li>
@@ -139,6 +140,7 @@ import discord4j.gateway.intent.Intent;
  *     <li>{@link DisconnectEvent}: disconnected from the Gateway</li>
  *     <li>{@link ReconnectStartEvent}: a resumption or reconnection attempt has begun</li>
  *     <li>{@link ReconnectFailEvent}: a resumption or reconnection attempt has failed but can be retried</li>
+ *     <li>{@link SessionInvalidatedEvent}: a gateway session has been invalidated</li>
  * </ul>
  */
 public abstract class Event {

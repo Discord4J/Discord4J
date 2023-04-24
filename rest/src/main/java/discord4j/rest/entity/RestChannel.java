@@ -29,12 +29,10 @@ import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToLongFunction;
 
 /**
  * Represents a guild or DM channel within Discord.
@@ -470,5 +468,42 @@ public class RestChannel {
 
     public Flux<WebhookData> getWebhooks() {
         return restClient.getWebhookService().getChannelWebhooks(id);
+    }
+
+    public Mono<ThreadMemberData> getThreadMember(Snowflake userId) {
+        return restClient.getChannelService().getThreadMember(id, userId.asLong());
+    }
+
+    public Flux<ListThreadsData> listThreads(Function<Map<String, Object>, Mono<ListThreadsData>> doRequest) {
+        ToLongFunction<ListThreadsData> getLastThreadId = response -> {
+            List<ChannelData> threads = response.threads();
+            return threads.isEmpty() ? Long.MAX_VALUE : Snowflake.asLong(threads.get(threads.size() - 1).id());
+        };
+        return PaginationUtil.paginateBefore(doRequest.andThen(Mono::flux), getLastThreadId, 0, 100);
+    }
+
+    public Flux<ListThreadsData> getPublicArchivedThreads() {
+        return listThreads(params -> restClient.getChannelService().listPublicArchivedThreads(id, params));
+    }
+
+    public Flux<ListThreadsData> getPrivateArchivedThreads() {
+        return listThreads(params -> restClient.getChannelService().listPrivateArchivedThreads(id, params));
+    }
+
+    public Flux<ListThreadsData> getJoinedPrivateArchivedThreads() {
+        return listThreads(params -> restClient.getChannelService().listJoinedPrivateArchivedThreads(id, params));
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RestChannel that = (RestChannel) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

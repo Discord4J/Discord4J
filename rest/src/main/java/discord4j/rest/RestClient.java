@@ -25,8 +25,10 @@ import discord4j.rest.service.*;
 import discord4j.rest.util.PaginationUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -41,15 +43,18 @@ public class RestClient {
     private final AuditLogService auditLogService;
     private final ChannelService channelService;
     private final EmojiService emojiService;
+    private final StickerService stickerService;
     private final GatewayService gatewayService;
     private final GuildService guildService;
     private final InteractionService interactionService;
     private final InviteService inviteService;
+    private final StageInstanceService stageInstanceService;
     private final TemplateService templateService;
     private final UserService userService;
     private final VoiceService voiceService;
     private final WebhookService webhookService;
     private final Mono<Long> applicationIdMono;
+    private final AutoModService autoModService;
 
     /**
      * Create a {@link RestClient} with default options, using the given token for authentication.
@@ -84,14 +89,17 @@ public class RestClient {
         this.auditLogService = new AuditLogService(router);
         this.channelService = new ChannelService(router);
         this.emojiService = new EmojiService(router);
+        this.stickerService = new StickerService(router);
         this.gatewayService = new GatewayService(router);
         this.guildService = new GuildService(router);
         this.interactionService = new InteractionService(router);
         this.inviteService = new InviteService(router);
+        this.stageInstanceService = new StageInstanceService(router);
         this.templateService = new TemplateService(router);
         this.userService = new UserService(router);
         this.voiceService = new VoiceService(router);
         this.webhookService = new WebhookService(router);
+        this.autoModService = new AutoModService(router);
 
         this.applicationIdMono = getApplicationInfo()
                 .map(app -> Snowflake.asLong(app.id()))
@@ -167,7 +175,30 @@ public class RestClient {
      */
     public RestEmoji restGuildEmoji(Snowflake guildId, EmojiData data) {
         return RestEmoji.create(this, guildId,
-                Snowflake.of(data.id().orElseThrow(() -> new IllegalArgumentException("Not a guild emoji"))));
+            Snowflake.of(data.id().orElseThrow(() -> new IllegalArgumentException("Not a guild emoji"))));
+    }
+
+    /**
+     * Requests to retrieve the guild sticker represented by the supplied IDs.
+     *
+     * @param guildId The ID of the guild.
+     * @param stickerId The ID of the sticker.
+     * @return A {@link RestSticker} as represented by the supplied IDs.
+     */
+    public RestSticker getGuildStickerById(final Snowflake guildId, final Snowflake stickerId) {
+        return RestSticker.create(this, guildId, stickerId);
+    }
+
+    /**
+     * Requests to retrieve the guild sticker represented by the supplied ID and {@link StickerData}.
+     *
+     * @param guildId The ID of the guild.
+     * @param data The data of the sticker.
+     * @return A {@link RestSticker} as represented by the supplied parameters.
+     */
+    public RestSticker restGuildSticker(Snowflake guildId, StickerData data) {
+        return RestSticker.create(this, guildId,
+            Snowflake.of(data.id()));
     }
 
     /**
@@ -364,6 +395,27 @@ public class RestClient {
     }
 
     /**
+     * Requests to retrieve an invite.
+     *
+     * @param inviteCode The code for the invite (e.g. "xdYkpp").
+     * @param withCounts whether the invite should contain approximate member counts
+     * @param withExpiration whether the invite should contain the expiration date
+     * @param guildScheduledEventId the guild scheduled event to include with the invite, can be {@code null}
+     * @return A {@link Mono} where, upon successful completion, emits the {@link InviteData} as represented by the
+     * supplied invite code. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<InviteData> getInvite(String inviteCode, boolean withCounts, boolean withExpiration,
+                                      @Nullable Snowflake guildScheduledEventId) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("with_counts", withCounts);
+        queryParams.put("with_expiration", withExpiration);
+        if (guildScheduledEventId != null) {
+            queryParams.put("guild_scheduled_event_id", guildScheduledEventId.asString());
+        }
+        return inviteService.getInvite(inviteCode, queryParams);
+    }
+
+    /**
      * Requests to retrieve an template.
      *
      * @param templateCode The code for the template (e.g. "hgM48av5Q69A").
@@ -383,6 +435,17 @@ public class RestClient {
      */
     public Mono<UserData> edit(UserModifyRequest request) {
         return userService.modifyCurrentUser(request);
+    }
+
+    /**
+     * Requests to retrieve a stage instance.
+     *
+     * @param channelId The channel id associated to the stage instance.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link StageInstanceData} associated to the
+     * supplied channel ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<StageInstanceData> getStageInstance(final Snowflake channelId) {
+        return stageInstanceService.getStageInstance(channelId.asLong());
     }
 
     /**
@@ -426,6 +489,17 @@ public class RestClient {
     }
 
     /**
+     * Access a low-level representation of the API endpoints for the Guild Sticker resource. It is recommended you use
+     * methods like {@link #getGuildStickerById(Snowflake, Snowflake)}, {@link #restGuildSticker(Snowflake, StickerData)} or
+     * {@link RestSticker#create(RestClient, Snowflake, Snowflake)}.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
+    public StickerService getStickerService() {
+        return stickerService;
+    }
+
+    /**
      * Access a low-level representation of the API endpoints for the Gateway resource.
      *
      * @return a handle to perform low-level requests to the API
@@ -461,6 +535,16 @@ public class RestClient {
      */
     public InviteService getInviteService() {
         return inviteService;
+    }
+
+    /**
+     * Access a low-level representation of the API endpoints for the Stage Instance resource. It is recommended you use
+     * the {@link #getStageInstance(Snowflake)} method.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
+    public StageInstanceService getStageInstanceService() {
+        return this.stageInstanceService;
     }
 
     /**
@@ -502,6 +586,15 @@ public class RestClient {
      */
     public WebhookService getWebhookService() {
         return webhookService;
+    }
+
+    /**
+     * Access a low-level representation of the API endpoints for the AutoMod resource.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
+    public AutoModService getAutoModService() {
+        return autoModService;
     }
 
     public Mono<Long> getApplicationId() {

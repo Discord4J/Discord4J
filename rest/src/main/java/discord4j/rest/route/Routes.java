@@ -73,6 +73,50 @@ public abstract class Routes {
     public static final Route AUDIT_LOG_GET = Route.get("/guilds/{guild.id}/audit-logs");
 
     //////////////////////////////////////////////
+    ////////////// AutoMod Resource //////////////
+    //////////////////////////////////////////////
+
+    /**
+     * Get a list of all rules currently configured for guild. Returns a list of auto moderation rule objects for the given guild. Requires the 'MANAGE_GUILD' permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#list-auto-moderation-rules-for-guild">
+     * https://discord.com/developers/docs/resources/auto-moderation#list-auto-moderation-rules-for-guild</a>
+     */
+    public static final Route AUTO_MOD_RULES_GET = Route.get("/guilds/{guild.id}/auto-moderation/rules");
+
+    /**
+     * Get a single rule. Returns an auto moderation rule object. Requires the 'MANAGE_GUILD' permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#get-auto-moderation-rule">
+     * https://discord.com/developers/docs/resources/auto-moderation#get-auto-moderation-rule</a>
+     */
+    public static final Route AUTO_MOD_RULE_GET = Route.get("/guilds/{guild.id}/auto-moderation/rules/{auto_moderation_rule.id}");
+
+    /**
+     * Create a new rule. Returns an auto moderation rule on success. Requires the 'MANAGE_GUILD' permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#create-auto-moderation-rule">
+     * https://discord.com/developers/docs/resources/auto-moderation#create-auto-moderation-rule</a>
+     */
+    public static final Route AUTO_MOD_RULE_CREATE = Route.post("/guilds/{guild.id}/auto-moderation/rules");
+
+    /**
+     * Modify an existing rule. Returns an auto moderation rule on success. Requires the 'MANAGE_GUILD' permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#modify-auto-moderation-rule">
+     * https://discord.com/developers/docs/resources/auto-moderation#modify-auto-moderation-rule</a>
+     */
+    public static final Route AUTO_MOD_RULE_MODIFY = Route.patch("/guilds/{guild.id}/auto-moderation/rules/{auto_moderation_rule.id}");
+
+    /**
+     * Delete a rule. Returns a 204 on success. Requires the 'MANAGE_GUILD' permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#delete-auto-moderation-rule">
+     * https://discord.com/developers/docs/resources/auto-moderation#delete-auto-moderation-rule</a>
+     */
+    public static final Route AUTO_MOD_RULE_DELETE = Route.patch("/guilds/{guild.id}/auto-moderation/rules/{auto_moderation_rule.id}");
+
+    //////////////////////////////////////////////
     ////////////// Channel Resource //////////////
     //////////////////////////////////////////////
 
@@ -372,15 +416,75 @@ public abstract class Routes {
 
     public static final Route REMOVE_THREAD_MEMBER = Route.delete("/channels/{channel.id}/thread-members/{user.id}");
 
-    public static final Route LIST_THREAD_MEMBERS = Route.get("/channels/{channel.id}/thread-members");
+    public static final Route GET_THREAD_MEMBER = Route.get("/channels/{channel.id}/thread-members/{user.id}");
 
-    public static final Route LIST_ACTIVE_THREADS = Route.get("/channels/{channel.id}/threads/active");
+    public static final Route LIST_THREAD_MEMBERS = Route.get("/channels/{channel.id}/thread-members");
 
     public static final Route LIST_PUBLIC_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/threads/archived/public");
 
     public static final Route LIST_PRIVATE_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/threads/archived/private");
 
     public static final Route LIST_JOINED_PRIVATE_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/users/@me/threads/archived/private");
+
+    ////////////////////////////////////////////
+    ////////////// Sticker Resource //////////////
+    ////////////////////////////////////////////
+
+    /**
+     * Returns a sticker object for the given sticker ID.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#get-sticker">
+     * https://discord.com/developers/docs/resources/sticker#get-sticker</a>
+     */
+    public static final Route STICKER_GET = Route.get("/stickers/{sticker.id}");
+
+    /**
+     * Returns the list of sticker packs available to Nitro subscribers.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs">
+     * https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs</a>
+     */
+    public static final Route NITRO_STICKER_PACKS_GET = Route.get("/sticker-packs");
+
+    /**
+     * Returns an array of sticker objects for the given guild. Includes user fields if the bot has the MANAGE_EMOJIS_AND_STICKERS permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#list-guild-stickers">
+     * https://discord.com/developers/docs/resources/sticker#list-guild-stickers</a>
+     */
+    public static final Route GUILD_STICKERS_GET = Route.get("/guilds/{guild.id}/stickers");
+
+    /**
+     * Returns a sticker object for the given guild and sticker IDs. Includes the user field if the bot has the MANAGE_EMOJIS_AND_STICKERS permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#get-guild-sticker">
+     * https://discord.com/developers/docs/resources/sticker#get-guild-sticker</a>
+     */
+    public static final Route GUILD_STICKER_GET = Route.get("/guilds/{guild.id}/stickers/{sticker.id}");
+
+    /**
+     * Create a new sticker for the guild. Send a multipart/form-data body. Requires the MANAGE_EMOJIS_AND_STICKERS permission. Returns the new sticker object on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#create-guild-sticker">
+     * https://discord.com/developers/docs/resources/sticker#create-guild-sticker</a>
+     */
+    public static final Route GUILD_STICKER_CREATE = Route.post("/guilds/{guild.id}/stickers");
+
+    /**
+     * Modify the given sticker. Requires the MANAGE_EMOJIS_AND_STICKERS permission. Returns the updated sticker object on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#modify-guild-sticker">
+     * https://discord.com/developers/docs/resources/sticker#modify-guild-sticker</a>
+     */
+    public static final Route GUILD_STICKER_MODIFY = Route.patch("/guilds/{guild.id}/stickers/{sticker.id}");
+
+    /**
+     * Delete the given sticker. Requires the MANAGE_EMOJIS_AND_STICKERS permission. Returns 204 No Content on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#delete-guild-sticker">
+     * https://discord.com/developers/docs/resources/sticker#delete-guild-sticker</a>
+     */
+    public static final Route GUILD_STICKER_DELETE = Route.delete("/guilds/{guild.id}/stickers/{sticker.id}");
 
     ////////////////////////////////////////////
     ////////////// Emoji Resource //////////////
@@ -771,6 +875,8 @@ public abstract class Routes {
      */
     public static final Route OTHERS_VOICE_STATE_MODIFY = Route.patch("/guilds/{guild.id}/voice-states/{user.id}");
 
+    public static final Route LIST_ACTIVE_GUILD_THREADS = Route.get("/guilds/{guild.id}/threads/active");
+
     /////////////////////////////////////////////
     ////////////// Invite Resource //////////////
     /////////////////////////////////////////////
@@ -1111,4 +1217,16 @@ public abstract class Routes {
     ///////////////////////////////////////////
 
     public static final Route INTERACTION_RESPONSE_CREATE = Route.post("/interactions/{interaction.id}/{interaction.token}/callback");
+
+    ///////////////////////////////////////////
+    //////// Stage Instance Ressource /////////
+    ///////////////////////////////////////////
+
+    public static final Route CREATE_STAGE_INSTANCE = Route.post("/stage-instances");
+
+    public static final Route GET_STAGE_INSTANCE = Route.get("/stage-instances/{channel.id}");
+
+    public static final Route MODIFY_STAGE_INSTANCE = Route.patch("/stage-instances/{channel.id}");
+
+    public static final Route DELETE_STAGE_INSTANCE = Route.delete("/stage-instances/{channel.id}");
 }

@@ -37,7 +37,12 @@ public class MessageComponent {
         switch (Type.of(data.type())) {
             case ACTION_ROW: return new ActionRow(data);
             case BUTTON: return new Button(data);
+            case SELECT_MENU_ROLE:
+            case SELECT_MENU_CHANNEL:
+            case SELECT_MENU_MENTIONABLE:
+            case SELECT_MENU_USER:
             case SELECT_MENU: return new SelectMenu(data);
+            case TEXT_INPUT: return new TextInput(data);
             default: return new MessageComponent(data);
         }
     }
@@ -70,7 +75,12 @@ public class MessageComponent {
         UNKNOWN(-1),
         ACTION_ROW(1),
         BUTTON(2),
-        SELECT_MENU(3);
+        SELECT_MENU(3),
+        TEXT_INPUT(4),
+        SELECT_MENU_USER(5),
+        SELECT_MENU_ROLE(6),
+        SELECT_MENU_MENTIONABLE(7),
+        SELECT_MENU_CHANNEL(8);
 
         private final int value;
 
@@ -87,6 +97,11 @@ public class MessageComponent {
                 case 1: return ACTION_ROW;
                 case 2: return BUTTON;
                 case 3: return SELECT_MENU;
+                case 4: return TEXT_INPUT;
+                case 5: return SELECT_MENU_USER;
+                case 6: return SELECT_MENU_ROLE;
+                case 7: return SELECT_MENU_MENTIONABLE;
+                case 8: return SELECT_MENU_CHANNEL;
                 default: return UNKNOWN;
             }
         }

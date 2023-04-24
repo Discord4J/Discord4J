@@ -21,6 +21,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.*;
 import discord4j.core.object.audit.AuditLogPart;
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -233,7 +234,7 @@ public final class Guild implements Entity {
      */
     @Deprecated
     public Region.Id getRegionId() {
-        return Region.Id.of(data.region());
+        return Region.Id.of(Possible.flatOpt(data.region()).orElse(null));
     }
 
     /**
@@ -440,12 +441,65 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the guild's sticker's IDs.
+     *
+     * @return The guild's sticker's IDs.
+     */
+    public Set<Snowflake> getStickerIds() {
+        return data.stickers().toOptional().map(ids -> ids.stream().map(Snowflake::of).collect(Collectors.toSet())).orElse(Collections.emptySet());
+    }
+
+    /**
+     * Requests to retrieve the guild's stickers.
+     *
+     * @return A {@link Flux} that continually emits guild's {@link GuildSticker stickers}. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<GuildSticker> getStickers() {
+        return gateway.getGuildStickers(getId());
+    }
+
+    /**
      * Gets the guild's emoji's IDs.
      *
      * @return The guild's emoji's IDs.
      */
     public Set<Snowflake> getEmojiIds() {
         return data.emojis().stream().map(Snowflake::of).collect(Collectors.toSet());
+    }
+
+    /**
+     * Requests to retrieve the guild's stickers, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the stickers
+     * @return A {@link Flux} that continually emits guild's {@link GuildSticker stickers}. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<GuildSticker> getStickers(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildStickers(getId());
+    }
+
+    /**
+     * Requests to retrieve the guild sticker as represented by the supplied ID.
+     *
+     * @param id The ID of the guild sticker.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildSticker} as represented by the
+     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildSticker> getGuildStickerById(final Snowflake id) {
+        return gateway.getGuildStickerById(getId(), id);
+    }
+
+    /**
+     * Requests to retrieve the guild sticker as represented by the supplied ID, using the given retrieval strategy.
+     *
+     * @param id The ID of the guild sticker.
+     * @param retrievalStrategy the strategy to use to get the guild sticker
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildSticker} as represented by the
+     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildSticker> getGuildStickerById(final Snowflake id, EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildStickerById(getId(), id);
     }
 
     /**
@@ -1076,6 +1130,21 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create a sticker.
+     *
+     * @param spec an immutable object that specifies how to create the sticker
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link GuildSticker}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildSticker> createSticker(GuildStickerCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> gateway.getRestClient().getStickerService()
+                    .createGuildSticker(getId().asLong(), spec.asRequest(), spec.reason()))
+            .map(data -> new GuildSticker(gateway, data, getId().asLong()));
+    }
+
+    /**
      * Requests to create a template based on this guild.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link LegacyGuildTemplateCreateSpec} to be operated on.
@@ -1367,6 +1436,52 @@ public final class Guild implements Entity {
                         .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(VoiceChannel.class);
+    }
+
+
+    /**
+     * Requests to create a stage channel.
+     *
+     * @param spec an immutable object that specifies how to create the stage channel
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link StageChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<VoiceChannel> createStageChannel(StageChannelCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                        () -> gateway.getRestClient().getGuildService()
+                                .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+                .map(data -> EntityUtil.getChannel(gateway, data))
+                .cast(VoiceChannel.class);
+    }
+
+    /**
+     * Requests to create an automod rule. Properties specifying how to create the rule can be set via the
+     * {@code withXxx} methods of the returned {@link AutoModRuleCreateMono}.
+     *
+     * @param name new name to set
+     * @param eventType type of event to set
+     * @param triggerType type of trigger to set
+     * @return A {@link AutoModRuleCreateMono} where, upon successful completion, emits the created {@link
+     * AutoModRule}. If an error is received, it is emitted through the {@code AutoModRuleCreateMono}.
+     */
+    public AutoModRuleCreateMono createAutoModRule(String name, AutoModRule.EventType eventType, AutoModRule.TriggerType triggerType) {
+        return AutoModRuleCreateMono.of(name, eventType.getValue(), triggerType.getValue(), this);
+    }
+
+    /**
+     * Requests to create an AutoMod Rule.
+     *
+     * @param spec an immutable object that specifies how to create the emoji
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link AutoModRule}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<AutoModRule> createAutoModRule(AutoModRuleCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                        () -> gateway.getRestClient().getAutoModService()
+                                .createAutoModRule(getId().asLong(), spec.asRequest(), spec.reason()))
+                .map(data -> new AutoModRule(gateway, data));
     }
 
     /**
@@ -1784,6 +1899,50 @@ public final class Guild implements Entity {
         return gateway.getVoiceConnectionRegistry().getVoiceConnection(getId());
     }
 
+    /**
+     * Requests to retrieve the active threads of the guild.
+     * <p>
+     * The audit log parts can be {@link ThreadListPart#combine(ThreadListPart) combined} for easier querying. For example,
+     * <pre>
+     * {@code
+     * guild.getActiveThreads()
+     *     .take(10)
+     *     .reduce(ThreadListPart::combine)
+     * }
+     * </pre>
+     *
+     * @return A {@link Flux} that continually emits the {@link ThreadListPart threads} of the guild. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Mono<ThreadListPart> getActiveThreads() {
+        return gateway.getRestClient().getGuildService()
+                .listActiveGuildThreads(data.id().asLong())
+                .map(data -> new ThreadListPart(gateway, data));
+    }
+
+    /**
+     * Requests to retrieve the automod rules of the guild. Requires the MANAGE_GUILD permission.
+     *
+     * @return A {@link Flux} that continually emits the {@link AutoModRule automod rules} of the guild. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<AutoModRule> getAutoModRules() {
+        return gateway.getRestClient().getAutoModService()
+                .getAutoModRules(getId().asLong())
+                .map(data -> new AutoModRule(gateway, data));
+    }
+
+    /**
+     * Requests to retrieve the automod rule of the guild using the ID. Requires the MANAGE_GUILD permission.
+     *
+     * @return A {@link Mono} of {@link AutoModRule} for this guild if present, or empty otherwise.
+     */
+    public Mono<AutoModRule> getAutoModRule(Snowflake autoModRuleId) {
+        return gateway.getRestClient().getAutoModService()
+            .getAutoModRule(getId().asLong(), autoModRuleId.asLong())
+            .map(data -> new AutoModRule(gateway, data));
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
@@ -2089,7 +2248,10 @@ public final class Guild implements Entity {
         SUPPRESS_PREMIUM_SUBSCRIPTIONS(1),
 
         /** Suppress server setup tips. */
-        SUPPRESS_GUILD_REMINDER_NOTIFICATIONS(2);
+        SUPPRESS_GUILD_REMINDER_NOTIFICATIONS(2),
+
+        /** Hide member join sticker reply buttons */
+        SUPPRESS_JOIN_NOTIFICATION_REPLIES(3);
 
         /** The underlying value as represented by Discord. */
         private final int value;

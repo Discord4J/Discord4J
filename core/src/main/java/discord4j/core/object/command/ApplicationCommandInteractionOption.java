@@ -21,6 +21,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.discordjson.json.ApplicationCommandInteractionOptionData;
+import discord4j.discordjson.json.ApplicationCommandInteractionResolvedData;
 import reactor.util.annotation.Nullable;
 
 import java.util.Collections;
@@ -48,6 +49,9 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     @Nullable
     private final Long guildId;
 
+    @Nullable
+    private final ApplicationCommandInteractionResolvedData resolved;
+
     /**
      * Constructs an {@code ApplicationCommandInteractionOption} with an associated {@link GatewayDiscordClient} and
      * Discord data.
@@ -57,10 +61,12 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
      */
     public ApplicationCommandInteractionOption(final GatewayDiscordClient gateway,
                                                final ApplicationCommandInteractionOptionData data,
-                                               @Nullable final Long guildId) {
+                                               @Nullable final Long guildId,
+                                               @Nullable final ApplicationCommandInteractionResolvedData resolved) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
         this.guildId = guildId;
+        this.resolved = resolved;
     }
 
     /**
@@ -75,7 +81,7 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     // TODO: Documentation
     public Optional<ApplicationCommandInteractionOptionValue> getValue() {
         return data.value().toOptional()
-                .map(value -> new ApplicationCommandInteractionOptionValue(gateway, guildId, data.type(), value));
+                .map(value -> new ApplicationCommandInteractionOptionValue(gateway, guildId, data.type(), value, resolved));
     }
 
     /**
@@ -94,7 +100,7 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
      */
     public List<ApplicationCommandInteractionOption> getOptions() {
         return data.options().toOptional().orElse(Collections.emptyList()).stream()
-                .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId))
+                .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId, resolved))
                 .collect(Collectors.toList());
     }
 
@@ -105,9 +111,20 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
      * @return The option corresponding to the provided name, if present.
      */
     public Optional<ApplicationCommandInteractionOption> getOption(final String name) {
-        return getOptions().stream()
-                .filter(data -> data.getName().equals(name))
-                .findFirst();
+        return data.options().toOptional().orElse(Collections.emptyList()).stream()
+                .filter(data -> data.name().equals(name))
+                .findFirst()
+                .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId, resolved));
+    }
+
+    /**
+     * Whether this option is currently focused or not.
+     * <p>
+     * This will always return false unless this option is from an autocomplete interaction.
+     * @return Whether this option is currently focused or not.
+     */
+    public boolean isFocused() {
+        return data.focused().toOptional().orElse(false);
     }
 
     @Override

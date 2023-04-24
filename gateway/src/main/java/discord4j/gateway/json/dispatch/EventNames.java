@@ -57,6 +57,7 @@ public abstract class EventNames {
     public static final String APPLICATION_COMMAND_CREATE = "APPLICATION_COMMAND_CREATE";
     public static final String APPLICATION_COMMAND_UPDATE = "APPLICATION_COMMAND_UPDATE";
     public static final String APPLICATION_COMMAND_DELETE = "APPLICATION_COMMAND_DELETE";
+    public static final String APPLICATION_COMMAND_PERMISSIONS_UPDATE = "APPLICATION_COMMAND_PERMISSIONS_UPDATE";
     public static final String INTERACTION_CREATE = "INTERACTION_CREATE";
     public static final String THREAD_CREATE = "THREAD_CREATE";
     public static final String THREAD_UPDATE = "THREAD_UPDATE";
@@ -64,7 +65,14 @@ public abstract class EventNames {
     public static final String THREAD_LIST_SYNC = "THREAD_LIST_SYNC";
     public static final String THREAD_MEMBER_UPDATE = "THREAD_MEMBER_UPDATE";
     public static final String THREAD_MEMBERS_UPDATE = "THREAD_MEMBERS_UPDATE";
-
+    public static final String STAGE_INSTANCE_CREATE = "STAGE_INSTANCE_CREATE";
+    public static final String STAGE_INSTANCE_UPDATE = "STAGE_INSTANCE_UPDATE";
+    public static final String STAGE_INSTANCE_DELETE = "STAGE_INSTANCE_DELETE";
+    public static final String GUILD_AUDIT_LOG_ENTRY_CREATE = "GUILD_AUDIT_LOG_ENTRY_CREATE";
+    public static final String AUTO_MODERATION_RULE_CREATE = "AUTO_MODERATION_RULE_CREATE";
+    public static final String AUTO_MODERATION_RULE_UPDATE = "AUTO_MODERATION_RULE_UPDATE";
+    public static final String AUTO_MODERATION_RULE_DELETE = "AUTO_MODERATION_RULE_DELETE";
+    public static final String AUTO_MODERATION_ACTION_EXECUTION = "AUTO_MODERATION_ACTION_EXECUTION";
 
     // Ignored
     public static final String PRESENCES_REPLACE = "PRESENCES_REPLACE";

@@ -34,6 +34,7 @@ import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.*;
 import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.util.IllegalReferenceCountException;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -51,10 +52,7 @@ import reactor.util.retry.Retry;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -137,6 +135,7 @@ public class DefaultGatewayClient implements GatewayClient {
     // Gateway session state tracking across multiple ws connections
     private final AtomicInteger sequence = new AtomicInteger(0);
     private final AtomicReference<String> sessionId = new AtomicReference<>("");
+    private final AtomicReference<String> resumeUrl = new AtomicReference<>();
     private final AtomicLong lastSent = new AtomicLong(0);
     private final AtomicLong lastAck = new AtomicLong(0);
     private final AtomicInteger missedAck = new AtomicInteger(0);
@@ -316,7 +315,7 @@ public class DefaultGatewayClient implements GatewayClient {
                             .websocket(WebsocketClientSpec.builder()
                                     .maxFramePayloadLength(Integer.MAX_VALUE)
                                     .build())
-                            .uri(gatewayUrl)
+                            .uri(buildGatewayUrl(gatewayUrl))
                             .handle(sessionHandler::handle)
                             .contextWrite(LogUtil.clearContext())
                             .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2()))
@@ -344,6 +343,13 @@ public class DefaultGatewayClient implements GatewayClient {
                         throw new IllegalStateException("execute can only be subscribed once");
                     }
                 });
+    }
+
+    private String buildGatewayUrl(String identifyGatewayUrl) {
+        QueryStringDecoder query = new QueryStringDecoder(identifyGatewayUrl);
+        return Optional.ofNullable(resumeUrl.get())
+                .map(url -> url + '?' + query.rawQuery())
+                .orElse(identifyGatewayUrl);
     }
 
     private HttpClient initHttpClient() {
@@ -405,8 +411,9 @@ public class DefaultGatewayClient implements GatewayClient {
 
     private Mono<Void> handleDispatch(GatewayPayload<Dispatch> payload) {
         if (payload.getData() instanceof Ready) {
-            String newSessionId = ((Ready) payload.getData()).sessionId();
-            sessionId.set(newSessionId);
+            Ready ready = (Ready) payload.getData();
+            sessionId.set(ready.sessionId());
+            resumeUrl.set(ready.resumeGatewayUrl());
         }
         if (payload.getData() != null) {
             emissionStrategy.emitNext(dispatch, payload.getData());
@@ -431,6 +438,7 @@ public class DefaultGatewayClient implements GatewayClient {
             emissionStrategy.emitNext(outbound,
                     GatewayPayload.resume(ImmutableResume.of(token, sessionId.get(), sequence.get())));
         } else {
+            resumeUrl.set(null);
             sessionHandler.error(new InvalidSessionException(currentContext,
                     "Reconnecting due to non-resumable session invalidation"));
         }

@@ -17,15 +17,13 @@
 
 package discord4j.core;
 
-import discord4j.common.store.Store;
-import discord4j.common.store.legacy.LegacyStoreLayout;
 import discord4j.common.util.Snowflake;
 import discord4j.core.command.CommandListener;
 import discord4j.core.support.AddRandomReaction;
 import discord4j.core.support.Commands;
 import discord4j.core.support.VoiceSupport;
-import discord4j.store.jdk.JdkStoreService;
 import discord4j.discordjson.json.ApplicationInfoData;
+import discord4j.gateway.intent.IntentSet;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -39,7 +37,7 @@ public class ExampleVoice {
     public static void main(String[] args) {
         GatewayDiscordClient client = DiscordClient.create(System.getenv("token"))
                 .gateway()
-                .setStore(Store.fromLayout(LegacyStoreLayout.of(new JdkStoreService())))
+                .setEnabledIntents(IntentSet.all())
                 .login()
                 .block();
 

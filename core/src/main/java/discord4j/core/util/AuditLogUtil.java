@@ -38,7 +38,7 @@ public class AuditLogUtil {
         options.deleteMemberDays().toOptional().ifPresent(it -> map.put(OptionKey.DELETE_MEMBER_DAYS.getField(), it));
         options.membersRemoved().toOptional().ifPresent(it -> map.put(OptionKey.MEMBERS_REMOVED.getField(), it));
         options.channelId().toOptional().ifPresent(it -> map.put(OptionKey.CHANNEL_ID.getField(), it.asString()));
-        options.messageId().toOptional().ifPresent(it -> map.put(OptionKey.COUNT.getField(), it.asString()));
+        options.messageId().toOptional().ifPresent(it -> map.put(OptionKey.MESSAGE_ID.getField(), it.asString()));
         options.count().toOptional().ifPresent(it -> map.put(OptionKey.COUNT.getField(), it));
         options.id().toOptional().ifPresent(it -> map.put(OptionKey.ID.getField(), it.asString()));
         options.type().toOptional().ifPresent(it -> map.put(OptionKey.TYPE.getField(), it));
