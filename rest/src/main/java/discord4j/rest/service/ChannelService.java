@@ -146,15 +146,6 @@ public class ChannelService extends RestService {
                 .bodyToMono(Void.class);
     }
 
-    @Experimental
-    public Mono<Void> suppressEmbeds(long channelId, long messageId, SuppressEmbedsRequest request) {
-        return Routes.MESSAGE_SUPPRESS_EMBEDS.newRequest(channelId, messageId)
-                .header("content-type", "application/json")
-                .body(request)
-                .exchange(getRouter())
-                .bodyToMono(Void.class);
-    }
-
     public Mono<MessageData> publishMessage(long channelId, long messageId) {
         return Routes.CROSSPOST_MESSAGE.newRequest(channelId, messageId)
                 .exchange(getRouter())

@@ -280,18 +280,6 @@ public abstract class Routes {
     public static final Route MESSAGE_DELETE_BULK = Route.post("/channels/{channel.id}/messages/bulk-delete");
 
     /**
-     * Enable/disable suppression of embeds on a Message. This endpoint requires the 'MANAGE_MESSAGES' permission to
-     * be present for the current user.
-     * <p>
-     * Returns a 204 empty response on success. Fires a Message Update Gateway event.
-     *
-     * @see <a href="https://discord.com/developers/docs/resources/channel#suppress-message-embeds">
-     * https://discord.com/developers/docs/resources/channel#suppress-message-embeds</a>
-     */
-    @Experimental
-    public static final Route MESSAGE_SUPPRESS_EMBEDS = Route.post("/channels/{channel.id}/messages/{message.id}/suppress-embeds");
-
-    /**
      * Crosspost a Message into all guilds what follow the news channel indicated. This endpoint requires the
      * 'DISCOVERY' feature to be present for the guild and requires the 'SEND_MESSAGES' permission, if the current user
      * sent the message, or additionally the 'MANAGE_MESSAGES' permission, for all other messages, to be present for

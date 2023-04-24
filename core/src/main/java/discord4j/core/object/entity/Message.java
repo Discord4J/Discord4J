@@ -656,21 +656,6 @@ public final class Message implements Entity {
     }
 
     /**
-     * Requests to suppress all embeds in this message. If the message have the embeds suppressed then this action
-     * can undo the suppressed embeds.
-     *
-     * @param suppress Determine if you need suppress or not the embeds.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the process has been
-     * completed. If an error is received, it is emitted through the {@code Mono}.
-     */
-    @Experimental
-    public Mono<Void> suppressEmbeds(final boolean suppress) {
-        return gateway.getRestClient().getChannelService()
-                .suppressEmbeds(getChannelId().asLong(), getId().asLong(),
-                        SuppressEmbedsRequest.builder().suppress(suppress).build());
-    }
-
-    /**
      * Requests to add a reaction on this message.
      *
      * @param emoji The reaction to add on this message.
