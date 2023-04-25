@@ -2250,8 +2250,14 @@ public final class Guild implements Entity {
         /** Suppress server setup tips. */
         SUPPRESS_GUILD_REMINDER_NOTIFICATIONS(2),
 
-        /** Hide member join sticker reply buttons */
-        SUPPRESS_JOIN_NOTIFICATION_REPLIES(3);
+        /** Hide member join sticker reply buttons. */
+        SUPPRESS_JOIN_NOTIFICATION_REPLIES(3),
+
+        /** Suppress role subscription purchase and renewal notifications. */
+        SUPPRESS_ROLE_SUBSCRIPTION_PURCHASE_NOTIFICATIONS(4),
+
+        /** Hide role subscription sticker reply buttons. */
+        SUPPRESS_ROLE_SUBSCRIPTION_PURCHASE_NOTIFICATION_REPLIES(5);
 
         /** The underlying value as represented by Discord. */
         private final int value;
