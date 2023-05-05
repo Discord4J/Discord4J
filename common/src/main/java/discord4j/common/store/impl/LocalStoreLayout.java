@@ -828,6 +828,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                     (p, u) -> p.withUser(PartialUserData.builder()
                             .id(u.id())
                             .avatar(Possible.of(u.avatar()))
+                            .globalName(Possible.of(u.globalName()))
                             .username(u.username())
                             .discriminator(u.discriminator())
                             .build())));
@@ -844,6 +845,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         ImmutablePartialUserData partialUserData = ImmutablePartialUserData.copyOf(newPresence.user());
         return UserData.builder()
                 .from(oldUser)
+                .globalName(or(Possible.flatOpt(partialUserData.globalName()), oldUser::globalName))
                 .username(partialUserData.usernameOrElse(oldUser.username()))
                 .discriminator(partialUserData.discriminatorOrElse(oldUser.discriminator()))
                 .avatar(or(Possible.flatOpt(partialUserData.avatar()), oldUser::avatar))

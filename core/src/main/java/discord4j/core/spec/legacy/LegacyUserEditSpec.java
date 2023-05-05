@@ -32,7 +32,7 @@ public class LegacyUserEditSpec implements LegacySpec<UserModifyRequest> {
     private Possible<String> avatar = Possible.absent();
 
     /**
-     * Sets the user's username. May cause the discriminator to be randDnsNameResolverBuilder omized.
+     * Sets the user's username. May cause the discriminator to be randomized.
      *
      * @param username The user's username.
      * @return This spec.

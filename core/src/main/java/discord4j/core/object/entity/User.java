@@ -85,7 +85,18 @@ public class User implements Entity {
     }
 
     /**
-     * Gets the user's username, not unique across the platform.
+     * Gets the user's global username, not enforced to be unique across the platform.
+     * May be empty if the user has not set a global username.
+     *
+     * @return The user's global name
+     */
+    public final Optional<String> getGlobalName() {
+        return data.globalName();
+    }
+
+    /**
+     * Gets the user's username.
+     * May or may not be unique across the platform (due to the system ongoing change)
      *
      * @return The user's username, not unique across the platform.
      */
@@ -99,17 +110,22 @@ public class User implements Entity {
      * The discriminator is randomly generated, but can be changed if the user has a nitro subscription.
      *
      * @return The user's 4-digit discriminator.
+     * @deprecated
      */
+    @Deprecated
     public final String getDiscriminator() {
         return data.discriminator();
     }
 
     /**
-     * Gets the user's username and discriminator separated by a #
-     * This is unique across the discord platform, but may change.
+     * Gets the user's username and discriminator separated by a # or its username if the user is using the new system
+     *
      * @return {@link User#getUsername()}#{@link User#getDiscriminator()}
      */
     public final String getTag() {
+        if (getDiscriminator() == null || Integer.parseInt(getDiscriminator()) == 0) // new system
+            return getUsername();
+
         return getUsername() + "#" + getDiscriminator();
     }
 
@@ -170,6 +186,9 @@ public class User implements Entity {
      * @return The default avatar URL for this user.
      */
     public final String getDefaultAvatarUrl() {
+        if (getDiscriminator() == null || Integer.parseInt(getDiscriminator()) == 0) // new system
+            return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, (getId().asLong() >> 22) % 5), PNG);
+
         return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, Integer.parseInt(getDiscriminator()) % 5), PNG);
     }
 
@@ -346,7 +365,7 @@ public class User implements Entity {
         VERIFIED_BOT(16),
 
         VERIFIED_BOT_DEVELOPER(17),
-        
+
         DISCORD_CERTIFIED_MODERATOR(18),
 
         BOT_HTTP_INTERACTIONS(19),

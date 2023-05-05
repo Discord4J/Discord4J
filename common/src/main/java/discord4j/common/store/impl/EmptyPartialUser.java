@@ -33,11 +33,17 @@ class EmptyPartialUser implements PartialUserData {
     }
 
     @Override
+    public Possible<Optional<String>> globalName() {
+        return Possible.absent();
+    }
+
+    @Override
     public Possible<String> username() {
         return Possible.absent();
     }
 
     @Override
+    @Deprecated
     public Possible<String> discriminator() {
         return Possible.absent();
     }
