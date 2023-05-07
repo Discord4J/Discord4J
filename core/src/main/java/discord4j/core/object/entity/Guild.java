@@ -735,6 +735,45 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the id of the channel where admins and moderators of Community guilds receive safety alerts from Discord, if
+     * present.
+     *
+     * @return The id of the channel where admins and moderators of Community guilds receive safety alerts from Discord, if
+     * present.
+     */
+    public Optional<Snowflake> getSafetyAlertsChannelId() {
+        return data.safetyAlertsChannelId().map(Snowflake::of);
+    }
+
+    /**
+     * Requests to retrieve the channel where admins and moderators of Community guilds receive safety alerts from Discord,
+     * if present.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where admins
+     * and moderators of Community guilds receive safety alerts from Discord, if present. If an error is received, it is
+     * emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> getPublicUpdatesChannel() {
+        return Mono.justOrEmpty(getSafetyAlertsChannelId()).flatMap(gateway::getChannelById).cast(TextChannel.class);
+    }
+
+    /**
+     * Requests to retrieve the channel where admins and moderators of Community guilds receive safety alerts from Discord,
+     * if present,
+     * using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the rules channel
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where admins
+     * and moderators of Community guilds receive safety alerts from Discord, if present. If an error is received, it is
+     * emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> getPublicUpdatesChannel(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getSafetyAlertsChannelId())
+            .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id))
+            .cast(TextChannel.class);
+    }
+
+    /**
      * Gets the maximum amount of users in a video channel, if present.
      *
      * @return The maximum amount of users in a video channel, if present.
