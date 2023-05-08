@@ -1943,19 +1943,6 @@ public final class Guild implements Entity {
             .map(data -> new ScheduledEvent(gateway, data));
     }
 
-    /**
-     * Requests to create a guild scheduled event with the provided mandatory parameters
-     *
-     * @param name The name of the scheduled event
-     * @param privacyLevel the {@link discord4j.core.object.entity.ScheduledEvent.PrivacyLevel} to set
-     * @param scheduledStartTime the scheduled start time of the event
-     * @param entityType the {@link discord4j.core.object.entity.ScheduledEvent.EntityType} where the event will take place
-     * @return A {@link ScheduledEventCreateMono} which, upon completion, returns the created {@link ScheduledEvent}
-     */
-    public ScheduledEventCreateMono createScheduledEvent(String name, int privacyLevel, Instant scheduledStartTime, int entityType) {
-        return ScheduledEventCreateMono.of(name, privacyLevel, scheduledStartTime, entityType, this);
-    }
-
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
