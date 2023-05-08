@@ -56,18 +56,18 @@ public class ScheduledEventUser implements DiscordObject {
     }
 
     /**
-     * Gets the ID of the event the user is interested in.
+     * Gets the ID of the event the user is subscribed to.
      *
-     * @return The ID of the event the user is interested in.
+     * @return The ID of the event the user is subscribed to.
      */
     public Snowflake getEventId() {
         return Snowflake.of(data.guildScheduledEventId());
     }
 
     /**
-     * Gets the {@link User} interested in the event.
+     * Gets the {@link User} subscribed to the event.
      *
-     * @return The {@code User} interested in the event.
+     * @return The {@code User} subscribed to the event.
      */
     public User getUser() {
         return new User(gateway, data.user());

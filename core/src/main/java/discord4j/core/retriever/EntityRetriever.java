@@ -215,7 +215,7 @@ public interface EntityRetriever {
     Flux<ScheduledEvent> getScheduledEvents(Snowflake guildId);
 
     /**
-     * Requests to retrieve the users that have RSVPed as "interested" to the event represented by the supplied IDs.
+     * Requests to retrieve the users that subscribed to the event represented by the supplied IDs.
      *
      * @return A {@link Flux} that continually emits the event's {@link ScheduledEventUser users}.
      * If an error is received, it is emitted through the {@code Flux}.

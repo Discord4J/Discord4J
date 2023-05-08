@@ -344,7 +344,7 @@ public class RestGuild {
      * Requests to retrieve the scheduled event under this guild.
      *
      * @param eventId The ID of the event
-     * @param withUserCount Whether to optionally include the number of "interested" users
+     * @param withUserCount Whether to optionally include the number of subscribed users
      * @return A {@link Mono} where, upon successful completion, emits the {@link GuildScheduledEventData}. If an
      *  error is received, it is emitted through the {@code Mono}.
      */
@@ -357,7 +357,7 @@ public class RestGuild {
     /**
      * Requests to retrieve the scheduled events under this guild.
      *
-     * @param withUserCount Whether to optionally include the number of "interested" users for each event
+     * @param withUserCount Whether to optionally include the number of subscribed users for each event
      * @return A {@link Flux} that continually emits all the  {@link GuildScheduledEventData} associated with this guild.
      * If an error is received, it is emitted through the {@code Flux}.
      */

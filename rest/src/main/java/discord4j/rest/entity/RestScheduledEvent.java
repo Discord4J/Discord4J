@@ -117,14 +117,14 @@ public class RestScheduledEvent {
     }
 
     /**
-     * Request to retrieve <i>all</i> interested users <i>before</i> the specified ID.
+     * Request to retrieve <i>all</i> subscribed users <i>before</i> the specified ID.
      * <p>
      * The returned {@code Flux} will emit items in <i>reverse-</i>chronological order (newest to oldest). It is
      * recommended to limit the emitted items by invoking either {@link Flux#takeWhile(Predicate)} (to retrieve IDs
      * within a specified range) or {@link Flux#take(long)} (to retrieve a specific amount of IDs).
      * <p>
      * The following example will get <i>all</i> users from {@code userId} to {@code myOtherUserId}:
-     * {@code getInterestedUsersBefore(userId).takeWhile(user -> user.getId().compareTo(myOtherUserId) >= 0)}
+     * {@code getSubscribedUsersBefore(userId).takeWhile(user -> user.getId().compareTo(myOtherUserId) >= 0)}
      *
      * @param userId The ID of the <i>newest</i> user to retrieve.
      * @param withMember Whether to optionally include the member object in the returned data (if the user is a member).
@@ -134,7 +134,7 @@ public class RestScheduledEvent {
      * <a href="https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event-users">
      * Get Guild Scheduled Event Users</a>
      */
-    public Flux<GuildScheduledEventUserData> getInterestedUsersBefore(Snowflake userId, @Nullable Boolean withMember) {
+    public Flux<GuildScheduledEventUserData> getSubscribedUsersBefore(Snowflake userId, @Nullable Boolean withMember) {
         Function<Map<String, Object>, Flux<GuildScheduledEventUserData>> doRequest = params -> {
             Optional.ofNullable(withMember).ifPresent(value -> params.put("with_member", value));
             return restClient.getGuildService().getScheduledEventUsers(guildId, id, params);
@@ -143,14 +143,14 @@ public class RestScheduledEvent {
     }
 
     /**
-     * Request to retrieve <i>all</i> interested users <i>after</i> the specified ID.
+     * Request to retrieve <i>all</i> subscribed users <i>after</i> the specified ID.
      * <p>
      * The returned {@code Flux} will emit items in chronological order (older to newest). It is recommended to limit
      * the emitted items by invoking either {@link Flux#takeWhile(Predicate)} (to retrieve IDs within a specified range)
      * or {@link Flux#take(long)} (to retrieve a specific amount of IDs).
      * <p>
      * The following example will get <i>all</i> users from {@code userId} to {@code myOtherUserId}:
-     * {@code getInterestedUsersAfter(userId).takeWhile(user -> user.getId().compareTo(myOtherUserId) <= 0)}
+     * {@code getSubscribedUsersAfter(userId).takeWhile(user -> user.getId().compareTo(myOtherUserId) <= 0)}
      *
      * @param userId The ID of the <i>oldest</i> user to retrieve.
      * @param withMember Whether to optionally include the member object in the returned data (if the user is a member).
@@ -160,7 +160,7 @@ public class RestScheduledEvent {
      * <a href="https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event-users">
      * Get Guild Scheduled Event Users</a>
      */
-    public Flux<GuildScheduledEventUserData> getInterestedUsersAfter(Snowflake userId, @Nullable Boolean withMember) {
+    public Flux<GuildScheduledEventUserData> getSubscribedUsersAfter(Snowflake userId, @Nullable Boolean withMember) {
         Function<Map<String, Object>, Flux<GuildScheduledEventUserData>> doRequest = params -> {
             Optional.ofNullable(withMember).ifPresent(value -> params.put("with_member", value));
             return restClient.getGuildService().getScheduledEventUsers(guildId, id, params);
@@ -171,7 +171,7 @@ public class RestScheduledEvent {
     /**
      * Retrieve this scheduled event's data upon subscription.
      *
-     * @param withUserCount Whether to optionally include the "interested" user count in the returned data.
+     * @param withUserCount Whether to optionally include the subscribed user count in the returned data.
      * @return A {@link Mono} where, upon successful completion, emits the {@link GuildScheduledEventData} belonging to
      * this scheduled event. If an error is received, it is emitted through the {@code Mono}.
      */

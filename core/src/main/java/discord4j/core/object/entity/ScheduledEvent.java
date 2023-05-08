@@ -217,22 +217,22 @@ public class ScheduledEvent implements Entity {
     }
 
     /**
-     * Gets the count of users who have said they are "interested" in the event, if present.
+     * Gets the count of users who have subscribed to the event, if present.
      *
-     * @return The count of users who have said they are "interested" in the event, if present.
+     * @return The count of users who have subscribed to the event, if present.
      */
-    public Optional<Integer> getInterestedUserCount() {
+    public Optional<Integer> getSubscribedUserCount() {
         return data.userCount().toOptional();
     }
 
     /**
-     * Requests to retrieve the interested users for this event.
+     * Requests to retrieve the users subscribed to this event.
      *
      * @param withMemberData requests to return member data along with user data
      * @return A {@link Flux} that continually emits <i>all</i> {@link ScheduledEventUser users} <i>after</i>
      * the specified ID. If an error is received, it is emitted through the {@code Flux}.
      */
-    public Flux<ScheduledEventUser> getInterestedUsers(boolean withMemberData) {
+    public Flux<ScheduledEventUser> getSubscribedUsers(boolean withMemberData) {
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("with_member", withMemberData);
 
@@ -241,30 +241,30 @@ public class ScheduledEvent implements Entity {
     }
 
     /**
-     * Requests to retrieve the interested users for this event <li>before</li> the given user ID.
+     * Requests to retrieve the users subscribed to this event <li>before</li> the given user ID.
      *
      * @param userId         the ID of the <li>newest</li> user to retrieve
      * @param withMemberData requests to return member data along with user data
      * @return A {@link Flux} that continually emits <i>all</i> {@link ScheduledEventUser users} <i>after</i>
      * the specified ID. If an error is received, it is emitted through the {@code Flux}.
      */
-    public Flux<ScheduledEventUser> getInterestedUsersBefore(Snowflake userId, boolean withMemberData) {
+    public Flux<ScheduledEventUser> getSubscribedUsersBefore(Snowflake userId, boolean withMemberData) {
         return gateway.getRestClient().getScheduledEventById(getGuildId(), getId())
-            .getInterestedUsersBefore(userId, withMemberData)
+            .getSubscribedUsersBefore(userId, withMemberData)
             .map(data -> new ScheduledEventUser(gateway, data, getGuildId()));
     }
 
     /**
-     * Requests to retrieve the interested users for this event <li>after</li> the given user ID.
+     * Requests to retrieve the users subscribed to this event <li>after</li> the given user ID.
      *
      * @param userId         the ID of the <li>oldest</li> user to retrieve
      * @param withMemberData requests to return member data along with user data
      * @return A {@link Flux} that continually emits <i>all</i> {@link ScheduledEventUser users} <i>after</i>
      * the specified ID. If an error is received, it is emitted through the {@code Flux}.
      */
-    public Flux<ScheduledEventUser> getInterestedUsersAfter(Snowflake userId, boolean withMemberData) {
+    public Flux<ScheduledEventUser> getSubscribedUsersAfter(Snowflake userId, boolean withMemberData) {
         return gateway.getRestClient().getScheduledEventById(getGuildId(), getId())
-            .getInterestedUsersAfter(userId, withMemberData)
+            .getSubscribedUsersAfter(userId, withMemberData)
             .map(data -> new ScheduledEventUser(gateway, data, getGuildId()));
     }
 
