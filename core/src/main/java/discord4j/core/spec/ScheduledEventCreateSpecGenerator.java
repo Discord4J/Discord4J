@@ -24,7 +24,7 @@ public interface ScheduledEventCreateSpecGenerator extends AuditSpec<GuildSchedu
 
     String name();
 
-    int privacyLevel();
+    ScheduledEvent.PrivacyLevel privacyLevel();
 
     Instant scheduledStartTime();
 
@@ -32,7 +32,7 @@ public interface ScheduledEventCreateSpecGenerator extends AuditSpec<GuildSchedu
 
     Possible<String> description();
 
-    int entityType();
+    ScheduledEvent.EntityType entityType();
 
     //TODO Add image support
 
@@ -42,11 +42,11 @@ public interface ScheduledEventCreateSpecGenerator extends AuditSpec<GuildSchedu
             .channelId(mapPossible(channelId(), snowflake -> Id.of(snowflake.asLong())))
             .entityMetadata(mapPossible(entityMetadata(), ScheduledEventEntityMetadataSpecGenerator::asRequest))
             .name(name())
-            .privacyLevel(privacyLevel())
+            .privacyLevel(privacyLevel().getValue())
             .scheduledStartTime(scheduledStartTime())
             .scheduledEndTime(scheduledEndTime())
             .description(description())
-            .entityType(entityType())
+            .entityType(entityType().getValue())
             .build();
     }
 }
