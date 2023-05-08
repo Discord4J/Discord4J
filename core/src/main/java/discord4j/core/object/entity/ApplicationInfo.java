@@ -191,9 +191,9 @@ public final class ApplicationInfo implements Entity {
     }
 
     /**
-     * Returns the public flags of this {@link InteractionInfo}.
+     * Returns the public flags of this {@link ApplicationInfo}.
      *
-     * @return A {@code EnumSet} with the public flags of this interaction.
+     * @return A {@code EnumSet} with the public flags of this application.
      */
     public EnumSet<Flag> getFlags() {
         int publicFlags = data.flags().toOptional().orElse(0);
@@ -213,9 +213,12 @@ public final class ApplicationInfo implements Entity {
         return EntityUtil.hashCode(this);
     }
 
-    /** Describes the flags of a interaction.
-     * @see <a href="https://discord.com/developers/docs/resources/application#application-object-application-flags">Discord Docs - Interaction Flags</a>
-     **/
+    /**
+     * Describes the flags of an application.
+     *
+     * @see
+     * <a href="https://discord.com/developers/docs/resources/application#application-object-application-flags">Discord</a>
+     */
     public enum Flag {
         APPLICATION_AUTO_MODERATION_RULE_CREATE_BADGE(6),
         GATEWAY_PRESENCE(12),
@@ -235,7 +238,7 @@ public final class ApplicationInfo implements Entity {
         private final int flag;
 
         /**
-         * Constructs a {@code InteractionInfo.Flag}.
+         * Constructs a {@code ApplicationInfo.Flag}.
          */
         Flag(final int value) {
             this.value = value;
@@ -261,21 +264,21 @@ public final class ApplicationInfo implements Entity {
         }
 
         /**
-         * Gets the flags of interaction. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
-         * equal ({@code ==}) to the supplied {@code value}.
+         * Gets the flags of an application. It is guaranteed that invoking {@link #getValue()} from the returned enum
+         * will be equal ({@code ==}) to the supplied {@code value}.
          *
          * @param value The flags value as represented by Discord.
          * @return The {@link EnumSet} of flags.
          */
         public static EnumSet<Flag> of(final int value) {
-            final EnumSet<Flag> userFlags = EnumSet.noneOf(Flag.class);
+            final EnumSet<Flag> flagSet = EnumSet.noneOf(Flag.class);
             for (Flag flag : Flag.values()) {
                 long flagValue = flag.getFlag();
                 if ((flagValue & value) == flagValue) {
-                    userFlags.add(flag);
+                    flagSet.add(flag);
                 }
             }
-            return userFlags;
+            return flagSet;
         }
     }
 
