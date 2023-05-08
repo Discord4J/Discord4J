@@ -59,6 +59,11 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         dispatchTypes.put(EventNames.GUILD_ROLE_CREATE, GuildRoleCreate.class);
         dispatchTypes.put(EventNames.GUILD_ROLE_UPDATE, GuildRoleUpdate.class);
         dispatchTypes.put(EventNames.GUILD_ROLE_DELETE, GuildRoleDelete.class);
+        dispatchTypes.put(EventNames.GUILD_SCHEDULED_EVENT_CREATE, GuildScheduledEventCreate.class);
+        dispatchTypes.put(EventNames.GUILD_SCHEDULED_EVENT_UPDATE, GuildScheduledEventUpdate.class);
+        dispatchTypes.put(EventNames.GUILD_SCHEDULED_EVENT_DELETE, GuildScheduledEventDelete.class);
+        dispatchTypes.put(EventNames.GUILD_SCHEDULED_EVENT_USER_ADD, GuildScheduledEventUserAdd.class);
+        dispatchTypes.put(EventNames.GUILD_SCHEDULED_EVENT_USER_REMOVE, GuildScheduledEventUserRemove.class);
         dispatchTypes.put(EventNames.MESSAGE_CREATE, MessageCreate.class);
         dispatchTypes.put(EventNames.MESSAGE_UPDATE, MessageUpdate.class);
         dispatchTypes.put(EventNames.MESSAGE_DELETE, MessageDelete.class);
