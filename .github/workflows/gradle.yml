@@ -31,40 +31,52 @@ jobs:
       matrix:
         java: [ 8, 11, 17 ]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v1
+      - name: PR Check (PR Blocked by Dependency)
+        if: ${{ contains(toJson(github.event.pull_request.labels.*.name), 'PR depends on PR') }}
+        run: echo "::warning::This PR was marked with the label 'PR depends on PR' this can cause issues in building"
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java }}
+          distribution: 'temurin'
       - name: Build with Gradle
         run: ./gradlew build
-        if: |
-          !contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.pull_request.title, '[ci skip]')
   release:
     name: Publish artifacts
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
+    if: ${{ github.event_name != 'pull_request' && ( (vars.runReleaseOnPush || 'true') == 'true' || contains(github.event.head_commit.message, '[release]') ) }}
     needs: build
+    env:
+        HAS_CREDENTIALS: ${{ secrets.signingKey != '' && secrets.signingPassword != '' && secrets.sonatypeUsername != '' && secrets.sonatypePassword != '' }}
     steps:
-      - uses: actions/checkout@v2
+      - name: Validate repository secrets for publish
+        if: ${{ env.HAS_CREDENTIALS != 'true' }}
+        run: |
+            echo '### Release Failed ❌' >> $GITHUB_STEP_SUMMARY
+            echo 'This repository does not have all required secrets: signingKey, signingPassword, sonatypeUsername or sonatypePassword).' >> $GITHUB_STEP_SUMMARY
+            echo "::error::This repository does not have all required secrets: signingKey, signingPassword, sonatypeUsername or sonatypePassword)."
+            exit -1
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: actions/cache@v1
+      - uses: actions/cache@v3
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Set up JDK
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
           java-version: 17
+          distribution: 'temurin'
       - name: Publish with Gradle
         run: ./gradlew -x test publish
         env:
