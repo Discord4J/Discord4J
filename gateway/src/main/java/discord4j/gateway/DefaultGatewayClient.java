@@ -367,7 +367,7 @@ public class DefaultGatewayClient implements GatewayClient {
         final Properties properties = GitProperties.getProperties();
         final String version = properties.getProperty(GitProperties.APPLICATION_VERSION, "3");
         final String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
-        return "DiscordBot(" + url + ", " + version + ")";
+        return "DiscordBot (" + url + ", " + version + ")";
     }
 
     private void notifyObserver(ConnectionObserver.State state) {

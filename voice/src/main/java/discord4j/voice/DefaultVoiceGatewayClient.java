@@ -154,7 +154,7 @@ public class DefaultVoiceGatewayClient {
         this.ipDiscoveryRetrySpec = Objects.requireNonNull(options.getIpDiscoveryRetrySpec());
 
         this.httpClient = reactorResources.getHttpClient()
-                .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)"));
+                .headers(headers -> headers.add(USER_AGENT, "DiscordBot (https://discord4j.com, 3)"));
         this.voiceSocket = new VoiceSocket(reactorResources.getUdpClient());
         this.heartbeat = new ResettableInterval(reactorResources.getTimerTaskScheduler());
         this.cleanup = Disposables.swap();
