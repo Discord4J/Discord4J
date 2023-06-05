@@ -1,0 +1,22 @@
+dependencies {
+    api project(':rest')
+
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_version"
+    testImplementation "ch.qos.logback:logback-classic:$logback_version"
+    testImplementation "io.projectreactor:reactor-test"
+}
+
+javadoc {
+    dependsOn project(':rest').javadoc
+
+    options.linksOffline rootProject.buildDocsUrl('discord4j-common'), project(':common').javadoc.destinationDir.toURI() as String
+    options.linksOffline rootProject.buildDocsUrl('discord4j-rest'), project(':rest').javadoc.destinationDir.toURI() as String
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': archivesBaseName,
+                'Implementation-Version': archiveVersion,
+                'Automatic-Module-Name': 'discord4j.oauth2'
+    }
+}
