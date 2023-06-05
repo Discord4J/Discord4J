@@ -19,6 +19,7 @@ package discord4j.rest.request;
 
 import discord4j.common.ReactorResources;
 import discord4j.rest.http.ExchangeStrategies;
+import discord4j.rest.http.client.AuthorizationScheme;
 import discord4j.rest.response.ResponseFunction;
 
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.Objects;
  */
 public class RouterOptions {
 
+    private final AuthorizationScheme authorizationScheme;
     private final String token;
     private final ReactorResources reactorResources;
     private final ExchangeStrategies exchangeStrategies;
@@ -40,6 +42,16 @@ public class RouterOptions {
     public RouterOptions(String token, ReactorResources reactorResources, ExchangeStrategies exchangeStrategies,
                          List<ResponseFunction> responseTransformers, GlobalRateLimiter globalRateLimiter,
                          RequestQueueFactory requestQueueFactory, String discordBaseUrl) {
+        this(AuthorizationScheme.BOT, token, reactorResources, exchangeStrategies,
+                responseTransformers, globalRateLimiter,
+                requestQueueFactory, discordBaseUrl);
+    }
+
+    public RouterOptions(AuthorizationScheme authorizationScheme, String token, ReactorResources reactorResources,
+                         ExchangeStrategies exchangeStrategies, List<ResponseFunction> responseTransformers,
+                         GlobalRateLimiter globalRateLimiter, RequestQueueFactory requestQueueFactory,
+                         String discordBaseUrl) {
+        this.authorizationScheme = Objects.requireNonNull(authorizationScheme, "authorizationScheme");
         this.token = Objects.requireNonNull(token, "token");
         this.reactorResources = Objects.requireNonNull(reactorResources, "reactorResources");
         this.exchangeStrategies = Objects.requireNonNull(exchangeStrategies, "exchangeStrategies");
@@ -47,6 +59,10 @@ public class RouterOptions {
         this.globalRateLimiter = Objects.requireNonNull(globalRateLimiter, "globalRateLimiter");
         this.requestQueueFactory = Objects.requireNonNull(requestQueueFactory, "requestQueueFactory");
         this.discordBaseUrl = Objects.requireNonNull(discordBaseUrl, "discordBaseUrl");
+    }
+
+    public AuthorizationScheme getAuthorizationScheme() {
+        return authorizationScheme;
     }
 
     /**

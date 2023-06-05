@@ -1006,6 +1006,13 @@ public abstract class Routes {
     public static final Route CURRENT_USER_GUILDS_GET = Route.get("/users/@me/guilds");
 
     /**
+     * Returns a guild member object for the current user. Requires the guilds.members.read OAuth2 scope.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/user#get-current-user-guild-member">Discord</a>
+     */
+    public static final Route CURRENT_USER_GUILD_MEMBER_GET = Route.get("/users/@me/guilds/{guild.id}/member");
+
+    /**
      * Leave a guild. Returns a 204 empty response on success.
      *
      * @see <a href="https://discord.com/developers/docs/resources/user#leave-guild">
@@ -1282,4 +1289,14 @@ public abstract class Routes {
      * https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event-users</a>
      */
     public static final Route GUILD_SCHEDULED_EVENT_USERS_GET = Route.get("/guilds/{guild.id}/scheduled-events/{event.id}/users");
+
+    ///////////////////////////////////////////
+    ///////////// OAuth2 Resource /////////////
+    ///////////////////////////////////////////
+
+    public static final Route TOKEN = Route.post("/oauth2/token");
+
+    public static final Route TOKEN_REVOKE = Route.post("/oauth2/token/revoke");
+
+    public static final Route AUTHORIZATION_INFO_GET = Route.get("/oauth2/@me");
 }
