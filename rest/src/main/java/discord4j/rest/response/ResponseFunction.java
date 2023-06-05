@@ -25,6 +25,7 @@ import discord4j.rest.request.RouteMatcher;
 import discord4j.rest.request.Router;
 import discord4j.rest.request.RouterOptions;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.RetryBackoffSpec;
 
 import java.time.Duration;
 import java.util.function.Function;
@@ -107,9 +108,8 @@ public interface ResponseFunction {
      */
     static RetryingTransformer retryOnceOnErrorStatus(Integer... codes) {
         return new RetryingTransformer(RouteMatcher.any(),
-                reactor.retry.Retry.onlyIf(ClientException.isRetryContextStatusCode(codes))
-                        .fixedBackoff(Duration.ofSeconds(1))
-                        .retryOnce());
+            RetryBackoffSpec.backoff(1, Duration.ofSeconds(1))
+                .filter(exception -> ClientException.isStatusCode(codes).test(exception)));
     }
 
     /**
@@ -130,9 +130,8 @@ public interface ResponseFunction {
      */
     static RetryingTransformer retryOnceOnErrorStatus(RouteMatcher routeMatcher, Integer... codes) {
         return new RetryingTransformer(routeMatcher,
-                reactor.retry.Retry.onlyIf(ClientException.isRetryContextStatusCode(codes))
-                        .fixedBackoff(Duration.ofSeconds(1))
-                        .retryOnce());
+            RetryBackoffSpec.backoff(1, Duration.ofSeconds(1))
+                .filter(exception -> ClientException.isStatusCode(codes).test(exception)));
     }
 
     /**
@@ -143,11 +142,11 @@ public interface ResponseFunction {
      * effectively block further requests on the same rate limiting bucket.
      *
      * @param routeMatcher the {@link RouteMatcher} determining whether to match a particular request
-     * @param retry the {@link reactor.retry.Retry} factory to install while applying this transformation
+     * @param retry the {@link reactor.util.retry.Retry} factory to install while applying this transformation
      * @return a {@link ResponseFunction} that transforms matching response statuses into sequence that retries the
      * request once after waiting 1 second.
      */
-    static RetryingTransformer retryWhen(RouteMatcher routeMatcher, reactor.retry.Retry<?> retry) {
+    static RetryingTransformer retryWhen(RouteMatcher routeMatcher, reactor.util.retry.Retry retry) {
         return new RetryingTransformer(routeMatcher, retry);
     }
 }
