@@ -19,6 +19,9 @@ package discord4j.oauth2;
 
 import discord4j.oauth2.object.AccessToken;
 
+import java.util.EnumSet;
+import java.util.stream.Collectors;
+
 /**
  * A permission granted to an {@link AccessToken} which grants access to an associated user-specific resource.
  *
@@ -180,5 +183,18 @@ public enum Scope {
             case "webhook.incoming": return WEBHOOK_INCOMING;
             default: throw new IllegalArgumentException();
         }
+    }
+
+    /**
+     * Construct a string from the values for each supplied {@link Scope}.
+     *
+     * @param first a scope to include
+     * @param rest the remaining scopes to include
+     * @return a string concatenation of each scope supplied, separated by a space
+     */
+    public static String asString(Scope first, Scope... rest) {
+        return EnumSet.of(first, rest).stream()
+                .map(Scope::getValue)
+                .collect(Collectors.joining(" "));
     }
 }
