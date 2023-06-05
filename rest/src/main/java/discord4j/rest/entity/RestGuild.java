@@ -216,7 +216,7 @@ public class RestGuild {
         return restClient.getGuildService().modifyOwnNickname(id, request);
     }
 
-    public Mono<CurrentMemberModifyData> modifyCurrentMember(CurrentMemberModifyData request) {
+    public Mono<MemberData> modifyCurrentMember(CurrentMemberModifyData request) {
         return restClient.getGuildService().modifyCurrentMember(id, request);
     }
 

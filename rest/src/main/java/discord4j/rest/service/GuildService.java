@@ -134,11 +134,11 @@ public class GuildService extends RestService {
                 .bodyToMono(NicknameModifyData.class);
     }
 
-    public Mono<CurrentMemberModifyData> modifyCurrentMember(long guildId, CurrentMemberModifyData request) {
+    public Mono<MemberData> modifyCurrentMember(long guildId, CurrentMemberModifyData request) {
         return Routes.CURRENT_MEMBER_MODIFY.newRequest(guildId)
                 .body(request)
                 .exchange(getRouter())
-                .bodyToMono(CurrentMemberModifyData.class);
+                .bodyToMono(MemberData.class);
     }
 
     public Mono<Void> addGuildMemberRole(long guildId, long userId, long roleId, @Nullable String reason) {
