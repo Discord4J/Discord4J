@@ -285,10 +285,14 @@ public abstract class Routes {
      * <p>
      * Returns a 204 empty response on success. Fires a Message Update Gateway event.
      *
+     * @deprecated - As of April 28, 2021, Discord removed this route in API v9. This {@code Route} will be removed in
+     * a future update. <a href="https://discord.com/developers/docs/change-log#april-28-2021">
+     * https://discord.com/developers/docs/change-log#april-28-2021</a>
+     *
      * @see <a href="https://discord.com/developers/docs/resources/channel#suppress-message-embeds">
      * https://discord.com/developers/docs/resources/channel#suppress-message-embeds</a>
      */
-    @Experimental
+    @Deprecated
     public static final Route MESSAGE_SUPPRESS_EMBEDS = Route.post("/channels/{channel.id}/messages/{message.id}/suppress-embeds");
 
     /**
