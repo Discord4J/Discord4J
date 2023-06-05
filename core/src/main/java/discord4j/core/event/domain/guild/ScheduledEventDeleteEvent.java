@@ -41,7 +41,7 @@ public class ScheduledEventDeleteEvent extends GuildEvent {
     }
 
     /**
-     * Return the {@link ScheduledEvent} associated with this create event.
+     * Return the {@link ScheduledEvent} associated with this delete event.
      *
      * @return a deleted scheduled event
      */
@@ -59,7 +59,7 @@ public class ScheduledEventDeleteEvent extends GuildEvent {
     }
 
     /**
-     * Requests to retrieve the {@link Guild} where a scheduled event was created.
+     * Requests to retrieve the {@link Guild} where a scheduled event was deleted.
      *
      * @return a {@link Mono} where, upon successful completion, emits the {@link Guild} involved.
      * If an error is received, it is emitted through the {@code Mono}.
@@ -72,6 +72,6 @@ public class ScheduledEventDeleteEvent extends GuildEvent {
     public String toString() {
         return "ScheduledEventDeleteEvent{" +
                 "scheduledEvent=" + scheduledEvent +
-                "} " + super.toString();
+                "}";
     }
 }
