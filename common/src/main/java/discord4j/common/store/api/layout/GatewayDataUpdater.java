@@ -217,7 +217,7 @@ public interface GatewayDataUpdater {
     Mono<GuildScheduledEventData> onGuildScheduledEventUpdate(int shardIndex, GuildScheduledEventUpdate dispatch);
 
     /**
-     * Updates the internal state of the store according to the {@link GuildScheduledEventCreate} gateway dispatch. This
+     * Updates the internal state of the store according to the {@link GuildScheduledEventDelete} gateway dispatch. This
      * will typically perform a delete operation on a related {@link GuildScheduledEventData} in the store,
      * if present.
      *
@@ -240,7 +240,7 @@ public interface GatewayDataUpdater {
     Mono<Void> onGuildScheduledEventUserAdd(int shardIndex, GuildScheduledEventUserAdd dispatch);
 
     /**
-     * Updates the internal state of the store according to the {@link GuildScheduledEventUserAdd} gateway dispatch.
+     * Updates the internal state of the store according to the {@link GuildScheduledEventUserRemove} gateway dispatch.
      * This will typically perform a delete operation on a related {@link java.util.List} handling a relationship
      * between a {@link GuildScheduledEventData} and the provided {@link GuildScheduledEventUserData}.
      *
