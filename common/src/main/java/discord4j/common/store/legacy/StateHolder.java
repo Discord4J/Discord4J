@@ -17,6 +17,7 @@
 
 package discord4j.common.store.legacy;
 
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.PresenceUpdate;
 import discord4j.store.api.Store;
@@ -29,6 +30,8 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Holder for various pieces of state for use in caching.
@@ -37,6 +40,8 @@ import java.util.Collections;
  * <ul>
  * <li>Channel store: {@code long} keys and {@link ChannelData} values.</li>
  * <li>Guild store: {@code long} keys and {@link GuildData} values.</li>
+ * <li>Guild scheduled event store: {@code long} pair keys and {@link GuildScheduledEventData} values.</li>
+ * <li>Guild scheduled event users store: {@code long} pair keys and {@link Id} values.</li>
  * <li>Guild emoji store: {@code long} keys and {@link EmojiData} values.</li>
  * <li>Member store: {@code long} pair keys and {@link MemberData} values.</li>
  * <li>Message store: {@code long} keys and {@link MessageData} values.</li>
@@ -46,6 +51,7 @@ import java.util.Collections;
  * <li>Voice state store: {@code long} pair keys and {@link VoiceStateData} values.</li>
  * </ul>
  */
+@SuppressWarnings("rawtypes")
 public final class StateHolder {
 
     private static final Logger log = Loggers.getLogger(StateHolder.class);
@@ -53,6 +59,10 @@ public final class StateHolder {
     private final StoreService storeService;
     private final LongObjStore<ChannelData> channelStore;
     private final LongObjStore<GuildData> guildStore;
+    private final Store<LongLongTuple2, GuildScheduledEventData> guildEventsStore;
+
+    private final Store<LongLongTuple2, Set> guildEventsUsersStore;
+
     private final LongObjStore<EmojiData> guildEmojiStore;
     private final LongObjStore<StickerData> guildStickerStore;
     private final Store<LongLongTuple2, MemberData> memberStore;
@@ -68,34 +78,40 @@ public final class StateHolder {
         service.init(new StoreContext(Collections.singletonMap("messageClass", MessageData.class)));
 
         channelStore = service.provideLongObjStore(ChannelData.class);
-        log.debug("Channel storage     : {}", channelStore);
+        log.debug("Channel storage           : {}", channelStore);
 
         guildStore = service.provideLongObjStore(GuildData.class);
-        log.debug("Guild storage       : {}", guildStore);
+        log.debug("Guild storage             : {}", guildStore);
 
         guildStickerStore = service.provideLongObjStore(StickerData.class);
         log.debug("Guild sticker storage : {}", guildStickerStore);
 
+        guildEventsStore = service.provideGenericStore(LongLongTuple2.class, GuildScheduledEventData.class);
+        log.debug("Guild event storage       : {}", guildEventsStore);
+
+        guildEventsUsersStore = service.provideGenericStore(LongLongTuple2.class, Set.class);
+        log.debug("Guild event users storage : {}", guildEventsUsersStore);
+
         guildEmojiStore = service.provideLongObjStore(EmojiData.class);
-        log.debug("Guild emoji storage : {}", guildEmojiStore);
+        log.debug("Guild emoji storage       : {}", guildEmojiStore);
 
         memberStore = service.provideGenericStore(LongLongTuple2.class, MemberData.class);
-        log.debug("Member storage      : {}", memberStore);
+        log.debug("Member storage            : {}", memberStore);
 
         messageStore = service.provideLongObjStore(MessageData.class);
-        log.debug("Message storage     : {}", messageStore);
+        log.debug("Message storage           : {}", messageStore);
 
         presenceStore = service.provideGenericStore(LongLongTuple2.class, PresenceData.class);
-        log.debug("Presence storage    : {}", presenceStore);
+        log.debug("Presence storage          : {}", presenceStore);
 
         roleStore = service.provideLongObjStore(RoleData.class);
-        log.debug("Role storage        : {}", roleStore);
+        log.debug("Role storage              : {}", roleStore);
 
         userStore = service.provideLongObjStore(UserData.class);
-        log.debug("User storage        : {}", userStore);
+        log.debug("User storage              : {}", userStore);
 
         voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateData.class);
-        log.debug("Voice state storage : {}", voiceStateStore);
+        log.debug("Voice state storage       : {}", voiceStateStore);
     }
 
     public StoreService getStoreService() {
@@ -112,6 +128,14 @@ public final class StateHolder {
 
     public LongObjStore<StickerData> getGuildStickerStore() {
         return guildStickerStore;
+    }
+
+    public Store<LongLongTuple2, GuildScheduledEventData> getGuildEventsStore() {
+        return guildEventsStore;
+    }
+
+    public Store<LongLongTuple2, Set> getGuildEventsUsersStore() {
+        return guildEventsUsersStore;
     }
 
     public LongObjStore<EmojiData> getGuildEmojiStore() {
@@ -146,6 +170,7 @@ public final class StateHolder {
         return channelStore.invalidate()
                 .and(guildStore.invalidate())
                 .and(guildEmojiStore.invalidate())
+                .and(guildEventsStore.invalidate())
                 .and(memberStore.invalidate())
                 .and(messageStore.invalidate())
                 .and(presenceStore.invalidate())
