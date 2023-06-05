@@ -77,7 +77,7 @@ public class DiscordWebClient {
         final HttpHeaders defaultHeaders = new DefaultHttpHeaders();
         defaultHeaders.add(HttpHeaderNames.CONTENT_TYPE, "application/json");
         defaultHeaders.add(HttpHeaderNames.AUTHORIZATION, authorizationScheme + " " + token);
-        defaultHeaders.add(HttpHeaderNames.USER_AGENT, "DiscordBot(" + url + ", " + version + ")");
+        defaultHeaders.add(HttpHeaderNames.USER_AGENT, "DiscordBot (" + url + ", " + version + ")");
 
         this.httpClient = configureHttpClient(httpClient.baseUrl(discordBaseUrl));
         this.defaultHeaders = defaultHeaders;
