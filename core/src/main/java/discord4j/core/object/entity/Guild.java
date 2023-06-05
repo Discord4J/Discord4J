@@ -1464,6 +1464,22 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create a forum channel.
+     *
+     * @param spec an immutable object that specifies how to create the forum channel
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link ForumChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ForumChannel> createForumChannel(ForumChannelCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> gateway.getRestClient().getGuildService()
+                    .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+            .map(data -> EntityUtil.getChannel(gateway, data))
+            .cast(ForumChannel.class);
+    }
+
+    /**
      * Requests to create an automod rule. Properties specifying how to create the rule can be set via the
      * {@code withXxx} methods of the returned {@link AutoModRuleCreateMono}.
      *
