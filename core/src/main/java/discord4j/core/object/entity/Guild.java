@@ -732,6 +732,17 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the id of the channel where admins and moderators of Community guilds receive safety alerts from Discord, if
+     * present.
+     *
+     * @return The id of the channel where admins and moderators of Community guilds receive safety alerts from Discord, if
+     * present.
+     */
+    public Optional<Snowflake> getSafetyAlertsChannelId() {
+        return data.safetyAlertsChannelId().map(Snowflake::of);
+    }
+
+    /**
      * Gets the maximum amount of users in a video channel, if present.
      *
      * @return The maximum amount of users in a video channel, if present.

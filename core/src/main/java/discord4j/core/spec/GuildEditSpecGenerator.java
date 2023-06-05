@@ -39,42 +39,44 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 interface GuildEditSpecGenerator extends AuditSpec<GuildModifyRequest> {
 
     Possible<String> name();
-    
+
     Possible<Optional<Region>> region();
-    
+
     Possible<Optional<Guild.VerificationLevel>> verificationLevel();
-    
+
     Possible<Optional<Guild.NotificationLevel>> defaultMessageNotificationsLevel();
 
     Possible<Optional<Guild.ContentFilterLevel>> explicitContentFilter();
-    
+
     Possible<Optional<Snowflake>> afkChannelId();
 
     Possible<Integer> afkTimeout();
-    
+
     Possible<Optional<Image>> icon();
 
     Possible<Snowflake> ownerId();
-    
+
     Possible<Optional<Image>> splash();
-    
+
     Possible<Optional<Image>> discoverySplash();
-    
+
     Possible<Optional<Image>> banner();
-    
+
     Possible<Optional<Snowflake>> systemChannelId();
-    
+
     Possible<Guild.SystemChannelFlag> systemChannelFlags();
-    
+
     Possible<Optional<Snowflake>> rulesChannelId();
-    
+
     Possible<Optional<Snowflake>> publicUpdatesChannelId();
-    
+
     Possible<Optional<Locale>> preferredLocale();
-    
+
     Possible<List<String>> features();
-    
+
     Possible<Optional<String>> description();
+
+    Possible<Optional<Snowflake>> safetyAlertsChannelId();
 
     @Override
     default GuildModifyRequest asRequest() {
@@ -95,6 +97,7 @@ interface GuildEditSpecGenerator extends AuditSpec<GuildModifyRequest> {
                 .systemChannelId(mapPossibleOptional(systemChannelId(), Snowflake::asString))
                 .systemChannelFlags(mapPossible(systemChannelFlags(), Guild.SystemChannelFlag::getValue))
                 .rulesChannelId(mapPossibleOptional(rulesChannelId(), Snowflake::asString))
+                .safetyAlertsChannelId(mapPossibleOptional(safetyAlertsChannelId(), Snowflake::asString))
                 .publicUpdatesChannelId(mapPossibleOptional(publicUpdatesChannelId(), Snowflake::asString))
                 .preferredLocale(mapPossibleOptional(preferredLocale(), Locale::toLanguageTag))
                 .features(mapPossible(features(), ArrayList::new))
