@@ -122,9 +122,9 @@ public class GuildServiceTest {
     }
 
     @Test
-    public void testModifyOwnNickname() {
-        NicknameModifyData req = NicknameModifyData.builder().nick("nickname").build();
-        guildService.modifyOwnNickname(guild, req).block();
+    public void testModifyCurrentMember() {
+        CurrentMemberModifyData req = CurrentMemberModifyData.builder().nick("nickname").build();
+        guildService.modifyCurrentMember(guild, req).block();
     }
 
     @Test

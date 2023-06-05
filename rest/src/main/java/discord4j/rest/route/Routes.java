@@ -641,13 +641,12 @@ public abstract class Routes {
     public static final Route GUILD_MEMBER_MODIFY = Route.patch("/guilds/{guild.id}/members/{user.id}");
 
     /**
-     * Modifies the nickname of the current user in a guild. Returns a 200 with the nickname on success. Fires a Guild
+     * Modifies the current member in a guild. Returns a 200 with the updated member on success. Fires a Guild
      * Member Update Gateway event.
      *
-     * @see <a href="https://discord.com/developers/docs/resources/guild#modify-current-user-nick">
-     * https://discord.com/developers/docs/resources/guild#modify-current-user-nick</a>
+     * @see <a href="https://discord.com/developers/docs/resources/guild#modify-current-member">Discord</a>
      */
-    public static final Route NICKNAME_MODIFY_OWN = Route.patch("/guilds/{guild.id}/members/@me/nick");
+    public static final Route CURRENT_MEMBER_MODIFY = Route.patch("/guilds/{guild.id}/members/@me");
 
     /**
      * Adds a role to a guild member. Requires the 'MANAGE_ROLES' permission. Returns a 204 empty response on success.

@@ -30,10 +30,7 @@ import discord4j.core.spec.legacy.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
-import discord4j.discordjson.json.AuditLogData;
-import discord4j.discordjson.json.AuditLogEntryData;
-import discord4j.discordjson.json.GuildData;
-import discord4j.discordjson.json.NicknameModifyData;
+import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.PaginationUtil;
@@ -1877,11 +1874,11 @@ public final class Guild implements Entity {
      */
     public Mono<String> changeSelfNickname(@Nullable final String nickname) {
         return gateway.getRestClient().getGuildService()
-                .modifyOwnNickname(getId().asLong(), NicknameModifyData.builder()
+                .modifyCurrentMember(getId().asLong(), CurrentMemberModifyData.builder()
                         .nick(Optional.ofNullable(nickname))
                         .build())
                 .handle((data, sink) -> {
-                    String nick = data.nick().orElse(null);
+                    String nick = Possible.flatOpt(data.nick()).orElse(null);
                     if (nick != null) {
                         sink.next(nick);
                     } else {
