@@ -209,6 +209,9 @@ public enum Permission {
     /** Allows for using soundboard in a voice channel */
     USE_SOUNDBOARD(0x0000040000000000L, false),
 
+    /** Allows the usage of custom soundboard sounds from other servers */
+    USE_EXTERNAL_SOUNDS(0x0000200000000000L, false),
+
     /** Allows sending voice messages. */
     SEND_VOICE_MESSAGES(0x0000400000000000L, false);
 
