@@ -1861,7 +1861,7 @@ public final class Guild implements Entity {
                         .nick(Optional.ofNullable(nickname))
                         .build())
                 .handle((data, sink) -> {
-                    String nick = data.nick().orElse(null);
+                    String nick = Possible.flatOpt(data.nick()).orElse(null);
                     if (nick != null) {
                         sink.next(nick);
                     } else {
