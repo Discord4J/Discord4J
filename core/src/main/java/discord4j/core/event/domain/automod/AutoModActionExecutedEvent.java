@@ -156,7 +156,7 @@ public class AutoModActionExecutedEvent extends Event {
      * @return the ID of the {@link MessageChannel} involved, if present.
      */
     public Optional<Snowflake> getMessageId() {
-        return this.data.channelId().toOptional().map(Snowflake::of);
+        return this.data.messageId().toOptional().map(Snowflake::of);
     }
 
     /**
@@ -166,7 +166,7 @@ public class AutoModActionExecutedEvent extends Event {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> getMessage() {
-        if (!this.getChannelId().isPresent() && !this.getMessageId().isPresent()) {
+        if (!this.getChannelId().isPresent() || !this.getMessageId().isPresent()) {
             return Mono.empty();
         }
         return getClient().getMessageById(this.getChannelId().get(), this.getMessageId().get());
@@ -179,7 +179,7 @@ public class AutoModActionExecutedEvent extends Event {
      * @return the ID of the system {@link Message} involved, if present.
      */
     public Optional<Snowflake> getSystemMessageId() {
-        return this.data.channelId().toOptional().map(Snowflake::of);
+        return this.data.alertSystemMessageId().toOptional().map(Snowflake::of);
     }
 
     /**

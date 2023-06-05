@@ -52,13 +52,19 @@ public class DiscordWebClient {
     private final ExchangeStrategies exchangeStrategies;
     private final List<ResponseFunction> responseFunctions;
 
+    public DiscordWebClient(HttpClient httpClient, ExchangeStrategies exchangeStrategies,
+                            AuthorizationScheme authorizationScheme, String token,
+                            List<ResponseFunction> responseFunctions, String discordBaseUrl) {
+        this(httpClient, exchangeStrategies, authorizationScheme.getScheme(), token, responseFunctions, discordBaseUrl);
+    }
+
     /**
      * Create a new {@link DiscordWebClient} wrapping HTTP, Discord and encoding/decoding resources.
      *
      * @param httpClient a Reactor Netty HTTP client
      * @param exchangeStrategies a strategy to transform requests and responses
-     * @param authorizationScheme scheme to use with the authorization header, like "Bot" or "Bearer"
-     * @param token a Discord token for API authorization
+     * @param authorizationScheme default scheme to use with the authorization header, like "Bot" or "Bearer"
+     * @param token default Discord token for API authorization
      * @param responseFunctions a list of {@link ResponseFunction} transformations
      */
     public DiscordWebClient(HttpClient httpClient, ExchangeStrategies exchangeStrategies,
@@ -153,6 +159,12 @@ public class DiscordWebClient {
 
     private <R> HttpHeaders buildHttpHeaders(ClientRequest request) {
         HttpHeaders headers = new DefaultHttpHeaders().add(defaultHeaders).setAll(request.getHeaders());
+        if (request.getAuthorizationScheme() == AuthorizationScheme.NONE) {
+            headers.remove(HttpHeaderNames.AUTHORIZATION);
+        } else if (request.getAuthorizationScheme() != null) {
+            headers.set(HttpHeaderNames.AUTHORIZATION,
+                    request.getAuthorizationScheme().getScheme() + " " + request.getAuthorizationValue());
+        }
         if (request.getBody() == null) {
             headers.remove(HttpHeaderNames.CONTENT_TYPE);
         }

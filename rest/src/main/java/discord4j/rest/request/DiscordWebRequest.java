@@ -16,6 +16,7 @@
  */
 package discord4j.rest.request;
 
+import discord4j.rest.http.client.AuthorizationScheme;
 import discord4j.rest.route.Route;
 import discord4j.rest.util.Multimap;
 import discord4j.rest.util.RouteUtils;
@@ -25,7 +26,7 @@ import java.util.*;
 import java.util.function.Predicate;
 
 /**
- * Template encoding all of the needed information to make an HTTP request to Discord.
+ * Template encoding all the needed information to make an HTTP request to Discord.
  */
 public class DiscordWebRequest {
 
@@ -42,6 +43,12 @@ public class DiscordWebRequest {
     @Nullable
     private Map<String, Set<String>> headers;
 
+    @Nullable
+    private AuthorizationScheme authorizationScheme;
+
+    @Nullable
+    private String authorizationValue;
+
     /**
      * Create a new {@link DiscordWebRequest} template based on a {@link Route} and its compiled URI.
      *
@@ -52,6 +59,26 @@ public class DiscordWebRequest {
         this.route = route;
         this.completeUri = RouteUtils.expand(route.getUriTemplate(), uriVars);
         this.uriVariableMap = RouteUtils.createVariableMap(route.getUriTemplate(), uriVars);
+    }
+
+    DiscordWebRequest(DiscordWebRequest other) {
+        this.route = other.route;
+        this.completeUri = other.completeUri;
+        this.uriVariableMap = other.uriVariableMap;
+        this.body = other.body;
+        this.queryParams = other.queryParams;
+        this.headers = other.headers;
+        this.authorizationScheme = other.authorizationScheme;
+        this.authorizationValue = other.authorizationValue;
+    }
+
+    /**
+     * Create a new instance using the values from this one.
+     *
+     * @return a new request
+     */
+    public DiscordWebRequest copy() {
+        return new DiscordWebRequest(this);
     }
 
     /**
@@ -100,6 +127,16 @@ public class DiscordWebRequest {
     @Nullable
     public Map<String, Set<String>> getHeaders() {
         return headers;
+    }
+
+    @Nullable
+    public AuthorizationScheme getAuthorizationScheme() {
+        return authorizationScheme;
+    }
+
+    @Nullable
+    public String getAuthorizationValue() {
+        return authorizationValue;
     }
 
     /**
@@ -158,10 +195,7 @@ public class DiscordWebRequest {
      * @return this request
      */
     public DiscordWebRequest header(String key, String value) {
-        if (headers == null) {
-            headers = new LinkedHashMap<>();
-        }
-        headers.computeIfAbsent(key.toLowerCase(), k -> new LinkedHashSet<>()).add(value);
+        initHeaders().computeIfAbsent(key.toLowerCase(), k -> new LinkedHashSet<>()).add(value);
         return this;
     }
 
@@ -175,6 +209,48 @@ public class DiscordWebRequest {
      */
     public DiscordWebRequest optionalHeader(String key, @Nullable String value) {
         return (value == null) ? this : header(key, value);
+    }
+
+    /**
+     * Use the given token as authentication value using the Bearer prefix.
+     *
+     * @param accessToken the bearer token to use
+     * @return this request
+     */
+    public DiscordWebRequest bearerAuth(String accessToken) {
+        this.authorizationScheme = AuthorizationScheme.BEARER;
+        this.authorizationValue = accessToken;
+        return this;
+    }
+
+    /**
+     * Use the given value as basic authentication.
+     *
+     * @param base64EncodedValue the base64 encoded value to use
+     * @return this request
+     */
+    public DiscordWebRequest basicAuth(String base64EncodedValue) {
+        this.authorizationScheme = AuthorizationScheme.BASIC;
+        this.authorizationValue = base64EncodedValue;
+        return this;
+    }
+
+    /**
+     * Use no authorization mechanism with this request.
+     *
+     * @return this request
+     */
+    public DiscordWebRequest unauthenticated() {
+        this.authorizationScheme = AuthorizationScheme.NONE;
+        this.authorizationValue = null;
+        return this;
+    }
+
+    private Map<String, Set<String>> initHeaders() {
+        if (headers == null) {
+            headers = new LinkedHashMap<>();
+        }
+        return headers;
     }
 
     boolean matchesVariables(Predicate<Map<String, String>> matcher) {

@@ -180,6 +180,12 @@ public final class Store {
                         .getThreadMemberById(action.getThreadId(), action.getUserId()))
                 .map(GetMembersInThreadAction.class, action -> dataAccessor
                         .getMembersInThread(action.getThreadId()))
+                .map(GetGuildScheduledEventsInGuildAction.class, action -> dataAccessor
+                        .getScheduledEventsInGuild(action.getGuildId()))
+                .map(GetGuildScheduledEventByIdAction.class, action -> dataAccessor
+                        .getScheduledEventById(action.getGuildId(), action.getEventId()))
+                .map(GetGuildScheduledEventUsersInEventAction.class, action -> dataAccessor
+                        .getScheduledEventUsersInEvent(action.getGuildId(), action.getEventId()))
                 .build();
     }
 
@@ -214,6 +220,12 @@ public final class Store {
                         .onGuildRoleDelete(action.getShardIndex(), action.getGuildRoleDelete()))
                 .map(GuildRoleUpdateAction.class, action -> gatewayDataUpdater
                         .onGuildRoleUpdate(action.getShardIndex(), action.getGuildRoleUpdate()))
+                .map(GuildScheduledEventCreateAction.class, action -> gatewayDataUpdater
+                        .onGuildScheduledEventCreate(action.getShardIndex(), action.getGuildScheduledEventCreate()))
+                .map(GuildScheduledEventUpdateAction.class, action -> gatewayDataUpdater
+                        .onGuildScheduledEventUpdate(action.getShardIndex(), action.getGuildScheduledEventUpdate()))
+                 .map(GuildScheduledEventDeleteAction.class, action -> gatewayDataUpdater
+                        .onGuildScheduledEventDelete(action.getShardIndex(), action.getGuildScheduledEventDelete()))
                 .map(GuildUpdateAction.class, action -> gatewayDataUpdater
                         .onGuildUpdate(action.getShardIndex(), action.getGuildUpdate()))
                 .map(InvalidateShardAction.class, action -> gatewayDataUpdater

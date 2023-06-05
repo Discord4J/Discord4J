@@ -38,6 +38,11 @@ public abstract class EventNames {
     public static final String GUILD_ROLE_CREATE = "GUILD_ROLE_CREATE";
     public static final String GUILD_ROLE_UPDATE = "GUILD_ROLE_UPDATE";
     public static final String GUILD_ROLE_DELETE = "GUILD_ROLE_DELETE";
+    public static final String GUILD_SCHEDULED_EVENT_CREATE = "GUILD_SCHEDULED_EVENT_CREATE";
+    public static final String GUILD_SCHEDULED_EVENT_UPDATE = "GUILD_SCHEDULED_EVENT_UPDATE";
+    public static final String GUILD_SCHEDULED_EVENT_DELETE = "GUILD_SCHEDULED_EVENT_DELETE";
+    public static final String GUILD_SCHEDULED_EVENT_USER_ADD = "GUILD_SCHEDULED_EVENT_USER_ADD";
+    public static final String GUILD_SCHEDULED_EVENT_USER_REMOVE = "GUILD_SCHEDULED_EVENT_USER_REMOVE";
     public static final String MESSAGE_CREATE = "MESSAGE_CREATE";
     public static final String MESSAGE_UPDATE = "MESSAGE_UPDATE";
     public static final String MESSAGE_DELETE = "MESSAGE_DELETE";

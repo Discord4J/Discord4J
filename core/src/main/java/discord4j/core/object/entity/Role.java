@@ -25,6 +25,7 @@ import discord4j.core.spec.RoleEditSpec;
 import discord4j.core.spec.legacy.LegacyRoleEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
+import discord4j.core.util.MentionUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.RoleData;
 import discord4j.discordjson.possible.Possible;
@@ -293,9 +294,9 @@ public final class Role implements Entity {
      */
     public String getMention() {
         if (isEveryone()) {
-            return "@everyone";
+            return MentionUtil.EVERYONE;
         }
-        return "<@&" + getId().asString() + ">";
+        return MentionUtil.forRole(getId());
     }
 
     /**

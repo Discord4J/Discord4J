@@ -21,6 +21,7 @@ import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
 import discord4j.common.util.Snowflake;
 import discord4j.common.util.TokenUtil;
+import discord4j.rest.http.client.AuthorizationScheme;
 import discord4j.rest.request.Router;
 import discord4j.rest.util.AllowedMentions;
 import reactor.util.annotation.Nullable;
@@ -32,13 +33,20 @@ import java.util.Optional;
  */
 public class RestResources {
 
+    private final AuthorizationScheme scheme;
     private final String token;
     private final ReactorResources reactorResources;
     private final JacksonResources jacksonResources;
     private final Router router;
-    private final long selfId;
+    @Nullable
+    private final Long selfId;
     @Nullable
     private final AllowedMentions allowedMentions;
+
+    public RestResources(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
+                         Router router, @Nullable AllowedMentions allowedMentions) {
+        this(AuthorizationScheme.BOT, token, reactorResources, jacksonResources, router, allowedMentions);
+    }
 
     /**
      * Create a {@link RestResources} instance with the given resources.
@@ -49,14 +57,19 @@ public class RestResources {
      * @param router a connector to perform requests against Discord API
      * @param allowedMentions a configuration object to limit mentions creating notifications on message sending
      */
-    public RestResources(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
-                         Router router, @Nullable AllowedMentions allowedMentions) {
+    public RestResources(AuthorizationScheme scheme, String token, ReactorResources reactorResources,
+                         JacksonResources jacksonResources, Router router, @Nullable AllowedMentions allowedMentions) {
+        this.scheme = scheme;
         this.token = token;
         this.reactorResources = reactorResources;
         this.jacksonResources = jacksonResources;
         this.router = router;
-        this.selfId = TokenUtil.getSelfId(token);
+        this.selfId = scheme == AuthorizationScheme.BOT ? TokenUtil.getSelfId(token) : null;
         this.allowedMentions = allowedMentions;
+    }
+
+    public AuthorizationScheme getScheme() {
+        return scheme;
     }
 
     /**
@@ -101,7 +114,7 @@ public class RestResources {
      * @return The bot user's ID.
      */
     public Snowflake getSelfId() {
-        return Snowflake.of(selfId);
+        return Snowflake.of(Optional.ofNullable(selfId).orElseThrow(UnsupportedOperationException::new));
     }
 
     /**

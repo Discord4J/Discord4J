@@ -34,11 +34,16 @@ import static discord4j.core.spec.InternalSpecUtils.putIfNotNull;
 interface BanQuerySpecGenerator extends AuditSpec<Map<String, Object>> {
 
     @Nullable
+    Integer deleteMessageSeconds();
+
+    @Deprecated
+    @Nullable
     Integer deleteMessageDays();
 
     @Override
     default Map<String, Object> asRequest() {
         Map<String, Object> request = new HashMap<>(2);
+        putIfNotNull(request, "delete_message_seconds", deleteMessageSeconds());
         putIfNotNull(request, "delete_message_days", deleteMessageDays());
         putIfNotNull(request, "reason", reason());
         return request;

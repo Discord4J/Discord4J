@@ -36,7 +36,6 @@ import discord4j.core.spec.StartThreadSpec;
 import discord4j.core.spec.legacy.LegacyMessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.json.SuppressEmbedsRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.entity.RestChannel;
@@ -656,21 +655,6 @@ public final class Message implements Entity {
     }
 
     /**
-     * Requests to suppress all embeds in this message. If the message have the embeds suppressed then this action
-     * can undo the suppressed embeds.
-     *
-     * @param suppress Determine if you need suppress or not the embeds.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the process has been
-     * completed. If an error is received, it is emitted through the {@code Mono}.
-     */
-    @Experimental
-    public Mono<Void> suppressEmbeds(final boolean suppress) {
-        return gateway.getRestClient().getChannelService()
-                .suppressEmbeds(getChannelId().asLong(), getId().asLong(),
-                        SuppressEmbedsRequest.builder().suppress(suppress).build());
-    }
-
-    /**
      * Requests to add a reaction on this message.
      *
      * @param emoji The reaction to add on this message.
@@ -817,7 +801,16 @@ public final class Message implements Entity {
         EPHEMERAL(6),
 
         /** This message is an Interaction Response and the bot is "thinking". */
-        LOADING(7);
+        LOADING(7),
+
+        /** This message failed to mention some roles and add their members to the thread. */
+        FAILED_TO_MENTION_SOME_ROLES_IN_THREAD(8),
+
+        /** This message will not trigger push and desktop notifications. */
+        SUPPRESS_NOTIFICATIONS(12),
+
+        /** This message is a voice message. */
+        IS_VOICE_MESSAGE(13);
 
         /**
          * The underlying value as represented by Discord.
@@ -985,7 +978,21 @@ public final class Message implements Entity {
 
         CONTEXT_MENU_COMMAND(23),
 
-        AUTO_MODERATION_ACTION(24);
+        AUTO_MODERATION_ACTION(24),
+
+        ROLE_SUBSCRIPTION_PURCHASE(25),
+
+        INTERACTION_PREMIUM_UPSELL(26),
+
+        STAGE_START(27),
+
+        STAGE_END(28),
+
+        STAGE_SPEAKER(29),
+
+        STAGE_TOPIC(31),
+
+        GUILD_APPLICATION_PREMIUM_SUBSCRIPTION(32);
 
         /**
          * The underlying value as represented by Discord.
@@ -1043,6 +1050,13 @@ public final class Message implements Entity {
                 case 22: return GUILD_INVITE_REMINDER;
                 case 23: return CONTEXT_MENU_COMMAND;
                 case 24: return AUTO_MODERATION_ACTION;
+                case 25: return ROLE_SUBSCRIPTION_PURCHASE;
+                case 26: return INTERACTION_PREMIUM_UPSELL;
+                case 27: return STAGE_START;
+                case 28: return STAGE_END;
+                case 29: return STAGE_SPEAKER;
+                case 31: return STAGE_TOPIC;
+                case 32: return GUILD_APPLICATION_PREMIUM_SUBSCRIPTION;
                 default: return UNKNOWN;
             }
         }

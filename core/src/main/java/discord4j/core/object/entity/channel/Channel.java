@@ -19,6 +19,7 @@ package discord4j.core.object.entity.channel;
 import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Entity;
+import discord4j.core.util.MentionUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.rest.entity.RestChannel;
 import reactor.core.publisher.Mono;
@@ -74,7 +75,7 @@ public interface Channel extends Entity {
      * @return The <i>raw</i> mention.
      */
     default String getMention() {
-        return "<#" + getId().asString() + '>';
+        return MentionUtil.forChannel(getId());
     }
 
     /**

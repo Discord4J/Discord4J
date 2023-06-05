@@ -83,6 +83,15 @@ public class AutoModRuleTriggerMetaData {
     }
 
     /**
+     * Gets whether to automatically detect mention raids.
+     *
+     * @return Whether the mention raid protecton is enabled.
+     */
+    public boolean isMentionRaidProtectionEnabled() {
+        return data.mentionRaidProtectionEnabled().toOptional().orElse(false);
+    }
+
+    /**
      * Gets the internally pre-defined wordsets which will be searched for in content.
      *
      * @return a EnumSet with all the presets in the class.
