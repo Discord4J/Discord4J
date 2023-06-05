@@ -76,6 +76,9 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     private final ConcurrentMap<Long, StageInstanceData> stageInstances = new ConcurrentHashMap<>();
 
+    private final ConcurrentMap<Long, GuildScheduledEventData> scheduledEvents = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Long2, List<Long>> scheduledEventsUsers = new ConcurrentHashMap<>();
+
     private final ConcurrentMap<Long, AtomicReference<ImmutableUserData>> users =
             StorageBackend.caffeine(Caffeine::weakValues).newMap();
 
@@ -282,6 +285,25 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     @Override
     public Mono<GuildData> getGuildById(long guildId) {
         return Mono.justOrEmpty(guilds.get(guildId)).map(WrappedGuildData::unwrap);
+    }
+
+    @Override
+    public Flux<GuildScheduledEventData> getScheduledEventsInGuild(long guildId) {
+        return Mono.justOrEmpty(contentByGuild.get(guildId))
+            .flatMapIterable(content -> content.eventIds)
+            .mapNotNull(scheduledEvents::get);
+    }
+
+    @Override
+    public Mono<GuildScheduledEventData> getScheduledEventById(long guildId, long eventId) {
+        return Mono.justOrEmpty(scheduledEvents.get(eventId))
+            .filter(event -> event.guildId().asLong() == guildId);
+    }
+
+    @Override
+    public Flux<Id> getScheduledEventUsersInEvent(long guildId, long eventId) {
+        return Flux.fromIterable(scheduledEventsUsers.getOrDefault(new Long2(guildId, eventId), new ArrayList<>()))
+            .map(Id::of);
     }
 
     @Override
@@ -575,6 +597,55 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     @Override
     public Mono<RoleData> onGuildRoleUpdate(int shardIndex, GuildRoleUpdate dispatch) {
         return Mono.fromCallable(() -> saveRole(dispatch.guildId().asLong(), dispatch.role()));
+    }
+
+    @Override
+    public Mono<Void> onGuildScheduledEventCreate(int shardIndex, GuildScheduledEventCreate dispatch) {
+        final long eventId = dispatch.scheduledEvent().id().asLong();
+
+        // Add event to guild->events index
+        GuildContent guildContent = computeGuildContent(dispatch.scheduledEvent().guildId().asLong());
+        guildContent.eventIds.add(eventId);
+
+        // Store the event
+        return Mono.fromRunnable(() -> scheduledEvents.put(eventId, ImmutableGuildScheduledEventData.copyOf(dispatch.scheduledEvent())));
+    }
+
+    @Override
+    public Mono<GuildScheduledEventData> onGuildScheduledEventUpdate(int shardIndex, GuildScheduledEventUpdate dispatch) {
+        final long eventId = dispatch.scheduledEvent().id().asLong();
+
+        // Update the event
+        return Mono.fromCallable(() -> scheduledEvents.replace(eventId, ImmutableGuildScheduledEventData.copyOf(dispatch.scheduledEvent())));
+    }
+
+    @Override
+    public Mono<GuildScheduledEventData> onGuildScheduledEventDelete(int shardIndex, GuildScheduledEventDelete dispatch) {
+        final long eventId = dispatch.scheduledEvent().id().asLong();
+
+        // Remove event from guild->events index
+        GuildContent guildContent = computeGuildContent(dispatch.scheduledEvent().guildId().asLong());
+        guildContent.eventIds.remove(eventId);
+
+        // Remove the event
+        return Mono.fromRunnable(() -> {
+            scheduledEvents.remove(eventId);
+            scheduledEventsUsers.remove(new Long2(dispatch.scheduledEvent().guildId().asLong(), eventId));
+        });
+    }
+
+    @Override
+    public Mono<Void> onGuildScheduledEventUserAdd(int shardIndex, GuildScheduledEventUserAdd dispatch) {
+        final Long2 key = new Long2(dispatch.guildId().asLong(), dispatch.scheduledEventId().asLong());
+
+        return Mono.fromRunnable(() -> scheduledEventsUsers.computeIfAbsent(key, ignored -> new ArrayList<>()).add(dispatch.userId().asLong()));
+    }
+
+    @Override
+    public Mono<Void> onGuildScheduledEventUserRemove(int shardIndex, GuildScheduledEventUserRemove dispatch) {
+        final Long2 key = new Long2(dispatch.guildId().asLong(), dispatch.scheduledEventId().asLong());
+
+        return Mono.fromRunnable(() -> scheduledEventsUsers.computeIfAbsent(key, ignored -> new ArrayList<>()).remove(dispatch.userId().asLong()));
     }
 
     @Override
@@ -1105,6 +1176,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         private final long guildId;
         private final Set<Long> channelIds = new HashSet<>();
         private final Set<Long> emojiIds = new HashSet<>();
+        private final Set<Long> eventIds = new HashSet<>();
         private final Set<Long> stickerIds = new HashSet<>();
         private final Set<Long2> memberIds = new HashSet<>();
         private final Set<Long2> presenceIds = new HashSet<>();
@@ -1137,6 +1209,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             members.keySet().removeAll(memberIds);
             presences.keySet().removeAll(presenceIds);
             roles.keySet().removeAll(roleIds);
+            scheduledEvents.keySet().removeAll(eventIds);
             voiceStates.keySet().removeAll(voiceStateIds);
             return ifNonNullMap(old, WrappedGuildData::unwrap);
         }

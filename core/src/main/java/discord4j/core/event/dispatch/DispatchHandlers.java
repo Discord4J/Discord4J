@@ -82,6 +82,11 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(GuildRoleCreate.class, GuildDispatchHandlers::guildRoleCreate);
         addHandler(GuildRoleDelete.class, GuildDispatchHandlers::guildRoleDelete);
         addHandler(GuildRoleUpdate.class, GuildDispatchHandlers::guildRoleUpdate);
+        addHandler(GuildScheduledEventCreate.class, GuildDispatchHandlers::scheduledEventCreate);
+        addHandler(GuildScheduledEventUpdate.class, GuildDispatchHandlers::scheduledEventUpdate);
+        addHandler(GuildScheduledEventDelete.class, GuildDispatchHandlers::scheduledEventDelete);
+        addHandler(GuildScheduledEventUserAdd.class, GuildDispatchHandlers::scheduledEventUserAdd);
+        addHandler(GuildScheduledEventUserRemove.class, GuildDispatchHandlers::scheduledEventUserRemove);
         addHandler(GuildUpdate.class, GuildDispatchHandlers::guildUpdate);
         addHandler(MessageCreate.class, MessageDispatchHandlers::messageCreate);
         addHandler(MessageDelete.class, MessageDispatchHandlers::messageDelete);
