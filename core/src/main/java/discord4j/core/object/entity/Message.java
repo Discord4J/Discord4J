@@ -36,7 +36,6 @@ import discord4j.core.spec.StartThreadSpec;
 import discord4j.core.spec.legacy.LegacyMessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.json.SuppressEmbedsRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.entity.RestChannel;
@@ -653,21 +652,6 @@ public final class Message implements Entity {
     public Mono<Void> delete(@Nullable final String reason) {
         return gateway.getRestClient().getChannelService()
                 .deleteMessage(getChannelId().asLong(), getId().asLong(), reason);
-    }
-
-    /**
-     * Requests to suppress all embeds in this message. If the message have the embeds suppressed then this action
-     * can undo the suppressed embeds.
-     *
-     * @param suppress Determine if you need suppress or not the embeds.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the process has been
-     * completed. If an error is received, it is emitted through the {@code Mono}.
-     */
-    @Experimental
-    public Mono<Void> suppressEmbeds(final boolean suppress) {
-        return gateway.getRestClient().getChannelService()
-                .suppressEmbeds(getChannelId().asLong(), getId().asLong(),
-                        SuppressEmbedsRequest.builder().suppress(suppress).build());
     }
 
     /**
