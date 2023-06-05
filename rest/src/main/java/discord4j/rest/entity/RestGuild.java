@@ -211,8 +211,13 @@ public class RestGuild {
         return restClient.getGuildService().modifyGuildMember(id, userId.asLong(), request, reason);
     }
 
+    @Deprecated
     public Mono<NicknameModifyData> modifyOwnNickname(NicknameModifyData request) {
         return restClient.getGuildService().modifyOwnNickname(id, request);
+    }
+
+    public Mono<CurrentMemberModifyData> modifyCurrentMember(CurrentMemberModifyData request) {
+        return restClient.getGuildService().modifyCurrentMember(id, request);
     }
 
     public Mono<Void> addMemberRole(Snowflake userId, Snowflake roleId, @Nullable String reason) {
