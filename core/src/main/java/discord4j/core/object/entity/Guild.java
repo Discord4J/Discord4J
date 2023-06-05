@@ -1905,6 +1905,44 @@ public final class Guild implements Entity {
             .map(data -> new AutoModRule(gateway, data));
     }
 
+    /**
+     * Requests to retrieve the scheduled event using the provided ID.
+     *
+     * @param eventId the event ID
+     * @param withUserCount Requests to fetch the enrolled user count to Discord or not
+     * @return A {@link Mono} which, upon completion, emits an associated {@link ScheduledEvent} if found.
+     */
+    public Mono<ScheduledEvent> getScheduledEventById(Snowflake eventId, boolean withUserCount) {
+        return gateway.getRestClient().getScheduledEventById(getId(), eventId).getData(withUserCount)
+            .map(data -> new ScheduledEvent(gateway, data));
+    }
+
+    /**
+     * Requests to retrieve all the scheduled events associated to this guild.
+     *
+     * @param withUserCount Requests to fetch the enrolled user count to Discord or not
+     * @return A {@link Flux} which emits {@link ScheduledEvent} objects.
+     */
+    public Flux<ScheduledEvent> getScheduledEvents(boolean withUserCount) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("with_user_count", withUserCount);
+
+        return gateway.getRestClient().getGuildService().getScheduledEvents(getId().asLong(), queryParams)
+            .map(data -> new ScheduledEvent(gateway, data));
+    }
+
+    /**
+     * Requests to create a guild scheduled event with the provided spec on this guild
+     *
+     * @param spec spec specifying {@link ScheduledEvent} parameters
+     * @return A {@link Mono} which, upon completion, emits the created {@link ScheduledEvent} object. Any error, if occurs,
+     * is emitted through the {@link Mono}.
+     */
+    public Mono<ScheduledEvent> createScheduledEvent(ScheduledEventCreateSpec spec) {
+        return gateway.getRestClient().getGuildService().createScheduledEvent(getId().asLong(), spec.asRequest())
+            .map(data -> new ScheduledEvent(gateway, data));
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);

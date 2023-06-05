@@ -780,7 +780,8 @@ public abstract class ReactiveEventAdapter {
     }
 
     /**
-     * Invoked when a user starts a deferrable interaction
+     * Invoked when a user starts a deferrable interaction.
+     *
      * @param event the event instance
      * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
      * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
@@ -889,7 +890,8 @@ public abstract class ReactiveEventAdapter {
     }
 
     /**
-     * Invoked when a user starts a modal supported interaction
+     * Invoked when a user starts a modal supported interaction.
+     *
      * @param event the event instance
      * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
      * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
@@ -976,6 +978,63 @@ public abstract class ReactiveEventAdapter {
      * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
      */
     public Publisher<?> onAutoModActionExecution(AutoModActionExecutedEvent event) {
+        return Mono.empty();
+    }
+
+    // ================= Scheduled event methods ================= //
+
+    /**
+     * Invoked when a scheduled event is created.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onScheduledEventCreate(ScheduledEventCreateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a scheduled event is updated.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onScheduledEventUpdate(ScheduledEventUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a scheduled event is deleted.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onScheduledEventDelete(ScheduledEventDeleteEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a user subscribes to a scheduled event.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onScheduledEventUserAdd(ScheduledEventUserAddEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a user unsubscribes from a scheduled event.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onScheduledEventUserRemove(ScheduledEventUserRemoveEvent event) {
         return Mono.empty();
     }
 
@@ -1075,6 +1134,11 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof AutoModRuleUpdateEvent) compatibleHooks.add(onAutoModRuleUpdate((AutoModRuleUpdateEvent) event));
         if (event instanceof AutoModRuleDeleteEvent) compatibleHooks.add(onAutoModRuleDelete((AutoModRuleDeleteEvent) event));
         if (event instanceof AutoModActionExecutedEvent) compatibleHooks.add(onAutoModActionExecution((AutoModActionExecutedEvent) event));
+        if (event instanceof ScheduledEventCreateEvent) compatibleHooks.add(onScheduledEventCreate((ScheduledEventCreateEvent) event));
+        if (event instanceof ScheduledEventUpdateEvent) compatibleHooks.add(onScheduledEventUpdate((ScheduledEventUpdateEvent) event));
+        if (event instanceof ScheduledEventDeleteEvent) compatibleHooks.add(onScheduledEventDelete((ScheduledEventDeleteEvent) event));
+        if (event instanceof ScheduledEventUserAddEvent) compatibleHooks.add(onScheduledEventUserAdd((ScheduledEventUserAddEvent) event));
+        if (event instanceof ScheduledEventUserRemoveEvent) compatibleHooks.add(onScheduledEventUserRemove((ScheduledEventUserRemoveEvent) event));
         // @formatter:on
         return Mono.whenDelayError(compatibleHooks);
     }

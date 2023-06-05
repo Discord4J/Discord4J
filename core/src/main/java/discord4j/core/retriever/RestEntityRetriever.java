@@ -17,6 +17,7 @@
 package discord4j.core.retriever;
 
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.ScheduledEventUser;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
@@ -30,6 +31,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -168,6 +170,38 @@ public class RestEntityRetriever implements EntityRetriever {
         return rest.getAutoModService()
             .getAutoModRules(guildId.asLong())
             .map(data -> new AutoModRule(gateway, data));
+    }
+
+    @Override
+    public Mono<ScheduledEvent> getScheduledEventById(Snowflake guildId, Snowflake eventId) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("with_user_count", true);
+
+        return rest.getGuildService()
+            .getScheduledEvent(guildId.asLong(), eventId.asLong(), queryParams)
+            .map(data -> new ScheduledEvent(gateway, data));
+    }
+
+    @Override
+    public Flux<ScheduledEvent> getScheduledEvents(Snowflake guildId) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("with_user_count", true);
+
+        return rest.getGuildService()
+            .getScheduledEvents(guildId.asLong(), queryParams)
+            .map(data -> new ScheduledEvent(gateway, data));
+    }
+
+    @Override
+    public Flux<ScheduledEventUser> getScheduledEventUsers(Snowflake guildId, Snowflake eventId) {
+        Function<Map<String, Object>, Flux<GuildScheduledEventUserData>> doRequest = params -> {
+            params.put("with_member", true);
+            return rest.getGuildService().getScheduledEventUsers(guildId.asLong(), eventId.asLong(), params);
+        };
+
+        return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 100)
+            .map(data -> new ScheduledEventUser(gateway, data, guildId));
+
     }
 
     private GuildData toGuildData(GuildUpdateData guild) {

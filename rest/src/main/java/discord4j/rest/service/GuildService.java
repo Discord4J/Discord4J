@@ -332,4 +332,48 @@ public class GuildService extends RestService {
             .bodyToMono(Void.class);
     }
 
+    public Mono<GuildScheduledEventData> getScheduledEvent(long guildId, long eventId, Map<String, Object> queryParams) {
+        return Routes.GUILD_SCHEDULED_EVENT_GET.newRequest(guildId, eventId)
+            .query(queryParams)
+            .exchange(getRouter())
+            .bodyToMono(GuildScheduledEventData.class);
+    }
+
+    public Flux<GuildScheduledEventData> getScheduledEvents(long guildId, Map<String, Object> queryParams) {
+        return Routes.GUILD_SCHEDULED_EVENTS_GET.newRequest(guildId)
+            .query(queryParams)
+            .exchange(getRouter())
+            .bodyToMono(GuildScheduledEventData[].class)
+            .flatMapMany(Flux::fromArray);
+    }
+
+    public Mono<GuildScheduledEventData> createScheduledEvent(long guildId, GuildScheduledEventCreateRequest request) {
+        return Routes.GUILD_SCHEDULED_EVENT_CREATE.newRequest(guildId)
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(GuildScheduledEventData.class);
+    }
+
+    public Mono<GuildScheduledEventData> modifyScheduledEvent(long guildId, long eventId, GuildScheduledEventModifyRequest request, @Nullable String reason) {
+        return Routes.GUILD_SCHEDULED_EVENT_MODIFY.newRequest(guildId, eventId)
+            .body(request)
+            .optionalHeader("X-Audit-Log-Reason", reason)
+            .exchange(getRouter())
+            .bodyToMono(GuildScheduledEventData.class);
+    }
+
+    public Mono<Void> deleteScheduledEvent(long guildId, long eventId, @Nullable String reason) {
+        return Routes.GUILD_SCHEDULED_EVENT_DELETE.newRequest(guildId, eventId)
+            .optionalHeader("X-Audit-Log-Reason", reason)
+            .exchange(getRouter())
+            .bodyToMono(Void.class);
+    }
+
+    public Flux<GuildScheduledEventUserData> getScheduledEventUsers(long guildId, long eventId, Map<String, Object> queryParams) {
+        return Routes.GUILD_SCHEDULED_EVENT_USERS_GET.newRequest(guildId, eventId)
+            .query(queryParams)
+            .exchange(getRouter())
+            .bodyToMono(GuildScheduledEventUserData[].class)
+            .flatMapMany(Flux::fromArray);
+    }
 }

@@ -29,7 +29,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
- * A single action recorded by an {@link AuditLogPart}.
+ * A single administrative action or event, that can be recorded by an {@link AuditLogPart} if it didn't originate from
+ * a gateway event.
  * <p>
  * Use {@link #getActionType()} to determine what kind of action occurred, and then {@link #getChange(ChangeKey)} to
  * get information about what changed. For example,
@@ -51,14 +52,13 @@ public class AuditLogEntry implements Entity {
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
 
-    /** The audit log part this entry belongs to. */
+    /** The audit log part this entry belongs to. Can be {@code null} */
     private final AuditLogPart auditLogPart;
 
     /** The raw data as represented by Discord. */
     private final AuditLogEntryData data;
 
-    AuditLogEntry(final GatewayDiscordClient gateway, final AuditLogPart auditLogPart,
-                         final AuditLogEntryData data) {
+    AuditLogEntry(final GatewayDiscordClient gateway, final AuditLogPart auditLogPart, final AuditLogEntryData data) {
         this.gateway = gateway;
         this.auditLogPart = auditLogPart;
         this.data = data;
@@ -103,11 +103,16 @@ public class AuditLogEntry implements Entity {
      * Gets the user who made the changes, if present.
      *
      * @return The user who made the changes, if present.
+     * @throws NoSuchElementException if {@link AuditLogEntry#getParent()} does not contain the
+     * {@link #getResponsibleUserId()} or if this entry was created from a gateway event.
      */
     public Optional<User> getResponsibleUser() {
+        if (auditLogPart == null) {
+            throw new NoSuchElementException("User is not available for audit log entries created by gateway events");
+        }
         return getResponsibleUserId()
                 .map(id -> auditLogPart.getUserById(id)
-                        .orElseThrow(() -> new NoSuchElementException("Audit log users does not contain responsible user ID.")));
+                        .orElseThrow(() -> new NoSuchElementException("Audit log user data does not contain responsible user ID")));
     }
 
     /**
@@ -169,7 +174,8 @@ public class AuditLogEntry implements Entity {
     /**
      * Gets the {@link AuditLogPart audit log part} that this entry belongs to.
      *
-     * @return The audit log part that this entry belongs to. or null if the entry get from the {@link AuditLogEntryCreateEvent}
+     * @return The audit log part that this entry belongs to, or {@code null} if the entry originated from a
+     * {@link AuditLogEntryCreateEvent}
      */
     @Nullable
     public AuditLogPart getParent() {

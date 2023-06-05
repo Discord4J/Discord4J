@@ -1201,6 +1201,59 @@ public abstract class Routes {
 
     public static final Route INTERACTION_RESPONSE_CREATE = Route.post("/interactions/{interaction.id}/{interaction.token}/callback");
 
+    /////////////////////////////////////////////////////
+    ////////// Guild Scheduled Event Resource ///////////
+    /////////////////////////////////////////////////////
+
+    /**
+     * Returns a list of all scheduled events for a guild.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild-scheduled-event#list-scheduled-events-for-guild">
+     * https://discord.com/developers/docs/resources/guild-scheduled-event#list-scheduled-events-for-guild</a>
+     */
+    public static final Route GUILD_SCHEDULED_EVENTS_GET = Route.get("/guilds/{guild.id}/scheduled-events");
+
+    /**
+     * Creates a guild scheduled event for the given guild. Returns a scheduled event object on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild-scheduled-event#create-guild-scheduled-event">
+     * ttps://discord.com/developers/docs/resources/guild-scheduled-event#create-guild-scheduled-event</a>
+     */
+    public static final Route GUILD_SCHEDULED_EVENT_CREATE = Route.post("/guilds/{guild.id}/scheduled-events");
+
+    /**
+     * Returns a scheduled event for the given guild.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event">
+     * https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event</a>
+     */
+    public static final Route GUILD_SCHEDULED_EVENT_GET = Route.get("/guilds/{guild.id}/scheduled-events/{event.id}");
+
+    /**
+     * Modifies a scheduled event for the given guild. Returns the modified scheduled event object on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild-scheduled-event#modify-guild-scheduled-event">
+     * https://discord.com/developers/docs/resources/guild-scheduled-event#modify-guild-scheduled-event</a>
+     */
+    public static final Route GUILD_SCHEDULED_EVENT_MODIFY = Route.patch("/guilds/{guild.id}/scheduled-events/{event.id}");
+
+    /**
+     * Deletes a scheduled event for the given guild. Returns a 204 empty response on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild-scheduled-event#delete-guild-scheduled-event">
+     * https://discord.com/developers/docs/resources/guild-scheduled-event#delete-guild-scheduled-event</a>
+     */
+    public static final Route GUILD_SCHEDULED_EVENT_DELETE = Route.delete("/guilds/{guild.id}/scheduled-events/{event.id}");
+
+    /**
+     * Returns a list of users RSVP'd to the scheduled event for the given guild. Returns a list of user objects on
+     * success with an optional `guild_member` property for each user if `with_member` query param is passed.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event-users">
+     * https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event-users</a>
+     */
+    public static final Route GUILD_SCHEDULED_EVENT_USERS_GET = Route.get("/guilds/{guild.id}/scheduled-events/{event.id}/users");
+
     ///////////////////////////////////////////
     ///////////// OAuth2 Resource /////////////
     ///////////////////////////////////////////

@@ -5,18 +5,18 @@ import discord4j.discordjson.json.AutoModRuleData;
 
 public class GetAutoModRuleByIdAction implements StoreAction<AutoModRuleData> {
     private final long guildId;
-    private final long stickerId;
+    private final long autoModRuleId;
 
-    GetAutoModRuleByIdAction(long guildId, long stickerId) {
+    GetAutoModRuleByIdAction(long guildId, long autoModRuleId) {
         this.guildId = guildId;
-        this.stickerId = stickerId;
+        this.autoModRuleId = autoModRuleId;
     }
 
     public long getGuildId() {
         return guildId;
     }
 
-    public long getStickerId() {
-        return stickerId;
+    public long getAutoModRuleId() {
+        return autoModRuleId;
     }
 }
