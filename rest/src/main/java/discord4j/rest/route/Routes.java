@@ -412,6 +412,8 @@ public abstract class Routes {
 
     public static final Route START_THREAD_WITHOUT_MESSAGE = Route.post("/channels/{channel.id}/threads");
 
+    public static final Route START_THREAD_IN_FORUM_CHANNEL_MESSAGE = Route.post("/channels/{channel.id}/threads");
+
     public static final Route JOIN_THREAD = Route.put("/channels/{channel.id}/thread-members/@me");
 
     public static final Route ADD_THREAD_MEMBER = Route.put("/channels/{channel.id}/thread-members/{user.id}");

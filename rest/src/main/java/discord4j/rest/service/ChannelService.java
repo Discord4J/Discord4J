@@ -256,6 +256,13 @@ public class ChannelService extends RestService {
                 .bodyToMono(ChannelData.class);
     }
 
+    public Mono<ChannelData> startThreadInForumChannel(long channelId, StartThreadInForumChannelRequest request) {
+        return Routes.START_THREAD_IN_FORUM_CHANNEL_MESSAGE.newRequest(channelId)
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(ChannelData.class);
+    }
+
     public Mono<Void> joinThread(long channelId) {
         return Routes.JOIN_THREAD.newRequest(channelId)
                 .exchange(getRouter())

@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.util.MentionUtil;
@@ -23,6 +24,8 @@ import discord4j.discordjson.json.ChannelData;
 import discord4j.rest.entity.RestChannel;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
+
+import java.util.EnumSet;
 
 /**
  * A Discord channel.
@@ -121,7 +124,10 @@ public interface Channel extends Entity {
         GUILD_PRIVATE_THREAD(12),
 
         /** Represents a {@link StageChannel} for hosting events with an audience. */
-        GUILD_STAGE_VOICE(13);
+        GUILD_STAGE_VOICE(13),
+
+        /** Represents a {@link ForumChannel} that can only contain threads */
+        GUILD_FORUM(15);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -164,8 +170,81 @@ public interface Channel extends Entity {
                 case 11: return GUILD_PUBLIC_THREAD;
                 case 12: return GUILD_PRIVATE_THREAD;
                 case 13: return GUILD_STAGE_VOICE;
+                case 15: return GUILD_FORUM;
                 default: return UNKNOWN;
             }
         }
+    }
+
+    /** Represent channel flags : <a href="https://discord.com/developers/docs/resources/channel#channel-object-channel-flags">https://discord.com/developers/docs/resources/channel#channel-object-channel-flags</a> */
+    @Experimental
+    enum Flag {
+        /**
+         * This {@link ThreadChannel} is pinned to the top of its parent {@link ForumChannel}
+         */
+        PINNED(1),
+
+        /**
+         * Whether a tag is required to be specified when creating a {@link ThreadChannel} in a {@link ForumChannel}. Tags are specified in the applied_tags field.
+         */
+        REQUIRE_TAG(4);
+
+        private final int shiftValue;
+        private final int bitValue;
+
+        Flag(int shiftValue) {
+            this.shiftValue = shiftValue;
+            this.bitValue = 1 << shiftValue;
+        }
+
+        /**
+         * Gets the shift amount associated to this bit value
+         *
+         * @return N in 1 << N that is the bit value for this flag
+         */
+        public int getShiftValue() {
+            return shiftValue;
+        }
+
+        /**
+         * Gets the bit value associated to this flag
+         *
+         * @return The bit field value associated to this flag
+         */
+        public int getBitValue() {
+            return bitValue;
+        }
+
+        /**
+         * Translate a bitfield value into an {@link EnumSet < ForumChannelFlag >} related to known flags
+         *
+         * @param bitfield An integer representing the flags, one per bit
+         * @return An {@link EnumSet<Flag>} of known flags associated to this bit field
+         * @implNote This implementation ignores unknown flags
+         */
+        public static EnumSet<Flag> valueOf(final int bitfield) {
+            EnumSet<Flag> returnSet = EnumSet.noneOf(Flag.class);
+            for (Flag flag : Flag.values()) {
+                if ((bitfield & flag.getBitValue()) != 0) {
+                    returnSet.add(flag);
+                }
+            }
+            return returnSet;
+        }
+
+        /**
+         * Translates an {@link EnumSet< Flag >} to a binary bitfield
+         *
+         * @param flags Set of known forum channel flags
+         * @return An integer representing the given set as an integer
+         */
+        public static int toBitfield(EnumSet<Flag> flags) {
+            int bitfield = 0;
+            for (Flag flag : flags) {
+                bitfield |= flag.getBitValue();
+            }
+            return bitfield;
+        }
+
     }
 }
