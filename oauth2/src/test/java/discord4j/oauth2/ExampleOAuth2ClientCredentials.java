@@ -17,14 +17,28 @@
 
 package discord4j.oauth2;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.discordjson.json.ClientCredentialsGrantRequest;
 import discord4j.rest.RestClient;
 import discord4j.rest.http.client.ClientException;
-import discord4j.rest.request.Router;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+/**
+ * Showcase a way to work with your own developer credentials to test fetching data that requires OAuth2.
+ * <p>
+ * Supply the following environment variables:
+ * <ul>
+ *     <li>{@code TOKEN} - your bot token</li>
+ *     <li>{@code CLIENT_ID} - your app client id</li>
+ *     <li>{@code CLIENT_SECRET} - your app client secret</li>
+ *     <li>{@code APPLICATION_ID} - an application id to retrieve command permissions</li>
+ *     <li>{@code GUILD_ID} - a guild where command permissions will be retrieved</li>
+ *     <li>{@code COMMAND_ID} - the command to retrieve permissions</li>
+ * </ul>
+ */
 public class ExampleOAuth2ClientCredentials {
 
     private static final Logger log = Loggers.getLogger(ExampleOAuth2ClientCredentials.class);
@@ -41,9 +55,9 @@ public class ExampleOAuth2ClientCredentials {
                 ClientCredentialsGrantRequest.builder()
                         .clientId(CLIENT_ID)
                         .clientSecret(CLIENT_SECRET)
-                        .scope("identify applications.commands.permissions.update")
+                        .scope(Scope.asString(Scope.IDENTIFY, Scope.APPLICATIONS_COMMANDS_PERMISSIONS_UPDATE, Scope.CONNECTIONS))
                         .build());
-        Router router = restClient.getRestResources().getRouter();
+
         // fetch the current permissions for COMMAND_ID in GUILD_ID
         // ignore 404 if no perms were set for COMMAND_ID in GUILD_ID
         oAuth2Client.getApplicationCommandPermissions(APPLICATION_ID, GUILD_ID, COMMAND_ID)
@@ -56,5 +70,18 @@ public class ExampleOAuth2ClientCredentials {
                     }
                 })
                 .block();
+
+        ObjectMapper mapper = restClient.getRestResources().getJacksonResources().getObjectMapper();
+
+        // print my own connections
+        oAuth2Client.getUserConnections()
+                .doOnNext(it -> {
+                    try {
+                        log.info("{}", mapper.writeValueAsString(it));
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .blockLast();
     }
 }

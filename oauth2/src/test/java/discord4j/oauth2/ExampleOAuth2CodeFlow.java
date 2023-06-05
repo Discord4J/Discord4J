@@ -16,6 +16,22 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Example code showcasing a Discord OAuth2 authorization code flow.
+ * <p>
+ * This code will spin up a {@link DiscordOAuth2Server} with three endpoints:
+ * <ul>
+ *     <li>{@code /} or root path, initiating an authorization code flow to login a user using Discord</li>
+ *     <li>{@code /@me} to return logged in user information</li>
+ *     <li>{@code /@me/connections} to return a payload of user connections</li>
+ * </ul>
+ * <p>
+ * A map is created to store OAuth2 clients, and populated on successful authorizations. For this to work, supply the
+ * following environment variables:
+ * <ul>
+ *     <li>{@code CLIENT_ID} - your app client id</li>
+ *     <li>{@code CLIENT_SECRET} - your app client secret</li>
+ *     <li>{@code SERVER_PORT} - the server port where this will run</li>
+ * </ul>
+ * Your OAuth2 application must also allow a redirect URI like {@code http://localhost:SERVER_PORT}
  */
 public class ExampleOAuth2CodeFlow {
 
