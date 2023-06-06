@@ -1,6 +1,7 @@
 package discord4j.oauth2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.discordjson.json.UserData;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.Cookie;
 import reactor.core.publisher.Mono;
@@ -57,6 +58,19 @@ public class ExampleOAuth2CodeFlow {
                     CLIENTS.put(sessionId, client);
                     return Mono.empty();
                 })
+                .responseHandler((client, req, res) -> client.getCurrentUser()
+                        .map(UserData::username)
+                        .flatMapMany(name -> res.sendString(Mono.just(
+                                "<!doctype html>" +
+                                        "<html lang=en>" +
+                                        "<head>" +
+                                        "<meta charset=utf-8>" +
+                                        "<title>Discord4J</title>" +
+                                        "</head>" +
+                                        "<body>" +
+                                        "<p>Hello, " + name + "!</p>" +
+                                        "</body>" +
+                                        "</html>"))))
                 .route(r -> r
                         .get("/@me", (req, res) -> {
                             DiscordOAuth2Client client = getClient(req);
