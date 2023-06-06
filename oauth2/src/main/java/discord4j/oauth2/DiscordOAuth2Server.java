@@ -31,6 +31,7 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.CookieHeaderNames;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServer;
 import reactor.netty.http.server.HttpServerRequest;
@@ -65,8 +66,9 @@ public class DiscordOAuth2Server {
     private final List<String> redirectUris;
     private final String scope;
     private final ObjectMapper objectMapper;
-    private final HttpServer httpServer;
     private final DiscordOAuth2SuccessHandler successHandler;
+    private final DiscordOAuth2ResponseHandler responseHandler;
+    private final HttpServer httpServer;
 
     /**
      * Initialize a new builder.
@@ -89,12 +91,19 @@ public class DiscordOAuth2Server {
         this.redirectUris = Collections.unmodifiableList(builder.redirectUris);
         this.scope = builder.scope.toString();
         this.objectMapper = Objects.requireNonNull(builder.objectMapper, "objectMapper");
+        this.successHandler = builder.successHandler == null ? (client, session) -> Mono.empty() :
+                builder.successHandler;
+        this.responseHandler = builder.responseHandler == null ?
+                (client, req, res) -> res.addHeader("content-type", "application/json")
+                        .addHeader("vary", "origin")
+                        .addHeader("access-control-allow-methods", "GET")
+                        .chunkedTransfer(false)
+                        .sendString(Mono.just("{\"ok\": true}")) : builder.responseHandler;
         Consumer<HttpServerRoutes> loginRoute = route -> route.get(builder.loginPath, new OAuth2ServerHandler());
         Function<HttpServer, HttpServer> initializer = httpServer ->
                 httpServer.route(builder.routesCustomizer == null ? loginRoute :
                         loginRoute.andThen(builder.routesCustomizer));
         this.httpServer = initializer.apply(Objects.requireNonNull(builder.httpServer, "httpServer"));
-        this.successHandler = Objects.requireNonNull(builder.successHandler, "successHandler");
     }
 
     /**
@@ -117,6 +126,7 @@ public class DiscordOAuth2Server {
         private ObjectMapper objectMapper = new ObjectMapper();
         private final StringBuilder scope = new StringBuilder();
         private DiscordOAuth2SuccessHandler successHandler;
+        private DiscordOAuth2ResponseHandler responseHandler;
         private Consumer<HttpServerRoutes> routesCustomizer;
         private String loginPath = "/";
 
@@ -205,6 +215,17 @@ public class DiscordOAuth2Server {
         }
 
         /**
+         * Add a handler called once an OAuth2 login completes, allowing to transform the response sent by the server.
+         *
+         * @param responseHandler a handler invoked every time a user authorization succeeds
+         * @return this builder
+         */
+        public Builder responseHandler(DiscordOAuth2ResponseHandler responseHandler) {
+            this.responseHandler = responseHandler;
+            return this;
+        }
+
+        /**
          * Override the route path this server uses to register the authorization handler. By default, it's the root
          * path ('/')
          *
@@ -242,7 +263,7 @@ public class DiscordOAuth2Server {
         }
     }
 
-    private class OAuth2ServerHandler implements ReactorNettyServerHandler {
+    public class OAuth2ServerHandler implements ReactorNettyServerHandler {
 
         private final SecureRandom random = new SecureRandom();
         private final Map<String, String> sessionToState = new ConcurrentHashMap<>();
@@ -276,27 +297,27 @@ public class DiscordOAuth2Server {
                     return res.status(HttpResponseStatus.BAD_REQUEST);
                 }
                 sessionToState.remove(sessionId);
-                return res.addHeader("content-type", "application/json")
-                        .addHeader("vary", "origin")
-                        .addHeader("access-control-allow-methods", "GET")
-                        .chunkedTransfer(false)
-                        .sendString(service.exchangeAuthorizationCode(AuthorizationCodeGrantRequest.builder()
-                                        .clientId(clientId)
-                                        .clientSecret(clientSecret)
-                                        .code(code)
-                                        .redirectUri(origin == null ? redirectUris.get(0) : origin)
-                                        .build())
-                                .flatMap(data -> {
-                                    DiscordOAuth2Client client = DiscordOAuth2Client.createFromToken(
-                                            restClient, clientId, clientSecret, data);
 
-                                    return Mono.defer(() -> successHandler.onAuthSuccess(client, sessionId))
-                                            .onErrorResume(e -> {
-                                                log.error("Unable to run success handler", e);
-                                                return Mono.empty();
-                                            })
-                                            .then(Mono.fromCallable(() -> objectMapper.writeValueAsString(data)));
-                                }));
+                Mono<DiscordOAuth2Client> exchange =
+                        service.exchangeAuthorizationCode(AuthorizationCodeGrantRequest.builder()
+                                .clientId(clientId)
+                                .clientSecret(clientSecret)
+                                .code(code)
+                                .redirectUri(origin == null ? redirectUris.get(0) : origin)
+                                .build())
+                        .flatMap(data -> {
+                            DiscordOAuth2Client client = DiscordOAuth2Client.createFromToken(
+                                    restClient, clientId, clientSecret, data);
+
+                            return Mono.defer(() -> successHandler.onAuthSuccess(client, sessionId))
+                                    .onErrorResume(e -> {
+                                        log.error("Unable to run success handler", e);
+                                        return Mono.empty();
+                                    })
+                                    .thenReturn(client);
+                        });
+
+                return exchange.flatMapMany(client -> Flux.defer(() -> responseHandler.handle(client, req, res)));
             }
         }
 

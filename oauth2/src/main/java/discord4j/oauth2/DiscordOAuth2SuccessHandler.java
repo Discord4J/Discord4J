@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
  * An interface to work with authorized users within a {@link DiscordOAuth2Server}. Allows retrieving details once
  * a user completes an authorization code grant request.
  */
+@FunctionalInterface
 public interface DiscordOAuth2SuccessHandler {
 
     /**
