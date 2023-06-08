@@ -187,7 +187,7 @@ public class User implements Entity {
      */
     public final String getDefaultAvatarUrl() {
         if (getDiscriminator() == null || Integer.parseInt(getDiscriminator()) == 0) // new system
-            return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, (getId().asLong() >> 22) % 5), PNG);
+            return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, (getId().asLong() >> 22) % 6), PNG);
 
         return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, Integer.parseInt(getDiscriminator()) % 5), PNG);
     }
