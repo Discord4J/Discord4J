@@ -108,13 +108,25 @@ public class User implements Entity {
      * Gets the user's 4-digit discriminator
      * The discriminator is unique number to distinct one among all users with the same username.
      * The discriminator is randomly generated, but can be changed if the user has a nitro subscription.
+     * Migrated users from the old system will have a discriminator of "0000".
+     * May become null after the system change is complete.
      *
-     * @return The user's 4-digit discriminator.
+     * @return The user's 4-digit discriminator, or "0000" if the user is migrated to the new system.
      * @deprecated
      */
     @Deprecated
+    @Nullable
     public final String getDiscriminator() {
         return data.discriminator();
+    }
+
+    /**
+     * Returns whether the user is migrated to the new system or not.
+     *
+     * @return true if the user is migrated to the new system
+     */
+    private boolean isMigrated() {
+        return getDiscriminator() == null || getDiscriminator().equals("0000");
     }
 
     /**
@@ -123,7 +135,7 @@ public class User implements Entity {
      * @return {@link User#getUsername()}#{@link User#getDiscriminator()}
      */
     public final String getTag() {
-        if (getDiscriminator() == null || Integer.parseInt(getDiscriminator()) == 0) // new system
+        if (isMigrated())
             return getUsername();
 
         return getUsername() + "#" + getDiscriminator();
@@ -186,7 +198,7 @@ public class User implements Entity {
      * @return The default avatar URL for this user.
      */
     public final String getDefaultAvatarUrl() {
-        if (getDiscriminator() == null || Integer.parseInt(getDiscriminator()) == 0) // new system
+        if (isMigrated())
             return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, (getId().asLong() >> 22) % 6), PNG);
 
         return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, Integer.parseInt(getDiscriminator()) % 5), PNG);
