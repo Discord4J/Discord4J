@@ -126,7 +126,7 @@ public class User implements Entity {
      * @return true if the user is migrated to the new system
      */
     private boolean isMigrated() {
-        return getDiscriminator() == null || getDiscriminator().equals("0000");
+        return getDiscriminator() == null || getDiscriminator().equals("0");
     }
 
     /**
