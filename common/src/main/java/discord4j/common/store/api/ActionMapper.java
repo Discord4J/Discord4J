@@ -73,6 +73,21 @@ public class ActionMapper {
     }
 
     /**
+     * Aggregates a collection of {@link ActionMapper ActionMappers} into a single instance. Mappers with matching
+     * actions will be merged by preserving the first declared one.
+     *
+     * @param mappers the mappers to aggregate
+     * @return an aggregated {@link ActionMapper}, merging any overlap by preserving the first mapper by collection
+     * order
+     */
+    public static ActionMapper mergeFirst(Collection<ActionMapper> mappers) {
+        Objects.requireNonNull(mappers);
+        return new ActionMapper(mappers.stream()
+                .flatMap(mapper -> mapper.mappings.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a)));
+    }
+
+    /**
      * Retrieves the handler associated to the given action based on its concrete type.
      *
      * @param action the action to retrieve the handler for

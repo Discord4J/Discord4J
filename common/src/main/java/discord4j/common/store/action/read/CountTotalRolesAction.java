@@ -15,19 +15,11 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.common.store.selective;
+package discord4j.common.store.action.read;
 
-/**
- * Flag for signaling which stores should be used / no-op'd
- */
-public enum StoreFlag {
-	CHANNEL,
-	EMOJI,
-	GUILD,
-	MEMBER,
-	MESSAGE,
-	PRESENCE,
-	ROLE,
-	USER,
-	VOICE_STATE,
+public class CountTotalRolesAction extends CountTotalAction {
+
+    CountTotalRolesAction() {
+        super(CountableEntity.ROLES);
+    }
 }

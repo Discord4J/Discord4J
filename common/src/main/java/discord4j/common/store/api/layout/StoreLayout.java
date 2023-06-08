@@ -18,6 +18,9 @@
 package discord4j.common.store.api.layout;
 
 import discord4j.common.store.api.ActionMapper;
+import discord4j.common.store.api.StoreFlag;
+
+import java.util.EnumSet;
 
 /**
  * A {@link StoreLayout} defines how store actions should be handled according to their type. It enforces an
@@ -41,12 +44,23 @@ public interface StoreLayout {
     GatewayDataUpdater getGatewayDataUpdater();
 
     /**
-     * Defines a mapping for custom action types. By default returns an empty {@link ActionMapper}, implementations
+     * Defines a mapping for custom action types. By default, returns an empty {@link ActionMapper}, implementations
      * may override this method to supply custom mappings.
      *
      * @return an {@link ActionMapper}
      */
     default ActionMapper getCustomActionMapper() {
         return ActionMapper.empty();
+    }
+
+    /**
+     * Return a set of {@link StoreFlag} values to selectively enable store actions. By default, it returns all values,
+     * meaning this layout will enable all available store actions.
+     *
+     * @return a set of flags to partially enable store actions
+     * @since 3.2.5
+     */
+    default EnumSet<StoreFlag> getEnabledFlags() {
+        return EnumSet.allOf(StoreFlag.class);
     }
 }

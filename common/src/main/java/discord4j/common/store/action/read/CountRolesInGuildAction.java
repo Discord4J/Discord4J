@@ -15,7 +15,11 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-@NonNullApi
-package discord4j.common.store.selective;
+package discord4j.common.store.action.read;
 
-import reactor.util.annotation.NonNullApi;
+public class CountRolesInGuildAction extends CountInGuildAction {
+
+    CountRolesInGuildAction(long guildId) {
+        super(InGuildEntity.ROLES, guildId);
+    }
+}
