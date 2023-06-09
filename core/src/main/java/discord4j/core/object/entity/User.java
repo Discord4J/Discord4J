@@ -112,7 +112,7 @@ public class User implements Entity {
      * May become null after the system change is complete.
      *
      * @return The user's 4-digit discriminator, or "0" if the user is migrated to the new system.
-     * @deprecated
+     * @deprecated This method will be removed once the system change is complete.
      */
     @Deprecated
     @Nullable

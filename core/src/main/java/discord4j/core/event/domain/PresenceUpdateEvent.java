@@ -110,6 +110,7 @@ public class PresenceUpdateEvent extends Event {
      * This may not exist if the {@code User}'s discriminator has not been changed.
      *
      * @return The {@link User}'s new discriminator, if present.
+     * @deprecated This method will be removed once the system change is complete.
      */
     @Deprecated
     public Optional<String> getNewDiscriminator() {
