@@ -77,10 +77,7 @@ public class DefaultRouter implements Router {
                     }
                     return callback.asMono();
                 })
-                .doOnCancel(() -> {
-                    log.info("Cancelling a router exchange");
-                    cancelSink.emitEmpty(FAIL_FAST);
-                })
+                .doOnCancel(() -> cancelSink.emitEmpty(FAIL_FAST))
                 .checkpoint("Request to " + request.getDescription() + " [DefaultRouter]"), reactorResources);
     }
 
