@@ -30,10 +30,7 @@ import discord4j.core.spec.legacy.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
-import discord4j.discordjson.json.AuditLogData;
-import discord4j.discordjson.json.AuditLogEntryData;
-import discord4j.discordjson.json.GuildData;
-import discord4j.discordjson.json.NicknameModifyData;
+import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.PaginationUtil;
@@ -732,6 +729,17 @@ public final class Guild implements Entity {
         return Mono.justOrEmpty(getPublicUpdatesChannelId())
                 .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id))
                 .cast(TextChannel.class);
+    }
+
+    /**
+     * Gets the id of the channel where admins and moderators of Community guilds receive safety alerts from Discord, if
+     * present.
+     *
+     * @return The id of the channel where admins and moderators of Community guilds receive safety alerts from Discord, if
+     * present.
+     */
+    public Optional<Snowflake> getSafetyAlertsChannelId() {
+        return data.safetyAlertsChannelId().map(Snowflake::of);
     }
 
     /**
@@ -1860,11 +1868,11 @@ public final class Guild implements Entity {
      */
     public Mono<String> changeSelfNickname(@Nullable final String nickname) {
         return gateway.getRestClient().getGuildService()
-                .modifyOwnNickname(getId().asLong(), NicknameModifyData.builder()
+                .modifyCurrentMember(getId().asLong(), CurrentMemberModifyData.builder()
                         .nick(Optional.ofNullable(nickname))
                         .build())
                 .handle((data, sink) -> {
-                    String nick = data.nick().orElse(null);
+                    String nick = Possible.flatOpt(data.nick()).orElse(null);
                     if (nick != null) {
                         sink.next(nick);
                     } else {
@@ -1903,6 +1911,44 @@ public final class Guild implements Entity {
         return gateway.getRestClient().getAutoModService()
             .getAutoModRule(getId().asLong(), autoModRuleId.asLong())
             .map(data -> new AutoModRule(gateway, data));
+    }
+
+    /**
+     * Requests to retrieve the scheduled event using the provided ID.
+     *
+     * @param eventId the event ID
+     * @param withUserCount Requests to fetch the enrolled user count to Discord or not
+     * @return A {@link Mono} which, upon completion, emits an associated {@link ScheduledEvent} if found.
+     */
+    public Mono<ScheduledEvent> getScheduledEventById(Snowflake eventId, boolean withUserCount) {
+        return gateway.getRestClient().getScheduledEventById(getId(), eventId).getData(withUserCount)
+            .map(data -> new ScheduledEvent(gateway, data));
+    }
+
+    /**
+     * Requests to retrieve all the scheduled events associated to this guild.
+     *
+     * @param withUserCount Requests to fetch the enrolled user count to Discord or not
+     * @return A {@link Flux} which emits {@link ScheduledEvent} objects.
+     */
+    public Flux<ScheduledEvent> getScheduledEvents(boolean withUserCount) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("with_user_count", withUserCount);
+
+        return gateway.getRestClient().getGuildService().getScheduledEvents(getId().asLong(), queryParams)
+            .map(data -> new ScheduledEvent(gateway, data));
+    }
+
+    /**
+     * Requests to create a guild scheduled event with the provided spec on this guild
+     *
+     * @param spec spec specifying {@link ScheduledEvent} parameters
+     * @return A {@link Mono} which, upon completion, emits the created {@link ScheduledEvent} object. Any error, if occurs,
+     * is emitted through the {@link Mono}.
+     */
+    public Mono<ScheduledEvent> createScheduledEvent(ScheduledEventCreateSpec spec) {
+        return gateway.getRestClient().getGuildService().createScheduledEvent(getId().asLong(), spec.asRequest())
+            .map(data -> new ScheduledEvent(gateway, data));
     }
 
     @Override
@@ -2212,8 +2258,14 @@ public final class Guild implements Entity {
         /** Suppress server setup tips. */
         SUPPRESS_GUILD_REMINDER_NOTIFICATIONS(2),
 
-        /** Hide member join sticker reply buttons */
-        SUPPRESS_JOIN_NOTIFICATION_REPLIES(3);
+        /** Hide member join sticker reply buttons. */
+        SUPPRESS_JOIN_NOTIFICATION_REPLIES(3),
+
+        /** Suppress role subscription purchase and renewal notifications. */
+        SUPPRESS_ROLE_SUBSCRIPTION_PURCHASE_NOTIFICATIONS(4),
+
+        /** Hide role subscription sticker reply buttons. */
+        SUPPRESS_ROLE_SUBSCRIPTION_PURCHASE_NOTIFICATION_REPLIES(5);
 
         /** The underlying value as represented by Discord. */
         private final int value;

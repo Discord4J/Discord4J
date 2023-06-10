@@ -18,6 +18,7 @@
 package discord4j.common.store.api.layout;
 
 import discord4j.common.store.api.object.ExactResultNotAvailableException;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -281,6 +282,38 @@ public interface DataAccessor {
     Mono<GuildData> getGuildById(long guildId);
 
     /**
+     * Retrieves data for all guild scheduled events corresponding to the given guild ID.
+     *
+     * @param guildId the guild ID
+     * @return A {@link Flux} emitting the scheduled events, or empty if none is present
+     */
+    default Flux<GuildScheduledEventData> getScheduledEventsInGuild(long guildId) {
+        return Flux.empty();
+    }
+
+    /**
+     * Retrieves data for the guild scheduled event corresponding to the given guild ID and event ID.
+     *
+     * @param guildId the guild ID
+     * @param eventId the event ID
+     * @return A {@link Mono} emitting the scheduled event, or empty if not found
+     */
+    default Mono<GuildScheduledEventData> getScheduledEventById(long guildId, long eventId) {
+        return Mono.empty();
+    }
+
+    /**
+     * Retrieves data for all guild scheduled event users corresponding to the given guild ID and event ID.
+     *
+     * @param guildId the guild ID
+     * @param eventId the event ID
+     * @return A {@link Flux} emitting the scheduled event users ids, or empty if none is present
+     */
+    default Flux<Id> getScheduledEventUsersInEvent(long guildId, long eventId) {
+        return Flux.empty();
+    }
+
+    /**
      * Retrieves data for all members present in the store.
      *
      * @return A {@link Flux} emitting the members, or empty if none is present
@@ -433,4 +466,6 @@ public interface DataAccessor {
      * @return A {@link Mono} emitting the voice state, or empty if not found
      */
     Mono<VoiceStateData> getVoiceStateById(long guildId, long userId);
+
+
 }

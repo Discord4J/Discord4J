@@ -138,7 +138,12 @@ public class ChannelService extends RestService {
                 .bodyToMono(Void.class);
     }
 
-    @Experimental
+    /**
+     * @deprecated - As of April 28, 2021, Discord removed the suppress-embeds route in API v9. This method will be
+     * removed in a future update. <a href="https://discord.com/developers/docs/change-log#april-28-2021">
+     * https://discord.com/developers/docs/change-log#april-28-2021</a>
+     */
+    @Deprecated
     public Mono<Void> suppressEmbeds(long channelId, long messageId, SuppressEmbedsRequest request) {
         return Routes.MESSAGE_SUPPRESS_EMBEDS.newRequest(channelId, messageId)
                 .header("content-type", "application/json")

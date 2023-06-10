@@ -55,10 +55,16 @@ public enum Permission {
     /** Allows for Stream in voice channel. */
     STREAM(0x00000200, false),
 
-    /** Allows guild members to view a channel, which includes reading messages in text channels. */
+    /**
+     * Allows guild members to view a channel, which includes reading messages in text channels and joining voice
+     * channels.
+     */
     VIEW_CHANNEL(0x00000400, false),
 
-    /** Allows for sending messages in a channel. */
+    /**
+     * Allows for sending messages in a channel and creating threads in a forum(does not allow sending messages in
+     * threads)
+     */
     SEND_MESSAGES(0x00000800, false),
 
     /** Allows for sending of /tts messages. */
@@ -121,13 +127,21 @@ public enum Permission {
     /**
      * Allows management and editing of emojis.
      *
-     * @deprecated Deprecated in favor of {@link Permission#MANAGE_EMOJIS_AND_STICKERS}
+     * @deprecated use the official permission name: {@link #MANAGE_GUILD_EXPRESSIONS}
      */
     @Deprecated
     MANAGE_EMOJIS(0x40000000, true),
 
-    /** Allows management and editing of emojis and stickers. */
+    /**
+     * Allows management and editing of emojis and stickers.
+     *
+     * @deprecated use the official permission name: {@link #MANAGE_GUILD_EXPRESSIONS}
+     */
+    @Deprecated
     MANAGE_EMOJIS_AND_STICKERS(0x40000000, true),
+
+    /** Allows management and editing of emojis, stickers, and soundboard sounds. */
+    MANAGE_GUILD_EXPRESSIONS(0x40000000, true),
 
     /** Allows members to use slash commands in text channels.
      *
@@ -169,7 +183,19 @@ public enum Permission {
     /**
      * Allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from speaking in voice and stage channels.
      */
-    MODERATE_MEMBERS(0x0000010000000000L, false);
+    MODERATE_MEMBERS(0x0000010000000000L, false),
+
+    /** Allows for viewing role subscription insights */
+    VIEW_CREATOR_MONETIZATION_ANALYTICS(0x0000020000000000L, true),
+
+    /** Allows for using soundboard in a voice channel */
+    USE_SOUNDBOARD(0x0000040000000000L, false),
+
+    /** Allows the usage of custom soundboard sounds from other servers */
+    USE_EXTERNAL_SOUNDS(0x0000200000000000L, false),
+
+    /** Allows sending voice messages. */
+    SEND_VOICE_MESSAGES(0x0000400000000000L, false);
 
     /** Whether MFA is required. */
     private final boolean mfa;

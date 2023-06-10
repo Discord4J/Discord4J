@@ -285,10 +285,14 @@ public abstract class Routes {
      * <p>
      * Returns a 204 empty response on success. Fires a Message Update Gateway event.
      *
+     * @deprecated - As of April 28, 2021, Discord removed this route in API v9. This {@code Route} will be removed in
+     * a future update. <a href="https://discord.com/developers/docs/change-log#april-28-2021">
+     * https://discord.com/developers/docs/change-log#april-28-2021</a>
+     *
      * @see <a href="https://discord.com/developers/docs/resources/channel#suppress-message-embeds">
      * https://discord.com/developers/docs/resources/channel#suppress-message-embeds</a>
      */
-    @Experimental
+    @Deprecated
     public static final Route MESSAGE_SUPPRESS_EMBEDS = Route.post("/channels/{channel.id}/messages/{message.id}/suppress-embeds");
 
     /**
@@ -624,8 +628,18 @@ public abstract class Routes {
      *
      * @see <a href="https://discord.com/developers/docs/resources/guild#modify-current-user-nick">
      * https://discord.com/developers/docs/resources/guild#modify-current-user-nick</a>
+     * @deprecated use
      */
+    @Deprecated
     public static final Route NICKNAME_MODIFY_OWN = Route.patch("/guilds/{guild.id}/members/@me/nick");
+
+    /**
+     * Modifies the current member in a guild. Returns a 200 with the updated member on success. Fires a Guild
+     * Member Update Gateway event.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#modify-current-member">Discord</a>
+     */
+    public static final Route CURRENT_MEMBER_MODIFY = Route.patch("/guilds/{guild.id}/members/@me");
 
     /**
      * Adds a role to a guild member. Requires the 'MANAGE_ROLES' permission. Returns a 204 empty response on success.
@@ -982,6 +996,13 @@ public abstract class Routes {
     public static final Route CURRENT_USER_GUILDS_GET = Route.get("/users/@me/guilds");
 
     /**
+     * Returns a guild member object for the current user. Requires the guilds.members.read OAuth2 scope.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/user#get-current-user-guild-member">Discord</a>
+     */
+    public static final Route CURRENT_USER_GUILD_MEMBER_GET = Route.get("/users/@me/guilds/{guild.id}/member");
+
+    /**
      * Leave a guild. Returns a 204 empty response on success.
      *
      * @see <a href="https://discord.com/developers/docs/resources/user#leave-guild">
@@ -1193,4 +1214,67 @@ public abstract class Routes {
     ///////////////////////////////////////////
 
     public static final Route INTERACTION_RESPONSE_CREATE = Route.post("/interactions/{interaction.id}/{interaction.token}/callback");
+
+    /////////////////////////////////////////////////////
+    ////////// Guild Scheduled Event Resource ///////////
+    /////////////////////////////////////////////////////
+
+    /**
+     * Returns a list of all scheduled events for a guild.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild-scheduled-event#list-scheduled-events-for-guild">
+     * https://discord.com/developers/docs/resources/guild-scheduled-event#list-scheduled-events-for-guild</a>
+     */
+    public static final Route GUILD_SCHEDULED_EVENTS_GET = Route.get("/guilds/{guild.id}/scheduled-events");
+
+    /**
+     * Creates a guild scheduled event for the given guild. Returns a scheduled event object on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild-scheduled-event#create-guild-scheduled-event">
+     * ttps://discord.com/developers/docs/resources/guild-scheduled-event#create-guild-scheduled-event</a>
+     */
+    public static final Route GUILD_SCHEDULED_EVENT_CREATE = Route.post("/guilds/{guild.id}/scheduled-events");
+
+    /**
+     * Returns a scheduled event for the given guild.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event">
+     * https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event</a>
+     */
+    public static final Route GUILD_SCHEDULED_EVENT_GET = Route.get("/guilds/{guild.id}/scheduled-events/{event.id}");
+
+    /**
+     * Modifies a scheduled event for the given guild. Returns the modified scheduled event object on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild-scheduled-event#modify-guild-scheduled-event">
+     * https://discord.com/developers/docs/resources/guild-scheduled-event#modify-guild-scheduled-event</a>
+     */
+    public static final Route GUILD_SCHEDULED_EVENT_MODIFY = Route.patch("/guilds/{guild.id}/scheduled-events/{event.id}");
+
+    /**
+     * Deletes a scheduled event for the given guild. Returns a 204 empty response on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild-scheduled-event#delete-guild-scheduled-event">
+     * https://discord.com/developers/docs/resources/guild-scheduled-event#delete-guild-scheduled-event</a>
+     */
+    public static final Route GUILD_SCHEDULED_EVENT_DELETE = Route.delete("/guilds/{guild.id}/scheduled-events/{event.id}");
+
+    /**
+     * Returns a list of users RSVP'd to the scheduled event for the given guild. Returns a list of user objects on
+     * success with an optional `guild_member` property for each user if `with_member` query param is passed.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event-users">
+     * https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event-users</a>
+     */
+    public static final Route GUILD_SCHEDULED_EVENT_USERS_GET = Route.get("/guilds/{guild.id}/scheduled-events/{event.id}/users");
+
+    ///////////////////////////////////////////
+    ///////////// OAuth2 Resource /////////////
+    ///////////////////////////////////////////
+
+    public static final Route TOKEN = Route.post("/oauth2/token");
+
+    public static final Route TOKEN_REVOKE = Route.post("/oauth2/token/revoke");
+
+    public static final Route AUTHORIZATION_INFO_GET = Route.get("/oauth2/@me");
 }

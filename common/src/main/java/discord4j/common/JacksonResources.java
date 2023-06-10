@@ -21,7 +21,9 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.discordjson.possible.PossibleFilter;
 import discord4j.discordjson.possible.PossibleModule;
@@ -39,6 +41,8 @@ public class JacksonResources {
      */
     public static final Function<ObjectMapper, ObjectMapper> INITIALIZER = mapper -> mapper
             .registerModule(new PossibleModule())
+            .registerModule(new JavaTimeModule())
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .registerModule(new Jdk8Module())
             .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
             .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.PUBLIC_ONLY)

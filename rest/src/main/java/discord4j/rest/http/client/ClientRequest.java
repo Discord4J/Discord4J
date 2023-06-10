@@ -39,6 +39,12 @@ public class ClientRequest {
     private final HttpHeaders headers;
     private final Object body;
 
+    @Nullable
+    private final AuthorizationScheme authorizationScheme;
+
+    @Nullable
+    private final String authorizationValue;
+
     /**
      * Create a new {@link ClientRequest} from the given request template.
      *
@@ -57,6 +63,8 @@ public class ClientRequest {
                 .orElse(new DefaultHttpHeaders());
         this.body = request.getBody();
         this.id = Integer.toHexString(System.identityHashCode(this));
+        this.authorizationScheme = request.getAuthorizationScheme();
+        this.authorizationValue = request.getAuthorizationValue();
     }
 
     /**
@@ -125,6 +133,16 @@ public class ClientRequest {
 
     public String getDescription() {
         return request.getDescription();
+    }
+
+    @Nullable
+    public AuthorizationScheme getAuthorizationScheme() {
+        return authorizationScheme;
+    }
+
+    @Nullable
+    public String getAuthorizationValue() {
+        return authorizationValue;
     }
 
     @Override

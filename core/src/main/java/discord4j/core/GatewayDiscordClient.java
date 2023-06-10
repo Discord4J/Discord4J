@@ -29,6 +29,7 @@ import discord4j.core.event.domain.Event;
 import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
+import discord4j.core.object.ScheduledEventUser;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
@@ -797,4 +798,20 @@ public class GatewayDiscordClient implements EntityRetriever {
     public Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId) {
         return entityRetriever.getGuildAutoModRules(guildId);
     }
+
+    @Override
+    public Mono<ScheduledEvent> getScheduledEventById(Snowflake guildId, Snowflake eventId) {
+        return entityRetriever.getScheduledEventById(guildId, eventId);
+    }
+
+    @Override
+    public Flux<ScheduledEvent> getScheduledEvents(Snowflake guildId) {
+        return entityRetriever.getScheduledEvents(guildId);
+    }
+
+    @Override
+    public Flux<ScheduledEventUser> getScheduledEventUsers(Snowflake guildId, Snowflake eventId) {
+        return entityRetriever.getScheduledEventUsers(guildId, eventId);
+    }
+
 }

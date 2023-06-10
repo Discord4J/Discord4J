@@ -20,6 +20,7 @@ import discord4j.common.LogUtil;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.guild.*;
+import discord4j.core.event.domain.guild.ScheduledEventCreateEvent;
 import discord4j.core.event.domain.role.RoleCreateEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.core.event.domain.role.RoleUpdateEvent;
@@ -257,6 +258,48 @@ class GuildDispatchHandlers {
             .orElse(null);
 
         return Mono.just(new RoleUpdateEvent(gateway, context.getShardInfo(), current, oldRole));
+    }
+
+    static Mono<ScheduledEventCreateEvent> scheduledEventCreate(DispatchContext<GuildScheduledEventCreate, Void> context) {
+        GatewayDiscordClient gateway = context.getGateway();
+        GuildScheduledEventData payload = context.getDispatch().scheduledEvent();
+        ScheduledEvent scheduledEvent = new ScheduledEvent(gateway, payload);
+        return Mono.just(new ScheduledEventCreateEvent(gateway, context.getShardInfo(), scheduledEvent));
+    }
+
+    static Mono<ScheduledEventUpdateEvent> scheduledEventUpdate(DispatchContext<GuildScheduledEventUpdate, GuildScheduledEventData> context) {
+        GatewayDiscordClient gateway = context.getGateway();
+        GuildScheduledEventData payload = context.getDispatch().scheduledEvent();
+        ScheduledEvent scheduledEvent = new ScheduledEvent(gateway, payload);
+        ScheduledEvent oldScheduledEvent = context.getOldState()
+                .map(data -> new ScheduledEvent(gateway, data))
+                .orElse(null);
+        return Mono.just(new ScheduledEventUpdateEvent(gateway, context.getShardInfo(), scheduledEvent, oldScheduledEvent));
+    }
+
+    static Mono<ScheduledEventDeleteEvent> scheduledEventDelete(DispatchContext<GuildScheduledEventDelete, GuildScheduledEventData> context) {
+        GatewayDiscordClient gateway = context.getGateway();
+        GuildScheduledEventData payload = context.getDispatch().scheduledEvent();
+        ScheduledEvent scheduledEvent = new ScheduledEvent(gateway, payload);
+        return Mono.just(new ScheduledEventDeleteEvent(gateway, context.getShardInfo(), scheduledEvent));
+    }
+
+    static Mono<ScheduledEventUserAddEvent> scheduledEventUserAdd(DispatchContext<GuildScheduledEventUserAdd, Void> context) {
+        GatewayDiscordClient gateway = context.getGateway();
+        GuildScheduledEventUserAdd dispatch = context.getDispatch();
+        return Mono.just(new ScheduledEventUserAddEvent(gateway, context.getShardInfo(),
+                Snowflake.asLong(dispatch.guildId()),
+                Snowflake.asLong(dispatch.scheduledEventId()),
+                Snowflake.asLong(dispatch.userId())));
+    }
+
+    static Mono<ScheduledEventUserRemoveEvent> scheduledEventUserRemove(DispatchContext<GuildScheduledEventUserRemove, Void> context) {
+        GatewayDiscordClient gateway = context.getGateway();
+        GuildScheduledEventUserRemove dispatch = context.getDispatch();
+        return Mono.just(new ScheduledEventUserRemoveEvent(gateway, context.getShardInfo(),
+                Snowflake.asLong(dispatch.guildId()),
+                Snowflake.asLong(dispatch.scheduledEventId()),
+                Snowflake.asLong(dispatch.userId())));
     }
 
     static Mono<GuildUpdateEvent> guildUpdate(DispatchContext<GuildUpdate, GuildData> context) {
