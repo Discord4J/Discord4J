@@ -86,6 +86,16 @@ public class PresenceUpdateEvent extends Event {
     }
 
     /**
+     * Gets the {@link User}'s new global name, if present. This may not exist if the {@code user}'s global
+     * name has not been changed.
+     *
+     * @return The {@link User}'s new global name, if present.
+     */
+    public Optional<String> getNewGlobalName() {
+        return Possible.flatOpt(user.globalName());
+    }
+
+    /**
      * Gets the {@link User}'s new username, if present. This may not exist if the {@code user}'s username has not
      * been changed.
      *
@@ -100,7 +110,9 @@ public class PresenceUpdateEvent extends Event {
      * This may not exist if the {@code User}'s discriminator has not been changed.
      *
      * @return The {@link User}'s new discriminator, if present.
+     * @deprecated This method will be removed once the system change is complete.
      */
+    @Deprecated
     public Optional<String> getNewDiscriminator() {
         return user.discriminator().toOptional();
     }

@@ -33,11 +33,17 @@ class EmptyUser implements UserData {
     }
 
     @Override
+    public Optional<String> globalName() {
+        return Optional.empty();
+    }
+
+    @Override
     public String username() {
         return "";
     }
 
     @Override
+    @Deprecated
     public String discriminator() {
         return "";
     }
