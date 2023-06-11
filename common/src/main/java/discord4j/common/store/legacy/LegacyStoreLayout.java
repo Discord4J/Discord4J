@@ -613,6 +613,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         return PresenceData.builder()
                 .user(PartialUserData.builder()
                         .id(member.user().id())
+                        .globalName(Possible.of(member.user().globalName()))
                         .username(member.user().username())
                         .discriminator(member.user().discriminator())
                         .avatar(Possible.of(member.user().avatar()))
@@ -1274,6 +1275,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .flatMap(oldUserData -> {
                     UserData newUserData = UserData.builder()
                             .from(oldUserData)
+                            .globalName(userData.globalName().isAbsent() ? oldUserData.globalName() :
+                                Possible.flatOpt(userData.globalName()))
                             .username(userData.username().toOptional()
                                     .orElse(oldUserData.username()))
                             .discriminator(userData.discriminator().toOptional()

@@ -86,7 +86,18 @@ public class User implements Entity {
     }
 
     /**
-     * Gets the user's username, not unique across the platform.
+     * Gets the user's global username, not enforced to be unique across the platform.
+     * May be empty if the user has not set a global username.
+     *
+     * @return The user's global name
+     */
+    public final Optional<String> getGlobalName() {
+        return data.globalName();
+    }
+
+    /**
+     * Gets the user's username.
+     * May or may not be unique across the platform (due to the system ongoing change)
      *
      * @return The user's username, not unique across the platform.
      */
@@ -98,19 +109,37 @@ public class User implements Entity {
      * Gets the user's 4-digit discriminator
      * The discriminator is unique number to distinct one among all users with the same username.
      * The discriminator is randomly generated, but can be changed if the user has a nitro subscription.
+     * Migrated users from the old system will have a discriminator of "0".
+     * May become null after the system change is complete.
      *
-     * @return The user's 4-digit discriminator.
+     * @return The user's 4-digit discriminator, or "0" if the user is migrated to the new system.
+     * @deprecated This method will be removed once the system change is complete.
      */
+    @Deprecated
+    @Nullable
     public final String getDiscriminator() {
         return data.discriminator();
     }
 
     /**
-     * Gets the user's username and discriminator separated by a #
-     * This is unique across the discord platform, but may change.
-     * @return {@link User#getUsername()}#{@link User#getDiscriminator()}
+     * Returns whether the user is migrated to the new system or not.
+     *
+     * @return true if the user is migrated to the new system
+     */
+    private boolean isMigrated() {
+        return getDiscriminator() == null || getDiscriminator().equals("0");
+    }
+
+    /**
+     * Gets the user's username and discriminator separated by a # or its username if the user is using the new system
+     *
+     * @return {@link User#getUsername()}#{@link User#getDiscriminator()} if the user is not migrated, {@link User#getUsername()} otherwise.
      */
     public final String getTag() {
+        if (isMigrated()) {
+            return getUsername();
+        }
+
         return getUsername() + "#" + getDiscriminator();
     }
 
@@ -171,6 +200,10 @@ public class User implements Entity {
      * @return The default avatar URL for this user.
      */
     public final String getDefaultAvatarUrl() {
+        if (isMigrated()) {
+            return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, (getId().asLong() >> 22) % 6), PNG);
+        }
+
         return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, Integer.parseInt(getDiscriminator()) % 5), PNG);
     }
 
