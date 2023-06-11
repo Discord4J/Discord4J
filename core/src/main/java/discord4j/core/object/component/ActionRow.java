@@ -18,6 +18,7 @@ package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,5 +55,40 @@ public class ActionRow extends LayoutComponent {
 
     ActionRow(ComponentData data) {
         super(data);
+    }
+
+    /**
+     * Create a new {@link ActionRow} instance from {@code this}, adding a given component.
+     *
+     * @param component the child component to be added
+     * @return an {@code ActionRow} containing the existing and added components
+     */
+    public ActionRow withAddedComponent(ActionComponent component) {
+        List<MessageComponent> components = new ArrayList<>(getChildren());
+        components.add(component);
+        return new ActionRow(ComponentData.builder()
+                .type(Type.ACTION_ROW.getValue())
+                .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+                .build());
+    }
+
+    /**
+     * Create a new {@link ActionRow} instance from {@code this}, removing any existing component by {@code customId}.
+     *
+     * @param customId the customId of the component to remove
+     * @return an {@code ActionRow} containing all components that did not match the given {@code customId}
+     */
+    public ActionRow withRemovedComponent(String customId) {
+        List<MessageComponent> components = getChildren()
+                .stream()
+                .filter(it -> !it.getData().customId()
+                        .toOptional()
+                        .filter(customId::equals)
+                        .isPresent())
+                .collect(Collectors.toList());
+        return new ActionRow(ComponentData.builder()
+                .type(Type.ACTION_ROW.getValue())
+                .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+                .build());
     }
 }
