@@ -17,6 +17,8 @@
 
 package discord4j.core.spec;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.EmbedImageData;
 import discord4j.discordjson.json.EmbedThumbnailData;
@@ -35,6 +37,8 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 import static discord4j.core.spec.InternalSpecUtils.toPossible;
 
 @Value.Immutable(singleton = true)
+@JsonSerialize(as = EmbedCreateSpec.class)
+@JsonDeserialize(as = EmbedCreateSpec.class)
 interface EmbedCreateSpecGenerator extends Spec<EmbedData> {
 
     Possible<String> title();

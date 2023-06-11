@@ -16,6 +16,9 @@
  */
 package discord4j.core.spec;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
@@ -37,6 +40,8 @@ import java.util.stream.Stream;
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable(singleton = true)
+@JsonSerialize(as = MessageCreateSpec.class)
+@JsonDeserialize(as = MessageCreateSpec.class)
 interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreateRequest>> {
 
     Possible<String> content();
@@ -48,11 +53,13 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
     Possible<List<EmbedCreateSpec>> embeds();
 
     @Value.Default
+    @JsonIgnore
     default List<MessageCreateFields.File> files() {
         return Collections.emptyList();
     }
 
     @Value.Default
+    @JsonIgnore
     default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
         return Collections.emptyList();
     }
