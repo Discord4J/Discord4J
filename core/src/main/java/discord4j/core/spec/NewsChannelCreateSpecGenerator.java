@@ -42,6 +42,8 @@ interface NewsChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest>
 
     Possible<Integer> position();
 
+    Possible<Integer> rateLimitPerUser();
+
     Possible<List<PermissionOverwrite>> permissionOverwrites();
 
     Possible<Snowflake> parentId();
@@ -51,16 +53,17 @@ interface NewsChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest>
     @Override
     default ChannelCreateRequest asRequest() {
         return ChannelCreateRequest.builder()
-                .type(Channel.Type.GUILD_NEWS.getValue())
-                .name(name())
-                .topic(topic())
-                .position(position())
-                .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
-                        .map(PermissionOverwrite::getData)
-                        .collect(Collectors.toList())))
-                .parentId(mapPossible(parentId(), Snowflake::asString))
-                .nsfw(nsfw())
-                .build();
+            .type(Channel.Type.GUILD_NEWS.getValue())
+            .name(name())
+            .topic(topic())
+            .position(position())
+            .rateLimitPerUser(rateLimitPerUser())
+            .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
+                .map(PermissionOverwrite::getData)
+                .collect(Collectors.toList())))
+            .parentId(mapPossible(parentId(), Snowflake::asString))
+            .nsfw(nsfw())
+            .build();
     }
 }
 

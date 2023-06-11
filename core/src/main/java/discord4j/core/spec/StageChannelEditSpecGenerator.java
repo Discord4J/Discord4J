@@ -42,6 +42,8 @@ interface StageChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> 
 
     Possible<Integer> position();
 
+    Possible<Integer> rateLimitPerUser();
+
     Possible<List<PermissionOverwrite>> permissionOverwrites();
 
     Possible<Optional<Snowflake>> parentId();
@@ -51,15 +53,16 @@ interface StageChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> 
     @Override
     default ChannelModifyRequest asRequest() {
         return ChannelModifyRequest.builder()
-                .name(name())
-                .bitrate(bitrate())
-                .position(position())
-                .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
-                        .map(PermissionOverwrite::getData)
-                        .collect(Collectors.toList())))
-                .parentId(mapPossibleOptional(parentId(), Snowflake::asString))
-                .rtcRegion(rtcRegion())
-                .build();
+            .name(name())
+            .bitrate(bitrate())
+            .position(position())
+            .rateLimitPerUser(rateLimitPerUser())
+            .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
+                .map(PermissionOverwrite::getData)
+                .collect(Collectors.toList())))
+            .parentId(mapPossibleOptional(parentId(), Snowflake::asString))
+            .rtcRegion(rtcRegion())
+            .build();
     }
 }
 
