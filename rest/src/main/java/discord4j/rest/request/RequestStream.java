@@ -85,17 +85,24 @@ class RequestStream {
      */
     private reactor.util.retry.Retry serverErrorRetryFactory() {
         return RetryBackoffSpec.backoff(10, Duration.ofSeconds(2))
-            .jitter(0.5)
-            .maxBackoff(Duration.ofSeconds(30))
-            .scheduler(timedTaskScheduler)
-            .doBeforeRetry(retrySignal -> {
-                if (log.isDebugEnabled()) {
-                    log.debug("Retry {} in bucket {} due to {}",
-                        retrySignal.totalRetries(),
-                        id.toString(),
-                        retrySignal.failure().toString());
-                }
-            });
+                .filter(ex -> {
+                    if (ex instanceof ClientException) {
+                        int code = ((ClientException) ex).getStatus().code();
+                        return code == 500 || code == 502 || code == 503 || code == 504;
+                    }
+                    return false;
+                })
+                .jitter(0.5)
+                .maxBackoff(Duration.ofSeconds(30))
+                .scheduler(timedTaskScheduler)
+                .doBeforeRetry(retrySignal -> {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Retry {} in bucket {} due to {}",
+                                retrySignal.totalRetries(),
+                                id.toString(),
+                                retrySignal.failure().toString());
+                    }
+                });
     }
 
     boolean push(RequestCorrelation<ClientResponse> request) {
