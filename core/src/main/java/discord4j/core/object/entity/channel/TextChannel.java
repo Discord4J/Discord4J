@@ -43,18 +43,6 @@ public final class TextChannel extends BaseTopLevelGuildChannel implements TopLe
     }
 
     /**
-     * Gets the amount of seconds an user has to wait before sending another message (0-120).
-     * <p>
-     * Bots, as well as users with the permission {@code manage_messages} or {@code manage_channel}, are unaffected.
-     *
-     * @return The amount of seconds an user has to wait before sending another message (0-120).
-     */
-    public int getRateLimitPerUser() {
-        return getData().rateLimitPerUser().toOptional()
-                .orElseThrow(IllegalStateException::new); // this should be safe for all TextChannels
-    }
-
-    /**
      * Gets whether this channel is considered NSFW (Not Safe For Work).
      *
      * @return {@code true} if this channel is considered NSFW (Not Safe For Work), {@code false} otherwise.

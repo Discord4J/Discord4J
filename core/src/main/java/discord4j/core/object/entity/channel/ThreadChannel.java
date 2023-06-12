@@ -36,6 +36,17 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
                 .orElseThrow(IllegalStateException::new); // should always be present for threads
     }
 
+    /**
+     * Gets the amount of seconds a user has to wait before sending another message (0-21600).
+     * <p>
+     * Bots, as well as users with the permission {@code manage_messages} or {@code manage_channel}, are unaffected.
+     *
+     * @return The amount of seconds a user has to wait before sending another message (0-21600).
+     */
+    public int getRateLimitPerUser() {
+        return getData().rateLimitPerUser().toOptional().orElse(0);
+    }
+
     // TODO: should this be Member? What if they're not in the guild anymore? Do we consider that anywhere else?
     public Mono<User> getStarter() {
         return getClient().getUserById(getStarterId());
