@@ -33,6 +33,17 @@ import java.util.function.Consumer;
 public interface CategorizableChannel extends TopLevelGuildChannel {
 
     /**
+     * Gets the amount of seconds a user has to wait before sending another message (0-21600).
+     * <p>
+     * Bots, as well as users with the permission {@code manage_messages} or {@code manage_channel}, are unaffected.
+     *
+     * @return The amount of seconds a user has to wait before sending another message (0-21600).
+     */
+    default int getRateLimitPerUser() {
+        return getData().rateLimitPerUser().toOptional().orElse(0);
+    }
+
+    /**
      * Gets the ID of the category for this channel, if present.
      *
      * @return The ID of the category for this channel, if present.

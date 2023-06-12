@@ -43,6 +43,8 @@ interface VoiceChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> 
 
     Possible<Integer> position();
 
+    Possible<Integer> rateLimitPerUser();
+
     Possible<List<PermissionOverwrite>> permissionOverwrites();
 
     Possible<Optional<Snowflake>> parentId();
@@ -54,17 +56,18 @@ interface VoiceChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> 
     @Override
     default ChannelModifyRequest asRequest() {
         return ChannelModifyRequest.builder()
-                .name(name())
-                .bitrate(bitrate())
-                .userLimit(userLimit())
-                .position(position())
-                .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
-                        .map(PermissionOverwrite::getData)
-                        .collect(Collectors.toList())))
-                .parentId(mapPossibleOptional(parentId(), Snowflake::asString))
-                .rtcRegion(rtcRegion())
-                .videoQualityMode(mapPossibleOptional(videoQualityMode(), VoiceChannel.Mode::getValue))
-                .build();
+            .name(name())
+            .bitrate(bitrate())
+            .userLimit(userLimit())
+            .position(position())
+            .rateLimitPerUser(rateLimitPerUser())
+            .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
+                .map(PermissionOverwrite::getData)
+                .collect(Collectors.toList())))
+            .parentId(mapPossibleOptional(parentId(), Snowflake::asString))
+            .rtcRegion(rtcRegion())
+            .videoQualityMode(mapPossibleOptional(videoQualityMode(), VoiceChannel.Mode::getValue))
+            .build();
     }
 }
 
