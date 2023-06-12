@@ -37,6 +37,18 @@ class BaseCategorizableChannel extends BaseGuildChannel implements Categorizable
         super(gateway, data);
     }
 
+    /**
+     * Gets the amount of seconds a user has to wait before sending another message (0-21600).
+     * <p>
+     * Bots, as well as users with the permission {@code manage_messages} or {@code manage_channel}, are unaffected.
+     *
+     * @return The amount of seconds a user has to wait before sending another message (0-21600).
+     */
+    public int getRateLimitPerUser() {
+        return getData().rateLimitPerUser().toOptional()
+                .orElseThrow(IllegalStateException::new);
+    }
+
     @Override
     public Optional<Snowflake> getCategoryId() {
         return Possible.flatOpt(getData().parentId())

@@ -39,6 +39,8 @@ interface NewsChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
 
     Possible<Integer> position();
 
+    Possible<Integer> rateLimitPerUser();
+
     Possible<String> topic();
 
     Possible<Boolean> nsfw();
@@ -52,6 +54,7 @@ interface NewsChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
         return ChannelModifyRequest.builder()
                 .name(name())
                 .position(position())
+                .rateLimitPerUser(rateLimitPerUser())
                 .topic(topic())
                 .nsfw(nsfw())
                 .permissionOverwrites(InternalSpecUtils.mapPossible(permissionOverwrites(), po -> po.stream()

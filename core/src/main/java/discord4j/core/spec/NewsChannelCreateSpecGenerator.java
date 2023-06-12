@@ -42,6 +42,8 @@ interface NewsChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest>
 
     Possible<Integer> position();
 
+    Possible<Integer> rateLimitPerUser();
+
     Possible<List<PermissionOverwrite>> permissionOverwrites();
 
     Possible<Snowflake> parentId();
@@ -55,6 +57,7 @@ interface NewsChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest>
                 .name(name())
                 .topic(topic())
                 .position(position())
+                .rateLimitPerUser(rateLimitPerUser())
                 .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
                         .map(PermissionOverwrite::getData)
                         .collect(Collectors.toList())))

@@ -67,7 +67,7 @@ public class LegacyTextChannelCreateSpec implements LegacyAuditSpec<ChannelCreat
 
     /**
      * Sets the amount of seconds a user has to wait before sending another message to the created
-     * {@link TextChannel}, from 0 to 120. Does not affect bots or users with {@link Permission#MANAGE_MESSAGES} or
+     * {@link TextChannel}, from 0 to 21600. Does not affect bots or users with {@link Permission#MANAGE_MESSAGES} or
      * {@link Permission#MANAGE_CHANNELS} permissions.
      *
      * @param rateLimitPerUser The channel user rate limit, in seconds.

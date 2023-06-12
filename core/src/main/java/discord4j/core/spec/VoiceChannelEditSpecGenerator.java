@@ -43,6 +43,8 @@ interface VoiceChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> 
 
     Possible<Integer> position();
 
+    Possible<Integer> rateLimitPerUser();
+
     Possible<List<PermissionOverwrite>> permissionOverwrites();
 
     Possible<Optional<Snowflake>> parentId();
@@ -58,6 +60,7 @@ interface VoiceChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> 
                 .bitrate(bitrate())
                 .userLimit(userLimit())
                 .position(position())
+                .rateLimitPerUser(rateLimitPerUser())
                 .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
                         .map(PermissionOverwrite::getData)
                         .collect(Collectors.toList())))
