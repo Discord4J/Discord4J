@@ -22,23 +22,24 @@ import discord4j.common.ReactorResources;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.request.*;
 import discord4j.rest.route.Route;
-import discord4j.rest.route.Routes;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 import reactor.test.StepVerifier;
 
+import java.time.Duration;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class WebClientTest {
 
     private DisposableServer server;
     private int port;
+
+    private final AtomicInteger callCount = new AtomicInteger();
 
     @BeforeAll
     public void setup() {
@@ -58,6 +59,13 @@ public class WebClientTest {
                                             "    <p>Example paragraph for an HTML response</p>\n" +
                                             "  </body>\n" +
                                             "</html>"));
+                        })
+                        .get("/rate-limited", (req, res) -> {
+                            callCount.incrementAndGet();
+                            return res.header("content-type", "text/plain")
+                                    .header("X-RateLimit-Remaining", "0")
+                                    .header("X-RateLimit-Reset-After", "1")
+                                    .sendString(Mono.just("hello!"));
                         }))
                 .bind()
                 .doOnNext(server -> port = server.port())
@@ -67,14 +75,44 @@ public class WebClientTest {
     @Test
     public void shouldErrorWithClientExceptionOnHtmlBadRequest() {
         ExchangeStrategies strategies = ExchangeStrategies.jackson(JacksonResources.create().getObjectMapper());
-        Route badRequestRoute = Route.get("http://0.0.0.0:" + port + "/html/bad-request");
         Router router = new DefaultRouter(new RouterOptions("", ReactorResources.create(), strategies,
-                Collections.emptyList(),
-                BucketGlobalRateLimiter.create(), RequestQueueFactory.buffering(), Routes.BASE_URL));
-        StepVerifier.create(router.exchange(new DiscordWebRequest(badRequestRoute))
-                .bodyToMono(String.class))
+                Collections.emptyList(), BucketGlobalRateLimiter.create(), RequestQueueFactory.buffering(),
+                "http://0.0.0.0:" + port));
+
+        DiscordWebRequest template = new DiscordWebRequest(Route.get("/html/bad-request"));
+
+        Mono<String> request = router.exchange(template)
+                .bodyToMono(String.class);
+
+        StepVerifier.create(request)
                 .expectSubscription()
                 .verifyError(ClientException.class);
+    }
+
+    @Test
+    public void shouldCancelHttpClientRequest() throws InterruptedException {
+        ExchangeStrategies strategies = ExchangeStrategies.jackson(JacksonResources.create().getObjectMapper());
+        Router router = new DefaultRouter(new RouterOptions("", ReactorResources.create(), strategies,
+                Collections.emptyList(), BucketGlobalRateLimiter.create(), RequestQueueFactory.buffering(),
+                "http://0.0.0.0:" + port));
+
+        DiscordWebRequest template = new DiscordWebRequest(Route.get("/rate-limited"));
+
+        Flux<String> requests = router.exchange(template)
+                .bodyToMono(String.class)
+                .repeat(5);
+
+        StepVerifier.create(requests)
+                .expectNext("hello!")
+                .thenAwait(Duration.ofMillis(800))
+                .thenCancel()
+                .verify();
+
+        // wait until rate limit clears
+        Thread.sleep(1000L);
+
+        // if request cancel didn't work then our server will be called again
+        Assertions.assertEquals(1, callCount.get());
     }
 
     @AfterAll

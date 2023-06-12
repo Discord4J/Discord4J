@@ -17,6 +17,7 @@
 
 package discord4j.rest.request;
 
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.util.context.ContextView;
 
@@ -25,11 +26,13 @@ class RequestCorrelation<T> {
     private final DiscordWebRequest request;
     private final Sinks.One<T> response;
     private final ContextView context;
+    private final Sinks.Empty<Void> cancel;
 
-    RequestCorrelation(DiscordWebRequest request, Sinks.One<T> response, ContextView context) {
+    RequestCorrelation(DiscordWebRequest request, Sinks.One<T> response, ContextView context, Sinks.Empty<Void> cancel) {
         this.request = request;
         this.response = response;
         this.context = context;
+        this.cancel = cancel;
     }
 
     public DiscordWebRequest getRequest() {
@@ -42,6 +45,10 @@ class RequestCorrelation<T> {
 
     public ContextView getContext() {
         return context;
+    }
+
+    public Mono<Void> onCancel() {
+        return cancel.asMono();
     }
 
     @Override

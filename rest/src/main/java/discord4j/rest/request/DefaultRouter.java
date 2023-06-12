@@ -65,17 +65,19 @@ public class DefaultRouter implements Router {
 
     @Override
     public DiscordWebResponse exchange(DiscordWebRequest request) {
+        Sinks.Empty<Void> cancelSink = Sinks.empty();
         return new DiscordWebResponse(Mono.deferContextual(
                 ctx -> {
                     Sinks.One<ClientResponse> callback = Sinks.one();
                     housekeepIfNecessary();
                     BucketKey bucketKey = BucketKey.of(request);
                     RequestStream stream = streamMap.computeIfAbsent(bucketKey, key -> createStream(key, request));
-                    if (!stream.push(new RequestCorrelation<>(request, callback, ctx))) {
+                    if (!stream.push(new RequestCorrelation<>(request, callback, ctx, cancelSink))) {
                         callback.emitError(new DiscardedRequestException(request), FAIL_FAST);
                     }
                     return callback.asMono();
                 })
+                .doOnCancel(() -> cancelSink.emitEmpty(FAIL_FAST))
                 .checkpoint("Request to " + request.getDescription() + " [DefaultRouter]"), reactorResources);
     }
 
