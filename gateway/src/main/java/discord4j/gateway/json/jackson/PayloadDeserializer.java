@@ -98,6 +98,7 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         dispatchTypes.put(EventNames.INTEGRATION_UPDATE, null);
         dispatchTypes.put(EventNames.INTEGRATION_DELETE, null);
         dispatchTypes.put(EventNames.GUILD_JOIN_REQUEST_DELETE, null);
+        dispatchTypes.put(EventNames.GUILD_JOIN_REQUEST_UPDATE, null);
     }
 
     public PayloadDeserializer() {
