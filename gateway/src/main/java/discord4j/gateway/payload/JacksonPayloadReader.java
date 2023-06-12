@@ -41,6 +41,7 @@ public class JacksonPayloadReader implements PayloadReader {
         this(mapper, true);
     }
 
+    @Deprecated
     public JacksonPayloadReader(ObjectMapper mapper, boolean lenient) {
         this.mapper = mapper;
         this.lenient = lenient;
@@ -55,7 +56,9 @@ public class JacksonPayloadReader implements PayloadReader {
                         ByteBufUtil.getBytes(buf, buf.readerIndex(), buf.readableBytes(), false),
                         new TypeReference<GatewayPayload<?>>() {});
                 sink.success(value);
-            } catch (IOException | IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
+                sink.success();
+            } catch (IOException e) {
                 if (lenient) {
                     // if eof input - just ignore
                     if (buf.readableBytes() > 0) {
