@@ -53,17 +53,17 @@ interface VoiceChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest
     @Override
     default ChannelCreateRequest asRequest() {
         return ChannelCreateRequest.builder()
-            .type(Channel.Type.GUILD_VOICE.getValue())
-            .name(name())
-            .bitrate(bitrate())
-            .userLimit(userLimit())
-            .position(position())
-            .rateLimitPerUser(rateLimitPerUser())
-            .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
-                .map(PermissionOverwrite::getData)
-                .collect(Collectors.toList())))
-            .parentId(mapPossible(parentId(), Snowflake::asString))
-            .build();
+                .type(Channel.Type.GUILD_VOICE.getValue())
+                .name(name())
+                .bitrate(bitrate())
+                .userLimit(userLimit())
+                .position(position())
+                .rateLimitPerUser(rateLimitPerUser())
+                .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
+                        .map(PermissionOverwrite::getData)
+                        .collect(Collectors.toList())))
+                .parentId(mapPossible(parentId(), Snowflake::asString))
+                .build();
     }
 }
 
