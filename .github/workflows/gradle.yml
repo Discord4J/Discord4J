@@ -26,7 +26,6 @@ jobs:
   build:
     name: Build for JDK ${{ matrix.java }}
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name != 'Discord4J/Discord4J' }}
     strategy:
       matrix:
         java: [ 8, 11, 17 ]

@@ -218,6 +218,7 @@ class RequestStream {
                     .retryWhen(Retry.withThrowable(rateLimitRetryOperator::apply))
                     .transform(getResponseTransformers(request))
                     .retryWhen(serverErrorRetryFactory())
+                    .takeUntilOther(correlation.onCancel())
                     .doFinally(this::next)
                     .checkpoint("Request to " + clientRequest.getDescription() + " [RequestStream]")
                     .subscribe(
