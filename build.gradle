@@ -23,7 +23,7 @@ ext {
     }
 
     // Dependencies
-    reactor_bom_version = '2020.0.30'
+    reactor_bom_version = '2020.0.33'
     jackson_databind_version = '2.12.7.1'
     jackson_datatype_jsr310_version = '2.14.2'
     jackson_datatype_jdk8_version = '2.12.7'
