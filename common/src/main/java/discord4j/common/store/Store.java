@@ -17,6 +17,7 @@
 
 package discord4j.common.store;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.store.action.gateway.*;
 import discord4j.common.store.action.read.*;
 import discord4j.common.store.api.ActionMapper;
@@ -84,6 +85,7 @@ public final class Store {
      * @param layouts a {@link StoreLayout} array
      * @return a new {@link Store}
      */
+    @Experimental
     public static Store fromLayouts(StoreLayout... layouts) {
         return new Store(ActionMapper.mergeFirst(Arrays.stream(layouts)
                         .map(Store::layoutToMapper)

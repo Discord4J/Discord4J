@@ -17,6 +17,7 @@
 
 package discord4j.common.store.impl;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.store.api.StoreFlag;
 import discord4j.common.store.api.layout.DataAccessor;
 import discord4j.common.store.api.layout.GatewayDataUpdater;
@@ -27,6 +28,7 @@ import java.util.EnumSet;
 /**
  * {@link StoreLayout} that enables caches based on the passed in {@link StoreFlag} values.
  */
+@Experimental
 public class SelectiveStoreLayout implements StoreLayout {
 
     private final EnumSet<StoreFlag> enabledFlags;

@@ -17,6 +17,7 @@
 
 package discord4j.common.store.api;
 
+import discord4j.common.annotations.Experimental;
 import org.reactivestreams.Publisher;
 
 import java.util.*;
@@ -80,6 +81,7 @@ public class ActionMapper {
      * @return an aggregated {@link ActionMapper}, merging any overlap by preserving the first mapper by collection
      * order
      */
+    @Experimental
     public static ActionMapper mergeFirst(Collection<ActionMapper> mappers) {
         Objects.requireNonNull(mappers);
         return new ActionMapper(mappers.stream()
