@@ -17,6 +17,7 @@
 
 package discord4j.common.store.api;
 
+import discord4j.common.annotations.Experimental;
 import org.reactivestreams.Publisher;
 
 import java.util.*;
@@ -70,6 +71,22 @@ public class ActionMapper {
         return new ActionMapper(Arrays.stream(mappers)
                 .flatMap(mapper -> mapper.mappings.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))); // throws ISE if duplicates
+    }
+
+    /**
+     * Aggregates a collection of {@link ActionMapper ActionMappers} into a single instance. Mappers with matching
+     * actions will be merged by preserving the first declared one.
+     *
+     * @param mappers the mappers to aggregate
+     * @return an aggregated {@link ActionMapper}, merging any overlap by preserving the first mapper by collection
+     * order
+     */
+    @Experimental
+    public static ActionMapper mergeFirst(Collection<ActionMapper> mappers) {
+        Objects.requireNonNull(mappers);
+        return new ActionMapper(mappers.stream()
+                .flatMap(mapper -> mapper.mappings.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a)));
     }
 
     /**
