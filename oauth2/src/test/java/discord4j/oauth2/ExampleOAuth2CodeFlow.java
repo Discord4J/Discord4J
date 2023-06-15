@@ -53,6 +53,10 @@ public class ExampleOAuth2CodeFlow {
                 .clientSecret(CLIENT_SECRET)
                 .addScope(Scope.IDENTIFY)
                 .addScope(Scope.CONNECTIONS)
+                // uncomment to prompt a user to join your bot to a user's guild
+                //.addScope(Scope.BOT)
+                // uncomment to prompt a user to select a channel and create a webhook to it
+                //.addScope(Scope.WEBHOOK_INCOMING)
                 .addRedirectUri("http://localhost:" + SERVER_PORT)
                 .onAuthSuccess((client, sessionId) -> {
                     CLIENTS.put(sessionId, client);

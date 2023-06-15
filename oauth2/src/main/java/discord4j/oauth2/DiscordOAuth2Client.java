@@ -32,6 +32,7 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -122,6 +123,21 @@ public class DiscordOAuth2Client {
     public static DiscordOAuth2Client createFromToken(RestClient restClient, long clientId, String clientSecret,
                                                       AccessTokenData data) {
         return new DiscordOAuth2Client(restClient, clientId, clientSecret, __ -> Mono.just(new AccessToken(data)));
+    }
+
+    /**
+     * Return the current access token for this client. Depending on the OAuth2 scopes used, you can extract information
+     * from this object to perform additional tasks. For instance, if you used {@link Scope#BOT},
+     * {@link AccessToken#getGuild()} will be available; if you used {@link Scope#WEBHOOK_INCOMING},
+     * {@link AccessToken#getWebhook()} will be available.
+     *
+     * @return the current access token authorized for this client. This is an immutable instance, so you may need to
+     * call this again if the token is refreshed.
+     * @throws IllegalStateException if this access token was invalidated, indicating you might require reauthorization
+     */
+    public AccessToken getAccessToken() {
+        return Optional.ofNullable(accessToken.get())
+                .orElseThrow(() -> new IllegalStateException("No valid token present"));
     }
 
     /**
