@@ -6,6 +6,7 @@ import discord4j.core.event.domain.guild.*;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.object.entity.ScheduledEvent;
 import discord4j.core.spec.ScheduledEventCreateSpec;
+import discord4j.core.spec.ScheduledEventEditSpec;
 import discord4j.core.spec.ScheduledEventEntityMetadataSpec;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -34,6 +35,8 @@ public class ExampleGuildScheduledEvents {
         DiscordClient.create(token)
                 .withGateway(client -> {
 
+
+
                     // Logic to create a scheduled event on ready event
                     Publisher<?> createOnReady = client.on(ReadyEvent.class)
                             // Fetch the given guild
@@ -41,22 +44,24 @@ public class ExampleGuildScheduledEvents {
                             // Create the event
                             .flatMap(guild -> guild.createScheduledEvent(ScheduledEventCreateSpec.builder()
                                     .name(EVENT_NAME)
-                                    .description(EVENT_DESCRIPTION)
                                     .privacyLevel(ScheduledEvent.PrivacyLevel.GUILD_ONLY)
                                     .entityType(ScheduledEvent.EntityType.EXTERNAL)
                                     .entityMetadata(ScheduledEventEntityMetadataSpec.builder()
                                             .location(EVENT_LOCATION)
                                             .build())
                                     .scheduledStartTime(Instant.now().plusSeconds(3600)) // Start in one hour
-                                    .scheduledEndTime(Instant.now().plusSeconds(7200)) // End in two hours (required
-                                    // for external events)
+                                    .scheduledEndTime(Instant.now().plusSeconds(7200)) // End in two hours (required for external events)
                                     .build()
                             ))
-                            // Update the event
-                            .flatMap(event -> event.edit().withName("Edited " + EVENT_NAME))
                             // Advertise our event
-                            .doOnNext(event -> System.out.format("The created event ID is %d\n",
-                                    event.getId().asLong()))
+                            .doOnNext(event -> System.out.format("The created event ID is %d\n", event.getId().asLong()))
+                            // Wait 10 seconds, then update the event
+                            .delayElements(Duration.ofSeconds(10))
+                            .flatMap(event -> event.edit(ScheduledEventEditSpec.builder()
+                                            .name("Edited " + EVENT_NAME)
+                                            .description(EVENT_DESCRIPTION)
+                                            .status(ScheduledEvent.Status.ACTIVE)
+                                    .build()))
                             // Wait a minute before deleting it
                             .delayElements(Duration.ofMinutes(1))
                             // Delete it

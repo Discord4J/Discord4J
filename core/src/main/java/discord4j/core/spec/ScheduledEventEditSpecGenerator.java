@@ -5,6 +5,7 @@ import discord4j.core.object.entity.ScheduledEvent;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.GuildScheduledEventModifyRequest;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Image;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
@@ -34,20 +35,24 @@ public interface ScheduledEventEditSpecGenerator extends AuditSpec<GuildSchedule
 
     Possible<ScheduledEvent.EntityType> entityType();
 
-    //TODO Add image support
+    Possible<ScheduledEvent.Status> status();
+
+    Possible<Image> image();
 
     @Override
     default GuildScheduledEventModifyRequest asRequest() {
         return GuildScheduledEventModifyRequest.builder()
-            .channelId(mapPossible(channelId(), optional -> optional.map(snowflake -> Id.of(snowflake.asLong()))))
-            .entityMetadata(mapPossible(entityMetadata(), ScheduledEventEntityMetadataSpecGenerator::asRequest))
-            .name(name())
-            .privacyLevel(mapPossible(privacyLevel(), ScheduledEvent.PrivacyLevel::getValue))
-            .scheduledStartTime(scheduledStartTime())
-            .scheduledEndTime(scheduledEndTime())
-            .description(description())
-            .entityType(mapPossible(entityType(), ScheduledEvent.EntityType::getValue))
-            .build();
+                .channelId(mapPossible(channelId(), optional -> optional.map(snowflake -> Id.of(snowflake.asLong()))))
+                .entityMetadata(mapPossible(entityMetadata(), ScheduledEventEntityMetadataSpecGenerator::asRequest))
+                .name(name())
+                .privacyLevel(mapPossible(privacyLevel(), ScheduledEvent.PrivacyLevel::getValue))
+                .scheduledStartTime(scheduledStartTime())
+                .scheduledEndTime(scheduledEndTime())
+                .description(description())
+                .entityType(mapPossible(entityType(), ScheduledEvent.EntityType::getValue))
+                .status(mapPossible(status(), ScheduledEvent.Status::getValue))
+                .image(mapPossible(image(), Image::getDataUri))
+                .build();
     }
 }
 
