@@ -770,7 +770,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                             .mentionChannels(edited.mentionChannels())
                             .attachments(edited.attachments())
                             .embeds(edited.embeds())
-                            .nonce(edited.nonceOrElse(m.nonce()))
+                            .nonce(edited.isNoncePresent() ? edited.nonce() : m.nonce())
                             .pinned(edited.pinnedOrElse(m.pinned()))
                             .webhookId(edited.isWebhookIdPresent() ? edited.webhookId() : m.webhookId())
                             .type(edited.typeOrElse(m.type()))

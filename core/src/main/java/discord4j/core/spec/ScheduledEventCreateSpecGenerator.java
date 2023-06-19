@@ -6,6 +6,7 @@ import discord4j.core.object.entity.ScheduledEvent;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.GuildScheduledEventCreateRequest;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Image;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
@@ -34,7 +35,7 @@ public interface ScheduledEventCreateSpecGenerator extends AuditSpec<GuildSchedu
 
     ScheduledEvent.EntityType entityType();
 
-    //TODO Add image support
+    Possible<Image> image();
 
     @Override
     default GuildScheduledEventCreateRequest asRequest() {
@@ -47,6 +48,7 @@ public interface ScheduledEventCreateSpecGenerator extends AuditSpec<GuildSchedu
             .scheduledEndTime(scheduledEndTime())
             .description(description())
             .entityType(entityType().getValue())
+            .image(mapPossible(image(), Image::getDataUri))
             .build();
     }
 }
