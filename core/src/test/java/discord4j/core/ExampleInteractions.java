@@ -90,10 +90,15 @@ public class ExampleInteractions {
                     Publisher<?> onUser = client.on(UserInteractionEvent.class, event -> {
                         if (USER_COMMAND_NAME.equals(event.getCommandName())) {
                             return event.getTargetUser()
+                                    .flatMap(u -> u.asMember(event.getInteraction().getGuildId().orElseThrow(RuntimeException::new)))
                                     .flatMap(user -> event.reply()
                                             .withEmbeds(EmbedCreateSpec.create()
                                                     .withFields(
                                                             EmbedCreateFields.Field.of("Name", user.getUsername(),
+                                                                    false),
+                                                            EmbedCreateFields.Field.of("Display Name", user.getDisplayName(),
+                                                                    false),
+                                                            EmbedCreateFields.Field.of("Global Name", user.getGlobalName().orElse("none"),
                                                                     false),
                                                             EmbedCreateFields.Field.of("Avatar URL",
                                                                     user.getAvatarUrl(), false))
