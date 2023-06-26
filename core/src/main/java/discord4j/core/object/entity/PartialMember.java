@@ -237,7 +237,7 @@ public class PartialMember extends User {
      * @return The name that is displayed in client.
      */
     public String getDisplayName() {
-        return getNickname().orElse(getUsername());
+        return getNickname().orElseGet(() -> getGlobalName().orElse(getUsername()));
     }
 
     /**

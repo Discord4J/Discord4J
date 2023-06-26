@@ -104,7 +104,7 @@ interface EmbedCreateSpecGenerator extends Spec<EmbedData> {
                 final EmbedAuthorData author = data.author().get();
                 $this.author(EmbedCreateFields.Author.of(
                         author.name().toOptional().orElseThrow(IllegalStateException::new),
-                        author.url().toOptional().orElse(null),
+                        Possible.flatOpt(author.url()).orElse(null),
                         author.iconUrl().toOptional().orElse(null)
                 ));
             } else {

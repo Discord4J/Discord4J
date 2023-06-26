@@ -19,6 +19,7 @@ package discord4j.core.object;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.*;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import reactor.util.annotation.Nullable;
 
@@ -662,7 +663,7 @@ public final class Embed implements DiscordObject {
          * @return The URL of the author.
          */
         public Optional<String> getUrl() {
-            return data.url().toOptional();
+            return Possible.flatOpt(data.url());
         }
 
         /**
