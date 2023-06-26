@@ -20,8 +20,11 @@ package discord4j.core.spec;
 import discord4j.discordjson.json.EmbedAuthorData;
 import discord4j.discordjson.json.EmbedFieldData;
 import discord4j.discordjson.json.EmbedFooterData;
+import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
 import reactor.util.annotation.Nullable;
+
+import java.util.Optional;
 
 import static discord4j.core.spec.InternalSpecUtils.toPossible;
 
@@ -71,9 +74,10 @@ public final class EmbedCreateFields {
 
         @Override
         default EmbedAuthorData asRequest() {
+            String url = url();
             return EmbedAuthorData.builder()
                     .name(name())
-                    .url(toPossible(url()))
+                    .url(url == null ? Possible.absent() : Possible.of(Optional.of(url)))
                     .iconUrl(toPossible(iconUrl()))
                     .build();
         }

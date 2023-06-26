@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A spec used to configure and send an embed.
@@ -143,7 +144,7 @@ public class LegacyEmbedCreateSpec implements LegacySpec<EmbedData> {
     public LegacyEmbedCreateSpec setAuthor(String name, @Nullable String url, @Nullable String iconUrl) {
         requestBuilder.author(EmbedAuthorData.builder()
                 .name(name)
-                .url(url == null ? Possible.absent() : Possible.of(url))
+                .url(url == null ? Possible.absent() : Possible.of(Optional.of(url)))
                 .iconUrl(iconUrl == null ? Possible.absent() : Possible.of(iconUrl))
                 .build());
         return this;
