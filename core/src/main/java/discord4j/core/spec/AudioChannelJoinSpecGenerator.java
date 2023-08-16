@@ -161,9 +161,7 @@ interface AudioChannelJoinSpecGenerator extends Spec<Function<AudioChannel, Mono
 
             final VoiceDisconnectTask disconnectTask = id -> voiceChannel.sendDisconnectVoiceState()
                     .then(gateway.getVoiceConnectionRegistry().disconnect(id));
-            //noinspection ConstantConditions
-            final VoiceServerUpdateTask serverUpdateTask = id -> onVoiceServerUpdate(gateway, id)
-                    .map(vsu -> new VoiceServerOptions(vsu.getToken(), vsu.getEndpoint()));
+            final VoiceServerUpdateTask serverUpdateTask = new DefaultVoiceServerUpdateTask(gateway);
             final VoiceStateUpdateTask stateUpdateTask = id -> onVoiceStateUpdates(gateway, id)
                     .map(stateUpdateEvent -> stateUpdateEvent.getCurrent().getSessionId());
             final VoiceChannelRetrieveTask channelRetrieveTask = () -> gateway

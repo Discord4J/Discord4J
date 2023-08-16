@@ -23,6 +23,7 @@ import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.AudioChannel;
+import discord4j.core.spec.DefaultVoiceServerUpdateTask;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.intent.Intent;
@@ -194,11 +195,11 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
      * <a href="https://discord.com/developers/docs/topics/voice-connections#ip-discovery">IP discovery</a>.
      * The default value is retrying once before exiting.
      *
-     * @param LegacyipDiscoveryRetrySpec the maximum amount of time to wait in a single attempt at IP discovery
+     * @param ipDiscoveryRetrySpec the maximum amount of time to wait in a single attempt at IP discovery
      * @return this spec
      */
-    public LegacyVoiceChannelJoinSpec setIpDiscoveryRetrySpec(RetrySpec LegacyipDiscoveryRetrySpec) {
-        this.ipDiscoveryRetrySpec = Objects.requireNonNull(LegacyipDiscoveryRetrySpec);
+    public LegacyVoiceChannelJoinSpec setIpDiscoveryRetrySpec(RetrySpec ipDiscoveryRetrySpec) {
+        this.ipDiscoveryRetrySpec = Objects.requireNonNull(ipDiscoveryRetrySpec);
         return this;
     }
 
@@ -227,8 +228,7 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
         final VoiceDisconnectTask disconnectTask = id -> audioChannel.sendDisconnectVoiceState()
                 .then(gateway.getVoiceConnectionRegistry().disconnect(id));
         //noinspection ConstantConditions
-        final VoiceServerUpdateTask serverUpdateTask = id -> onVoiceServerUpdate(gateway, id)
-                .map(vsu -> new VoiceServerOptions(vsu.getToken(), vsu.getEndpoint()));
+        final VoiceServerUpdateTask serverUpdateTask = new DefaultVoiceServerUpdateTask(gateway);
         final VoiceStateUpdateTask stateUpdateTask = id -> onVoiceStateUpdates(gateway, id)
                 .map(stateUpdateEvent -> stateUpdateEvent.getCurrent().getSessionId());
         final VoiceChannelRetrieveTask channelRetrieveTask = () -> gateway

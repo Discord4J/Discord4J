@@ -172,138 +172,151 @@ public class DefaultVoiceGatewayClient {
 
     public Mono<VoiceConnection> start(VoiceServerOptions voiceServerOptions, String session) {
         return Mono.create(sink -> sink.onRequest(d -> {
-            Disposable connect = connect(voiceServerOptions, session, sink)
+
+            Disposable.Composite outerCleanup = Disposables.composite();
+
+            outerCleanup.add(serverUpdateTask.onVoiceServerUpdates(guildId)
+                    .subscribe(newValue -> {
+                        VoiceServerOptions current = serverOptions.get();
+                        if (!current.getEndpoint().equals(newValue.getEndpoint())) {
+                            log.debug(format(sink.currentContext(), "Voice server endpoint change: {}"),
+                                    current.getEndpoint(), newValue.getEndpoint());
+                            serverOptions.set(newValue);
+                            if (sessionHandler != null) {
+                                sessionHandler.close(DisconnectBehavior.retryAbruptly(
+                                        new VoiceServerUpdateReconnectException(sink.currentContext())));
+                            }
+                        }
+                    }));
+
+            outerCleanup.add(connect(voiceServerOptions, session, sink)
                     .contextWrite(sink.currentContext())
                     .subscribe(null,
                             t -> log.debug(format(sink.currentContext(), "Voice gateway error: {}"), t.toString()),
-                            () -> log.debug(format(sink.currentContext(), "Voice gateway completed")));
-            sink.onCancel(connect);
+                            () -> log.debug(format(sink.currentContext(), "Voice gateway completed"))
+                    ));
+
+            sink.onCancel(outerCleanup);
         }));
     }
 
     private Mono<Void> connect(VoiceServerOptions vso, String sessionId,
                                MonoSink<VoiceConnection> voiceConnectionSink) {
         return Mono.deferContextual(
-                context -> {
-                    serverOptions.compareAndSet(null, vso);
-                    session.compareAndSet(null, sessionId);
-                    disconnectNotifier = Sinks.one();
-                    currentContext = context;
+                        context -> {
+                            serverOptions.compareAndSet(null, vso);
+                            session.compareAndSet(null, sessionId);
+                            disconnectNotifier = Sinks.one();
+                            currentContext = context;
 
-                    Flux<ByteBuf> outFlux = outbound.asFlux()
-                            .flatMap(payloadWriter)
-                            .doOnNext(buf -> logPayload(senderLog, context, buf));
+                            Flux<ByteBuf> outFlux = outbound.asFlux()
+                                    .flatMap(payloadWriter)
+                                    .doOnNext(buf -> logPayload(senderLog, context, buf));
 
-                    sessionHandler = new VoiceWebsocketHandler(receiver, outFlux, context);
+                            sessionHandler = new VoiceWebsocketHandler(receiver, outFlux, context);
 
-                    Mono<?> onOpen = state.asFlux()
-                            .next()
-                            .doOnNext(s -> {
-                                if (s == VoiceConnection.State.RESUMING) {
-                                    log.info(format(context, "Attempting to resume"));
-                                    emissionStrategy.emitNext(outbound, new Resume(guildId.asString(), session.get(),
-                                            serverOptions.get().getToken()));
-                                } else {
-                                    emissionStrategy.emitNext(state, VoiceConnection.State.CONNECTING);
-                                    log.info(format(context, "Identifying"));
-                                    emissionStrategy.emitNext(outbound, new Identify(guildId.asString(),
-                                            selfId.asString(), session.get(), serverOptions.get().getToken()));
-                                }
-                            });
+                            Mono<?> onOpen = state.asFlux()
+                                    .next()
+                                    .doOnNext(s -> {
+                                        if (s == VoiceConnection.State.RESUMING) {
+                                            log.info(format(context, "Attempting to resume"));
+                                            emissionStrategy.emitNext(outbound, new Resume(guildId.asString(),
+                                                    session.get(),
+                                                    serverOptions.get().getToken()));
+                                        } else {
+                                            nextState(VoiceConnection.State.CONNECTING);
+                                            log.info(format(context, "Identifying"));
+                                            emissionStrategy.emitNext(outbound, new Identify(guildId.asString(),
+                                                    selfId.asString(), session.get(), serverOptions.get().getToken()));
+                                        }
+                                    });
 
-                    Disposable.Composite innerCleanup = Disposables.composite();
+                            Disposable.Composite innerCleanup = Disposables.composite();
 
-                    Mono<Void> receiverFuture = receiver.asFlux()
-                            .doOnNext(buf -> logPayload(receiverLog, context, buf))
-                            .flatMap(payloadReader)
-                            .doOnNext(payload -> {
-                                if (payload instanceof Hello) {
-                                    Hello hello = (Hello) payload;
-                                    Duration interval = Duration.ofMillis(hello.getData().getHeartbeatInterval());
-                                    heartbeat.start(interval, interval);
-                                } else if (payload instanceof Ready) {
-                                    log.info(format(context, "Waiting for session description"));
-                                    Ready ready = (Ready) payload;
-                                    ssrc = ready.getData().getSsrc();
-                                    cleanup.update(innerCleanup);
-                                    innerCleanup.add(Mono.defer(() ->
-                                            voiceSocket.setup(ready.getData().getIp(), ready.getData().getPort()))
-                                            .zipWith(voiceSocket.performIpDiscovery(ready.getData().getSsrc()))
-                                            .timeout(ipDiscoveryTimeout)
-                                            .retryWhen(ipDiscoveryRetrySpec)
-                                            .contextWrite(context)
-                                            .onErrorMap(t -> new VoiceGatewayException(context,
-                                                    "UDP socket setup error", t))
-                                            .subscribe(TupleUtils.consumer((connection, address) -> {
-                                                        innerCleanup.add(connection);
-                                                        String hostName = address.getHostName();
-                                                        int port = address.getPort();
-                                                        emissionStrategy.emitNext(outbound,
-                                                                new SelectProtocol(VoiceSocket.PROTOCOL, hostName,
-                                                                        port, VoiceSocket.ENCRYPTION_MODE));
-                                                    }),
-                                                    t -> {
-                                                        voiceConnectionSink.error(t);
-                                                        sessionHandler.close(DisconnectBehavior.stop(t));
-                                                    },
-                                                    () -> log.debug(format(context, "Voice socket setup complete"))));
-                                } else if (payload instanceof SessionDescription) {
-                                    log.info(format(context, "Receiving events"));
-                                    emissionStrategy.emitNext(state, VoiceConnection.State.CONNECTED);
-                                    reconnectContext.reset();
-                                    SessionDescription sessionDescription = (SessionDescription) payload;
-                                    byte[] secretKey = sessionDescription.getData().getSecretKey();
-                                    TweetNaclFast.SecretBox boxer = new TweetNaclFast.SecretBox(secretKey);
-                                    PacketTransformer transformer = new PacketTransformer(ssrc, boxer);
-                                    Consumer<Boolean> speakingSender = speaking -> emissionStrategy.emitNext(
-                                            outbound, new SentSpeaking(speaking, 0, ssrc));
-                                    innerCleanup.add(() -> log.debug(format(context, "Disposing voice tasks")));
-                                    innerCleanup.add(sendTaskFactory.create(reactorResources.getSendTaskScheduler(),
-                                            speakingSender, voiceSocket::send, audioProvider, transformer));
-                                    innerCleanup.add(receiveTaskFactory.create(reactorResources.getReceiveTaskScheduler(),
-                                            voiceSocket.getInbound(), transformer, audioReceiver));
-                                    innerCleanup.add(serverUpdateTask.onVoiceServerUpdate(guildId)
-                                            .subscribe(newValue -> {
-                                                VoiceServerOptions current = serverOptions.get();
-                                                if (!current.getEndpoint().equals(newValue.getEndpoint())) {
-                                                    log.debug(format(context, "Voice server endpoint change: {}"),
-                                                            current.getEndpoint(), newValue.getEndpoint());
-                                                    serverOptions.set(newValue);
-                                                    sessionHandler.close(DisconnectBehavior.retryAbruptly(
-                                                            new VoiceServerUpdateReconnectException(context)));
-                                                }
-                                            }));
-                                    voiceConnectionSink.success(acquireConnection());
-                                } else if (payload instanceof Resumed) {
-                                    log.info(format(context, "Resumed"));
-                                    emissionStrategy.emitNext(state, VoiceConnection.State.CONNECTED);
-                                    reconnectContext.reset();
-                                }
-                                emissionStrategy.emitNext(events, (VoiceGatewayEvent) payload);
-                            })
-                            .then();
+                            Mono<Void> receiverFuture = receiver.asFlux()
+                                    .doOnNext(buf -> logPayload(receiverLog, context, buf))
+                                    .flatMap(payloadReader)
+                                    .doOnNext(payload -> {
+                                        if (payload instanceof Hello) {
+                                            Hello hello = (Hello) payload;
+                                            Duration interval =
+                                                    Duration.ofMillis(hello.getData().getHeartbeatInterval());
+                                            heartbeat.start(interval, interval);
+                                        } else if (payload instanceof Ready) {
+                                            log.info(format(context, "Waiting for session description"));
+                                            Ready ready = (Ready) payload;
+                                            ssrc = ready.getData().getSsrc();
+                                            cleanup.update(innerCleanup);
+                                            innerCleanup.add(Mono.defer(() ->
+                                                            voiceSocket.setup(ready.getData().getIp(),
+                                                                    ready.getData().getPort()))
+                                                    .zipWith(voiceSocket.performIpDiscovery(ready.getData().getSsrc()))
+                                                    .timeout(ipDiscoveryTimeout)
+                                                    .retryWhen(ipDiscoveryRetrySpec)
+                                                    .contextWrite(context)
+                                                    .onErrorMap(t -> new VoiceGatewayException(context,
+                                                            "UDP socket setup error", t))
+                                                    .subscribe(TupleUtils.consumer((connection, address) -> {
+                                                                innerCleanup.add(connection);
+                                                                String hostName = address.getHostName();
+                                                                int port = address.getPort();
+                                                                emissionStrategy.emitNext(outbound,
+                                                                        new SelectProtocol(VoiceSocket.PROTOCOL,
+                                                                                hostName,
+                                                                                port, VoiceSocket.ENCRYPTION_MODE));
+                                                            }),
+                                                            t -> {
+                                                                voiceConnectionSink.error(t);
+                                                                sessionHandler.close(DisconnectBehavior.stop(t));
+                                                            },
+                                                            () -> log.debug(format(context, "Voice socket setup " +
+                                                                    "complete"))));
+                                        } else if (payload instanceof SessionDescription) {
+                                            log.info(format(context, "Receiving events"));
+                                            nextState(VoiceConnection.State.CONNECTED);
+                                            reconnectContext.reset();
+                                            SessionDescription sessionDescription = (SessionDescription) payload;
+                                            byte[] secretKey = sessionDescription.getData().getSecretKey();
+                                            TweetNaclFast.SecretBox boxer = new TweetNaclFast.SecretBox(secretKey);
+                                            PacketTransformer transformer = new PacketTransformer(ssrc, boxer);
+                                            Consumer<Boolean> speakingSender = speaking -> emissionStrategy.emitNext(
+                                                    outbound, new SentSpeaking(speaking, 0, ssrc));
+                                            innerCleanup.add(() -> log.debug(format(context, "Disposing voice tasks")));
+                                            innerCleanup.add(sendTaskFactory.create(reactorResources.getSendTaskScheduler(),
+                                                    speakingSender, voiceSocket::send, audioProvider, transformer));
+                                            innerCleanup.add(receiveTaskFactory.create(reactorResources.getReceiveTaskScheduler(),
+                                                    voiceSocket.getInbound(), transformer, audioReceiver));
+                                            voiceConnectionSink.success(acquireConnection());
+                                        } else if (payload instanceof Resumed) {
+                                            log.info(format(context, "Resumed"));
+                                            nextState(VoiceConnection.State.CONNECTED);
+                                            reconnectContext.reset();
+                                        }
+                                        emissionStrategy.emitNext(events, (VoiceGatewayEvent) payload);
+                                    })
+                                    .then();
 
-                    Mono<Void> heartbeatHandler = heartbeat.ticks()
-                            .map(Heartbeat::new)
-                            .doOnNext(tick -> emissionStrategy.emitNext(outbound, tick))
-                            .then();
+                            Mono<Void> heartbeatHandler = heartbeat.ticks()
+                                    .map(Heartbeat::new)
+                                    .doOnNext(tick -> emissionStrategy.emitNext(outbound, tick))
+                                    .then();
 
-                    Mono<Void> httpFuture = httpClient
-                            .websocket(WebsocketClientSpec.builder()
-                                    .maxFramePayloadLength(Integer.MAX_VALUE)
-                                    .build())
-                            .uri(serverOptions.get().getEndpoint() + "?v=4")
-                            .handle((in, out) -> onOpen.then(sessionHandler.handle(in, out)))
-                            .contextWrite(LogUtil.clearContext())
-                            .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2()))
-                            .then();
+                            Mono<Void> httpFuture = httpClient
+                                    .websocket(WebsocketClientSpec.builder()
+                                            .maxFramePayloadLength(Integer.MAX_VALUE)
+                                            .build())
+                                    .uri(serverOptions.get().getEndpoint() + "?v=4")
+                                    .handle((in, out) -> onOpen.then(sessionHandler.handle(in, out)))
+                                    .contextWrite(LogUtil.clearContext())
+                                    .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2()))
+                                    .then();
 
-                    return Mono.zip(httpFuture, receiverFuture, heartbeatHandler)
-                            .doOnError(t -> log.error(format(context, "{}"), t.toString()))
-                            .doOnTerminate(heartbeat::stop)
-                            .doOnCancel(() -> sessionHandler.close())
-                            .then();
-                })
+                            return Mono.zip(httpFuture, receiverFuture, heartbeatHandler)
+                                    .doOnError(t -> log.error(format(context, "{}"), t.toString()))
+                                    .doOnTerminate(heartbeat::stop)
+                                    .doOnCancel(() -> sessionHandler.close())
+                                    .then();
+                        })
                 .contextWrite(ctx -> ctx.put(LogUtil.KEY_GUILD_ID, guildId.asString()))
                 .retryWhen(retryFactory())
                 .then(Mono.defer(() -> disconnectNotifier.asMono().then()))
@@ -312,6 +325,11 @@ public class DefaultVoiceGatewayClient {
                         throw new IllegalStateException("connect can only be subscribed once");
                     }
                 });
+    }
+
+    private void nextState(VoiceConnection.State value) {
+        log.debug(format(currentContext, "New state: {}"), value);
+        emissionStrategy.emitNext(state, value);
     }
 
     private VoiceConnection acquireConnection() {
@@ -356,8 +374,8 @@ public class DefaultVoiceGatewayClient {
                 return onConnectOrDisconnect()
                         .flatMap(s -> s.equals(State.CONNECTED) ?
                                 Mono.fromRunnable(() -> sessionHandler.close(
-                                        DisconnectBehavior.retryAbruptly(
-                                                errorCause.apply(currentContext))))
+                                                DisconnectBehavior.retryAbruptly(
+                                                        errorCause.apply(currentContext))))
                                         .then(stateEvents()
                                                 .filter(ss -> ss.equals(State.CONNECTED))
                                                 .next()) :
@@ -387,7 +405,7 @@ public class DefaultVoiceGatewayClient {
     private Retry retryFactory() {
         return VoiceGatewayRetrySpec.create(reconnectOptions, reconnectContext)
                 .doBeforeRetry(retry -> {
-                    emissionStrategy.emitNext(state, retry.nextState());
+                    nextState(retry.nextState());
                     long attempt = retry.iteration();
                     Duration backoff = retry.nextBackoff();
                     log.debug(format(getContextFromException(retry.failure()),
@@ -427,7 +445,7 @@ public class DefaultVoiceGatewayClient {
                     if (behavior.getCause() != null) {
                         return Mono.just(new CloseException(closeStatus, ctx, behavior.getCause()))
                                 .flatMap(ex -> {
-                                    emissionStrategy.emitNext(state, VoiceConnection.State.DISCONNECTED);
+                                    nextState(VoiceConnection.State.DISCONNECTED);
                                     disconnectNotifier.emitError(ex, FAIL_FAST);
                                     Mono<CloseStatus> thenMono = closeStatus.getCode() == 4014 ?
                                             Mono.just(closeStatus) : Mono.error(ex);
@@ -436,7 +454,7 @@ public class DefaultVoiceGatewayClient {
                     }
                     return Mono.just(closeStatus)
                             .flatMap(status -> {
-                                emissionStrategy.emitNext(state, VoiceConnection.State.DISCONNECTED);
+                                nextState(VoiceConnection.State.DISCONNECTED);
                                 disconnectNotifier.emitValue(closeStatus, FAIL_FAST);
                                 return disconnectTask.onDisconnect(guildId).thenReturn(closeStatus);
                             });

@@ -18,13 +18,37 @@
 package discord4j.voice;
 
 import discord4j.common.util.Snowflake;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * A listener to derive a potentially new {@link VoiceServerOptions} from a VOICE_SERVER_UPDATE gateway event.
+ * A listener to track voice server changes due to migrations or disconnections. A voice client can then react to
+ * external changes coming from the gateway.
  */
 @FunctionalInterface
 public interface VoiceServerUpdateTask {
 
+    /**
+     * Return a Mono sequence containing an eventual {@link VoiceServerOptions} instance indicating a voice server
+     * update payload was received from the gateway connection for the given guild.
+     *
+     * @param guildId the guild ID listening for voice server updates
+     * @return a Mono with a VoiceServerOptions payload
+     * @deprecated for removal in future versions, migrate to {@link #onVoiceServerUpdates(Snowflake)} as voice clients
+     * can receive multiple voice server updates throughout their lifecycle
+     */
+    @Deprecated
     Mono<VoiceServerOptions> onVoiceServerUpdate(Snowflake guildId);
+
+    /**
+     * Return a Flux sequence containing {@link VoiceServerOptions} instances indicating a voice server update payload
+     * was received from the gateway connection for the given guild.
+     *
+     * @param guildId the guild ID listening for voice server updates
+     * @return a Flux with a VoiceServerOptions payload
+     */
+    default Flux<VoiceServerOptions> onVoiceServerUpdates(Snowflake guildId) {
+        return onVoiceServerUpdate(guildId).repeat();
+    }
+
 }
