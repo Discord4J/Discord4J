@@ -99,13 +99,13 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         dispatchTypes.put(EventNames.AUTO_MODERATION_RULE_UPDATE, AutoModRuleUpdate.class);
         dispatchTypes.put(EventNames.AUTO_MODERATION_RULE_DELETE, AutoModRuleDelete.class);
         dispatchTypes.put(EventNames.AUTO_MODERATION_ACTION_EXECUTION, AutoModActionExecution.class);
+        dispatchTypes.put(EventNames.INTEGRATION_CREATE, IntegrationCreate.class);
+        dispatchTypes.put(EventNames.INTEGRATION_UPDATE, IntegrationUpdate.class);
+        dispatchTypes.put(EventNames.INTEGRATION_DELETE, IntegrationDelete.class);
 
         // Ignored
         dispatchTypes.put(EventNames.PRESENCES_REPLACE, null);
         dispatchTypes.put(EventNames.GIFT_CODE_UPDATE, null);
-        dispatchTypes.put(EventNames.INTEGRATION_CREATE, null);
-        dispatchTypes.put(EventNames.INTEGRATION_UPDATE, null);
-        dispatchTypes.put(EventNames.INTEGRATION_DELETE, null);
         dispatchTypes.put(EventNames.GUILD_JOIN_REQUEST_DELETE, null);
         dispatchTypes.put(EventNames.GUILD_JOIN_REQUEST_UPDATE, null);
     }
