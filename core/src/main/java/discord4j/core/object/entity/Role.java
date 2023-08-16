@@ -36,6 +36,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -307,6 +308,19 @@ public final class Role implements Entity {
         return data.tags().toOptional().map(data -> new RoleTags(gateway, data));
     }
 
+    /**
+     * Returns the flags of this {@link Role}.
+     *
+     * @return A {@code EnumSet} with the flags of this role.
+     */
+    public EnumSet<Flag> getFlags() {
+        int flags = data.flags();
+        if (flags != 0) {
+            return Flag.of(flags);
+        }
+        return EnumSet.noneOf(Flag.class);
+    }
+
     @Override
     public Snowflake getId() {
         return Snowflake.of(data.id());
@@ -404,5 +418,68 @@ public final class Role implements Entity {
                 "data=" + data +
                 ", guildId=" + guildId +
                 '}';
+    }
+
+    /**
+     * Describes the flags of a Role.
+     *
+     * @see
+     * <a href="https://discord.com/developers/docs/topics/permissions#role-object-role-flags">Discord</a>
+     */
+    public enum Flag {
+        /**
+         * Role can be selected by members in an onboarding prompt
+         */
+        IN_PROMPT(0);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /** The flag value as represented by Discord. */
+        private final int flag;
+
+        /**
+         * Constructs a {@code Role.Flag}.
+         */
+        Flag(final int value) {
+            this.value = value;
+            this.flag = 1 << value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the flags of a role. It is guaranteed that invoking {@link #getValue()} from the returned enum
+         * will be equal ({@code ==}) to the supplied {@code value}.
+         *
+         * @param value The flags value as represented by Discord.
+         * @return The {@link EnumSet} of flags.
+         */
+        public static EnumSet<Flag> of(final int value) {
+            final EnumSet<Flag> flagSet = EnumSet.noneOf(Flag.class);
+            for (Flag flag : Flag.values()) {
+                long flagValue = flag.getFlag();
+                if ((flagValue & value) == flagValue) {
+                    flagSet.add(flag);
+                }
+            }
+            return flagSet;
+        }
     }
 }
