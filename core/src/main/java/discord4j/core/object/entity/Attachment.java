@@ -23,11 +23,10 @@ import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * A Discord attachment.
@@ -151,6 +150,35 @@ public final class Attachment implements Entity {
         return data.contentType().toOptional();
     }
 
+    /**
+     * Gets the attachment's duration in seconds, if present.
+     * Note that this is currently only present for voice messages.
+     *
+     * @return The attachment's duration in seconds, if present.
+     */
+    public Optional<Float> getDurationSeconds() {
+        return data.durationSeconds().toOptional();
+    }
+
+    /**
+     * Gets the attachment's wave form, if present.
+     * Note that this is currently only present for voice messages.
+     *
+     * @return A base64 encoded bytearray representing a sampled waveform, if present.
+     */
+    public Optional<String> getWaveform() {
+        return data.waveform().toOptional();
+    }
+
+    /**
+     * Returns the flags of the attachment.
+     *
+     * @return A {@code EnumSet} with the flags of the attachment.
+     */
+    public EnumSet<AttachmentFlags> getFlags() {
+        return AttachmentFlags.of(data.flags().toOptional().orElse(0));
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
@@ -166,5 +194,56 @@ public final class Attachment implements Entity {
         return "Attachment{" +
                 "data=" + data +
                 '}';
+    }
+
+    /**
+     * A set of flags for an {@link Attachment attachment}.
+     */
+    public enum AttachmentFlags {
+
+        /* This attachment has been edited using the remix feature on mobile */
+        IS_REMIX(1 << 2);
+
+        /** The flag value as represented by Discord. */
+        private final int value;
+
+        /**
+         * Constructs an {@code AttachmentFlags} with a value.
+         *
+         * @param value The value of the attachment flag.
+         */
+        AttachmentFlags(int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getValue() {
+            return this.value;
+        }
+
+        /**
+         * Gets the flags of the attachment. It is guaranteed that invoking {@link #getValue()} from the returned enum
+         * will be equal ({@code ==}) to the supplied {@code value}.
+         *
+         * @param value The flags value as represented by Discord.
+         * @return The {@link EnumSet} of flags.
+         */
+        public static EnumSet<AttachmentFlags> of(final int value) {
+            final EnumSet<AttachmentFlags> flags = EnumSet.noneOf(AttachmentFlags.class);
+
+            for (AttachmentFlags flag : AttachmentFlags.values()) {
+                long flagValue = flag.getValue();
+
+                if ((flagValue & value) == flagValue) {
+                    flags.add(flag);
+                }
+            }
+
+            return flags;
+        }
     }
 }
