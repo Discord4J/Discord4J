@@ -105,6 +105,7 @@ class MessageDispatchHandlers {
         long userId = Snowflake.asLong(context.getDispatch().userId());
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
         long messageId = Snowflake.asLong(context.getDispatch().messageId());
+        long messageAuthorId = Snowflake.asLong(context.getDispatch().messageAuthorId());
         Long guildId = context.getDispatch().guildId()
                 .toOptional()
                 .map(Snowflake::asLong)
@@ -125,7 +126,7 @@ class MessageDispatchHandlers {
         Member member = memberData != null ? new Member(gateway, memberData, guildId) : null;
 
         return Mono.just(new ReactionAddEvent(gateway, context.getShardInfo(), userId, channelId,
-                messageId, guildId, emoji, member));
+                messageId, guildId, emoji, member, messageAuthorId));
     }
 
     static Mono<ReactionRemoveEvent> messageReactionRemove(DispatchContext<MessageReactionRemove, Void> context) {
