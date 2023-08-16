@@ -149,22 +149,7 @@ interface VoiceChannelJoinSpecGenerator extends Spec<Function<VoiceChannel, Mono
 
             final VoiceDisconnectTask disconnectTask = id -> voiceChannel.sendDisconnectVoiceState()
                     .then(gateway.getVoiceConnectionRegistry().disconnect(id));
-            final VoiceServerUpdateTask serverUpdateTask = new VoiceServerUpdateTask() {
-
-                @Override
-                public Flux<VoiceServerOptions> onVoiceServerUpdates(Snowflake guildId) {
-                    //noinspection DataFlowIssue
-                    return gateway.getEventDispatcher()
-                            .on(VoiceServerUpdateEvent.class)
-                            .filter(vsu -> vsu.getGuildId().equals(guildId) && vsu.getEndpoint() != null)
-                            .map(vsu -> new VoiceServerOptions(vsu.getToken(), vsu.getEndpoint()));
-                }
-
-                @Override
-                public Mono<VoiceServerOptions> onVoiceServerUpdate(Snowflake guildId) {
-                    return onVoiceServerUpdates(guildId).next();
-                }
-            };
+            final VoiceServerUpdateTask serverUpdateTask = new DefaultVoiceServerUpdateTask(gateway);
             final VoiceStateUpdateTask stateUpdateTask = id -> onVoiceStateUpdates(gateway, id)
                     .map(stateUpdateEvent -> stateUpdateEvent.getCurrent().getSessionId());
             final VoiceChannelRetrieveTask channelRetrieveTask = () -> gateway

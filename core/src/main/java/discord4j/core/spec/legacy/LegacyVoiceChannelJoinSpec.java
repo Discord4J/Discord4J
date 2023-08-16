@@ -23,6 +23,7 @@ import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.core.spec.DefaultVoiceServerUpdateTask;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.intent.Intent;
@@ -64,7 +65,7 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
     private boolean selfDeaf;
     private boolean selfMute;
     private Duration ipDiscoveryTimeout = Duration.ofSeconds(DEFAULT_DISCOVERY_TIMEOUT);
-    private RetrySpec LegacyipDiscoveryRetrySpec = RetrySpec.maxInARow(1);
+    private RetrySpec ipDiscoveryRetrySpec = RetrySpec.maxInARow(1);
 
     private final GatewayDiscordClient gateway;
     private final VoiceChannel voiceChannel;
@@ -182,11 +183,11 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
      * <a href="https://discord.com/developers/docs/topics/voice-connections#ip-discovery">IP discovery</a>.
      * The default value is retrying once before exiting.
      *
-     * @param LegacyipDiscoveryRetrySpec the maximum amount of time to wait in a single attempt at IP discovery
+     * @param ipDiscoveryRetrySpec the maximum amount of time to wait in a single attempt at IP discovery
      * @return this spec
      */
-    public LegacyVoiceChannelJoinSpec LegacysetIpDiscoveryRetrySpec(RetrySpec LegacyipDiscoveryRetrySpec) {
-        this.LegacyipDiscoveryRetrySpec = Objects.requireNonNull(LegacyipDiscoveryRetrySpec);
+    public LegacyVoiceChannelJoinSpec setIpDiscoveryRetrySpec(RetrySpec ipDiscoveryRetrySpec) {
+        this.ipDiscoveryRetrySpec = Objects.requireNonNull(ipDiscoveryRetrySpec);
         return this;
     }
 
@@ -215,8 +216,7 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
         final VoiceDisconnectTask disconnectTask = id -> voiceChannel.sendDisconnectVoiceState()
                 .then(gateway.getVoiceConnectionRegistry().disconnect(id));
         //noinspection ConstantConditions
-        final VoiceServerUpdateTask serverUpdateTask = id -> onVoiceServerUpdate(gateway, id)
-                .map(vsu -> new VoiceServerOptions(vsu.getToken(), vsu.getEndpoint()));
+        final VoiceServerUpdateTask serverUpdateTask = new DefaultVoiceServerUpdateTask(gateway);
         final VoiceStateUpdateTask stateUpdateTask = id -> onVoiceStateUpdates(gateway, id)
                 .map(stateUpdateEvent -> stateUpdateEvent.getCurrent().getSessionId());
         final VoiceChannelRetrieveTask channelRetrieveTask = () -> gateway
@@ -238,7 +238,7 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
                             gateway.getGatewayResources().getVoiceReconnectOptions(),
                             provider, receiver, sendTaskFactory, receiveTaskFactory, disconnectTask,
                             serverUpdateTask, stateUpdateTask, channelRetrieveTask,
-                            ipDiscoveryTimeout, LegacyipDiscoveryRetrySpec);
+                            ipDiscoveryTimeout, ipDiscoveryRetrySpec);
 
                     return gateway.getVoiceConnectionFactory()
                             .create(voiceGatewayOptions)
