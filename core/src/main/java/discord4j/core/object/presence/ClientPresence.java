@@ -20,7 +20,6 @@ import discord4j.discordjson.json.ActivityUpdateRequest;
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import reactor.util.annotation.Nullable;
 
-import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +34,7 @@ import java.util.function.Function;
  *
  * @see discord4j.core.GatewayDiscordClient#updatePresence(ClientPresence)
  * @see discord4j.core.shard.GatewayBootstrap#setInitialPresence(Function)
- * @see <a href="https://discord.com/developers/docs/topics/gateway#presence">Presence</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway-events#update-presence">Presence</a>
  */
 public class ClientPresence {
 

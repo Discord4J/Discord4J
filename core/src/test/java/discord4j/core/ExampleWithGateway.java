@@ -18,6 +18,7 @@
 package discord4j.core;
 
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import discord4j.core.object.presence.ClientActivity;
 import discord4j.core.object.presence.ClientPresence;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -29,7 +30,8 @@ public class ExampleWithGateway {
     public static void main(String[] args) {
         DiscordClient.create(System.getenv("token"))
                 .gateway()
-                .setInitialPresence(s -> ClientPresence.invisible())
+                .setInitialPresence(s -> ClientPresence.online(
+                        ClientActivity.playing("with a new feature").withState("and an extra state")))
                 .withGateway(client -> client.on(ReadyEvent.class)
                         .doOnNext(ready -> log.info("Logged in as {}", ready.getSelf().getUsername()))
                         .then())
