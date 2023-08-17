@@ -18,10 +18,8 @@ package discord4j.core.object.presence;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ActivityData;
-import discord4j.discordjson.json.ActivityUpdateRequest;
 import discord4j.discordjson.possible.Possible;
 
 import java.time.Instant;
@@ -58,11 +56,15 @@ public class Activity {
     }
 
     /**
-     * Gets the activity's name.
+     * Returns this activity's name. For custom activities, this returns {@link #getState()} or an empty string if not
+     * present.
      *
-     * @return The activity's name.
+     * @return the activity's name
      */
     public String getName() {
+        if (getType() == Type.CUSTOM) {
+            return Possible.flatOpt(data.state()).orElse("");
+        }
         return data.name();
     }
 
@@ -126,9 +128,9 @@ public class Activity {
     }
 
     /**
-     * Gets the user's current party status, if present.
+     * Gets the user's current party status, or text used for a custom status, if present.
      *
-     * @return The user's current party status, if present.
+     * @return the presence activity state field, if present
      */
     public Optional<String> getState() {
         return Possible.flatOpt(data.state());
@@ -257,9 +259,9 @@ public class Activity {
     }
 
     /**
-     * Gets whether or not the activity is an instanced game session.
+     * Gets whether the activity is an instanced game session.
      *
-     * @return Whether or not the activity is an instanced game session.
+     * @return whether the activity is an instanced game session
      */
     public boolean isInstance() {
         return data.instance().toOptional().orElse(false);
