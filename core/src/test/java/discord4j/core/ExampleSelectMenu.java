@@ -51,6 +51,10 @@ public class ExampleSelectMenu {
                                                     .withMaxValues(2)))
                                     .then(channel.createMessage("Select some user options!")
                                             .withComponents(ActionRow.of(SelectMenu.ofUser("mySelectMenu2"))))
+                                    .then(channel.createMessage("Select some user with default options!")
+                                            .withComponents(ActionRow.of(SelectMenu.ofUser("mySelectMenu2", Collections.singletonList(
+                                                    SelectMenu.DefaultValue.of(Snowflake.of("177000261233934336"), SelectMenu.DefaultValue.Type.USER)
+                                            )))))
                                     .then(channel.createMessage("Select some channel options!")
                                             .withComponents(ActionRow.of(SelectMenu.ofChannel("mySelectMenu3",
                                                     Collections.singletonList(Channel.Type.GUILD_TEXT))))));
