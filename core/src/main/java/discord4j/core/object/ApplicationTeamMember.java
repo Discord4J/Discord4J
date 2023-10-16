@@ -112,6 +112,66 @@ public class ApplicationTeamMember implements DiscordObject {
     }
 
     /**
+     * Gets the user's role on the team.
+     *
+     * @return The user's role on the team.
+     */
+    public TeamMemberRole getRole() {
+        return TeamMemberRole.of(data.role());
+    }
+
+    /**
+     * Represents the roles of a {@link ApplicationTeamMember}.
+     *
+     * @see <a href="https://discord.com/developers/docs/topics/teams#team-member-roles-team-member-role-types">
+     *     Team Member Role Types</a>
+     */
+    public enum TeamMemberRole {
+        UNKNOWN("unknown"),
+        ADMIN("admin"),
+        DEVELOPER("developer"),
+        READ_ONLY("read_only"),
+        ;
+
+        /** The underlying value as represented by Discord. */
+        private final String value;
+
+        /**
+         * Constructs an {@code ApplicationTeamMember.TeamMemberRole}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        TeamMemberRole(String value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public String getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the role of team member. It is guaranteed that invoking {@link #getValue()} from the
+         * returned enum will equal ({@link #equals(Object)}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The role of team member.
+         */
+        public static ApplicationTeamMember.TeamMemberRole of(final String value) {
+            switch (value) {
+                case "admin": return ADMIN;
+                case "developer": return DEVELOPER;
+                case "read_only": return READ_ONLY;
+                default: return UNKNOWN;
+            }
+        }
+    }
+
+    /**
      * Represents the various types of membership state.
      *
      * @see <a href="https://discord.com/developers/docs/topics/teams#data-models-membership-state-enum">
