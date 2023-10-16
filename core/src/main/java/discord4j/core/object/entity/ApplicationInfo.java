@@ -16,6 +16,8 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.core.spec.ApplicationEditMono;
+import discord4j.core.spec.ApplicationEditSpec;
 import discord4j.discordjson.json.ApplicationInfoData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -201,6 +203,20 @@ public final class ApplicationInfo implements Entity {
             return Flag.of(publicFlags);
         }
         return EnumSet.noneOf(Flag.class);
+    }
+
+    public ApplicationEditMono edit() {
+        return ApplicationEditMono.of(this);
+    }
+
+    public Mono<ApplicationInfo> edit(ApplicationEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+            () -> gateway.getRestClient().getApplicationService().setCurrentApplicationInfo(spec.asRequest()))
+            .map(data -> new ApplicationInfo(gateway, ApplicationInfoData.builder()
+                .from(this.data)
+                .from(data)
+                .build()));
     }
 
     @Override
