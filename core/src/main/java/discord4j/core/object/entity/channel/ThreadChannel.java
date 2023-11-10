@@ -78,16 +78,16 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
                 .map(Snowflake::of);
     }
 
-    public Mono<TopLevelGuildMessageChannel> getParent() {
+    public Mono<TopLevelGuildChannel> getParent() {
         return Mono.justOrEmpty(getParentId())
                 .flatMap(getClient()::getChannelById)
-                .cast(TopLevelGuildMessageChannel.class);
+                .cast(TopLevelGuildChannel.class);
     }
 
-    public Mono<TopLevelGuildMessageChannel> getParent(EntityRetrievalStrategy retrievalStrategy) {
+    public Mono<TopLevelGuildChannel> getParent(EntityRetrievalStrategy retrievalStrategy) {
         return Mono.justOrEmpty(getParentId())
                 .flatMap(getClient().withRetrievalStrategy(retrievalStrategy)::getChannelById)
-                .cast(TopLevelGuildMessageChannel.class);
+                .cast(TopLevelGuildChannel.class);
     }
 
     /**
