@@ -117,6 +117,9 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(AutoModRuleUpdate.class, DispatchHandlers::autoModRuleUpdate);
         addHandler(AutoModRuleDelete.class, DispatchHandlers::autoModRuleDelete);
         addHandler(AutoModActionExecution.class, DispatchHandlers::autoModActionExecute);
+        addHandler(EntitlementCreate.class, MonetizationDispatchHandlers::entitlementCreate);
+        addHandler(EntitlementUpdate.class, MonetizationDispatchHandlers::entitlementUpdate);
+        addHandler(EntitlementDelete.class, MonetizationDispatchHandlers::entitlementDelete);
 
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
 
