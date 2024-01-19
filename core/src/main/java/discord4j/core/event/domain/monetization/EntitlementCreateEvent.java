@@ -2,7 +2,13 @@ package discord4j.core.event.domain.monetization;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.monetization.Entitlement;
 import discord4j.gateway.ShardInfo;
+import reactor.core.publisher.Mono;
+
+import java.util.Optional;
 
 /**
  * Dispatched when an entitlement is created.
@@ -13,42 +19,43 @@ import discord4j.gateway.ShardInfo;
  */
 public class EntitlementCreateEvent extends Event {
 
-    private final long entitlementId;
-    private final long skuId;
-    private final Long subscriptionId;
-    private final Long userId;
-    private final Long guildId;
-    private final int type;
-    private final boolean deleted;
-    private final String startsAt;
-    private final String endsAt;
+    private final Entitlement entitlement;
 
-    public EntitlementCreateEvent(
-        GatewayDiscordClient gateway,
-        ShardInfo shardInfo,
-        long entitlementId,
-        long skuId,
-        Long subscriptionId,
-        Long userId,
-        Long guildId,
-        int type,
-        boolean deleted,
-        String startsAt,
-        String endsAt
-    ) {
+    public EntitlementCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Entitlement entitlement) {
         super(gateway, shardInfo);
 
-        this.entitlementId = entitlementId;
-        this.skuId = skuId;
-        this.subscriptionId = subscriptionId;
-        this.userId = userId;
-        this.guildId = guildId;
-        this.type = type;
-        this.deleted = deleted;
-        this.startsAt = startsAt;
-        this.endsAt = endsAt;
+        this.entitlement = entitlement;
     }
 
+    /**
+     * Gets the entitlement that was created.
+     *
+     * @return The entitlement that was created.
+     */
+    public Entitlement getEntitlement() {
+        return entitlement;
+    }
 
+    /**
+     * Gets the user associated with this entitlement.
+     * Only present if the entitlement corresponds to a user subscription.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the user associated with this entitlement
+     * or empty if the entitlement does not correspond to a user subscription.
+     */
+    public Mono<User> getUser() {
+        return entitlement.getUserId().map(getClient()::getUserById).orElse(Mono.empty());
+    }
+
+    /**
+     * Gets the guild associated with this entitlement.
+     * Only present if the entitlement corresponds to a guild subscription.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the guild associated with this entitlement
+     * or empty if the entitlement does not correspond to a guild subscription.
+     */
+    public Mono<Guild> getGuild() {
+        return entitlement.getGuildId().map(getClient()::getGuildById).orElse(Mono.empty());
+    }
 
 }
