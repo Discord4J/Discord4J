@@ -193,6 +193,15 @@ public class ApplicationCommand implements DiscordObject {
         return data.dmPermission().toOptional().orElse(!this.getGuildId().isPresent());
     }
 
+    /**
+     * Gets if the command is flagged as NSFW.
+     *
+     * @return {@code true} if the command is flagged as NSFW, {@code false} otherwise.
+     */
+    public boolean isNsfw() {
+        return data.nsfw().toOptional().orElse(false);
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
