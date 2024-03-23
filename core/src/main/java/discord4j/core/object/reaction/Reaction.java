@@ -96,7 +96,7 @@ public final class Reaction implements DiscordObject  {
      *
      * @return Whether the current bot user super-reacted using this reaction's emoji.
      */
-    public boolean selfBurstReacted() {
+    public boolean selfSuperReacted() {
         return data.meBurst();
     }
 
@@ -105,7 +105,7 @@ public final class Reaction implements DiscordObject  {
      *
      * @return A list of {@link Color} used in this reaction.
      */
-    public List<Color> getBurstColors() {
+    public List<Color> getSuperColors() {
         return this.data.burstColors().stream().map(Color::of).collect(Collectors.toList());
     }
 

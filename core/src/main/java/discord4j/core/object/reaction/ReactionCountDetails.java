@@ -46,20 +46,20 @@ public class ReactionCountDetails implements DiscordObject {
     }
 
     /**
-     * Count of super reactions
+     * Count of normal reactions
      *
-     * @return Count of super reactions
+     * @return Count of normal reactions
      */
     public int getNormal() {
         return this.data.normal();
     }
 
     /**
-     * Count of normal reactions
+     * Count of super reactions
      *
-     * @return Count of normal reactions
+     * @return Count of super reactions
      */
-    public int getBurst() {
+    public int getSuper() {
         return this.data.burst();
     }
 }
