@@ -205,14 +205,28 @@ public final class ApplicationInfo implements Entity {
         return EnumSet.noneOf(Flag.class);
     }
 
+    /**
+     * Requests to edit the current application. Properties specifying how to edit this application
+     * can be set via the {@code withXxx} methods of the returned {@link ApplicationEditMono}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link ApplicationInfo}.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
     public ApplicationEditMono edit() {
         return ApplicationEditMono.of(this);
     }
 
+    /**
+     * Requests to edit this application.
+     *
+     * @param spec an immutable object that specifies how to edit this application
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link ApplicationInfo}. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
     public Mono<ApplicationInfo> edit(ApplicationEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-            () -> gateway.getRestClient().getApplicationService().setCurrentApplicationInfo(spec.asRequest()))
+            () -> gateway.getRestClient().getApplicationService().modifyCurrentApplicationInfo(spec.asRequest()))
             .map(data -> new ApplicationInfo(gateway, ApplicationInfoData.builder()
                 .from(this.data)
                 .from(data)

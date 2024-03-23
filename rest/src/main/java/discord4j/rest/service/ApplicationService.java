@@ -36,8 +36,8 @@ public class ApplicationService extends RestService {
                 .bodyToMono(ApplicationInfoData.class);
     }
 
-    public Mono<ApplicationInfoData> setCurrentApplicationInfo(ApplicationInfoRequest request) {
-        return Routes.APPLICATION_INFO_SET.newRequest()
+    public Mono<ApplicationInfoData> modifyCurrentApplicationInfo(ApplicationInfoRequest request) {
+        return Routes.APPLICATION_INFO_MODIFY.newRequest()
             .body(request)
             .exchange(getRouter())
             .bodyToMono(ApplicationInfoData.class);
