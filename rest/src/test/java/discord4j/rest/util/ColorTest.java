@@ -25,4 +25,25 @@ public class ColorTest {
         assertEquals(0, color.getGreen());
         assertEquals(255, color.getBlue());
     }
+
+    @Test
+    public void testHexConstructor() {
+        String hexCode = "FF9933";
+        String hexCodeVariant = "#FF9933";
+        int red = 255;
+        int green = 153;
+        int blue = 51;
+
+        Color color = Color.of(hexCode);
+        assertEquals(red, color.getRed());
+        assertEquals(green, color.getGreen());
+        assertEquals(blue, color.getBlue());
+
+        Color colorVariant = Color.of(hexCodeVariant);
+        assertEquals(red, colorVariant.getRed());
+        assertEquals(green, colorVariant.getGreen());
+        assertEquals(blue, colorVariant.getBlue());
+
+        assertThrows(IllegalArgumentException.class, () -> Color.of("random"));
+    }
 }

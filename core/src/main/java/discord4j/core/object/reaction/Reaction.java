@@ -19,8 +19,11 @@ package discord4j.core.object.reaction;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.discordjson.json.ReactionData;
+import discord4j.rest.util.Color;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * A Discord message reaction.
@@ -61,12 +64,22 @@ public final class Reaction implements DiscordObject  {
     }
 
     /**
-     * Gets the number of people who reacted with this reaction's emoji.
+     * Gets the number of people who reacted with this reaction's emoji (normal and super reactions).
      *
+     * @see #getCountDetails() getCountDetails()
      * @return The number of people who reacted with this reaction's emoji.
      */
     public int getCount() {
         return data.count();
+    }
+
+    /**
+     * Gets the details of the count for this reaction.
+     *
+     * @return The details of the count for this reaction.
+     */
+    public ReactionCountDetails getCountDetails() {
+        return new ReactionCountDetails(this.gateway, this.data.countDetails());
     }
 
     /**
@@ -76,6 +89,24 @@ public final class Reaction implements DiscordObject  {
      */
     public boolean selfReacted() {
         return data.me();
+    }
+
+    /**
+     * Gets whether the current bot user super-reacted using this reaction's emoji.
+     *
+     * @return Whether the current bot user super-reacted using this reaction's emoji.
+     */
+    public boolean selfSuperReacted() {
+        return data.meBurst();
+    }
+
+    /**
+     * Get a list of HEX colors used for super reaction.
+     *
+     * @return A list of {@link Color} used in this reaction.
+     */
+    public List<Color> getSuperColors() {
+        return this.data.burstColors().stream().map(Color::of).collect(Collectors.toList());
     }
 
     /**
