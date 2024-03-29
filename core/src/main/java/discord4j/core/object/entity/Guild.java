@@ -2518,12 +2518,33 @@ public final class Guild implements Entity {
      */
     public enum ResourceNavigation {
         /** Customize tab with the server's onboarding prompts */
-        CUSTOMIZE,
+        CUSTOMIZE("customize"),
         /** Browse Channels tab */
-        BROWSE,
+        BROWSE("browse"),
         /** Server Guide */
-        GUIDE,
+        GUIDE("guide"),
         ;
+
+        /** The underlying value as represented by Discord. */
+        private final String value;
+
+        /**
+         * Constructs an {@code Guild.ResourceNavigation}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        ResourceNavigation(final String value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public String getValue() {
+            return value;
+        }
 
         /**
          * Gets the <i>raw</i> mention. This is the format utilized to directly mention guild resource.
@@ -2531,7 +2552,7 @@ public final class Guild implements Entity {
          * @return The <i>raw</i> mention.
          */
         public String getMention() {
-            return "<id:" + this.name().toLowerCase() + ">";
+            return "<id:" + this.getValue() + ">";
         }
     }
 
