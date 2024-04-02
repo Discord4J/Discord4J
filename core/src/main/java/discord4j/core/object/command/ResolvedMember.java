@@ -94,6 +94,15 @@ public class ResolvedMember implements DiscordObject {
     }
 
     /**
+     * Gets the avatar hash of this member, if provided.
+     *
+     * @return The avatar hash, if present.
+     */
+    public Optional<String> getAvatar() {
+        return Possible.flatOpt(data.avatar());
+    }
+
+    /**
      * Gets the ID of the guild this user is associated to.
      *
      * @return The ID of the guild this user is associated to.
