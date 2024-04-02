@@ -394,11 +394,11 @@ public class SelectMenu extends ActionComponent {
 
         // Validate default values
         if (defaultValues.size() > this.getMaxValues()) {
-            throw new IllegalArgumentException("Default values count can't be greater than max values count");
+            throw new IllegalArgumentException("Default values count (" + defaultValues.size() + ") can't be greater than max values count (" + this.getMaxValues() + ")!");
         }
 
         if (defaultValues.size() < this.getMinValues()) {
-            throw new IllegalArgumentException("Default values count can't be less than min values count");
+            throw new IllegalArgumentException("Default values count (" + defaultValues.size() + ") can't be less than min values count (" + this.getMinValues() + ")!");
         }
 
         for (SelectDefaultValueData defaultValue : defaultValues) {
