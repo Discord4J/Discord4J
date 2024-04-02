@@ -78,16 +78,29 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
                 .map(Snowflake::of);
     }
 
-    public Mono<TopLevelGuildMessageChannel> getParent() {
+    /**
+     * Fetches the parent channel for this thread object.
+     * When the parent channel is a message channel, an appropriate target class for casting is {@link TopLevelGuildMessageChannel}.
+     *
+     * @return A {@link Mono} which, upon completion, emits a {@link TopLevelGuildChannel}. Any error is emitted through the mono.
+     */
+    public Mono<TopLevelGuildChannel> getParent() {
         return Mono.justOrEmpty(getParentId())
                 .flatMap(getClient()::getChannelById)
-                .cast(TopLevelGuildMessageChannel.class);
+                .cast(TopLevelGuildChannel.class);
     }
 
-    public Mono<TopLevelGuildMessageChannel> getParent(EntityRetrievalStrategy retrievalStrategy) {
+    /**
+     * Fetches the parent channel for this thread object using the provided retrieval strategy.
+     * When the parent channel is a message channel, an appropriate target class for casting is {@link TopLevelGuildMessageChannel}.
+     *
+     * @param retrievalStrategy The selected retrieval strategy for this request
+     * @return A {@link Mono} which, upon completion, emits a {@link TopLevelGuildChannel}. Any error is emitted through the mono.
+     */
+    public Mono<TopLevelGuildChannel> getParent(EntityRetrievalStrategy retrievalStrategy) {
         return Mono.justOrEmpty(getParentId())
                 .flatMap(getClient().withRetrievalStrategy(retrievalStrategy)::getChannelById)
-                .cast(TopLevelGuildMessageChannel.class);
+                .cast(TopLevelGuildChannel.class);
     }
 
     /**
