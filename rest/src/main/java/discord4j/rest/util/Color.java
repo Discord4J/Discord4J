@@ -132,6 +132,23 @@ public final class Color {
     public static final Color BISMARK = of(0x546E7A);
 
     /**
+     * Initializes a new instance of {@link Color} using the specified hex color, which must be given
+     * as string.
+     *
+     * @param hexColor the hex color in a valid format (#ffffff or ffffff)
+     */
+    public static Color of(String hexColor) {
+        hexColor = hexColor.replace("#", "");
+        if (!hexColor.matches("^[0-9a-fA-F]+$")) {
+            throw new IllegalArgumentException("Illegal HEX argument " + hexColor);
+        }
+        int red = Integer.valueOf(hexColor.substring(0, 2), 16);
+        int green = Integer.valueOf(hexColor.substring(2, 4), 16);
+        int blue = Integer.valueOf(hexColor.substring(4, 6), 16);
+        return of(red, green, blue);
+    }
+
+    /**
      * Initializes a new instance of {@link Color} using the specified red, green, and blue values, which must be given
      * as floats in the range of 0.0F-1.0F.
      *

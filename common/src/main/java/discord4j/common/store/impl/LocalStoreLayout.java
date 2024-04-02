@@ -1069,11 +1069,12 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                             .from(r)
                             .count(r.count() + 1)
                             .me(r.me() || me)
+                            .meBurst(false) // BOTs cannot super-react
                             .build() : r)
                     .collect(Collectors.toList())));
         }
         return message.withReactions(Possible.of(
-                add(reactions, ImmutableReactionData.of(1, me, dispatch.emoji()))));
+                add(reactions, ImmutableReactionData.of(1, ImmutableReactionCountDetailsData.of(1, 0), me, false, dispatch.emoji(), Collections.emptyList()))));
     }
 
     private ImmutableMessageData removeReaction(ImmutableMessageData message, MessageReactionRemove dispatch) {
