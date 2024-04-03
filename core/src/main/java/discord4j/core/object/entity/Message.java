@@ -37,6 +37,7 @@ import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.SuppressEmbedsRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
+import discord4j.gateway.intent.Intent;
 import discord4j.rest.entity.RestChannel;
 import discord4j.rest.entity.RestMessage;
 import discord4j.rest.util.MultipartRequest;
@@ -207,9 +208,16 @@ public final class Message implements Entity {
     /**
      * Gets the contents of the message, if present.
      *
+     * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled
      * @return The contents of the message, if present.
      */
     public String getContent() {
+        if (!this.gateway.getGatewayResources().getIntents().contains(Intent.MESSAGE_CONTENT)) {
+            throw new UnsupportedOperationException("The MESSAGE_CONTENT intent is required to access message content!" +
+                    "\nSee https://github.com/Discord4J/Discord4J?tab=readme-ov-file#calling-messagegetcontent-without-enabling-the-message-content-intent" +
+                    " for more information.");
+        }
+
         return data.content();
     }
 
