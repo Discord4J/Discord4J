@@ -867,8 +867,6 @@ public final class Message implements Entity {
             return;
         }
 
-        // If all the previous fields are empty, then we don't have access to the content
-
         // Check if the MESSAGE_CONTENT intent is enabled
         if (!this.gateway.getGatewayResources().getIntents().contains(Intent.MESSAGE_CONTENT)) {
             throw new UnsupportedOperationException("The MESSAGE_CONTENT intent is required to access message content!" +
@@ -878,7 +876,7 @@ public final class Message implements Entity {
 
         // If we are here, then the MESSAGE_CONTENT intent is enabled, but we still don't have access to the content
         // This can happen in the following cases:
-        // - The message is a notification message (ex. message pin)
+        // - The message is a notification message (ex. message pin), and thus don't have neither content nor embeds, etc.
         // - Discord broke their API :'(
     }
 
