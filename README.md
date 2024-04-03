@@ -211,7 +211,7 @@ client.withGateway {
 ## 🐛 Common mistakes
 
 ### Calling Message#getContent without enabling the Message Content intent
-Starting from June 21, 2022, Discord requires bots to enable the "MESSAGE_CONTENT" intent to access the content of messages.
+Starting from September 1, 2022, Discord requires bots to enable the "MESSAGE_CONTENT" intent to access the content of messages.
 To enable the intent, go to the [Discord Developer Portal](https://discord.com/developers/applications) and select your bot. Then, go to the "Bot" tab and enable the "Message Content" intent.
 Then, add the intent to your bot when creating the DiscordClient:
 ```java
