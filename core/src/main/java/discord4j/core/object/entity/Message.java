@@ -579,7 +579,7 @@ public final class Message implements Entity {
      */
     public List<LayoutComponent> getComponents() {
         List<LayoutComponent> components = data.components().toOptional()
-                .map(components -> components.stream()
+                .map(componentList -> componentList.stream()
                         .map(MessageComponent::fromData)
                         // top level message components should only be LayoutComponents
                         .filter(component -> component instanceof LayoutComponent)
