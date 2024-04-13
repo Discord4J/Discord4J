@@ -47,5 +47,6 @@ jar {
 }
 
 sourcesJar {
+    dependsOn project(':core').compileJava
     from "build/generated/sources/annotationProcessor/java/main"
 }

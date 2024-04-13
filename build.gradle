@@ -54,8 +54,10 @@ allprojects {
     version = project_version
     description = project_description
 
-    sourceCompatibility = project_jdk
-    targetCompatibility = project_jdk
+    java {
+        sourceCompatibility = project_jdk
+        targetCompatibility = project_jdk
+    }
 
     dependencies {
         api platform("io.projectreactor:reactor-bom:$reactor_bom_version")
@@ -126,6 +128,7 @@ subprojects {
     archivesBaseName = "discord4j-$project.name"
 
     tasks.withType(Javadoc) {
+        System.out.println("TEST -> $archivesBaseName ${version} API")
         title = "$archivesBaseName ${version} API"
         options.windowTitle = "$archivesBaseName ($version)"
     }
