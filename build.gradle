@@ -125,10 +125,11 @@ allprojects {
 }
 
 subprojects {
+
+    // TODO: Deprecated need to be handled if we need update to gradle 9.0 ref: https://docs.gradle.org/current/userguide/upgrading_version_8.html#base_convention_deprecation
     archivesBaseName = "discord4j-$project.name"
 
-    tasks.withType(Javadoc) {
-        System.out.println("TEST -> $archivesBaseName ${version} API")
+    tasks.withType(Javadoc).configureEach {
         title = "$archivesBaseName ${version} API"
         options.windowTitle = "$archivesBaseName ($version)"
     }
