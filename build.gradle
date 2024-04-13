@@ -75,11 +75,11 @@ allprojects {
         maven { url 'https://m2.dv8tion.net/releases' }
     }
 
-    configurations.all {
+    configurations.configureEach {
         resolutionStrategy.cacheChangingModulesFor 60, 'seconds'
     }
 
-    tasks.withType(Javadoc) {
+    tasks.withType(Javadoc).configureEach {
         options {
             encoding = 'UTF-8'
             tags = ["apiNote:a:API Note:",
@@ -89,13 +89,13 @@ allprojects {
             addStringOption 'encoding', 'UTF-8'
             // adding links to javadocs for filling specific classes when not existing inside current javadoc
             links = [
-                    jdk_javadoc,
-                    "https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/2.12.7/",
-                    "https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
-                    "https://projectreactor.io/docs/core/3.4.26/api/",
-                    "https://projectreactor.io/docs/netty/1.0.27/api/",
-                    "https://projectreactor.io/docs/extra/3.4.9/api/",
-                    "https://netty.io/4.1/api/"
+                jdk_javadoc,
+                "https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/2.12.7/",
+                "https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
+                "https://projectreactor.io/docs/core/3.4.26/api/",
+                "https://projectreactor.io/docs/netty/1.0.27/api/",
+                "https://projectreactor.io/docs/extra/3.4.9/api/",
+                "https://netty.io/4.1/api/"
             ]
         }
         if (JavaVersion.current().isJava9Compatible()) {
@@ -106,12 +106,12 @@ allprojects {
         }
     }
 
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
         options.incremental = true
     }
 
-    task downloadDependencies() {
+    tasks.register('downloadDependencies') {
         description 'Download all dependencies to the Gradle cache'
         doLast {
             configurations.findAll { it.canBeResolved }.files
@@ -126,19 +126,23 @@ allprojects {
 
 subprojects {
 
-    // TODO: Deprecated need to be handled if we need update to gradle 9.0 ref: https://docs.gradle.org/current/userguide/upgrading_version_8.html#base_convention_deprecation
-    archivesBaseName = "discord4j-$project.name"
+    base {
+        archivesName = "discord4j-$project.name"
+    }
 
     tasks.withType(Javadoc).configureEach {
-        title = "$archivesBaseName ${version} API"
-        options.windowTitle = "$archivesBaseName ($version)"
+        println("Configuring javadoc project for ${base.archivesName.get()}")
+        title = "${base.archivesName.get()} ${version} API"
+        options.windowTitle = "${base.archivesName.get()} ($version)"
     }
 
     publishing {
         publications {
             mavenJava(MavenPublication) {
                 from components.java
-                artifactId archivesBaseName
+                afterEvaluate {
+                    artifactId = jar.archiveBaseName.get()
+                }
 
                 versionMapping {
                     usage('java-api') {
