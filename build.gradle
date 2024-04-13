@@ -101,7 +101,7 @@ allprojects {
         if (JavaVersion.current().isJava9Compatible()) {
             options.addBooleanOption('html5', true)
         }
-        if (JavaVersion.current().isJava11Compatible()) {
+        if (JavaVersion.current().isJava11Compatible() && !JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_13)) {
             options.addBooleanOption('-no-module-directories', true)
         }
     }
@@ -128,6 +128,7 @@ subprojects {
 
     // TODO: Deprecated need to be handled if we need update to gradle 9.0 ref: https://docs.gradle.org/current/userguide/upgrading_version_8.html#base_convention_deprecation
     archivesBaseName = "discord4j-$project.name"
+    System.out.println(archivesBaseName)
 
     tasks.withType(Javadoc).configureEach {
         title = "$archivesBaseName ${version} API"
