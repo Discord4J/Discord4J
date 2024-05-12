@@ -1174,6 +1174,8 @@ public abstract class Routes {
      */
     public static final Route APPLICATION_INFO_GET = Route.get("/oauth2/applications/@me");
 
+    public static final Route APPLICATION_INFO_MODIFY = Route.patch("/applications/@me");
+
     public static final Route GLOBAL_APPLICATION_COMMANDS_GET = Route.get("/applications/{application.id}/commands");
 
     public static final Route GLOBAL_APPLICATION_COMMANDS_CREATE = Route.post("/applications/{application.id}/commands");

@@ -44,6 +44,13 @@ public class ApplicationService extends RestService {
                 .flatMapMany(Flux::fromArray);
     }
 
+    public Mono<ApplicationInfoData> modifyCurrentApplicationInfo(ApplicationInfoRequest request) {
+        return Routes.APPLICATION_INFO_MODIFY.newRequest()
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(ApplicationInfoData.class);
+    }
+
     public Flux<ApplicationCommandData> getGlobalApplicationCommands(long applicationId) {
         return Routes.GLOBAL_APPLICATION_COMMANDS_GET.newRequest(applicationId)
             .exchange(getRouter())
@@ -84,14 +91,6 @@ public class ApplicationService extends RestService {
         return Routes.GLOBAL_APPLICATION_COMMAND_DELETE.newRequest(applicationId, commandId)
             .exchange(getRouter())
             .bodyToMono(Void.class);
-    }
-
-    public Flux<ApplicationCommandData> getGuildApplicationCommands(long applicationId, long guildId, boolean withLocalizations) {
-        return Routes.GUILD_APPLICATION_COMMANDS_GET.newRequest(applicationId, guildId)
-                .query("with_localizations", withLocalizations)
-                .exchange(getRouter())
-                .bodyToMono(ApplicationCommandData[].class)
-                .flatMapMany(Flux::fromArray);
     }
 
     public Flux<ApplicationCommandData> getGuildApplicationCommands(long applicationId, long guildId) {
