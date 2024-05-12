@@ -140,8 +140,11 @@ public enum Permission {
     @Deprecated
     MANAGE_EMOJIS_AND_STICKERS(0x40000000, true),
 
-    /** Allows management and editing of emojis, stickers, and soundboard sounds. */
+    /** Allows for editing and deleting emojis, stickers, and soundboard sounds created by all users. */
     MANAGE_GUILD_EXPRESSIONS(0x40000000, true),
+
+    /** Allows for creating emojis, stickers, and soundboard sounds, and editing and deleting those created by the current user. **/
+    CREATE_GUILD_EXPRESSIONS(0x0000080000000000L, false),
 
     /** Allows members to use slash commands in text channels.
      *
@@ -160,8 +163,11 @@ public enum Permission {
     @Experimental
     REQUEST_TO_SPEAK(0x0000000100000000L, false),
 
-    /** Allows for creating, editing, and deleting scheduled events. */
+    /** Allows for editing and deleting scheduled events created by all users. */
     MANAGE_EVENTS(0x0000000200000000L, false),
+
+    /** Allows for creating scheduled events, and editing and deleting those created by the current user. */
+    CREATE_EVENTS(0x0000100000000000L, false),
 
     /** Allows for deleting and archiving threads, and viewing all private threads. */
     MANAGE_THREADS(0x0000000400000000L, true),
