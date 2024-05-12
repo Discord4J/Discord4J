@@ -545,6 +545,7 @@ public final class Guild implements Entity {
 
     /**
      * Returns the enabled features of this {@link Guild}.
+     * Raw data features are still available with {@code getData().features}.
      *
      * @return A {@code EnumSet} with the enabled guild features.
      */
@@ -2368,72 +2369,82 @@ public final class Guild implements Entity {
 
     /**
      * Describes the features of a guild.
+     * <br>
+     * You can see the available
+     * <a href="https://discord.com/developers/docs/resources/guild#guild-object-guild-features">guild features</a>
      */
     public enum FeatureSet {
 
         /* guild has access to set an animated guild banner image */
-        ANIMATED_BANNER("ANIMATED_BANNER"),
+        ANIMATED_BANNER("ANIMATED_BANNER", Boolean.FALSE),
         /* guild has access to set an animated guild icon */
-        ANIMATED_ICON("ANIMATED_ICON"),
+        ANIMATED_ICON("ANIMATED_ICON", Boolean.FALSE),
         /* guild is using the old permissions configuration behavior */
-        APPLICATION_COMMAND_PERMISSIONS_V2("APPLICATION_COMMAND_PERMISSIONS_V2"),
+        APPLICATION_COMMAND_PERMISSIONS_V2("APPLICATION_COMMAND_PERMISSIONS_V2", Boolean.FALSE),
         /* guild has set up auto moderation rules */
-        AUTO_MODERATION("AUTO_MODERATION"),
+        AUTO_MODERATION("AUTO_MODERATION", Boolean.FALSE),
         /* guild has access to set a guild banner image */
-        BANNER("BANNER"),
+        BANNER("BANNER", Boolean.FALSE),
         /* guild can enable welcome screen, Membership Screening, stage channels and discovery, and receives community updates */
-        COMMUNITY("COMMUNITY"),
+        COMMUNITY("COMMUNITY", Boolean.TRUE),
         /* guild has enabled monetization */
-        CREATOR_MONETIZABLE_PROVISIONAL("CREATOR_MONETIZABLE_PROVISIONAL"),
+        CREATOR_MONETIZABLE_PROVISIONAL("CREATOR_MONETIZABLE_PROVISIONAL", Boolean.FALSE),
         /* guild has enabled the role subscription promo page */
-        CREATOR_STORE_PAGE("CREATOR_STORE_PAGE"),
+        CREATOR_STORE_PAGE("CREATOR_STORE_PAGE", Boolean.FALSE),
         /* guild has been set as a support server on the App Directory */
-        DEVELOPER_SUPPORT_SERVER("DEVELOPER_SUPPORT_SERVER"),
+        DEVELOPER_SUPPORT_SERVER("DEVELOPER_SUPPORT_SERVER", Boolean.FALSE),
         /* guild is able to be discovered in the directory */
-        DISCOVERABLE("DISCOVERABLE"),
+        DISCOVERABLE("DISCOVERABLE", Boolean.TRUE),
         /* guild is able to be featured in the directory */
-        FEATURABLE("FEATURABLE"),
+        FEATURABLE("FEATURABLE", Boolean.FALSE),
         /* guild has paused invites, preventing new users from joining */
-        INVITES_DISABLED("INVITES_DISABLED"),
+        INVITES_DISABLED("INVITES_DISABLED", Boolean.TRUE),
         /* guild has access to set an invite splash background */
-        INVITE_SPLASH("INVITE_SPLASH"),
+        INVITE_SPLASH("INVITE_SPLASH", Boolean.FALSE),
         /* guild has enabled Membership Screening */
-        MEMBER_VERIFICATION_GATE_ENABLED("MEMBER_VERIFICATION_GATE_ENABLED"),
+        MEMBER_VERIFICATION_GATE_ENABLED("MEMBER_VERIFICATION_GATE_ENABLED", Boolean.FALSE),
         /* guild has increased custom sticker slots */
-        MORE_STICKERS("MORE_STICKERS"),
+        MORE_STICKERS("MORE_STICKERS", Boolean.FALSE),
         /* guild has access to create announcement channels */
-        NEWS("NEWS"),
+        NEWS("NEWS", Boolean.FALSE),
         /* guild is partnered */
-        PARTNERED("PARTNERED"),
+        PARTNERED("PARTNERED", Boolean.FALSE),
         /* guild can be previewed before joining via Membership Screening or the directory */
-        PREVIEW_ENABLED("PREVIEW_ENABLED"),
+        PREVIEW_ENABLED("PREVIEW_ENABLED", Boolean.FALSE),
         /* guild has disabled alerts for join raids in the configured safety alerts channel */
-        RAID_ALERTS_DISABLED("RAID_ALERTS_DISABLED"),
+        RAID_ALERTS_DISABLED("RAID_ALERTS_DISABLED", Boolean.TRUE),
         /* guild is able to set role icons */
-        ROLE_ICONS("ROLE_ICONS"),
+        ROLE_ICONS("ROLE_ICONS", Boolean.FALSE),
         /* guild has role subscriptions that can be purchased */
-        ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE("ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE"),
+        ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE("ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE", Boolean.FALSE),
         /* guild has enabled role subscriptions */
-        ROLE_SUBSCRIPTIONS_ENABLED("ROLE_SUBSCRIPTIONS_ENABLED"),
+        ROLE_SUBSCRIPTIONS_ENABLED("ROLE_SUBSCRIPTIONS_ENABLED", Boolean.FALSE),
         /* guild has enabled ticketed events */
-        TICKETED_EVENTS_ENABLED("TICKETED_EVENTS_ENABLED"),
+        TICKETED_EVENTS_ENABLED("TICKETED_EVENTS_ENABLED", Boolean.FALSE),
         /* guild has access to set a vanity URL */
-        VANITY_URL("VANITY_URL"),
+        VANITY_URL("VANITY_URL", Boolean.FALSE),
         /* guild is verified */
-        VERIFIED("VERIFIED"),
+        VERIFIED("VERIFIED", Boolean.FALSE),
         /* guild has access to set 384kbps bitrate in voice (previously VIP voice servers) */
-        VIP_REGIONS("VIP_REGIONS"),
+        VIP_REGIONS("VIP_REGIONS", Boolean.FALSE),
         /* guild has enabled the welcome screen */
-        WELCOME_SCREEN_ENABLED("WELCOME_SCREEN_ENABLED");
+        WELCOME_SCREEN_ENABLED("WELCOME_SCREEN_ENABLED", Boolean.FALSE);
 
         private final String value;
 
-        FeatureSet(String value) {
+        private final boolean mutable;
+
+        FeatureSet(String value, boolean mutable) {
             this.value = value;
+            this.mutable = mutable;
         }
 
         public String getValue() {
             return value;
+        }
+
+        public boolean isMutable() {
+            return mutable;
         }
 
         /**
