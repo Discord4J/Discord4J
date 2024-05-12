@@ -21,7 +21,6 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.ModalSubmitInteractionEvent;
 import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.component.SelectMenu;
 import discord4j.core.object.component.TextInput;
 import discord4j.core.spec.InteractionPresentModalSpec;
 import discord4j.rest.interaction.GuildCommandRegistrar;
@@ -29,10 +28,9 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import static java.util.Collections.emptyList;
 
 public class ExampleModal {
 
@@ -41,7 +39,7 @@ public class ExampleModal {
 
     static final String CHAT_INPUT_COMMAND_NAME = "example";
     static final String MODAL_CUSTOM_ID = "my-modal";
-    static final String SELECT_CUSTOM_ID = "my-select";
+    static final String PARAGRAPHINPUT_CUSTOM_ID = "my-paragraph-input";
     static final String INPUT_CUSTOM_ID = "my-input";
 
     public static void main(String[] args) {
@@ -59,14 +57,10 @@ public class ExampleModal {
                             return event.presentModal(InteractionPresentModalSpec.builder()
                                     .title("Example modal")
                                     .customId(MODAL_CUSTOM_ID)
-                                    .addComponent(ActionRow.of(SelectMenu.of(SELECT_CUSTOM_ID,
-                                                    SelectMenu.Option.of("one", "1"),
-                                                    SelectMenu.Option.of("two", "2"),
-                                                    SelectMenu.Option.of("three", "3"))
-                                            .withMinValues(0)))
-                                            .addComponent(ActionRow.of(TextInput.small(
-                                                    INPUT_CUSTOM_ID, "Something else to add?")
-                                                    .required(false)))
+                                    .addAllComponents(Arrays.asList(
+                                            ActionRow.of(TextInput.small(INPUT_CUSTOM_ID, "A title?").required(false)),
+                                            ActionRow.of(TextInput.paragraph(PARAGRAPHINPUT_CUSTOM_ID, "Tell us something...", 250, 928).placeholder("...in more than 250 characters but less than 928").required(true))
+                                    ))
                                     .build());
                         }
                         return Mono.empty();
@@ -74,20 +68,18 @@ public class ExampleModal {
 
                     Publisher<?> onModal = client.on(ModalSubmitInteractionEvent.class, event -> {
                         if (MODAL_CUSTOM_ID.equals(event.getCustomId())) {
+                            String story = "";
                             String comments = "";
+
                             for (TextInput component : event.getComponents(TextInput.class)) {
-                                if (INPUT_CUSTOM_ID.equals(component.getCustomId())) {
+                                if (PARAGRAPHINPUT_CUSTOM_ID.equals(component.getCustomId())) {
+                                    story = component.getValue().orElse("untiteled");
+                                } else if (INPUT_CUSTOM_ID.equals(component.getCustomId())) {
                                     comments = component.getValue().orElse("");
                                 }
                             }
-                            for (SelectMenu component : event.getComponents(SelectMenu.class)) {
-                                if (SELECT_CUSTOM_ID.equals(component.getCustomId())) {
-                                    return event.reply("You selected: " +
-                                                    component.getValues().orElse(emptyList()) +
-                                                    (comments.isEmpty() ? "" : "\nwith a comment: " + comments))
-                                            .withEphemeral(true);
-                                }
-                            }
+
+                            return event.reply("You wrote: " + story + "\n\nComments: " + comments);
                         }
                         return Mono.empty();
                     });
