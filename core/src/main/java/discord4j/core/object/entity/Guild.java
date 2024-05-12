@@ -544,14 +544,28 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the enabled guild features.
+     * <br>
+     * You can see the available
+     * <a href="https://discord.com/developers/docs/resources/guild#guild-object-guild-features">guild features</a>
+     *
+     * @return The enabled guild features.
+     * @deprecated Use {@code Guild#getGuildFeatures} instead
+     */
+    @Deprecated
+    public Set<String> getFeatures() {
+        return new HashSet<>(data.features());
+    }
+
+    /**
      * Gets the enabled features of this {@link Guild}.
      * <br>
-     * Raw data features are still available with {@link #getData()} using {@link GuildData#features()}.
+     * Raw data features are still available with {@link #getData)} using {@link GuildData#features)}.
      *
      * @return A {@code EnumSet} with the enabled guild features.
      */
-    public EnumSet<FeatureSet> getFeatures() {
-        return FeatureSet.of(data.features());
+    public EnumSet<GuildFeature> getGuildFeatures() {
+        return GuildFeature.of(data.features());
     }
 
     /**
@@ -2374,7 +2388,7 @@ public final class Guild implements Entity {
      * You can see the available
      * @see <a href="https://discord.com/developers/docs/resources/guild#guild-object-guild-features">Guild Features</a>
      */
-    public enum FeatureSet {
+    public enum GuildFeature {
 
         /* guild has access to set an animated guild banner image */
         ANIMATED_BANNER("ANIMATED_BANNER", false),
@@ -2435,7 +2449,7 @@ public final class Guild implements Entity {
 
         private final boolean mutable;
 
-        FeatureSet(String value, boolean mutable) {
+        GuildFeature(String value, boolean mutable) {
             this.value = value;
             this.mutable = mutable;
         }
@@ -2458,17 +2472,17 @@ public final class Guild implements Entity {
          * @param values The values as represented by Discord.
          * @return The {@link EnumSet} of enabled features.
          */
-        public static EnumSet<FeatureSet> of(final List<String> values) {
-            final EnumSet<FeatureSet> featureSet = EnumSet.noneOf(FeatureSet.class);
+        public static EnumSet<GuildFeature> of(final List<String> values) {
+            final EnumSet<GuildFeature> guildFeature = EnumSet.noneOf(GuildFeature.class);
             for (final String value : values) {
-                for (final FeatureSet feature : FeatureSet.values()) {
+                for (final GuildFeature feature : GuildFeature.values()) {
                     final String featureValue = feature.getValue();
                     if (featureValue.equals(value)) {
-                        featureSet.add(feature);
+                        guildFeature.add(feature);
                     }
                 }
             }
-            return featureSet;
+            return guildFeature;
         }
 
     }
