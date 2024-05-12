@@ -45,6 +45,7 @@ public class AuditLogUtil {
         options.integrationType().toOptional().ifPresent(it -> map.put(OptionKey.INTEGRATION_TYPE.getField(), it));
         options.autoModerationRuleName().toOptional().ifPresent(it -> map.put(OptionKey.AUTO_MODERATION_RULE_NAME.getField(), it));
         options.autoModerationRuleTriggerType().toOptional().ifPresent(it -> map.put(OptionKey.AUTO_MODERATION_RULE_TRIGGER_TYPE.getField(), it));
+        options.applicationId().toOptional().ifPresent(it -> map.put(OptionKey.APPLICATION_ID.getField(), it.asString()));
         return map;
     }
 
