@@ -545,7 +545,8 @@ public final class Guild implements Entity {
 
     /**
      * Gets the enabled features of this {@link Guild}.
-     * Raw data features are still available with {@code getData().features}.
+     * <br>
+     * Raw data features are still available with {@link #getData()} using {@link GuildData#features()}.
      *
      * @return A {@code EnumSet} with the enabled guild features.
      */
