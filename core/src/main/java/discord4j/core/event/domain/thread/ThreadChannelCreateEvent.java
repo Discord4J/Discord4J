@@ -29,20 +29,32 @@ import discord4j.gateway.ShardInfo;
 public class ThreadChannelCreateEvent extends ThreadEvent {
 
     private final ThreadChannel channel;
+    private final boolean threadNewlyCreated;
 
-    public ThreadChannelCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, ThreadChannel channel) {
+    public ThreadChannelCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, ThreadChannel channel, boolean threadNewlyCreated) {
         super(gateway, shardInfo);
         this.channel = channel;
+        this.threadNewlyCreated = threadNewlyCreated;
     }
 
     public ThreadChannel getChannel() {
         return channel;
     }
 
+    /**
+     * Gets if the thread related to this event was newly created.
+     *
+     * @return {@code true} if was newly created, {@code false} otherwise.
+     */
+    public boolean isNewlyCreated() {
+        return threadNewlyCreated;
+    }
+
     @Override
     public String toString() {
         return "ThreadChannelCreateEvent{" +
                 "channel=" + channel +
+                ",newlyCreated=" + threadNewlyCreated +
                 '}';
     }
 }

@@ -36,9 +36,10 @@ class ThreadDispatchHandlers {
     static Mono<? extends Event> threadCreate(DispatchContext<ThreadCreate, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         ChannelData channel = context.getDispatch().thread();
+        boolean threadNewlyCreated = context.getDispatch().newlyCreated().toOptional().orElse(false);
 
         return Mono.just(new ThreadChannelCreateEvent(gateway, context.getShardInfo(),
-                new ThreadChannel(gateway, channel)));
+                new ThreadChannel(gateway, channel), threadNewlyCreated));
     }
 
     static Mono<? extends Event> threadUpdate(DispatchContext<ThreadUpdate, ChannelData> context) {
