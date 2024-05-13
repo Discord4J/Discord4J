@@ -559,13 +559,17 @@ public final class Guild implements Entity {
 
     /**
      * Gets the enabled features of this {@link Guild}.
+     * If the EnumSet contains an UNKNOWN value, it means that one or more values are not implemented yet
+     * or did not match the Discord Guild Features.
      * <br>
      * Raw data features are still available with {@link #getData)} using {@link GuildData#features)}.
      *
      * @return A {@code EnumSet} with the enabled guild features.
      */
     public EnumSet<GuildFeature> getGuildFeatures() {
-        return GuildFeature.of(data.features());
+        return data.features().stream()
+            .map(GuildFeature::of)
+            .collect(Collectors.toCollection(() -> EnumSet.noneOf(GuildFeature.class)));
     }
 
     /**
@@ -2390,6 +2394,8 @@ public final class Guild implements Entity {
      */
     public enum GuildFeature {
 
+        /* indicates that the value is not implemented yet or does not match any of the Discord Guild Features */
+        UNKNOWN("UNKNOWN", false),
         /* guild has access to set an animated guild banner image */
         ANIMATED_BANNER("ANIMATED_BANNER", false),
         /* guild has access to set an animated guild icon */
@@ -2468,21 +2474,15 @@ public final class Guild implements Entity {
 
         /**
          * Gets the enabled guild features.
-         *
-         * @param values The values as represented by Discord.
+         * For internal use, we set unknown values to UNKNOWN.
+         * @param value The value as represented by Discord.
          * @return The {@link EnumSet} of enabled features.
          */
-        public static EnumSet<GuildFeature> of(final List<String> values) {
-            final EnumSet<GuildFeature> guildFeature = EnumSet.noneOf(GuildFeature.class);
-            for (final String value : values) {
-                for (final GuildFeature feature : GuildFeature.values()) {
-                    final String featureValue = feature.getValue();
-                    if (featureValue.equals(value)) {
-                        guildFeature.add(feature);
-                    }
-                }
-            }
-            return guildFeature;
+        public static GuildFeature of(final String value) {
+            return Arrays.stream(GuildFeature.values())
+                .filter(guildFeature -> guildFeature.getValue().equals(value))
+                .findAny()
+                .orElse(GuildFeature.UNKNOWN);
         }
 
     }
