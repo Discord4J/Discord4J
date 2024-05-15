@@ -2466,7 +2466,7 @@ public final class Guild implements Entity {
 
         /**
          * @see <a href="https://discord.com/developers/docs/resources/guild#guild-object-mutable-guild-features">Mutable Guild Features</a>
-         * @return a booolean indicating if the guild feature is mutable or not
+         * @return a boolean indicating if the guild feature is mutable or not
          */
         public boolean isMutable() {
             return mutable;
