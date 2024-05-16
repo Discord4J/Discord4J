@@ -550,9 +550,26 @@ public final class Guild implements Entity {
      * <a href="https://discord.com/developers/docs/resources/guild#guild-object-guild-features">guild features</a>
      *
      * @return The enabled guild features.
+     * @deprecated Use {@code Guild#getGuildFeatures} instead
      */
+    @Deprecated
     public Set<String> getFeatures() {
         return new HashSet<>(data.features());
+    }
+
+    /**
+     * Gets the enabled features of this {@link Guild}.
+     * If the EnumSet contains an UNKNOWN value, it means that one or more values are not implemented yet
+     * or did not match the Discord Guild Features.
+     * <br>
+     * Raw data features are still available with {@link #getData)} using {@link GuildData#features)}.
+     *
+     * @return A {@code EnumSet} with the enabled guild features.
+     */
+    public EnumSet<GuildFeature> getGuildFeatures() {
+        return data.features().stream()
+            .map(GuildFeature::of)
+            .collect(Collectors.toCollection(() -> EnumSet.noneOf(GuildFeature.class)));
     }
 
     /**
@@ -2421,6 +2438,107 @@ public final class Guild implements Entity {
                 default: return UNKNOWN;
             }
         }
+    }
+
+    /**
+     * Describes the features of a guild.
+     * <br>
+     * You can see the available
+     * @see <a href="https://discord.com/developers/docs/resources/guild#guild-object-guild-features">Guild Features</a>
+     */
+    public enum GuildFeature {
+
+        /* indicates that the value is not implemented yet or does not match any of the Discord Guild Features */
+        UNKNOWN("UNKNOWN", false),
+        /* guild has access to set an animated guild banner image */
+        ANIMATED_BANNER("ANIMATED_BANNER", false),
+        /* guild has access to set an animated guild icon */
+        ANIMATED_ICON("ANIMATED_ICON", false),
+        /* guild is using the old permissions configuration behavior */
+        APPLICATION_COMMAND_PERMISSIONS_V2("APPLICATION_COMMAND_PERMISSIONS_V2", false),
+        /* guild has set up auto moderation rules */
+        AUTO_MODERATION("AUTO_MODERATION", false),
+        /* guild has access to set a guild banner image */
+        BANNER("BANNER", false),
+        /* guild can enable welcome screen, Membership Screening, stage channels and discovery, and receives community updates */
+        COMMUNITY("COMMUNITY", true),
+        /* guild has enabled monetization */
+        CREATOR_MONETIZABLE_PROVISIONAL("CREATOR_MONETIZABLE_PROVISIONAL", false),
+        /* guild has enabled the role subscription promo page */
+        CREATOR_STORE_PAGE("CREATOR_STORE_PAGE", false),
+        /* guild has been set as a support server on the App Directory */
+        DEVELOPER_SUPPORT_SERVER("DEVELOPER_SUPPORT_SERVER", false),
+        /* guild is able to be discovered in the directory */
+        DISCOVERABLE("DISCOVERABLE", true),
+        /* guild is able to be featured in the directory */
+        FEATURABLE("FEATURABLE", false),
+        /* guild has paused invites, preventing new users from joining */
+        INVITES_DISABLED("INVITES_DISABLED", true),
+        /* guild has access to set an invite splash background */
+        INVITE_SPLASH("INVITE_SPLASH", false),
+        /* guild has enabled Membership Screening */
+        MEMBER_VERIFICATION_GATE_ENABLED("MEMBER_VERIFICATION_GATE_ENABLED", false),
+        /* guild has increased custom sticker slots */
+        MORE_STICKERS("MORE_STICKERS", false),
+        /* guild has access to create announcement channels */
+        NEWS("NEWS", false),
+        /* guild is partnered */
+        PARTNERED("PARTNERED", false),
+        /* guild can be previewed before joining via Membership Screening or the directory */
+        PREVIEW_ENABLED("PREVIEW_ENABLED", false),
+        /* guild has disabled alerts for join raids in the configured safety alerts channel */
+        RAID_ALERTS_DISABLED("RAID_ALERTS_DISABLED", true),
+        /* guild is able to set role icons */
+        ROLE_ICONS("ROLE_ICONS", false),
+        /* guild has role subscriptions that can be purchased */
+        ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE("ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE", false),
+        /* guild has enabled role subscriptions */
+        ROLE_SUBSCRIPTIONS_ENABLED("ROLE_SUBSCRIPTIONS_ENABLED", false),
+        /* guild has enabled ticketed events */
+        TICKETED_EVENTS_ENABLED("TICKETED_EVENTS_ENABLED", false),
+        /* guild has access to set a vanity URL */
+        VANITY_URL("VANITY_URL", false),
+        /* guild is verified */
+        VERIFIED("VERIFIED", false),
+        /* guild has access to set 384kbps bitrate in voice (previously VIP voice servers) */
+        VIP_REGIONS("VIP_REGIONS", false),
+        /* guild has enabled the welcome screen */
+        WELCOME_SCREEN_ENABLED("WELCOME_SCREEN_ENABLED", false);
+
+        private final String value;
+
+        private final boolean mutable;
+
+        GuildFeature(String value, boolean mutable) {
+            this.value = value;
+            this.mutable = mutable;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        /**
+         * @see <a href="https://discord.com/developers/docs/resources/guild#guild-object-mutable-guild-features">Mutable Guild Features</a>
+         * @return a boolean indicating if the guild feature is mutable or not
+         */
+        public boolean isMutable() {
+            return mutable;
+        }
+
+        /**
+         * Gets the enabled guild features.
+         * For internal use, we set unknown values to UNKNOWN.
+         * @param value The value as represented by Discord.
+         * @return The {@link EnumSet} of enabled features.
+         */
+        public static GuildFeature of(final String value) {
+            return Arrays.stream(GuildFeature.values())
+                .filter(guildFeature -> guildFeature.getValue().equals(value))
+                .findAny()
+                .orElse(GuildFeature.UNKNOWN);
+        }
+
     }
 
     @Override
