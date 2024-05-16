@@ -38,6 +38,7 @@ import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
+import discord4j.gateway.intent.Intent;
 import discord4j.rest.entity.RestChannel;
 import discord4j.rest.entity.RestMessage;
 import discord4j.rest.util.MultipartRequest;
@@ -208,10 +209,27 @@ public final class Message implements Entity {
     /**
      * Gets the contents of the message, if present.
      *
+     * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled and
+     * the content cannot be accessed
      * @return The contents of the message, if present.
      */
     public String getContent() {
-        return data.content();
+        String content = data.content();
+
+        // No need to check for intents if the content is not empty
+        // This can happen without the intent in the following cases:
+        // - DMs
+        // - Interactions
+        // - A message in which the bot is mentioned
+        // - A message sent by the bot
+        if (!content.isEmpty()) {
+            return content;
+        }
+
+        checkIfMessageContentAccessIsAllowed();
+
+        // Well, we should have access to the content, but it's actually empty
+        return content;
     }
 
     /**
@@ -339,23 +357,57 @@ public final class Message implements Entity {
     /**
      * Gets any attached files, with the same order as in the message.
      *
+     * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled and
+     * the content cannot be accessed
      * @return Any attached files, with the same order as in the message.
      */
     public List<Attachment> getAttachments() {
-        return data.attachments().stream()
+        List<Attachment> attachments = data.attachments().stream()
                 .map(data -> new Attachment(gateway, data))
                 .collect(Collectors.toList());
+
+        // No need to check for intents if the attachments is not empty
+        // This can happen without the intent in the following cases:
+        // - DMs
+        // - Interactions
+        // - A message in which the bot is mentioned
+        // - A message sent by the bot
+        if (!attachments.isEmpty()) {
+            return attachments;
+        }
+
+        checkIfMessageContentAccessIsAllowed();
+
+        // Well, we should have access to the attachments, but it's actually empty
+        return attachments;
     }
 
     /**
      * Gets any embedded content.
      *
+     * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled and
+     * the content cannot be accessed
      * @return Any embedded content.
      */
     public List<Embed> getEmbeds() {
-        return data.embeds().stream()
+        List<Embed> embeds = data.embeds().stream()
                 .map(data -> new Embed(gateway, data))
                 .collect(Collectors.toList());
+
+        // No need to check for intents if the embeds is not empty
+        // This can happen without the intent in the following cases:
+        // - DMs
+        // - Interactions
+        // - A message in which the bot is mentioned
+        // - A message sent by the bot
+        if (!embeds.isEmpty()) {
+            return embeds;
+        }
+
+        checkIfMessageContentAccessIsAllowed();
+
+        // Well, we should have access to the embeds, but it's actually empty
+        return embeds;
     }
 
     /**
@@ -522,17 +574,34 @@ public final class Message implements Entity {
     /**
      * Gets the components on the message.
      *
+     * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled and
+     * the content cannot be accessed
      * @return The components on the message.
      */
     public List<LayoutComponent> getComponents() {
-        return data.components().toOptional()
-                .map(components -> components.stream()
+        List<LayoutComponent> components = data.components().toOptional()
+                .map(componentList -> componentList.stream()
                         .map(MessageComponent::fromData)
                         // top level message components should only be LayoutComponents
                         .filter(component -> component instanceof LayoutComponent)
                         .map(component -> (LayoutComponent) component)
                         .collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
+
+        // No need to check for intents if the components is not empty
+        // This can happen without the intent in the following cases:
+        // - DMs
+        // - Interactions
+        // - A message in which the bot is mentioned
+        // - A message sent by the bot
+        if (!components.isEmpty()) {
+            return components;
+        }
+
+        checkIfMessageContentAccessIsAllowed();
+
+        // Well, we should have access to the components, but it's actually empty
+        return components;
     }
 
     /**
@@ -762,6 +831,49 @@ public final class Message implements Entity {
         return gateway.getRestClient().getChannelService()
                 .startThreadWithMessage(getChannelId().asLong(), getId().asLong(), spec.asRequest())
                 .map(data -> new ThreadChannel(gateway, data));
+    }
+
+    /**
+     * Checks if the MESSAGE_CONTENT intent is enabled and if the content is accessible.
+     *
+     * @throws UnsupportedOperationException if the MESSAGE_CONTENT intent is not enabled and the content is empty
+     */
+    private void checkIfMessageContentAccessIsAllowed() {
+        // DMs always have the content
+        if (data.guildId().isAbsent()) {
+            return;
+        }
+
+        // Messages sent by the bot always have the content
+        if (data.author().id().asLong() == gateway.getSelfId().asLong()) {
+            return;
+        }
+
+        // Sticker messages can only have stickers
+        if (!data.stickerItems().toOptional().orElse(Collections.emptyList()).isEmpty()) {
+            return;
+        }
+
+        // If we have access to one of these fields, we can read the content
+        // This assume that one of these fields is not empty when the bot has access to the content
+        if (!data.content().isEmpty()
+                || !data.embeds().isEmpty()
+                || !data.attachments().isEmpty()
+                || !data.components().toOptional().orElse(Collections.emptyList()).isEmpty()) {
+            return;
+        }
+
+        // Check if the MESSAGE_CONTENT intent is enabled
+        if (!this.gateway.getGatewayResources().getIntents().contains(Intent.MESSAGE_CONTENT)) {
+            throw new UnsupportedOperationException("The MESSAGE_CONTENT intent is required to access message content!" +
+                    "\nSee https://github.com/Discord4J/Discord4J?tab=readme-ov-file#calling-messagegetcontent-without-enabling-the-message-content-intent" +
+                    " for more information.");
+        }
+
+        // If we are here, then the MESSAGE_CONTENT intent is enabled, but we still don't have access to the content
+        // This can happen in the following cases:
+        // - The message is a notification message (ex. message pin), and thus don't have neither content nor embeds, etc.
+        // - Discord broke their API :'(
     }
 
     @Override
