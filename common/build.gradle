@@ -7,7 +7,7 @@ dependencies {
     api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jackson_datatype_jdk8_version"
     api "com.github.ben-manes.caffeine:caffeine:$caffeine_version"
 
-    implementation "com.discord4j:stores-api:$storesVersion"
+    api "com.discord4j:stores-api:$storesVersion"
 
     testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_version"
     testImplementation "io.projectreactor:reactor-test"
