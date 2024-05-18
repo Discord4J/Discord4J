@@ -130,6 +130,15 @@ public class Entitlement implements Entity {
     }
 
     /**
+     * Gets whether the entitlement has been consumed.
+     *
+     * @return Whether the entitlement has been consumed.
+     */
+    public boolean isConsumed() {
+        return data.consumed().toOptional().orElse(false);
+    }
+
+    /**
      * Gets the data of the entitlement.
      *
      * @return The data of the entitlement.
@@ -207,6 +216,27 @@ public class Entitlement implements Entity {
         /* Unknown type */
         UNKNOWN(-1),
 
+        /* Entitlement was purchased by user */
+        PURCHASE(1),
+
+        /* Entitlement for Discord Nitro subscription */
+        PREMIUM_SUBSCRIPTION(2),
+
+        /* Entitlement was gifted by developer */
+        DEVELOPER_GIFT(3),
+
+        /* Entitlement was purchased by a dev in application test mode */
+        TEST_MODE_PURCHASE(4),
+
+        /* Entitlement was granted when the SKU was free */
+        FREE_PURCHASE(5),
+
+        /* Entitlement was gifted by another user */
+        USER_GIFT(6),
+
+        /* Entitlement was claimed by user for free as a Nitro Subscriber */
+        PREMIUM_PURCHASE(7),
+
         /* Represents a recurring subscription */
         APPLICATION_SUBSCRIPTION(8);
 
@@ -242,6 +272,20 @@ public class Entitlement implements Entity {
          */
         public static Type of(final int value) {
             switch (value) {
+                case 1:
+                    return PURCHASE;
+                case 2:
+                    return PREMIUM_SUBSCRIPTION;
+                case 3:
+                    return DEVELOPER_GIFT;
+                case 4:
+                    return TEST_MODE_PURCHASE;
+                case 5:
+                    return FREE_PURCHASE;
+                case 6:
+                    return USER_GIFT;
+                case 7:
+                    return PREMIUM_PURCHASE;
                 case 8:
                     return APPLICATION_SUBSCRIPTION;
                 default:
