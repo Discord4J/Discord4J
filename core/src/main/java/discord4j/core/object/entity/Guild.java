@@ -1043,6 +1043,16 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the mention for the given {@link ResourceNavigation} channel.
+     *
+     * @param resourceNavigation The {@link ResourceNavigation} to get the mention for.
+     * @return The mention for the given {@link ResourceNavigation} channel.
+     */
+    public String getResourceNavigationMention(ResourceNavigation resourceNavigation) {
+        return String.format(resourceNavigation.getMention(), data.id().asString());
+    }
+
+    /**
      * Gets the maximum amount of members of the guild, if present.
      *
      * @return The maximum amount of members for the guild, if present.
@@ -2507,7 +2517,7 @@ public final class Guild implements Entity {
          * @return The <i>raw</i> mention.
          */
         public String getMention() {
-            return "<id:" + this.name().toLowerCase() + ">";
+            return "<%s:" + this.name().toLowerCase() + ">";
         }
     }
 
