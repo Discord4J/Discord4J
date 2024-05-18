@@ -31,14 +31,27 @@ import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
 import discord4j.core.object.ScheduledEventUser;
 import discord4j.core.object.automod.AutoModRule;
-import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.ApplicationInfo;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.GuildEmoji;
+import discord4j.core.object.entity.GuildSticker;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.ScheduledEvent;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.Webhook;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.monetization.Entitlement;
+import discord4j.core.object.monetization.SKU;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.retriever.EntityRetriever;
 import discord4j.core.shard.GatewayBootstrap;
+import discord4j.core.spec.CreateTestEntitlementMono;
+import discord4j.core.spec.EntitlementListRequestFlux;
 import discord4j.core.spec.GuildCreateMono;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditMono;
@@ -74,7 +87,12 @@ import reactor.util.annotation.Nullable;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -223,8 +241,8 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public Mono<Webhook> getWebhookById(final Snowflake webhookId) {
         return getRestClient().getWebhookService()
-                .getWebhook(webhookId.asLong())
-                .map(data -> new Webhook(this, data));
+            .getWebhook(webhookId.asLong())
+            .map(data -> new Webhook(this, data));
     }
 
     /**
@@ -232,15 +250,15 @@ public class GatewayDiscordClient implements EntityRetriever {
      * return the user who created the webhook object. Doesn't require the bot to have the MANAGE_WEBHOOKS permission.
      *
      * @param webhookId The ID of the webhook.
-     * @param token The authentication token of the webhook.
+     * @param token     The authentication token of the webhook.
      * @return A {@link Mono} where, upon successful completion, emits the {@link Webhook} as represented by the
      * supplied ID without the user field and with the token field. If an error is received,
      * it is emitted through the {@code Mono}.
      */
     public Mono<Webhook> getWebhookByIdWithToken(final Snowflake webhookId, final String token) {
         return getRestClient().getWebhookService()
-                .getWebhookWithToken(webhookId.asLong(), token)
-                .map(data -> new Webhook(this, data));
+            .getWebhookWithToken(webhookId.asLong(), token)
+            .map(data -> new Webhook(this, data));
     }
 
 
@@ -252,8 +270,8 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public Mono<ApplicationInfo> getApplicationInfo() {
         return getRestClient().getApplicationService()
-                .getCurrentApplicationInfo()
-                .map(data -> new ApplicationInfo(this, data));
+            .getCurrentApplicationInfo()
+            .map(data -> new ApplicationInfo(this, data));
     }
 
     /**
@@ -264,7 +282,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public Flux<User> getUsers() {
         return Flux.from(gatewayResources.getStore().execute(ReadActions.getUsers()))
-                .map(data -> new User(this, data));
+            .map(data -> new User(this, data));
     }
 
     /**
@@ -275,7 +293,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public Flux<Region> getRegions() {
         return getRestClient().getVoiceService().getVoiceRegions()
-                .map(data -> new Region(this, data));
+            .map(data -> new Region(this, data));
     }
 
     /**
@@ -287,8 +305,8 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public Mono<GuildTemplate> getTemplateByCode(String templateCode) {
         return getRestClient().getTemplateService()
-                .getTemplate(templateCode)
-                .map(data -> new GuildTemplate(this, data));
+            .getTemplate(templateCode)
+            .map(data -> new GuildTemplate(this, data));
     }
 
     /**
@@ -317,7 +335,7 @@ public class GatewayDiscordClient implements EntityRetriever {
                     spec.accept(mutatedSpec);
                     return getRestClient().getGuildService().createGuild(mutatedSpec.asRequest());
                 })
-                .map(data -> new Guild(this, toGuildData(data)));
+            .map(data -> new Guild(this, toGuildData(data)));
     }
 
     /**
@@ -343,26 +361,26 @@ public class GatewayDiscordClient implements EntityRetriever {
     public Mono<Guild> createGuild(GuildCreateSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(() -> getRestClient().getGuildService().createGuild(spec.asRequest()))
-                .map(data -> new Guild(this, toGuildData(data)));
+            .map(data -> new Guild(this, toGuildData(data)));
     }
 
     private GuildData toGuildData(GuildUpdateData guild) {
         return GuildData.builder()
-                .from(guild)
-                .roles(guild.roles().stream()
-                        .map(RoleData::id)
-                        .collect(Collectors.toList()))
-                .emojis(guild.emojis().stream()
-                        .map(EmojiData::id)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList()))
-                .channels(Collections.emptyList())
-                .members(Collections.emptyList())
-                .joinedAt(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now())) // we just created this
-                .large(false)
-                .memberCount(1)
-                .build();
+            .from(guild)
+            .roles(guild.roles().stream()
+                .map(RoleData::id)
+                .collect(Collectors.toList()))
+            .emojis(guild.emojis().stream()
+                .map(EmojiData::id)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList()))
+            .channels(Collections.emptyList())
+            .members(Collections.emptyList())
+            .joinedAt(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now())) // we just created this
+            .large(false)
+            .memberCount(1)
+            .build();
     }
 
     /**
@@ -396,16 +414,16 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public Mono<Invite> getInvite(final String inviteCode) {
         return getRestClient().getInviteService()
-                .getInvite(inviteCode)
-                .map(data -> new Invite(this, data));
+            .getInvite(inviteCode)
+            .map(data -> new Invite(this, data));
     }
 
     /**
      * Requests to retrieve an invite.
      *
-     * @param inviteCode the code for the invite (e.g. "xdYkpp").
-     * @param withCounts whether the invite should contain approximate member counts
-     * @param withExpiration whether the invite should contain the expiration date
+     * @param inviteCode            the code for the invite (e.g. "xdYkpp").
+     * @param withCounts            whether the invite should contain approximate member counts
+     * @param withExpiration        whether the invite should contain the expiration date
      * @param guildScheduledEventId the guild scheduled event to include with the invite, can be {@code null}
      * @return A {@link Mono} where, upon successful completion, emits the {@link Invite} as represented by the
      * supplied invite code. If an error is received, it is emitted through the {@code Mono}.
@@ -419,8 +437,8 @@ public class GatewayDiscordClient implements EntityRetriever {
             queryParams.put("guild_scheduled_event_id", guildScheduledEventId.asString());
         }
         return getRestClient().getInviteService()
-                .getInvite(inviteCode, queryParams)
-                .map(data -> new Invite(this, data));
+            .getInvite(inviteCode, queryParams)
+            .map(data -> new Invite(this, data));
     }
 
     /**
@@ -439,7 +457,7 @@ public class GatewayDiscordClient implements EntityRetriever {
                     spec.accept(mutatedSpec);
                     return getRestClient().getUserService().modifyCurrentUser(mutatedSpec.asRequest());
                 })
-                .map(data -> new User(this, data));
+            .map(data -> new User(this, data));
     }
 
     /**
@@ -463,7 +481,7 @@ public class GatewayDiscordClient implements EntityRetriever {
     public Mono<User> edit(UserEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(() -> getRestClient().getUserService().modifyCurrentUser(spec.asRequest()))
-                .map(data -> new User(this, data));
+            .map(data -> new User(this, data));
     }
 
     /**
@@ -516,12 +534,12 @@ public class GatewayDiscordClient implements EntityRetriever {
      * <a href="https://docs.discord4j.com/error-handling">Error Handling</a> docs page.
      *
      * @param eventClass the event class to obtain events from
-     * @param <E> the type of the event class
+     * @param <E>        the type of the event class
      * @return a new {@link reactor.core.publisher.Flux} with the requested events
      */
     public <E extends Event> Flux<E> on(Class<E> eventClass) {
         return getEventDispatcher().on(eventClass)
-                .contextWrite(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
+            .contextWrite(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
     }
 
     /**
@@ -548,15 +566,15 @@ public class GatewayDiscordClient implements EntityRetriever {
      * Check the docs for {@link #on(Class)} for more details.
      *
      * @param eventClass the event class to obtain events from
-     * @param mapper an event mapping function called on each event. If you do not wish to perform further operations
-     * you can return {@code Mono.empty()}.
-     * @param <E> the type of the event class
-     * @param <T> the type of the event mapper function
+     * @param mapper     an event mapping function called on each event. If you do not wish to perform further operations
+     *                   you can return {@code Mono.empty()}.
+     * @param <E>        the type of the event class
+     * @param <T>        the type of the event mapper function
      * @return a new {@link Flux} with the type resulting from the given event mapper
      */
     public <E extends Event, T> Flux<T> on(Class<E> eventClass, Function<E, Publisher<T>> mapper) {
         return getEventDispatcher().on(eventClass, mapper)
-                .contextWrite(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
+            .contextWrite(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
     }
 
     /**
@@ -597,7 +615,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public Flux<Event> on(ReactiveEventAdapter adapter) {
         return getEventDispatcher().on(adapter)
-                .contextWrite(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
+            .contextWrite(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
     }
 
     /**
@@ -611,10 +629,10 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public Flux<Member> requestMembers(Snowflake guildId) {
         return requestMembers(RequestGuildMembers.builder()
-                .guildId(guildId.asString())
-                .query("")
-                .limit(0)
-                .build());
+            .guildId(guildId.asString())
+            .query("")
+            .limit(0)
+            .build());
     }
 
     /**
@@ -629,13 +647,13 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public Flux<Member> requestMembers(Snowflake guildId, Set<Snowflake> userIds) {
         return Flux.fromIterable(userIds)
-                .map(Snowflake::asString)
-                .buffer(100)
-                .concatMap(userIdBuffer -> requestMembers(RequestGuildMembers.builder()
-                        .guildId(guildId.asString())
-                        .userIds(userIdBuffer)
-                        .limit(0)
-                        .build()));
+            .map(Snowflake::asString)
+            .buffer(100)
+            .concatMap(userIdBuffer -> requestMembers(RequestGuildMembers.builder()
+                .guildId(guildId.asString())
+                .userIds(userIdBuffer)
+                .limit(0)
+                .build()));
     }
 
     /**
@@ -650,9 +668,9 @@ public class GatewayDiscordClient implements EntityRetriever {
     public Flux<Member> requestMembers(RequestGuildMembers request) {
         Snowflake guildId = Snowflake.of(request.guildId());
         return requestMemberChunks(request)
-                .flatMapIterable(chunk -> chunk.members().stream()
-                        .map(data -> new Member(this, data, guildId.asLong()))
-                        .collect(Collectors.toList()));
+            .flatMapIterable(chunk -> chunk.members().stream()
+                .map(data -> new Member(this, data, guildId.asLong()))
+                .collect(Collectors.toList()));
     }
 
     /**
@@ -665,7 +683,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      * triggered, a {@link TimeoutException} is forwarded through the {@link Flux}.
      *
      * @param request the member request to submit. Create one using {@link RequestGuildMembers#builder()}.
-     * {@link Flux#timeout(Duration)}
+     *                {@link Flux#timeout(Duration)}
      * @return a {@link Flux} of {@link GuildMembersChunk} for the given {@link Guild}. If an error occurs, it is
      * emitted through the {@link Flux}.
      */
@@ -680,28 +698,28 @@ public class GatewayDiscordClient implements EntityRetriever {
         int shardId = gatewayClientGroup.computeShardIndex(guildId);
         String nonce = String.valueOf(System.nanoTime());
         Supplier<Flux<GuildMembersChunk>> incomingMembers = () -> gatewayClientGroup.find(shardId)
-                .map(gatewayClient -> gatewayClient.dispatch()
-                        .ofType(GuildMembersChunk.class)
-                        .takeUntilOther(onDisconnect)
-                        .filter(chunk -> chunk.nonce().toOptional()
-                                .map(s -> s.equals(nonce))
-                                .orElse(false))
-                        .takeUntil(chunk -> chunk.chunkIndex() + 1 == chunk.chunkCount()))
-                .orElseThrow(() -> new IllegalStateException("Unable to find gateway client"));
+            .map(gatewayClient -> gatewayClient.dispatch()
+                .ofType(GuildMembersChunk.class)
+                .takeUntilOther(onDisconnect)
+                .filter(chunk -> chunk.nonce().toOptional()
+                    .map(s -> s.equals(nonce))
+                    .orElse(false))
+                .takeUntil(chunk -> chunk.chunkIndex() + 1 == chunk.chunkCount()))
+            .orElseThrow(() -> new IllegalStateException("Unable to find gateway client"));
         return Flux.deferContextual(ctx -> getGuildById(guildId)
-                .then(gatewayClientGroup.unicast(ShardGatewayPayload.requestGuildMembers(
-                        RequestGuildMembers.builder()
-                                .from(request)
-                                .nonce(nonce)
-                                .build(), shardId))
-                        .then(Mono.fromRunnable(() -> {
-                            if (request.query().toOptional().map(String::isEmpty).orElse(false)
-                                    && request.limit() == 0) {
-                                completingChunkNonces.add(nonce);
-                            }
-                        })))
-                .thenMany(Flux.defer(incomingMembers))
-                .doOnComplete(() -> log.debug(format(ctx, "Member request completed: {}"), request)));
+            .then(gatewayClientGroup.unicast(ShardGatewayPayload.requestGuildMembers(
+                    RequestGuildMembers.builder()
+                        .from(request)
+                        .nonce(nonce)
+                        .build(), shardId))
+                .then(Mono.fromRunnable(() -> {
+                    if (request.query().toOptional().map(String::isEmpty).orElse(false)
+                        && request.limit() == 0) {
+                        completingChunkNonces.add(nonce);
+                    }
+                })))
+            .thenMany(Flux.defer(incomingMembers))
+            .doOnComplete(() -> log.debug(format(ctx, "Member request completed: {}"), request)));
     }
 
     /**
@@ -812,6 +830,82 @@ public class GatewayDiscordClient implements EntityRetriever {
     @Override
     public Flux<ScheduledEventUser> getScheduledEventUsers(Snowflake guildId, Snowflake eventId) {
         return entityRetriever.getScheduledEventUsers(guildId, eventId);
+    }
+
+    /**
+     * Request to retrieve all the {@link SKU SKUs} for the current application.
+     *
+     * @return A {@link Flux} that emits the {@link SKU SKUs} for the application upon successful completion. If an
+     * error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<SKU> getSKUs() {
+        return getApplicationInfo().flatMapMany(applicationInfo -> {
+            return getRestClient().getMonetizationService()
+                .getAllSkus(applicationInfo.getId().asLong())
+                .map(data -> new SKU(this, data));
+        });
+    }
+
+    /**
+     * Request to retrieve the {@link SKU SKU} for the application with the given ID.
+     *
+     * @param applicationId The ID of the application.
+     * @return A {@link Mono} that emits the {@link SKU SKU} for the application with the given ID upon successful
+     * completion. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Flux<SKU> getSKUs(long applicationId) {
+        return getRestClient().getMonetizationService()
+            .getAllSkus(applicationId)
+            .map(data -> new SKU(this, data));
+    }
+
+    /**
+     * Request to retrieve all the {@link Entitlement} for the current application.
+     * The request can be filtered using the "withXXX" methods of the returned {@link EntitlementListRequestFlux}.
+     *
+     * @return A {@link EntitlementListRequestFlux} that emits the {@link Entitlement} for the application with the given ID upon successful
+     * completion. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public EntitlementListRequestFlux getEntitlements() {
+        return EntitlementListRequestFlux.of(this, discordClient);
+    }
+
+    /**
+     * Create a test entitlement for the given {@link SKU} and guild ID.
+     *
+     * @param skuId   The ID of the SKU.
+     * @param guildId The ID of the guild.
+     * @return A {@link CreateTestEntitlementMono} that emits the created {@link Entitlement} upon successful
+     * completion. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public CreateTestEntitlementMono createTestEntitlementForGuild(Snowflake skuId, Snowflake guildId) {
+        return CreateTestEntitlementMono.of(skuId, guildId, Entitlement.OwnerType.GUILD, this, discordClient);
+    }
+
+    /**
+     * Create a test entitlement for the given {@link SKU} and user ID.
+     *
+     * @param skuId  The ID of the SKU.
+     * @param userId The ID of the user.
+     * @return A {@link CreateTestEntitlementMono} that emits the created {@link Entitlement} upon successful
+     * completion. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public CreateTestEntitlementMono createTestEntitlementForUser(Snowflake skuId, Snowflake userId) {
+        return CreateTestEntitlementMono.of(skuId, userId, Entitlement.OwnerType.USER, this, discordClient);
+    }
+
+    /**
+     * Delete a test entitlement with the given ID.
+     *
+     * @param entitlementId The ID of the entitlement.
+     * @return A {@link Mono} that completes upon successful deletion.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> deleteTestEntitlement(Snowflake entitlementId) {
+        return getApplicationInfo().flatMap(applicationInfo -> {
+            return getRestClient().getMonetizationService()
+                .deleteTestEntitlement(applicationInfo.getId().asLong(), entitlementId.asLong());
+        });
     }
 
 }

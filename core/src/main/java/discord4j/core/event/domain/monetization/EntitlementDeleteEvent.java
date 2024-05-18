@@ -27,7 +27,6 @@ public class EntitlementDeleteEvent extends Event {
         this.entitlement = entitlement;
     }
 
-
     /**
      * Gets the entitlement that was created.
      *

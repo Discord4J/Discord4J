@@ -148,6 +148,60 @@ public class Entitlement implements Entity {
         return Snowflake.of(data.id());
     }
 
+    public enum OwnerType {
+
+        /* Unknown owner type */
+        UNKNOWN(-1),
+
+        /* Represents a guild */
+        GUILD(1),
+
+        /* Represents a user */
+        USER(2);
+
+        /**
+         * The underlying value as represented by Discord.
+         */
+        private final int value;
+
+        /**
+         * Constructs an {@code OwnerType}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        OwnerType(final int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the owner type. It is guaranteed that invoking {@link #getValue()} from the returned enum will equal
+         * ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The owner type.
+         */
+        public static OwnerType of(final int value) {
+            switch (value) {
+                case 1:
+                    return GUILD;
+                case 2:
+                    return USER;
+                default:
+                    return UNKNOWN;
+            }
+        }
+
+    }
+
     public enum Type {
 
         /* Unknown type */

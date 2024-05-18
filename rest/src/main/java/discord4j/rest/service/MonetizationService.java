@@ -5,6 +5,7 @@ import discord4j.discordjson.json.EntitlementData;
 import discord4j.discordjson.json.SkuData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import discord4j.rest.util.Multimap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -22,7 +23,12 @@ public class MonetizationService extends RestService {
     }
 
     public Flux<EntitlementData> getAllEntitlements(long applicationId) {
+        return getAllEntitlements(applicationId, new Multimap<>());
+    }
+
+    public Flux<EntitlementData> getAllEntitlements(long applicationId, Multimap<String, Object> params) {
         return Routes.LIST_ENTITLEMENTS.newRequest(applicationId)
+            .query(params)
             .exchange(getRouter())
             .bodyToMono(EntitlementData[].class)
             .flatMapMany(Flux::fromArray);
