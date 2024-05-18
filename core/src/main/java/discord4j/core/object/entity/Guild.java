@@ -1049,7 +1049,7 @@ public final class Guild implements Entity {
      * @return The mention for the given {@link ResourceNavigation} channel.
      */
     public String getResourceNavigationMention(ResourceNavigation resourceNavigation) {
-        return String.format(resourceNavigation.getMention(), data.id().asString());
+        return String.format(resourceNavigation.getMention(), data.id().asLong());
     }
 
     /**
@@ -2538,7 +2538,7 @@ public final class Guild implements Entity {
          * @return The <i>raw</i> mention.
          */
         public String getMention() {
-            return "<id:" + this.value  + ">";
+            return "<%d:" + this.value  + ">";
         }
     }
 
