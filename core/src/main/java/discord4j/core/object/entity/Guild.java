@@ -2504,30 +2504,6 @@ public final class Guild implements Entity {
      */
     public enum ResourceNavigation {
         /** Customize tab with the server's onboarding prompts */
-        CUSTOMIZE,
-        /** Browse Channels tab */
-        BROWSE,
-        /** Server Guide */
-        GUIDE,
-        ;
-
-        /**
-         * Gets the <i>raw</i> mention. This is the format utilized to directly mention guild resource.
-         *
-         * @return The <i>raw</i> mention.
-         */
-        public String getMention() {
-            return "<%s:" + this.name().toLowerCase() + ">";
-        }
-    }
-
-    /**
-     * Describes guild navigation types.
-     *
-     * @see <a href="https://discord.com/developers/docs/reference#message-formatting-guild-navigation-types">Discord Docs</a>
-     */
-    public enum ResourceNavigation {
-        /** Customize tab with the server's onboarding prompts */
         CUSTOMIZE("customize"),
         /** Browse Channels tab */
         BROWSE("browse"),
@@ -2562,7 +2538,7 @@ public final class Guild implements Entity {
          * @return The <i>raw</i> mention.
          */
         public String getMention() {
-            return "<id:" + this.getValue() + ">";
+            return "<id:" + this.value  + ">";
         }
     }
 
