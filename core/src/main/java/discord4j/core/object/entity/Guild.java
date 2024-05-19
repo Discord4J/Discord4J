@@ -29,6 +29,7 @@ import discord4j.core.spec.*;
 import discord4j.core.spec.legacy.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
+import discord4j.core.util.MentionUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
@@ -1040,6 +1041,16 @@ public final class Guild implements Entity {
      */
     public int getMaxPresences() {
         return Possible.flatOpt(data.maxPresences()).orElse(DEFAULT_MAX_PRESENCES);
+    }
+
+    /**
+     * Gets the mention for the given {@link ResourceNavigation} channel.
+     *
+     * @param resourceNavigation The {@link ResourceNavigation} to get the mention for.
+     * @return The mention for the given {@link ResourceNavigation} channel.
+     */
+    public String getResourceNavigationMention(ResourceNavigation resourceNavigation) {
+        return resourceNavigation.getMention();
     }
 
     /**
@@ -2539,6 +2550,51 @@ public final class Guild implements Entity {
                 .orElse(GuildFeature.UNKNOWN);
         }
 
+    }
+
+    /**
+     * Describes guild navigation types.
+     *
+     * @see <a href="https://discord.com/developers/docs/reference#message-formatting-guild-navigation-types">Discord Docs</a>
+     */
+    public enum ResourceNavigation {
+        /** Customize tab with the server's onboarding prompts */
+        CUSTOMIZE("customize"),
+        /** Browse Channels tab */
+        BROWSE("browse"),
+        /** Server Guide */
+        GUIDE("guide"),
+        ;
+
+        /** The underlying value as represented by Discord. */
+        private final String value;
+
+        /**
+         * Constructs an {@code Guild.ResourceNavigation}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        ResourceNavigation(final String value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public String getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the <i>raw</i> mention. This is the format utilized to directly mention guild resource.
+         *
+         * @return The <i>raw</i> mention.
+         */
+        public String getMention() {
+            return MentionUtil.forGuildResourceNavigation(this);
+        }
     }
 
     @Override

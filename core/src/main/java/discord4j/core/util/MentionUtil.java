@@ -17,6 +17,7 @@
 package discord4j.core.util;
 
 import discord4j.common.util.Snowflake;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
@@ -47,6 +48,18 @@ public final class MentionUtil {
     public static final String HERE = "@here";
 
     private MentionUtil() {
+    }
+
+    /**
+     * Gets a <i>raw</i> mention for a {@link Guild.ResourceNavigation}.
+     *
+     * <p>This is the format utilized to directly mention a Guild Resource Navigation.</p>
+     *
+     * @param resourceNavigation The type of the resource navigation to mention.
+     * @return The <i>raw</i> mention.
+     */
+    public static String forGuildResourceNavigation(final Guild.ResourceNavigation resourceNavigation) {
+        return "<id:" + resourceNavigation.getValue() + ">";
     }
 
     /**
