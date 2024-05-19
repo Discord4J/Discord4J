@@ -1636,6 +1636,26 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Request a Bulk Ban to a specific list of users.
+     * <br>
+     * <b>Things considered error for this request</b>
+     * <ul>
+     *   <li>The list of users is over 200</li>
+     *   <li>None of the list of users can be banned</li>
+     * </ul>
+     *
+     * @param spec an immutable object that specifies how to bulk ban in the guild
+     * @return A {@link Mono} where, upon successful completion, emits an {@link BulkBan} with the results.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<BulkBan> bulkBan(BulkBanSpec spec) {
+        Objects.requireNonNull(spec);
+        return gateway.getRestClient().getGuildService()
+            .bulkGuildBan(getId().asLong(), spec.asRequest(), spec.reason())
+            .map(data -> new BulkBan(gateway, data));
+    }
+
+    /**
      * Requests to retrieve the number of users that will be pruned. Users are pruned if they have not been seen within
      * the past specified amount of days, with roles optionally included in the prune count if specified through {@link
      * LegacyGuildPruneCountSpec#addRole(Snowflake)} or {@link LegacyGuildPruneCountSpec#addRoles(Collection)}.
