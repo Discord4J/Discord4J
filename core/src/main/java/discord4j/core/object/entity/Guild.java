@@ -1636,6 +1636,18 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to ban the specified users. Properties specifying how to ban the user can be set via the {@code withXxx}
+     * methods of the returned {@link BulkBanRequestMono}.
+     *
+     * @param userIds The list of IDs of the users to ban.
+     * @return A {@link BulkBanRequestMono} where, upon successful completion, emits an {@link BulkBan} with the results.
+     *      * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public BulkBanRequestMono bulkBan(List<Snowflake> userIds) {
+        return BulkBanRequestMono.of(this).withUserIds(userIds);
+    }
+
+    /**
      * Request a Bulk Ban to a specific list of users.
      * <br>
      * <b>Things considered error for this request</b>
@@ -1648,7 +1660,7 @@ public final class Guild implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits an {@link BulkBan} with the results.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<BulkBan> bulkBan(BulkBanSpec spec) {
+    public Mono<BulkBan> bulkBan(BulkBanRequestSpec spec) {
         Objects.requireNonNull(spec);
         return gateway.getRestClient().getGuildService()
             .bulkGuildBan(getId().asLong(), spec.asRequest(), spec.reason())

@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Value.Immutable
-interface BulkBanSpecGenerator extends AuditSpec<BulkBanRequest> {
+interface BulkBanRequestSpecGenerator extends AuditSpec<BulkBanRequest> {
 
     List<Snowflake> userIds();
 
@@ -48,13 +48,13 @@ interface BulkBanSpecGenerator extends AuditSpec<BulkBanRequest> {
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
-abstract class BulkBanMonoGenerator extends Mono<BulkBan> implements BulkBanSpecGenerator {
+abstract class BulkBanRequestMonoGenerator extends Mono<BulkBan> implements BulkBanRequestSpecGenerator {
 
     abstract Guild guild();
 
     @Override
     public void subscribe(CoreSubscriber<? super BulkBan> actual) {
-        guild().bulkBan(BulkBanSpec.copyOf(this)).subscribe(actual);
+        guild().bulkBan(BulkBanRequestSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override
