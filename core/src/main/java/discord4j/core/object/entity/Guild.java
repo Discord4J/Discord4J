@@ -1043,6 +1043,16 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the mention for the given {@link ResourceNavigation} channel.
+     *
+     * @param resourceNavigation The {@link ResourceNavigation} to get the mention for.
+     * @return The mention for the given {@link ResourceNavigation} channel.
+     */
+    public String getResourceNavigationMention(ResourceNavigation resourceNavigation) {
+        return resourceNavigation.getMention();
+    }
+
+    /**
      * Gets the maximum amount of members of the guild, if present.
      *
      * @return The maximum amount of members for the guild, if present.
@@ -2485,6 +2495,51 @@ public final class Guild implements Entity {
                 .orElse(GuildFeature.UNKNOWN);
         }
 
+    }
+
+    /**
+     * Describes guild navigation types.
+     *
+     * @see <a href="https://discord.com/developers/docs/reference#message-formatting-guild-navigation-types">Discord Docs</a>
+     */
+    public enum ResourceNavigation {
+        /** Customize tab with the server's onboarding prompts */
+        CUSTOMIZE("customize"),
+        /** Browse Channels tab */
+        BROWSE("browse"),
+        /** Server Guide */
+        GUIDE("guide"),
+        ;
+
+        /** The underlying value as represented by Discord. */
+        private final String value;
+
+        /**
+         * Constructs an {@code Guild.ResourceNavigation}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        ResourceNavigation(final String value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public String getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the <i>raw</i> mention. This is the format utilized to directly mention guild resource.
+         *
+         * @return The <i>raw</i> mention.
+         */
+        public String getMention() {
+            return "<id:" + this.value  + ">";
+        }
     }
 
     @Override
