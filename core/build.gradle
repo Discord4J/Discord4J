@@ -11,9 +11,6 @@ dependencies {
 
     compileOnly "com.discord4j:discord-json-encoding:$discordJsonVersion"
 
-    compileOnly "com.google.code.findbugs:jsr305:3.0.1"
-    testCompileOnly "com.google.code.findbugs:jsr305:3.0.1"
-
     testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_version"
     testImplementation "org.mockito:mockito-core:$mockito_version"
     testImplementation "ch.qos.logback:logback-classic:$logback_version"

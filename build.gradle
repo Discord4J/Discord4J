@@ -30,7 +30,7 @@ ext {
     jackson_datatype_jdk8_version = '2.12.7'
     caffeine_version = '2.8.8'
     immutables_group = 'org.immutables'
-    immutables_version = '2.9.0'
+    immutables_version = '2.10.1'
 
     // Test dependencies
     junit_version = '5.7.1'
@@ -64,6 +64,9 @@ allprojects {
         api platform("io.projectreactor:reactor-bom:$reactor_bom_version")
         api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_datatype_jsr310_version"
         api "com.discord4j:discord-json:$discordJsonVersion"
+
+        compileOnly "com.google.code.findbugs:jsr305:3.0.1"
+        testCompileOnly "com.google.code.findbugs:jsr305:3.0.1"
     }
 
     repositories {
