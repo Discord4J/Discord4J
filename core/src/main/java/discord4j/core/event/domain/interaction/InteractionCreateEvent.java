@@ -80,7 +80,7 @@ public class InteractionCreateEvent extends Event {
      * @return The {@link discord4j.core.object.entity.User} associated with the event.
      */
     public User getUser() {
-        return this.getInteraction().getUser();
+        return interaction.getUser();
     }
 
     @Deprecated
