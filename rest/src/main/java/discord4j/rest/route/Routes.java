@@ -427,12 +427,12 @@ public abstract class Routes {
     public static final Route STICKER_GET = Route.get("/stickers/{sticker.id}");
 
     /**
-     * Returns the list of sticker packs available to Nitro subscribers.
+     * Returns the list of available sticker packs.
      *
-     * @see <a href="https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs">
-     * https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs</a>
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#list-sticker-packs">
+     * https://discord.com/developers/docs/resources/sticker#list-sticker-packs</a>
      */
-    public static final Route NITRO_STICKER_PACKS_GET = Route.get("/sticker-packs");
+    public static final Route STICKER_PACKS_GET = Route.get("/sticker-packs");
 
     /**
      * Returns an array of sticker objects for the given guild. Includes user fields if the bot has the MANAGE_EMOJIS_AND_STICKERS permission.
