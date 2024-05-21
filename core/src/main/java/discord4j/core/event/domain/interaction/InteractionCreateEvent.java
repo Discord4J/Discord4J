@@ -76,6 +76,7 @@ public class InteractionCreateEvent extends Event {
 
     /**
      * Gets the {@link discord4j.core.object.entity.User} associated with the event.
+     * The User is retrieved from the {@link #getInteraction} method.
      * 
      * @return The {@link discord4j.core.object.entity.User} associated with the event.
      */
