@@ -24,6 +24,7 @@ import discord4j.discordjson.possible.Possible;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * A class for holding the allowed_mentions object with an built-in factory for default values.
@@ -121,6 +122,39 @@ public class AllowedMentions {
         if (!repliedUser.isAbsent()) {
             builder.repliedUser(repliedUser.get());
         }
+        return builder.build();
+    }
+
+    /**
+     * Maps an {@link AllowedMentionsData} to a wrapped {@link AllowedMentions} object
+     *
+     * @param allowedMentionsData The data to map
+     * @return A wrapped {@link AllowedMentionsData}
+     */
+    public static AllowedMentions from(AllowedMentionsData allowedMentionsData) {
+        final AllowedMentions.Builder builder = AllowedMentions.builder();
+        if (!allowedMentionsData.parse().isAbsent()) {
+            allowedMentionsData.parse().get().stream()
+                .map(Type::valueOf) // Parse to Type object
+                .forEach(builder::parseType);
+        }
+
+        if (!allowedMentionsData.users().isAbsent()) {
+            allowedMentionsData.users().get().stream()
+                .map(Snowflake::of)
+                .forEach(builder::allowUser);
+        }
+
+        if (!allowedMentionsData.roles().isAbsent()) {
+            allowedMentionsData.roles().get().stream()
+                .map(Snowflake::of)
+                .forEach(builder::allowRole);
+        }
+
+        if (!allowedMentionsData.repliedUser().isAbsent()) {
+            builder.repliedUser(allowedMentionsData.repliedUser().get());
+        }
+
         return builder.build();
     }
 

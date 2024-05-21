@@ -211,11 +211,6 @@ public class RestGuild {
         return restClient.getGuildService().modifyGuildMember(id, userId.asLong(), request, reason);
     }
 
-    @Deprecated
-    public Mono<NicknameModifyData> modifyOwnNickname(NicknameModifyData request) {
-        return restClient.getGuildService().modifyOwnNickname(id, request);
-    }
-
     public Mono<MemberData> modifyCurrentMember(CurrentMemberModifyData request) {
         return restClient.getGuildService().modifyCurrentMember(id, request);
     }
@@ -345,6 +340,10 @@ public class RestGuild {
         return restClient.getTemplateService().getTemplates(id);
     }
 
+    public Mono<ListThreadsData> getActiveThreads() {
+        return restClient.getGuildService().listActiveGuildThreads(id);
+    }
+
     /**
      * Requests to retrieve the scheduled event under this guild.
      *
@@ -411,8 +410,6 @@ public class RestGuild {
     public Mono<Void> deleteScheduledEvent(Snowflake eventId, @Nullable String reason) {
         return restClient.getGuildService().deleteScheduledEvent(id, eventId.asLong(), reason);
     }
-
-
 
     @Override
     public boolean equals(final Object o) {

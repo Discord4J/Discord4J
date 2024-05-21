@@ -32,6 +32,7 @@ import reactor.netty.http.client.HttpClientResponse;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.retry.Retry;
+import reactor.util.retry.RetryBackoffSpec;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -83,16 +84,25 @@ class RequestStream {
      * 500, 502, 503 and 504). The delay is calculated using exponential backoff with jitter.
      */
     private reactor.util.retry.Retry serverErrorRetryFactory() {
-        return Retry.withThrowable(reactor.retry.Retry.onlyIf(ClientException.isRetryContextStatusCode(500, 502, 503,
-                504, 520))
-                .withBackoffScheduler(timedTaskScheduler)
-                .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(30))
-                .doOnRetry(ctx -> {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Retry {} in bucket {} due to {} for {}",
-                                ctx.iteration(), id.toString(), ctx.exception().toString(), ctx.backoff());
+        return RetryBackoffSpec.backoff(10, Duration.ofSeconds(2))
+                .filter(ex -> {
+                    if (ex instanceof ClientException) {
+                        int code = ((ClientException) ex).getStatus().code();
+                        return code == 500 || code == 502 || code == 503 || code == 504;
                     }
-                }));
+                    return false;
+                })
+                .jitter(0.5)
+                .maxBackoff(Duration.ofSeconds(30))
+                .scheduler(timedTaskScheduler)
+                .doBeforeRetry(retrySignal -> {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Retry {} in bucket {} due to {}",
+                                retrySignal.totalRetries(),
+                                id.toString(),
+                                retrySignal.failure().toString());
+                    }
+                });
     }
 
     boolean push(RequestCorrelation<ClientResponse> request) {

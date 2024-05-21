@@ -19,6 +19,7 @@ on:
       - '**.gradle'
       - '**.properties'
       - '**/src/**'
+      - '.github/workflows/**'
     types: [opened, synchronize, reopened]
 
 jobs:
@@ -27,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ 8, 11 ]
+        java: [ 8, 11, 17 ]
     steps:
       - name: PR Check (PR Blocked by Dependency)
         if: ${{ contains(toJson(github.event.pull_request.labels.*.name), 'PR depends on PR') }}
@@ -73,7 +74,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: 11
+          java-version: 17
           distribution: 'temurin'
       - name: Publish with Gradle
         run: ./gradlew -x test publish

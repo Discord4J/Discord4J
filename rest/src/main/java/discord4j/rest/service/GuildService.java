@@ -126,14 +126,6 @@ public class GuildService extends RestService {
                 .bodyToMono(MemberData.class);
     }
 
-    @Deprecated
-    public Mono<NicknameModifyData> modifyOwnNickname(long guildId, NicknameModifyData request) {
-        return Routes.NICKNAME_MODIFY_OWN.newRequest(guildId)
-                .body(request)
-                .exchange(getRouter())
-                .bodyToMono(NicknameModifyData.class);
-    }
-
     public Mono<MemberData> modifyCurrentMember(long guildId, CurrentMemberModifyData request) {
         return Routes.CURRENT_MEMBER_MODIFY.newRequest(guildId)
                 .body(request)
@@ -340,6 +332,11 @@ public class GuildService extends RestService {
             .bodyToMono(Void.class);
     }
 
+    public Mono<ListThreadsData> listActiveGuildThreads(long guildId) {
+        return Routes.LIST_ACTIVE_GUILD_THREADS.newRequest(guildId)
+                .exchange(getRouter())
+                .bodyToMono(ListThreadsData.class);
+    }
     public Mono<GuildScheduledEventData> getScheduledEvent(long guildId, long eventId, Map<String, Object> queryParams) {
         return Routes.GUILD_SCHEDULED_EVENT_GET.newRequest(guildId, eventId)
             .query(queryParams)

@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 /**
  * A Discord text channel.
  */
-public final class TextChannel extends BaseTopLevelGuildMessageChannel {
+public final class TextChannel extends BaseTopLevelGuildChannel implements TopLevelGuildMessageChannel {
 
     /**
      * Constructs an {@code TextChannel} with an associated {@link GatewayDiscordClient} and Discord data.
@@ -40,18 +40,6 @@ public final class TextChannel extends BaseTopLevelGuildMessageChannel {
      */
     public TextChannel(GatewayDiscordClient gateway, ChannelData data) {
         super(gateway, data);
-    }
-
-    /**
-     * Gets the amount of seconds an user has to wait before sending another message (0-120).
-     * <p>
-     * Bots, as well as users with the permission {@code manage_messages} or {@code manage_channel}, are unaffected.
-     *
-     * @return The amount of seconds an user has to wait before sending another message (0-120).
-     */
-    public int getRateLimitPerUser() {
-        return getData().rateLimitPerUser().toOptional()
-                .orElseThrow(IllegalStateException::new); // this should be safe for all TextChannels
     }
 
     /**

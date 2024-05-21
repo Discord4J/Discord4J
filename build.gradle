@@ -99,9 +99,6 @@ allprojects {
         if (JavaVersion.current().isJava9Compatible()) {
             options.addBooleanOption('html5', true)
         }
-        if (JavaVersion.current().isJava11Compatible()) {
-            options.addBooleanOption('-no-module-directories', true)
-        }
     }
 
     tasks.withType(JavaCompile) {

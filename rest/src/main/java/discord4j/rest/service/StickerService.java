@@ -23,7 +23,7 @@ public class StickerService extends RestService {
     }
 
     public Flux<StickerPackData> getStickerPacks() {
-        return Routes.NITRO_STICKER_PACKS_GET.newRequest()
+        return Routes.STICKER_PACKS_GET.newRequest()
             .exchange(getRouter())
             .bodyToMono(StickerPackData[].class)
             .flatMapMany(Flux::fromArray);

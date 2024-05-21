@@ -18,6 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.GuildEmojiEditMono;
 import discord4j.core.spec.GuildEmojiEditSpec;
@@ -326,7 +327,7 @@ public final class GuildEmoji implements Entity {
      * @return The formatted version of this emoji (i.e., to display in the client).
      */
     public String asFormat() {
-        return '<' + (isAnimated() ? "a" : "") + ':' + getName() + ':' + getId().asString() + '>';
+        return ReactionEmoji.Custom.asFormat(this.isAnimated(), this.getName(), this.getId());
     }
 
     @Override

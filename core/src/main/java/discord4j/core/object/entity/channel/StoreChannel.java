@@ -28,7 +28,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /** A Discord store channel. */
-public final class StoreChannel extends BaseCategorizableChannel {
+public final class StoreChannel extends BaseTopLevelGuildChannel implements CategorizableChannel {
 
     /**
      * Constructs an {@code StoreChannel} with an associated {@link GatewayDiscordClient} and Discord data.

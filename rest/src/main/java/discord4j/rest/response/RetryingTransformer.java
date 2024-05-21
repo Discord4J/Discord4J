@@ -22,7 +22,6 @@ import discord4j.rest.http.client.ClientResponse;
 import discord4j.rest.request.DiscordWebRequest;
 import discord4j.rest.request.RouteMatcher;
 import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
 
 import java.util.function.Function;
 
@@ -33,17 +32,17 @@ import java.util.function.Function;
 public class RetryingTransformer implements ResponseFunction {
 
     private final RouteMatcher routeMatcher;
-    private final reactor.retry.Retry<?> retryFactory;
+    private final reactor.util.retry.Retry retryStrategy;
 
-    public RetryingTransformer(RouteMatcher routeMatcher, reactor.retry.Retry<?> retryFactory) {
+    public RetryingTransformer(RouteMatcher routeMatcher, reactor.util.retry.Retry retryStrategy) {
         this.routeMatcher = routeMatcher;
-        this.retryFactory = retryFactory;
+        this.retryStrategy = retryStrategy;
     }
 
     @Override
     public Function<Mono<ClientResponse>, Mono<ClientResponse>> transform(DiscordWebRequest request) {
         if (routeMatcher.matches(request)) {
-            return mono -> mono.retryWhen(Retry.withThrowable(retryFactory));
+            return mono -> mono.retryWhen(retryStrategy);
         }
         return mono -> mono;
     }

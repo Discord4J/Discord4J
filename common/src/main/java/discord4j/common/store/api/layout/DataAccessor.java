@@ -49,9 +49,7 @@ public interface DataAccessor {
      * @return A {@link Mono} emitting the sticker count
      * @since 3.2.3
      */
-    default Mono<Long> countStickers() {
-        return Mono.empty();
-    }
+    Mono<Long> countStickers();
 
     /**
      * Counts the number of stickers present in the store for the given guild ID.
@@ -60,9 +58,7 @@ public interface DataAccessor {
      * @return A {@link Mono} emitting the sticker count
      * @since 3.2.3
      */
-    default Mono<Long> countStickersInGuild(long guildId) {
-        return Mono.empty();
-    }
+    Mono<Long> countStickersInGuild(long guildId);
 
     /**
      * Counts the number of emojis present in the store.
@@ -215,9 +211,7 @@ public interface DataAccessor {
      * @return A {@link Flux} emitting the stickers, or empty if none is present
      * @since 3.2.3
      */
-    default Flux<StickerData> getStickers() {
-        return Flux.empty();
-    }
+    Flux<StickerData> getStickers();
 
     /**
      * Retrieves data for all stickers present in the store for the given guild ID.
@@ -226,9 +220,7 @@ public interface DataAccessor {
      * @return A {@link Flux} emitting the stickers, or empty if none is present
      * @since 3.2.3
      */
-    default Flux<StickerData> getStickersInGuild(long guildId) {
-        return Flux.empty();
-    }
+    Flux<StickerData> getStickersInGuild(long guildId);
 
     /**
      * Retrieves data for the sticker corresponding to the given guild ID and sticker ID.
@@ -238,9 +230,7 @@ public interface DataAccessor {
      * @return A {@link Mono} emitting the sticker, or empty if not found
      * @since 3.2.3
      */
-    default Mono<StickerData> getStickerById(long guildId, long stickerId) {
-        return Mono.empty();
-    }
+    Mono<StickerData> getStickerById(long guildId, long stickerId);
 
     /**
      * Retrieves data for all emojis present in the store.
@@ -470,5 +460,34 @@ public interface DataAccessor {
      */
     Mono<VoiceStateData> getVoiceStateById(long guildId, long userId);
 
+    /**
+     * Retrieves data for the stage instance corresponding to the given channel ID.
+     *
+     * @param channelId the channel ID
+     * @return A {@link Mono} emitting the stage instance data, or empty if not found
+     */
+    Mono<StageInstanceData> getStageInstanceByChannelId(long channelId);
 
+    /**
+     * Retrieves data for the thread member corresponding to the given thread ID and user ID.
+     *
+     * @param threadId the thread ID
+     * @param userId the user ID
+     * @return A {@link Mono} emitting the thread member data, or empty if not found
+     * @since 3.3.0
+     */
+    default Mono<ThreadMemberData> getThreadMemberById(long threadId, long userId) {
+        return Mono.empty();
+    }
+
+    /**
+     * Retrieves data for all thread members present in the store for the given thread ID.
+     *
+     * @param threadId the thread ID
+     * @return A {@link Flux} emitting the thread members, or empty if none is present
+     * @since 3.3.0
+     */
+    default Flux<ThreadMemberData> getMembersInThread(long threadId) {
+        return Flux.empty();
+    }
 }

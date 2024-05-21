@@ -94,6 +94,15 @@ public class ResolvedMember implements DiscordObject {
     }
 
     /**
+     * Gets the avatar hash of this member, if provided.
+     *
+     * @return The avatar hash, if present.
+     */
+    public Optional<String> getAvatar() {
+        return Possible.flatOpt(data.avatar());
+    }
+
+    /**
      * Gets the ID of the guild this user is associated to.
      *
      * @return The ID of the guild this user is associated to.
@@ -155,7 +164,9 @@ public class ResolvedMember implements DiscordObject {
      * user exists in context of the mention).
      *
      * @return The <i>raw</i> nickname mention.
+     * @deprecated This type of ping has been deprecated in the Discord API.
      */
+    @Deprecated
     public String getNicknameMention() {
         return "<@!" + getId().asString() + ">";
     }
