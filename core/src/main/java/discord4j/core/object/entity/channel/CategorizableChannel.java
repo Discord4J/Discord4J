@@ -40,7 +40,8 @@ public interface CategorizableChannel extends TopLevelGuildChannel {
      * @return The amount of seconds a user has to wait before sending another message (0-21600).
      */
     default int getRateLimitPerUser() {
-        return getData().rateLimitPerUser().toOptional().orElse(0);
+        return getData().rateLimitPerUser().toOptional()
+                .orElseThrow(IllegalStateException::new);
     }
 
     /**

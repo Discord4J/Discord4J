@@ -237,5 +237,41 @@ public enum StoreFlag {
      *     <li>getScheduledEventUsersInEvent</li>
      * </ul>
      */
-    SCHEDULED_EVENT
+    SCHEDULED_EVENT,
+
+    /**
+     * Flag affecting operations related to threads.
+     * Updates:
+     * <ul>
+     *     <li>onThreadCreate</li>
+     *     <li>onThreadUpdate</li>
+     *     <li>onThreadDelete</li>
+     *     <li>onThreadListSync</li>
+     *     <li>onThreadMemberUpdate</li>
+     *     <li>onThreadMembersUpdate</li>
+     * </ul>
+     * Queries:
+     * <ul>
+     *     <li>getThreadMemberById</li>
+     *     <li>getMembersInThread</li>
+     * </ul>
+     * @since 3.3.0
+     */
+    THREAD,
+
+    /**
+     * Flag affecting operations related to stage instances.
+     * Updates:
+     * <ul>
+     *     <li>onStageInstanceCreate</li>
+     *     <li>onStageInstanceUpdate</li>
+     *     <li>onStageInstanceDelete</li>
+     * </ul>
+     * Queries:
+     * <ul>
+     *     <li>getStageInstanceByChannelId</li>
+     * </ul>
+     * @since 3.3.0
+     */
+    STAGE_INSTANCE
 }

@@ -67,24 +67,16 @@ public final class EntityUtil {
             case GUILD_CATEGORY: return new Category(gateway, data);
             case GUILD_NEWS: return new NewsChannel(gateway, data);
             case GUILD_STORE: return new StoreChannel(gateway, data);
+            case GUILD_NEWS_THREAD:
+            case GUILD_PUBLIC_THREAD:
+            case GUILD_PRIVATE_THREAD:
+                return new ThreadChannel(gateway, data);
+            case GUILD_FORUM:
+                return new ForumChannel(gateway, data);
             default:
                 log.info("Unknown channel type {} with data: {}", data.type(), data);
                 return new UnknownChannel(gateway, data);
         }
-    }
-
-    /**
-     * Throws an {@link UnsupportedOperationException} for an unknown Discord value. This method is intended to be used
-     * in enum value constructs such as {@link Channel.Type#of(int)} when the value has not been properly supported.
-     *
-     * @param value The unknown Discord value.
-     * @param <T> The return type. Used to simulate bottom type.
-     * @return Diverging function, never returns.
-     * @deprecated for removal in 3.3.0, no longer used
-     */
-    @Deprecated
-    public static <T> T throwUnsupportedDiscordValue(final Object value) {
-        throw new UnsupportedOperationException("Unknown Value: " + value);
     }
 
     /**

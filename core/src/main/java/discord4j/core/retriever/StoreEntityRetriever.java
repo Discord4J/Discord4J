@@ -139,6 +139,12 @@ public class StoreEntityRetriever implements EntityRetriever {
     }
 
     @Override
+    public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId) {
+        return Mono.from(store.execute(ReadActions.getStageInstanceByChannelId(channelId.asLong())))
+                .map(data -> new StageInstance(gateway, data));
+    }
+
+    @Override
     public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
         return Flux.from(store.execute(ReadActions.getStickersInGuild(guildId.asLong())))
                 .map(data -> new GuildSticker(gateway, data, guildId.asLong()));

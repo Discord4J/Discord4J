@@ -29,6 +29,7 @@ import discord4j.core.spec.*;
 import discord4j.core.spec.legacy.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
+import discord4j.core.util.MentionUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
@@ -1951,6 +1952,27 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to retrieve the active threads of the guild.
+     * <p>
+     * The audit log parts can be {@link ThreadListPart#combine(ThreadListPart) combined} for easier querying. For example,
+     * <pre>
+     * {@code
+     * guild.getActiveThreads()
+     *     .take(10)
+     *     .reduce(ThreadListPart::combine)
+     * }
+     * </pre>
+     *
+     * @return A {@link Flux} that continually emits the {@link ThreadListPart threads} of the guild. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Mono<ThreadListPart> getActiveThreads() {
+        return gateway.getRestClient().getGuildService()
+                .listActiveGuildThreads(data.id().asLong())
+                .map(data -> new ThreadListPart(gateway, data));
+    }
+
+    /**
      * Requests to retrieve the automod rules of the guild. Requires the MANAGE_GUILD permission.
      *
      * @return A {@link Flux} that continually emits the {@link AutoModRule automod rules} of the guild. If an error is
@@ -2571,7 +2593,7 @@ public final class Guild implements Entity {
          * @return The <i>raw</i> mention.
          */
         public String getMention() {
-            return "<id:" + this.value  + ">";
+            return MentionUtil.forGuildResourceNavigation(this);
         }
     }
 

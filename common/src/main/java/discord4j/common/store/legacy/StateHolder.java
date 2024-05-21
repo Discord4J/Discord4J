@@ -47,8 +47,10 @@ import java.util.Set;
  * <li>Message store: {@code long} keys and {@link MessageData} values.</li>
  * <li>Presence store: {@code long} pair keys and {@link PresenceUpdate} values.</li>
  * <li>Role store: {@code long} keys and {@link RoleData} values.</li>
+ * <li>Stage instance store: {@code long} keys and {@link StageInstanceData} values.</li>
  * <li>User store: {@code long} keys and {@link UserData} values.</li>
  * <li>Voice state store: {@code long} pair keys and {@link VoiceStateData} values.</li>
+ * <li>Thread member store: {@code long} pair keys and {@link ThreadMemberData} values.</li>
  * </ul>
  */
 @SuppressWarnings("rawtypes")
@@ -72,6 +74,7 @@ public final class StateHolder {
     private final LongObjStore<StageInstanceData> stageInstanceStore;
     private final LongObjStore<UserData> userStore;
     private final Store<LongLongTuple2, VoiceStateData> voiceStateStore;
+    private final Store<LongLongTuple2, ThreadMemberData> threadMemberStore;
 
     public StateHolder(final StoreService service) {
         storeService = service;
@@ -85,7 +88,7 @@ public final class StateHolder {
         log.debug("Guild storage             : {}", guildStore);
 
         guildStickerStore = service.provideLongObjStore(StickerData.class);
-        log.debug("Guild sticker storage : {}", guildStickerStore);
+        log.debug("Guild sticker storage     : {}", guildStickerStore);
 
         guildEventsStore = service.provideGenericStore(LongLongTuple2.class, GuildScheduledEventData.class);
         log.debug("Guild event storage       : {}", guildEventsStore);
@@ -109,13 +112,16 @@ public final class StateHolder {
         log.debug("Role storage              : {}", roleStore);
 
         stageInstanceStore = service.provideLongObjStore(StageInstanceData.class);
-        log.debug("StageInstance storage        : {}", stageInstanceStore);
+        log.debug("StageInstance storage     : {}", stageInstanceStore);
 
         userStore = service.provideLongObjStore(UserData.class);
         log.debug("User storage              : {}", userStore);
 
         voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateData.class);
         log.debug("Voice state storage       : {}", voiceStateStore);
+
+        threadMemberStore = service.provideGenericStore(LongLongTuple2.class, ThreadMemberData.class);
+        log.debug("Thread member storage     : {}", voiceStateStore);
     }
 
     public StoreService getStoreService() {
@@ -174,6 +180,10 @@ public final class StateHolder {
         return voiceStateStore;
     }
 
+    public Store<LongLongTuple2, ThreadMemberData> getThreadMemberStore() {
+        return threadMemberStore;
+    }
+
     public Mono<Void> invalidateStores() {
         return channelStore.invalidate()
                 .and(guildStore.invalidate())
@@ -185,6 +195,7 @@ public final class StateHolder {
                 .and(roleStore.invalidate())
                 .and(stageInstanceStore.invalidate())
                 .and(userStore.invalidate())
-                .and(voiceStateStore.invalidate());
+                .and(voiceStateStore.invalidate())
+                .and(threadMemberStore.invalidate());
     }
 }

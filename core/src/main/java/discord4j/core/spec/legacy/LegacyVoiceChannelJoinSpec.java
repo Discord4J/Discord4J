@@ -22,14 +22,26 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.core.object.entity.channel.AudioChannel;
 import discord4j.core.spec.DefaultVoiceServerUpdateTask;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.intent.Intent;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.util.Permission;
-import discord4j.voice.*;
+import discord4j.voice.AudioProvider;
+import discord4j.voice.AudioReceiver;
+import discord4j.voice.LocalVoiceReceiveTaskFactory;
+import discord4j.voice.LocalVoiceSendTaskFactory;
+import discord4j.voice.VoiceChannelRetrieveTask;
+import discord4j.voice.VoiceConnection;
+import discord4j.voice.VoiceDisconnectTask;
+import discord4j.voice.VoiceGatewayOptions;
+import discord4j.voice.VoiceReceiveTaskFactory;
+import discord4j.voice.VoiceSendTaskFactory;
+import discord4j.voice.VoiceServerOptions;
+import discord4j.voice.VoiceServerUpdateTask;
+import discord4j.voice.VoiceStateUpdateTask;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
@@ -44,7 +56,7 @@ import java.util.concurrent.TimeoutException;
 import static discord4j.common.LogUtil.format;
 
 /**
- * LegacySpec used to request a connection to a {@link VoiceChannel} and handle the initialization of the resulting
+ * LegacySpec used to request a connection to a {@link AudioChannel} and handle the initialization of the resulting
  * {@link VoiceConnection}.
  */
 public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnection>> {
@@ -68,11 +80,11 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
     private RetrySpec ipDiscoveryRetrySpec = RetrySpec.maxInARow(1);
 
     private final GatewayDiscordClient gateway;
-    private final VoiceChannel voiceChannel;
+    private final AudioChannel audioChannel;
 
-    public LegacyVoiceChannelJoinSpec(final GatewayDiscordClient gateway, final VoiceChannel voiceChannel) {
+    public LegacyVoiceChannelJoinSpec(final GatewayDiscordClient gateway, final AudioChannel audioChannel) {
         this.gateway = Objects.requireNonNull(gateway);
-        this.voiceChannel = voiceChannel;
+        this.audioChannel = audioChannel;
     }
 
     /**
@@ -198,9 +210,9 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
                     "GUILD_VOICE_STATES intent is required to establish a voice connection"));
         }
 
-        final Snowflake guildId = voiceChannel.getGuildId();
-        final Snowflake channelId = voiceChannel.getId();
-        final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();
+        final Snowflake guildId = audioChannel.getGuildId();
+        final Snowflake channelId = audioChannel.getId();
+        final GatewayClientGroup clientGroup = audioChannel.getClient().getGatewayClientGroup();
         final int shardId = clientGroup.computeShardIndex(guildId);
         final Mono<Void> sendVoiceStateUpdate = clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
                 VoiceStateUpdate.builder()
@@ -213,14 +225,14 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
         final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = onVoiceStateUpdates(gateway, guildId).next();
         final Mono<VoiceServerUpdateEvent> waitForVoiceServerUpdate = onVoiceServerUpdate(gateway, guildId);
 
-        final VoiceDisconnectTask disconnectTask = id -> voiceChannel.sendDisconnectVoiceState()
+        final VoiceDisconnectTask disconnectTask = id -> audioChannel.sendDisconnectVoiceState()
                 .then(gateway.getVoiceConnectionRegistry().disconnect(id));
         //noinspection ConstantConditions
         final VoiceServerUpdateTask serverUpdateTask = new DefaultVoiceServerUpdateTask(gateway);
         final VoiceStateUpdateTask stateUpdateTask = id -> onVoiceStateUpdates(gateway, id)
                 .map(stateUpdateEvent -> stateUpdateEvent.getCurrent().getSessionId());
         final VoiceChannelRetrieveTask channelRetrieveTask = () -> gateway
-                .getMemberById(voiceChannel.getGuildId(), gateway.getSelfId())
+                .getMemberById(audioChannel.getGuildId(), gateway.getSelfId())
                 .flatMap(Member::getVoiceState)
                 .flatMap(voiceState -> Mono.justOrEmpty(voiceState.getChannelId()));
 
@@ -261,7 +273,7 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
                 // send disconnecting voice state to Discord and forward the timeout error signal
                 .onErrorResume(TimeoutException.class,
                         t -> gateway.getVoiceConnectionRegistry().getVoiceConnection(guildId)
-                                .switchIfEmpty(voiceChannel.sendDisconnectVoiceState().then(Mono.error(t))));
+                                .switchIfEmpty(audioChannel.sendDisconnectVoiceState().then(Mono.error(t))));
 
         return gateway.getVoiceConnectionRegistry().getVoiceConnection(guildId)
                 .flatMap(existing -> sendVoiceStateUpdate.then(waitForVoiceStateUpdate).thenReturn(existing))

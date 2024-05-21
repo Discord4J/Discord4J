@@ -16,7 +16,6 @@
  */
 package discord4j.rest.service;
 
-import discord4j.common.annotations.Experimental;
 import discord4j.discordjson.json.*;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
@@ -141,20 +140,6 @@ public class ChannelService extends RestService {
 
     public Mono<Void> bulkDeleteMessages(long channelId, BulkDeleteRequest request) {
         return Routes.MESSAGE_DELETE_BULK.newRequest(channelId)
-                .body(request)
-                .exchange(getRouter())
-                .bodyToMono(Void.class);
-    }
-
-    /**
-     * @deprecated - As of April 28, 2021, Discord removed the suppress-embeds route in API v9. This method will be
-     * removed in a future update. <a href="https://discord.com/developers/docs/change-log#april-28-2021">
-     * https://discord.com/developers/docs/change-log#april-28-2021</a>
-     */
-    @Deprecated
-    public Mono<Void> suppressEmbeds(long channelId, long messageId, SuppressEmbedsRequest request) {
-        return Routes.MESSAGE_SUPPRESS_EMBEDS.newRequest(channelId, messageId)
-                .header("content-type", "application/json")
                 .body(request)
                 .exchange(getRouter())
                 .bodyToMono(Void.class);

@@ -31,7 +31,7 @@ public abstract class Routes {
      * @see <a href="https://discord.com/developers/docs/reference#base-url">
      * https://discord.com/developers/docs/reference#base-url</a>
      */
-    public static final String BASE_URL = "https://discord.com/api/v9";
+    public static final String BASE_URL = "https://discord.com/api/v8";
 
     //////////////////////////////////////////////
     ////////////// Gateway Resource //////////////
@@ -407,30 +407,6 @@ public abstract class Routes {
      * https://discord.com/developers/docs/resources/channel#group-dm-remove-recipient</a>
      */
     public static final Route GROUP_DM_RECIPIENT_DELETE = Route.delete("/channels/{channel.id}/recipients/{user.id}");
-
-    public static final Route START_THREAD_WITH_MESSAGE = Route.post("/channels/{channel.id}/messages/{message.id}/threads");
-
-    public static final Route START_THREAD_WITHOUT_MESSAGE = Route.post("/channels/{channel.id}/threads");
-
-    public static final Route START_THREAD_IN_FORUM_CHANNEL_MESSAGE = Route.post("/channels/{channel.id}/threads");
-
-    public static final Route JOIN_THREAD = Route.put("/channels/{channel.id}/thread-members/@me");
-
-    public static final Route ADD_THREAD_MEMBER = Route.put("/channels/{channel.id}/thread-members/{user.id}");
-
-    public static final Route LEAVE_THREAD = Route.delete("/channels/{channel.id}/thread-members/@me");
-
-    public static final Route REMOVE_THREAD_MEMBER = Route.delete("/channels/{channel.id}/thread-members/{user.id}");
-
-    public static final Route LIST_THREAD_MEMBERS = Route.get("/channels/{channel.id}/thread-members");
-
-    public static final Route LIST_ACTIVE_THREADS = Route.get("/channels/{channel.id}/threads/active");
-
-    public static final Route LIST_PUBLIC_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/threads/archived/public");
-
-    public static final Route LIST_PRIVATE_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/threads/archived/private");
-
-    public static final Route LIST_JOINED_PRIVATE_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/users/@me/threads/archived/private");
 
     ////////////////////////////////////////////
     ////////////// Sticker Resource //////////////

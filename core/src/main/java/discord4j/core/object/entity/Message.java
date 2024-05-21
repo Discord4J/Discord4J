@@ -26,15 +26,16 @@ import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageEditMono;
 import discord4j.core.spec.MessageEditSpec;
+import discord4j.core.spec.StartThreadSpec;
 import discord4j.core.spec.legacy.LegacyMessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.json.SuppressEmbedsRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.intent.Intent;
@@ -723,24 +724,6 @@ public final class Message implements Entity {
     }
 
     /**
-     * Requests to suppress all embeds in this message. If the message have the embeds suppressed then this action
-     * can undo the suppressed embeds.
-     *
-     * @deprecated - As of April 28, 2021, Discord removed the suppress-embeds route in API v9. This method will be
-     * removed in a future update. <a href="https://discord.com/developers/docs/change-log#april-28-2021">
-     * https://discord.com/developers/docs/change-log#april-28-2021</a>
-     * @param suppress Determine if you need suppress or not the embeds.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the process has been
-     * completed. If an error is received, it is emitted through the {@code Mono}.
-     */
-    @Deprecated
-    public Mono<Void> suppressEmbeds(final boolean suppress) {
-        return gateway.getRestClient().getChannelService()
-                .suppressEmbeds(getChannelId().asLong(), getId().asLong(),
-                        SuppressEmbedsRequest.builder().suppress(suppress).build());
-    }
-
-    /**
      * Requests to add a reaction on this message.
      *
      * @param emoji The reaction to add on this message.
@@ -835,6 +818,19 @@ public final class Message implements Entity {
         return gateway.getRestClient().getChannelService()
                 .publishMessage(getChannelId().asLong(), getId().asLong())
                 .map(data -> new Message(gateway, data));
+    }
+
+    /**
+     * Creates a new thread from an existing message.
+     *
+     * @param spec an immutable object that specifies how to create the thread
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link ThreadChannel}.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ThreadChannel> startThread(StartThreadSpec spec) {
+        return gateway.getRestClient().getChannelService()
+                .startThreadWithMessage(getChannelId().asLong(), getId().asLong(), spec.asRequest())
+                .map(data -> new ThreadChannel(gateway, data));
     }
 
     /**
