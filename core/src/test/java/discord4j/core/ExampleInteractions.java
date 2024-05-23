@@ -119,7 +119,7 @@ public class ExampleInteractions {
 
                     Publisher<?> onSelect = client.on(SelectMenuInteractionEvent.class, event -> {
                         if (REPLY_MODE_SELECT.equals(event.getCustomId())) {
-                            Snowflake user = event.getInteraction().getUser().getId();
+                            Snowflake user = event.getUser().getId();
                             String selected = event.getValues().get(0);
                             String previous = modeByUser.put(user, selected);
                             if (previous == null) {
@@ -134,7 +134,7 @@ public class ExampleInteractions {
                     // create a listener that handles the button click
                     Publisher<?> onButton = client.on(ButtonInteractionEvent.class, event -> {
                         if (ACTION_BUTTON.equals(event.getCustomId())) {
-                            Snowflake user = event.getInteraction().getUser().getId();
+                            Snowflake user = event.getUser().getId();
                             String mode = modeByUser.getOrDefault(user, DEFER_REPLY);
                             switch (mode) {
                                 case DEFER_REPLY:

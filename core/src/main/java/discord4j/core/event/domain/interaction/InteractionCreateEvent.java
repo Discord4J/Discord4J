@@ -22,6 +22,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.ShardInfo;
@@ -71,6 +72,16 @@ public class InteractionCreateEvent extends Event {
      */
     public Interaction getInteraction() {
         return interaction;
+    }
+
+    /**
+     * Gets the {@link discord4j.core.object.entity.User} associated with the event.
+     * The User is retrieved from the {@link #getInteraction} method.
+     * 
+     * @return The {@link discord4j.core.object.entity.User} associated with the event.
+     */
+    public User getUser() {
+        return interaction.getUser();
     }
 
     @Deprecated
