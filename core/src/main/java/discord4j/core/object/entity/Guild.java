@@ -563,7 +563,7 @@ public final class Guild implements Entity {
      * If the EnumSet contains an UNKNOWN value, it means that one or more values are not implemented yet
      * or did not match the Discord Guild Features.
      * <br>
-     * Raw data features are still available with {@link #getData)} using {@link GuildData#features)}.
+     * Raw data features are still available with {@link #getData} using {@link GuildData#features}.
      *
      * @return A {@code EnumSet} with the enabled guild features.
      */
