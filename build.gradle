@@ -61,6 +61,9 @@ allprojects {
         api platform("io.projectreactor:reactor-bom:$reactor_bom_version")
         api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_datatype_jsr310_version"
         api "com.discord4j:discord-json:$discordJsonVersion"
+
+        compileOnly "com.google.code.findbugs:annotations:3.0.1"
+        testCompileOnly "com.google.code.findbugs:annotations:3.0.1"
     }
 
     repositories {
