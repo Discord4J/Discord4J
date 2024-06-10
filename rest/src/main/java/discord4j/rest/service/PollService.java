@@ -18,6 +18,7 @@ package discord4j.rest.service;
 
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.UserData;
+import discord4j.discordjson.json.gateway.PollVoters;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import discord4j.rest.util.Multimap;
@@ -40,8 +41,9 @@ public class PollService extends RestService {
         return Routes.GET_POLL_ANSWER_VOTERS.newRequest(channelId, messageId, answerId)
             .query(queryParams)
             .exchange(getRouter())
-            .bodyToMono(UserData[].class)
-            .flatMapMany(Flux::fromArray);
+            .bodyToMono(PollVoters.class)
+            .map(PollVoters::users)
+            .flatMapMany(Flux::fromIterable);
     }
 
 }

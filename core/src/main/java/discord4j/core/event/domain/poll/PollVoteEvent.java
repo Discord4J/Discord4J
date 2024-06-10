@@ -24,7 +24,6 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.object.entity.poll.PollAnswer;
-import discord4j.discordjson.json.gateway.PollVoteData;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
@@ -45,14 +44,14 @@ public class PollVoteEvent extends Event {
     private final Optional<Snowflake> guildId;
     private final int answerId;
 
-    protected PollVoteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, PollVoteData data) {
+    protected PollVoteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Snowflake userId, Snowflake channelId, Snowflake messageId, Optional<Snowflake> guildId, int answerId) {
         super(gateway, shardInfo);
 
-        this.userId = Snowflake.of(data.userId());
-        this.channelId = Snowflake.of(data.channelId());
-        this.messageId = Snowflake.of(data.messageId());
-        this.guildId = data.guildId().map(Snowflake::of);
-        this.answerId = data.answerId();
+        this.userId = userId;
+        this.channelId = channelId;
+        this.messageId = messageId;
+        this.guildId = guildId;
+        this.answerId = answerId;
     }
 
     /**

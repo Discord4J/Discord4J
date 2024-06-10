@@ -16,6 +16,7 @@
  */
 package discord4j.core.event.domain.poll;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.discordjson.json.gateway.PollVoteRemove;
 import discord4j.gateway.ShardInfo;
@@ -30,7 +31,7 @@ import discord4j.gateway.ShardInfo;
 public class PollVoteRemoveEvent extends PollVoteEvent {
 
     public PollVoteRemoveEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, PollVoteRemove data) {
-        super(gateway, shardInfo, data.data());
+        super(gateway, shardInfo, Snowflake.of(data.userId()), Snowflake.of(data.channelId()), Snowflake.of(data.messageId()), data.guildId().map(Snowflake::of), data.answerId());
     }
 
 }
