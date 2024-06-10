@@ -35,6 +35,7 @@ import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.spec.legacy.LegacyMessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.PollData;
 import discord4j.discordjson.json.SuppressEmbedsRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
@@ -844,7 +845,18 @@ public final class Message implements Entity {
      * @return An {@link Optional} containing the {@link Poll} if present, otherwise {@link Optional#empty()}.
      */
     public Optional<Poll> getPoll() {
-        return this.data.poll().toOptional().map(data -> new Poll(this.gateway, data, this.data.channelId().asLong(), this.data.id().asLong()));
+        Optional<PollData> pollData = this.data.poll().toOptional();
+
+        // If we already have the poll data, we can create the Poll object
+        if (pollData.isPresent()) {
+            return pollData.map(data -> new Poll(this.gateway, data, this.data.channelId().asLong(), this.data.id().asLong()));
+        }
+
+        // We need the MESSAGE_CONTENT intent to access the poll
+        this.checkIfMessageContentAccessIsAllowed();
+
+        // Well, we should have access to the content, but it's actually empty
+        return Optional.empty();
     }
 
     /**
