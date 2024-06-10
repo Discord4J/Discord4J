@@ -26,6 +26,7 @@ import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -835,6 +836,15 @@ public final class Message implements Entity {
         return gateway.getRestClient().getChannelService()
                 .publishMessage(getChannelId().asLong(), getId().asLong())
                 .map(data -> new Message(gateway, data));
+    }
+
+    /**
+     * Get the poll in the current message.
+     *
+     * @return An {@link Optional} containing the {@link Poll} if present, otherwise {@link Optional#empty()}.
+     */
+    public Optional<Poll> getPoll() {
+        return this.data.poll().toOptional().map(data -> new Poll(this.gateway, data, this.data.channelId().asLong(), this.data.id().asLong()));
     }
 
     /**
