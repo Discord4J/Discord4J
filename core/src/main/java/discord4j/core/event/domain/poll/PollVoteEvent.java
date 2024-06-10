@@ -70,7 +70,7 @@ public class PollVoteEvent extends Event {
      * @return The user who voted.
      */
     public Mono<User> getUser() {
-        return super.gateway.getUserById(this.userId);
+        return super.getClient().getUserById(this.userId);
     }
 
     /**
@@ -88,7 +88,7 @@ public class PollVoteEvent extends Event {
      * @return The channel where the poll is.
      */
     public Mono<MessageChannel> getChannel() {
-        return super.gateway.getChannelById(this.channelId).ofType(MessageChannel.class);
+        return super.getClient().getChannelById(this.channelId).ofType(MessageChannel.class);
     }
 
     /**
@@ -106,7 +106,7 @@ public class PollVoteEvent extends Event {
      * @return The message where the poll is.
      */
     public Mono<Message> getMessage() {
-        return super.gateway.getMessageById(this.channelId, this.messageId);
+        return super.getClient().getMessageById(this.channelId, this.messageId);
     }
 
     /**
@@ -115,7 +115,7 @@ public class PollVoteEvent extends Event {
      * @return The poll where the vote was added.
      */
     public Mono<Poll> getPoll() {
-        return super.gateway.getMessageById(this.channelId, this.messageId)
+        return super.getClient().getMessageById(this.channelId, this.messageId)
             .map(Message::getPoll)
             .flatMap(Mono::justOrEmpty);
     }

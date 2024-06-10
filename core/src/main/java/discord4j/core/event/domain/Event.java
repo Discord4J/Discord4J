@@ -23,6 +23,7 @@ import discord4j.core.event.domain.guild.*;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.*;
 import discord4j.core.event.domain.interaction.*;
+import discord4j.core.event.domain.poll.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.core.event.domain.role.RoleUpdateEvent;
@@ -130,6 +131,13 @@ import discord4j.gateway.intent.Intent;
  *     <li>{@link VoiceServerUpdateEvent}: a guild's voice server was requested or has updated</li>
  * </ul>
  *
+ * <h2>Poll related events</h2>
+ *
+ * <ul>
+ *     <li>{@link PollVoteAddEvent}: a user added a vote to a poll</li>
+ *     <li>{@link PollVoteRemoveEvent}: a user removed a vote from a poll</li>
+ * </ul>
+ *
  * <h2>Connection lifecycle events</h2>
  * <p>
  * These events are derived by Discord4J according to the status of the websocket lifecycle.
@@ -145,7 +153,7 @@ import discord4j.gateway.intent.Intent;
  */
 public abstract class Event {
 
-    protected final GatewayDiscordClient gateway;
+    private final GatewayDiscordClient gateway;
     private final ShardInfo shardInfo;
 
     protected Event(GatewayDiscordClient gateway, ShardInfo shardInfo) {
