@@ -26,7 +26,7 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Flux;
 
-//import static discord4j.core.spec.InternalSpecUtils.setIfPresent;
+import static discord4j.core.spec.InternalSpecUtils.setIfPresent;
 
 @Value.Immutable
 public interface PollVotersRequestSpecGenerator extends Spec<Multimap<String, Object>> {
@@ -39,8 +39,8 @@ public interface PollVotersRequestSpecGenerator extends Spec<Multimap<String, Ob
     default Multimap<String, Object> asRequest() {
         Multimap<String, Object> map = new Multimap<>();
 
-        /*setIfPresent(after(), "after", map);
-        setIfPresent(limit(), "limit", map);*/
+        setIfPresent(after(), "after", map);
+        setIfPresent(limit(), "limit", map);
 
         return map;
     }
