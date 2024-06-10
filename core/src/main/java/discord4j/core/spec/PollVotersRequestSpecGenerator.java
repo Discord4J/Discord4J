@@ -39,8 +39,8 @@ public interface PollVotersRequestSpecGenerator extends Spec<Multimap<String, Ob
     default Multimap<String, Object> asRequest() {
         Multimap<String, Object> map = new Multimap<>();
 
-        setIfPresent(after(), "after", map);
-        setIfPresent(limit(), "limit", map);
+        setIfPresent(map, "after", after());
+        setIfPresent(map, "limit", limit());
 
         return map;
     }
