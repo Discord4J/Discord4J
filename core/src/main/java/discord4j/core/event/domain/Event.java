@@ -145,7 +145,7 @@ import discord4j.gateway.intent.Intent;
  */
 public abstract class Event {
 
-    private final GatewayDiscordClient gateway;
+    protected final GatewayDiscordClient gateway;
     private final ShardInfo shardInfo;
 
     protected Event(GatewayDiscordClient gateway, ShardInfo shardInfo) {
