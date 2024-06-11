@@ -38,7 +38,7 @@ public class PollService extends RestService {
     }
 
     public Flux<UserData> getPollVoters(long channelId, long messageId, int answerId, Multimap<String, Object> queryParams) {
-        return Routes.GET_POLL_ANSWER_VOTERS.newRequest(channelId, messageId, answerId)
+        return Routes.POLL_ANSWER_VOTERS_GET.newRequest(channelId, messageId, answerId)
             .query(queryParams)
             .exchange(getRouter())
             .bodyToMono(PollVoters.class)

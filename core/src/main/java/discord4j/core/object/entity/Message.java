@@ -843,6 +843,8 @@ public final class Message implements Entity {
      * Get the poll in the current message.
      *
      * @return An {@link Optional} containing the {@link Poll} if present, otherwise {@link Optional#empty()}.
+     * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled and
+     * the content cannot be accessed
      */
     public Optional<Poll> getPoll() {
         Optional<PollData> pollData = this.data.poll().toOptional();
