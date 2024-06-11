@@ -28,7 +28,7 @@ import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.core.object.entity.channel.TopLevelGuildMessageChannel;
-import discord4j.core.spec.StartThreadSpec;
+import discord4j.core.spec.StartThreadFromMessageSpec;
 import discord4j.core.spec.StartThreadWithoutMessageSpec;
 import discord4j.core.spec.ThreadChannelEditSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -274,7 +274,7 @@ public class ExampleThread {
                             return event.deferReply()
                                     .withEphemeral(true)
                                     .then(event.getTargetMessage())
-                                    .flatMap(msg -> msg.startThread(StartThreadSpec.builder()
+                                    .flatMap(msg -> msg.startThread(StartThreadFromMessageSpec.builder()
                                             .name("Thread from " + msg.getId())
                                             .build()))
                                     .then(event.editReply("Done!"))

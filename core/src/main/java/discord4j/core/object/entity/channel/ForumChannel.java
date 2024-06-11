@@ -5,6 +5,8 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.ForumTag;
 import discord4j.core.object.reaction.DefaultReaction;
 import discord4j.core.spec.ForumChannelEditSpec;
+import discord4j.core.spec.ForumThreadMessageCreateSpec;
+import discord4j.core.spec.StartThreadInForumChannelMono;
 import discord4j.core.spec.StartThreadInForumChannelSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
@@ -248,6 +250,19 @@ public final class ForumChannel extends BaseTopLevelGuildChannel implements Cate
     public Mono<ThreadChannel> startThread(StartThreadInForumChannelSpec request) {
         return getClient().getRestClient().getChannelService().startThreadInForumChannel(getId().asLong(), request.asRequest())
             .map(channelData -> new ThreadChannel(getClient(), channelData));
+    }
+
+    /**
+     * Starts a new {@link ThreadChannel} in this forum channel. Properties specifying how to create this channel
+     * can be set via the {@code withXxx} methods of the returned {@link StartThreadInForumChannelMono}.
+     *
+     * @param name The name of the thread
+     * @param messageCreateSpec The message to start the thread with
+     * @return A {@link StartThreadInForumChannelMono} where, upon successful completion, emits the created
+     * {@link ThreadChannel}. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public StartThreadInForumChannelMono startThread(String name, ForumThreadMessageCreateSpec messageCreateSpec) {
+        return StartThreadInForumChannelMono.of(name, messageCreateSpec, this);
     }
 
     /**

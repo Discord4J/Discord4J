@@ -17,6 +17,9 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Message;
+import discord4j.core.spec.StartThreadFromMessageMono;
+import discord4j.core.spec.StartThreadWithoutMessageMono;
 import discord4j.core.spec.TextChannelEditMono;
 import discord4j.core.spec.TextChannelEditSpec;
 import discord4j.core.spec.legacy.LegacyTextChannelEditSpec;
@@ -104,4 +107,27 @@ public final class TextChannel extends BaseTopLevelGuildChannel implements TopLe
     public String toString() {
         return "TextChannel{} " + super.toString();
     }
+
+    @Override
+    public StartThreadWithoutMessageMono startPublicThreadWithoutMessage(String name) {
+        return StartThreadWithoutMessageMono.of(name, ThreadChannel.Type.GUILD_PUBLIC_THREAD, this);
+    }
+
+    @Override
+    public StartThreadFromMessageMono startPublicThreadWithMessage(String name, Message message) {
+        return StartThreadFromMessageMono.of(name, message);
+    }
+
+    /**
+     * Start a new private thread. Properties specifying how to create the thread can be set via the {@code withXxx}
+     * methods of the returned {@link StartThreadWithoutMessageMono}.
+     *
+     * @param name the name of the thread
+     * @return A {@link StartThreadWithoutMessageMono} where, upon successful completion, emits the created {@link ThreadChannel}.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public StartThreadWithoutMessageMono startPrivateThread(String name) {
+        return StartThreadWithoutMessageMono.of(name, ThreadChannel.Type.GUILD_PRIVATE_THREAD, this);
+    }
+
 }

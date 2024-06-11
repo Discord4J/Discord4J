@@ -19,8 +19,11 @@ package discord4j.core.object.entity.channel;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.FollowedChannel;
+import discord4j.core.object.entity.Message;
 import discord4j.core.spec.NewsChannelEditMono;
 import discord4j.core.spec.NewsChannelEditSpec;
+import discord4j.core.spec.StartThreadFromMessageMono;
+import discord4j.core.spec.StartThreadWithoutMessageMono;
 import discord4j.core.spec.legacy.LegacyNewsChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
@@ -106,6 +109,16 @@ public final class NewsChannel extends BaseTopLevelGuildChannel implements TopLe
                         .webhookChannelId(targetChannelId.asString())
                         .build())
                 .map(data -> new FollowedChannel(getClient(), data));
+    }
+
+    @Override
+    public StartThreadWithoutMessageMono startPublicThreadWithoutMessage(String name) {
+        return StartThreadWithoutMessageMono.of(name, ThreadChannel.Type.GUILD_NEWS_THREAD, this);
+    }
+
+    @Override
+    public StartThreadFromMessageMono startPublicThreadWithMessage(String name, Message message) {
+        return StartThreadFromMessageMono.of(name, message);
     }
 
     @Override
