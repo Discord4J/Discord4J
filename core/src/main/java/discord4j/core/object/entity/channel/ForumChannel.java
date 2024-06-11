@@ -10,6 +10,7 @@ import discord4j.core.spec.StartThreadInForumChannelMono;
 import discord4j.core.spec.StartThreadInForumChannelSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.EnumSet;
@@ -21,124 +22,7 @@ import java.util.stream.Collectors;
 /**
  * A Discord guild channel that contains organized threads with labels.
  */
-@Experimental
 public final class ForumChannel extends BaseTopLevelGuildChannel implements CategorizableChannel {
-
-    /**
-     * Layout types are used by Forum channels to organize their threads channel into a user view
-     * <p>
-     * Please see <a href="https://discord.com/developers/docs/resources/channel#channel-object-forum-layout-types">Discord documentation</a> for further details.
-     */
-    @Experimental
-    public enum LayoutType {
-        /**
-         * Internal value only, for unknown values
-         */
-        UNKNOWN(-1),
-
-        /**
-         * Default value for unset layout
-         */
-        NOT_SET(0),
-
-        /**
-         * Layout showing threads as a list
-         */
-        LIST_VIEW(1),
-
-        /**
-         * Layout showing threads as a gallery
-         */
-        GALLERY_VIEW(2);
-
-        /**
-         * Discord represented integer value
-         */
-        private final int value;
-
-        LayoutType(int value) {
-            this.value = value;
-        }
-
-        /**
-         * Gets Discord represented value
-         *
-         * @return Discord integer represented value
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
-         * Translates an integer value to a {@link LayoutType}
-         *
-         * @param value The integer value
-         * @return The {@link LayoutType} if known, or the fallback UNKNOWN value
-         */
-        public static LayoutType valueOf(final int value) {
-            // Same as SortOrder, we could exclude the UNKNOWN value
-            for (LayoutType layoutType : LayoutType.values()) {
-                if (layoutType.getValue() == value) {
-                    return layoutType;
-                }
-            }
-            // Fallback to UNKNOWN as default value
-            return LayoutType.UNKNOWN;
-        }
-    }
-
-    /**
-     * Sort orders are proposed by Discord to choose the order or threads in a Forum channel
-     * <br/>
-     * Please see <a href="https://discord.com/developers/docs/resources/channel#channel-object-sort-order-types">Discord documentation</a> for further details
-     */
-    @Experimental
-    public enum SortOrder {
-
-        /**
-         * Internal value only, for unknown values
-         */
-        UNKNOWN(-1),
-        LATEST_ACTIVITY(0),
-        CREATION_DATE(1);
-
-        /**
-         * Discord represented integer value
-         */
-        private final int value;
-
-        SortOrder(int value) {
-            this.value = value;
-        }
-
-        /**
-         * Gets Discord represented value
-         *
-         * @return Discord integer represented value
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
-         * Translates an integer value to a {@link SortOrder}
-         *
-         * @param value The integer value
-         * @return The SortOrder if known, or the fallback UNKNOWN value
-         */
-        public static SortOrder valueOf(final int value) {
-            /* We could exclude UNKNOWN from the lookup array using
-            Arrays.copyOfRange(SortOrder.values(), 1, SortOrder.values().length) but this would just waste CPU time
-            because if -1 is one day used by Discord we would need anyway to update the code here */
-            for (SortOrder sortOrder : SortOrder.values()) {
-                if (sortOrder.getValue() == value) {
-                    return sortOrder;
-                }
-            }
-            // Fallback to UNKNOWN as default value
-            return SortOrder.UNKNOWN;
-        }
-    }
 
     public ForumChannel(GatewayDiscordClient gateway, ChannelData data) {
         super(gateway, data);
@@ -278,6 +162,132 @@ public final class ForumChannel extends BaseTopLevelGuildChannel implements Cate
                     .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
             .map(data -> EntityUtil.getChannel(getClient(), data))
             .cast(ForumChannel.class);
+    }
+
+    /**
+     * Request to retrieve all threads in this channel.
+     *
+     * @return A {@link Flux} that continually emits the {@link ThreadChannel threads} of the channel. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<ThreadChannel> getAllThreads() {
+        return getClient().getGuildChannels(getGuildId())
+            .ofType(ThreadChannel.class)
+            .filter(thread -> thread.getParentId().map(id -> id.equals(getId())).orElse(false));
+    }
+
+    /**
+     * Layout types are used by Forum channels to organize their threads channel into a user view
+     * <p>
+     * Please see <a href="https://discord.com/developers/docs/resources/channel#channel-object-forum-layout-types">Discord documentation</a> for further details.
+     */
+    public enum LayoutType {
+        /**
+         * Internal value only, for unknown values
+         */
+        UNKNOWN(-1),
+
+        /**
+         * Default value for unset layout
+         */
+        NOT_SET(0),
+
+        /**
+         * Layout showing threads as a list
+         */
+        LIST_VIEW(1),
+
+        /**
+         * Layout showing threads as a gallery
+         */
+        GALLERY_VIEW(2);
+
+        /**
+         * Discord represented integer value
+         */
+        private final int value;
+
+        LayoutType(int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets Discord represented value
+         *
+         * @return Discord integer represented value
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Translates an integer value to a {@link LayoutType}
+         *
+         * @param value The integer value
+         * @return The {@link LayoutType} if known, or the fallback UNKNOWN value
+         */
+        public static LayoutType valueOf(final int value) {
+            // Same as SortOrder, we could exclude the UNKNOWN value
+            for (LayoutType layoutType : LayoutType.values()) {
+                if (layoutType.getValue() == value) {
+                    return layoutType;
+                }
+            }
+            // Fallback to UNKNOWN as default value
+            return LayoutType.UNKNOWN;
+        }
+    }
+
+    /**
+     * Sort orders are proposed by Discord to choose the order or threads in a Forum channel
+     * <br/>
+     * Please see <a href="https://discord.com/developers/docs/resources/channel#channel-object-sort-order-types">Discord documentation</a> for further details
+     */
+    public enum SortOrder {
+
+        /**
+         * Internal value only, for unknown values
+         */
+        UNKNOWN(-1),
+        LATEST_ACTIVITY(0),
+        CREATION_DATE(1);
+
+        /**
+         * Discord represented integer value
+         */
+        private final int value;
+
+        SortOrder(int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets Discord represented value
+         *
+         * @return Discord integer represented value
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Translates an integer value to a {@link SortOrder}
+         *
+         * @param value The integer value
+         * @return The SortOrder if known, or the fallback UNKNOWN value
+         */
+        public static SortOrder valueOf(final int value) {
+            /* We could exclude UNKNOWN from the lookup array using
+            Arrays.copyOfRange(SortOrder.values(), 1, SortOrder.values().length) but this would just waste CPU time
+            because if -1 is one day used by Discord we would need anyway to update the code here */
+            for (SortOrder sortOrder : SortOrder.values()) {
+                if (sortOrder.getValue() == value) {
+                    return sortOrder;
+                }
+            }
+            // Fallback to UNKNOWN as default value
+            return SortOrder.UNKNOWN;
+        }
     }
 
 }
