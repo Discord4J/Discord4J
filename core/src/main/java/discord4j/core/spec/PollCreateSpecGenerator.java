@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.poll.Poll;
-import discord4j.discordjson.json.PollAnswerObject;
+import discord4j.core.object.entity.poll.PollAnswer;
 import discord4j.discordjson.json.PollCreateData;
 import discord4j.discordjson.json.PollMediaObject;
 import discord4j.discordjson.possible.Possible;
@@ -29,13 +29,14 @@ import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Value.Immutable
 public interface PollCreateSpecGenerator extends Spec<PollCreateData> {
 
-    Possible<PollMediaObject> question();
+    Possible<String> question();
 
-    Possible<List<PollAnswerObject>> answers();
+    Possible<List<PollAnswer>> answers();
 
     Possible<Integer> duration();
 
@@ -43,16 +44,16 @@ public interface PollCreateSpecGenerator extends Spec<PollCreateData> {
     Possible<Boolean> allowMultiselect();
 
     @JsonProperty("layout_type")
-    Possible<Integer> layoutType();
+    Possible<Poll.PollLayoutType> layoutType();
 
     @Override
     default PollCreateData asRequest() {
         return PollCreateData.builder()
-            .question(question())
-            .answers(answers())
+            .question(PollMediaObject.builder().text(question()).build())
+            .answers(answers().map(answers -> answers.stream().map(PollAnswer::getData).collect(Collectors.toList())))
             .duration(duration())
             .allowMultiselect(allowMultiselect())
-            .layoutType(layoutType())
+            .layoutType(layoutType().map(Poll.PollLayoutType::getValue))
             .build();
     }
 

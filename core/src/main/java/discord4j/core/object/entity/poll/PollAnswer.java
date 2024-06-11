@@ -18,6 +18,7 @@ package discord4j.core.object.entity.poll;
 
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.json.PollAnswerObject;
+import discord4j.discordjson.json.PollMediaObject;
 
 import java.util.Optional;
 
@@ -37,6 +38,26 @@ public class PollAnswer {
      */
     PollAnswer(PollAnswerObject data) {
         this.data = data;
+    }
+
+    /**
+     * Creates a poll answer with the given text.
+     *
+     * @param text the text of the poll answer
+     * @return the poll answer
+     */
+    public static PollAnswer of(String text) {
+        return new PollAnswer(PollAnswerObject.builder().data(PollMediaObject.builder().text(text).build()).build());
+    }
+
+    /**
+     * Creates a poll answer with the given emoji.
+     *
+     * @param emoji the emoji of the poll answer
+     * @return the poll answer
+     */
+    public static PollAnswer of(String text, ReactionEmoji emoji) {
+        return new PollAnswer(PollAnswerObject.builder().data(PollMediaObject.builder().text(text).emoji(emoji.asEmojiData()).build()).build());
     }
 
     /**

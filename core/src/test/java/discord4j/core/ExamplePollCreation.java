@@ -20,6 +20,8 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.entity.poll.Poll;
+import discord4j.core.object.entity.poll.PollAnswer;
+import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.PollAnswerObject;
 import discord4j.discordjson.json.PollMediaObject;
@@ -40,30 +42,14 @@ public class ExamplePollCreation {
                     .flatMap(e -> e.getGuild().getChannelById(Snowflake.of(channelId)))
                     .ofType(TextChannel.class)
                     .flatMap(channel -> channel.createPoll()
-                        .withQuestion(PollMediaObject.builder()
-                            .text("What is your favorite color?")
-                            .build())
+                        .withQuestion("What is your favorite color?")
                         .withAnswers(
-                            PollAnswerObject.builder()
-                                .data(PollMediaObject.builder()
-                                    .text("Red")
-                                    .emoji(EmojiData.builder()
-                                        .name("\uD83D\uDD34")
-                                        .build())
-                                    .build())
-                                .build(),
-                            PollAnswerObject.builder()
-                                .data(PollMediaObject.builder()
-                                    .text("Green")
-                                    .emoji(EmojiData.builder()
-                                        .name("\uD83D\uDFE2")
-                                        .build())
-                                    .build())
-                                .build()
+                            PollAnswer.of("Red", ReactionEmoji.unicode("\uD83D\uDD34")),
+                            PollAnswer.of("Green", ReactionEmoji.unicode("\uD83D\uDFE2"))
                         )
                         .withAllowMultiselect(true)
                         .withDuration(3) // 3 hours
-                        .withLayoutType(Poll.PollLayoutType.DEFAULT.getValue()));
+                        .withLayoutType(Poll.PollLayoutType.DEFAULT));
 
                 return createPoll.then();
             })
