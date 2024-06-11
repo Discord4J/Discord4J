@@ -19,15 +19,18 @@ package discord4j.core.object.entity.channel;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.FollowedChannel;
+import discord4j.core.object.ThreadListPart;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.NewsChannelEditMono;
 import discord4j.core.spec.NewsChannelEditSpec;
 import discord4j.core.spec.StartThreadFromMessageMono;
 import discord4j.core.spec.StartThreadWithoutMessageMono;
+import discord4j.core.spec.StartThreadWithoutMessageSpec;
 import discord4j.core.spec.legacy.LegacyNewsChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.NewsChannelFollowRequest;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -111,13 +114,60 @@ public final class NewsChannel extends BaseTopLevelGuildChannel implements TopLe
                 .map(data -> new FollowedChannel(getClient(), data));
     }
 
-    @Override
-    public StartThreadWithoutMessageMono startPublicThreadWithoutMessage(String name) {
+    /**
+     * Request to retrieve all threads in this channel.
+     *
+     * @return A {@link Flux} that continually emits the {@link ThreadChannel threads} of the channel. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<ThreadChannel> getAllThreads() {
+        return getClient().getGuildChannels(getGuildId())
+            .ofType(ThreadChannel.class)
+            .filter(thread -> thread.getParentId().map(id -> id.equals(getId())).orElse(false));
+    }
+
+    /**
+     * Requests to retrieve the public archived threads for this channel.
+     * <p>
+     * The audit log parts can be {@link ThreadListPart#combine(ThreadListPart) combined} for easier querying. For example,
+     * <pre>
+     * {@code
+     * channel.getPublicArchivedThreads()
+     *     .take(10)
+     *     .reduce(ThreadListPart::combine)
+     * }
+     * </pre>
+     *
+     * @return A {@link Flux} that continually parts of this channel's thread list. If an error is received, it is emitted
+     * through the {@code Flux}.
+     */
+    public Flux<ThreadListPart> getPublicArchivedThreads() {
+        return getRestChannel().getPublicArchivedThreads()
+            .map(data -> new ThreadListPart(getClient(), data));
+    }
+
+    /**
+     * Start a new public thread that is not connected to an existing message. Properties specifying how to create the thread
+     * can be set via the {@code withXxx} methods of the returned {@link StartThreadWithoutMessageMono}.
+     *
+     * @param name the name of the thread
+     * @return A {@link StartThreadWithoutMessageMono} where, upon successful completion, emits the created {@link ThreadChannel}.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public StartThreadWithoutMessageMono startThreadWithoutMessage(String name) {
         return StartThreadWithoutMessageMono.of(name, ThreadChannel.Type.GUILD_NEWS_THREAD, this);
     }
 
-    @Override
-    public StartThreadFromMessageMono startPublicThreadWithMessage(String name, Message message) {
+    /**
+     * Start a new public thread that is not connected to an existing message. Properties specifying how to create the thread
+     * can be set via the {@code withXxx} methods of the returned {@link StartThreadWithoutMessageMono}.
+     *
+     * @param name the name of the thread
+     * @param message the message to start the thread with
+     * @return A {@link StartThreadWithoutMessageMono} where, upon successful completion, emits the created {@link ThreadChannel}.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public StartThreadFromMessageMono startThreadWithMessage(String name, Message message) {
         return StartThreadFromMessageMono.of(name, message);
     }
 

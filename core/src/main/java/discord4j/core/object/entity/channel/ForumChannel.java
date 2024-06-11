@@ -126,6 +126,21 @@ public final class ForumChannel extends BaseTopLevelGuildChannel implements Cate
     }
 
     /**
+     * Requests to edit the current forum channel object
+     *
+     * @param spec an immutable object that specifies the modifications requested
+     * @return A {@link Mono} that, upon completion, emits the updated {@link ForumChannel} object
+     */
+    public Mono<ForumChannel> edit(ForumChannelEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> getClient().getRestClient().getChannelService()
+                    .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+            .map(data -> EntityUtil.getChannel(getClient(), data))
+            .cast(ForumChannel.class);
+    }
+
+    /**
      * Starts a new {@link ThreadChannel} in this forum channel
      *
      * @param request an immutable object that specifies how to create the thread
@@ -147,21 +162,6 @@ public final class ForumChannel extends BaseTopLevelGuildChannel implements Cate
      */
     public StartThreadInForumChannelMono startThread(String name, ForumThreadMessageCreateSpec messageCreateSpec) {
         return StartThreadInForumChannelMono.of(name, messageCreateSpec, this);
-    }
-
-    /**
-     * Requests to edit the current forum channel object
-     *
-     * @param spec an immutable object that specifies the modifications requested
-     * @return A {@link Mono} that, upon completion, emits the updated {@link ForumChannel} object
-     */
-    public Mono<ForumChannel> edit(ForumChannelEditSpec spec) {
-        Objects.requireNonNull(spec);
-        return Mono.defer(
-                () -> getClient().getRestClient().getChannelService()
-                    .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
-            .map(data -> EntityUtil.getChannel(getClient(), data))
-            .cast(ForumChannel.class);
     }
 
     /**
