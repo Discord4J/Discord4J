@@ -100,6 +100,12 @@ public class SKU implements Entity {
         /* Unknown type */
         UNKNOWN(-1),
 
+        /* Durable one-time purchase */
+        DURABLE(2),
+
+        /* Consumable one-time purchase */
+        CONSUMABLE(3),
+
         /* Represents a recurring subscription */
         SUBSCRIPTION(5),
 
@@ -138,6 +144,10 @@ public class SKU implements Entity {
          */
         public static Type of(final int value) {
             switch (value) {
+                case 2:
+                    return DURABLE;
+                case 3:
+                    return CONSUMABLE;
                 case 5:
                     return SUBSCRIPTION;
                 case 6:

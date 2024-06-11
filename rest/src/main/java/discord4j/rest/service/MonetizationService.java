@@ -47,4 +47,10 @@ public class MonetizationService extends RestService {
             .skipBody();
     }
 
+    public Mono<Void> consumeEntitlement(long applicationId, long entitlementId) {
+        return Routes.CONSUME_ENTITLEMENT.newRequest(applicationId, entitlementId)
+            .exchange(getRouter())
+            .skipBody();
+    }
+
 }

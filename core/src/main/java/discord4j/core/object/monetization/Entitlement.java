@@ -3,7 +3,10 @@ package discord4j.core.object.monetization;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.EntitlementData;
+import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -39,6 +42,16 @@ public class Entitlement implements Entity {
     }
 
     /**
+     * Gets the SKU associated with this entitlement.
+     *
+     * @return A {@link Mono} that completes with the SKU associated with this entitlement. If an error occurs, it will
+     * be emitted through the {@link Mono}.
+     */
+    public Mono<SKU> getSku() {
+        return gateway.getSKUs().filter(sku -> sku.getId().equals(getSkuId())).next();
+    }
+
+    /**
      * Gets the application ID associated with this entitlement.
      *
      * @return The application ID associated with this entitlement.
@@ -58,6 +71,16 @@ public class Entitlement implements Entity {
     }
 
     /**
+     * Gets the user of the entitlement.
+     *
+     * @return A {@link Mono} that completes with the user of the entitlement. If an error occurs, it will be emitted
+     * through the {@link Mono}. If the entitlement is not associated with a user, the {@link Mono} will complete empty.
+     */
+    public Mono<User> getUser() {
+        return getUserId().map(gateway::getUserById).orElse(Mono.empty());
+    }
+
+    /**
      * Gets the guild ID of the entitlement.
      * Only present if the entitlement corresponds to a guild subscription.
      *
@@ -65,6 +88,16 @@ public class Entitlement implements Entity {
      */
     public Optional<Snowflake> getGuildId() {
         return data.guildId().toOptional().map(Snowflake::of);
+    }
+
+    /**
+     * Gets the guild of the entitlement.
+     *
+     * @return A {@link Mono} that completes with the guild of the entitlement. If an error occurs, it will be emitted
+     * through the {@link Mono}. If the entitlement is not associated with a guild, the {@link Mono} will complete empty.
+     */
+    public Mono<Guild> getGuild() {
+        return getGuildId().map(gateway::getGuildById).orElse(Mono.empty());
     }
 
     /**
@@ -91,7 +124,12 @@ public class Entitlement implements Entity {
     }
 
     /**
-     * Gets whether the entitlement has been deleted.
+     * Gets whether the entitlement has been deleted. Entitlement deletions are infrequent, and occur when:
+     *<ul>
+     * <li>Discord issues a refund for a subscription</li>
+     * <li>Discord removes an entitlement from a user via internal tooling</li>
+     *</ul>
+     * Entitlements are not deleted when they expire.
      *
      * @return Whether the entitlement has been deleted.
      */
@@ -127,6 +165,18 @@ public class Entitlement implements Entity {
      */
     public Optional<Snowflake> getSubscriptionId() {
         return data.subscriptionId().toOptional().map(Snowflake::of);
+    }
+
+    /**
+     * Consumes the entitlement.
+     * Only applicable to entitlements that are consumable ({@link SKU.Type#CONSUMABLE}). Consuming an entitlement
+     * will mark it as consumed, and it will no longer be available for use.
+     *
+     * @return A {@link Mono} that completes when the entitlement has been consumed. If an error occurs, it will be
+     * emitted through the {@link Mono}.
+     */
+    public Mono<Void> consume() {
+        return gateway.getRestClient().getMonetizationService().consumeEntitlement(getApplicationId().asLong(), getId().asLong());
     }
 
     /**

@@ -1313,4 +1313,11 @@ public abstract class Routes {
      */
     public static final Route DELETE_TEST_ENTITLEMENT = Route.delete("/applications/{application.id}/entitlements/{entitlement.id}");
 
+    /**
+     * For One-Time Purchase consumable SKUs, marks a given entitlement for the user as consumed. The entitlement will have consumed=true when using {@link Routes#LIST_ENTITLEMENTS}.
+     *
+     * @see <a href="https://discord.com/developers/docs/monetization/entitlements#consume-an-entitlement">Docs</a>
+     */
+    public static final Route CONSUME_ENTITLEMENT = Route.post("/applications/{application.id}/entitlements/{entitlement.id}/consume");
+
 }
