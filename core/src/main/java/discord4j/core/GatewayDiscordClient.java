@@ -21,6 +21,7 @@ package discord4j.core;
 import discord4j.common.JacksonResources;
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
+import discord4j.common.annotations.Experimental;
 import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.EventDispatcher;
@@ -824,6 +825,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      * @return A {@link Flux} that emits the {@link SKU SKUs} for the application upon successful completion. If an
      * error is received, it is emitted through the {@code Flux}.
      */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
     public Flux<SKU> getSKUs() {
         return getApplicationInfo().flatMapMany(applicationInfo -> {
             return getRestClient().getMonetizationService()
@@ -839,6 +841,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      * @return A {@link Mono} that emits the {@link SKU SKU} for the application with the given ID upon successful
      * completion. If an error is received, it is emitted through the {@code Mono}.
      */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
     public Flux<SKU> getSKUs(long applicationId) {
         return getRestClient().getMonetizationService()
             .getAllSkus(applicationId)
@@ -852,6 +855,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      * @return A {@link EntitlementListRequestFlux} that emits the {@link Entitlement} for the application with the given ID upon successful
      * completion. If an error is received, it is emitted through the {@code Mono}.
      */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
     public EntitlementListRequestFlux getEntitlements() {
         return EntitlementListRequestFlux.of(this, discordClient);
     }
@@ -864,6 +868,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      * @return A {@link CreateTestEntitlementMono} that emits the created {@link Entitlement} upon successful
      * completion. If an error is received, it is emitted through the {@code Mono}.
      */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
     public CreateTestEntitlementMono createTestEntitlementForGuild(Snowflake skuId, Snowflake guildId) {
         return CreateTestEntitlementMono.of(skuId, guildId, Entitlement.OwnerType.GUILD, this, discordClient);
     }
@@ -876,6 +881,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      * @return A {@link CreateTestEntitlementMono} that emits the created {@link Entitlement} upon successful
      * completion. If an error is received, it is emitted through the {@code Mono}.
      */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
     public CreateTestEntitlementMono createTestEntitlementForUser(Snowflake skuId, Snowflake userId) {
         return CreateTestEntitlementMono.of(skuId, userId, Entitlement.OwnerType.USER, this, discordClient);
     }
@@ -887,6 +893,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      * @return A {@link Mono} that completes upon successful deletion.
      * If an error is received, it is emitted through the {@code Mono}.
      */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
     public Mono<Void> deleteTestEntitlement(Snowflake entitlementId) {
         return getApplicationInfo().flatMap(applicationInfo -> {
             return getRestClient().getMonetizationService()

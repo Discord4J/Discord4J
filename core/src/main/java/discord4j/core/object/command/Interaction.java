@@ -217,6 +217,7 @@ public class Interaction implements DiscordObject {
      *
      * @return The list of {@link Entitlement} attached to the interaction.
      */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
     public List<Entitlement> getEntitlements() {
         return data.entitlements()
             .stream()
@@ -229,6 +230,7 @@ public class Interaction implements DiscordObject {
      *
      * @return {@code true} if the user has an entitlement for this interaction, {@code false} otherwise.
      */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
     public boolean hasUserEntitlement() {
         User user = getUser();
         return data.entitlements().stream().anyMatch(entitlementData -> !entitlementData.userId().isAbsent() && entitlementData.userId().get().asLong() == user.getId().asLong());
@@ -239,6 +241,7 @@ public class Interaction implements DiscordObject {
      *
      * @return {@code true} if the guild has an entitlement for this interaction, {@code false} otherwise.
      */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
     public boolean hasGuildEntitlement() {
         if (data.guildId().isAbsent())
             return false;

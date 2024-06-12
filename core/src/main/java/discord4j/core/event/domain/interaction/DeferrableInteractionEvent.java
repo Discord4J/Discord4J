@@ -202,6 +202,7 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has been sent. If an error is received, it is emitted through the {@code Mono}.
      */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
     public Mono<Void> replyWithPremiumRequired() {
         return Mono.defer(() -> createInteractionResponse(InteractionResponseType.PREMIUM_REQUIRED, MultipartRequest.ofRequest(InteractionApplicationCommandCallbackData.builder().build())));
     }

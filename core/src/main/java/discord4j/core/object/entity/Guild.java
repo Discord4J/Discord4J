@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
@@ -1976,6 +1977,7 @@ public final class Guild implements Entity {
      * @return A {@link EntitlementListRequestFlux} which emits {@link discord4j.core.object.monetization.Entitlement} objects.
      * If an error is received, it is emitted through the {@link Flux}.
      */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
     public EntitlementListRequestFlux getEntitlements() {
         return gateway.getEntitlements().withGuildId(getId());
     }
@@ -1986,6 +1988,7 @@ public final class Guild implements Entity {
      * @return A {@link CreateTestEntitlementMono} which emits the created {@link discord4j.core.object.monetization.Entitlement}.
      * If an error is received, it is emitted through the {@link Mono}.
      */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
     public CreateTestEntitlementMono createTestEntitlement(Snowflake skuId) {
         return gateway.createTestEntitlementForGuild(skuId, getId());
     }

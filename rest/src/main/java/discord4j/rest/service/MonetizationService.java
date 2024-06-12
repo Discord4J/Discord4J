@@ -1,5 +1,6 @@
 package discord4j.rest.service;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.discordjson.json.CreateTestEntitlementRequest;
 import discord4j.discordjson.json.EntitlementData;
 import discord4j.discordjson.json.SkuData;
@@ -9,6 +10,7 @@ import discord4j.rest.util.Multimap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Experimental // These methods could not be tested due to the lack of a Discord verified application
 public class MonetizationService extends RestService {
 
     public MonetizationService(Router router) {

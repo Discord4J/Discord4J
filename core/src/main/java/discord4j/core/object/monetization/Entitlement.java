@@ -1,5 +1,6 @@
 package discord4j.core.object.monetization;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
@@ -16,6 +17,7 @@ import java.util.Optional;
  *
  * @see <a href="https://discord.com/developers/docs/monetization/entitlements">Discord Documentation</a>
  */
+@Experimental // These methods could not be tested due to the lack of a Discord verified application
 public class Entitlement implements Entity {
 
     private final GatewayDiscordClient gateway;

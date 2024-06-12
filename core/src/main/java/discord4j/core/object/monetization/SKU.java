@@ -1,5 +1,6 @@
 package discord4j.core.object.monetization;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
@@ -12,6 +13,7 @@ import java.util.EnumSet;
  *
  * @see <a href="https://discord.com/developers/docs/monetization/skus">Discord Documentation</a>
  */
+@Experimental // These methods could not be tested due to the lack of a Discord verified application
 public class SKU implements Entity {
 
     private final GatewayDiscordClient gateway;

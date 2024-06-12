@@ -1,5 +1,6 @@
 package discord4j.core.event.domain.monetization;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.entity.Guild;
@@ -17,6 +18,7 @@ import reactor.core.publisher.Mono;
  *
  * @see <a href="https://discord.com/developers/docs/monetization/entitlements#new-entitlement">New Entitlement</a>
  */
+@Experimental // These methods could not be tested due to the lack of a Discord verified application
 public class EntitlementDeleteEvent extends Event {
 
     private final Entitlement entitlement;

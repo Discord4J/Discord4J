@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -350,6 +351,7 @@ public class User implements Entity {
      * @return A {@link EntitlementListRequestFlux} which emits {@link discord4j.core.object.monetization.Entitlement} objects.
      * If an error is received, it is emitted through the {@link Flux}.
      */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
     public EntitlementListRequestFlux getEntitlements() {
         return gateway.getEntitlements().withUserId(getId());
     }
@@ -360,6 +362,7 @@ public class User implements Entity {
      * @return A {@link CreateTestEntitlementMono} which emits the created {@link discord4j.core.object.monetization.Entitlement}.
      * If an error is received, it is emitted through the {@link Mono}.
      */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
     public CreateTestEntitlementMono createTestEntitlement(Snowflake skuId) {
         return gateway.createTestEntitlementForUser(skuId, getId());
     }
