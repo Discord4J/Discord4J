@@ -885,7 +885,7 @@ public final class Message implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits the created {@link ThreadChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<ThreadChannel> createThread(StartThreadFromMessageRequest spec) {
+    public Mono<ThreadChannel> createPublicThread(StartThreadFromMessageRequest spec) {
         return gateway.getRestClient().getChannelService()
                 .startThreadWithMessage(getChannelId().asLong(), getId().asLong(), spec)
                 .map(data -> new ThreadChannel(gateway, data));
@@ -899,7 +899,7 @@ public final class Message implements Entity {
      * @return A {@link StartThreadFromMessageMono} where, upon successful completion, emits the created {@link ThreadChannel}. If
      * an error is received, it is emitted through the {@link Mono}.
      */
-    public StartThreadFromMessageMono createThread(String name) {
+    public StartThreadFromMessageMono createPublicThread(String name) {
         return StartThreadFromMessageMono.of(name, this);
     }
 
