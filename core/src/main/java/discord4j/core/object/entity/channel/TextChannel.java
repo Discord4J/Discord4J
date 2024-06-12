@@ -18,6 +18,8 @@ package discord4j.core.object.entity.channel;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ThreadListPart;
+import discord4j.core.object.entity.Message;
+import discord4j.core.spec.StartThreadFromMessageSpec;
 import discord4j.core.spec.StartThreadWithoutMessageMono;
 import discord4j.core.spec.StartThreadWithoutMessageSpec;
 import discord4j.core.spec.TextChannelEditMono;
@@ -149,6 +151,13 @@ public final class TextChannel extends BaseTopLevelGuildChannel implements TopLe
         return StartThreadWithoutMessageMono.of(threadName, ThreadChannel.Type.GUILD_PUBLIC_THREAD, this);
     }
 
+    @Override
+    public Mono<ThreadChannel> startPublicThreadWithoutMessage(StartThreadWithoutMessageSpec spec) {
+        spec = spec.withType(ThreadChannel.Type.GUILD_PUBLIC_THREAD);
+
+        return TopLevelGuildMessageWithThreadsChannel.super.startPublicThreadWithoutMessage(spec);
+    }
+
     /**
      * Start a new private thread. Properties specifying how to create the thread can be set via the {@code withXxx}
      * methods of the returned {@link StartThreadWithoutMessageMono}.
@@ -170,6 +179,8 @@ public final class TextChannel extends BaseTopLevelGuildChannel implements TopLe
      * received, it is emitted through the {@link Mono}.
      */
     public Mono<ThreadChannel> startPrivateThread(StartThreadWithoutMessageSpec spec) {
+        spec = spec.withType(ThreadChannel.Type.GUILD_PRIVATE_THREAD);
+
         return getRestChannel().startThreadWithoutMessage(spec.asRequest())
             .map(data -> new ThreadChannel(getClient(), data));
     }

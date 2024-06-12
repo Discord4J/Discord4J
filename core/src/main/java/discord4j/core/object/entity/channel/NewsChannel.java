@@ -115,6 +115,13 @@ public final class NewsChannel extends BaseTopLevelGuildChannel implements TopLe
     }
 
     @Override
+    public Mono<ThreadChannel> startPublicThreadWithoutMessage(StartThreadWithoutMessageSpec spec) {
+        spec = spec.withType(ThreadChannel.Type.GUILD_NEWS_THREAD);
+
+        return TopLevelGuildMessageWithThreadsChannel.super.startPublicThreadWithoutMessage(spec);
+    }
+
+    @Override
     public StartThreadWithoutMessageMono startPublicThreadWithoutMessage(String threadName) {
         return StartThreadWithoutMessageMono.of(threadName, ThreadChannel.Type.GUILD_NEWS_THREAD, this);
     }
