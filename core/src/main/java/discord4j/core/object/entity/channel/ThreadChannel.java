@@ -35,6 +35,7 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -262,6 +263,32 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
                     .modifyThread(getId().asLong(), spec.asRequest(), spec.reason()))
             .map(data -> EntityUtil.getChannel(getClient(), data))
             .cast(ThreadChannel.class);
+    }
+
+    /**
+     * Request to pin the current thread. Only available for threads created in a {@link ForumChannel}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits an empty {@code Mono}. If an error is received, it
+     * is emitted through the {@code Mono}.
+     */
+    public Mono<Void> pin() {
+        return getParent()
+            .filter(ForumChannel.class::isInstance)
+            .map(__ -> this)
+            .flatMap(threadChannel -> threadChannel.edit().withFlags(EnumSet.of(ForumChannel.Flag.PINNED)).then());
+    }
+
+    /**
+     * Request to unpin the current thread. Only available for threads created in a {@link ForumChannel}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits an empty {@code Mono}. If an error is received, it
+     * is emitted through the {@code Mono}.
+     */
+    public Mono<Void> unpin() {
+        return getParent()
+            .filter(ForumChannel.class::isInstance)
+            .map(__ -> this)
+            .flatMap(threadChannel -> threadChannel.edit().withFlags(EnumSet.noneOf(ForumChannel.Flag.class)).then());
     }
 
     /** Duration in minutes to automatically archive the thread after recent activity. */
