@@ -494,6 +494,14 @@ public class RestChannel {
         return listThreads(params -> restClient.getChannelService().listJoinedPrivateArchivedThreads(id, params));
     }
 
+    public Mono<ChannelData> startThreadWithoutMessage(StartThreadWithoutMessageRequest request) {
+        return restClient.getChannelService().startThreadWithoutMessage(id, request);
+    }
+
+    public Mono<ChannelData> startThreadFromMessage(long messageId, StartThreadFromMessageRequest request) {
+        return restClient.getChannelService().startThreadWithMessage(id, messageId, request);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;

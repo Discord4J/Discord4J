@@ -306,21 +306,26 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
     public enum Type {
 
         /** Unknown type. */
-        UNKNOWN(-1),
-        GUILD_NEWS_THREAD(10),
-        GUILD_PUBLIC_THREAD(11),
-        GUILD_PRIVATE_THREAD(12);
+        UNKNOWN(-1, false),
+        GUILD_NEWS_THREAD(10, true),
+        GUILD_PUBLIC_THREAD(11, true),
+        GUILD_PRIVATE_THREAD(12, false);
 
         /** The underlying value as represented by Discord. */
         private final int value;
 
+        /** If the thread type is public */
+        private final boolean isPublic;
+
         /**
          * Constructs a {@code ThreadChannel.Type}.
          *
-         * @param value The underlying value as represented by Discord.
+         * @param value    The underlying value as represented by Discord.
+         * @param isPublic If the thread type is public
          */
-        Type(final int value) {
+        Type(final int value, boolean isPublic) {
             this.value = value;
+            this.isPublic = isPublic;
         }
 
         /**
@@ -330,6 +335,15 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
          */
         public int getValue() {
             return value;
+        }
+
+        /**
+         * Gets whether the thread type is public.
+         *
+         * @return If the thread type is public
+         */
+        public boolean isPublic() {
+            return this.isPublic;
         }
 
         /**

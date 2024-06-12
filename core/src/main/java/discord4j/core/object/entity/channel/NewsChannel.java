@@ -37,7 +37,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /** A Discord news channel. */
-public final class NewsChannel extends BaseTopLevelGuildChannel implements TopLevelGuildMessageChannel {
+public final class NewsChannel extends BaseTopLevelGuildChannel implements TopLevelGuildMessageWithThreadsChannel {
 
     /**
      * Constructs an {@code NewsChannel} with an associated {@link GatewayDiscordClient} and Discord data.
@@ -114,61 +114,9 @@ public final class NewsChannel extends BaseTopLevelGuildChannel implements TopLe
                 .map(data -> new FollowedChannel(getClient(), data));
     }
 
-    /**
-     * Request to retrieve all threads in this channel.
-     *
-     * @return A {@link Flux} that continually emits the {@link ThreadChannel threads} of the channel. If an error is
-     * received, it is emitted through the {@code Flux}.
-     */
-    public Flux<ThreadChannel> getAllThreads() {
-        return getClient().getGuildChannels(getGuildId())
-            .ofType(ThreadChannel.class)
-            .filter(thread -> thread.getParentId().map(id -> id.equals(getId())).orElse(false));
-    }
-
-    /**
-     * Requests to retrieve the public archived threads for this channel.
-     * <p>
-     * The audit log parts can be {@link ThreadListPart#combine(ThreadListPart) combined} for easier querying. For example,
-     * <pre>
-     * {@code
-     * channel.getPublicArchivedThreads()
-     *     .take(10)
-     *     .reduce(ThreadListPart::combine)
-     * }
-     * </pre>
-     *
-     * @return A {@link Flux} that continually parts of this channel's thread list. If an error is received, it is emitted
-     * through the {@code Flux}.
-     */
-    public Flux<ThreadListPart> getPublicArchivedThreads() {
-        return getRestChannel().getPublicArchivedThreads()
-            .map(data -> new ThreadListPart(getClient(), data));
-    }
-
-    /**
-     * Start a new public thread that is not connected to an existing message. Properties specifying how to create the thread
-     * can be set via the {@code withXxx} methods of the returned {@link StartThreadWithoutMessageMono}.
-     *
-     * @param name the name of the thread
-     * @return A {@link StartThreadWithoutMessageMono} where, upon successful completion, emits the created {@link ThreadChannel}.
-     * If an error is received, it is emitted through the {@code Mono}.
-     */
-    public StartThreadWithoutMessageMono startThreadWithoutMessage(String name) {
+    @Override
+    public StartThreadWithoutMessageMono startPublicThreadWithoutMessage(String name) {
         return StartThreadWithoutMessageMono.of(name, ThreadChannel.Type.GUILD_NEWS_THREAD, this);
-    }
-
-    /**
-     * Start a new public thread that is not connected to an existing message. Properties specifying how to create the thread
-     * can be set via the {@code withXxx} methods of the returned {@link StartThreadWithoutMessageMono}.
-     *
-     * @param name the name of the thread
-     * @param message the message to start the thread with
-     * @return A {@link StartThreadWithoutMessageMono} where, upon successful completion, emits the created {@link ThreadChannel}.
-     * If an error is received, it is emitted through the {@code Mono}.
-     */
-    public StartThreadFromMessageMono startThreadWithMessage(String name, Message message) {
-        return StartThreadFromMessageMono.of(name, message);
     }
 
     @Override
