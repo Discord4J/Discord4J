@@ -145,20 +145,20 @@ public final class TextChannel extends BaseTopLevelGuildChannel implements TopLe
     }
 
     @Override
-    public StartThreadWithoutMessageMono startPublicThreadWithoutMessage(String name) {
-        return StartThreadWithoutMessageMono.of(name, ThreadChannel.Type.GUILD_PUBLIC_THREAD, this);
+    public StartThreadWithoutMessageMono startPublicThreadWithoutMessage(String threadName) {
+        return StartThreadWithoutMessageMono.of(threadName, ThreadChannel.Type.GUILD_PUBLIC_THREAD, this);
     }
 
     /**
      * Start a new private thread. Properties specifying how to create the thread can be set via the {@code withXxx}
      * methods of the returned {@link StartThreadWithoutMessageMono}.
      *
-     * @param name the name of the thread
+     * @param threadName the name of the thread
      * @return A {@link StartThreadWithoutMessageMono} where, upon successful completion, emits the created {@link ThreadChannel}.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public StartThreadWithoutMessageMono startPrivateThread(String name) {
-        return StartThreadWithoutMessageMono.of(name, ThreadChannel.Type.GUILD_PRIVATE_THREAD, this);
+    public StartThreadWithoutMessageMono startPrivateThread(String threadName) {
+        return StartThreadWithoutMessageMono.of(threadName, ThreadChannel.Type.GUILD_PRIVATE_THREAD, this);
     }
 
     /**

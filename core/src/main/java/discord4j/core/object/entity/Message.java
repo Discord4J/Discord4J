@@ -895,12 +895,12 @@ public final class Message implements Entity {
      * Request to create a thread from the current message with the given name. The thread can be configured further
      * by calling the "withXxx" methods on the returned {@link StartThreadFromMessageMono}.
      *
-     * @param name The name of the thread.
+     * @param threadName The name of the thread.
      * @return A {@link StartThreadFromMessageMono} where, upon successful completion, emits the created {@link ThreadChannel}. If
      * an error is received, it is emitted through the {@link Mono}.
      */
-    public StartThreadFromMessageMono createPublicThread(String name) {
-        return StartThreadFromMessageMono.of(name, this);
+    public StartThreadFromMessageMono createPublicThread(String threadName) {
+        return StartThreadFromMessageMono.of(threadName, this);
     }
 
     @Override

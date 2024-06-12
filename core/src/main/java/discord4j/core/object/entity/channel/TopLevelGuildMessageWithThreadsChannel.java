@@ -77,23 +77,23 @@ public interface TopLevelGuildMessageWithThreadsChannel extends TopLevelGuildMes
      * Start a new public thread that is not connected to an existing message. Properties specifying how to create the thread
      * can be set via the {@code withXxx} methods of the returned {@link StartThreadWithoutMessageMono}.
      *
-     * @param name the name of the thread
+     * @param threadName the name of the thread
      * @return A {@link StartThreadWithoutMessageMono} where, upon successful completion, emits the created {@link ThreadChannel}.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    StartThreadWithoutMessageMono startPublicThreadWithoutMessage(String name);
+    StartThreadWithoutMessageMono startPublicThreadWithoutMessage(String threadName);
 
     /**
      * Start a new public thread that is not connected to an existing message. Properties specifying how to create the thread
      * can be set via the {@code withXxx} methods of the returned {@link StartThreadWithoutMessageMono}.
      *
-     * @param name the name of the thread
+     * @param threadName the name of the thread
      * @param message the message to start the thread with
      * @return A {@link StartThreadWithoutMessageMono} where, upon successful completion, emits the created {@link ThreadChannel}.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    default StartThreadFromMessageMono startPublicThreadWithMessage(String name, Message message) {
-        return StartThreadFromMessageMono.of(name, message);
+    default StartThreadFromMessageMono startPublicThreadWithMessage(String threadName, Message message) {
+        return StartThreadFromMessageMono.of(threadName, message);
     }
 
 }
