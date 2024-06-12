@@ -17,7 +17,6 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.Message;
 import discord4j.core.spec.VoiceChannelEditMono;
 import discord4j.core.spec.VoiceChannelEditSpec;
 import discord4j.core.spec.legacy.LegacyVoiceChannelEditSpec;
