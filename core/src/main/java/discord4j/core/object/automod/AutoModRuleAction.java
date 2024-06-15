@@ -140,10 +140,15 @@ public class AutoModRuleAction implements DiscordObject {
         /**
          * Timeout user for a specified duration
          * <br>
-         * <b>Note:</b> This action can only be setup for {@link AutoModRule.TriggerType#KEYWORD} rules and
-         * the user need to be the permission {@link discord4j.rest.util.Permission#MODERATE_MEMBERS} for use the action
+         * <b>Note:</b> This action can only be setup for {@link AutoModRule.TriggerType#KEYWORD} and {@link AutoModRule.TriggerType#MENTION_SPAM} rules and
+         * the user need to have the permission {@link discord4j.rest.util.Permission#MODERATE_MEMBERS} for use the action
          */
-        TIMEOUT(3);
+        TIMEOUT(3),
+
+        /**
+         * Prevents a member from using text, voice, or other interactions
+         */
+        BLOCK_MEMBER_INTERACTION(4);
 
         /**
          * The underlying value as represented by Discord.
