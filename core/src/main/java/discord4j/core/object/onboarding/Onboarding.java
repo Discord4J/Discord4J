@@ -25,7 +25,7 @@ public class Onboarding implements Entity {
         this.client = client;
         this.data = data;
 
-        this.guildId = Snowflake.of(data.guildId());
+        this.guildId = Snowflake.of(data.guildId().get()); // .get because we know it's present here (only absent in the request to edit)
         this.prompts = data.prompts().stream()
                 .map(promptData -> new OnboardingPrompt(client, promptData))
                 .collect(Collectors.toList());

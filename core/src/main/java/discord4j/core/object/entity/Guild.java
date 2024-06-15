@@ -23,6 +23,7 @@ import discord4j.core.object.*;
 import discord4j.core.object.audit.AuditLogPart;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.channel.*;
+import discord4j.core.object.onboarding.Onboarding;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.*;
@@ -1976,6 +1977,44 @@ public final class Guild implements Entity {
     public Mono<ScheduledEvent> createScheduledEvent(ScheduledEventCreateSpec spec) {
         return gateway.getRestClient().getGuildService().createScheduledEvent(getId().asLong(), spec.asRequest())
             .map(data -> new ScheduledEvent(gateway, data));
+    }
+
+    /**
+     * Get the onboarding of the guild.
+     *
+     * @return A {@link Mono} which, upon completion, emits the {@link Onboarding} object. Any error, if occurs,
+     * is emitted through the {@link Mono}.
+     */
+    public Mono<Onboarding> getOnboarding() {
+        return this.gateway.getRestClient()
+            .getGuildService()
+            .getOnboarding(this.getId().asLong())
+            .map(data -> new Onboarding(this.gateway, data));
+    }
+
+    /**
+     * Request to edit the onboarding of the guild with the provided spec.
+     *
+     * @param spec spec specifying how to edit the onboarding
+     * @return A {@link Mono} which, upon completion, emits the edited {@link Onboarding} object. Any error, if occurs,
+     * is emitted through the {@link Mono}.
+     */
+    public Mono<Onboarding> modifyOnboarding(OnboardingEditSpec spec) {
+        return this.gateway.getRestClient()
+            .getGuildService()
+            .modifyOnboarding(this.getId().asLong(), spec.asRequest(), spec.reason())
+            .map(data -> new Onboarding(this.gateway, data));
+    }
+
+    /**
+     * Requests to edit the onboarding of the guild. Properties specifying how to edit the onboarding can be set via the
+     * {@code withXxx} methods of the returned {@link OnboardingEditMono}.
+     *
+     * @return A {@link Mono} which, upon completion, emits nothing. Any error, if occurs,
+     * is emitted through the {@link Mono}.
+     */
+    public OnboardingEditMono modifyOnboarding() {
+        return OnboardingEditMono.of(this);
     }
 
     @Override

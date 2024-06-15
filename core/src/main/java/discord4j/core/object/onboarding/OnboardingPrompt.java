@@ -25,7 +25,7 @@ public class OnboardingPrompt implements Entity {
         this.client = client;
         this.data = data;
 
-        this.id = Snowflake.of(data.id());
+        this.id = Snowflake.of(data.id().get()); // .get because we know it's present here (only absent in the request to edit)
         this.type = Type.from(this.data.type());
         this.options = data.options()
                 .stream()

@@ -1298,7 +1298,7 @@ public abstract class Routes {
      *
      * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-onboarding">https://discord.com/developers/docs/resources/guild#modify-guild-onboarding</a>
      */
-    public static final Route GUILD_ONBOARDING_MODIFY = Route.patch("/guilds/{guild.id}/onboarding");
+    public static final Route GUILD_ONBOARDING_MODIFY = Route.put("/guilds/{guild.id}/onboarding");
 
     ///////////////////////////////////////////
     ///////////// OAuth2 Resource /////////////
