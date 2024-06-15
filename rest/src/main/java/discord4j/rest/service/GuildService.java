@@ -391,7 +391,7 @@ public class GuildService extends RestService {
             .bodyToMono(OnboardingData.class);
     }
 
-    public Mono<OnboardingData> modifyOnboarding(long id, OnboardingData request, @Nullable String reason) {
+    public Mono<OnboardingData> modifyOnboarding(long id, OnboardingEditData request, @Nullable String reason) {
         return Routes.GUILD_ONBOARDING_MODIFY.newRequest(id)
             .body(request)
             .optionalHeader("X-Audit-Log-Reason", reason)
