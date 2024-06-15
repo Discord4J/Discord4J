@@ -17,7 +17,6 @@
 
 package discord4j.core.event.domain.interaction;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
