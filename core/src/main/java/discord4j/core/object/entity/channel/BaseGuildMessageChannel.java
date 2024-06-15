@@ -25,9 +25,12 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
+import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.core.spec.PollCreateMono;
+import discord4j.core.spec.PollCreateSpec;
 import discord4j.core.spec.WebhookCreateSpec;
 import discord4j.core.spec.legacy.LegacyInviteCreateSpec;
 import discord4j.core.spec.legacy.LegacyMessageCreateSpec;
@@ -167,6 +170,16 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     @Override
     public Mono<Message> createMessage(MessageCreateSpec spec) {
         return messageChannel.createMessage(spec);
+    }
+
+    @Override
+    public Mono<Poll> createPoll(PollCreateSpec spec) {
+        return messageChannel.createPoll(spec);
+    }
+
+    @Override
+    public PollCreateMono createPoll() {
+        return messageChannel.createPoll();
     }
 
     @Override

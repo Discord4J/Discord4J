@@ -201,7 +201,10 @@ public enum Permission {
     USE_EXTERNAL_SOUNDS(0x0000200000000000L, false),
 
     /** Allows sending voice messages. */
-    SEND_VOICE_MESSAGES(0x0000400000000000L, false);
+    SEND_VOICE_MESSAGES(0x0000400000000000L, false),
+
+    /** Allows creating polls */
+    SEND_POLLS(0x0002000000000000L, false);
 
     /** Whether MFA is required. */
     private final boolean mfa;
