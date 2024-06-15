@@ -139,7 +139,7 @@ public class ChatInputInteractionEvent extends ApplicationCommandInteractionEven
     }
 
     /**
-     * Gets the value of the option corresponding to the provided name, if present, as a snowflake.
+     * Gets the value of the option corresponding to the provided name, if present, as a {@link Snowflake}.
      *
      * @param name The name of the option.
      * @return An {@link Optional} containing the value of the option corresponding to the provided name, if present, or empty otherwise.
@@ -152,7 +152,7 @@ public class ChatInputInteractionEvent extends ApplicationCommandInteractionEven
     }
 
     /**
-     * Gets the value of the option corresponding to the provided name, if present, as a user.
+     * Gets the value of the option corresponding to the provided name, if present, as a {@link User}.
      *
      * @param name The name of the option.
      * @return A {@link Mono} containing the value of the option corresponding to the provided name, if present, or empty otherwise.
@@ -166,7 +166,7 @@ public class ChatInputInteractionEvent extends ApplicationCommandInteractionEven
     }
 
     /**
-     * Gets the value of the option corresponding to the provided name, if present, as a role.
+     * Gets the value of the option corresponding to the provided name, if present, as a {@link Role}.
      *
      * @param name The name of the option.
      * @return A {@link Mono} containing the value of the option corresponding to the provided name, if present, or empty otherwise.
@@ -180,7 +180,7 @@ public class ChatInputInteractionEvent extends ApplicationCommandInteractionEven
     }
 
     /**
-     * Gets the value of the option corresponding to the provided name, if present, as a channel.
+     * Gets the value of the option corresponding to the provided name, if present, as a {@link Channel}.
      *
      * @param name The name of the option.
      * @return A {@link Mono} containing the value of the option corresponding to the provided name, if present, or empty otherwise.
@@ -194,7 +194,7 @@ public class ChatInputInteractionEvent extends ApplicationCommandInteractionEven
     }
 
     /**
-     * Gets the value of the option corresponding to the provided name, if present, as an attachment.
+     * Gets the value of the option corresponding to the provided name, if present, as an {@link Attachment}.
      *
      * @param name The name of the option.
      * @return An {@link Optional} containing the value of the option corresponding to the provided name, if present, or empty otherwise.
