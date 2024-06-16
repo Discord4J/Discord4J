@@ -421,12 +421,23 @@ public abstract class Routes {
     public static final Route STICKER_GET = Route.get("/stickers/{sticker.id}");
 
     /**
-     * Returns the list of sticker packs available to Nitro subscribers.
+     * Returns the list of available sticker packs.
      *
-     * @see <a href="https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs">
-     * https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs</a>
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#list-sticker-packs">
+     * https://discord.com/developers/docs/resources/sticker#list-sticker-packs</a>
      */
-    public static final Route NITRO_STICKER_PACKS_GET = Route.get("/sticker-packs");
+    public static final Route STICKER_PACKS_GET = Route.get("/sticker-packs");
+
+    /**
+     * Returns the list of available sticker packs.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#list-sticker-packs">
+     * https://discord.com/developers/docs/resources/sticker#list-sticker-packs</a>
+     *
+     * @deprecated Deprecated in favor of {@link #STICKER_PACKS_GET}. <b>To be removed in 3.3.x</b>
+     */
+    @Deprecated
+    public static final Route NITRO_STICKER_PACKS_GET = STICKER_PACKS_GET;
 
     /**
      * Returns an array of sticker objects for the given guild. Includes user fields if the bot has the MANAGE_EMOJIS_AND_STICKERS permission.
@@ -1176,6 +1187,8 @@ public abstract class Routes {
      * https://discord.com/developers/docs/topics/oauth2#get-current-application-information</a>
      */
     public static final Route APPLICATION_INFO_GET = Route.get("/oauth2/applications/@me");
+
+    public static final Route APPLICATION_INFO_MODIFY = Route.patch("/applications/@me");
 
     public static final Route GLOBAL_APPLICATION_COMMANDS_GET = Route.get("/applications/{application.id}/commands");
 

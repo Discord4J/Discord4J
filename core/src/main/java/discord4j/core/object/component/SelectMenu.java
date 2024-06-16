@@ -16,10 +16,12 @@
  */
 package discord4j.core.object.component;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.json.ImmutableComponentData;
+import discord4j.discordjson.json.SelectDefaultValueData;
 import discord4j.discordjson.json.SelectOptionData;
 import reactor.util.annotation.Nullable;
 
@@ -42,7 +44,7 @@ public class SelectMenu extends ActionComponent {
      * @return A select menu with the given data.
      */
     public static SelectMenu of(String customId, Option... options) {
-        return of(Type.SELECT_MENU, customId, Arrays.asList(options), null);
+        return of(Type.SELECT_MENU, customId, Arrays.asList(options), null, null);
     }
 
     /**
@@ -54,7 +56,7 @@ public class SelectMenu extends ActionComponent {
      */
     public static SelectMenu of(String customId, List<Option> options) {
         Objects.requireNonNull(options);
-        return of(Type.SELECT_MENU, customId, options, null);
+        return of(Type.SELECT_MENU, customId, options, null, null);
     }
 
     /**
@@ -64,7 +66,18 @@ public class SelectMenu extends ActionComponent {
      * @return A select menu with the given data.
      */
     public static SelectMenu ofRole(String customId) {
-        return of(Type.SELECT_MENU_ROLE, customId, null, null);
+        return of(Type.SELECT_MENU_ROLE, customId, null, null, null);
+    }
+
+    /**
+     * Creates a role select menu.
+     *
+     * @param customId A developer-defined identifier for the select menu.
+     * @param defaultValues The default values for auto-populated select menus.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofRole(String customId, List<DefaultValue> defaultValues) {
+        return of(Type.SELECT_MENU_ROLE, customId, null, null, defaultValues);
     }
 
     /**
@@ -74,7 +87,18 @@ public class SelectMenu extends ActionComponent {
      * @return A select menu with the given data.
      */
     public static SelectMenu ofUser(String customId) {
-        return of(Type.SELECT_MENU_USER, customId, null, null);
+        return of(Type.SELECT_MENU_USER, customId, null, null, null);
+    }
+
+    /**
+     * Creates a user select menu.
+     *
+     * @param customId A developer-defined identifier for the select menu.
+     * @param defaultValues The default values for auto-populated select menus.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofUser(String customId, List<DefaultValue> defaultValues) {
+        return of(Type.SELECT_MENU_USER, customId, null, null, defaultValues);
     }
 
     /**
@@ -84,7 +108,18 @@ public class SelectMenu extends ActionComponent {
      * @return A select menu with the given data.
      */
     public static SelectMenu ofMentionable(String customId) {
-        return of(Type.SELECT_MENU_MENTIONABLE, customId, null, null);
+        return of(Type.SELECT_MENU_MENTIONABLE, customId, null, null, null);
+    }
+
+    /**
+     * Creates a mentionable select menu.
+     *
+     * @param customId A developer-defined identifier for the select menu.
+     * @param defaultValues The default values for auto-populated select menus.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofMentionable(String customId, List<DefaultValue> defaultValues) {
+        return of(Type.SELECT_MENU_MENTIONABLE, customId, null, null, defaultValues);
     }
 
     /**
@@ -95,7 +130,19 @@ public class SelectMenu extends ActionComponent {
      * @return A select menu with the given data.
      */
     public static SelectMenu ofChannel(String customId, Channel.Type... channelTypes) {
-        return of(Type.SELECT_MENU_CHANNEL, customId, null, Arrays.asList(channelTypes));
+        return of(Type.SELECT_MENU_CHANNEL, customId, null, Arrays.asList(channelTypes), null);
+    }
+
+    /**
+     * Creates a channel select menu.
+     *
+     * @param customId A developer-defined identifier for the select menu.
+     * @param defaultValues The default values for auto-populated select menus.
+     * @param channelTypes The allowed channel types.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofChannel(String customId, List<DefaultValue> defaultValues, Channel.Type... channelTypes) {
+        return of(Type.SELECT_MENU_CHANNEL, customId, null, Arrays.asList(channelTypes), defaultValues);
     }
 
     /**
@@ -106,10 +153,22 @@ public class SelectMenu extends ActionComponent {
      * @return A select menu with the given data.
      */
     public static SelectMenu ofChannel(String customId, List<Channel.Type> channelTypes) {
-        return of(Type.SELECT_MENU_CHANNEL, customId, null, channelTypes);
+        return of(Type.SELECT_MENU_CHANNEL, customId, null, channelTypes, null);
     }
 
-    private static SelectMenu of(Type type, String customId, @Nullable List<Option> options, @Nullable List<Channel.Type> channelTypes) {
+    /**
+     * Creates a channel select menu.
+     *
+     * @param customId A developer-defined identifier for the select menu.
+     * @param defaultValues The default values for auto-populated select menus.
+     * @param channelTypes The allowed channel types.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofChannel(String customId, List<DefaultValue> defaultValues, List<Channel.Type> channelTypes) {
+        return of(Type.SELECT_MENU_CHANNEL, customId, null, channelTypes, defaultValues);
+    }
+
+    private static SelectMenu of(Type type, String customId, @Nullable List<Option> options, @Nullable List<Channel.Type> channelTypes, @Nullable List<DefaultValue> defaultValues) {
         ImmutableComponentData.Builder builder = ComponentData.builder()
                 .type(type.getValue())
                 .customId(customId);
@@ -121,6 +180,12 @@ public class SelectMenu extends ActionComponent {
         if (channelTypes != null) {
             builder.channelTypes(channelTypes.stream()
                     .map(Channel.Type::getValue)
+                    .collect(Collectors.toList()));
+        }
+
+        if (defaultValues != null) {
+            builder.defaultValues(defaultValues.stream()
+                    .map(DefaultValue::getData)
                     .collect(Collectors.toList()));
         }
 
@@ -201,6 +266,20 @@ public class SelectMenu extends ActionComponent {
                 .orElse(Collections.emptyList()).stream()
                 .map(Option::new)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets the default values for auto-populated select menus. List can be empty
+     * if {@link #getType() type} of select menu is not {@link MessageComponent.Type#SELECT_MENU_USER}
+     * nor {@link MessageComponent.Type#SELECT_MENU_ROLE} nor {@link MessageComponent.Type#SELECT_MENU_MENTIONABLE}
+     *
+     * @return The default values for auto-populated select menus.
+     */
+    public List<DefaultValue> getDefaultValues() {
+        return getData().defaultValues().toOptional()
+            .orElse(Collections.emptyList()).stream()
+            .map(DefaultValue::new)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -295,6 +374,53 @@ public class SelectMenu extends ActionComponent {
                 .channelTypes(Arrays.stream(types)
                         .map(Channel.Type::getValue)
                         .collect(Collectors.toList()))
+                .build());
+    }
+
+    /**
+     * Creates a new select menu with the same data as this one, but with the given default values.
+     *
+     * @param values The new default values.
+     * @return A new select menu with the given default values.
+     */
+    public SelectMenu withDefaultValues(Iterable<DefaultValue> values) {
+        if (getType() != Type.SELECT_MENU_USER && getType() != Type.SELECT_MENU_ROLE && getType() != Type.SELECT_MENU_MENTIONABLE) {
+            throw new IllegalArgumentException("Select menu with type " + getType() + " can't have default values");
+        }
+
+        List<SelectDefaultValueData> defaultValues = StreamSupport.stream(values.spliterator(), false)
+            .map(DefaultValue::getData)
+            .collect(Collectors.toList());
+
+        // Validate default values
+        if (defaultValues.size() > this.getMaxValues()) {
+            throw new IllegalArgumentException("Default values count (" + defaultValues.size() + ") can't be greater than max values count (" + this.getMaxValues() + ")!");
+        }
+
+        if (defaultValues.size() < this.getMinValues()) {
+            throw new IllegalArgumentException("Default values count (" + defaultValues.size() + ") can't be less than min values count (" + this.getMinValues() + ")!");
+        }
+
+        for (SelectDefaultValueData defaultValue : defaultValues) {
+            if (getType() == Type.SELECT_MENU_USER && !defaultValue.type().equals(DefaultValue.Type.USER.value)) {
+                throw new IllegalArgumentException("Default value type must be USER for user select menu");
+            }
+
+            if (getType() == Type.SELECT_MENU_ROLE && !defaultValue.type().equals(DefaultValue.Type.ROLE.value)) {
+                throw new IllegalArgumentException("Default value type must be ROLE for role select menu");
+            }
+
+            if (getType() == Type.SELECT_MENU_MENTIONABLE && !defaultValue.type().equals(DefaultValue.Type.USER.value) && !defaultValue.type().equals(DefaultValue.Type.ROLE.value)) {
+                throw new IllegalArgumentException("Default value type must be USER or ROLE for mentionable select menu");
+            }
+
+            if (getType() == Type.SELECT_MENU_CHANNEL && !defaultValue.type().equals(DefaultValue.Type.CHANNEL.value)) {
+                throw new IllegalArgumentException("Default value type must be CHANNEL for channel select menu");
+            }
+        }
+
+        return new SelectMenu(ComponentData.builder().from(getData())
+                .defaultValues(defaultValues)
                 .build());
     }
 
@@ -415,6 +541,114 @@ public class SelectMenu extends ActionComponent {
          */
         public Option withDefault(boolean isDefault) {
             return new Option(SelectOptionData.builder().from(data).isDefault(isDefault).build());
+        }
+    }
+
+    /**
+     * A default value for auto populated select menus.
+     */
+    public static class DefaultValue {
+
+        /**
+         * The type of default value.
+         */
+        public enum Type {
+
+            /** An unknown type */
+            UNKNOWN(""),
+
+            /** A user */
+            USER("user"),
+
+            /** A role */
+            ROLE("role"),
+
+            /** A channel */
+            CHANNEL("channel");
+
+            public static Type of(String value) {
+                for (Type type : values()) {
+                    if (type.getValue().equals(value)) {
+                        return type;
+                    }
+                }
+
+                return UNKNOWN;
+            }
+
+            /** The underlying value as represented by Discord */
+            private final String value;
+
+            /**
+             * Constructs a {@code SelectMenu.DefaultValue.Type}.
+             *
+             * @param value The underlying value as represented by Discord.
+             */
+            Type(String value) {
+                this.value = value;
+            }
+
+            /**
+             * Gets the value of the type.
+             *
+             * @return The value of the type.
+             */
+            public String getValue() {
+                return value;
+            }
+        }
+
+        /**
+         * Creates a select menu option.
+         *
+         * @param snowflake The id of the default value.
+         * @param type The type of the default value.
+         * @return A default value with the given data.
+         */
+        public static DefaultValue of(Snowflake snowflake, Type type) {
+            return new DefaultValue(SelectDefaultValueData.builder()
+                .id(snowflake.asString())
+                .type(type.getValue())
+                .build());
+        }
+
+        /** The underlying data */
+        private final SelectDefaultValueData data;
+
+        /**
+         * Constructs a {@code SelectMenu.DefaultValue}.
+         *
+         * @param data The underlying data.
+         */
+        DefaultValue(SelectDefaultValueData data) {
+            this.data = data;
+        }
+
+        /**
+         * Gets the id of the default value.
+         *
+         * @return The id of the default value.
+         */
+        public Snowflake getId() {
+            return Snowflake.of(data.id());
+        }
+
+        /**
+         * Gets the type of the default value.
+         *
+         * @return The type of the default value.
+         */
+        public Type getType() {
+            return Type.of(data.type());
+        }
+
+        /**
+         * Gets the internal data.
+         *
+         * @return The internal data.
+         */
+        public SelectDefaultValueData getData() {
+            return data;
         }
     }
 }

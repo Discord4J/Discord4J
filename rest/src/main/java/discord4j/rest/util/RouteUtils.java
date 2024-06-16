@@ -40,6 +40,23 @@ public class RouteUtils {
     private RouteUtils() {
     }
 
+    /**
+     * "Overrides" Object#toString behaviour for some objects, when we need to format them in a special form
+     * For instance, this function on its creation handle long printing to make them unsigned only
+     *
+     * @param obj Object to handle
+     * @return If handled, custom string value or else the object's toString return value
+     */
+    public static String handleStringConversion(Object obj) {
+        if (obj instanceof Long) {
+            Long number = (Long) obj;
+
+            return Long.toUnsignedString(number);
+        }
+
+        return obj.toString();
+    }
+
     public static String expand(String template, Object... variables) {
         if (variables.length == 0) {
             return template;
@@ -48,7 +65,7 @@ public class RouteUtils {
         Matcher matcher = PARAMETER_PATTERN.matcher(template);
         int index = 0;
         while (matcher.find()) {
-            matcher.appendReplacement(buf, encodeUriPathSegment(variables[index++].toString()));
+            matcher.appendReplacement(buf, encodeUriPathSegment(handleStringConversion(variables[index++])));
         }
         matcher.appendTail(buf);
         return buf.toString();

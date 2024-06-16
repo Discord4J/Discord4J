@@ -18,7 +18,6 @@ package discord4j.core.util;
 
 import discord4j.discordjson.json.AuditEntryInfoData;
 import discord4j.discordjson.json.AuditLogChangeData;
-import discord4j.core.object.audit.AuditLogChange;
 import discord4j.core.object.audit.OptionKey;
 
 import java.util.HashMap;
@@ -43,6 +42,10 @@ public class AuditLogUtil {
         options.id().toOptional().ifPresent(it -> map.put(OptionKey.ID.getField(), it.asString()));
         options.type().toOptional().ifPresent(it -> map.put(OptionKey.TYPE.getField(), it));
         options.roleName().toOptional().ifPresent(it -> map.put(OptionKey.ROLE_NAME.getField(), it));
+        options.integrationType().toOptional().ifPresent(it -> map.put(OptionKey.INTEGRATION_TYPE.getField(), it));
+        options.autoModerationRuleName().toOptional().ifPresent(it -> map.put(OptionKey.AUTO_MODERATION_RULE_NAME.getField(), it));
+        options.autoModerationRuleTriggerType().toOptional().ifPresent(it -> map.put(OptionKey.AUTO_MODERATION_RULE_TRIGGER_TYPE.getField(), it));
+        options.applicationId().toOptional().ifPresent(it -> map.put(OptionKey.APPLICATION_ID.getField(), it.asString()));
         return map;
     }
 

@@ -45,6 +45,14 @@ public class OptionKey<T> {
     public static final OptionKey<String> TYPE = optionKey("type", Function.identity());
     /** Name of the role if type is "role". */
     public static final OptionKey<String> ROLE_NAME = optionKey("role_name", Function.identity());
+    /** The type of integration which performed the action. */
+    public static final OptionKey<String> INTEGRATION_TYPE = optionKey("integration_type", Function.identity());
+    /** Name of the Auto Moderation rule that was triggered **/
+    public static final OptionKey<String> AUTO_MODERATION_RULE_NAME = optionKey("auto_moderation_rule_name", Function.identity());
+    /** Trigger type of the Auto Moderation rule that was triggered **/
+    public static final OptionKey<String> AUTO_MODERATION_RULE_TRIGGER_TYPE = optionKey("auto_moderation_rule_trigger_type", Function.identity());
+    /** ID of the app whose permissions were targeted. */
+    public static final OptionKey<Snowflake> APPLICATION_ID = optionKey("application_id", Snowflake::of);
 
     private static <T> OptionKey<T> optionKey(String field, Function<String, T> parser) {
         return new OptionKey<>(field, parser);
