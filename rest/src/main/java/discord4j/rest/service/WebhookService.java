@@ -116,8 +116,36 @@ public class WebhookService extends RestService {
                 .bodyToMono(MessageData.class);
     }
 
+    /**
+     * Executes the specified webhook.
+     *
+     * @param wait true if you want to return message data and errors for the webhook.
+     * @param threadId specify the thread id within a webhook's channel.
+     * @return If wait is true, a mono that contains the message information of the execution or an
+     * error if the webhook is unsuccessful. If wait is false, the mono completes as soon as the request
+     * is finished sending, and DOES NOT result in an error if the message is not saved.
+     */
+    public Mono<MessageData> executeWebhook(long webhookId, String token, boolean wait, long threadId,
+                                            MultipartRequest<? extends WebhookExecuteRequest> request) {
+        return Routes.WEBHOOK_EXECUTE
+            .newRequest(webhookId, token)
+            .query("wait", wait)
+            .query("thread_id", threadId)
+            .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
+            .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
+            .exchange(getRouter())
+            .bodyToMono(MessageData.class);
+    }
+
     public Mono<MessageData> getWebhookMessage(long webhookId, String webhookToken, String messageId) {
         return Routes.WEBHOOK_MESSAGE_GET.newRequest(webhookId, webhookToken, messageId)
+            .exchange(getRouter())
+            .bodyToMono(MessageData.class);
+    }
+
+    public Mono<MessageData> getWebhookMessage(long webhookId, String webhookToken, String messageId, long threadId) {
+        return Routes.WEBHOOK_MESSAGE_GET.newRequest(webhookId, webhookToken, messageId)
+            .query("thread_id", threadId)
             .exchange(getRouter())
             .bodyToMono(MessageData.class);
     }
@@ -125,6 +153,15 @@ public class WebhookService extends RestService {
     public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId,
                                                   WebhookMessageEditRequest request) {
         return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(MessageData.class);
+    }
+
+    public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId, long threadId,
+                                                  WebhookMessageEditRequest request) {
+        return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
+            .query("thread_id", threadId)
             .body(request)
             .exchange(getRouter())
             .bodyToMono(MessageData.class);
@@ -139,8 +176,25 @@ public class WebhookService extends RestService {
                 .bodyToMono(MessageData.class);
     }
 
+    public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId, long threadId,
+                                                  MultipartRequest<WebhookMessageEditRequest> request) {
+        return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
+            .query("thread_id", threadId)
+            .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
+            .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
+            .exchange(getRouter())
+            .bodyToMono(MessageData.class);
+    }
+
     public Mono<Void> deleteWebhookMessage(long webhookId, String webhookToken, String messageId) {
         return Routes.WEBHOOK_MESSAGE_DELETE.newRequest(webhookId, webhookToken, messageId)
+            .exchange(getRouter())
+            .bodyToMono(Void.class);
+    }
+
+    public Mono<Void> deleteWebhookMessage(long webhookId, String webhookToken, String messageId, long threadId) {
+        return Routes.WEBHOOK_MESSAGE_DELETE.newRequest(webhookId, webhookToken, messageId)
+            .query("thread_id", threadId)
             .exchange(getRouter())
             .bodyToMono(Void.class);
     }

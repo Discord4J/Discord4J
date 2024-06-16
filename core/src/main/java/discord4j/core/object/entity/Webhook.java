@@ -434,9 +434,16 @@ public final class Webhook implements Entity {
                     }
                     LegacyWebhookExecuteSpec mutatedSpec = new LegacyWebhookExecuteSpec();
                     spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getWebhookService()
+
+                    if (mutatedSpec.getThreadId().isAbsent()) {
+                        return gateway.getRestClient().getWebhookService()
                             .executeWebhook(getId().asLong(), getToken().get(), wait, mutatedSpec.asRequest())
                             .map(data -> new Message(gateway, data));
+                    } else {
+                        return gateway.getRestClient().getWebhookService()
+                            .executeWebhook(getId().asLong(), getToken().get(), wait, mutatedSpec.getThreadId().get().asLong(), mutatedSpec.asRequest())
+                            .map(data -> new Message(gateway, data));
+                    }
                 }
         );
     }
@@ -457,10 +464,41 @@ public final class Webhook implements Entity {
                     if (!getToken().isPresent()) {
                         throw new IllegalArgumentException("Can't execute webhook.");
                     }
-                    return gateway.getRestClient().getWebhookService()
+
+                    if (spec.threadId().isAbsent()) {
+                        return gateway.getRestClient().getWebhookService()
                             .executeWebhook(getId().asLong(), getToken().get(), wait, spec.asRequest())
                             .map(data -> new Message(gateway, data));
+                    } else {
+                        return gateway.getRestClient().getWebhookService()
+                            .executeWebhook(getId().asLong(), getToken().get(), wait, spec.threadId().get().asLong(), spec.asRequest())
+                            .map(data -> new Message(gateway, data));
+                    }
                 }
+        );
+    }
+
+    /**
+     * Executes this webhook.
+     *
+     * @param wait True to specify to wait for server confirmation that the message was saved or there was an error
+     *             saving the message.
+     * @param threadId The ID of the thread to execute the webhook in. Overrides the thread ID in the spec.
+     * @param spec an immutable object that specifies how to execute this webhook
+     * @return A {@link Mono} where, upon successful webhook execution, emits a Message if {@code wait = true}. If the
+     * message fails to save, an error is emitted through the {@code Mono} only if {@code wait = true}.
+     */
+    public Mono<Message> execute(boolean wait, Snowflake threadId, WebhookExecuteSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+            () -> {
+                if (!getToken().isPresent()) {
+                    throw new IllegalArgumentException("Can't execute webhook.");
+                }
+                return gateway.getRestClient().getWebhookService()
+                    .executeWebhook(getId().asLong(), getToken().get(), wait, threadId.asLong(), spec.asRequest())
+                    .map(data -> new Message(gateway, data));
+            }
         );
     }
 
@@ -510,6 +548,29 @@ public final class Webhook implements Entity {
     }
 
     /**
+     * Executes this webhook to get a message.
+     *
+     * @param messageId The ID of the message to get
+     * @param threadId The ID of the thread to get the message from
+     * @return A {@link Mono} where, upon successful webhook execution, emits a Message. If the message get fails, an
+     * error is emitted through the {@code Mono}.
+     */
+    public Mono<Message> getMessage(Snowflake messageId, Snowflake threadId) {
+        Objects.requireNonNull(messageId);
+        Objects.requireNonNull(threadId);
+        return Mono.defer(
+            () -> {
+                if (!getToken().isPresent()) {
+                    throw new IllegalArgumentException("Can't get message with this webhook.");
+                }
+                return gateway.getRestClient().getWebhookService()
+                    .getWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(), threadId.asLong())
+                    .map(data -> new Message(gateway, data));
+            }
+        );
+    }
+
+    /**
      * Executes this webhook to edit a message. Properties specifying how to execute this webhook, including the ID of
      * the message being edited, can be set via the {@code withXxx} methods of the returned {@link
      * WebhookMessageEditMono}.
@@ -538,8 +599,39 @@ public final class Webhook implements Entity {
                 if (!getToken().isPresent()) {
                     throw new IllegalArgumentException("Can't edit message with this webhook.");
                 }
+
+                if (spec.threadId().isAbsent()) {
+                    return gateway.getRestClient().getWebhookService()
+                        .modifyWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(), spec.asRequest())
+                        .map(data -> new Message(gateway, data));
+                } else {
+                    return gateway.getRestClient().getWebhookService()
+                        .modifyWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(), spec.threadId().get().asLong(), spec.asRequest())
+                        .map(data -> new Message(gateway, data));
+                }
+            }
+        );
+    }
+
+    /**
+     * Executes this webhook to edit a message.
+     *
+     * @param messageId The ID of the message to edit
+     * @param threadId The ID of the thread to edit the message in. Overrides the thread ID in the spec.
+     * @param spec an immutable object that specifies how to edit the message
+     * @return A {@link Mono} where, upon successful webhook execution, emits a Message. If the message edit fails, an
+     * error is emitted through the {@code Mono}.
+     */
+    public Mono<Message> editMessage(Snowflake messageId, Snowflake threadId, WebhookMessageEditSpec spec) {
+        Objects.requireNonNull(messageId);
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+            () -> {
+                if (!getToken().isPresent()) {
+                    throw new IllegalArgumentException("Can't edit message with this webhook.");
+                }
                 return gateway.getRestClient().getWebhookService()
-                    .modifyWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(), spec.asRequest())
+                    .modifyWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(), threadId.asLong(), spec.asRequest())
                     .map(data -> new Message(gateway, data));
             }
         );
@@ -561,6 +653,27 @@ public final class Webhook implements Entity {
                 }
                 return gateway.getRestClient().getWebhookService()
                     .deleteWebhookMessage(getId().asLong(), getToken().get(), messageId.asString());
+            }
+        );
+    }
+
+    /**
+     * Executes this webhook to delete a message.
+     *
+     * @param messageId The ID of the message to delete
+     * @param threadId The ID of the thread to delete the message from
+     * @return A {@link Mono} where, upon successful webhook execution, emits nothing; indicating the message has been
+     * deleted. If the message delete fails, an error is emitted through the {@code Mono}.
+     */
+    public Mono<Void> deleteMessage(Snowflake messageId, Snowflake threadId) {
+        Objects.requireNonNull(messageId);
+        return Mono.defer(
+            () -> {
+                if (!getToken().isPresent()) {
+                    throw new IllegalArgumentException("Can't delete message with this webhook.");
+                }
+                return gateway.getRestClient().getWebhookService()
+                    .deleteWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(), threadId.asLong());
             }
         );
     }

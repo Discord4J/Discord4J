@@ -62,6 +62,8 @@ public interface WebhookMessageEditSpecGenerator extends Spec<MultipartRequest<W
 
     Possible<List<LayoutComponent>> components();
 
+    Possible<Snowflake> threadId();
+
     @Override
     default MultipartRequest<WebhookMessageEditRequest> asRequest() {
         WebhookMessageEditRequest request = WebhookMessageEditRequest.builder()
@@ -88,7 +90,11 @@ abstract class WebhookMessageEditMonoGenerator extends Mono<Message> implements 
 
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
-        webhook().editMessage(messageId(), WebhookMessageEditSpec.copyOf(this)).subscribe(actual);
+        if (this.threadId().isAbsent()) {
+            webhook().editMessage(messageId(), WebhookMessageEditSpec.copyOf(this)).subscribe(actual);
+        } else {
+            webhook().editMessage(messageId(), this.threadId().get(), WebhookMessageEditSpec.copyOf(this)).subscribe(actual);
+        }
     }
 
     @Override
