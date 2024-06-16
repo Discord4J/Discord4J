@@ -217,13 +217,14 @@ class GuildDispatchHandlers {
         String currentPremiumSince = Possible.flatOpt(context.getDispatch().premiumSince()).orElse(null);
         Boolean currentPending = context.getDispatch().pending().toOptional().orElse(null);
         String communicationDisabledUntil = Possible.flatOpt(context.getDispatch().communicationDisabledUntil()).orElse(null);
+        AvatarDecoration avatarDecoration = Possible.flatOpt(context.getDispatch().avatarDecoration()).map(avatarDecorationData -> new AvatarDecoration(gateway, avatarDecorationData)).orElse(null);
         Member oldMember = context.getOldState()
                 .map(data -> new Member(gateway, data, guildId))
                 .orElse(null);
 
         return Mono.just(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, oldMember,
                 currentRoleIds, currentNick, currentAvatar, currentJoinedAt,
-                currentPremiumSince, currentPending, communicationDisabledUntil));
+                currentPremiumSince, currentPending, communicationDisabledUntil, avatarDecoration));
     }
 
     static Mono<RoleCreateEvent> guildRoleCreate(DispatchContext<GuildRoleCreate, Void> context) {

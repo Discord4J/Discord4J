@@ -18,6 +18,7 @@
 package discord4j.common.store.impl;
 
 import discord4j.discordjson.Id;
+import discord4j.discordjson.json.AvatarDecorationData;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
 
@@ -105,6 +106,11 @@ class EmptyUser implements UserData {
 
     @Override
     public Possible<Long> publicFlags() {
+        return Possible.absent();
+    }
+
+    @Override
+    public Possible<Optional<AvatarDecorationData>> avatarDecoration() {
         return Possible.absent();
     }
 }
