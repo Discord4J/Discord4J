@@ -158,12 +158,20 @@ public class LegacyWebhookExecuteSpec implements LegacySpec<MultipartRequest<Web
         return this;
     }
 
+    /**
+     * Get the thread id within the webhook's channel.
+     *
+     * @return The thread id.
+     */
+    public Possible<Snowflake> getThreadId() {
+        return this.threadId;
+    }
+
     @Override
     public MultipartRequest<WebhookExecuteRequest> asRequest() {
         return MultipartRequest.ofRequestAndFiles(
                 WebhookExecuteRequest
                         .builder()
-                        .threadId(threadId.isAbsent() ? Possible.absent() : Possible.of(Id.of(threadId.get().toString())))
                         .content(content)
                         .username(username)
                         .avatarUrl(avatarUrl)

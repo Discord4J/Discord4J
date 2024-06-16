@@ -434,9 +434,16 @@ public final class Webhook implements Entity {
                     }
                     LegacyWebhookExecuteSpec mutatedSpec = new LegacyWebhookExecuteSpec();
                     spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getWebhookService()
+
+                    if (mutatedSpec.getThreadId().isAbsent()) {
+                        return gateway.getRestClient().getWebhookService()
                             .executeWebhook(getId().asLong(), getToken().get(), wait, mutatedSpec.asRequest())
                             .map(data -> new Message(gateway, data));
+                    } else {
+                        return gateway.getRestClient().getWebhookService()
+                            .executeWebhook(getId().asLong(), getToken().get(), wait, mutatedSpec.getThreadId().get().asLong(), mutatedSpec.asRequest())
+                            .map(data -> new Message(gateway, data));
+                    }
                 }
         );
     }
