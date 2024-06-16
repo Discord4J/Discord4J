@@ -20,9 +20,10 @@ package discord4j.core.event.domain;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.channel.*;
 import discord4j.core.event.domain.guild.*;
+import discord4j.core.event.domain.interaction.*;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.*;
-import discord4j.core.event.domain.interaction.*;
+import discord4j.core.event.domain.monetization.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.core.event.domain.role.RoleUpdateEvent;
@@ -141,6 +142,14 @@ import discord4j.gateway.intent.Intent;
  *     <li>{@link ReconnectStartEvent}: a resumption or reconnection attempt has begun</li>
  *     <li>{@link ReconnectFailEvent}: a resumption or reconnection attempt has failed but can be retried</li>
  *     <li>{@link SessionInvalidatedEvent}: a gateway session has been invalidated</li>
+ * </ul>
+ *
+ * <h2>Monetization related events</h2>
+ *
+ * <ul>
+ *     <li>{@link EntitlementCreateEvent}: a new entitlement was created</li>
+ *     <li>{@link EntitlementDeleteEvent}: an entitlement was deleted</li>
+ *     <li>{@link EntitlementUpdateEvent}: an entitlement was updated</li>
  * </ul>
  */
 public abstract class Event {
