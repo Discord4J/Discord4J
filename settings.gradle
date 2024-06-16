@@ -1,3 +1,15 @@
+plugins {
+    id "com.gradle.develocity" version "3.17.1"
+}
+
+develocity {
+    buildScan {
+        publishing.onlyIf { false }
+        termsOfUseUrl.set("https://gradle.com/help/legal-terms-of-use")
+        termsOfUseAgree.set("yes")
+    }
+}
+
 rootProject.name = 'Discord4J'
 
 include 'core'

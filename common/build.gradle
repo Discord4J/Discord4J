@@ -24,7 +24,7 @@ gitProperties {
 
 jar {
     manifest {
-        attributes 'Implementation-Title': archivesBaseName,
+        attributes 'Implementation-Title': base.archivesName.get(),
                 'Implementation-Version': archiveVersion,
                 'Automatic-Module-Name': 'discord4j.common'
     }
