@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
  * @see <a href="https://discord.com/developers/docs/interactions/slash-commands#applicationcommand">
  * Application Command Object</a>
  */
-@Experimental
 public class ApplicationCommand implements DiscordObject {
 
     /** The maximum amount of characters that can be in an application command name. */
@@ -190,7 +189,25 @@ public class ApplicationCommand implements DiscordObject {
      * @return {@code true} if the command is available in DM, {@code false} otherwise.
      */
     public boolean isAvailableInDM() {
-        return data.dmPermission().toOptional().orElse(!this.getGuildId().isPresent());
+        return data.contexts().contains(ApplicationCommandContexts.PRIVATE_CHANNEL.getValue());
+    }
+
+    /**
+     * Gets the application integration types.
+     *
+     * @return A {@link List} of {@link ApplicationIntegrationType} representing the integration types.
+     */
+    public List<ApplicationIntegrationType> getIntegrationTypes() {
+        return data.integrationTypes().stream().map(ApplicationIntegrationType::of).collect(Collectors.toList());
+    }
+
+    /**
+     * Gets the contexts in which the command can be used.
+     *
+     * @return A {@link List} of {@link ApplicationCommandContexts} representing the contexts in which the command can be used.
+     */
+    public List<ApplicationCommandContexts> getContexts() {
+        return data.contexts().stream().map(ApplicationCommandContexts::of).collect(Collectors.toList());
     }
 
     /**
