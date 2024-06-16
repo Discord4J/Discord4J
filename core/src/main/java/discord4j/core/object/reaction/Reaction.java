@@ -124,4 +124,46 @@ public final class Reaction implements DiscordObject  {
                 "data=" + data +
                 '}';
     }
+
+    /**
+     * Represents the various type of Reaction.
+     * See <a href="https://discord.com/developers/docs/resources/channel#get-reactions-reaction-types">
+     *  Reaction Types</a>
+     */
+    public enum Type {
+        UNKNOWN(-1),
+        NORMAL(1),
+        BURST(2);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        Type(int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the type of action. It is guaranteed that invoking {@link #getValue()} from the returned enum will equal
+         * ({@link #equals(Object)}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The type of reaction.
+         */
+        public static Type of(final int value) {
+            switch (value) {
+                case 1: return NORMAL;
+                case 2: return BURST;
+                default: return UNKNOWN;
+            }
+        }
+    }
 }
