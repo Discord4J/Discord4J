@@ -22,5 +22,5 @@
 @SpecStyle
 package discord4j.core.spec;
 
-import discord4j.discordjson.MetaEncodingEnabled;
+import discord4j.discordjson.encoding.MetaEncodingEnabled;
 import reactor.util.annotation.NonNullApi;
