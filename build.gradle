@@ -4,7 +4,8 @@ plugins {
     id 'signing'
     id 'com.gorylenko.gradle-git-properties' version '2.3.2' apply false
     id 'com.github.ben-manes.versions' version '0.38.0'
-    id 'net.researchgate.release' version '2.8.1'
+    // TODO: Warning for Gradle 9 by https://github.com/researchgate/gradle-release/issues/379
+    id 'net.researchgate.release' version '3.0.2'
 }
 
 ext {
@@ -54,8 +55,10 @@ allprojects {
     version = project_version
     description = project_description
 
-    sourceCompatibility = project_jdk
-    targetCompatibility = project_jdk
+    java {
+        sourceCompatibility = project_jdk
+        targetCompatibility = project_jdk
+    }
 
     dependencies {
         api platform("io.projectreactor:reactor-bom:$reactor_bom_version")
@@ -73,11 +76,11 @@ allprojects {
         maven { url 'https://m2.dv8tion.net/releases' }
     }
 
-    configurations.all {
+    configurations.configureEach {
         resolutionStrategy.cacheChangingModulesFor 60, 'seconds'
     }
 
-    tasks.withType(Javadoc) {
+    tasks.withType(Javadoc).configureEach {
         options {
             encoding = 'UTF-8'
             tags = ["apiNote:a:API Note:",
@@ -87,29 +90,29 @@ allprojects {
             addStringOption 'encoding', 'UTF-8'
             // adding links to javadocs for filling specific classes when not existing inside current javadoc
             links = [
-                    jdk_javadoc,
-                    "https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/2.12.7/",
-                    "https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
-                    "https://projectreactor.io/docs/core/3.4.26/api/",
-                    "https://projectreactor.io/docs/netty/1.0.27/api/",
-                    "https://projectreactor.io/docs/extra/3.4.9/api/",
-                    "https://netty.io/4.1/api/"
+                jdk_javadoc,
+                "https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/2.12.7/",
+                "https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
+                "https://projectreactor.io/docs/core/3.4.26/api/",
+                "https://projectreactor.io/docs/netty/1.0.27/api/",
+                "https://projectreactor.io/docs/extra/3.4.9/api/",
+                "https://netty.io/4.1/api/"
             ]
         }
         if (JavaVersion.current().isJava9Compatible()) {
             options.addBooleanOption('html5', true)
         }
-        if (JavaVersion.current().isJava11Compatible()) {
+        if (JavaVersion.current().isJava11Compatible() && !JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_13)) {
             options.addBooleanOption('-no-module-directories', true)
         }
     }
 
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
         options.incremental = true
     }
 
-    task downloadDependencies() {
+    tasks.register('downloadDependencies') {
         description 'Download all dependencies to the Gradle cache'
         doLast {
             configurations.findAll { it.canBeResolved }.files
@@ -123,18 +126,23 @@ allprojects {
 }
 
 subprojects {
-    archivesBaseName = "discord4j-$project.name"
 
-    tasks.withType(Javadoc) {
-        title = "$archivesBaseName ${version} API"
-        options.windowTitle = "$archivesBaseName ($version)"
+    base {
+        archivesName = "discord4j-$project.name"
+    }
+
+    tasks.withType(Javadoc).configureEach {
+        title = "${base.archivesName.get()} ${version} API"
+        options.windowTitle = "${base.archivesName.get()} ($version)"
     }
 
     publishing {
         publications {
             mavenJava(MavenPublication) {
                 from components.java
-                artifactId archivesBaseName
+                afterEvaluate {
+                    artifactId = jar.archiveBaseName.get()
+                }
 
                 versionMapping {
                     usage('java-api') {
@@ -221,11 +229,11 @@ release {
     tagCommitMessage = 'Release version'
     newVersionCommitMessage = 'Next development version'
     git {
-        requireBranch = ''
+        requireBranch.set('')
     }
 }
 
-task updateReadme {
+tasks.register('updateReadme') {
     if (isRelease && !version.contains('M') && !version.contains('RC')) {
         doLast {
             copy {
