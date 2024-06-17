@@ -16,15 +16,18 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.core.object.ApplicationRoleConnectionMetadata;
 import discord4j.core.spec.ApplicationEditMono;
 import discord4j.core.spec.ApplicationEditSpec;
 import discord4j.discordjson.json.ApplicationInfoData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.discordjson.json.ApplicationRoleConnectionMetadataData;
 import discord4j.rest.util.Image;
 import discord4j.common.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -203,6 +206,33 @@ public final class ApplicationInfo implements Entity {
             return Flag.of(publicFlags);
         }
         return EnumSet.noneOf(Flag.class);
+    }
+
+    /**
+     * Request the {@link ApplicationRoleConnectionMetadata} for this application.
+     *
+     * @return A {@link Flux} where, upon successful completion, emits the {@link ApplicationRoleConnectionMetadata} for this application.
+     * If an error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<ApplicationRoleConnectionMetadata> getRoleConnectionMetadata() {
+        return this.gateway.rest()
+            .getApplicationService()
+            .getApplicationRoleConnectionMetadata(this.getId().asLong())
+            .map(ApplicationRoleConnectionMetadata::new);
+    }
+
+    /**
+     * Request to set the new {@link ApplicationRoleConnectionMetadata} for this application.
+     *
+     * @param metadata The new metadata to set.
+     * @return A {@link Flux} where, upon successful completion, emits the new {@link ApplicationRoleConnectionMetadata}
+     * for this application. If an error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<ApplicationRoleConnectionMetadata> setRoleConnectionMetadata(List<ApplicationRoleConnectionMetadataData> metadata) {
+        return this.gateway.rest()
+            .getApplicationService()
+            .modifyApplicationRoleConnectionMetadata(this.getId().asLong(), metadata)
+            .map(ApplicationRoleConnectionMetadata::new);
     }
 
     /**
