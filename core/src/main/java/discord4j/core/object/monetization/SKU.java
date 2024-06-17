@@ -16,6 +16,8 @@ import java.util.EnumSet;
 @Experimental // These methods could not be tested due to the lack of a Discord verified application
 public class SKU implements Entity {
 
+    private static final String SKU_URL_SCHEME = "https://discord.com/application-directory/%s/store/%s";
+
     private final GatewayDiscordClient gateway;
     private final SkuData data;
 
@@ -85,6 +87,15 @@ public class SKU implements Entity {
      */
     public SkuData getSkuData() {
         return data;
+    }
+
+    /**
+     * Get the URL of the SKU.
+     *
+     * @return The URL of the SKU.
+     */
+    public String getUrl() {
+        return String.format(SKU.SKU_URL_SCHEME, data.applicationId().asString(), data.id().asString());
     }
 
     @Override

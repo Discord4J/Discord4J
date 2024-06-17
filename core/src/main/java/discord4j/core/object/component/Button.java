@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.component;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.json.ImmutableComponentData;
@@ -38,7 +39,7 @@ public class Button extends ActionComponent {
      * @return A button with the given data.
      */
     public static Button primary(String customId, String label) {
-        return of(Button.Style.PRIMARY, customId, null, label, null);
+        return of(Button.Style.PRIMARY, customId, null, label, null, null);
     }
 
     /**
@@ -49,7 +50,7 @@ public class Button extends ActionComponent {
      * @return A button with the given data.
      */
     public static Button primary(String customId, ReactionEmoji emoji) {
-        return of(Button.Style.PRIMARY, customId, emoji, null, null);
+        return of(Button.Style.PRIMARY, customId, emoji, null, null, null);
     }
 
     /**
@@ -61,7 +62,7 @@ public class Button extends ActionComponent {
      * @return A button with the given data.
      */
     public static Button primary(String customId, ReactionEmoji emoji, String label) {
-        return of(Button.Style.PRIMARY, customId, emoji, label, null);
+        return of(Button.Style.PRIMARY, customId, emoji, label, null, null);
     }
 
     /**
@@ -72,7 +73,7 @@ public class Button extends ActionComponent {
      * @return A button with the given data.
      */
     public static Button secondary(String customId, String label) {
-        return of(Button.Style.SECONDARY, customId, null, label, null);
+        return of(Button.Style.SECONDARY, customId, null, label, null, null);
     }
 
     /**
@@ -83,7 +84,7 @@ public class Button extends ActionComponent {
      * @return A button with the given data.
      */
     public static Button secondary(String customId, ReactionEmoji emoji) {
-        return of(Button.Style.SECONDARY, customId, emoji, null, null);
+        return of(Button.Style.SECONDARY, customId, emoji, null, null, null);
     }
 
     /**
@@ -95,7 +96,7 @@ public class Button extends ActionComponent {
      * @return A button with the given data.
      */
     public static Button secondary(String customId, ReactionEmoji emoji, String label) {
-        return of(Button.Style.SECONDARY, customId, emoji, label, null);
+        return of(Button.Style.SECONDARY, customId, emoji, label, null, null);
     }
 
     /**
@@ -106,7 +107,7 @@ public class Button extends ActionComponent {
      * @return A button with the given data.
      */
     public static Button success(String customId, String label) {
-        return of(Button.Style.SUCCESS, customId, null, label, null);
+        return of(Button.Style.SUCCESS, customId, null, label, null, null);
     }
 
     /**
@@ -117,7 +118,7 @@ public class Button extends ActionComponent {
      * @return A button with the given data.
      */
     public static Button success(String customId, ReactionEmoji emoji) {
-        return of(Button.Style.SUCCESS, customId, emoji, null, null);
+        return of(Button.Style.SUCCESS, customId, emoji, null, null, null);
     }
 
     /**
@@ -129,7 +130,7 @@ public class Button extends ActionComponent {
      * @return A button with the given data.
      */
     public static Button success(String customId, ReactionEmoji emoji, String label) {
-        return of(Button.Style.SUCCESS, customId, emoji, label, null);
+        return of(Button.Style.SUCCESS, customId, emoji, label, null, null);
     }
 
     /**
@@ -140,7 +141,7 @@ public class Button extends ActionComponent {
      * @return A button with the given data.
      */
     public static Button danger(String customId, String label) {
-        return of(Button.Style.DANGER, customId, null, label, null);
+        return of(Button.Style.DANGER, customId, null, label, null, null);
     }
 
     /**
@@ -151,7 +152,7 @@ public class Button extends ActionComponent {
      * @return A button with the given data.
      */
     public static Button danger(String customId, ReactionEmoji emoji) {
-        return of(Button.Style.DANGER, customId, emoji, null, null);
+        return of(Button.Style.DANGER, customId, emoji, null, null, null);
     }
 
     /**
@@ -163,7 +164,7 @@ public class Button extends ActionComponent {
      * @return A button with the given data.
      */
     public static Button danger(String customId, ReactionEmoji emoji, String label) {
-        return of(Button.Style.DANGER, customId, emoji, label, null);
+        return of(Button.Style.DANGER, customId, emoji, label, null, null);
     }
 
     /**
@@ -174,7 +175,7 @@ public class Button extends ActionComponent {
      * @return A button with the given data.
      */
     public static Button link(String url, String label) {
-        return of(Button.Style.LINK, null, null, label, url);
+        return of(Button.Style.LINK, null, null, label, url, null);
     }
 
     /**
@@ -185,7 +186,7 @@ public class Button extends ActionComponent {
      * @return A button with the given data.
      */
     public static Button link(String url, ReactionEmoji emoji) {
-        return of(Button.Style.LINK, null, emoji, null, url);
+        return of(Button.Style.LINK, null, emoji, null, url, null);
     }
 
     /**
@@ -197,10 +198,15 @@ public class Button extends ActionComponent {
      * @return A button with the given data.
      */
     public static Button link(String url, ReactionEmoji emoji, String label) {
-        return of(Button.Style.LINK, null, emoji, label, url);
+        return of(Button.Style.LINK, null, emoji, label, url, null);
     }
 
-    private static Button of(Style style, @Nullable String customId, @Nullable ReactionEmoji emoji, @Nullable String label, @Nullable String url) {
+    public static Button premium(Snowflake skuId) {
+        return of (Button.Style.PREMIUM, null, null, null, null, skuId.asString());
+    }
+
+    private static Button of(Style style, @Nullable String customId, @Nullable ReactionEmoji emoji,
+                             @Nullable String label, @Nullable String url, @Nullable String skuId) {
         ImmutableComponentData.Builder builder = ComponentData.builder()
                 .type(MessageComponent.Type.BUTTON.getValue())
                 .style(style.getValue());
@@ -216,6 +222,9 @@ public class Button extends ActionComponent {
 
         if (url != null)
             builder.url(url);
+
+        if (skuId != null)
+            builder.skuId(skuId);
 
         return new Button(builder.build());
     }
@@ -273,6 +282,15 @@ public class Button extends ActionComponent {
     }
 
     /**
+     * Get the button's sku id.
+     *
+     * @return The button's sku id if present.
+     */
+    public Optional<Snowflake> getSkuId() {
+        return getData().skuId().toOptional().map(Snowflake::of);
+    }
+
+    /**
      * Gets whether button is disabled.
      *
      * @return Whether the button is disabled.
@@ -289,11 +307,11 @@ public class Button extends ActionComponent {
     public Button disabled() {
         return disabled(true);
     }
-    
+
     /**
      * Creates a new button with the same data as this one, but depending on the value param it may be disabled or not.
      *
-     * @param value True if the button should be disabled otherwise False.  
+     * @param value True if the button should be disabled otherwise False.
      * @return A new possibly disabled button with the same data as this one.
      */
     public Button disabled(boolean value) {
@@ -311,7 +329,8 @@ public class Button extends ActionComponent {
         SECONDARY(2),
         SUCCESS(3),
         DANGER(4),
-        LINK(5);
+        LINK(5),
+        PREMIUM(6);
 
         private final int value;
 
@@ -330,6 +349,7 @@ public class Button extends ActionComponent {
                 case 3: return SUCCESS;
                 case 4: return DANGER;
                 case 5: return LINK;
+                case 6: return PREMIUM;
                 default: return UNKNOWN;
             }
         }
