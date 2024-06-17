@@ -81,6 +81,15 @@ public class RoleTags implements DiscordObject {
         return !data.premiumSubscriber().isAbsent();
     }
 
+    /**
+     * Gets whether this role is a guild's linked role
+     *
+     * @return Whether this role is a guild's linked role
+     */
+    public boolean isGuildLinkedRole() {
+        return !data.guildConnections().isAbsent();
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;

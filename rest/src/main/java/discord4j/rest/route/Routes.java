@@ -1222,6 +1222,25 @@ public abstract class Routes {
 
     public static final Route APPLICATION_COMMAND_PERMISSIONS_BULK_MODIFY = Route.put("/applications/{application.id}/guilds/{guild.id}/commands/permissions");
 
+    ///////////////////////////////////////////////////
+    // Application Role Connection Metadata Resource //
+    ///////////////////////////////////////////////////
+
+    /**
+     * Returns a list of application role connection metadata objects for the given application.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/application-role-connection-metadata#get-application-role-connection-metadata-records">https://discord.com/developers/docs/resources/application-role-connection-metadata#get-application-role-connection-metadata-records</a>
+     */
+    public static final Route APPLICATION_ROLE_CONNECTION_METADATA_GET = Route.get("/applications/{application.id}/role-connections/metadata");
+
+    /**
+     * Updates and returns a list of application role connection metadata objects for the given application.
+     * An application can have a maximum of 5 metadata records.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/application-role-connection-metadata#modify-application-role-connection-metadata">https://discord.com/developers/docs/resources/application-role-connection-metadata#modify-application-role-connection-metadata</a>
+     */
+    public static final Route APPLICATION_ROLE_CONNECTION_METADATA_MODIFY = Route.put("/applications/{application.id}/role-connections/metadata");
+
     ///////////////////////////////////////////
     ////////// Interaction Resource ///////////
     ///////////////////////////////////////////
