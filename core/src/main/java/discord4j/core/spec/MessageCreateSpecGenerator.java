@@ -43,6 +43,8 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
 
     Possible<String> nonce();
 
+    Possible<Boolean> enforceNonce();
+
     Possible<Boolean> tts();
 
     Possible<List<EmbedCreateSpec>> embeds();
@@ -68,6 +70,7 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
         MessageCreateRequest json = MessageCreateRequest.builder()
                 .content(content())
                 .nonce(nonce())
+                .enforceNonce(enforceNonce())
                 .tts(tts())
                 .embeds(mapPossible(embeds(), embeds -> embeds.stream()
                         .map(EmbedCreateSpec::asRequest)
