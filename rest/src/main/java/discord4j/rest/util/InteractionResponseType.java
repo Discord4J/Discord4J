@@ -58,6 +58,7 @@ public enum InteractionResponseType {
     /**
      * Response to a supported interaction with a notification that this interaction is only available to premium guilds or users.
      */
+    @Deprecated
     PREMIUM_REQUIRED(10);
 
     /**

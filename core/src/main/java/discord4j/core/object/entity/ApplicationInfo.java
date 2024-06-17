@@ -45,6 +45,9 @@ public final class ApplicationInfo implements Entity {
     /** The path for application icon image URLs. */
     private static final String ICON_IMAGE_PATH = "app-icons/%s/%s";
 
+    /** The path for the store URL. */
+    private static final String STORE_URL_SCHEME = "https://discord.com/application-directory/%s/store";
+
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
 
@@ -262,6 +265,15 @@ public final class ApplicationInfo implements Entity {
             return Flag.of(publicFlags);
         }
         return EnumSet.noneOf(Flag.class);
+    }
+
+    /**
+     * Get the store URL for the current application.
+     *
+     * @return the store url for the current application
+     */
+    public String getStoreUrl() {
+        return String.format(ApplicationInfo.STORE_URL_SCHEME, getId().asString());
     }
 
     /**
