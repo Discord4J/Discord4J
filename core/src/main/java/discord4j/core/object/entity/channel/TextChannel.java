@@ -17,9 +17,6 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.ThreadListPart;
-import discord4j.core.object.entity.Message;
-import discord4j.core.spec.StartThreadFromMessageSpec;
 import discord4j.core.spec.StartThreadWithoutMessageMono;
 import discord4j.core.spec.StartThreadWithoutMessageSpec;
 import discord4j.core.spec.TextChannelEditMono;
@@ -128,22 +125,15 @@ public final class TextChannel extends BaseTopLevelGuildChannel implements TopLe
 
     /**
      * Requests to retrieve the joined private archived threads for this channel.
-     * <p>
-     * The thread list parts can be {@link ThreadListPart#combine(ThreadListPart) combined} for easier querying. For example,
-     * <pre>
-     * {@code
-     * channel.getJoinedPrivateArchivedThreads()
-     *     .take(10)
-     *     .reduce(ThreadListPart::combine)
-     * }
-     * </pre>
      *
-     * @return A {@link Flux} that continually parts of this channel's thread list. If an error is received, it is emitted
-     * through the {@code Flux}.
+     * @return A {@link Flux} that continually emits the joined private archived {@link ThreadChannel threads} of the channel.
+     * If an error is received, it is emitted through the {@code Flux}.
      */
-    public Flux<ThreadListPart> getJoinedPrivateArchivedThreads() {
+    public Flux<ThreadChannel> getJoinedPrivateArchivedThreads() {
         return getRestChannel().getJoinedPrivateArchivedThreads()
-            .map(data -> new ThreadListPart(getClient(), data));
+            .map(ListThreadsData::threads)
+            .flatMap(Flux::fromIterable)
+            .map(channelData -> new ThreadChannel(getClient(), channelData));
     }
 
     @Override
