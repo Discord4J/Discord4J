@@ -227,7 +227,7 @@ public class ChannelService extends RestService {
                 .bodyToMono(Void.class);
     }
 
-    public Mono<ChannelData> startThreadWithMessage(long channelId, long messageId, StartThreadRequest request) {
+    public Mono<ChannelData> startThreadWithMessage(long channelId, long messageId, StartThreadFromMessageRequest request) {
         return Routes.START_THREAD_WITH_MESSAGE.newRequest(channelId, messageId)
                 .body(request)
                 .exchange(getRouter())

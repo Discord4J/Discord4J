@@ -19,19 +19,25 @@ package discord4j.core.object.entity.channel;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.FollowedChannel;
+import discord4j.core.object.ThreadListPart;
+import discord4j.core.object.entity.Message;
 import discord4j.core.spec.NewsChannelEditMono;
 import discord4j.core.spec.NewsChannelEditSpec;
+import discord4j.core.spec.StartThreadFromMessageMono;
+import discord4j.core.spec.StartThreadWithoutMessageMono;
+import discord4j.core.spec.StartThreadWithoutMessageSpec;
 import discord4j.core.spec.legacy.LegacyNewsChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.NewsChannelFollowRequest;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 import java.util.function.Consumer;
 
 /** A Discord news channel. */
-public final class NewsChannel extends BaseTopLevelGuildChannel implements TopLevelGuildMessageChannel {
+public final class NewsChannel extends BaseTopLevelGuildChannel implements TopLevelGuildMessageWithThreadsChannel {
 
     /**
      * Constructs an {@code NewsChannel} with an associated {@link GatewayDiscordClient} and Discord data.
@@ -106,6 +112,18 @@ public final class NewsChannel extends BaseTopLevelGuildChannel implements TopLe
                         .webhookChannelId(targetChannelId.asString())
                         .build())
                 .map(data -> new FollowedChannel(getClient(), data));
+    }
+
+    @Override
+    public Mono<ThreadChannel> startPublicThreadWithoutMessage(StartThreadWithoutMessageSpec spec) {
+        spec = spec.withType(ThreadChannel.Type.GUILD_NEWS_THREAD);
+
+        return TopLevelGuildMessageWithThreadsChannel.super.startPublicThreadWithoutMessage(spec);
+    }
+
+    @Override
+    public StartThreadWithoutMessageMono startPublicThreadWithoutMessage(String threadName) {
+        return StartThreadWithoutMessageMono.of(threadName, ThreadChannel.Type.GUILD_NEWS_THREAD, this);
     }
 
     @Override

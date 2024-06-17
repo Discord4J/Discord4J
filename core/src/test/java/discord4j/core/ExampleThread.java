@@ -27,9 +27,8 @@ import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.ThreadChannel;
-import discord4j.core.object.entity.channel.TopLevelGuildMessageChannel;
-import discord4j.core.spec.StartThreadSpec;
-import discord4j.core.spec.StartThreadWithoutMessageSpec;
+import discord4j.core.object.entity.channel.TopLevelGuildMessageWithThreadsChannel;
+import discord4j.core.spec.StartThreadFromMessageSpec;
 import discord4j.core.spec.ThreadChannelEditSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -167,11 +166,8 @@ public class ExampleThread {
                             return event.deferReply()
                                     .withEphemeral(true)
                                     .then(event.getInteraction().getChannel())
-                                    .ofType(TopLevelGuildMessageChannel.class) // TextChannel or NewsChannel
-                                    .flatMap(ch -> ch.startThread(StartThreadWithoutMessageSpec.builder()
-                                            .name(title)
-                                            .type(ThreadChannel.Type.GUILD_PUBLIC_THREAD)
-                                            .build()))
+                                    .ofType(TopLevelGuildMessageWithThreadsChannel.class) // TextChannel or NewsChannel
+                                    .flatMap(ch -> ch.startPublicThreadWithoutMessage(title))
                                     .then(event.editReply("Done!"))
                                     .onErrorResume(ex -> event.editReply("Error: " + ex).then(Mono.error(ex)));
 
@@ -274,7 +270,7 @@ public class ExampleThread {
                             return event.deferReply()
                                     .withEphemeral(true)
                                     .then(event.getTargetMessage())
-                                    .flatMap(msg -> msg.startThread(StartThreadSpec.builder()
+                                    .flatMap(msg -> msg.startThread(StartThreadFromMessageSpec.builder()
                                             .name("Thread from " + msg.getId())
                                             .build()))
                                     .then(event.editReply("Done!"))

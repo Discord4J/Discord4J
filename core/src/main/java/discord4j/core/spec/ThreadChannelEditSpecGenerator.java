@@ -18,13 +18,16 @@ package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.ThreadChannel;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ThreadModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -47,6 +50,10 @@ interface ThreadChannelEditSpecGenerator extends AuditSpec<ThreadModifyRequest> 
 
     Possible<Boolean> invitable();
 
+    Possible<EnumSet<Channel.Flag>> flags();
+
+    Possible<List<Snowflake>> appliedTags();
+
     @Override
     default ThreadModifyRequest asRequest() {
         return ThreadModifyRequest.builder()
@@ -56,6 +63,8 @@ interface ThreadChannelEditSpecGenerator extends AuditSpec<ThreadModifyRequest> 
             .autoArchiveDuration(mapPossible(autoArchiveDuration(), ThreadChannel.AutoArchiveDuration::getValue))
             .locked(locked())
             .invitable(invitable())
+            .appliedTags(mapPossible(appliedTags(), tags -> tags.stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList())))
+            .flags(mapPossible(flags(), Channel.Flag::toBitfield))
             .build();
     }
 }
