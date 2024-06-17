@@ -1,8 +1,9 @@
 package discord4j.core.object.entity.channel;
 
-import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.ThreadListPart;
 import discord4j.core.object.entity.ForumTag;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.reaction.DefaultReaction;
 import discord4j.core.spec.ForumChannelEditSpec;
 import discord4j.core.spec.ForumThreadMessageCreateSpec;
@@ -10,6 +11,7 @@ import discord4j.core.spec.StartThreadInForumChannelMono;
 import discord4j.core.spec.StartThreadInForumChannelSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.ListThreadsData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -171,9 +173,35 @@ public final class ForumChannel extends BaseTopLevelGuildChannel implements Cate
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<ThreadChannel> getAllThreads() {
-        return getClient().getGuildChannels(getGuildId())
-            .ofType(ThreadChannel.class)
+        return Flux.merge(getActiveThreads(), getArchivedThreads());
+    }
+
+    /**
+     * Request to retrieve all active threads in this forum channel.
+     *
+     * @return A {@link Flux} that continually emits the {@link ThreadChannel threads} of the channel. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<ThreadChannel> getActiveThreads() {
+        return getClient().getGuildById(getGuildId())
+            .flatMapMany(Guild::getActiveThreads)
+            .map(ThreadListPart::getThreads)
+            .flatMap(Flux::fromIterable)
             .filter(thread -> thread.getParentId().map(id -> id.equals(getId())).orElse(false));
+    }
+
+    /**
+     * Request to retrieve all archived threads in this forum channel.
+     *
+     * @return A {@link Flux} that continually emits the {@link ThreadChannel threads} of the channel. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<ThreadChannel> getArchivedThreads() {
+        return getRestChannel()
+            .getPublicArchivedThreads()
+            .map(ListThreadsData::threads)
+            .flatMap(Flux::fromIterable)
+            .map(channelData -> new ThreadChannel(getClient(), channelData));
     }
 
     /**

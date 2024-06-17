@@ -1,11 +1,13 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.object.ThreadListPart;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.StartThreadFromMessageMono;
 import discord4j.core.spec.StartThreadFromMessageSpec;
 import discord4j.core.spec.StartThreadWithoutMessageMono;
 import discord4j.core.spec.StartThreadWithoutMessageSpec;
+import discord4j.discordjson.json.ListThreadsData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -21,29 +23,35 @@ public interface TopLevelGuildMessageWithThreadsChannel extends TopLevelGuildMes
      * received, it is emitted through the {@code Flux}.
      */
     default Flux<ThreadChannel> getAllThreads() {
-        return getClient().getGuildChannels(getGuildId())
-            .ofType(ThreadChannel.class)
+        return Flux.merge(getActiveThreads(), getPublicArchivedThreads());
+    }
+
+    /**
+     * Request to retrieve all active threads in this forum channel.
+     *
+     * @return A {@link Flux} that continually emits the {@link ThreadChannel threads} of the channel. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    default Flux<ThreadChannel> getActiveThreads() {
+        return getClient().getGuildById(getGuildId())
+            .flatMapMany(Guild::getActiveThreads)
+            .map(ThreadListPart::getThreads)
+            .flatMap(Flux::fromIterable)
             .filter(thread -> thread.getParentId().map(id -> id.equals(getId())).orElse(false));
     }
 
     /**
      * Requests to retrieve the public archived threads for this channel.
-     * <p>
-     * The audit log parts can be {@link ThreadListPart#combine(ThreadListPart) combined} for easier querying. For example,
-     * <pre>
-     * {@code
-     * channel.getPublicArchivedThreads()
-     *     .take(10)
-     *     .reduce(ThreadListPart::combine)
-     * }
-     * </pre>
      *
-     * @return A {@link Flux} that continually parts of this channel's thread list. If an error is received, it is emitted
-     * through the {@code Flux}.
+     * @return A {@link Flux} that continually emits the public archived {@link ThreadChannel threads} of the channel.
+     * If an error is received, it is emitted through the {@code Flux}.
      */
-    default Flux<ThreadListPart> getPublicArchivedThreads() {
-        return getRestChannel().getPublicArchivedThreads()
-            .map(data -> new ThreadListPart(getClient(), data));
+    default Flux<ThreadChannel> getPublicArchivedThreads() {
+        return getRestChannel()
+            .getPublicArchivedThreads()
+            .map(ListThreadsData::threads)
+            .flatMap(Flux::fromIterable)
+            .map(channelData -> new ThreadChannel(getClient(), channelData));
     }
 
     /**

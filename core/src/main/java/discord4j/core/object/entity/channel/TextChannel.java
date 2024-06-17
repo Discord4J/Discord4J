@@ -27,6 +27,7 @@ import discord4j.core.spec.TextChannelEditSpec;
 import discord4j.core.spec.legacy.LegacyTextChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.ListThreadsData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -106,24 +107,23 @@ public final class TextChannel extends BaseTopLevelGuildChannel implements TopLe
                 .cast(TextChannel.class);
     }
 
+    @Override
+    public Flux<ThreadChannel> getAllThreads() {
+        return Flux.merge(getActiveThreads(), getPublicArchivedThreads(), getPrivateArchivedThreads());
+    }
+
     /**
      * Requests to retrieve the private archived threads for this channel.
-     * <p>
-     * The thread list parts can be {@link ThreadListPart#combine(ThreadListPart) combined} for easier querying. For example,
-     * <pre>
-     * {@code
-     * channel.getPrivateArchivedThreads()
-     *     .take(10)
-     *     .reduce(ThreadListPart::combine)
-     * }
-     * </pre>
      *
-     * @return A {@link Flux} that continually parts of this channel's thread list. If an error is received, it is emitted
-     * through the {@code Flux}.
+     * @return A {@link Flux} that continually emits the private archived {@link ThreadChannel threads} of the channel.
+     * If an error is received, it is emitted through the {@code Flux}.
      */
-    public Flux<ThreadListPart> getPrivateArchivedThreads() {
-        return getRestChannel().getPrivateArchivedThreads()
-            .map(data -> new ThreadListPart(getClient(), data));
+    public Flux<ThreadChannel> getPrivateArchivedThreads() {
+        return getRestChannel()
+            .getPrivateArchivedThreads()
+            .map(ListThreadsData::threads)
+            .flatMap(Flux::fromIterable)
+            .map(channelData -> new ThreadChannel(getClient(), channelData));
     }
 
     /**
