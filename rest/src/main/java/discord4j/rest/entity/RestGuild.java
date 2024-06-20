@@ -431,7 +431,7 @@ public class RestGuild {
      * @return A {@link Mono} where, upon successful completion, emits the modified {@link OnboardingData}.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<OnboardingData> modifyOnboarding(OnboardingData request, @Nullable String reason) {
+    public Mono<OnboardingData> modifyOnboarding(OnboardingEditData request, @Nullable String reason) {
         return this.restClient.getGuildService().modifyOnboarding(this.id, request, reason);
     }
 
