@@ -117,7 +117,7 @@ public class ApplicationTeamMember implements DiscordObject {
      * @return The user's role on the team.
      */
     public TeamMemberRole getRole() {
-        return TeamMemberRole.of(data.role());
+        return data.role().toOptional().map(TeamMemberRole::of).orElse(TeamMemberRole.ADMIN);
     }
 
     /**
