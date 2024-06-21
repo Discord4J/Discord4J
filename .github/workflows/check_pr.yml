@@ -17,4 +17,4 @@ jobs:
             -   uses: superbrothers/close-pull-request@v3
                 id: "master_branch"
                 with:
-                    comment: "This Pull Request is using a release branch this can cause issues in the maintenance of the Pull Request, please create a new branch instead."
+                    comment: "This Pull Request is created from a restricted branch name. This can cause issues in the maintenance of the Pull Request; please create a new branch instead."
