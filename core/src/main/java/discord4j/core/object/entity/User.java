@@ -269,6 +269,16 @@ public class User implements Entity {
     }
 
     /**
+     * Gets the user avatar decoration, if present.
+     *
+     * @return The user avatar decoration, if present.
+     */
+    public Optional<AvatarDecoration> getAvatarDecoration() {
+        return Possible.flatOpt(data.avatarDecoration())
+            .map(data -> new AvatarDecoration(this.getClient(), data));
+    }
+
+    /**
      * Gets whether the user is a bot.
      *
      * @return {@code true} if this user is a bot, {@code false} otherwise.
