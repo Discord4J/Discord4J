@@ -2,10 +2,10 @@ package discord4j.core.object;
 
 import discord4j.discordjson.json.ApplicationIntegrationTypeConfigurationData;
 import discord4j.discordjson.json.InstallParamsData;
+import discord4j.rest.util.PermissionSet;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Represents the configuration of an integration type
@@ -34,7 +34,7 @@ public class ApplicationIntegrationTypeConfiguration {
      *
      * @return The scopes of this configuration
      */
-    public List<String> scopes() {
+    public List<String> getScopes() {
         return this.data.oauth2InstallParams()
             .toOptional()
             .map(InstallParamsData::scopes)
@@ -46,10 +46,12 @@ public class ApplicationIntegrationTypeConfiguration {
      *
      * @return The permissions of this configuration
      */
-    public Optional<String> permissions() {
+    public PermissionSet getPermissions() {
         return this.data.oauth2InstallParams()
             .toOptional()
-            .map(InstallParamsData::permissions);
+            .map(InstallParamsData::permissions)
+            .map(PermissionSet::of)
+            .orElse(PermissionSet.none());
     }
 
 }
