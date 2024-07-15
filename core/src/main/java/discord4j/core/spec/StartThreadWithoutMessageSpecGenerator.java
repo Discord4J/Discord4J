@@ -17,8 +17,9 @@
 
 package discord4j.core.spec;
 
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.entity.channel.ThreadChannel;
-import discord4j.core.object.entity.channel.TopLevelGuildMessageChannel;
+import discord4j.core.object.entity.channel.TopLevelGuildMessageWithThreadsChannel;
 import discord4j.discordjson.json.StartThreadWithoutMessageRequest;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
@@ -72,11 +73,20 @@ public interface StartThreadWithoutMessageSpecGenerator extends AuditSpec<StartT
 @Value.Immutable(builder = false)
 abstract class StartThreadWithoutMessageMonoGenerator extends Mono<ThreadChannel> implements StartThreadWithoutMessageSpecGenerator {
 
-    abstract TopLevelGuildMessageChannel channel();
+    abstract TopLevelGuildMessageWithThreadsChannel channel();
 
     @Override
     public void subscribe(CoreSubscriber<? super ThreadChannel> actual) {
-        channel().startThread(StartThreadWithoutMessageSpec.copyOf(this)).subscribe(actual);
+        TopLevelGuildMessageWithThreadsChannel channel = channel();
+
+        if (this.type().isPublic()) {
+            channel.startPublicThreadWithoutMessage(StartThreadWithoutMessageSpec.copyOf(this)).subscribe(actual);
+        } else if (channel instanceof TextChannel) {
+            ((TextChannel) channel).startPrivateThread(StartThreadWithoutMessageSpec.copyOf(this)).subscribe(actual);
+        } else {
+            Mono.<ThreadChannel>error(new IllegalArgumentException(this.type().name() + " type cannot be used to start a thread without a message in a " + channel.getType().name() + " channel!"))
+                .subscribe(actual);
+        }
     }
 
     @Override
