@@ -19,8 +19,10 @@ package discord4j.core.object.entity.channel;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.core.spec.PollCreateSpec;
 import discord4j.core.spec.legacy.LegacyMessageCreateSpec;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.MessageData;
@@ -103,6 +105,15 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
                     return getRestChannel().createMessage(actualSpec.asRequest());
                 })
                 .map(data -> new Message(getClient(), data));
+    }
+
+    @Override
+    public Mono<Poll> createPoll(PollCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return createMessage()
+            .withPoll(spec.asRequest())
+            .map(Message::getPoll)
+            .flatMap(Mono::justOrEmpty);
     }
 
     @Override

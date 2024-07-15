@@ -26,6 +26,7 @@ import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -34,6 +35,7 @@ import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.spec.legacy.LegacyMessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.PollData;
 import discord4j.discordjson.json.SuppressEmbedsRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
@@ -835,6 +837,28 @@ public final class Message implements Entity {
         return gateway.getRestClient().getChannelService()
                 .publishMessage(getChannelId().asLong(), getId().asLong())
                 .map(data -> new Message(gateway, data));
+    }
+
+    /**
+     * Get the poll in the current message.
+     *
+     * @return An {@link Optional} containing the {@link Poll} if present, otherwise {@link Optional#empty()}.
+     * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled and
+     * the content cannot be accessed
+     */
+    public Optional<Poll> getPoll() {
+        Optional<PollData> pollData = this.data.poll().toOptional();
+
+        // If we already have the poll data, we can create the Poll object
+        if (pollData.isPresent()) {
+            return pollData.map(data -> new Poll(this.gateway, data, this.data.channelId().asLong(), this.data.id().asLong()));
+        }
+
+        // We need the MESSAGE_CONTENT intent to access the poll
+        this.checkIfMessageContentAccessIsAllowed();
+
+        // Well, we should have access to the content, but it's actually empty
+        return Optional.empty();
     }
 
     /**
