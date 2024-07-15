@@ -218,7 +218,12 @@ public class AutoModRule implements Entity {
         /**
          * Check if content contains more unique mentions than allowed
          */
-        MENTION_SPAM(5);
+        MENTION_SPAM(5),
+
+        /**
+         * Check if member profile contains words from a user defined list of keywords
+         */
+        MEMBER_PROFILE(6);
 
         /**
          * The underlying value as represented by Discord.
@@ -272,7 +277,12 @@ public class AutoModRule implements Entity {
         /**
          * When a member sends or edits a message in the guild
          */
-        MESSAGE_SEND(1);
+        MESSAGE_SEND(1),
+
+        /**
+         * When a member edits their profile
+         */
+        MEMBER_UPDATE(2);
 
         /**
          * The underlying value as represented by Discord.
@@ -305,10 +315,12 @@ public class AutoModRule implements Entity {
          * @return The type of message.
          */
         public static AutoModRule.EventType of(final int value) {
-            switch (value) {
-                case 1: return MESSAGE_SEND;
-                default: return UNKNOWN;
+            for (AutoModRule.EventType eventType : values()) {
+                if (eventType.getValue() == value) {
+                    return eventType;
+                }
             }
+            return UNKNOWN;
         }
 
     }

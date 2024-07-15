@@ -26,6 +26,7 @@ import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -34,6 +35,7 @@ import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.spec.legacy.LegacyMessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.PollData;
 import discord4j.discordjson.json.SuppressEmbedsRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
@@ -838,6 +840,28 @@ public final class Message implements Entity {
     }
 
     /**
+     * Get the poll in the current message.
+     *
+     * @return An {@link Optional} containing the {@link Poll} if present, otherwise {@link Optional#empty()}.
+     * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled and
+     * the content cannot be accessed
+     */
+    public Optional<Poll> getPoll() {
+        Optional<PollData> pollData = this.data.poll().toOptional();
+
+        // If we already have the poll data, we can create the Poll object
+        if (pollData.isPresent()) {
+            return pollData.map(data -> new Poll(this.gateway, data, this.data.channelId().asLong(), this.data.id().asLong()));
+        }
+
+        // We need the MESSAGE_CONTENT intent to access the poll
+        this.checkIfMessageContentAccessIsAllowed();
+
+        // Well, we should have access to the content, but it's actually empty
+        return Optional.empty();
+    }
+
+    /**
      * Checks if the MESSAGE_CONTENT intent is enabled and if the content is accessible.
      *
      * @throws UnsupportedOperationException if the MESSAGE_CONTENT intent is not enabled and the content is empty
@@ -991,7 +1015,7 @@ public final class Message implements Entity {
         /**
          * Unknown type.
          */
-        UNKNOWN(-1),
+        UNKNOWN(-1, false),
 
         /**
          * A message created by a user.
@@ -1001,27 +1025,27 @@ public final class Message implements Entity {
         /**
          * A message created when a recipient was added to a DM.
          */
-        RECIPIENT_ADD(1),
+        RECIPIENT_ADD(1, false),
 
         /**
          * A message created when a recipient left a DM.
          */
-        RECIPIENT_REMOVE(2),
+        RECIPIENT_REMOVE(2, false),
 
         /**
          * A message created when a call was started.
          */
-        CALL(3),
+        CALL(3, false),
 
         /**
          * A message created when a channel's name changed.
          */
-        CHANNEL_NAME_CHANGE(4),
+        CHANNEL_NAME_CHANGE(4, false),
 
         /**
          * A message created when a channel's icon changed.
          */
-        CHANNEL_ICON_CHANGE(5),
+        CHANNEL_ICON_CHANGE(5, false),
 
         /**
          * A message created when a message was pinned.
@@ -1029,33 +1053,34 @@ public final class Message implements Entity {
         CHANNEL_PINNED_MESSAGE(6),
 
         /**
-         * A message created when an user joins a guild.
+         * A message created when a user joins a guild.
          */
         GUILD_MEMBER_JOIN(7),
 
         /**
-         * A message created when an user boost a guild.
+         * A message created when a user boost a guild.
          */
         USER_PREMIUM_GUILD_SUBSCRIPTION(8),
 
         /**
-         * A message created when an user boost a guild and the guild reach the tier 1.
+         * A message created when a user boost a guild and the guild reach the tier 1.
          */
         USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1(9),
 
         /**
-         * A message created when an user boost a guild and the guild reach the tier 2.
+         * A message created when a user boost a guild and the guild reach the tier 2.
          */
         USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2(10),
 
         /**
-         * A message created when an user boost a guild and the guild reach the tier 3.
+         * A message created when a user boost a guild and the guild reach the tier 3.
          */
         USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3(11),
 
         /**
-         * A message created when a user follows a channel from another guild into specific channel (
-         * <a href="https://support.discord.com/hc/en-us/articles/360028384531-Server-Following-FAQ">Server Following</a>).
+         * A message created when a user follows a channel from another guild into specific channel.
+         *
+         * @see <a href="https://support.discord.com/hc/en-us/articles/360028384531-Channel-Following-FAQ">Channel Following</a>
          */
         CHANNEL_FOLLOW_ADD(12),
 
@@ -1085,7 +1110,7 @@ public final class Message implements Entity {
         /**
          * The first message in a thread pointing to a related message in the parent channel from which the thread was started
          * <br>
-         * <b>Note: </b> Only supported from v9 of API
+         * <b>Note:</b> Only supported from v9 of API
         **/
         THREAD_STARTER_MESSAGE(21),
 
@@ -1094,6 +1119,11 @@ public final class Message implements Entity {
 
         CONTEXT_MENU_COMMAND(23),
 
+        /**
+         * A message created by AutoMod.
+         * <br>
+         * <b>Note:</b> For remove this type of message you need {@link discord4j.rest.util.Permission#MANAGE_MESSAGES}
+         */
         AUTO_MODERATION_ACTION(24),
 
         ROLE_SUBSCRIPTION_PURCHASE(25),
@@ -1108,7 +1138,17 @@ public final class Message implements Entity {
 
         STAGE_TOPIC(31),
 
-        GUILD_APPLICATION_PREMIUM_SUBSCRIPTION(32);
+        GUILD_APPLICATION_PREMIUM_SUBSCRIPTION(32),
+
+        GUILD_INCIDENT_ALERT_MODE_ENABLED(36),
+
+        GUILD_INCIDENT_ALERT_MODE_DISABLED(37),
+
+        GUILD_INCIDENT_REPORT_RAID(38),
+
+        GUILD_INCIDENT_REPORT_FALSE_ALARM(39),
+
+        PURCHASE_NOTIFICATION(40);
 
         /**
          * The underlying value as represented by Discord.
@@ -1116,12 +1156,28 @@ public final class Message implements Entity {
         private final int value;
 
         /**
+         * Define if this type of message are deletable
+         */
+        private final boolean deletable;
+
+        /**
          * Constructs a {@code Message.Type}.
          *
          * @param value The underlying value as represented by Discord.
          */
         Type(final int value) {
+            this(value, true);
+        }
+
+        /**
+         * Constructs a {@code Message.Type}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @param deletable If this type of message is deletable.
+         */
+        Type(final int value, final boolean deletable) {
             this.value = value;
+            this.deletable = deletable;
         }
 
         /**
@@ -1131,6 +1187,15 @@ public final class Message implements Entity {
          */
         public int getValue() {
             return value;
+        }
+
+        /**
+         * Gets if this type of Message can be deleted.
+         *
+         * @return {@code true} if this type of message can be deleted.
+         */
+        public boolean isDeletable() {
+            return deletable;
         }
 
         /**
@@ -1173,6 +1238,11 @@ public final class Message implements Entity {
                 case 29: return STAGE_SPEAKER;
                 case 31: return STAGE_TOPIC;
                 case 32: return GUILD_APPLICATION_PREMIUM_SUBSCRIPTION;
+                case 36: return GUILD_INCIDENT_ALERT_MODE_ENABLED;
+                case 37: return GUILD_INCIDENT_ALERT_MODE_DISABLED;
+                case 38: return GUILD_INCIDENT_REPORT_RAID;
+                case 39: return GUILD_INCIDENT_REPORT_FALSE_ALARM;
+                case 44: return PURCHASE_NOTIFICATION;
                 default: return UNKNOWN;
             }
         }

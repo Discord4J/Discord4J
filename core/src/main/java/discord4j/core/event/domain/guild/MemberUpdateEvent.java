@@ -17,6 +17,7 @@
 package discord4j.core.event.domain.guild;
 
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.AvatarDecoration;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.common.util.Snowflake;
@@ -65,11 +66,15 @@ public class MemberUpdateEvent extends GuildEvent {
     private final Boolean currentPending;
     @Nullable
     private final String communicationDisabledUntil;
+    @Nullable
+    private final AvatarDecoration avatarDecoration;
 
     public MemberUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long memberId,
                              @Nullable Member old, Set<Long> currentRoleIds, @Nullable String currentNickname,
-                             @Nullable String currentAvatar, @Nullable String currentJoinedAt, @Nullable String currentPremiumSince,
-                             @Nullable Boolean currentPending, @Nullable String communicationDisabledUntil) {
+                             @Nullable String currentAvatar, @Nullable String currentJoinedAt,
+                             @Nullable String currentPremiumSince,
+                             @Nullable Boolean currentPending, @Nullable String communicationDisabledUntil,
+                             @Nullable AvatarDecoration avatarDecoration) {
         super(gateway, shardInfo);
 
         this.guildId = guildId;
@@ -82,6 +87,7 @@ public class MemberUpdateEvent extends GuildEvent {
         this.currentPremiumSince = currentPremiumSince;
         this.currentPending = currentPending;
         this.communicationDisabledUntil = communicationDisabledUntil;
+        this.avatarDecoration = avatarDecoration;
     }
 
     /**
@@ -139,8 +145,8 @@ public class MemberUpdateEvent extends GuildEvent {
      */
     public Set<Snowflake> getCurrentRoleIds() {
         return currentRoleIds.stream()
-                .map(Snowflake::of)
-                .collect(Collectors.toSet());
+            .map(Snowflake::of)
+            .collect(Collectors.toSet());
     }
 
     /**
@@ -150,7 +156,7 @@ public class MemberUpdateEvent extends GuildEvent {
      */
     public Flux<Role> getCurrentRoles() {
         return getClient().getGuildRoles(getGuildId())
-                .filter(role -> currentRoleIds.contains(role.getId().asLong()));
+            .filter(role -> currentRoleIds.contains(role.getId().asLong()));
     }
 
     /**
@@ -170,16 +176,18 @@ public class MemberUpdateEvent extends GuildEvent {
      */
     public Optional<String> getCurrentGuildAvatarUrl(Image.Format format) {
         return Optional.ofNullable(currentAvatar)
-                .map(avatar -> ImageUtil.getUrl(String.format(AVATAR_IMAGE_PATH,
-                        guildId, Snowflake.asString(memberId), avatar), format));
+            .map(avatar -> ImageUtil.getUrl(String.format(AVATAR_IMAGE_PATH,
+                guildId, Snowflake.asString(memberId), avatar), format));
     }
 
 
     /**
-     * Gets the current member's guild avatar. This is the avatar at the url given by {@link #getCurrentGuildAvatarUrl(Image.Format)}.
+     * Gets the current member's guild avatar. This is the avatar at the url given by
+     * {@link #getCurrentGuildAvatarUrl(Image.Format)}.
      *
      * @param format The format for the avatar.
-     * @return a {@link Mono} where, upon successful completion, emits the current {@link Image guild avatar} of the member.
+     * @return a {@link Mono} where, upon successful completion, emits the current {@link Image guild avatar} of the
+     * member.
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Image> getCurrentGuildAvatar(Image.Format format) {
@@ -194,7 +202,7 @@ public class MemberUpdateEvent extends GuildEvent {
      */
     public Optional<Instant> getJoinTime() {
         return Optional.ofNullable(currentJoinedAt)
-                .map(it -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(it, Instant::from));
+            .map(it -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(it, Instant::from));
     }
 
     /**
@@ -223,22 +231,32 @@ public class MemberUpdateEvent extends GuildEvent {
      */
     public Optional<Instant> getCommunicationDisabledUntil() {
         return Optional.ofNullable(communicationDisabledUntil)
-                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+            .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+    }
+
+    /**
+     * Gets the user avatar decoration, if present.
+     *
+     * @return The user avatar decoration, if present.
+     */
+    public Optional<AvatarDecoration> getAvatarDecoration() {
+        return Optional.ofNullable(avatarDecoration);
     }
 
     @Override
     public String toString() {
         return "MemberUpdateEvent{" +
-                "guildId=" + guildId +
-                ", memberId=" + memberId +
-                ", old=" + old +
-                ", currentRoleIds=" + currentRoleIds +
-                ", currentNickname='" + currentNickname + '\'' +
-                ", currentAvatar='" + currentAvatar + '\'' +
-                ", currentJoinedAt='" + currentJoinedAt + '\'' +
-                ", currentPremiumSince='" + currentPremiumSince + '\'' +
-                ", currentPending=" + currentPending +
-                ", communicationDisabledUntil='" + communicationDisabledUntil + '\'' +
-                '}';
+            "guildId=" + guildId +
+            ", memberId=" + memberId +
+            ", old=" + old +
+            ", currentRoleIds=" + currentRoleIds +
+            ", currentNickname='" + currentNickname + '\'' +
+            ", currentAvatar='" + currentAvatar + '\'' +
+            ", currentJoinedAt='" + currentJoinedAt + '\'' +
+            ", currentPremiumSince='" + currentPremiumSince + '\'' +
+            ", currentPending=" + currentPending +
+            ", communicationDisabledUntil='" + communicationDisabledUntil + '\'' +
+            ", avatarDecoration='" + avatarDecoration + '\'' +
+            '}';
     }
 }
