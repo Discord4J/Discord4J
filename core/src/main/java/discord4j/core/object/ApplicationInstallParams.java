@@ -1,7 +1,10 @@
 package discord4j.core.object;
 
 import discord4j.discordjson.json.InstallParamsData;
+import discord4j.rest.util.Permission;
+import discord4j.rest.util.PermissionSet;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -40,8 +43,8 @@ public class ApplicationInstallParams {
      *
      * @return The permissions of this configuration
      */
-    public String getPermissions() {
-        return this.data.permissions();
+    public PermissionSet getPermissions() {
+        return PermissionSet.of(this.data.permissions());
     }
 
 }
