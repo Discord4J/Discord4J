@@ -23,6 +23,7 @@ import discord4j.core.support.AddRandomReaction;
 import discord4j.core.support.Commands;
 import discord4j.core.support.VoiceSupport;
 import discord4j.discordjson.json.ApplicationInfoData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.intent.IntentSet;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
@@ -43,6 +44,8 @@ public class ExampleVoice {
 
         Mono<Long> ownerId = client.rest().getApplicationInfo()
                 .map(ApplicationInfoData::owner)
+                .map(Possible::toOptional)
+                .flatMap(Mono::justOrEmpty)
                 .map(user -> Snowflake.asLong(user.id()))
                 .cache();
 
