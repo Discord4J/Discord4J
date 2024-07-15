@@ -201,7 +201,13 @@ public interface MessageChannel extends Channel {
      * received, it is emitted through the {@code Mono}.
      * @see PollCreateSpec#builder()
      */
-    Mono<Poll> createPoll(PollCreateSpec spec);
+    default Mono<Poll> createPoll(PollCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return createMessage()
+            .withPoll(spec.asRequest())
+            .map(Message::getPoll)
+            .flatMap(Mono::justOrEmpty);
+    }
 
     /**
      * Requests to create a poll.
