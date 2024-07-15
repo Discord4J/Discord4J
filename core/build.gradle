@@ -24,7 +24,7 @@ dependencies {
     testImplementation "ch.qos.logback:logback-classic:$logback_version"
     testImplementation "io.projectreactor:reactor-test"
     testImplementation "org.reflections:reflections:$reflections_version"
-    testImplementation "com.sedmelluq:lavaplayer:$lavaplayer_version"
+    testImplementation "com.github.walkyst:lavaplayer-fork:$lavaplayer_version"
 }
 
 javadoc {

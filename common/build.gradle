@@ -1,8 +1,8 @@
 apply plugin: 'com.gorylenko.gradle-git-properties'
 
 dependencies {
-    api "io.projectreactor.netty:reactor-netty-http:1.1.18"
-    api "io.projectreactor.addons:reactor-extra:3.5.1"
+    api "io.projectreactor.netty:reactor-netty-http"
+    api "io.projectreactor.addons:reactor-extra"
     api "com.fasterxml.jackson.core:jackson-databind:$jackson_databind_version"
     api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jackson_datatype_jdk8_version"
     api "com.github.ben-manes.caffeine:caffeine:$caffeine_version"
