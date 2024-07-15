@@ -414,6 +414,24 @@ public abstract class Routes {
 
     public static final Route LIST_JOINED_PRIVATE_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/users/@me/threads/archived/private");
 
+    ///////////////////////////////////////////
+    ////////////////// Polls //////////////////
+    ///////////////////////////////////////////
+
+    /**
+     * Returns a list of users that voted for the given `answer_id` in the poll for the given message represented by
+     * its `message.id` and `channel.id`.
+     * @see <a href="https://discord.com/developers/docs/resources/poll#get-answer-voters">https://discord.com/developers/docs/resources/poll#get-answer-voters</a>
+     */
+    public static final Route POLL_ANSWER_VOTERS_GET = Route.get("/channels/{channel.id}/polls/{message.id}/answers/{answer_id}");
+
+    /**
+     * Request to end a poll early. This will end the poll and return the final results.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/poll#end-poll">https://discord.com/developers/docs/resources/poll#end-poll</a>
+     */
+    public static final Route END_POLL = Route.post("/channels/{channel.id}/polls/{message.id}/expire");
+
     ////////////////////////////////////////////
     ////////////// Sticker Resource //////////////
     ////////////////////////////////////////////

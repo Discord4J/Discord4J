@@ -221,6 +221,9 @@ public enum Permission {
     /** Allows sending voice messages. */
     SEND_VOICE_MESSAGES(0x0000400000000000L, false),
 
+    /** Allows creating polls */
+    SEND_POLLS(0x0002000000000000L, false),
+
     /** Allows user-installed apps to send public responses.
      * <br>
      * When disabled, users will still be allowed to use their apps but the responses will be ephemeral.

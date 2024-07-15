@@ -102,6 +102,8 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         dispatchTypes.put(EventNames.INTEGRATION_CREATE, IntegrationCreate.class);
         dispatchTypes.put(EventNames.INTEGRATION_UPDATE, IntegrationUpdate.class);
         dispatchTypes.put(EventNames.INTEGRATION_DELETE, IntegrationDelete.class);
+        dispatchTypes.put(EventNames.MESSAGE_POLL_VOTE_ADD, PollVoteAdd.class);
+        dispatchTypes.put(EventNames.MESSAGE_POLL_VOTE_REMOVE, PollVoteRemove.class);
 
         // Ignored
         dispatchTypes.put(EventNames.PRESENCES_REPLACE, null);
