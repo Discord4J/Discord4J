@@ -201,6 +201,15 @@ public class Poll implements Entity {
         return Optional.ofNullable(this.pollAnswerById.get(answerId));
     }
 
+    @Override
+    public String toString() {
+        return "Poll{" +
+            "data=" + data +
+            ", messageId=" + messageId +
+            ", channelId=" + channelId +
+            '}';
+    }
+
     /**
      * The layout type of a poll.
      */
