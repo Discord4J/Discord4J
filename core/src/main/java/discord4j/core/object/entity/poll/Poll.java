@@ -211,7 +211,7 @@ public class Poll implements Entity {
     }
 
     /**
-     * The layout type of a poll.
+     * The layout type of poll.
      */
     public enum PollLayoutType {
 
