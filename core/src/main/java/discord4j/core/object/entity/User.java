@@ -351,7 +351,7 @@ public class User implements Entity {
     }
 
     @Override
-    public final boolean equals(@Nullable final Object obj) {
+    public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
     }
 
