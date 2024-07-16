@@ -28,7 +28,7 @@ public class OnboardingPromptOption implements Entity {
         this.client = client;
         this.data = data;
 
-        this.id = Snowflake.of(data.id().get()); // .get because we know it's present here (only absent in the request to edit)
+        this.id = Snowflake.of(data.id());
         this.addedChannelIds = data.channelsIds().stream()
                 .map(Snowflake::of)
                 .collect(Collectors.toList());
