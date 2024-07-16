@@ -22,6 +22,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.discordjson.json.MessageReferenceData;
+import discord4j.discordjson.json.PollCreateData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
 import discord4j.rest.util.MultipartRequest;
@@ -63,6 +64,8 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
 
     Possible<List<LayoutComponent>> components();
 
+    Possible<PollCreateData> poll();
+
     @Override
     default MultipartRequest<MessageCreateRequest> asRequest() {
         MessageCreateRequest json = MessageCreateRequest.builder()
@@ -80,6 +83,7 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
                 .components(mapPossible(components(), components -> components.stream()
                         .map(LayoutComponent::getData)
                         .collect(Collectors.toList())))
+                .poll(poll())
                 .build();
         return MultipartRequest.ofRequestAndFiles(json, Stream.concat(files().stream(), fileSpoilers().stream())
                 .map(MessageCreateFields.File::asRequest)

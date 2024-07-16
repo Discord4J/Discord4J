@@ -281,7 +281,11 @@ return guild.getMembers()
 
 ### 🎵 Voice and Music
 
-Discord4J provides full support for voice connections and the ability to send audio to other users connected to the same channel. Discord4J can accept any [Opus](https://opus-codec.org/) audio source with [LavaPlayer](https://github.com/sedmelluq/lavaplayer) being the preferred solution for downloading and encoding audio from YouTube, SoundCloud, and other providers.
+Discord4J provides full support for voice connections and the ability to send audio to other users connected to the same channel. Discord4J can accept any [Opus](https://opus-codec.org/) audio source with LavaPlayer being the preferred solution for downloading and encoding audio from YouTube, SoundCloud, and other providers.
+
+> [!WARNING]  
+> The original LavaPlayer is no longer maintained. A new maintained version can be found [here](https://github.com/lavalink-devs/lavaplayer).
+> If you need Java 8 support, you can use [Walkyst's LavaPlayer fork](https://github.com/Walkyst/lavaplayer-fork), but it is also no longer maintained!
 
 To get started, you will first need to instantiate and configure an, conventionally global, `AudioPlayerManager`.
 
