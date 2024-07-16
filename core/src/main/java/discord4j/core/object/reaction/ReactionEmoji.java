@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.reaction;
 
+import discord4j.core.object.Emoji;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.ReactionData;
@@ -29,7 +30,9 @@ import java.util.Optional;
 /**
  * An emoji used for {@link Reaction message reactions}, provides factory methods such as {@link #unicode(String)}
  * and others to generate reactions.
+ * @deprecated to be removed in 3.3.0, please move to {@link Emoji}
  */
+@Deprecated
 public abstract class ReactionEmoji {
 
     /**
@@ -160,7 +163,7 @@ public abstract class ReactionEmoji {
      */
     public abstract EmojiData asEmojiData();
 
-    public static final class Custom extends ReactionEmoji {
+    public static final class Custom extends Emoji {
 
         private final long id;
         private final String name;
@@ -244,7 +247,7 @@ public abstract class ReactionEmoji {
         }
     }
 
-    public static final class Unicode extends ReactionEmoji {
+    public static final class Unicode extends Emoji {
 
         private final String raw;
 
