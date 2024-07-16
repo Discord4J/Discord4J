@@ -129,7 +129,7 @@ public abstract class ReactionEmoji {
     public static ReactionEmoji of(EmojiData data) {
         if (data.id().isPresent()) {
             return custom(Snowflake.of(data.id().get()),
-                    data.name().orElseThrow(IllegalArgumentException::new),
+                    data.name().orElse(""),
                     data.animated().toOptional().orElse(false));
         }
         return unicode(data.name().orElseThrow(IllegalArgumentException::new));
