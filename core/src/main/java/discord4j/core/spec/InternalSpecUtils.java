@@ -52,6 +52,12 @@ final class InternalSpecUtils {
         }
     }
 
+    static void setIfPresent(Multimap<String, Object> map, String key, Possible<?> value) {
+        if (!value.isAbsent()) {
+            map.set(key, value.get());
+        }
+    }
+
     static void addAllIfNotNull(Multimap<String, Object> map, String key, @Nullable List<Object> values) {
         if (values != null) {
             map.addAll(key, values);

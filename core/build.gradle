@@ -11,20 +11,12 @@ dependencies {
 
     compileOnly "com.discord4j:discord-json-encoding:$discordJsonVersion"
 
-    if (JavaVersion.current().isJava8()) {
-        compileOnly "com.google.code.findbugs:annotations:3.0.1"
-        testCompileOnly "com.google.code.findbugs:annotations:3.0.1"
-    } else {
-        compileOnly "javax.annotation:javax.annotation-api:1.3.2"
-        testCompileOnly "javax.annotation:javax.annotation-api:1.3.2"
-    }
-
     testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_version"
     testImplementation "org.mockito:mockito-core:$mockito_version"
     testImplementation "ch.qos.logback:logback-classic:$logback_version"
     testImplementation "io.projectreactor:reactor-test"
     testImplementation "org.reflections:reflections:$reflections_version"
-    testImplementation "com.sedmelluq:lavaplayer:$lavaplayer_version"
+    testImplementation "com.github.walkyst:lavaplayer-fork:$lavaplayer_version"
 }
 
 javadoc {
@@ -40,12 +32,13 @@ javadoc {
 
 jar {
     manifest {
-        attributes 'Implementation-Title': archivesBaseName,
+        attributes 'Implementation-Title': base.archivesName.get(),
                 'Implementation-Version': archiveVersion,
                 'Automatic-Module-Name': 'discord4j.core'
     }
 }
 
 sourcesJar {
+    dependsOn project(':core').compileJava
     from "build/generated/sources/annotationProcessor/java/main"
 }
