@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.List;
 import java.util.Map;
 
 public class GuildService extends RestService {
@@ -81,7 +82,7 @@ public class GuildService extends RestService {
                 .bodyToMono(ChannelData.class);
     }
 
-    public Flux<RoleData> modifyGuildChannelPositions(long guildId, PositionModifyRequest[] request) {
+    public Flux<RoleData> modifyGuildChannelPositions(long guildId, ChannelPositionModifyRequest[] request) {
         return Routes.GUILD_CHANNEL_POSITIONS_MODIFY.newRequest(guildId)
                 .body(request)
                 .exchange(getRouter())
@@ -190,6 +191,14 @@ public class GuildService extends RestService {
                 .bodyToMono(Void.class);
     }
 
+    public Mono<BulkBanResponseData> bulkGuildBan(long guildId, BulkBanRequest request, @Nullable String reason) {
+        return Routes.GUILD_BAN_BULK.newRequest(guildId)
+            .body(request)
+            .optionalHeader("X-Audit-Log-Reason", reason)
+            .exchange(getRouter())
+            .bodyToMono(BulkBanResponseData.class);
+    }
+
     public Flux<RoleData> getGuildRoles(long guildId) {
         return Routes.GUILD_ROLES_GET.newRequest(guildId)
                 .exchange(getRouter())
@@ -205,7 +214,7 @@ public class GuildService extends RestService {
                 .bodyToMono(RoleData.class);
     }
 
-    public Flux<RoleData> modifyGuildRolePositions(long guildId, PositionModifyRequest[] request) {
+    public Flux<RoleData> modifyGuildRolePositions(long guildId, RolePositionModifyRequest[] request) {
         return Routes.GUILD_ROLE_POSITIONS_MODIFY.newRequest(guildId)
                 .body(request)
                 .exchange(getRouter())

@@ -163,6 +163,11 @@ public class GuildServiceTest {
     }
 
     @Test
+    public void testBulkGuildBan() {
+        // TODO
+    }
+
+    @Test
     public void testGetGuildRoles() {
         guildService.getGuildRoles(guild).then().block();
     }
