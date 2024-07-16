@@ -82,7 +82,7 @@ public class GuildService extends RestService {
                 .bodyToMono(ChannelData.class);
     }
 
-    public Flux<RoleData> modifyGuildChannelPositions(long guildId, PositionModifyRequest[] request) {
+    public Flux<RoleData> modifyGuildChannelPositions(long guildId, ChannelPositionModifyRequest[] request) {
         return Routes.GUILD_CHANNEL_POSITIONS_MODIFY.newRequest(guildId)
                 .body(request)
                 .exchange(getRouter())
@@ -214,7 +214,7 @@ public class GuildService extends RestService {
                 .bodyToMono(RoleData.class);
     }
 
-    public Flux<RoleData> modifyGuildRolePositions(long guildId, PositionModifyRequest[] request) {
+    public Flux<RoleData> modifyGuildRolePositions(long guildId, RolePositionModifyRequest[] request) {
         return Routes.GUILD_ROLE_POSITIONS_MODIFY.newRequest(guildId)
                 .body(request)
                 .exchange(getRouter())
