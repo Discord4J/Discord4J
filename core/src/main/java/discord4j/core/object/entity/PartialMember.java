@@ -729,6 +729,16 @@ public class PartialMember extends User {
     }
 
     @Override
+    public boolean equals(@Nullable final Object object) {
+        if (object instanceof PartialMember) {
+            PartialMember other = (PartialMember) object;
+            return guildId == other.guildId && getId().equals(other.getId());
+        } else {
+            return false;
+        }
+    }
+
+    @Override
     public String toString() {
         return "PartialMember{" +
             "data=" + data +
