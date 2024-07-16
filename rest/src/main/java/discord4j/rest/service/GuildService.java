@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.List;
 import java.util.Map;
 
 public class GuildService extends RestService {
@@ -188,6 +189,14 @@ public class GuildService extends RestService {
                 .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
                 .bodyToMono(Void.class);
+    }
+
+    public Mono<BulkBanResponseData> bulkGuildBan(long guildId, BulkBanRequest request, @Nullable String reason) {
+        return Routes.GUILD_BAN_BULK.newRequest(guildId)
+            .body(request)
+            .optionalHeader("X-Audit-Log-Reason", reason)
+            .exchange(getRouter())
+            .bodyToMono(BulkBanResponseData.class);
     }
 
     public Flux<RoleData> getGuildRoles(long guildId) {

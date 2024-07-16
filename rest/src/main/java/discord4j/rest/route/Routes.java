@@ -731,6 +731,16 @@ public abstract class Routes {
     public static final Route GUILD_BAN_REMOVE = Route.delete("/guilds/{guild.id}/bans/{user.id}");
 
     /**
+     * Ban up to 200 users from a guild, and optionally delete previous messages sent by the banned users.
+     * Requires both the `BAN_MEMBERS` and `MANAGE_GUILD` permissions.
+     * Returns a 200 response on success, including the fields banned_users with the IDs of the banned users and failed_users with IDs that could not be banned or were already banned.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#bulk-guild-ban">
+     * https://discord.com/developers/docs/resources/guild#bulk-guild-ban</a>
+     */
+    public static final Route GUILD_BAN_BULK = Route.post("/guilds/{guild.id}/bulk-ban");
+
+    /**
      * Returns a list of role objects for the guild. Requires the 'MANAGE_ROLES' permission.
      *
      * @see <a href="https://discord.com/developers/docs/resources/guild#get-guild-roles">
