@@ -20,6 +20,7 @@ package discord4j.rest.entity;
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
+import discord4j.rest.route.Routes;
 import discord4j.rest.util.PaginationUtil;
 import discord4j.rest.util.Permission;
 import reactor.core.publisher.Flux;
@@ -244,6 +245,10 @@ public class RestGuild {
 
     public Mono<Void> removeGuildBan(Snowflake userId, @Nullable String reason) {
         return restClient.getGuildService().removeGuildBan(id, userId.asLong(), reason);
+    }
+
+    public Mono<BulkBanResponseData> bulkGuildBan(BulkBanRequest request, @Nullable String reason) {
+        return restClient.getGuildService().bulkGuildBan(id, request, reason);
     }
 
     public Flux<RoleData> getRoles() {
