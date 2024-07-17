@@ -202,6 +202,17 @@ public class PartialMember extends User {
     }
 
     /**
+     * Gets the user avatar decoration, if present.
+     *
+     * @return The user avatar decoration, if present.
+     */
+    @Override
+    public Optional<AvatarDecoration> getAvatarDecoration() {
+        return Possible.flatOpt(data.avatarDecoration())
+            .map(data -> new AvatarDecoration(this.getClient(), data));
+    }
+
+    /**
      * Gets the ID of the guild this user is associated to.
      *
      * @return The ID of the guild this user is associated to.
@@ -279,7 +290,7 @@ public class PartialMember extends User {
      */
     public final Optional<String> getGuildAvatarUrl(final Image.Format format) {
         return data.avatar().map(avatar -> ImageUtil.getUrl(
-                String.format(AVATAR_IMAGE_PATH, guildId, getId().asString(), avatar), format));
+            String.format(AVATAR_IMAGE_PATH, guildId, getId().asString(), avatar), format));
     }
 
     /**
@@ -353,7 +364,8 @@ public class PartialMember extends User {
                         .flatMapIterable(list -> list)
                         .next()
                         .map(Presence::new))
-                    // IllegalArgumentException can be thrown during request validation if intents are not matching the request
+                    // IllegalArgumentException can be thrown during request validation if intents are not matching
+                        // the request
                     .onErrorResume(IllegalArgumentException.class, err -> Mono.empty());
             });
         }
@@ -717,6 +729,16 @@ public class PartialMember extends User {
     }
 
     @Override
+    public boolean equals(@Nullable final Object object) {
+        if (object instanceof PartialMember) {
+            PartialMember other = (PartialMember) object;
+            return guildId == other.guildId && getId().equals(other.getId());
+        } else {
+            return false;
+        }
+    }
+
+    @Override
     public String toString() {
         return "PartialMember{" +
             "data=" + data +
@@ -724,8 +746,11 @@ public class PartialMember extends User {
             "} " + super.toString();
     }
 
-    /** Describes the flags of a member in a guild.
-     * @see <a href="https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags">Discord Docs - Guild Member Flags</a>
+    /**
+     * Describes the flags of a member in a guild.
+     *
+     * @see
+     * <a href="https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags">Discord Docs - Guild Member Flags</a>
      **/
     public enum Flag {
         /**
@@ -739,7 +764,8 @@ public class PartialMember extends User {
         /**
          * Member has completed onboarding
          * <br>
-         * <b>Note:</b> this flag allows a member who does not meet verification requirements to participate in a server.
+         * <b>Note:</b> this flag allows a member who does not meet verification requirements to participate in a
+         * server.
          */
         BYPASSES_VERIFICATION(2),
         /**

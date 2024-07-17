@@ -78,6 +78,8 @@ public abstract class EventNames {
     public static final String AUTO_MODERATION_RULE_UPDATE = "AUTO_MODERATION_RULE_UPDATE";
     public static final String AUTO_MODERATION_RULE_DELETE = "AUTO_MODERATION_RULE_DELETE";
     public static final String AUTO_MODERATION_ACTION_EXECUTION = "AUTO_MODERATION_ACTION_EXECUTION";
+    public static final String MESSAGE_POLL_VOTE_ADD = "MESSAGE_POLL_VOTE_ADD";
+    public static final String MESSAGE_POLL_VOTE_REMOVE = "MESSAGE_POLL_VOTE_REMOVE";
 
     // Ignored
     public static final String PRESENCES_REPLACE = "PRESENCES_REPLACE";

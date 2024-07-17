@@ -54,6 +54,7 @@ public class LegacyMessageCreateSpec implements LegacySpec<MultipartRequest<Mess
     private String content;
     @Nullable
     private String nonce;
+    private Boolean enforceNonce;
     private boolean tts;
     private List<EmbedData> embeds;
     private List<Tuple2<String, InputStream>> files;
@@ -80,6 +81,19 @@ public class LegacyMessageCreateSpec implements LegacySpec<MultipartRequest<Mess
      */
     public LegacyMessageCreateSpec setNonce(Snowflake nonce) {
         this.nonce = nonce.asString();
+        return this;
+    }
+
+    /**
+     * Sets if the nonce is enforced. If true and nonce is present, it will be checked for uniqueness in the past
+     * few minutes. If another message was created by the same author with the same nonce, that message will be returned
+     * and no new message will be created.
+     *
+     * @param enforceNonce Whether to enforce the nonce.
+     * @return This spec.
+     */
+    public LegacyMessageCreateSpec setEnforceNonce(boolean enforceNonce) {
+        this.enforceNonce = enforceNonce;
         return this;
     }
 
@@ -207,6 +221,7 @@ public class LegacyMessageCreateSpec implements LegacySpec<MultipartRequest<Mess
         MessageCreateRequest json = MessageCreateRequest.builder()
                 .content(content == null ? Possible.absent() : Possible.of(content))
                 .nonce(nonce == null ? Possible.absent() : Possible.of(nonce))
+                .enforceNonce(enforceNonce == null ? Possible.absent() : Possible.of(enforceNonce))
                 .tts(tts)
                 .embeds(embeds == null ? Possible.absent() : Possible.of(embeds))
                 .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))

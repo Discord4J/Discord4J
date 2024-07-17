@@ -21,6 +21,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
@@ -47,15 +48,19 @@ public class ReactionRemoveEvent extends MessageEvent {
     @Nullable
     private final Long guildId;
     private final ReactionEmoji emoji;
+    private final boolean burst;
+    private final int type;
 
     public ReactionRemoveEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long userId, long channelId, long messageId,
-                               @Nullable Long guildId, ReactionEmoji emoji) {
+                               @Nullable Long guildId, ReactionEmoji emoji, boolean burst, int type) {
         super(gateway, shardInfo);
         this.userId = userId;
         this.channelId = channelId;
         this.messageId = messageId;
         this.guildId = guildId;
         this.emoji = emoji;
+        this.burst = burst;
+        this.type = type;
     }
 
     /**
@@ -144,6 +149,24 @@ public class ReactionRemoveEvent extends MessageEvent {
      */
     public ReactionEmoji getEmoji() {
         return emoji;
+    }
+
+    /**
+     * Gets whether the reaction related to this event is "Super".
+     *
+     * @return Whether the reaction related to this event is "Super".
+     */
+    public boolean isSuperReaction() {
+        return this.burst;
+    }
+
+    /**
+     * Gets the {@link Reaction.Type} of the reaction.
+     *
+     * @return A {@link Reaction.Type}
+     */
+    public Reaction.Type getType() {
+        return Reaction.Type.of(this.type);
     }
 
     @Override
