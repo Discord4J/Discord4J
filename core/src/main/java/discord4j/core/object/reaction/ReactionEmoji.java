@@ -50,7 +50,7 @@ public abstract class ReactionEmoji {
      * @param isAnimated Whether the custom emoji is animated.
      * @return A reaction emoji using the given information.
      */
-    public static Custom custom(Snowflake id, String name, boolean isAnimated) {
+    public static Custom custom(Snowflake id, @Nullable String name, boolean isAnimated) {
         return new Custom(id.asLong(), name, isAnimated);
     }
 
@@ -129,7 +129,7 @@ public abstract class ReactionEmoji {
     public static ReactionEmoji of(EmojiData data) {
         if (data.id().isPresent()) {
             return custom(Snowflake.of(data.id().get()),
-                    data.name().orElseThrow(IllegalArgumentException::new),
+                    data.name().orElse(null),
                     data.animated().toOptional().orElse(false));
         }
         return unicode(data.name().orElseThrow(IllegalArgumentException::new));
@@ -170,10 +170,11 @@ public abstract class ReactionEmoji {
     public static final class Custom extends ReactionEmoji {
 
         private final long id;
+        @Nullable
         private final String name;
         private final boolean isAnimated;
 
-        private Custom(long id, String name, boolean isAnimated) {
+        private Custom(long id, @Nullable String name, boolean isAnimated) {
             this.id = id;
             this.name = name;
             this.isAnimated = isAnimated;
@@ -190,11 +191,13 @@ public abstract class ReactionEmoji {
 
         /**
          * Gets the name of the emoji.
+         * <br>
+         * <b>Note:</b> this can be empty for reactions or onboarding.
          *
          * @return The name of the emoji.
          */
         public String getName() {
-            return name;
+            return (name != null) ? name : "";
         }
 
         /**
@@ -210,7 +213,7 @@ public abstract class ReactionEmoji {
         public EmojiData asEmojiData() {
             return EmojiData.builder()
                     .id(id)
-                    .name(name)
+                    .name(Optional.ofNullable(name))
                     .animated(isAnimated)
                     .build();
         }
@@ -222,6 +225,8 @@ public abstract class ReactionEmoji {
 
         /**
          * Gets the formatted version of this emoji (i.e., to display in the client).
+         * <br>
+         * <b>Note:</b> please check first if {@link #getName()} is not empty.
          *
          * @param isAnimated Whether the emoji is animated.
          * @param id The ID of the custom emoji.
