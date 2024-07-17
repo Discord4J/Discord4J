@@ -2,9 +2,10 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'signing'
-    id 'com.gorylenko.gradle-git-properties' version '2.3.2' apply false
-    id 'com.github.ben-manes.versions' version '0.38.0'
-    id 'net.researchgate.release' version '2.8.1'
+    id 'com.gorylenko.gradle-git-properties' version '2.4.1' apply false
+    id 'com.github.ben-manes.versions' version '0.42.0'
+    // TODO: Warning for Gradle 9 by https://github.com/researchgate/gradle-release/issues/379
+    id 'net.researchgate.release' version '3.0.2'
 }
 
 ext {
@@ -23,20 +24,20 @@ ext {
     }
 
     // Dependencies
-    reactor_bom_version = '2020.0.33'
-    jackson_databind_version = '2.12.7.1'
-    jackson_datatype_jsr310_version = '2.14.2'
-    jackson_datatype_jdk8_version = '2.12.7'
-    caffeine_version = '2.8.8'
+    reactor_bom_version = '2023.0.8'
+    jackson_databind_version = '2.17.0'
+    jackson_datatype_jsr310_version = '2.17.0'
+    jackson_datatype_jdk8_version = '2.17.0'
+    caffeine_version = '2.9.3'
     immutables_group = 'org.immutables'
-    immutables_version = '2.9.0'
+    immutables_version = '2.10.1'
 
     // Test dependencies
     junit_version = '5.7.1'
     mockito_version = '3.11.2'
-    logback_version = '1.2.3'
+    logback_version = '1.3.14'
     reflections_version = '0.9.12'
-    lavaplayer_version = '1.3.78'
+    lavaplayer_version = '1.4.3'
 
     isJitpack = "true" == System.getenv("JITPACK")
     isRelease = !version.toString().endsWith('-SNAPSHOT')
@@ -54,13 +55,18 @@ allprojects {
     version = project_version
     description = project_description
 
-    sourceCompatibility = project_jdk
-    targetCompatibility = project_jdk
+    java {
+        sourceCompatibility = project_jdk
+        targetCompatibility = project_jdk
+    }
 
     dependencies {
         api platform("io.projectreactor:reactor-bom:$reactor_bom_version")
         api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_datatype_jsr310_version"
         api "com.discord4j:discord-json:$discordJsonVersion"
+
+        compileOnly "com.google.code.findbugs:jsr305:3.0.1"
+        testCompileOnly "com.google.code.findbugs:jsr305:3.0.1"
     }
 
     repositories {
@@ -71,13 +77,14 @@ allprojects {
             maven { url 'https://oss.sonatype.org/content/repositories/staging' }
         }
         maven { url 'https://m2.dv8tion.net/releases' }
+        maven { url 'https://jitpack.io' }
     }
 
-    configurations.all {
+    configurations.configureEach {
         resolutionStrategy.cacheChangingModulesFor 60, 'seconds'
     }
 
-    tasks.withType(Javadoc) {
+    tasks.withType(Javadoc).configureEach {
         options {
             encoding = 'UTF-8'
             tags = ["apiNote:a:API Note:",
@@ -87,29 +94,29 @@ allprojects {
             addStringOption 'encoding', 'UTF-8'
             // adding links to javadocs for filling specific classes when not existing inside current javadoc
             links = [
-                    jdk_javadoc,
-                    "https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/2.12.7/",
-                    "https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
-                    "https://projectreactor.io/docs/core/3.4.26/api/",
-                    "https://projectreactor.io/docs/netty/1.0.27/api/",
-                    "https://projectreactor.io/docs/extra/3.4.9/api/",
-                    "https://netty.io/4.1/api/"
+                jdk_javadoc,
+                "https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/2.17.0/",
+                "https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
+                "https://projectreactor.io/docs/core/3.6.8/api/",
+                "https://projectreactor.io/docs/netty/1.1.21/api/",
+                "https://projectreactor.io/docs/extra/3.5.1/api/",
+                "https://netty.io/4.1/api/"
             ]
         }
         if (JavaVersion.current().isJava9Compatible()) {
             options.addBooleanOption('html5', true)
         }
-        if (JavaVersion.current().isJava11Compatible()) {
+        if (JavaVersion.current().isJava11Compatible() && !JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_13)) {
             options.addBooleanOption('-no-module-directories', true)
         }
     }
 
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
         options.incremental = true
     }
 
-    task downloadDependencies() {
+    tasks.register('downloadDependencies') {
         description 'Download all dependencies to the Gradle cache'
         doLast {
             configurations.findAll { it.canBeResolved }.files
@@ -123,18 +130,23 @@ allprojects {
 }
 
 subprojects {
-    archivesBaseName = "discord4j-$project.name"
 
-    tasks.withType(Javadoc) {
-        title = "$archivesBaseName ${version} API"
-        options.windowTitle = "$archivesBaseName ($version)"
+    base {
+        archivesName = "discord4j-$project.name"
+    }
+
+    tasks.withType(Javadoc).configureEach {
+        title = "${base.archivesName.get()} ${version} API"
+        options.windowTitle = "${base.archivesName.get()} ($version)"
     }
 
     publishing {
         publications {
             mavenJava(MavenPublication) {
                 from components.java
-                artifactId archivesBaseName
+                afterEvaluate {
+                    artifactId = jar.archiveBaseName.get()
+                }
 
                 versionMapping {
                     usage('java-api') {
@@ -221,11 +233,11 @@ release {
     tagCommitMessage = 'Release version'
     newVersionCommitMessage = 'Next development version'
     git {
-        requireBranch = ''
+        requireBranch.set('')
     }
 }
 
-task updateReadme {
+tasks.register('updateReadme') {
     if (isRelease && !version.contains('M') && !version.contains('RC')) {
         doLast {
             copy {

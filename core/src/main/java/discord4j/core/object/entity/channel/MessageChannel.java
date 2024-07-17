@@ -18,10 +18,13 @@ package discord4j.core.object.entity.channel;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateMono;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.core.spec.PollCreateMono;
+import discord4j.core.spec.PollCreateSpec;
 import discord4j.core.spec.legacy.LegacyEmbedCreateSpec;
 import discord4j.core.spec.legacy.LegacyMessageCreateSpec;
 import org.reactivestreams.Publisher;
@@ -143,6 +146,27 @@ public interface MessageChannel extends Channel {
     @Deprecated
     default MessageCreateMono createEmbed(EmbedCreateSpec embed) {
         return MessageCreateMono.of(this).withEmbeds(embed);
+    }
+
+    /**
+     * Requests to create a message.
+     *
+     * @param spec an immutable object that specifies how to create the poll
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @see PollCreateSpec#builder()
+     */
+    Mono<Poll> createPoll(PollCreateSpec spec);
+
+    /**
+     * Requests to create a poll.
+     *
+     * @return A {@link PollCreateMono} where, upon successful completion, emits the created {@link Message}. If an
+     * error is received, it is emitted through the {@code PollCreateMono}.
+     * @see PollCreateMono#builder()
+     */
+    default PollCreateMono createPoll() {
+        return PollCreateMono.of(this);
     }
 
     /**

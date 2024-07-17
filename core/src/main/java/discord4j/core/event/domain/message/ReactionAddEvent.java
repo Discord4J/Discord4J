@@ -22,13 +22,17 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
+import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Dispatched when a reaction is added to a message.
@@ -50,9 +54,12 @@ public class ReactionAddEvent extends MessageEvent {
     @Nullable
     private final Member member;
     private final long messageAuthorId;
+    private final boolean burst;
+    private final List<String> burstColors;
+    private final int type;
 
     public ReactionAddEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long userId, long channelId, long messageId, @Nullable Long guildId,
-                            ReactionEmoji emoji, @Nullable Member member, long messageAuthorId) {
+                            ReactionEmoji emoji, @Nullable Member member, long messageAuthorId, boolean burst, List<String> burstColors, int type) {
         super(gateway, shardInfo);
         this.userId = userId;
         this.channelId = channelId;
@@ -61,6 +68,9 @@ public class ReactionAddEvent extends MessageEvent {
         this.emoji = emoji;
         this.member = member;
         this.messageAuthorId = messageAuthorId;
+        this.burst = burst;
+        this.burstColors = burstColors;
+        this.type = type;
     }
 
     /**
@@ -168,6 +178,33 @@ public class ReactionAddEvent extends MessageEvent {
      */
     public Snowflake getMessageAuthorId() {
         return Snowflake.of(messageAuthorId);
+    }
+
+    /**
+     * Get a list of HEX colors used for super reaction.
+     *
+     * @return A list of {@link Color} used in this reaction.
+     */
+    public List<Color> getSuperColors() {
+        return this.burstColors.stream().map(Color::of).collect(Collectors.toList());
+    }
+
+    /**
+     * Gets whether the reaction related to this event is "Super".
+     *
+     * @return Whether the reaction related to this event is "Super".
+     */
+    public boolean isSuperReaction() {
+        return this.burst;
+    }
+
+    /**
+     * Gets the {@link Reaction.Type} of the reaction.
+     *
+     * @return A {@link Reaction.Type}
+     */
+    public Reaction.Type getType() {
+        return Reaction.Type.of(this.type);
     }
 
     @Override

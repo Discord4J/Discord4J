@@ -18,6 +18,7 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.ApplicationInfoData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.voice.AudioProvider;
 import discord4j.voice.VoiceConnection;
 import discord4j.voice.retry.VoiceGatewayReconnectException;
@@ -57,6 +58,8 @@ public class VoiceSupport {
     public static Mono<Void> voiceHandler(GatewayDiscordClient client) {
         Mono<Long> ownerId = client.rest().getApplicationInfo()
                 .map(ApplicationInfoData::owner)
+                .map(Possible::toOptional)
+                .flatMap(Mono::justOrEmpty)
                 .map(user -> Snowflake.asLong(user.id()))
                 .cache();
 

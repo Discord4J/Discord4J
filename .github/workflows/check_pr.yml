@@ -1,0 +1,20 @@
+name: Check Pull Request
+
+on:
+    pull_request_target:
+        types: [ opened ]
+
+jobs:
+    run:
+        if: |
+            github.repository != github.event.pull_request.head.repo.full_name &&
+            (
+              (github.head_ref == 'master' || github.head_ref == '3.2.x' || github.head_ref == '3.1.x' || github.head_ref == '3.0.x' || github.head_ref == '2.x') ||
+              github.event.pull_request.head.repo.owner.type != 'User'
+            )
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: superbrothers/close-pull-request@v3
+                id: "master_branch"
+                with:
+                    comment: "This Pull Request is created from a restricted branch name. This can cause issues in the maintenance of the Pull Request; please create a new branch instead."
