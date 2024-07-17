@@ -186,6 +186,7 @@ public class AutoModActionExecutedEvent extends Event {
     /**
      * Gets the User-generated text content.
      *
+     * @throws UnsupportedOperationException if the MESSAGE_CONTENT intent is not enabled and the content is empty
      * @return The contents.
      */
     public String getContent() {
@@ -217,6 +218,7 @@ public class AutoModActionExecutedEvent extends Event {
     /**
      * Gets the Substring in content that triggered the rule, if present.
      *
+     * @throws UnsupportedOperationException if the MESSAGE_CONTENT intent is not enabled and the content is empty
      * @return The matched content, if present.
      */
     public Optional<String> getMatchedContent() {
