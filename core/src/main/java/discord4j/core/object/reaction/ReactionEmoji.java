@@ -183,6 +183,8 @@ public abstract class ReactionEmoji {
 
         /**
          * Gets the name of the emoji.
+         * <br>
+         * <b>Note:</b> this can return an empty name for reactions or onboarding
          *
          * @return The name of the emoji.
          */
