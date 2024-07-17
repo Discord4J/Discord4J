@@ -13,7 +13,8 @@ import java.util.stream.Collectors;
 /**
  * Represents an option for an onboarding prompt.
  *
- * @see <a href="https://discord.com/developers/docs/resources/guild#guild-onboarding-object-prompt-option-structure">https://discord.com/developers/docs/resources/guild#guild-onboarding-object-prompt-option-structure</a>
+ * @see <a href="https://discord.com/developers/docs/resources/guild#guild-onboarding-object-prompt-option-structure">
+ *     Guild Onboarding Prompt Option Structure</a>
  */
 public class OnboardingPromptOption implements Entity {
 

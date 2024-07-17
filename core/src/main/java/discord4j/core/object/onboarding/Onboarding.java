@@ -11,7 +11,8 @@ import java.util.stream.Collectors;
 /**
  * Represents the onboarding configuration for a guild.
  *
- * @see <a href="https://discord.com/developers/docs/resources/guild#guild-onboarding-object>https://discord.com/developers/docs/resources/guild#guild-onboarding-object</a>
+ * @see <a href="https://discord.com/developers/docs/resources/guild#guild-onboarding-object-guild-onboarding-structure">
+ *     Guild Onboarding Structure</a>
  */
 public class Onboarding implements Entity {
 

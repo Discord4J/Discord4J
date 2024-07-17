@@ -11,7 +11,8 @@ import java.util.stream.Collectors;
 /**
  * Represents an onboarding prompt.
  *
- * @see <a href="https://discord.com/developers/docs/resources/guild#guild-onboarding-object-onboarding-prompt-structure">https://discord.com/developers/docs/resources/guild#guild-onboarding-object-onboarding-prompt-structure</a>
+ * @see <a href="https://discord.com/developers/docs/resources/guild#guild-onboarding-object-onboarding-prompt-structure">
+ *     Guild Onboarding Prompt Structure</a>
  */
 public class OnboardingPrompt implements Entity {
 
@@ -89,7 +90,7 @@ public class OnboardingPrompt implements Entity {
 
     /**
      * Indicates whether the prompt is present in the onboarding flow. If false, the prompt will only appear
-     * in the Channels & Roles tab
+     * in the Channels and Roles tab
      *
      * @return {@code true} if the prompt is present in the onboarding flow, {@code false} otherwise.
      */
