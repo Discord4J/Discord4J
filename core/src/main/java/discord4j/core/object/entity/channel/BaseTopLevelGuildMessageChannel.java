@@ -21,8 +21,11 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
+import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.core.spec.PollCreateMono;
+import discord4j.core.spec.PollCreateSpec;
 import discord4j.core.spec.WebhookCreateSpec;
 import discord4j.core.spec.legacy.LegacyMessageCreateSpec;
 import discord4j.core.spec.legacy.LegacyWebhookCreateSpec;
@@ -87,6 +90,16 @@ class BaseTopLevelGuildMessageChannel extends BaseCategorizableChannel implement
     @Override
     public Mono<Message> createMessage(MessageCreateSpec spec) {
         return guildMessageChannel.createMessage(spec);
+    }
+
+    @Override
+    public Mono<Poll> createPoll(PollCreateSpec spec) {
+        return guildMessageChannel.createPoll(spec);
+    }
+
+    @Override
+    public PollCreateMono createPoll() {
+        return guildMessageChannel.createPoll();
     }
 
     @Override

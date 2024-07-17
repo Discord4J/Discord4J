@@ -112,6 +112,9 @@ class MessageDispatchHandlers {
                 .orElse(null);
 
         MemberData memberData = context.getDispatch().member().toOptional().orElse(null);
+        List<String> burstColors = context.getDispatch().burstColors().toOptional().orElse(Collections.emptyList());
+        boolean burst = context.getDispatch().burst();
+        int type = context.getDispatch().type();
 
         Long emojiId = context.getDispatch().emoji().id()
                 .map(Snowflake::asLong)
@@ -126,7 +129,7 @@ class MessageDispatchHandlers {
         Member member = memberData != null ? new Member(gateway, memberData, guildId) : null;
 
         return Mono.just(new ReactionAddEvent(gateway, context.getShardInfo(), userId, channelId,
-                messageId, guildId, emoji, member, messageAuthorId));
+                messageId, guildId, emoji, member, messageAuthorId, burst, burstColors, type));
     }
 
     static Mono<ReactionRemoveEvent> messageReactionRemove(DispatchContext<MessageReactionRemove, Void> context) {
@@ -138,6 +141,8 @@ class MessageDispatchHandlers {
                 .toOptional()
                 .map(Snowflake::asLong)
                 .orElse(null);
+        boolean burst = context.getDispatch().burst();
+        int type = context.getDispatch().type();
 
         Long emojiId = context.getDispatch().emoji().id()
                 .map(Snowflake::asLong)
@@ -149,7 +154,7 @@ class MessageDispatchHandlers {
                 .orElse(false);
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
         return Mono.just(new ReactionRemoveEvent(gateway, context.getShardInfo(), userId,
-                channelId, messageId, guildId, emoji));
+                channelId, messageId, guildId, emoji, burst, type));
     }
 
     static Mono<ReactionRemoveEmojiEvent> messageReactionRemoveEmoji(DispatchContext<MessageReactionRemoveEmoji, Void> context) {

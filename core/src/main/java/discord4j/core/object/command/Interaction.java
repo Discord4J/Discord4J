@@ -32,6 +32,7 @@ import discord4j.discordjson.json.UserData;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -210,6 +211,36 @@ public class Interaction implements DiscordObject {
      */
     public Optional<String> getGuildLocale() {
         return data.guildLocale().toOptional();
+    }
+
+    /**
+     * Get the id of the authorizing integration owner for the given integration type, if present.
+     *
+     * @param type The type of integration to get the owner for.
+     * @return An {@link Optional} containing the id of the authorizing integration owner if present.
+     */
+    public Optional<Snowflake> getAuthorizingIntegrationOwner(ApplicationIntegrationType type) {
+        return Optional.ofNullable(data.authorizingIntegrationOwners().get(type.getValue()))
+            .map(Snowflake::of);
+    }
+
+    /**
+     * Get the authorizing integration owners for the interaction.
+     *
+     * @return A {@link Map} containing the authorizing integration owners for the interaction.
+     */
+    public Map<ApplicationIntegrationType, Snowflake> getAuthorizingIntegrationOwners() {
+        return data.authorizingIntegrationOwners().entrySet().stream()
+            .collect(Collectors.toMap(entry -> ApplicationIntegrationType.of(entry.getKey()), entry -> Snowflake.of(entry.getValue())));
+    }
+
+    /**
+     * Get the context of the interaction.
+     *
+     * @return An {@link Optional} containing the context of the interaction if present.
+     */
+    public Optional<ApplicationCommandContexts> getContext() {
+        return data.context().toOptional().map(ApplicationCommandContexts::of);
     }
 
     /**

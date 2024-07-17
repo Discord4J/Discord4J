@@ -54,6 +54,7 @@ public class RestClient {
     private final WebhookService webhookService;
     private final Mono<Long> applicationIdMono;
     private final AutoModService autoModService;
+    private final PollService pollService;
     private final MonetizationService monetizationService;
 
     /**
@@ -99,6 +100,7 @@ public class RestClient {
         this.voiceService = new VoiceService(router);
         this.webhookService = new WebhookService(router);
         this.autoModService = new AutoModService(router);
+        this.pollService = new PollService(router);
         this.monetizationService = new MonetizationService(router);
 
         this.applicationIdMono = getApplicationInfo()
@@ -601,5 +603,9 @@ public class RestClient {
 
     public Mono<Long> getApplicationId() {
         return applicationIdMono;
+    }
+
+    public PollService getPollService() {
+        return this.pollService;
     }
 }

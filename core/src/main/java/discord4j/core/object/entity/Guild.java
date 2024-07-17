@@ -564,7 +564,7 @@ public final class Guild implements Entity {
      * If the EnumSet contains an UNKNOWN value, it means that one or more values are not implemented yet
      * or did not match the Discord Guild Features.
      * <br>
-     * Raw data features are still available with {@link #getData)} using {@link GuildData#features)}.
+     * Raw data features are still available with {@link #getData} using {@link GuildData#features}.
      *
      * @return A {@code EnumSet} with the enabled guild features.
      */
@@ -1042,6 +1042,16 @@ public final class Guild implements Entity {
      */
     public int getMaxPresences() {
         return Possible.flatOpt(data.maxPresences()).orElse(DEFAULT_MAX_PRESENCES);
+    }
+
+    /**
+     * Gets the mention for the given {@link ResourceNavigation} channel.
+     *
+     * @param resourceNavigation The {@link ResourceNavigation} to get the mention for.
+     * @return The mention for the given {@link ResourceNavigation} channel.
+     */
+    public String getResourceNavigationMention(ResourceNavigation resourceNavigation) {
+        return resourceNavigation.getMention();
     }
 
     /**
@@ -1625,6 +1635,38 @@ public final class Guild implements Entity {
     public Mono<Void> unban(final Snowflake userId, @Nullable final String reason) {
         return gateway.getRestClient().getGuildService()
                 .removeGuildBan(getId().asLong(), userId.asLong(), reason);
+    }
+
+    /**
+     * Requests to ban the specified users. Properties specifying how to ban the user can be set via the {@code withXxx}
+     * methods of the returned {@link BulkBanRequestMono}.
+     *
+     * @param userIds The list of IDs of the users to ban.
+     * @return A {@link BulkBanRequestMono} where, upon successful completion, emits an {@link BulkBan} with the results.
+     *      * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public BulkBanRequestMono bulkBan(List<Snowflake> userIds) {
+        return BulkBanRequestMono.of(this).withUserIds(userIds);
+    }
+
+    /**
+     * Request a Bulk Ban to a specific list of users.
+     * <br>
+     * <b>Things considered error for this request</b>
+     * <ul>
+     *   <li>The list of users is over 200</li>
+     *   <li>None of the list of users can be banned</li>
+     * </ul>
+     *
+     * @param spec an immutable object that specifies how to bulk ban in the guild
+     * @return A {@link Mono} where, upon successful completion, emits an {@link BulkBan} with the results.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<BulkBan> bulkBan(BulkBanRequestSpec spec) {
+        Objects.requireNonNull(spec);
+        return gateway.getRestClient().getGuildService()
+            .bulkGuildBan(getId().asLong(), spec.asRequest(), spec.reason())
+            .map(data -> new BulkBan(gateway, data));
     }
 
     /**
@@ -2510,6 +2552,51 @@ public final class Guild implements Entity {
                 .orElse(GuildFeature.UNKNOWN);
         }
 
+    }
+
+    /**
+     * Describes guild navigation types.
+     *
+     * @see <a href="https://discord.com/developers/docs/reference#message-formatting-guild-navigation-types">Discord Docs</a>
+     */
+    public enum ResourceNavigation {
+        /** Customize tab with the server's onboarding prompts */
+        CUSTOMIZE("customize"),
+        /** Browse Channels tab */
+        BROWSE("browse"),
+        /** Server Guide */
+        GUIDE("guide"),
+        ;
+
+        /** The underlying value as represented by Discord. */
+        private final String value;
+
+        /**
+         * Constructs an {@code Guild.ResourceNavigation}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        ResourceNavigation(final String value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public String getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the <i>raw</i> mention. This is the format utilized to directly mention guild resource.
+         *
+         * @return The <i>raw</i> mention.
+         */
+        public String getMention() {
+            return "<id:" + this.value  + ">";
+        }
     }
 
     @Override
