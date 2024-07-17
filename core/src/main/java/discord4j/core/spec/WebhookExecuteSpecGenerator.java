@@ -17,6 +17,7 @@
 
 package discord4j.core.spec;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
@@ -68,6 +69,10 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
 
     Possible<List<LayoutComponent>> components();
 
+    Possible<String> threadName();
+
+    Possible<Snowflake> threadId();
+
     @Override
     default MultipartRequest<WebhookExecuteRequest> asRequest() {
         WebhookExecuteRequest request = WebhookExecuteRequest.builder()
@@ -80,6 +85,7 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
                 .components(mapPossible(components(), components -> components.stream()
                         .map(LayoutComponent::getData)
                         .collect(Collectors.toList())))
+                .threadName(threadName())
                 .build();
         return MultipartRequest.ofRequestAndFiles(request, Stream.concat(files().stream(), fileSpoilers().stream())
                 .map(MessageCreateFields.File::asRequest)
@@ -97,7 +103,11 @@ abstract class WebhookExecuteMonoGenerator extends Mono<Message> implements Webh
 
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
-        webhook().execute(waitForMessage(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
+        if (threadId().isAbsent()) {
+            webhook().execute(waitForMessage(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
+        } else {
+            webhook().execute(waitForMessage(), threadId().get(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
+        }
     }
 
     @Override

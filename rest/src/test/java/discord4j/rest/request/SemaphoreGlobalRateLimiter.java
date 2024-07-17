@@ -105,7 +105,7 @@ public class SemaphoreGlobalRateLimiter implements GlobalRateLimiter {
                         return new Resource(outer, null);
                     });
                 })
-                .subscribeOn(Schedulers.elastic())
+                .subscribeOn(Schedulers.boundedElastic())
                 .delayUntil(resource -> onComplete());
     }
 
