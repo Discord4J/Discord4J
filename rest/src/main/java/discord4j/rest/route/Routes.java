@@ -29,7 +29,7 @@ public abstract class Routes {
      * @see <a href="https://discord.com/developers/docs/reference#base-url">
      * https://discord.com/developers/docs/reference#base-url</a>
      */
-    public static final String BASE_URL = "https://discord.com/api/v9";
+    public static final String BASE_URL = "https://discord.com/api/v10";
 
     //////////////////////////////////////////////
     ////////////// Gateway Resource //////////////

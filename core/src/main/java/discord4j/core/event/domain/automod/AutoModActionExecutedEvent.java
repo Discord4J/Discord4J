@@ -12,6 +12,7 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.discordjson.json.gateway.AutoModActionExecution;
 import discord4j.gateway.ShardInfo;
+import discord4j.gateway.intent.Intent;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
@@ -185,10 +186,24 @@ public class AutoModActionExecutedEvent extends Event {
     /**
      * Gets the User-generated text content.
      *
+     * @throws UnsupportedOperationException if the MESSAGE_CONTENT intent is not enabled and the content is empty
      * @return The contents.
      */
     public String getContent() {
-        return this.data.content();
+        String content = this.data.content();
+
+        if (!content.isEmpty()) {
+            return content;
+        }
+
+        if (!super.getClient().getGatewayResources().getIntents().contains(Intent.MESSAGE_CONTENT)) {
+            throw new UnsupportedOperationException("The MESSAGE_CONTENT intent is required to access message content!" +
+                "\nSee https://github.com/Discord4J/Discord4J?tab=readme-ov-file#calling-messagegetcontent-without-enabling-the-message-content-intent" +
+                " for more information.");
+        }
+
+        // We have access to the message content, but the content is empty.
+        return content;
     }
 
     /**
@@ -203,9 +218,23 @@ public class AutoModActionExecutedEvent extends Event {
     /**
      * Gets the Substring in content that triggered the rule, if present.
      *
+     * @throws UnsupportedOperationException if the MESSAGE_CONTENT intent is not enabled and the content is empty
      * @return The matched content, if present.
      */
     public Optional<String> getMatchedContent() {
-        return this.data.matchedContent();
+        Optional<String> content = this.data.matchedContent();
+
+        if (content.isPresent() && !content.get().isEmpty()) {
+            return content;
+        }
+
+        if (!super.getClient().getGatewayResources().getIntents().contains(Intent.MESSAGE_CONTENT)) {
+            throw new UnsupportedOperationException("The MESSAGE_CONTENT intent is required to access message content!" +
+                "\nSee https://github.com/Discord4J/Discord4J?tab=readme-ov-file#calling-messagegetcontent-without-enabling-the-message-content-intent" +
+                " for more information.");
+        }
+
+        // We have access to the message content, but the content is empty.
+        return content;
     }
 }
