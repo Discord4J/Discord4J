@@ -221,7 +221,7 @@ public class LegacyMessageCreateSpec implements LegacySpec<MultipartRequest<Mess
         MessageCreateRequest json = MessageCreateRequest.builder()
                 .content(content == null ? Possible.absent() : Possible.of(content))
                 .nonce(nonce == null ? Possible.absent() : Possible.of(nonce))
-                .enforceNonce(enforceNonce == null ? Possible.absent() : Possible.of(enforceNonce)
+                .enforceNonce(enforceNonce == null ? Possible.absent() : Possible.of(enforceNonce))
                 .tts(tts)
                 .embeds(embeds == null ? Possible.absent() : Possible.of(embeds))
                 .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
