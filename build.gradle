@@ -24,7 +24,7 @@ ext {
     }
 
     // Dependencies
-    reactor_bom_version = '2023.0.3'
+    reactor_bom_version = '2023.0.8'
     jackson_databind_version = '2.17.0'
     jackson_datatype_jsr310_version = '2.17.0'
     jackson_datatype_jdk8_version = '2.17.0'
@@ -97,9 +97,9 @@ allprojects {
                 jdk_javadoc,
                 "https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/2.17.0/",
                 "https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
-                "https://projectreactor.io/docs/core/3.4.26/api/",
-                "https://projectreactor.io/docs/netty/1.0.27/api/",
-                "https://projectreactor.io/docs/extra/3.4.9/api/",
+                "https://projectreactor.io/docs/core/3.6.8/api/",
+                "https://projectreactor.io/docs/netty/1.1.21/api/",
+                "https://projectreactor.io/docs/extra/3.5.1/api/",
                 "https://netty.io/4.1/api/"
             ]
         }
