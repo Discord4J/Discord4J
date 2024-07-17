@@ -241,7 +241,25 @@ public enum Intent {
      *     <li>AUTO_MODERATION_ACTION_EXECUTION</li>
      * </ul>
      */
-    AUTO_MODERATION_EXECUTION(21);
+    AUTO_MODERATION_EXECUTION(21),
+
+    /**
+     * Events which will be received by subscribing to GUILD_MESSAGE_POLLS
+     * <ul>
+     *     <li>MESSAGE_POLL_VOTE_ADD</li>
+     *     <li>MESSAGE_POLL_VOTE_REMOVE</li>
+     * </ul>
+     */
+    GUILD_MESSAGE_POLLS(24),
+
+    /**
+     * Events which will be received by subscribing to DIRECT_MESSAGE_POLLS
+     * <ul>
+     *     <li>MESSAGE_POLL_VOTE_ADD</li>
+     *     <li>MESSAGE_POLL_VOTE_REMOVE</li>
+     * </ul>
+     */
+    DIRECT_MESSAGE_POLLS(25);
 
     private final int value;
 

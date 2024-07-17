@@ -16,22 +16,32 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.annotations.Experimental;
+import discord4j.common.util.Snowflake;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.ApplicationInstallParams;
+import discord4j.core.object.ApplicationIntegrationTypeConfiguration;
 import discord4j.core.object.ApplicationRoleConnectionMetadata;
+import discord4j.core.object.command.ApplicationIntegrationType;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.ApplicationEditMono;
 import discord4j.core.spec.ApplicationEditSpec;
-import discord4j.discordjson.json.ApplicationInfoData;
-import discord4j.core.GatewayDiscordClient;
-import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.discordjson.json.ApplicationRoleConnectionMetadataData;
-import discord4j.rest.util.Image;
-import discord4j.common.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
+import discord4j.discordjson.json.ApplicationInfoData;
+import discord4j.discordjson.json.ApplicationRoleConnectionMetadataData;
+import discord4j.rest.util.Image;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Represents the Current (typically) Application Information.
@@ -111,6 +121,28 @@ public final class ApplicationInfo implements Entity {
     }
 
     /**
+     * Gets the cover image URL of the application, if present.
+     *
+     * @param format The format for the URL.
+     * @return The icon URL of the application, if present.
+     */
+    public Optional<String> getCoverImageUrl(final Image.Format format) {
+        return data.coverImage().toOptional()
+            .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
+    }
+
+    /**
+     * Gets the cover image of the application.
+     *
+     * @param format The format in which to get the icon.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image cover image} of the application.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getCoverImage(final Image.Format format) {
+        return Mono.justOrEmpty(getCoverImageUrl(format)).flatMap(Image::ofUrl);
+    }
+
+    /**
      * Gets the description of the app.
      *
      * @return The description of the app.
@@ -120,11 +152,31 @@ public final class ApplicationInfo implements Entity {
     }
 
     /**
+     * Gets the list of RPC origin URLs, if RPC is enabled
+     *
+     * @return A {@link List} of RPC origin URLs, if RPC is enabled
+     */
+    public List<String> getRpcOrigins() {
+        return data.rpcOrigins().toOptional().orElse(Collections.emptyList());
+    }
+
+    /**
+     * Gets whether only the app owner can join the app's bot to guilds.
+     *
+     * @return {@code true} if only the app owner can join the app's bot to guilds, {@code false} otherwise.
+     * @deprecated Use {@link #isBotPublic()} instead.
+     */
+    @Deprecated
+    public boolean isPublic() {
+        return data.botPublic();
+    }
+
+    /**
      * Gets whether only the app owner can join the app's bot to guilds.
      *
      * @return {@code true} if only the app owner can join the app's bot to guilds, {@code false} otherwise.
      */
-    public boolean isPublic() {
+    public boolean isBotPublic() {
         return data.botPublic();
     }
 
@@ -133,8 +185,20 @@ public final class ApplicationInfo implements Entity {
      *
      * @return {@code true} if the app's bot will only join upon completion of the full OAuth2 code grant flow,
      * {@code false} otherwise.
+     * @deprecated Use {@link #botRequiresCodeGrant()} instead.
      */
+    @Deprecated
     public boolean requireCodeGrant() {
+        return data.botRequireCodeGrant();
+    }
+
+    /**
+     * Gets whether the app's bot will only join upon completion of the full OAuth2 code grant flow.
+     *
+     * @return {@code true} if the app's bot will only join upon completion of the full OAuth2 code grant flow,
+     * {@code false} otherwise.
+     */
+    public boolean botRequiresCodeGrant() {
         return data.botRequireCodeGrant();
     }
 
@@ -161,8 +225,8 @@ public final class ApplicationInfo implements Entity {
      *
      * @return The ID of the owner of the application.
      */
-    public Snowflake getOwnerId() {
-        return Snowflake.of(data.owner().id());
+    public Optional<Snowflake> getOwnerId() {
+        return data.owner().toOptional().map(data -> Snowflake.of(data.id()));
     }
 
     /**
@@ -172,7 +236,7 @@ public final class ApplicationInfo implements Entity {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getOwner() {
-        return gateway.getUserById(getOwnerId());
+        return getOwnerId().map(gateway::getUserById).orElseGet(Mono::empty);
     }
 
     /**
@@ -183,7 +247,7 @@ public final class ApplicationInfo implements Entity {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getOwner(EntityRetrievalStrategy retrievalStrategy) {
-        return gateway.withRetrievalStrategy(retrievalStrategy).getUserById(getOwnerId());
+        return getOwnerId().map(gateway.withRetrievalStrategy(retrievalStrategy)::getUserById).orElseGet(Mono::empty);
     }
 
     /**
@@ -206,6 +270,155 @@ public final class ApplicationInfo implements Entity {
             return Flag.of(publicFlags);
         }
         return EnumSet.noneOf(Flag.class);
+    }
+
+    /**
+     * Hex encoded key for verification in interactions and the GameSDK's GetTicket
+     *
+     * @return The verify key
+     */
+    public String getVerifyKey() {
+        return data.verifyKey();
+    }
+
+    /**
+     * Returns the bot's id associated with this application, if present
+     *
+     * @return An {@link Optional} containing the bot's id or empty if the bot is not present
+     */
+    public Optional<Snowflake> getBotId() {
+        return data.bot().toOptional().map(bot -> Snowflake.of(bot.id()));
+    }
+
+    /**
+     * Returns the bot's user associated with this application, if present
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the bot's {@link User}
+     * associated with this application. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<User> getBot() {
+        return data.bot().toOptional().map(bot -> gateway.getUserById(Snowflake.of(bot.id()))).orElseGet(Mono::empty);
+    }
+
+    /**
+     * Returns the guild id associated with the app. For example, a developer support server.
+     *
+     * @return An {@link Optional} containing the guild id or empty if the guild is not present
+     */
+    public Optional<Snowflake> getGuildId() {
+        return data.guildId().toOptional().map(Snowflake::of);
+    }
+
+    /**
+     * Returns the guild associated with the app. For example, a developer support server.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} associated with the app.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild() {
+        return data.guildId().toOptional()
+            .map(Snowflake::of)
+            .map(gateway::getGuildById)
+            .orElseGet(Mono::empty);
+    }
+
+    /**
+     * Returns the primary SKU id of the app. If this app is a game sold on Discord, this field will be the id of
+     * the "Game SKU" that is created, if exists
+     *
+     * @return An {@link Optional} containing the primary SKU id or empty if the primary SKU id is not present
+     */
+    public Optional<Snowflake> getPrimarySkuId() {
+        return data.primarySkuId().toOptional().map(Snowflake::of);
+    }
+
+    /**
+     * If this app is a game sold on Discord, this field will be the URL slug that links to the store page
+     *
+     * @return An {@link Optional} containing the slug or empty if the slug is not present
+     */
+    public Optional<String> getSlug() {
+        return data.slug().toOptional();
+    }
+
+    /**
+     * Returns the approximate count of guilds the app has been added to, if present
+     *
+     * @return An {@link Optional} containing the approximate count of guilds the app has been added to, if present
+     */
+    public Optional<Integer> getApproximateGuildCount() {
+        return data.approximateGuildCount().toOptional();
+    }
+
+    /**
+     * Returns the list of redirect URIs for the app
+     *
+     * @return A {@link List} of redirect URIs for the app
+     */
+    public List<String> getRedirectUris() {
+        return data.redirectUris().toOptional().orElse(Collections.emptyList());
+    }
+
+    /**
+     * Returns the interactions endpoint URL for the app if present
+     *
+     * @return An {@link Optional} containing the interactions endpoint URL for the app if present
+     */
+    public Optional<String> getInteractionsEndpointUrl() {
+        return data.interactionsEndpointUrl().toOptional();
+    }
+
+    /**
+     * Returns the role connection verification URL for the app
+     *
+     * @return An {@link Optional} containing the role connection verification URL for the app
+     */
+    public Optional<String> getRoleConnectionsVerificationUrl() {
+        return data.roleConnectionsVerificationUrl().toOptional();
+    }
+
+    /**
+     * Returns the of tags describing the content and functionality of the app
+     *
+     * @return A {@link List} of tags of the app
+     */
+    public List<String> getTags() {
+        return data.tags().toOptional().orElse(Collections.emptyList());
+    }
+
+    /**
+     * Returns the settings for the app's default in-app authorization link, if enabled
+     *
+     * @return An {@link Optional} containing the settings for the app's default in-app authorization link, if enabled
+     */
+    public Optional<ApplicationInstallParams> getInstallParams() {
+        return data.installParams().toOptional()
+            .map(ApplicationInstallParams::new);
+    }
+
+    /**
+     * Returns the default scopes and permissions for each supported installation context.
+     *
+     * @return A map of {@link ApplicationIntegrationType} to {@link ApplicationIntegrationTypeConfiguration}
+     */
+    @Experimental // In preview
+    public Map<ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration> getIntegrationTypesConfig() {
+        return data.integrationTypesConfig().toOptional()
+            .map(map -> {
+                Map<ApplicationIntegrationType, ApplicationIntegrationTypeConfiguration> integrationTypesConfig = new HashMap<>();
+                map.forEach((key, value) -> integrationTypesConfig.put(ApplicationIntegrationType.of(key), new ApplicationIntegrationTypeConfiguration(value)));
+                return integrationTypesConfig;
+            })
+            .orElse(Collections.emptyMap());
+    }
+
+    /**
+     * Returns the default custom authorization URL for the app, if enabled
+     *
+     * @return An {@link Optional} containing the default custom authorization URL for the app, if enabled
+     */
+    public Optional<String> getCustomInstallUrl() {
+        return data.customInstallUrl().toOptional();
     }
 
     /**
