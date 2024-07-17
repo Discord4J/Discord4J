@@ -26,10 +26,12 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.monetization.Entitlement;
 import discord4j.discordjson.json.InteractionData;
 import discord4j.discordjson.json.UserData;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -40,6 +42,7 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://discord.com/developers/docs/interactions/slash-commands#interaction">Interaction Object</a>
  */
+@Experimental
 public class Interaction implements DiscordObject {
 
     /** The gateway associated to this object. */
@@ -238,6 +241,43 @@ public class Interaction implements DiscordObject {
      */
     public Optional<ApplicationCommandContexts> getContext() {
         return data.context().toOptional().map(ApplicationCommandContexts::of);
+    }
+
+    /**
+     * Gets the entitlements attached to the interaction.
+     *
+     * @return The list of {@link Entitlement} attached to the interaction.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public List<Entitlement> getEntitlements() {
+        return data.entitlements()
+            .stream()
+            .map(entitlementData -> new Entitlement(gateway, entitlementData))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Checks if the user has an entitlement for this interaction.
+     *
+     * @return {@code true} if the user has an entitlement for this interaction, {@code false} otherwise.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public boolean hasUserEntitlement() {
+        User user = getUser();
+        return data.entitlements().stream().anyMatch(entitlementData -> !entitlementData.userId().isAbsent() && entitlementData.userId().get().asLong() == user.getId().asLong());
+    }
+
+    /**
+     * Checks if the guild has an entitlement for this interaction.
+     *
+     * @return {@code true} if the guild has an entitlement for this interaction, {@code false} otherwise.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public boolean hasGuildEntitlement() {
+        if (data.guildId().isAbsent())
+            return false;
+
+        return data.entitlements().stream().anyMatch(entitlementData -> !entitlementData.guildId().isAbsent() && entitlementData.guildId().get().asLong() == data.guildId().get().asLong());
     }
 
     @Override
