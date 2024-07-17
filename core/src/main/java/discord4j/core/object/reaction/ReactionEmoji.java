@@ -183,14 +183,14 @@ public abstract class ReactionEmoji {
         }
 
         /**
-         * Gets the name of the emoji, if present.
+         * Gets the name of the emoji.
          * <br>
-         * <b>Note:</b> this can not be present for reactions or onboarding.
+         * <b>Note:</b> this can be empty for reactions or onboarding.
          *
-         * @return The name of the emoji, if present.
+         * @return The name of the emoji.
          */
-        public Optional<String> getName() {
-            return Optional.ofNullable(name);
+        public String getName() {
+            return (name != null) ? name : "";
         }
 
         /**
@@ -206,7 +206,7 @@ public abstract class ReactionEmoji {
         public EmojiData asEmojiData() {
             return EmojiData.builder()
                     .id(id)
-                    .name(getName())
+                    .name(Optional.ofNullable(name))
                     .animated(isAnimated)
                     .build();
         }
@@ -214,7 +214,7 @@ public abstract class ReactionEmoji {
         /**
          * Gets the formatted version of this emoji (i.e., to display in the client).
          * <br>
-         * <b>Note:</b> please check first if {@link #getName()} is present.
+         * <b>Note:</b> please check first if {@link #getName()} is not empty.
          *
          * @return The formatted version of this emoji (i.e., to display in the client).
          */
