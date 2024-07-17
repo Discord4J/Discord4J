@@ -108,6 +108,15 @@ public class OnboardingPrompt implements Entity {
         return this.client;
     }
 
+    @Override
+    public String toString() {
+        return "OnboardingPrompt{" +
+            "id=" + id +
+            ", type=" + type +
+            ", options=" + options +
+            '}';
+    }
+
     /**
      * Represents the type of onboarding prompt.
      */

@@ -23,7 +23,7 @@ public class OnboardingPromptOption implements Entity {
     private final Snowflake id;
     private final List<Snowflake> addedChannelIds;
     private final List<Snowflake> roleIds;
-    private final Optional<ReactionEmoji> emoji;
+    private final ReactionEmoji emoji;
 
     public OnboardingPromptOption(GatewayDiscordClient client, OnboardingPromptOptionData data) {
         this.client = client;
@@ -37,7 +37,7 @@ public class OnboardingPromptOption implements Entity {
                 .map(Snowflake::of)
                 .collect(Collectors.toList());
 
-        this.emoji = data.emoji().toOptional().map(ReactionEmoji::of);
+        this.emoji = data.emoji().toOptional().map(ReactionEmoji::of).orElse(null);
     }
 
     /**
@@ -91,7 +91,7 @@ public class OnboardingPromptOption implements Entity {
      * @return An {@link Optional} containing the emoji of the option or {@link Optional#empty()} if not present.
      */
     public Optional<ReactionEmoji> getEmoji() {
-        return this.emoji;
+        return Optional.ofNullable(this.emoji);
     }
 
     @Override
@@ -102,5 +102,15 @@ public class OnboardingPromptOption implements Entity {
     @Override
     public GatewayDiscordClient getClient() {
         return this.client;
+    }
+
+    @Override
+    public String toString() {
+        return "OnboardingPromptOption{" +
+            "id=" + id +
+            ", addedChannelIds=" + addedChannelIds +
+            ", roleIds=" + roleIds +
+            ", emoji=" + emoji +
+            '}';
     }
 }

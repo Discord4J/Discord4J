@@ -99,6 +99,15 @@ public class Onboarding implements Entity {
         return this.client;
     }
 
+    @Override
+    public String toString() {
+        return "Onboarding{" +
+            "guildId=" + guildId +
+            ", prompts=" + prompts +
+            ", defaultChannelIds=" + defaultChannelIds +
+            '}';
+    }
+
     /**
      * The onboarding mode.
      */
