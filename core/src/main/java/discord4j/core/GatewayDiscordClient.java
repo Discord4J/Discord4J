@@ -21,6 +21,7 @@ package discord4j.core;
 import discord4j.common.JacksonResources;
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
+import discord4j.common.annotations.Experimental;
 import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.EventDispatcher;
@@ -34,12 +35,16 @@ import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.monetization.Entitlement;
+import discord4j.core.object.monetization.SKU;
 import discord4j.core.object.entity.channel.StageChannel;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.retriever.EntityRetriever;
 import discord4j.core.shard.GatewayBootstrap;
+import discord4j.core.spec.CreateTestEntitlementMono;
+import discord4j.core.spec.EntitlementListRequestFlux;
 import discord4j.core.spec.GuildCreateMono;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditMono;
@@ -879,6 +884,88 @@ public class GatewayDiscordClient implements EntityRetriever {
     @Override
     public Flux<ScheduledEventUser> getScheduledEventUsers(Snowflake guildId, Snowflake eventId) {
         return entityRetriever.getScheduledEventUsers(guildId, eventId);
+    }
+
+    /**
+     * Request to retrieve all the {@link SKU SKUs} for the current application.
+     *
+     * @return A {@link Flux} that emits the {@link SKU SKUs} for the application upon successful completion. If an
+     * error is received, it is emitted through the {@code Flux}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public Flux<SKU> getSKUs() {
+        return getApplicationInfo().flatMapMany(applicationInfo -> {
+            return getRestClient().getMonetizationService()
+                .getAllSkus(applicationInfo.getId().asLong())
+                .map(data -> new SKU(this, data));
+        });
+    }
+
+    /**
+     * Request to retrieve the {@link SKU SKU} for the application with the given ID.
+     *
+     * @param applicationId The ID of the application.
+     * @return A {@link Mono} that emits the {@link SKU SKU} for the application with the given ID upon successful
+     * completion. If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public Flux<SKU> getSKUs(long applicationId) {
+        return getRestClient().getMonetizationService()
+            .getAllSkus(applicationId)
+            .map(data -> new SKU(this, data));
+    }
+
+    /**
+     * Request to retrieve all the {@link Entitlement} for the current application.
+     * The request can be filtered using the "withXXX" methods of the returned {@link EntitlementListRequestFlux}.
+     *
+     * @return A {@link EntitlementListRequestFlux} that emits the {@link Entitlement} for the application with the given ID upon successful
+     * completion. If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public EntitlementListRequestFlux getEntitlements() {
+        return EntitlementListRequestFlux.of(this, discordClient);
+    }
+
+    /**
+     * Create a test entitlement for the given {@link SKU} and guild ID.
+     *
+     * @param skuId   The ID of the SKU.
+     * @param guildId The ID of the guild.
+     * @return A {@link CreateTestEntitlementMono} that emits the created {@link Entitlement} upon successful
+     * completion. If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public CreateTestEntitlementMono createTestEntitlementForGuild(Snowflake skuId, Snowflake guildId) {
+        return CreateTestEntitlementMono.of(skuId, guildId, Entitlement.OwnerType.GUILD, this, discordClient);
+    }
+
+    /**
+     * Create a test entitlement for the given {@link SKU} and user ID.
+     *
+     * @param skuId  The ID of the SKU.
+     * @param userId The ID of the user.
+     * @return A {@link CreateTestEntitlementMono} that emits the created {@link Entitlement} upon successful
+     * completion. If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public CreateTestEntitlementMono createTestEntitlementForUser(Snowflake skuId, Snowflake userId) {
+        return CreateTestEntitlementMono.of(skuId, userId, Entitlement.OwnerType.USER, this, discordClient);
+    }
+
+    /**
+     * Delete a test entitlement with the given ID.
+     *
+     * @param entitlementId The ID of the entitlement.
+     * @return A {@link Mono} that completes upon successful deletion.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public Mono<Void> deleteTestEntitlement(Snowflake entitlementId) {
+        return getApplicationInfo().flatMap(applicationInfo -> {
+            return getRestClient().getMonetizationService()
+                .deleteTestEntitlement(applicationInfo.getId().asLong(), entitlementId.asLong());
+        });
     }
 
 }

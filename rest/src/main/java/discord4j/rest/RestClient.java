@@ -56,6 +56,7 @@ public class RestClient {
     private final Mono<Long> applicationIdMono;
     private final AutoModService autoModService;
     private final PollService pollService;
+    private final MonetizationService monetizationService;
 
     /**
      * Create a {@link RestClient} with default options, using the given token for authentication.
@@ -102,6 +103,7 @@ public class RestClient {
         this.webhookService = new WebhookService(router);
         this.autoModService = new AutoModService(router);
         this.pollService = new PollService(router);
+        this.monetizationService = new MonetizationService(router);
 
         this.applicationIdMono = getApplicationInfo()
                 .map(app -> Snowflake.asLong(app.id()))
@@ -612,6 +614,14 @@ public class RestClient {
      */
     public AutoModService getAutoModService() {
         return autoModService;
+    }
+
+    /**
+     * Access a low-level representation of the API endpoints for the Monetization resource.
+     * @return a handle to perform low-level requests to the API
+     */
+    public MonetizationService getMonetizationService() {
+        return monetizationService;
     }
 
     public Mono<Long> getApplicationId() {

@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
@@ -23,6 +24,7 @@ import discord4j.core.object.*;
 import discord4j.core.object.audit.AuditLogPart;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.channel.*;
+import discord4j.core.object.monetization.Entitlement;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.*;
@@ -2063,6 +2065,29 @@ public final class Guild implements Entity {
     public Mono<ScheduledEvent> createScheduledEvent(ScheduledEventCreateSpec spec) {
         return gateway.getRestClient().getGuildService().createScheduledEvent(getId().asLong(), spec.asRequest())
             .map(data -> new ScheduledEvent(gateway, data));
+    }
+
+    /**
+     * Request the guild's entitlements associated with the current application.
+     * The request can be filtered using the "withXXX" methods of the returned {@link EntitlementListRequestFlux}.
+     *
+     * @return A {@link EntitlementListRequestFlux} which emits {@link discord4j.core.object.monetization.Entitlement} objects.
+     * If an error is received, it is emitted through the {@link Flux}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public EntitlementListRequestFlux getEntitlements() {
+        return gateway.getEntitlements().withGuildId(getId());
+    }
+
+    /**
+     * Request to create a test entitlement for the guild with the provided SKU ID.
+     *
+     * @return A {@link CreateTestEntitlementMono} which emits the created {@link discord4j.core.object.monetization.Entitlement}.
+     * If an error is received, it is emitted through the {@link Mono}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public CreateTestEntitlementMono createTestEntitlement(Snowflake skuId) {
+        return gateway.createTestEntitlementForGuild(skuId, getId());
     }
 
     @Override
