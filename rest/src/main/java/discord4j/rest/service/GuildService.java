@@ -216,7 +216,6 @@ public class GuildService extends RestService {
             .bodyToMono(RoleData.class);
     }
 
-    @Deprecated
     public Flux<RoleData> modifyGuildRolePositions(long guildId, RolePositionModifyRequest[] request) {
         return modifyGuildRolePositions(guildId, request, null);
     }

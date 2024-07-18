@@ -269,7 +269,6 @@ public class RestGuild {
             requests.toArray(new RolePositionModifyRequest[0]), reason);
     }
 
-    @Deprecated
     public Flux<RoleData> modifyRolePositions(List<RolePositionModifyRequest> requests) {
         return modifyRolePositions(requests, null);
     }
