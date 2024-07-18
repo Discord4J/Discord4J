@@ -178,9 +178,9 @@ public class RestGuild {
         return restClient.getGuildService().createGuildChannel(id, request, reason);
     }
 
-    public Flux<RoleData> modifyChannelPositions(List<ChannelPositionModifyRequest> requests) {
+    public Flux<Void> modifyChannelPositions(List<ChannelPositionModifyRequest> requests) {
         return restClient.getGuildService()
-                .modifyGuildChannelPositions(id, requests.toArray(new ChannelPositionModifyRequest[0]));
+            .modifyGuildChannelPositions(id, requests.toArray(new ChannelPositionModifyRequest[0]));
     }
 
     public Mono<MemberData> getMember(Snowflake userId) {
@@ -264,9 +264,14 @@ public class RestGuild {
         return restClient.getGuildService().createGuildRole(id, request, reason);
     }
 
-    public Flux<RoleData> modifyRolePositions(List<RolePositionModifyRequest> requests) {
+    public Flux<RoleData> modifyRolePositions(List<RolePositionModifyRequest> requests, @Nullable String reason) {
         return restClient.getGuildService().modifyGuildRolePositions(id,
-                requests.toArray(new RolePositionModifyRequest[0]));
+            requests.toArray(new RolePositionModifyRequest[0]), reason);
+    }
+
+    @Deprecated
+    public Flux<RoleData> modifyRolePositions(List<RolePositionModifyRequest> requests) {
+        return modifyRolePositions(requests, null);
     }
 
     public Mono<RoleData> modifyRole(Snowflake roleId, RoleModifyRequest request, @Nullable String reason) {
