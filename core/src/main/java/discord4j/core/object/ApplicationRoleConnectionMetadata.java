@@ -10,7 +10,8 @@ import java.util.stream.Collectors;
 /**
  * Represents metadata for an application role connection.
  *
- * @see <a href="https://discord.com/developers/docs/resources/application-role-connection-metadata">https://discord.com/developers/docs/resources/application-role-connection-metadata</a>
+ * @see
+ * <a href="https://discord.com/developers/docs/resources/application-role-connection-metadata">Application Role Connection Metadata</a>
  */
 public class ApplicationRoleConnectionMetadata {
 
@@ -112,10 +113,16 @@ public class ApplicationRoleConnectionMetadata {
         /** the metadata value (integer) is not equal to the guild's configured value (integer) */
         INTEGER_NOT_EQUAL(4),
 
-        /** the metadata value (ISO8601 string) is less than or equal to the guild's configured value (integer; days before current date) */
+        /**
+         * the metadata value (ISO8601 string) is less than or equal to the guild's configured value (integer; days
+         * before current date)
+         */
         DATETIME_LESS_THAN_OR_EQUAL(5),
 
-        /** the metadata value (ISO8601 string) is greater than or equal to the guild's configured value (integer; days before current date) */
+        /**
+         * the metadata value (ISO8601 string) is greater than or equal to the guild's configured value (integer;
+         * days before current date)
+         */
         DATETIME_GREATER_THAN_OR_EQUAL(6),
 
         /** the metadata value (integer) is equal to the guild's configured value (integer; 1) */
@@ -142,7 +149,7 @@ public class ApplicationRoleConnectionMetadata {
         }
 
         /**
-         * Get the {@link Type} from an internal value.  It is guaranteed that invoking {@link #getValue()} from the
+         * Get the {@link Type} from an internal value. It is guaranteed that invoking {@link #getValue()} from the
          * returned enum will equal ({@code ==}) the supplied {@code value}.
          *
          * @param value the internal value
