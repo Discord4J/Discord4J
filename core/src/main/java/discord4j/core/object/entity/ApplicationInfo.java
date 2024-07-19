@@ -356,7 +356,7 @@ public final class ApplicationInfo implements Entity {
      * @return An {@link Optional} containing the interactions endpoint URL for the app if present
      */
     public Optional<String> getInteractionsEndpointUrl() {
-        return data.interactionsEndpointUrl().toOptional().flatMap(o -> o);
+        return Possible.flatOpt(data.interactionsEndpointUrl());
     }
 
     /**
@@ -365,7 +365,7 @@ public final class ApplicationInfo implements Entity {
      * @return An {@link Optional} containing the role connection verification URL for the app
      */
     public Optional<String> getRoleConnectionsVerificationUrl() {
-        return data.roleConnectionsVerificationUrl().toOptional().flatMap(o -> o);
+        return Possible.flatOpt(data.roleConnectionsVerificationUrl());
     }
 
     /**
