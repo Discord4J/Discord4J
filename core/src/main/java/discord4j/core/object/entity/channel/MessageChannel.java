@@ -214,7 +214,6 @@ public interface MessageChannel extends Channel {
      *
      * @return A {@link PollCreateMono} where, upon successful completion, emits the created {@link Message}. If an
      * error is received, it is emitted through the {@code PollCreateMono}.
-     * @see PollCreateMono#builder()
      */
     default PollCreateMono createPoll() {
         return PollCreateMono.of(this);
