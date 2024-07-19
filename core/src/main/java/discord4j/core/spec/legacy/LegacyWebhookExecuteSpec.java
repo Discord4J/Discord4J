@@ -17,7 +17,9 @@
 
 package discord4j.core.spec.legacy;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Attachment;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.WebhookExecuteRequest;
@@ -47,6 +49,7 @@ public class LegacyWebhookExecuteSpec implements LegacySpec<MultipartRequest<Web
     private List<Tuple2<String, InputStream>> files = null;
     private List<EmbedData> embeds = null;
     private Possible<AllowedMentionsData> allowedMentions = Possible.absent();
+    private Possible<Snowflake> threadId = Possible.absent();
 
     /**
      * Sets the created {@link discord4j.core.object.entity.Message} contents, up to 2000 characters.
@@ -137,11 +140,31 @@ public class LegacyWebhookExecuteSpec implements LegacySpec<MultipartRequest<Web
     /**
      * Adds an allowed mentions object to the webhook execute spec.
      * @param allowedMentions The allowed mentions to add.
-     * @return Tis spec.
+     * @return This spec.
      */
     public LegacyWebhookExecuteSpec setAllowedMentions(AllowedMentions allowedMentions) {
         this.allowedMentions = Possible.of(allowedMentions.toData());
         return this;
+    }
+
+    /**
+     * Set the thread id within the webhook's channel. The thread will automatically be unarchived.
+     *
+     * @param threadId the thread id to set
+     * @return This spec.
+     */
+    public LegacyWebhookExecuteSpec setThreadId(Snowflake threadId) {
+        this.threadId = Possible.of(threadId);
+        return this;
+    }
+
+    /**
+     * Get the thread id within the webhook's channel.
+     *
+     * @return The thread id.
+     */
+    public Possible<Snowflake> getThreadId() {
+        return this.threadId;
     }
 
     @Override

@@ -45,6 +45,9 @@ public class ExampleWebhook {
         // The ID of a channel the bot has the MANAGE_WEBHOOKS permission in.
         Snowflake webhookChannel = Snowflake.of(System.getenv("webhook_channel"));
 
+        // The ID of a thread.
+        Snowflake threadId = Snowflake.of(System.getenv("thread_id"));
+
         // The path of a .txt file.
         String file1 = System.getenv("webhook_file1");
 
@@ -57,6 +60,12 @@ public class ExampleWebhook {
                 .block();
 
         assert gateway != null;
+
+        gateway.getWebhookByIdWithToken(secretWebhookId, secretWebhookToken)
+            .flatMap(webhook -> webhook.execute()
+                .withThreadId(threadId)
+                .withContent("A webhook can execute in channels with threads doesn't have access to."))
+            .block();
 
         gateway.getWebhookById(webhookId)
                 .flatMap(webhook -> {
