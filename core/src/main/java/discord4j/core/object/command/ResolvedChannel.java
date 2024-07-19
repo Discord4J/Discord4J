@@ -24,7 +24,6 @@ import discord4j.core.object.DiscordObject;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.ResolvedChannelData;
-import discord4j.discordjson.json.ThreadMetadata;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.PermissionSet;
 import reactor.core.publisher.Mono;
@@ -109,24 +108,6 @@ public class ResolvedChannel implements DiscordObject {
      */
     public Optional<PermissionSet> getEffectivePermissions() {
         return Possible.flatOpt(data.permissions()).map(PermissionSet::of);
-    }
-
-    /**
-     * Gets the associated thread metadata, if the provided channel is a thread.
-     *
-     * @return Associated {@link ThreadMetadata}, if present.
-     */
-    public Optional<ThreadMetadata> getThreadMetadata() {
-        return data.threadMetadata().toOptional();
-    }
-
-    /**
-     * Gets the thread parent id, if the provided channel is a thread.
-     *
-     * @return The parent ID as a {@link Snowflake}, if present.
-     */
-    public Optional<Snowflake> getParentId() {
-        return data.parentId().toOptional().map(Snowflake::of);
     }
 
     /**
