@@ -25,6 +25,7 @@ import discord4j.core.spec.ApplicationEditSpec;
 import discord4j.discordjson.json.ApplicationInfoData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import discord4j.common.util.Snowflake;
 import discord4j.core.util.EntityUtil;
