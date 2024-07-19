@@ -25,6 +25,7 @@ import discord4j.core.spec.ApplicationEditSpec;
 import discord4j.discordjson.json.ApplicationInfoData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import discord4j.common.util.Snowflake;
 import discord4j.core.util.EntityUtil;
@@ -356,7 +357,7 @@ public final class ApplicationInfo implements Entity {
      * @return An {@link Optional} containing the interactions endpoint URL for the app if present
      */
     public Optional<String> getInteractionsEndpointUrl() {
-        return data.interactionsEndpointUrl().toOptional();
+        return Possible.flatOpt(data.interactionsEndpointUrl());
     }
 
     /**
@@ -365,7 +366,7 @@ public final class ApplicationInfo implements Entity {
      * @return An {@link Optional} containing the role connection verification URL for the app
      */
     public Optional<String> getRoleConnectionsVerificationUrl() {
-        return data.roleConnectionsVerificationUrl().toOptional();
+        return Possible.flatOpt(data.roleConnectionsVerificationUrl());
     }
 
     /**
