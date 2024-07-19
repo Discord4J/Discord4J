@@ -1071,6 +1071,22 @@ public abstract class Routes {
      */
     public static final Route USER_CONNECTIONS_GET = Route.get("/users/@me/connections");
 
+    /**
+     * Returns the application role connection for the user. Requires an OAuth2 access token with role_connections.write scope for the application specified in the path.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/user#get-current-user-application-role-connection">
+     * https://discord.com/developers/docs/resources/user#get-current-user-application-role-connection</a>
+     */
+    public static final Route USER_APPLICATIONS_ROLE_CONNECTION_GET = Route.get("/users/@me/applications/{application.id}/role-connection");
+
+    /**
+     * Updates and returns the application role connection for the user. Requires an OAuth2 access token with role_connections.write scope for the application specified in the path.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/user#update-current-user-application-role-connection">
+     * https://discord.com/developers/docs/resources/user#update-current-user-application-role-connection</a>
+     */
+    public static final Route USER_APPLICATIONS_ROLE_CONNECTION_MODIFY = Route.put("/users/@me/applications/{application.id}/role-connection");
+
     ////////////////////////////////////////////
     ////////////// Voice Resource //////////////
     ////////////////////////////////////////////
