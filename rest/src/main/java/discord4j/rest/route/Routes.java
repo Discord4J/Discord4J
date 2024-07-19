@@ -1308,6 +1308,25 @@ public abstract class Routes {
     public static final Route GUILD_SCHEDULED_EVENT_USERS_GET = Route.get("/guilds/{guild.id}/scheduled-events/{event.id}/users");
 
     ///////////////////////////////////////////
+    ////// Onboarding and welcome screen //////
+    ///////////////////////////////////////////
+
+    /**
+     * Returns the Onboarding object for the guild.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#get-guild-onboarding">https://discord.com/developers/docs/resources/guild#get-guild-onboarding</a>
+     */
+    public static final Route GUILD_ONBOARDING_GET = Route.get("/guilds/{guild.id}/onboarding");
+
+    /**
+     * Modifies the onboarding configuration of the guild. Returns a 200 with the Onboarding object for the guild. Requires the MANAGE_GUILD and MANAGE_ROLES permissions.
+     * This endpoint supports the X-Audit-Log-Reason header.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-onboarding">https://discord.com/developers/docs/resources/guild#modify-guild-onboarding</a>
+     */
+    public static final Route GUILD_ONBOARDING_MODIFY = Route.put("/guilds/{guild.id}/onboarding");
+
+    ///////////////////////////////////////////
     ///////////// OAuth2 Resource /////////////
     ///////////////////////////////////////////
 

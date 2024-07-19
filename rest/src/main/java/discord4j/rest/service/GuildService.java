@@ -393,4 +393,18 @@ public class GuildService extends RestService {
             .bodyToMono(GuildScheduledEventUserData[].class)
             .flatMapMany(Flux::fromArray);
     }
+
+    public Mono<OnboardingData> getOnboarding(long id) {
+        return Routes.GUILD_ONBOARDING_GET.newRequest(id)
+            .exchange(getRouter())
+            .bodyToMono(OnboardingData.class);
+    }
+
+    public Mono<OnboardingData> modifyOnboarding(long id, OnboardingEditData request, @Nullable String reason) {
+        return Routes.GUILD_ONBOARDING_MODIFY.newRequest(id)
+            .body(request)
+            .optionalHeader("X-Audit-Log-Reason", reason)
+            .exchange(getRouter())
+            .bodyToMono(OnboardingData.class);
+    }
 }
