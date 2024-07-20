@@ -1059,6 +1059,22 @@ public abstract class Routes {
      */
     public static final Route USER_CONNECTIONS_GET = Route.get("/users/@me/connections");
 
+    /**
+     * Returns the application role connection for the user. Requires an OAuth2 access token with role_connections.write scope for the application specified in the path.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/user#get-current-user-application-role-connection">
+     * https://discord.com/developers/docs/resources/user#get-current-user-application-role-connection</a>
+     */
+    public static final Route USER_APPLICATIONS_ROLE_CONNECTION_GET = Route.get("/users/@me/applications/{application.id}/role-connection");
+
+    /**
+     * Updates and returns the application role connection for the user. Requires an OAuth2 access token with role_connections.write scope for the application specified in the path.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/user#update-current-user-application-role-connection">
+     * https://discord.com/developers/docs/resources/user#update-current-user-application-role-connection</a>
+     */
+    public static final Route USER_APPLICATIONS_ROLE_CONNECTION_MODIFY = Route.put("/users/@me/applications/{application.id}/role-connection");
+
     ////////////////////////////////////////////
     ////////////// Voice Resource //////////////
     ////////////////////////////////////////////
@@ -1235,6 +1251,25 @@ public abstract class Routes {
     public static final Route APPLICATION_COMMAND_PERMISSIONS_MODIFY = Route.put("/applications/{application.id}/guilds/{guild.id}/commands/{command.id}/permissions");
 
     public static final Route APPLICATION_COMMAND_PERMISSIONS_BULK_MODIFY = Route.put("/applications/{application.id}/guilds/{guild.id}/commands/permissions");
+
+    ///////////////////////////////////////////////////
+    // Application Role Connection Metadata Resource //
+    ///////////////////////////////////////////////////
+
+    /**
+     * Returns a list of application role connection metadata objects for the given application.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/application-role-connection-metadata#get-application-role-connection-metadata-records">https://discord.com/developers/docs/resources/application-role-connection-metadata#get-application-role-connection-metadata-records</a>
+     */
+    public static final Route APPLICATION_ROLE_CONNECTION_METADATA_GET = Route.get("/applications/{application.id}/role-connections/metadata");
+
+    /**
+     * Updates and returns a list of application role connection metadata objects for the given application.
+     * An application can have a maximum of 5 metadata records.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/application-role-connection-metadata#modify-application-role-connection-metadata">https://discord.com/developers/docs/resources/application-role-connection-metadata#modify-application-role-connection-metadata</a>
+     */
+    public static final Route APPLICATION_ROLE_CONNECTION_METADATA_MODIFY = Route.put("/applications/{application.id}/role-connections/metadata");
 
     ///////////////////////////////////////////
     ////////// Interaction Resource ///////////

@@ -169,4 +169,20 @@ public class ApplicationService extends RestService {
             .bodyToMono(GuildApplicationCommandPermissionsData[].class)
             .flatMapMany(Flux::fromArray);
     }
+
+    public Flux<ApplicationRoleConnectionMetadataData> getApplicationRoleConnectionMetadata(long applicationId) {
+        return Routes.APPLICATION_ROLE_CONNECTION_METADATA_GET.newRequest(applicationId)
+                .exchange(getRouter())
+                .bodyToMono(ApplicationRoleConnectionMetadataData[].class)
+                .flatMapMany(Flux::fromArray);
+    }
+
+    public Flux<ApplicationRoleConnectionMetadataData> modifyApplicationRoleConnectionMetadata(long applicationId, List<ApplicationRoleConnectionMetadataData> request) {
+        return Routes.APPLICATION_ROLE_CONNECTION_METADATA_MODIFY.newRequest(applicationId)
+                .body(request)
+                .exchange(getRouter())
+                .bodyToMono(ApplicationRoleConnectionMetadataData[].class)
+                .flatMapMany(Flux::fromArray);
+    }
+
 }
