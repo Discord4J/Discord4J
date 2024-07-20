@@ -112,15 +112,27 @@ public class RestRole {
      * Requests to change this role's position.
      *
      * @param position The position to change for this role.
+     * @param reason The reason, if present.
+     * @return A {@link Flux} that continually emits all the {@link RoleData roles} associated to this role's
+     * guild. If an error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<RoleData> changePosition(final int position, @Nullable final String reason) {
+        final RolePositionModifyRequest[] requests = {RolePositionModifyRequest.builder()
+            .id(Snowflake.asString(id))
+            .positionOrNull(position)
+            .build()};
+        return restClient.getGuildService().modifyGuildRolePositions(guildId, requests, reason);
+    }
+
+    /**
+     * Requests to change this role's position.
+     *
+     * @param position The position to change for this role.
      * @return A {@link Flux} that continually emits all the {@link RoleData roles} associated to this role's
      * guild. If an error is received, it is emitted through the {@code Flux}.
      */
     public Flux<RoleData> changePosition(final int position) {
-        final RolePositionModifyRequest[] requests = {RolePositionModifyRequest.builder()
-                .id(Snowflake.asString(id))
-                .position(position)
-                .build()};
-        return restClient.getGuildService().modifyGuildRolePositions(guildId, requests);
+        return changePosition(position, null);
     }
 
     /**
