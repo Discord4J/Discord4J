@@ -1097,11 +1097,25 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                     ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
 
                     if (oldMessage.reactions().isAbsent()) {
-                        newMessageBuilder.addReaction(ReactionData.builder()
-                                .count(1)
-                                .me(me)
-                                .emoji(dispatch.emoji())
-                                .build());
+                        // If burst, increment the burst count, otherwise the normal count
+                        ReactionCountDetailsData countDetailsData = ReactionCountDetailsData.builder()
+                                .normal(dispatch.burst() ? 0 : 1)
+                                .burst(dispatch.burst() ? 1 : 0)
+                                .build();
+
+                        ImmutableReactionData.Builder reactionBuilder = ReactionData.builder()
+                            .count(1)
+                            .countDetails(countDetailsData)
+                            .me(me)
+                            // If I added the reaction, and this is a burst, this is a me_burst
+                            .meBurst(me && dispatch.burst())
+                            .emoji(dispatch.emoji());
+
+                        if (!dispatch.burstColors().isAbsent()) {
+                            reactionBuilder.burstColors(dispatch.burstColors().get());
+                        }
+
+                        newMessageBuilder.addReaction(reactionBuilder.build());
                     } else {
                         List<ReactionData> reactions = oldMessage.reactions().get();
                         int i = indexOfReactionByEmojiData(reactions, dispatch.emoji());
@@ -1109,19 +1123,46 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                         if (i < reactions.size()) {
                             // message already has this reaction: bump 1
                             ReactionData oldExisting = reactions.get(i);
+
+                            // Prepare the updated ReactionCountDetails object depending on if this is a burst or not
+                            ReactionCountDetailsData countDetailsData;
+                            if (dispatch.burst()) {
+                                countDetailsData = ReactionCountDetailsData.builder()
+                                    .normal(oldExisting.countDetails().normal())
+                                    .burst(oldExisting.countDetails().burst() + 1)
+                                    .build();
+                            } else {
+                                countDetailsData = ReactionCountDetailsData.builder()
+                                    .normal(oldExisting.countDetails().normal() + 1)
+                                    .burst(oldExisting.countDetails().burst())
+                                    .build();
+                            }
+
                             ReactionData newExisting = ReactionData.builder()
                                     .from(oldExisting)
                                     .me(oldExisting.me() || me)
+                                    // If the change is me adding a reaction, and this is a burst that was dispatched
+                                    // then this is a me_burst
+                                    .meBurst(!oldExisting.me() && me && dispatch.burst())
                                     .count(oldExisting.count() + 1)
+                                    .countDetails(countDetailsData)
                                     .build();
                             newMessageBuilder.reactions(ListUtil.replace(reactions,
                                     oldExisting, newExisting));
                         } else {
                             // message doesn't have this reaction: create
+                            ReactionCountDetailsData countDetailsData = ReactionCountDetailsData.builder()
+                                .normal(dispatch.burst() ? 0 : 1)
+                                .burst(dispatch.burst() ? 1 : 0)
+                                .build();
+
                             ReactionData reaction = ReactionData.builder()
                                     .emoji(dispatch.emoji())
-                                    .me(me)
                                     .count(1)
+                                    .countDetails(countDetailsData)
+                                    .me(me)
+                                    // If I added the reaction, and this is a burst, this is a me_burst
+                                    .meBurst(me && dispatch.burst())
                                     .build();
                             newMessageBuilder.reactions(ListUtil.add(reactions, reaction));
                         }
@@ -1155,10 +1196,25 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                             newMessageBuilder.reactions(ListUtil.remove(reactions,
                                     reaction -> reaction.equals(existing)));
                         } else {
+                            ReactionCountDetailsData countDetailsData;
+                            if (dispatch.burst()) {
+                                countDetailsData = ReactionCountDetailsData.builder()
+                                    .normal(existing.countDetails().normal())
+                                    .burst(existing.countDetails().burst() - 1)
+                                    .build();
+                            } else {
+                                countDetailsData = ReactionCountDetailsData.builder()
+                                    .normal(existing.countDetails().normal() - 1)
+                                    .burst(existing.countDetails().burst())
+                                    .build();
+                            }
+
                             ReactionData newExisting = ReactionData.builder()
                                     .from(existing)
                                     .count(existing.count() - 1)
+                                    .countDetails(countDetailsData)
                                     .me(!me && existing.me())
+                                    .meBurst(existing.meBurst() && me)
                                     .build();
                             newMessageBuilder.reactions(ListUtil.replace(reactions, existing, newExisting));
                         }
