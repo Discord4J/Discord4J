@@ -57,7 +57,9 @@ public enum InteractionResponseType {
 
     /**
      * Response to a supported interaction with a notification that this interaction is only available to premium guilds or users.
+     * @deprecated in favor of using {@link discord4j.core.object.component.Button#premium(Snowflake)}. This will continue to function but may eventually be unsupported
      */
+    @Deprecated
     PREMIUM_REQUIRED(10);
 
     /**
