@@ -24,7 +24,6 @@ import discord4j.core.object.*;
 import discord4j.core.object.audit.AuditLogPart;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.channel.*;
-import discord4j.core.object.monetization.Entitlement;
 import discord4j.core.object.onboarding.Onboarding;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
