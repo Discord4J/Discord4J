@@ -24,10 +24,12 @@ import discord4j.core.object.DiscordObject;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.ResolvedChannelData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.PermissionSet;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A Discord channel that was resolved in a command.
@@ -80,12 +82,13 @@ public class ResolvedChannel implements DiscordObject {
     }
 
     /**
-     * Gets the name of the channel.
+     * Gets the name of the channel, if given.
+     * This field can be absent when you are not in a guild, e.g. when providing a DM channel.
      *
      * @return The name of the channel.
      */
-    public String getName() {
-        return data.name();
+    public Optional<String> getName() {
+        return data.name().toOptional().flatMap(opt -> opt);
     }
 
     /**
@@ -99,11 +102,12 @@ public class ResolvedChannel implements DiscordObject {
 
     /**
      * Gets the computed permissions for the invoking user in the channel, including overwrites.
+     * This field can be absent when you are not in a guild, e.g. when providing a DM channel.
      *
      * @return The permissions of the channel.
      */
-    public PermissionSet getEffectivePermissions() {
-        return PermissionSet.of(data.permissions());
+    public Optional<PermissionSet> getEffectivePermissions() {
+        return Possible.flatOpt(data.permissions()).map(PermissionSet::of);
     }
 
     /**

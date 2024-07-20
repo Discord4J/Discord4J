@@ -178,9 +178,9 @@ public class RestGuild {
         return restClient.getGuildService().createGuildChannel(id, request, reason);
     }
 
-    public Flux<RoleData> modifyChannelPositions(List<ChannelPositionModifyRequest> requests) {
+    public Flux<Void> modifyChannelPositions(List<ChannelPositionModifyRequest> requests) {
         return restClient.getGuildService()
-                .modifyGuildChannelPositions(id, requests.toArray(new ChannelPositionModifyRequest[0]));
+            .modifyGuildChannelPositions(id, requests.toArray(new ChannelPositionModifyRequest[0]));
     }
 
     public Mono<MemberData> getMember(Snowflake userId) {
@@ -264,9 +264,13 @@ public class RestGuild {
         return restClient.getGuildService().createGuildRole(id, request, reason);
     }
 
-    public Flux<RoleData> modifyRolePositions(List<RolePositionModifyRequest> requests) {
+    public Flux<RoleData> modifyRolePositions(List<RolePositionModifyRequest> requests, @Nullable String reason) {
         return restClient.getGuildService().modifyGuildRolePositions(id,
-                requests.toArray(new RolePositionModifyRequest[0]));
+            requests.toArray(new RolePositionModifyRequest[0]), reason);
+    }
+
+    public Flux<RoleData> modifyRolePositions(List<RolePositionModifyRequest> requests) {
+        return modifyRolePositions(requests, null);
     }
 
     public Mono<RoleData> modifyRole(Snowflake roleId, RoleModifyRequest request, @Nullable String reason) {
@@ -417,7 +421,28 @@ public class RestGuild {
         return restClient.getGuildService().deleteScheduledEvent(id, eventId.asLong(), reason);
     }
 
+    /**
+     * Request to retrieve the onboarding of the guild.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link OnboardingData}. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    public Mono<OnboardingData> getOnboarding() {
+        return this.restClient.getGuildService().getOnboarding(this.id);
+    }
 
+    /**
+     * Request to modify the onboarding of the guild. Requires the {@link Permission#MANAGE_GUILD} and
+     * {@link Permission#MANAGE_ROLES} permissions.
+     *
+     * @param request the request body
+     * @param reason an optional reason for the audit log
+     * @return A {@link Mono} where, upon successful completion, emits the modified {@link OnboardingData}.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<OnboardingData> modifyOnboarding(OnboardingEditData request, @Nullable String reason) {
+        return this.restClient.getGuildService().modifyOnboarding(this.id, request, reason);
+    }
 
     @Override
     public boolean equals(final Object o) {

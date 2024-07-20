@@ -53,7 +53,14 @@ public enum InteractionResponseType {
     /**
      * Response to a supported interaction with a modal
      */
-    MODAL(9);
+    MODAL(9),
+
+    /**
+     * Response to a supported interaction with a notification that this interaction is only available to premium guilds or users.
+     * @deprecated in favor of using {@link discord4j.core.object.component.Button#premium(Snowflake)}. This will continue to function but may eventually be unsupported
+     */
+    @Deprecated
+    PREMIUM_REQUIRED(10);
 
     /**
      * The underlying value as represented by Discord.
@@ -94,6 +101,7 @@ public enum InteractionResponseType {
             case 7: return UPDATE_MESSAGE;
             case 8: return APPLICATION_COMMAND_AUTOCOMPLETE_RESULT;
             case 9: return MODAL;
+            case 10: return PREMIUM_REQUIRED;
             default: return UNKNOWN;
         }
     }

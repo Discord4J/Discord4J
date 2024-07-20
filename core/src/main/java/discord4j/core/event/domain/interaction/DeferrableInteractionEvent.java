@@ -28,6 +28,7 @@ import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.interaction.InteractionResponse;
 import discord4j.rest.util.InteractionResponseType;
+import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
 
 import java.util.Collection;
@@ -194,6 +195,18 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      */
     public InteractionApplicationCommandCallbackReplyMono reply() {
         return InteractionApplicationCommandCallbackReplyMono.of(this);
+    }
+
+    /**
+     * Requests to respond to the interaction with a notification instructing the user that this interaction requires a premium subscription.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has been sent. If an error is received, it is emitted through the {@code Mono}.
+     * @deprecated in favor of using {@link discord4j.core.object.component.Button#premium(Snowflake)}. This will continue to function but may be eventually unsupported
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    @Deprecated
+    public Mono<Void> replyWithPremiumRequired() {
+        return Mono.defer(() -> createInteractionResponse(InteractionResponseType.PREMIUM_REQUIRED, MultipartRequest.ofRequest(InteractionApplicationCommandCallbackData.builder().build())));
     }
 
     /**

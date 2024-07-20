@@ -16,9 +16,12 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.core.spec.CreateTestEntitlementMono;
+import discord4j.core.spec.EntitlementListRequestFlux;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.discordjson.json.DMCreateRequest;
@@ -27,6 +30,7 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.Image;
 import discord4j.common.util.Snowflake;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -348,6 +352,29 @@ public class User implements Entity {
             return Flag.of(publicFlags);
         }
         return EnumSet.noneOf(Flag.class);
+    }
+
+    /**
+     * Request the user's entitlements associated with the current application.
+     * The request can be filtered using the "withXXX" methods of the returned {@link EntitlementListRequestFlux}.
+     *
+     * @return A {@link EntitlementListRequestFlux} which emits {@link discord4j.core.object.monetization.Entitlement} objects.
+     * If an error is received, it is emitted through the {@link Flux}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public EntitlementListRequestFlux getEntitlements() {
+        return gateway.getEntitlements().withUserId(getId());
+    }
+
+    /**
+     * Request to create a test entitlement for the user with the provided SKU ID.
+     *
+     * @return A {@link CreateTestEntitlementMono} which emits the created {@link discord4j.core.object.monetization.Entitlement}.
+     * If an error is received, it is emitted through the {@link Mono}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public CreateTestEntitlementMono createTestEntitlement(Snowflake skuId) {
+        return gateway.createTestEntitlementForUser(skuId, getId());
     }
 
     @Override

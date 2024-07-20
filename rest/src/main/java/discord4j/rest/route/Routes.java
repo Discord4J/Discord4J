@@ -1343,6 +1343,25 @@ public abstract class Routes {
     public static final Route GUILD_SCHEDULED_EVENT_USERS_GET = Route.get("/guilds/{guild.id}/scheduled-events/{event.id}/users");
 
     ///////////////////////////////////////////
+    ////// Onboarding and welcome screen //////
+    ///////////////////////////////////////////
+
+    /**
+     * Returns the Onboarding object for the guild.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#get-guild-onboarding">https://discord.com/developers/docs/resources/guild#get-guild-onboarding</a>
+     */
+    public static final Route GUILD_ONBOARDING_GET = Route.get("/guilds/{guild.id}/onboarding");
+
+    /**
+     * Modifies the onboarding configuration of the guild. Returns a 200 with the Onboarding object for the guild. Requires the MANAGE_GUILD and MANAGE_ROLES permissions.
+     * This endpoint supports the X-Audit-Log-Reason header.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-onboarding">https://discord.com/developers/docs/resources/guild#modify-guild-onboarding</a>
+     */
+    public static final Route GUILD_ONBOARDING_MODIFY = Route.put("/guilds/{guild.id}/onboarding");
+
+    ///////////////////////////////////////////
     ///////////// OAuth2 Resource /////////////
     ///////////////////////////////////////////
 
@@ -1351,4 +1370,45 @@ public abstract class Routes {
     public static final Route TOKEN_REVOKE = Route.post("/oauth2/token/revoke");
 
     public static final Route AUTHORIZATION_INFO_GET = Route.get("/oauth2/@me");
+
+
+    ////////////////////////////////////////
+    ///////////// Monetization /////////////
+    ////////////////////////////////////////
+
+    /**
+     * Returns a list of SKUs for a given application.
+     *
+     * @see <a href="https://discord.com/developers/docs/monetization/skus#list-skus">Docs</a>
+     */
+    public static final Route LIST_SKUS = Route.get("/applications/{application.id}/skus");
+
+    /**
+     * Returns a list of entitlements for a given application.
+     *
+     * @see <a href="https://discord.com/developers/docs/monetization/entitlements#list-entitlements">Docs</a>
+     */
+    public static final Route LIST_ENTITLEMENTS = Route.get("/applications/{application.id}/entitlements");
+
+    /**
+     * Creates a test entitlement for a given application.
+     *
+     * @see <a href="https://discord.com/developers/docs/monetization/entitlements#create-test-entitlement">Docs</a>
+     */
+    public static final Route CREATE_TEST_ENTITLEMENT = Route.post("/applications/{application.id}/entitlements");
+
+    /**
+     * Deletes a test entitlement for a given application.
+     *
+     * @see <a href="https://discord.com/developers/docs/monetization/entitlements#delete-test-entitlement">Docs</a>
+     */
+    public static final Route DELETE_TEST_ENTITLEMENT = Route.delete("/applications/{application.id}/entitlements/{entitlement.id}");
+
+    /**
+     * For One-Time Purchase consumable SKUs, marks a given entitlement for the user as consumed. The entitlement will have consumed=true when using {@link Routes#LIST_ENTITLEMENTS}.
+     *
+     * @see <a href="https://discord.com/developers/docs/monetization/entitlements#consume-an-entitlement">Docs</a>
+     */
+    public static final Route CONSUME_ENTITLEMENT = Route.post("/applications/{application.id}/entitlements/{entitlement.id}/consume");
+
 }

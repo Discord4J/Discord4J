@@ -30,6 +30,7 @@ import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.discordjson.json.ApplicationInfoData;
 import discord4j.discordjson.json.ApplicationRoleConnectionMetadataData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -52,6 +53,9 @@ public final class ApplicationInfo implements Entity {
 
     /** The path for application icon image URLs. */
     private static final String ICON_IMAGE_PATH = "app-icons/%s/%s";
+
+    /** The path for the store URL. */
+    private static final String STORE_URL_SCHEME = "https://discord.com/application-directory/%s/store";
 
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
@@ -273,6 +277,15 @@ public final class ApplicationInfo implements Entity {
     }
 
     /**
+     * Get the store URL for the current application.
+     *
+     * @return the store url for the current application
+     */
+    public String getStoreUrl() {
+        return String.format(ApplicationInfo.STORE_URL_SCHEME, getId().asString());
+    }
+
+    /**
      * Hex encoded key for verification in interactions and the GameSDK's GetTicket
      *
      * @return The verify key
@@ -365,7 +378,7 @@ public final class ApplicationInfo implements Entity {
      * @return An {@link Optional} containing the interactions endpoint URL for the app if present
      */
     public Optional<String> getInteractionsEndpointUrl() {
-        return data.interactionsEndpointUrl().toOptional();
+        return Possible.flatOpt(data.interactionsEndpointUrl());
     }
 
     /**
@@ -374,7 +387,7 @@ public final class ApplicationInfo implements Entity {
      * @return An {@link Optional} containing the role connection verification URL for the app
      */
     public Optional<String> getRoleConnectionsVerificationUrl() {
-        return data.roleConnectionsVerificationUrl().toOptional();
+        return Possible.flatOpt(data.roleConnectionsVerificationUrl());
     }
 
     /**
