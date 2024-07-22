@@ -1253,6 +1253,50 @@ public abstract class Routes {
     public static final Route APPLICATION_COMMAND_PERMISSIONS_BULK_MODIFY = Route.put("/applications/{application.id}/guilds/{guild.id}/commands/permissions");
 
     ///////////////////////////////////////////////////
+    // Application Emoji Resource //
+    ///////////////////////////////////////////////////
+
+    /**
+     * Returns an object containing a list of emoji objects for the given application under the items key.
+     * <br>
+     * Includes a user object for the team member that uploaded the emoji from the app's settings, or for the bot user if uploaded using the API.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/emoji#list-application-emojis">https://discord.com/developers/docs/resources/emoji#list-application-emojis</a>
+     */
+    public static final Route APPLICATION_EMOJIS_GET = Route.get("/applications/{application.id}/emojis");
+
+    /**
+     * Returns an emoji object for the given application and emoji IDs. Includes the user field.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/emoji#get-application-emoji">https://discord.com/developers/docs/resources/emoji#get-application-emoji</a>
+     */
+    public static final Route APPLICATION_EMOJI_GET = Route.get("/applications/{application.id}/emojis/{emoji.id}");
+
+    /**
+     * Create a new emoji for the application. Returns the new emoji object on success.
+     * <br>
+     * Emojis and animated emojis have a maximum file size of 256 KiB.
+     * Attempting to upload an emoji larger than this limit will fail and return 400 Bad Request and an error message, but not a JSON status code.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/emoji#create-application-emoji">https://discord.com/developers/docs/resources/emoji#create-application-emoji</a>
+     */
+    public static final Route APPLICATION_EMOJI_CREATE = Route.post("/applications/{application.id}/emojis");
+
+    /**
+     * Modify the given emoji. Returns the updated emoji object on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/emoji#modify-application-emoji">https://discord.com/developers/docs/resources/emoji#modify-application-emoji</a>
+     */
+    public static final Route APPLICATION_EMOJI_MODIFY = Route.patch("/applications/{application.id}/emojis/{emoji.id}");
+
+    /**
+     * Delete the given emoji. Returns 204 No Content on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/emoji#delete-application-emoji">https://discord.com/developers/docs/resources/emoji#delete-application-emoji</a>
+     */
+    public static final Route APPLICATION_EMOJI_DELETE = Route.delete("/applications/{application.id}/emojis/{emoji.id}");
+
+    ///////////////////////////////////////////////////
     // Application Role Connection Metadata Resource //
     ///////////////////////////////////////////////////
 

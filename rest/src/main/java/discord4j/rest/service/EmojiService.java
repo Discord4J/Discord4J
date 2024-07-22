@@ -16,6 +16,9 @@
  */
 package discord4j.rest.service;
 
+import discord4j.discordjson.json.ApplicationEmojiCreateRequest;
+import discord4j.discordjson.json.ApplicationEmojiDataList;
+import discord4j.discordjson.json.ApplicationEmojiModifyRequest;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.GuildEmojiCreateRequest;
 import discord4j.discordjson.json.GuildEmojiModifyRequest;
@@ -65,5 +68,37 @@ public class EmojiService extends RestService {
                 .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
                 .bodyToMono(Void.class);
+    }
+
+    public Mono<ApplicationEmojiDataList> getApplicationEmojis(long applicationId) {
+        return Routes.APPLICATION_EMOJIS_GET.newRequest(applicationId)
+            .exchange(getRouter())
+            .bodyToMono(ApplicationEmojiDataList.class);
+    }
+
+    public Mono<EmojiData> getApplicationEmoji(long guildId, long emojiId) {
+        return Routes.APPLICATION_EMOJI_GET.newRequest(guildId, emojiId)
+            .exchange(getRouter())
+            .bodyToMono(EmojiData.class);
+    }
+
+    public Mono<EmojiData> createApplicationEmoji(long applicationId, ApplicationEmojiCreateRequest request) {
+        return Routes.APPLICATION_EMOJI_CREATE.newRequest(applicationId)
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(EmojiData.class);
+    }
+
+    public Mono<EmojiData> modifyApplicationEmoji(long applicationId, long emojiId, ApplicationEmojiModifyRequest request) {
+        return Routes.APPLICATION_EMOJI_MODIFY.newRequest(applicationId, emojiId)
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(EmojiData.class);
+    }
+
+    public Mono<Void> deleteApplicationEmoji(long applicationId, long emojiId) {
+        return Routes.APPLICATION_EMOJI_DELETE.newRequest(applicationId, emojiId)
+            .exchange(getRouter())
+            .bodyToMono(Void.class);
     }
 }
