@@ -496,7 +496,7 @@ public final class ApplicationInfo implements Entity {
      * Requests to create an emoji. Properties specifying how to create an emoji can be set via the {@code withXxx}
      * methods of the returned {@link ApplicationEmojiCreateMono}.
      *
-     * @param name  the name of the emoji to create
+     * @param name the name of the emoji to create
      * @param image the image of the emoji to create
      * @return A {@link ApplicationEmojiCreateMono} where, upon successful completion, emits the created {@link ApplicationEmoji}.
      * If an error is received, it is emitted through the {@code ApplicationEmojiCreateMono}.
