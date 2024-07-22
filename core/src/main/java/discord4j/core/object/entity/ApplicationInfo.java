@@ -485,7 +485,7 @@ public final class ApplicationInfo implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<ApplicationEmoji> getApplicationEmojiById(final Snowflake id) {
+    public Mono<ApplicationEmoji> getEmojiById(final Snowflake id) {
         return gateway.rest()
             .getEmojiService()
             .getApplicationEmoji(getId().asLong(), id.asLong())
