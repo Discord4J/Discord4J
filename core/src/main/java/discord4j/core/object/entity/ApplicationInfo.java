@@ -26,8 +26,11 @@ import discord4j.core.object.command.ApplicationIntegrationType;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.ApplicationEditMono;
 import discord4j.core.spec.ApplicationEditSpec;
+import discord4j.core.spec.ApplicationEmojiCreateMono;
+import discord4j.core.spec.ApplicationEmojiCreateSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
+import discord4j.discordjson.json.ApplicationEmojiDataList;
 import discord4j.discordjson.json.ApplicationInfoData;
 import discord4j.discordjson.json.ApplicationRoleConnectionMetadataData;
 import discord4j.discordjson.possible.Possible;
@@ -459,6 +462,62 @@ public final class ApplicationInfo implements Entity {
             .getApplicationService()
             .modifyApplicationRoleConnectionMetadata(this.getId().asLong(), metadata)
             .map(ApplicationRoleConnectionMetadata::new);
+    }
+
+    /**
+     * Requests to retrieve the application's emojis.
+     *
+     * @return A {@link Flux} that continually emits guild's {@link ApplicationEmoji emojis}. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<ApplicationEmoji> getEmojis() {
+        return gateway.rest()
+            .getEmojiService()
+            .getApplicationEmojis(this.getId().asLong())
+            .flatMapIterable(ApplicationEmojiDataList::items) // the response include a items field with all the emojis
+            .map(emojiData -> new ApplicationEmoji(gateway, emojiData, getId().asLong()));
+    }
+
+    /**
+     * Requests to retrieve the guild emoji as represented by the supplied ID.
+     *
+     * @param id The ID of the guild emoji.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
+     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ApplicationEmoji> getEmojiById(final Snowflake id) {
+        return gateway.rest()
+            .getEmojiService()
+            .getApplicationEmoji(getId().asLong(), id.asLong())
+            .map(emojiData -> new ApplicationEmoji(gateway, emojiData, id.asLong()));
+    }
+
+    /**
+     * Requests to create an emoji. Properties specifying how to create an emoji can be set via the {@code withXxx}
+     * methods of the returned {@link ApplicationEmojiCreateMono}.
+     *
+     * @param name the name of the emoji to create
+     * @param image the image of the emoji to create
+     * @return A {@link ApplicationEmojiCreateMono} where, upon successful completion, emits the created {@link ApplicationEmoji}.
+     * If an error is received, it is emitted through the {@code ApplicationEmojiCreateMono}.
+     */
+    public ApplicationEmojiCreateMono createEmoji(String name, Image image) {
+        return ApplicationEmojiCreateMono.of(name, image, this);
+    }
+
+    /**
+     * Requests to create an emoji.
+     *
+     * @param spec an immutable object that specifies how to create the emoji
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link ApplicationEmoji}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ApplicationEmoji> createEmoji(ApplicationEmojiCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> gateway.getRestClient().getEmojiService()
+                    .createApplicationEmoji(getId().asLong(), spec.asRequest()))
+            .map(data -> new ApplicationEmoji(gateway, data, getId().asLong()));
     }
 
     /**
