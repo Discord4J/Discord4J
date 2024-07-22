@@ -91,7 +91,7 @@ public final class ApplicationEmoji extends Emoji {
         Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> this.getClient().getRestClient().getEmojiService()
-                        .modifyApplicationEmoji(getApplicationId().asLong(), getId().asLong(), spec.asRequest()))
+                        .modifyApplicationEmoji(this.applicationId, getId().asLong(), spec.asRequest()))
                 .map(data -> new ApplicationEmoji(this.getClient(), data, getApplicationId().asLong()));
     }
 
