@@ -103,7 +103,7 @@ public final class ApplicationEmoji extends Emoji {
      */
     public Mono<Void> delete() {
         return this.getClient().getRestClient().getEmojiService()
-            .deleteApplicationEmoji(getApplicationId().asLong(), getId().asLong());
+            .deleteApplicationEmoji(this.applicationId, getId().asLong());
     }
 
     /**
