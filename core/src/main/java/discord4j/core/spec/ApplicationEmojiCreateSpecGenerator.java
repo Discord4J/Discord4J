@@ -17,22 +17,16 @@
 
 package discord4j.core.spec;
 
-import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.ApplicationEmoji;
 import discord4j.core.object.entity.ApplicationInfo;
-import discord4j.core.object.entity.Guild;
 import discord4j.discordjson.json.ApplicationEmojiCreateRequest;
 import discord4j.rest.util.Image;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Value.Immutable
-interface ApplicationEmojiCreateSpecGenerator extends AuditSpec<ApplicationEmojiCreateRequest> {
+interface ApplicationEmojiCreateSpecGenerator extends Spec<ApplicationEmojiCreateRequest> {
 
     String name();
 

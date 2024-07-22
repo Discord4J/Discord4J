@@ -17,7 +17,6 @@
 
 package discord4j.core.spec;
 
-import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.ApplicationEmoji;
 import discord4j.discordjson.json.ApplicationEmojiModifyRequest;
 import discord4j.discordjson.possible.Possible;
@@ -25,14 +24,10 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
 @Value.Immutable(singleton = true)
-interface ApplicationEmojiEditSpecGenerator extends AuditSpec<ApplicationEmojiModifyRequest> {
+interface ApplicationEmojiEditSpecGenerator extends Spec<ApplicationEmojiModifyRequest> {
 
     Possible<String> name();
-
-    Possible<List<Snowflake>> roles();
 
     @Override
     default ApplicationEmojiModifyRequest asRequest() {
