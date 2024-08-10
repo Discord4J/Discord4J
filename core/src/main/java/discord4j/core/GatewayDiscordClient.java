@@ -31,6 +31,7 @@ import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
 import discord4j.core.object.ScheduledEventUser;
+import discord4j.core.object.VoiceState;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
@@ -884,6 +885,11 @@ public class GatewayDiscordClient implements EntityRetriever {
     @Override
     public Flux<ScheduledEventUser> getScheduledEventUsers(Snowflake guildId, Snowflake eventId) {
         return entityRetriever.getScheduledEventUsers(guildId, eventId);
+    }
+
+    @Override
+    public Mono<VoiceState> getVoiceStateById(Snowflake guildId, Snowflake userId) {
+        return entityRetriever.getVoiceStateById(guildId, userId);
     }
 
     /**

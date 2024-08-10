@@ -18,6 +18,7 @@ package discord4j.core.retriever;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.ScheduledEventUser;
+import discord4j.core.object.VoiceState;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
@@ -148,5 +149,10 @@ public class FallbackEntityRetriever implements EntityRetriever {
     @Override
     public Flux<ScheduledEventUser> getScheduledEventUsers(Snowflake guildId, Snowflake eventId) {
         return first.getScheduledEventUsers(guildId, eventId).switchIfEmpty(fallback.getScheduledEventUsers(guildId, eventId));
+    }
+
+    @Override
+    public Mono<VoiceState> getVoiceStateById(Snowflake guildId, Snowflake userId) {
+        return first.getVoiceStateById(guildId, userId);
     }
 }

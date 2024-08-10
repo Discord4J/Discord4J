@@ -328,15 +328,24 @@ public class PartialMember extends User {
     }
 
     /**
+     * Requests to retrieve this user's voice state for this guild, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the Voice State
+     * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceState voice state} for this user
+     *      * for this guild. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<VoiceState> getVoiceState(EntityRetrievalStrategy retrievalStrategy) {
+        return getClient().withRetrievalStrategy(retrievalStrategy).getVoiceStateById(getGuildId(), getId());
+    }
+
+    /**
      * Requests to retrieve this user's voice state for this guild.
      *
      * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceState voice state} for this user
      * for this guild. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceState> getVoiceState() {
-        return Mono.from(getClient().getGatewayResources().getStore()
-                .execute(ReadActions.getVoiceStateById(getGuildId().asLong(), getId().asLong())))
-            .map(bean -> new VoiceState(getClient(), bean));
+        return getClient().getVoiceStateById(getGuildId(), getId());
     }
 
     /**

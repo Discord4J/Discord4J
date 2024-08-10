@@ -22,6 +22,7 @@ import discord4j.common.store.api.object.ExactResultNotAvailableException;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ScheduledEventUser;
+import discord4j.core.object.VoiceState;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
@@ -188,5 +189,11 @@ public class StoreEntityRetriever implements EntityRetriever {
                 .user(userData)
                 .guildScheduledEventId(eventId.asLong())
                 .build(), guildId));
+    }
+
+    @Override
+    public Mono<VoiceState> getVoiceStateById(Snowflake guildId, Snowflake userId) {
+        return Mono.from(store.execute(ReadActions.getVoiceStateById(guildId.asLong(), userId.asLong())))
+            .map(bean -> new VoiceState(gateway, bean));
     }
 }

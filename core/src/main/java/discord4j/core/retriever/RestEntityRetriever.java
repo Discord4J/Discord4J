@@ -19,6 +19,7 @@ package discord4j.core.retriever;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ScheduledEventUser;
+import discord4j.core.object.VoiceState;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
@@ -214,6 +215,11 @@ public class RestEntityRetriever implements EntityRetriever {
         return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 100)
             .map(data -> new ScheduledEventUser(gateway, data, guildId));
 
+    }
+
+    @Override
+    public Mono<VoiceState> getVoiceStateById(Snowflake guildId, Snowflake userId) {
+        return rest.getGuildService().getOthersVoiceState(guildId.asLong(), userId.asLong()).map(data -> new VoiceState(gateway, data));
     }
 
     private GuildData toGuildData(GuildUpdateData guild) {

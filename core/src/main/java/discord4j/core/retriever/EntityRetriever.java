@@ -18,6 +18,7 @@ package discord4j.core.retriever;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.ScheduledEventUser;
+import discord4j.core.object.VoiceState;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.Guild;
@@ -253,5 +254,15 @@ public interface EntityRetriever {
      * If an error is received, it is emitted through the {@code Flux}.
      */
     Flux<ScheduledEventUser> getScheduledEventUsers(Snowflake guildId, Snowflake eventId);
+
+    /**
+     * Requests to retrieve the Voice State of User in Guild represented by the supplied ID.
+     *
+     * @param guildId The ID of the guild.
+     * @param userId The ID of the user.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link VoiceState} as represented by the supplied
+     *         ID of User. If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<VoiceState> getVoiceStateById(Snowflake guildId, Snowflake userId);
 
 }
