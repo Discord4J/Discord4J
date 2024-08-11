@@ -453,6 +453,14 @@ public abstract class Routes {
     public static final Route STICKER_PACKS_GET = Route.get("/sticker-packs");
 
     /**
+     * Returns a sticker pack object for the given sticker pack ID.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#get-sticker-pack">
+     * https://discord.com/developers/docs/resources/sticker#get-sticker-pack</a>
+     */
+    public static final Route STICKER_PACK_GET = Route.get("/sticker-packs/{pack.id}");
+
+    /**
      * Returns an array of sticker objects for the given guild. Includes user fields if the bot has the MANAGE_EMOJIS_AND_STICKERS permission.
      *
      * @see <a href="https://discord.com/developers/docs/resources/sticker#list-guild-stickers">
