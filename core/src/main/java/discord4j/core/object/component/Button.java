@@ -17,7 +17,7 @@
 package discord4j.core.object.component;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.emoji.Emoji;
 import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.json.ImmutableComponentData;
 import reactor.util.annotation.Nullable;
@@ -49,7 +49,7 @@ public class Button extends ActionComponent {
      * @param emoji The emoji that appears on the button.
      * @return A button with the given data.
      */
-    public static Button primary(String customId, ReactionEmoji emoji) {
+    public static Button primary(String customId, Emoji emoji) {
         return of(Button.Style.PRIMARY, customId, emoji, null, null, null);
     }
 
@@ -61,7 +61,7 @@ public class Button extends ActionComponent {
      * @param label The text that appears on the button.
      * @return A button with the given data.
      */
-    public static Button primary(String customId, ReactionEmoji emoji, String label) {
+    public static Button primary(String customId, Emoji emoji, String label) {
         return of(Button.Style.PRIMARY, customId, emoji, label, null, null);
     }
 
@@ -83,7 +83,7 @@ public class Button extends ActionComponent {
      * @param emoji The emoji that appears on the button.
      * @return A button with the given data.
      */
-    public static Button secondary(String customId, ReactionEmoji emoji) {
+    public static Button secondary(String customId, Emoji emoji) {
         return of(Button.Style.SECONDARY, customId, emoji, null, null, null);
     }
 
@@ -95,7 +95,7 @@ public class Button extends ActionComponent {
      * @param label The text that appears on the button.
      * @return A button with the given data.
      */
-    public static Button secondary(String customId, ReactionEmoji emoji, String label) {
+    public static Button secondary(String customId, Emoji emoji, String label) {
         return of(Button.Style.SECONDARY, customId, emoji, label, null, null);
     }
 
@@ -117,7 +117,7 @@ public class Button extends ActionComponent {
      * @param emoji The emoji that appears on the button.
      * @return A button with the given data.
      */
-    public static Button success(String customId, ReactionEmoji emoji) {
+    public static Button success(String customId, Emoji emoji) {
         return of(Button.Style.SUCCESS, customId, emoji, null, null, null);
     }
 
@@ -129,7 +129,7 @@ public class Button extends ActionComponent {
      * @param label The text that appears on the button.
      * @return A button with the given data.
      */
-    public static Button success(String customId, ReactionEmoji emoji, String label) {
+    public static Button success(String customId, Emoji emoji, String label) {
         return of(Button.Style.SUCCESS, customId, emoji, label, null, null);
     }
 
@@ -151,7 +151,7 @@ public class Button extends ActionComponent {
      * @param emoji The emoji that appears on the button.
      * @return A button with the given data.
      */
-    public static Button danger(String customId, ReactionEmoji emoji) {
+    public static Button danger(String customId, Emoji emoji) {
         return of(Button.Style.DANGER, customId, emoji, null, null, null);
     }
 
@@ -163,7 +163,7 @@ public class Button extends ActionComponent {
      * @param label The text that appears on the button.
      * @return A button with the given data.
      */
-    public static Button danger(String customId, ReactionEmoji emoji, String label) {
+    public static Button danger(String customId, Emoji emoji, String label) {
         return of(Button.Style.DANGER, customId, emoji, label, null, null);
     }
 
@@ -185,7 +185,7 @@ public class Button extends ActionComponent {
      * @param emoji The emoji that appears on the button.
      * @return A button with the given data.
      */
-    public static Button link(String url, ReactionEmoji emoji) {
+    public static Button link(String url, Emoji emoji) {
         return of(Button.Style.LINK, null, emoji, null, url, null);
     }
 
@@ -197,7 +197,7 @@ public class Button extends ActionComponent {
      * @param label The text that appears on the button.
      * @return A button with the given data.
      */
-    public static Button link(String url, ReactionEmoji emoji, String label) {
+    public static Button link(String url, Emoji emoji, String label) {
         return of(Button.Style.LINK, null, emoji, label, url, null);
     }
 
@@ -205,7 +205,7 @@ public class Button extends ActionComponent {
         return of (Button.Style.PREMIUM, null, null, null, null, skuId.asString());
     }
 
-    private static Button of(Style style, @Nullable String customId, @Nullable ReactionEmoji emoji,
+    private static Button of(Style style, @Nullable String customId, @Nullable Emoji emoji,
                              @Nullable String label, @Nullable String url, @Nullable String skuId) {
         ImmutableComponentData.Builder builder = ComponentData.builder()
                 .type(MessageComponent.Type.BUTTON.getValue())
@@ -258,9 +258,9 @@ public class Button extends ActionComponent {
      *
      * @return The button's emoji.
      */
-    public Optional<ReactionEmoji> getEmoji() {
+    public Optional<Emoji> getEmoji() {
         return getData().emoji().toOptional()
-                .map(ReactionEmoji::of);
+                .map(Emoji::of);
     }
 
     /**

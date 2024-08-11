@@ -20,7 +20,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.emoji.Emoji;
 import discord4j.gateway.ShardInfo;
 import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
@@ -44,10 +44,10 @@ public class ReactionRemoveEmojiEvent extends MessageEvent {
     private final long messageId;
     @Nullable
     private final Long guildId;
-    private final ReactionEmoji emoji;
+    private final Emoji emoji;
 
     public ReactionRemoveEmojiEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long channelId, long messageId,
-                                    @Nullable Long guildId, ReactionEmoji emoji) {
+                                    @Nullable Long guildId, Emoji emoji) {
         super(gateway, shardInfo);
         this.channelId = channelId;
         this.messageId = messageId;
@@ -117,11 +117,11 @@ public class ReactionRemoveEmojiEvent extends MessageEvent {
     }
 
     /**
-     * The {@link ReactionEmoji} that was removed from a message.
+     * The {@link Emoji} that was removed from a message.
      *
      * @return The {@code Emoji} that has been removed.
      */
-    public ReactionEmoji getEmoji() {
+    public Emoji getEmoji() {
         return emoji;
     }
 

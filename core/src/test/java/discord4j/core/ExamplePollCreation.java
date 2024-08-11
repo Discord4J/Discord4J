@@ -21,10 +21,7 @@ import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.object.entity.poll.PollAnswer;
-import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.discordjson.json.EmojiData;
-import discord4j.discordjson.json.PollAnswerObject;
-import discord4j.discordjson.json.PollMediaObject;
+import discord4j.core.object.emoji.Emoji;
 import reactor.core.publisher.Mono;
 
 public class ExamplePollCreation {
@@ -44,8 +41,8 @@ public class ExamplePollCreation {
                     .flatMap(channel -> channel.createPoll()
                         .withQuestion("What is your favorite color?")
                         .withAnswers(
-                            PollAnswer.of("Red", ReactionEmoji.unicode("\uD83D\uDD34")),
-                            PollAnswer.of("Green", ReactionEmoji.unicode("\uD83D\uDFE2"))
+                            PollAnswer.of("Red", Emoji.unicode("\uD83D\uDD34")),
+                            PollAnswer.of("Green", Emoji.unicode("\uD83D\uDFE2"))
                         )
                         .withAllowMultiselect(true)
                         .withDuration(3) // 3 hours
