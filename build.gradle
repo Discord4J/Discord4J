@@ -6,6 +6,7 @@ plugins {
     id 'com.github.ben-manes.versions' version '0.42.0'
     // TODO: Warning for Gradle 9 by https://github.com/researchgate/gradle-release/issues/379
     id 'net.researchgate.release' version '3.0.2'
+    id 'checkstyle'
 }
 
 ext {
@@ -47,8 +48,15 @@ allprojects {
     apply plugin: 'java-library'
     apply plugin: 'com.github.ben-manes.versions'
     apply plugin: 'maven-publish'
+    apply plugin: 'checkstyle'
+
     if (!isJitpack && isRelease) {
         apply plugin: 'signing'
+    }
+
+    checkstyle {
+        toolVersion = "10.17.0"
+        configFile = rootProject.file('checkstyle.xml')
     }
 
     group = artifact_group
@@ -82,6 +90,13 @@ allprojects {
 
     configurations.configureEach {
         resolutionStrategy.cacheChangingModulesFor 60, 'seconds'
+    }
+
+    tasks.withType(Checkstyle).configureEach {
+        reports {
+            xml.required = false
+            html.required = true
+        }
     }
 
     tasks.withType(Javadoc).configureEach {
