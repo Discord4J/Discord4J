@@ -1,11 +1,17 @@
 package discord4j.core.object.emoji;
 
 import discord4j.common.util.Snowflake;
+import discord4j.core.util.ImageUtil;
 import discord4j.discordjson.json.EmojiData;
+import discord4j.rest.util.Image;
+import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
+
+import static discord4j.rest.util.Image.Format.GIF;
+import static discord4j.rest.util.Image.Format.PNG;
 
 /**
  * A Discord emoji.
@@ -25,7 +31,25 @@ public class EmojiCustom extends Emoji {
     }
 
     EmojiCustom(long id, @Nullable String name, boolean isAnimated) {
-        this.data = EmojiData.builder().id(id).name(Optional.ofNullable(name)).animated(isAnimated).build();
+        this.data = EmojiData.builder()
+            .id(id)
+            .name(Optional.ofNullable(name))
+            .animated(isAnimated)
+            .build();
+    }
+
+    /**
+     * Gets the formatted version of this emoji (i.e., to display in the client).
+     * <br>
+     * <b>Note:</b> please check first if {@link #getName()} is not empty.
+     *
+     * @param isAnimated Whether the emoji is animated.
+     * @param id The ID of the custom emoji.
+     * @param name The name of the custom emoji.
+     * @return The formatted version of this emoji (i.e., to display in the client).
+     */
+    public static String asFormat(final boolean isAnimated, final String name, final Snowflake id) {
+        return '<' + (isAnimated ? "a" : "") + ':' + Objects.requireNonNull(name) + ':' + Objects.requireNonNull(id).asString() + '>';
     }
 
     /**
@@ -61,6 +85,26 @@ public class EmojiCustom extends Emoji {
     }
 
     /**
+     * Gets whether this emoji must be wrapped in colons.
+     *
+     * @return {@code true} if this emoji must be wrapped in colons, {@code false} otherwise.
+     */
+    public boolean requiresColons() {
+        return data.requireColons().toOptional()
+            .orElse(true); // this should be safe for emojis
+    }
+
+    /**
+     * Gets whether this emoji is managed.
+     *
+     * @return {@code true} if this emoji is managed, {@code false} otherwise.
+     */
+    public boolean isManaged() {
+        return data.managed().toOptional()
+            .orElse(false);
+    }
+
+    /**
      * Gets whether this emoji is animated.
      *
      * @return {@code true} if this emoji is animated, {@code false} otherwise.
@@ -81,6 +125,26 @@ public class EmojiCustom extends Emoji {
             .orElseThrow(IllegalStateException::new); // this should be safe for emojis
     }
 
+    /**
+     * Gets the URL for this emoji.
+     *
+     * @return The URL for this emoji.
+     */
+    public String getImageUrl() {
+        final String path = String.format(EMOJI_IMAGE_PATH, getId().asString());
+        return isAnimated() ? ImageUtil.getUrl(path, GIF) : ImageUtil.getUrl(path, PNG);
+    }
+
+    /**
+     * Gets the image for this emoji.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image image} of the emoji. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getImage() {
+        return Image.ofUrl(getImageUrl());
+    }
+
     @Override
     public EmojiData asEmojiData() {
         return EmojiData.builder().from(this.data).build();
@@ -89,20 +153,6 @@ public class EmojiCustom extends Emoji {
     @Override
     public String asFormat() {
         return asFormat(this.isAnimated(), this.getName(), this.getId());
-    }
-
-    /**
-     * Gets the formatted version of this emoji (i.e., to display in the client).
-     * <br>
-     * <b>Note:</b> please check first if {@link #getName()} is not empty.
-     *
-     * @param isAnimated Whether the emoji is animated.
-     * @param id The ID of the custom emoji.
-     * @param name The name of the custom emoji.
-     * @return The formatted version of this emoji (i.e., to display in the client).
-     */
-    public static String asFormat(final boolean isAnimated, final String name, final Snowflake id) {
-        return '<' + (isAnimated ? "a" : "") + ':' + Objects.requireNonNull(name) + ':' + Objects.requireNonNull(id).asString() + '>';
     }
 
     @Override
