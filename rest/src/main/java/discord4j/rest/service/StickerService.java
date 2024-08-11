@@ -29,6 +29,12 @@ public class StickerService extends RestService {
             .flatMapMany(Flux::fromArray);
     }
 
+    public Mono<StickerPackData> getStickerPack(long stickerPackId) {
+        return Routes.STICKER_PACK_GET.newRequest(stickerPackId)
+            .exchange(getRouter())
+            .bodyToMono(StickerPackData.class);
+    }
+
     public Flux<StickerData> getGuildStickers(long guildId) {
         return Routes.GUILD_STICKERS_GET.newRequest(guildId)
             .exchange(getRouter())
