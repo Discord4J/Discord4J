@@ -757,6 +757,14 @@ public abstract class Routes {
     public static final Route GUILD_ROLES_GET = Route.get("/guilds/{guild.id}/roles");
 
     /**
+     * Returns a role object for the specified role id. Requires the 'MANAGE_ROLES' permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#get-guild-role">
+     * https://discord.com/developers/docs/resources/guild#get-guild-role</a>
+     */
+    public static final Route GUILD_ROLE_GET = Route.get("/guilds/{guild.id}/roles/{role.id}");
+
+    /**
      * Create a new role for the guild. Requires the 'MANAGE_ROLES' permission. Returns the new role object on success.
      * Fires a Guild Role Create Gateway event. All JSON params are optional.
      *
