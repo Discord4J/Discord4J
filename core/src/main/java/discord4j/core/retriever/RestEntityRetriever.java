@@ -94,9 +94,7 @@ public class RestEntityRetriever implements EntityRetriever {
     @Override
     public Mono<Role> getRoleById(Snowflake guildId, Snowflake roleId) {
         return rest.getGuildService()
-                .getGuildRoles(guildId.asLong())
-                .filter(response -> response.id().asString().equals(roleId.asString()))
-                .singleOrEmpty()
+                .getGuildRole(guildId.asLong(), roleId.asLong())
                 .map(data -> new Role(gateway, data, guildId.asLong()));
     }
 
