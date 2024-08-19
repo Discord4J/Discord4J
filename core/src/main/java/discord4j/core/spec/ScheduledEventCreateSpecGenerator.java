@@ -37,6 +37,8 @@ public interface ScheduledEventCreateSpecGenerator extends AuditSpec<GuildSchedu
 
     Possible<Image> image();
 
+    Possible<RecurrenceRuleSpec> recurrenceRule();
+
     @Override
     default GuildScheduledEventCreateRequest asRequest() {
         return GuildScheduledEventCreateRequest.builder()
@@ -49,6 +51,7 @@ public interface ScheduledEventCreateSpecGenerator extends AuditSpec<GuildSchedu
             .description(description())
             .entityType(entityType().getValue())
             .image(mapPossible(image(), Image::getDataUri))
+            .recurrenceRule(mapPossible(recurrenceRule(), RecurrenceRuleSpecGenerator::asRequest))
             .build();
     }
 }
