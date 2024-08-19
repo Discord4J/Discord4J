@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-class BaseTopLevelGuildChannel extends BaseChannel implements TopLevelGuildChannel {
+public class BaseTopLevelGuildChannel extends BaseChannel implements TopLevelGuildChannel {
 
     BaseTopLevelGuildChannel(GatewayDiscordClient gateway, ChannelData data) {
         super(gateway, data);
