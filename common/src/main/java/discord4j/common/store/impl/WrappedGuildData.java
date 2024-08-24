@@ -52,11 +52,11 @@ class WrappedGuildData {
     ImmutableGuildData unwrap() {
         return ImmutableGuildData.builder()
                 .from(guild)
-                .members(members)
-                .emojis(emojis)
-                .stickers(stickers)
-                .channels(channels)
-                .roles(roles)
+                .members(new ArrayList<>(members))
+                .emojis(new ArrayList<>(emojis))
+                .stickers(new ArrayList<>(stickers))
+                .channels(new ArrayList<>(channels))
+                .roles(new ArrayList<>(roles))
                 .build();
     }
 
