@@ -81,27 +81,30 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
 
     /**
      * Fetches the parent channel for this thread object.
-     * When the parent channel is a message channel, an appropriate target class for casting is {@link TopLevelGuildMessageChannel}.
+     * When the parent channel is a message channel, an appropriate target class for casting is
+     * {@link BaseTopLevelGuildChannel}.
      *
-     * @return A {@link Mono} which, upon completion, emits a {@link TopLevelGuildChannel}. Any error is emitted through the mono.
+     * @return A {@link Mono} which, upon completion, emits a {@link BaseTopLevelGuildChannel}.
+     * Any error is emitted through the mono.
      */
-    public Mono<TopLevelGuildChannel> getParent() {
+    public Mono<BaseTopLevelGuildChannel> getParent() {
         return Mono.justOrEmpty(getParentId())
                 .flatMap(getClient()::getChannelById)
-                .cast(TopLevelGuildChannel.class);
+                .cast(BaseTopLevelGuildChannel.class);
     }
 
     /**
      * Fetches the parent channel for this thread object using the provided retrieval strategy.
-     * When the parent channel is a message channel, an appropriate target class for casting is {@link TopLevelGuildMessageChannel}.
+     * When the parent channel is a message channel, an appropriate target class for casting is {@link BaseTopLevelGuildChannel}.
      *
      * @param retrievalStrategy The selected retrieval strategy for this request
-     * @return A {@link Mono} which, upon completion, emits a {@link TopLevelGuildChannel}. Any error is emitted through the mono.
+     * @return A {@link Mono} which, upon completion, emits a {@link BaseTopLevelGuildChannel}.
+     * Any error is emitted through the mono.
      */
-    public Mono<TopLevelGuildChannel> getParent(EntityRetrievalStrategy retrievalStrategy) {
+    public Mono<BaseTopLevelGuildChannel> getParent(EntityRetrievalStrategy retrievalStrategy) {
         return Mono.justOrEmpty(getParentId())
                 .flatMap(getClient().withRetrievalStrategy(retrievalStrategy)::getChannelById)
-                .cast(TopLevelGuildChannel.class);
+                .cast(BaseTopLevelGuildChannel.class);
     }
 
     /**
