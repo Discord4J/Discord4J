@@ -1,14 +1,14 @@
-package discord4j.core.object.entity;
+package discord4j.core.object.emoji;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.util.ImageUtil;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.rest.util.Image;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import static discord4j.rest.util.Image.Format.GIF;
 import static discord4j.rest.util.Image.Format.PNG;
@@ -18,40 +18,38 @@ import static discord4j.rest.util.Image.Format.PNG;
  * <p>
  * <a href="https://discord.com/developers/docs/resources/emoji#emoji-resource">Emoji Resource</a>
  */
-public abstract class Emoji implements Entity {
+public class EmojiCustom extends Emoji {
 
     /** The path for {@code Emoji} image URLs. */
     static final String EMOJI_IMAGE_PATH = "emojis/%s";
 
-    /** The gateway associated to this object. */
-    final GatewayDiscordClient gateway;
-
     /** The raw data as represented by Discord. */
     final EmojiData data;
 
-    /**
-     * Constructs a {@code Emoji} with an associated {@link GatewayDiscordClient} and Discord data.
-     *
-     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data The raw data as represented by Discord, must be non-null.
-     */
-    protected Emoji(GatewayDiscordClient gateway, EmojiData data) {
-        this.gateway = Objects.requireNonNull(gateway);
+    public EmojiCustom(EmojiData data) {
         this.data = Objects.requireNonNull(data);
     }
 
-    public abstract Mono<User> getUser();
-
-    @Override
-    public GatewayDiscordClient getClient() {
-        return gateway;
+    EmojiCustom(long id, @Nullable String name, boolean isAnimated) {
+        this.data = EmojiData.builder()
+            .id(id)
+            .name(Optional.ofNullable(name))
+            .animated(isAnimated)
+            .build();
     }
 
-    @Override
-    public Snowflake getId() {
-        return data.id()
-            .map(Snowflake::of)
-            .orElseThrow(IllegalStateException::new); // this should be safe for emojis
+    /**
+     * Gets the formatted version of this emoji (i.e., to display in the client).
+     * <br>
+     * <b>Note:</b> please check first if {@link #getName()} is not empty.
+     *
+     * @param isAnimated Whether the emoji is animated.
+     * @param id The ID of the custom emoji.
+     * @param name The name of the custom emoji.
+     * @return The formatted version of this emoji (i.e., to display in the client).
+     */
+    public static String asFormat(final boolean isAnimated, final String name, final Snowflake id) {
+        return '<' + (isAnimated ? "a" : "") + ':' + Objects.requireNonNull(name) + ':' + Objects.requireNonNull(id).asString() + '>';
     }
 
     /**
@@ -64,9 +62,22 @@ public abstract class Emoji implements Entity {
     }
 
     /**
-     * Gets the emoji name.
+     * Gets the id of the emoji.
      *
-     * @return The emoji name.
+     * @return The id of the emoji.
+     */
+    public Snowflake getId() {
+        return data.id()
+            .map(Snowflake::of)
+            .orElseThrow(IllegalStateException::new); // this should be safe for emojis
+    }
+
+    /**
+     * Gets the name of the emoji.
+     * <br>
+     * <b>Note:</b> this can be empty for reactions or onboarding.
+     *
+     * @return The name of the emoji.
      */
     public String getName() {
         return data.name()
@@ -80,7 +91,7 @@ public abstract class Emoji implements Entity {
      */
     public boolean requiresColons() {
         return data.requireColons().toOptional()
-            .orElseThrow(IllegalStateException::new); // this should be safe for emojis
+            .orElse(true); // this should be safe for emojis
     }
 
     /**
@@ -90,7 +101,7 @@ public abstract class Emoji implements Entity {
      */
     public boolean isManaged() {
         return data.managed().toOptional()
-            .orElseThrow(IllegalStateException::new); // this should be safe for emojis
+            .orElse(false);
     }
 
     /**
@@ -134,19 +145,37 @@ public abstract class Emoji implements Entity {
         return Image.ofUrl(getImageUrl());
     }
 
-    /**
-     * Gets the formatted version of this emoji (i.e., to display in the client).
-     *
-     * @return The formatted version of this emoji (i.e., to display in the client).
-     */
+    @Override
+    public EmojiData asEmojiData() {
+        return EmojiData.builder().from(this.data).build();
+    }
+
+    @Override
     public String asFormat() {
-        return ReactionEmoji.Custom.custom(this).asFormat();
+        return asFormat(this.isAnimated(), this.getName(), this.getId());
     }
 
     @Override
     public String toString() {
-        return "Emoji{" +
+        return "CustomEmoji{" +
             "data=" + data +
             '}';
+    }
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        EmojiCustom custom = (EmojiCustom) o;
+        return getId().asLong() == custom.getId().asLong();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId().asLong());
     }
 }
