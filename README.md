@@ -217,7 +217,7 @@ Then, add the intent to your bot when creating the DiscordClient:
 ```java
 GatewayDiscordClient client = DiscordClient.create(token)
   .gateway()
-  .setEnabledIntents(IntentSet.nonPrivileged().and(IntentSet.of(Intent.MESSAGE_CONTENT)))
+  .setEnabledIntents(IntentSet.nonPrivileged().or(IntentSet.of(Intent.MESSAGE_CONTENT)))
   .login()
   .block();
 ```
