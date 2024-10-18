@@ -19,7 +19,6 @@ package discord4j.voice;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.iwebpp.crypto.TweetNaclFast;
 import discord4j.common.LogUtil;
 import discord4j.common.ResettableInterval;
 import discord4j.common.close.CloseException;
@@ -29,6 +28,7 @@ import discord4j.common.retry.ReconnectContext;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.common.sinks.EmissionStrategy;
 import discord4j.common.util.Snowflake;
+import discord4j.voice.crypto.EncryptionMode;
 import discord4j.voice.json.*;
 import discord4j.voice.retry.VoiceGatewayException;
 import discord4j.voice.retry.VoiceGatewayReconnectException;
@@ -52,6 +52,7 @@ import reactor.util.retry.Retry;
 import reactor.util.retry.RetrySpec;
 
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -73,6 +74,7 @@ public class DefaultVoiceGatewayClient {
     private static final Logger log = Loggers.getLogger(DefaultVoiceGatewayClient.class);
     private static final Logger senderLog = Loggers.getLogger("discord4j.voice.protocol.sender");
     private static final Logger receiverLog = Loggers.getLogger("discord4j.voice.protocol.receiver");
+    private static final int AUDIO_GATEWAY_VERSION = 4;
 
     private final Snowflake guildId;
     private final Snowflake selfId;
@@ -125,6 +127,7 @@ public class DefaultVoiceGatewayClient {
     private volatile Sinks.One<CloseStatus> disconnectNotifier;
     private volatile ContextView currentContext;
     private volatile VoiceWebsocketHandler sessionHandler;
+    private EncryptionMode encryptionMode;
 
     public DefaultVoiceGatewayClient(VoiceGatewayOptions options) {
         this.guildId = options.getGuildId();
@@ -238,11 +241,13 @@ public class DefaultVoiceGatewayClient {
                                     .flatMap(payloadReader)
                                     .doOnNext(payload -> {
                                         if (payload instanceof Hello) {
+                                            log.debug("Received HELLO");
                                             Hello hello = (Hello) payload;
                                             Duration interval =
                                                     Duration.ofMillis(hello.getData().getHeartbeatInterval());
                                             heartbeat.start(interval, interval);
                                         } else if (payload instanceof Ready) {
+                                            log.debug("Received READY");
                                             log.info(format(context, "Waiting for session description"));
                                             Ready ready = (Ready) payload;
                                             ssrc = ready.getData().getSsrc();
@@ -260,10 +265,21 @@ public class DefaultVoiceGatewayClient {
                                                                 innerCleanup.add(connection);
                                                                 String hostName = address.getHostName();
                                                                 int port = address.getPort();
+
+                                                                this.encryptionMode = EncryptionMode.getBestMode();
+                                                                if (this.encryptionMode == null) {
+                                                                    log.error("No encryption mode available");
+                                                                    nextState(VoiceConnection.State.DISCONNECTED);
+                                                                    voiceConnectionSink.error(new IllegalStateException("No encryption mode available"));
+                                                                    return;
+                                                                }
+
+                                                                log.info("Using encryption mode {}", this.encryptionMode.name());
+
                                                                 emissionStrategy.emitNext(outbound,
                                                                         new SelectProtocol(VoiceSocket.PROTOCOL,
                                                                                 hostName,
-                                                                                port, VoiceSocket.ENCRYPTION_MODE));
+                                                                                port, encryptionMode.getValue()));
                                                             }),
                                                             t -> {
                                                                 voiceConnectionSink.error(t);
@@ -272,13 +288,23 @@ public class DefaultVoiceGatewayClient {
                                                             () -> log.debug(format(context, "Voice socket setup " +
                                                                     "complete"))));
                                         } else if (payload instanceof SessionDescription) {
+                                            log.debug("Received SESSION_DESCRIPTION");
                                             log.info(format(context, "Receiving events"));
                                             nextState(VoiceConnection.State.CONNECTED);
                                             reconnectContext.reset();
                                             SessionDescription sessionDescription = (SessionDescription) payload;
                                             byte[] secretKey = sessionDescription.getData().getSecretKey();
-                                            TweetNaclFast.SecretBox boxer = new TweetNaclFast.SecretBox(secretKey);
-                                            PacketTransformer transformer = new PacketTransformer(ssrc, boxer);
+
+                                            PacketTransformer transformer;
+                                            try {
+                                                transformer = new PacketTransformer(ssrc, encryptionMode, secretKey);
+                                            } catch (GeneralSecurityException e) {
+                                                log.error("Failed to create packet transformer", e);
+                                                nextState(VoiceConnection.State.DISCONNECTED);
+                                                voiceConnectionSink.error(e);
+                                                return;
+                                            }
+
                                             Consumer<Boolean> speakingSender = speaking -> emissionStrategy.emitNext(
                                                     outbound, new SentSpeaking(speaking, 0, ssrc));
                                             innerCleanup.add(() -> log.debug(format(context, "Disposing voice tasks")));
@@ -288,9 +314,12 @@ public class DefaultVoiceGatewayClient {
                                                     voiceSocket.getInbound(), transformer, audioReceiver));
                                             voiceConnectionSink.success(acquireConnection());
                                         } else if (payload instanceof Resumed) {
+                                            log.debug("Received RESUMED");
                                             log.info(format(context, "Resumed"));
                                             nextState(VoiceConnection.State.CONNECTED);
                                             reconnectContext.reset();
+                                        } else {
+                                            log.debug("Received UNKNOWN");
                                         }
                                         emissionStrategy.emitNext(events, (VoiceGatewayEvent) payload);
                                     })
@@ -301,11 +330,14 @@ public class DefaultVoiceGatewayClient {
                                     .doOnNext(tick -> emissionStrategy.emitNext(outbound, tick))
                                     .then();
 
+                            String fullEndpoint = "wss://" + serverOptions.get().getEndpoint() + "?v=" + AUDIO_GATEWAY_VERSION; // TODO: support v8
+                            log.debug("Using endpoint {}", fullEndpoint);
+
                             Mono<Void> httpFuture = httpClient
                                     .websocket(WebsocketClientSpec.builder()
                                             .maxFramePayloadLength(Integer.MAX_VALUE)
                                             .build())
-                                    .uri(serverOptions.get().getEndpoint() + "?v=4")
+                                    .uri(fullEndpoint)
                                     .handle((in, out) -> onOpen.then(sessionHandler.handle(in, out)))
                                     .contextWrite(LogUtil.clearContext())
                                     .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2()))
