@@ -2,6 +2,8 @@ dependencies {
     api project(':common')
     api 'com.discord4j:simple-fsm:1.0.1'
 
+    implementation 'com.google.crypto.tink:tink:1.15.0'
+
     testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_version"
     testImplementation "ch.qos.logback:logback-classic:$logback_version"
 }
