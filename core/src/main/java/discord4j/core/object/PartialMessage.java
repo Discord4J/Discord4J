@@ -21,11 +21,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * A Partial Message where just a few elements from a {@link Message} are present.
- * <b>Note:</b> this is just a partial representation of elements where many of them can not be present and not fully represent the full data of the message
+ * Represent a partial message where just a few elements from a {@link Message} are present.
  *
- * @see <a href="https://discord.com/developers/docs/resources/message#message-snapshot-object">
- * Message Snapshot Object</a>
+ * @see <a href="https://discord.com/developers/docs/resources/message#message-object">
+ * Message Object</a>
+ * @see MessageSnapshot
  */
 public class PartialMessage implements DiscordObject {
 
@@ -70,7 +70,8 @@ public class PartialMessage implements DiscordObject {
     }
 
     /**
-     * Gets the ID of the guild this message is associated to, if this {@code PartialMessage} was built from Gateway data,
+     * Gets the ID of the guild this message is associated to, if this {@code PartialMessage} was built from Gateway
+     * data,
      * like an incoming event. If requested from REST API, this field will be empty.
      *
      * @return The ID of the guild this message is associated to, if present.

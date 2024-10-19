@@ -22,7 +22,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
 import discord4j.core.object.MessageInteraction;
 import discord4j.core.object.MessageReference;
-import discord4j.core.object.PartialMessage;
+import discord4j.core.object.MessageSnapshot;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -476,15 +476,14 @@ public final class Message implements Entity {
     }
 
     /**
-     * Returns a list of {@link PartialMessage} sent with the forward message.
+     * Returns a list of {@link MessageSnapshot} sent with the forward message.
      *
-     * @return A list of {@link PartialMessage} sent with the forward message.
+     * @return A list of {@link MessageSnapshot} sent with the forward message.
      */
-    @Experimental
-    public List<PartialMessage> getMessageSnapshots() {
+    public List<MessageSnapshot> getMessageSnapshots() {
         return data.messageSnapshots().toOptional()
             .map(messageSnapshotsData -> messageSnapshotsData.stream()
-                .map(data -> new PartialMessage(gateway, data.message()))
+                .map(data -> new MessageSnapshot(gateway, data))
                 .collect(Collectors.toList()))
             .orElse(Collections.emptyList());
     }
