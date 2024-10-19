@@ -720,9 +720,28 @@ public final class Message implements Entity {
         return MessageEditMono.of(this);
     }
 
-    public Mono<Message> forward(TopLevelGuildMessageChannel channel) {
-        Objects.requireNonNull(channel);
-        return channel.createMessage(MessageCreateSpec.create().withMessageReference(MessageReferenceData.builder().type(MessageReference.Type.FORWARD.getValue()).messageId(this.data.id()).channelId(this.data.channelId()).build()));
+    /**
+     * Request to forward this message.
+     *
+     * @param messageChannel The message channel where the forward is going to be sent.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Message> forward(MessageChannel messageChannel) {
+        Objects.requireNonNull(messageChannel);
+        return messageChannel.createMessage(MessageCreateSpec.create().withMessageReference(MessageReferenceData.builder().type(MessageReference.Type.FORWARD.getValue()).messageId(this.data.id()).channelId(this.data.channelId()).guildId(this.data.guildId()).build()));
+    }
+
+    /**
+     * Request to forward this message.
+     *
+     * @param channelId The id of the message channel where the forward is going to be sent.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Message> forward(Snowflake channelId) {
+        Objects.requireNonNull(channelId);
+        return this.getClient().getChannelById(channelId).cast(MessageChannel.class).flatMap(this::forward);
     }
 
     /**
