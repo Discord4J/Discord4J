@@ -73,7 +73,7 @@ final class PacketTransformer {
         try {
             encrypted = this.encryptionAdapter.encrypt(header, audio, nonce);
         } catch (GeneralSecurityException e) {
-            PacketTransformer.LOGGER.debug("Failed to encrypt audio", e);
+            PacketTransformer.LOGGER.error("Failed to encrypt audio", e);
             return null;
         }
 
@@ -137,7 +137,7 @@ final class PacketTransformer {
         try {
             decrypted = this.encryptionAdapter.decrypt(header, encrypted, nonce);
         } catch (GeneralSecurityException e) {
-            PacketTransformer.LOGGER.debug("Failed to decrypt audio", e);
+            PacketTransformer.LOGGER.error("Failed to decrypt audio", e);
             return null;
         }
 

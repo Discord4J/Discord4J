@@ -74,7 +74,6 @@ public class DefaultVoiceGatewayClient {
     private static final Logger log = Loggers.getLogger(DefaultVoiceGatewayClient.class);
     private static final Logger senderLog = Loggers.getLogger("discord4j.voice.protocol.sender");
     private static final Logger receiverLog = Loggers.getLogger("discord4j.voice.protocol.receiver");
-    private static final int AUDIO_GATEWAY_VERSION = 4;
 
     private final Snowflake guildId;
     private final Snowflake selfId;
@@ -268,7 +267,6 @@ public class DefaultVoiceGatewayClient {
 
                                                                 this.encryptionMode = EncryptionMode.getBestMode();
                                                                 if (this.encryptionMode == null) {
-                                                                    log.error("No encryption mode available");
                                                                     nextState(VoiceConnection.State.DISCONNECTED);
                                                                     voiceConnectionSink.error(new IllegalStateException("No encryption mode available"));
                                                                     return;
@@ -330,7 +328,7 @@ public class DefaultVoiceGatewayClient {
                                     .doOnNext(tick -> emissionStrategy.emitNext(outbound, tick))
                                     .then();
 
-                            String fullEndpoint = "wss://" + serverOptions.get().getEndpoint() + "?v=" + AUDIO_GATEWAY_VERSION; // TODO: support v8
+                            String fullEndpoint = serverOptions.get().getEndpoint();
                             log.debug("Using endpoint {}", fullEndpoint);
 
                             Mono<Void> httpFuture = httpClient
