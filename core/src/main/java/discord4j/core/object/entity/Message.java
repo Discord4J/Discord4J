@@ -476,6 +476,12 @@ public final class Message implements Entity {
                 .map(data -> new MessageReference(gateway, data));
     }
 
+    /**
+     * Returns a list of {@link PartialMessage} sent with the forward message.
+     *
+     * @return A list of {@link PartialMessage} sent with the forward message.
+     */
+    @Experimental
     public List<PartialMessage> getMessageSnapshots() {
         return data.messageSnapshots().toOptional()
             .map(messageSnapshotsData -> messageSnapshotsData.stream()
