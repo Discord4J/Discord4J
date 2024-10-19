@@ -64,7 +64,7 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
     Possible<AllowedMentions> allowedMentions();
 
     /**
-     * @deprecated this is just a helper for the reply format in this spec you need {@link MessageReferenceData}
+     * @deprecated this just map to a reply message for modify behaviour you need use {@link MessageReferenceData}
      */
     @Deprecated
     Possible<Snowflake> messageReferenceId();
