@@ -10,6 +10,13 @@ develocity {
     }
 }
 
+includeBuild("../discord-json") {
+    dependencySubstitution {
+        substitute module("com.discord4j:discord-json")
+        substitute module("com.discord4j:discord-json-api")
+    }
+}
+
 rootProject.name = 'Discord4J'
 
 include 'core'

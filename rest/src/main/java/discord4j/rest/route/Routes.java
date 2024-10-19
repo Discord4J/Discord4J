@@ -548,6 +548,82 @@ public abstract class Routes {
      */
     public static final Route GUILD_EMOJI_DELETE = Route.delete("/guilds/{guild.id}/emojis/{emoji.id}");
 
+    /////////////////////////////////////////////
+    //////////// Soundboard Resource ////////////
+    /////////////////////////////////////////////
+
+    /**
+     * Send a soundboard sound to a voice channel the user is connected to. Fires a Voice Channel Effect Send Gateway event.
+     * <p>
+     * Requires the SPEAK and USE_SOUNDBOARD permissions, and also the USE_EXTERNAL_SOUNDS permission if the sound is from
+     * a different server. Additionally, requires the user to be connected to the voice channel, having a voice state without
+     * deaf, self_deaf, mute, or suppress enabled.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/soundboard#send-soundboard-sound">https://discord.com/developers/docs/resources/soundboard#send-soundboard-sound</a>
+     */
+    public static final Route SEND_SOUNDBOARD_SOUND = Route.post("/channels/{channel.id}/send-soundboard-sound");
+
+    /**
+     * Returns an array of soundboard sound objects that can be used by all users.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/soundboard#list-default-soundboard-sounds">https://discord.com/developers/docs/resources/soundboard#list-default-soundboard-sounds</a>
+     */
+    public static final Route LIST_DEFAULT_SOUNDBOARD_SOUNDS = Route.get("/soundboard-default-sounds");
+
+    /**
+     * Returns a list of the guild's soundboard sounds. Includes user fields if the bot has the CREATE_GUILD_EXPRESSIONS
+     * or MANAGE_GUILD_EXPRESSIONS permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/soundboard#list-guild-soundboard-sounds">https://discord.com/developers/docs/resources/soundboard#list-guild-soundboard-sounds</a>
+     */
+    public static final Route LIST_GUILD_SOUNDBOARD_SOUNDS = Route.get("/guilds/{guild.id}/soundboard-sounds");
+
+    /**
+     * Returns a soundboard sound object for the given sound id. Includes the user field if the bot has the
+     * CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/soundboard#get-guild-soundboard-sound">https://discord.com/developers/docs/resources/soundboard#get-guild-soundboard-sound</a>
+     */
+    public static final Route GET_GUILD_SOUNDBOARD_SOUND = Route.get("/guilds/{guild.id}/soundboard-sounds/{sound.id}");
+
+    /**
+     * Create a new soundboard sound for the guild. Requires the CREATE_GUILD_EXPRESSIONS permission. Returns the new
+     * soundboard sound object on success. Fires a Guild Soundboard Sound Create Gateway event.
+     * <p>
+     * Soundboard sounds have a max file size of 512kb and a max duration of 5.2 seconds.
+     * <p>
+     * This endpoint supports the X-Audit-Log-Reason header.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/soundboard#create-guild-soundboard-sound">https://discord.com/developers/docs/resources/soundboard#create-guild-soundboard-sound</a>
+     */
+    public static final Route CREATE_GUILD_SOUNDBOARD_SOUND = Route.post("/guilds/{guild.id}/soundboard-sounds");
+
+    /**
+     * Modify the given soundboard sound. For sounds created by the current user, requires either the
+     * CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission. For other sounds, requires the
+     * MANAGE_GUILD_EXPRESSIONS permission. Returns the updated soundboard sound object on success. Fires a Guild
+     * Soundboard Sound Update Gateway event.
+     * <p>
+     * All parameters to this endpoint are optional.
+     * <p>
+     * This endpoint supports the X-Audit-Log-Reason header.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/soundboard#modify-guild-soundboard-sound">https://discord.com/developers/docs/resources/soundboard#modify-guild-soundboard-sound</a>
+     */
+    public static final Route MODIFY_GUILD_SOUNDBOARD_SOUND = Route.patch("/guilds/{guild.id}/soundboard-sounds/{sound.id}");
+
+    /**
+     * Delete the given soundboard sound. For sounds created by the current user, requires either the
+     * CREATE_GUILD_EXPRESSIONS or MANAGE_GUILD_EXPRESSIONS permission. For other sounds, requires the
+     * MANAGE_GUILD_EXPRESSIONS permission. Returns 204 No Content on success. Fires a Guild Soundboard Sound
+     * Delete Gateway event.
+     * <p>
+     * This endpoint supports the X-Audit-Log-Reason header.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/soundboard#delete-guild-soundboard-sound">https://discord.com/developers/docs/resources/soundboard#delete-guild-soundboard-sound</a>
+     */
+    public static final Route DELETE_GUILD_SOUNDBOARD_SOUND = Route.delete("/guilds/{guild.id}/soundboard-sounds/{sound.id}");
+
     ////////////////////////////////////////////
     ////////////// Guild Resource //////////////
     ////////////////////////////////////////////
