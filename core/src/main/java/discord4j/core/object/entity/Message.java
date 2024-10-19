@@ -22,19 +22,23 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
 import discord4j.core.object.MessageInteraction;
 import discord4j.core.object.MessageReference;
+import discord4j.core.object.PartialMessage;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.TopLevelGuildMessageChannel;
 import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.MessageEditMono;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.spec.legacy.LegacyMessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.MessageReferenceData;
 import discord4j.discordjson.json.PollData;
 import discord4j.discordjson.json.SuppressEmbedsRequest;
 import discord4j.discordjson.json.UserData;
@@ -472,6 +476,14 @@ public final class Message implements Entity {
                 .map(data -> new MessageReference(gateway, data));
     }
 
+    public List<PartialMessage> getMessageSnapshots() {
+        return data.messageSnapshots().toOptional()
+            .map(messageSnapshotsData -> messageSnapshotsData.stream()
+                .map(data -> new PartialMessage(gateway, data.message()))
+                .collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
+    }
+
     /**
      * Returns the flags of this {@link Message}, describing its features.
      *
@@ -700,6 +712,11 @@ public final class Message implements Entity {
      */
     public MessageEditMono edit() {
         return MessageEditMono.of(this);
+    }
+
+    public Mono<Message> forward(TopLevelGuildMessageChannel channel) {
+        Objects.requireNonNull(channel);
+        return channel.createMessage(MessageCreateSpec.create().withMessageReference(MessageReferenceData.builder().type(MessageReference.Type.FORWARD.getValue()).messageId(this.data.id()).channelId(this.data.channelId()).build()));
     }
 
     /**

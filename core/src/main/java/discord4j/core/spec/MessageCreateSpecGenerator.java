@@ -16,6 +16,7 @@
  */
 package discord4j.core.spec;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
@@ -62,7 +63,14 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
 
     Possible<AllowedMentions> allowedMentions();
 
-    Possible<Snowflake> messageReference();
+    /**
+     * @deprecated this is just a helper for the reply format in this spec you need {@link MessageReferenceData}
+     */
+    @Deprecated
+    Possible<Snowflake> messageReferenceId();
+
+    @Experimental
+    Possible<MessageReferenceData> messageReference();
 
     Possible<List<LayoutComponent>> components();
 
@@ -71,26 +79,26 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
     @Override
     default MultipartRequest<MessageCreateRequest> asRequest() {
         MessageCreateRequest json = MessageCreateRequest.builder()
-                .content(content())
-                .nonce(nonce())
-                .enforceNonce(enforceNonce())
-                .tts(tts())
-                .embeds(mapPossible(embeds(), embeds -> embeds.stream()
-                        .map(EmbedCreateSpec::asRequest)
-                        .collect(Collectors.toList())))
-                .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
-                .messageReference(mapPossible(messageReference(),
-                        ref -> MessageReferenceData.builder()
-                                .messageId(ref.asString())
-                                .build()))
-                .components(mapPossible(components(), components -> components.stream()
-                        .map(LayoutComponent::getData)
-                        .collect(Collectors.toList())))
-                .poll(poll())
-                .build();
+            .content(content())
+            .nonce(nonce())
+            .enforceNonce(enforceNonce())
+            .tts(tts())
+            .embeds(mapPossible(embeds(), embeds -> embeds.stream()
+                .map(EmbedCreateSpec::asRequest)
+                .collect(Collectors.toList())))
+            .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
+            .messageReference((messageReference().isAbsent() ? mapPossible(messageReferenceId(),
+                ref -> MessageReferenceData.builder()
+                    .messageId(ref.asString())
+                    .build()) : messageReference()))
+            .components(mapPossible(components(), components -> components.stream()
+                .map(LayoutComponent::getData)
+                .collect(Collectors.toList())))
+            .poll(poll())
+            .build();
         return MultipartRequest.ofRequestAndFiles(json, Stream.concat(files().stream(), fileSpoilers().stream())
-                .map(MessageCreateFields.File::asRequest)
-                .collect(Collectors.toList()));
+            .map(MessageCreateFields.File::asRequest)
+            .collect(Collectors.toList()));
     }
 }
 
