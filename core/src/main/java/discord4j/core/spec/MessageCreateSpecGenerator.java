@@ -69,7 +69,6 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
     @Deprecated
     Possible<Snowflake> messageReferenceId();
 
-    @Experimental
     Possible<MessageReferenceData> messageReference();
 
     Possible<List<LayoutComponent>> components();
