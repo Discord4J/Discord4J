@@ -730,12 +730,12 @@ public class PartialMember extends User {
          */
         COMPLETED_ONBOARDING(1),
         /**
-         * Member has completed onboarding
+         * Member is exempt from guild verification requirements.
          * <br>
          * <b>Note:</b> this flag allows a member who does not meet verification requirements to participate in a
          * server.
          */
-        BYPASSES_VERIFICATION(2),
+        BYPASSES_VERIFICATION(2, true),
         /**
          * Member has started onboarding.
          */
@@ -768,12 +768,23 @@ public class PartialMember extends User {
         /** The flag value as represented by Discord. */
         private final int flag;
 
+        /** If the flag can be use in {@link Member#edit()} for add/remove flags */
+        private final boolean editable;
+
         /**
          * Constructs a {@code PartialMember.Flag}.
          */
         Flag(final int value) {
+            this(value, false);
+        }
+
+        /**
+         * Constructs a {@code PartialMember.Flag}.
+         */
+        Flag(final int value, final boolean editable) {
             this.value = value;
             this.flag = 1 << value;
+            this.editable = editable;
         }
 
         /**
@@ -792,6 +803,15 @@ public class PartialMember extends User {
          */
         public int getFlag() {
             return flag;
+        }
+
+        /**
+         * Gets if the flag can be use in {@link Member#edit()} for add/remove flags.
+         *
+         * @return true if the flag is editable in member.
+         */
+        public boolean isEditable() {
+            return editable;
         }
 
         /**
