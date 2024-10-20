@@ -722,11 +722,11 @@ public class PartialMember extends User {
      **/
     public enum Flag {
         /**
-         * Member has left and rejoined the guild
+         * Member has left and rejoined the guild.
          */
         DID_REJOIN(0),
         /**
-         * Member has completed onboarding
+         * Member has completed onboarding.
          */
         COMPLETED_ONBOARDING(1),
         /**
@@ -737,9 +737,30 @@ public class PartialMember extends User {
          */
         BYPASSES_VERIFICATION(2),
         /**
-         * Member has started onboarding
+         * Member has started onboarding.
          */
-        STARTED_ONBOARDING(3);
+        STARTED_ONBOARDING(3),
+        /**
+         * Member is a guest and can only access the voice channel they were invited to.
+         */
+        IS_GUEST(4),
+        /**
+         * Member has started Server Guide new member actions.
+         */
+        STARTED_HOME_ACTIONS(5),
+        /**
+         * Member has completed Server Guide new member actions.
+         */
+        COMPLETED_HOME_ACTIONS(6),
+        /**
+         * Member's username, display name, or nickname is blocked by AutoMod.
+         */
+        AUTOMOD_QUARANTINED_USERNAME(7),
+        /**
+         * Member has dismissed the DM settings upsell.
+         */
+        DM_SETTINGS_UPSELL_ACKNOWLEDGED(9),
+        ;
 
         /** The underlying value as represented by Discord. */
         private final int value;
