@@ -730,7 +730,7 @@ public class PartialMember extends User {
          */
         COMPLETED_ONBOARDING(1),
         /**
-         * Member has completed onboarding.
+         * Member is exempt from guild verification requirements.
          * <br>
          * <b>Note:</b> this flag allows a member who does not meet verification requirements to participate in a
          * server.
@@ -808,7 +808,7 @@ public class PartialMember extends User {
         /**
          * Gets if the flag can be use in {@link Member#edit()} for add/remove flags.
          *
-         * @return true if the flag is editable in member
+         * @return true if the flag is editable in member.
          */
         public boolean isEditable() {
             return editable;
