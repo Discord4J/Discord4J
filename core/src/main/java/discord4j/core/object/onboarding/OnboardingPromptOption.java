@@ -3,7 +3,7 @@ package discord4j.core.object.onboarding;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
-import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.emoji.Emoji;
 import discord4j.discordjson.json.OnboardingPromptOptionData;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class OnboardingPromptOption implements Entity {
     private final Snowflake id;
     private final List<Snowflake> addedChannelIds;
     private final List<Snowflake> roleIds;
-    private final ReactionEmoji emoji;
+    private final Emoji emoji;
 
     public OnboardingPromptOption(GatewayDiscordClient client, OnboardingPromptOptionData data) {
         this.client = client;
@@ -37,7 +37,7 @@ public class OnboardingPromptOption implements Entity {
                 .map(Snowflake::of)
                 .collect(Collectors.toList());
 
-        this.emoji = data.emoji().toOptional().map(ReactionEmoji::of).orElse(null);
+        this.emoji = data.emoji().toOptional().map(Emoji::of).orElse(null);
     }
 
     /**
@@ -90,7 +90,7 @@ public class OnboardingPromptOption implements Entity {
      *
      * @return An {@link Optional} containing the emoji of the option or {@link Optional#empty()} if not present.
      */
-    public Optional<ReactionEmoji> getEmoji() {
+    public Optional<Emoji> getEmoji() {
         return Optional.ofNullable(this.emoji);
     }
 

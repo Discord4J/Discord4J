@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.poll;
 
-import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.emoji.Emoji;
 import discord4j.discordjson.json.PollMediaObject;
 
 import java.util.Optional;
@@ -62,8 +62,8 @@ public class PollQuestion {
      *
      * @return An {@link Optional} containing the emoji of the poll question, or {@link Optional#empty()} if not present
      */
-    public Optional<ReactionEmoji> getEmoji() {
-        return this.data.emoji().toOptional().map(ReactionEmoji::of);
+    public Optional<Emoji> getEmoji() {
+        return this.data.emoji().toOptional().map(Emoji::of);
     }
 
 }
