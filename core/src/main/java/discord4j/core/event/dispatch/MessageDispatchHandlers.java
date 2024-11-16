@@ -26,7 +26,7 @@ import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.MemberData;
 import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.json.PartialMessageData;
+import discord4j.discordjson.json.PartialMessageUpdateData;
 import discord4j.discordjson.json.gateway.*;
 import reactor.core.publisher.Mono;
 
@@ -195,7 +195,7 @@ class MessageDispatchHandlers {
 
     static Mono<MessageUpdateEvent> messageUpdate(DispatchContext<MessageUpdate, MessageData> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        PartialMessageData messageData = context.getDispatch().message();
+        PartialMessageUpdateData messageData = context.getDispatch().message();
 
         long channelId = Snowflake.asLong(messageData.channelId());
         long messageId = Snowflake.asLong(messageData.id());
