@@ -63,7 +63,13 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
 
     Possible<AllowedMentions> allowedMentions();
 
-    Possible<Snowflake> messageReference();
+    /**
+     * @deprecated this just map to a reply message for modify behaviour you need use {@link MessageReferenceData}
+     */
+    @Deprecated
+    Possible<Snowflake> messageReferenceId();
+
+    Possible<MessageReferenceData> messageReference();
 
     Possible<List<LayoutComponent>> components();
 
@@ -84,10 +90,10 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
                 .map(EmbedCreateSpec::asRequest)
                 .collect(Collectors.toList())))
             .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
-            .messageReference(mapPossible(messageReference(),
+            .messageReference((messageReference().isAbsent() ? mapPossible(messageReferenceId(),
                 ref -> MessageReferenceData.builder()
                     .messageId(ref.asString())
-                    .build()))
+                    .build()) : messageReference()))
             .components(mapPossible(components(), components -> components.stream()
                 .map(LayoutComponent::getData)
                 .collect(Collectors.toList())))
