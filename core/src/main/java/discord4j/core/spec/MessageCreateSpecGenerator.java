@@ -16,11 +16,11 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.discordjson.json.MessageReferenceData;
 import discord4j.discordjson.json.PollCreateData;
@@ -73,7 +73,11 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
 
     Possible<List<LayoutComponent>> components();
 
+    Possible<List<Snowflake>> stickersIds();
+
     Possible<PollCreateData> poll();
+
+    Possible<List<Message.Flag>> flags();
 
     @Override
     default MultipartRequest<MessageCreateRequest> asRequest() {
@@ -93,7 +97,12 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
             .components(mapPossible(components(), components -> components.stream()
                 .map(LayoutComponent::getData)
                 .collect(Collectors.toList())))
+            .stickerIds(mapPossible(stickersIds(),
+                r -> r.stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList())))
             .poll(poll())
+            .flags(mapPossible(flags(), f -> f.stream()
+                .mapToInt(Message.Flag::getFlag)
+                .reduce(0, (left, right) -> left | right)))
             .build();
         return MultipartRequest.ofRequestAndFiles(json, Stream.concat(files().stream(), fileSpoilers().stream())
             .map(MessageCreateFields.File::asRequest)

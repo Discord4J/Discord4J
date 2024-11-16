@@ -7,6 +7,7 @@ import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.EntitlementData;
+import discord4j.discordjson.possible.Possible;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
@@ -156,7 +157,7 @@ public class Entitlement implements Entity {
      * @return An {@link Optional} containing the end time of the entitlement.
      */
     public Optional<Instant> getEndsAt() {
-        return data.endsAt().toOptional().map(Instant::parse);
+        return Possible.flatOpt(data.endsAt()).map(Instant::parse);
     }
 
     /**
