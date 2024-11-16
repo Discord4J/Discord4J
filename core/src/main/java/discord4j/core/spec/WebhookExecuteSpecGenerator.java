@@ -73,23 +73,28 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
 
     Possible<Snowflake> threadId();
 
+    Possible<List<Message.Flag>> flags();
+
     @Override
     default MultipartRequest<WebhookExecuteRequest> asRequest() {
         WebhookExecuteRequest request = WebhookExecuteRequest.builder()
-                .content(content())
-                .username(username())
-                .avatarUrl(avatarUrl())
-                .tts(tts())
-                .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
-                .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
-                .components(mapPossible(components(), components -> components.stream()
-                        .map(LayoutComponent::getData)
-                        .collect(Collectors.toList())))
-                .threadName(threadName())
-                .build();
+            .content(content())
+            .username(username())
+            .avatarUrl(avatarUrl())
+            .tts(tts())
+            .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
+            .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
+            .components(mapPossible(components(), components -> components.stream()
+                .map(LayoutComponent::getData)
+                .collect(Collectors.toList())))
+            .threadName(threadName())
+            .flags(mapPossible(flags(), f -> f.stream()
+                .mapToInt(Message.Flag::getFlag)
+                .reduce(0, (left, right) -> left | right)))
+            .build();
         return MultipartRequest.ofRequestAndFiles(request, Stream.concat(files().stream(), fileSpoilers().stream())
-                .map(MessageCreateFields.File::asRequest)
-                .collect(Collectors.toList()));
+            .map(MessageCreateFields.File::asRequest)
+            .collect(Collectors.toList()));
     }
 }
 
