@@ -22,6 +22,7 @@ import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
+import discord4j.discordjson.json.PollCreateData;
 import discord4j.discordjson.json.WebhookMessageEditRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
@@ -60,29 +61,32 @@ interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<Webhoo
 
     Possible<Optional<List<LayoutComponent>>> components();
 
+    Possible<PollCreateData> poll();
+
     Possible<Optional<List<Attachment>>> attachments();
 
     @Override
     default MultipartRequest<WebhookMessageEditRequest> asRequest() {
         WebhookMessageEditRequest json = WebhookMessageEditRequest.builder()
-                .content(content())
-                .embeds(mapPossibleOptional(embeds(), embeds -> embeds.stream()
-                        .map(EmbedCreateSpec::asRequest)
-                        .collect(Collectors.toList())))
-                .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
-                .components(mapPossible(components(), components -> components
-                        .map(list -> list.stream()
-                                .map(LayoutComponent::getData)
-                                .collect(Collectors.toList()))
-                        .orElse(Collections.emptyList())))
-                // TODO upon v10 upgrade, it is required to also include new files as attachment here
-                .attachments(mapPossibleOptional(attachments(), attachments -> attachments.stream()
-                        .map(Attachment::getData)
-                        .collect(Collectors.toList())))
-                .build();
+            .content(content())
+            .embeds(mapPossibleOptional(embeds(), embeds -> embeds.stream()
+                .map(EmbedCreateSpec::asRequest)
+                .collect(Collectors.toList())))
+            .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
+            .components(mapPossible(components(), components -> components
+                .map(list -> list.stream()
+                    .map(LayoutComponent::getData)
+                    .collect(Collectors.toList()))
+                .orElse(Collections.emptyList())))
+            .poll(poll())
+            // TODO upon v10 upgrade, it is required to also include new files as attachment here
+            .attachments(mapPossibleOptional(attachments(), attachments -> attachments.stream()
+                .map(Attachment::getData)
+                .collect(Collectors.toList())))
+            .build();
         return MultipartRequest.ofRequestAndFiles(json, Stream.concat(files().stream(), fileSpoilers().stream())
-                .map(MessageCreateFields.File::asRequest)
-                .collect(Collectors.toList()));
+            .map(MessageCreateFields.File::asRequest)
+            .collect(Collectors.toList()));
     }
 }
 
