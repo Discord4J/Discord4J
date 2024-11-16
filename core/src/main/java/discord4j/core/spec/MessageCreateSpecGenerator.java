@@ -63,7 +63,7 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
 
     Possible<AllowedMentions> allowedMentions();
 
-    Possible<Snowflake> messageReference();
+    Possible<MessageReferenceData> messageReference();
 
     Possible<List<LayoutComponent>> components();
 
@@ -84,10 +84,7 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
                 .map(EmbedCreateSpec::asRequest)
                 .collect(Collectors.toList())))
             .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
-            .messageReference(mapPossible(messageReference(),
-                ref -> MessageReferenceData.builder()
-                    .messageId(ref.asString())
-                    .build()))
+            .messageReference(messageReference())
             .components(mapPossible(components(), components -> components.stream()
                 .map(LayoutComponent::getData)
                 .collect(Collectors.toList())))
