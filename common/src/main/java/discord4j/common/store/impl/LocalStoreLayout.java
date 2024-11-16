@@ -749,7 +749,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<MessageData> onMessageUpdate(int shardIndex, MessageUpdate dispatch) {
-        ImmutablePartialMessageData edited = ImmutablePartialMessageData.copyOf(dispatch.message());
+        ImmutablePartialMessageUpdateData edited = ImmutablePartialMessageUpdateData.copyOf(dispatch.message());
         long channelId = edited.channelId().asLong();
         long messageId = edited.id().asLong();
         Long2 id = new Long2(channelId, messageId);

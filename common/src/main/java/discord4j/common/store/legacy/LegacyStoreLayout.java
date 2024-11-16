@@ -1276,7 +1276,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
     @Override
     public Mono<MessageData> onMessageUpdate(int shardIndex, MessageUpdate dispatch) {
-        PartialMessageData messageData = dispatch.message();
+        PartialMessageUpdateData messageData = dispatch.message();
         long messageId = Snowflake.asLong(messageData.id());
 
         return stateHolder.getMessageStore()
