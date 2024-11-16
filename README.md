@@ -4,12 +4,12 @@
 
 [![Support Server Invite](https://img.shields.io/discord/208023865127862272.svg?color=7289da&label=Discord4J&logo=discord&style=flat-square)](https://discord.gg/d4j)
 [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core/3.2.svg?style=flat-square)](https://search.maven.org/artifact/com.discord4j/discord4j-core)
-[![Javadocs](https://javadoc.io/badge2/com.discord4j/discord4j-core/3.2.5/javadoc.svg?color=blue&style=flat-square)](https://javadoc.io/doc/com.discord4j/discord4j-core/3.2.5)
+[![Javadocs](https://javadoc.io/badge2/com.discord4j/discord4j-core/3.2.7/javadoc.svg?color=blue&style=flat-square)](https://javadoc.io/doc/com.discord4j/discord4j-core/3.2.7)
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/Discord4J/Discord4J/gradle.yml?branch=3.2.x&logo=github&style=flat-square)](https://github.com/Discord4J/Discord4J/actions)
 
 Discord4J is a fast, powerful, unopinionated, reactive library to enable quick and easy development of Discord bots for Java, Kotlin, and other JVM languages using the official [Discord Bot API](https://discord.com/developers/docs/intro).
 
-## üèÉ Quick Example
+## ü?É Quick Example
 
 In this example for v3.2, whenever a user sends a `!ping` message the bot will immediately respond with `Pong!`.
 
@@ -53,11 +53,11 @@ For a full project example, check out our example projects repository [here](htt
 
 * üìú **Official** - Automatic rate limiting, automatic reconnection strategies, and consistent naming conventions are among the many features Discord4J offers to ensure your Discord bots run up to Discord's specifications and to provide the least amount of surprises when interacting with our library.
 
-* üõ†Ô∏è **Modular** - Discord4J breaks itself into modules to allow advanced users to interact with our API at lower levels to build minimal and fast runtimes or even add their own abstractions.
+* üõ†Ô∏? **Modular** - Discord4J breaks itself into modules to allow advanced users to interact with our API at lower levels to build minimal and fast runtimes or even add their own abstractions.
 
-* ‚öîÔ∏è **Powerful** - Discord4J can be used to develop any bot, big or small. We offer many tools for developing large-scale bots from [custom distribution frameworks](https://github.com/Discord4J/connect), [off-heap caching](https://github.com/Discord4J/Stores/tree/master/redis), and its interaction with Reactor allows complete integration with frameworks such as Spring and Micronaut.
+* ‚öîÔ∏? **Powerful** - Discord4J can be used to develop any bot, big or small. We offer many tools for developing large-scale bots from [custom distribution frameworks](https://github.com/Discord4J/connect), [off-heap caching](https://github.com/Discord4J/Stores/tree/master/redis), and its interaction with Reactor allows complete integration with frameworks such as Spring and Micronaut.
 
-* üè´ **Community** - We pride ourselves on our inclusive community and are willing to help whenever challenges arise; or if you just want to chat! We offer help ranging from Discord4J specific problems, to general programming and web development help, and even Reactor-specific questions. Be sure to visit us on our [Discord server](https://discord.gg/d4j)!
+* ü?´ **Community** - We pride ourselves on our inclusive community and are willing to help whenever challenges arise; or if you just want to chat! We offer help ranging from Discord4J specific problems, to general programming and web development help, and even Reactor-specific questions. Be sure to visit us on our [Discord server](https://discord.gg/d4j)!
 
 ## üì¶ Installation
 
@@ -73,7 +73,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.discord4j:discord4j-core:3.2.5'
+  implementation 'com.discord4j:discord4j-core:3.2.7'
 }
 ```
 
@@ -84,7 +84,7 @@ repositories {
 }
 
 dependencies {
-  implementation("com.discord4j:discord4j-core:3.2.5")
+  implementation("com.discord4j:discord4j-core:3.2.7")
 }
 ```
 
@@ -94,7 +94,7 @@ dependencies {
   <dependency>
     <groupId>com.discord4j</groupId>
     <artifactId>discord4j-core</artifactId>
-    <version>3.2.5</version>
+    <version>3.2.7</version>
   </dependency>
 </dependencies>
 ```
@@ -102,7 +102,7 @@ dependencies {
 ### SBT
 ```scala
 libraryDependencies ++= Seq(
-  "com.discord4j" % "discord4j-core" % "3.2.5"
+  "com.discord4j" % "discord4j-core" % "3.2.7"
 )
 ```
 
@@ -127,7 +127,7 @@ We would like to give a special thanks to all of our sponsors for providing us t
 * [ByteAlex](https://github.com/ByteAlex)
 * [Shadorc](https://github.com/Shadorc)
 
-## ‚õ∞Ô∏è Large Bots
+## ‚õ∞Ô∏? Large Bots
 
 Here are some real-world examples of large bots using Discord4J:
 
@@ -138,7 +138,7 @@ Here are some real-world examples of large bots using Discord4J:
 
 Do you own a large bot using Discord4J? Ask an admin in our Discord or submit a pull request to add your bot to the list!
 
-## ‚öõÔ∏è Reactive
+## ‚öõÔ∏? Reactive
 
 Discord4J uses [Project Reactor](https://projectreactor.io/) as the foundation for our asynchronous framework. Reactor provides a simple yet extremely powerful API that enables users to reduce resources and increase performance.
 
@@ -165,21 +165,21 @@ Discord4J also provides several methods to aid in better reactive chain composit
 public class ExampleBot {
 
     public static void main(String[] args) {
-        String token = args[0];
-        DiscordClient client = DiscordClient.create(token);
+      String token = args[0];
+      DiscordClient client = DiscordClient.create(token);
 
-        client.withGateway(gateway -> {
-            Publisher<?> pingPong = gateway.on(MessageCreateEvent.class, event ->
-                    Mono.just(event.getMessage())
-                            .filter(message -> "!ping".equals(message.getContent()))
-                            .flatMap(Message::getChannel)
-                            .flatMap(channel -> channel.createMessage("Pong!")));
+      client.withGateway(gateway -> {
+        Publisher<?> pingPong = gateway.on(MessageCreateEvent.class, event ->
+          Mono.just(event.getMessage())
+            .filter(message -> "!ping".equals(message.getContent()))
+            .flatMap(Message::getChannel)
+            .flatMap(channel -> channel.createMessage("Pong!")));
 
-            Publisher<?> onDisconnect = gateway.onDisconnect()
-                    .doOnTerminate(() -> System.out.println("Disconnected!"));
+        Publisher<?> onDisconnect = gateway.onDisconnect()
+          .doOnTerminate(() -> System.out.println("Disconnected!"));
 
-            return Mono.when(pingPong, onDisconnect);
-        }).block();
+        return Mono.when(pingPong, onDisconnect);
+      }).block();
     }
 }
 ```
@@ -223,9 +223,12 @@ builder.author("setAuthor", ANY_URL, IMAGE_URL);
 builder.image(IMAGE_URL);
 builder.title("setTitle/setUrl");
 builder.url(ANY_URL);
-builder.description("setDescription\n" +
-      "big D: is setImage\n" +
-      "small D: is setThumbnail\n" +
+builder.description("setDescription
+" +
+      "big D: is setImage
+" +
+      "small D: is setThumbnail
+" +
       "<-- setColor");
 builder.addField("addField", "inline = true", true);
 builder.addField("addFIeld", "inline = true", true);
@@ -236,7 +239,7 @@ builder.timestamp(Instant.now());
 channel.createMessage(builder.build()).block();
 ```
 
-### üè∑Ô∏è Find Members by Role Name
+### ü?∑Ô∏? Find Members by Role Name
 
 Users typically prefer working with names instead of IDs. This example will demonstrate how to search for all members that have a role with a specific name.
 
@@ -399,7 +402,7 @@ VoiceConnection connection = channel.join(spec -> spec.setProvider(provider)).bl
 PLAYER_MANAGER.loadItem("https://www.youtube.com/watch?v=dQw4w9WgXcQ", new AudioLoadResultHandler() { /* overrides */ })
 ```
 
-### ‚ùå Disconnecting from a Voice Channel Automatically
+### ‚?å Disconnecting from a Voice Channel Automatically
 
 Typically, after everyone has left a voice channel, the bot should disconnect automatically as users typically forget to disconnect the bot manually. This problem can be solved rather elegantly using a reactive approach over an imperative one as the example below demonstrates.
 
