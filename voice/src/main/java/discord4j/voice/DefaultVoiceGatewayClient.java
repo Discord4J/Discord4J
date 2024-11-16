@@ -240,13 +240,11 @@ public class DefaultVoiceGatewayClient {
                                     .flatMap(payloadReader)
                                     .doOnNext(payload -> {
                                         if (payload instanceof Hello) {
-                                            log.debug("Received HELLO");
                                             Hello hello = (Hello) payload;
                                             Duration interval =
                                                     Duration.ofMillis(hello.getData().getHeartbeatInterval());
                                             heartbeat.start(interval, interval);
                                         } else if (payload instanceof Ready) {
-                                            log.debug("Received READY");
                                             log.info(format(context, "Waiting for session description"));
                                             Ready ready = (Ready) payload;
                                             ssrc = ready.getData().getSsrc();
@@ -286,7 +284,6 @@ public class DefaultVoiceGatewayClient {
                                                             () -> log.debug(format(context, "Voice socket setup " +
                                                                     "complete"))));
                                         } else if (payload instanceof SessionDescription) {
-                                            log.debug("Received SESSION_DESCRIPTION");
                                             log.info(format(context, "Receiving events"));
                                             nextState(VoiceConnection.State.CONNECTED);
                                             reconnectContext.reset();
@@ -312,13 +309,11 @@ public class DefaultVoiceGatewayClient {
                                                     voiceSocket.getInbound(), transformer, audioReceiver));
                                             voiceConnectionSink.success(acquireConnection());
                                         } else if (payload instanceof Resumed) {
-                                            log.debug("Received RESUMED");
                                             log.info(format(context, "Resumed"));
                                             nextState(VoiceConnection.State.CONNECTED);
                                             reconnectContext.reset();
-                                        } else {
-                                            log.debug("Received UNKNOWN");
                                         }
+
                                         emissionStrategy.emitNext(events, (VoiceGatewayEvent) payload);
                                     })
                                     .then();
