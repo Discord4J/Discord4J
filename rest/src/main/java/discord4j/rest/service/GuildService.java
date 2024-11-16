@@ -208,6 +208,12 @@ public class GuildService extends RestService {
             .flatMapMany(Flux::fromArray);
     }
 
+    public Mono<RoleData> getGuildRole(long guildId, long roleId) {
+        return Routes.GUILD_ROLE_GET.newRequest(guildId, roleId)
+            .exchange(getRouter())
+            .bodyToMono(RoleData.class);
+    }
+
     public Mono<RoleData> createGuildRole(long guildId, RoleCreateRequest request, @Nullable String reason) {
         return Routes.GUILD_ROLE_CREATE.newRequest(guildId)
             .body(request)
@@ -341,6 +347,18 @@ public class GuildService extends RestService {
         return Routes.GUILD_PREVIEW_GET.newRequest(guildId)
             .exchange(getRouter())
             .bodyToMono(GuildPreviewData.class);
+    }
+
+    public Mono<VoiceStateData> getSelfVoiceState(long guildId) {
+        return Routes.SELF_VOICE_STATE_GET.newRequest(guildId)
+            .exchange(getRouter())
+            .bodyToMono(VoiceStateData.class);
+    }
+
+    public Mono<VoiceStateData> getOthersVoiceState(long guildId, long userId) {
+        return Routes.OTHERS_VOICE_STATE_GET.newRequest(guildId, userId)
+            .exchange(getRouter())
+            .bodyToMono(VoiceStateData.class);
     }
 
     public Mono<Void> modifySelfVoiceState(long guildId, UpdateCurrentUserVoiceStateRequest request) {

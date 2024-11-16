@@ -325,15 +325,24 @@ public class PartialMember extends User {
     }
 
     /**
+     * Requests to retrieve this user's voice state for this guild, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the Voice State
+     * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceState voice state} for this user
+     *      * for this guild. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<VoiceState> getVoiceState(EntityRetrievalStrategy retrievalStrategy) {
+        return getClient().withRetrievalStrategy(retrievalStrategy).getVoiceStateById(getGuildId(), getId());
+    }
+
+    /**
      * Requests to retrieve this user's voice state for this guild.
      *
      * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceState voice state} for this user
      * for this guild. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceState> getVoiceState() {
-        return Mono.from(getClient().getGatewayResources().getStore()
-                .execute(ReadActions.getVoiceStateById(getGuildId().asLong(), getId().asLong())))
-            .map(bean -> new VoiceState(getClient(), bean));
+        return getClient().getVoiceStateById(getGuildId(), getId());
     }
 
     /**
@@ -713,24 +722,45 @@ public class PartialMember extends User {
      **/
     public enum Flag {
         /**
-         * Member has left and rejoined the guild
+         * Member has left and rejoined the guild.
          */
         DID_REJOIN(0),
         /**
-         * Member has completed onboarding
+         * Member has completed onboarding.
          */
         COMPLETED_ONBOARDING(1),
         /**
-         * Member has completed onboarding
+         * Member is exempt from guild verification requirements.
          * <br>
          * <b>Note:</b> this flag allows a member who does not meet verification requirements to participate in a
          * server.
          */
-        BYPASSES_VERIFICATION(2),
+        BYPASSES_VERIFICATION(2, true),
         /**
-         * Member has started onboarding
+         * Member has started onboarding.
          */
-        STARTED_ONBOARDING(3);
+        STARTED_ONBOARDING(3),
+        /**
+         * Member is a guest and can only access the voice channel they were invited to.
+         */
+        IS_GUEST(4),
+        /**
+         * Member has started Server Guide new member actions.
+         */
+        STARTED_HOME_ACTIONS(5),
+        /**
+         * Member has completed Server Guide new member actions.
+         */
+        COMPLETED_HOME_ACTIONS(6),
+        /**
+         * Member's username, display name, or nickname is blocked by AutoMod.
+         */
+        AUTOMOD_QUARANTINED_USERNAME(7),
+        /**
+         * Member has dismissed the DM settings upsell.
+         */
+        DM_SETTINGS_UPSELL_ACKNOWLEDGED(9),
+        ;
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -738,12 +768,23 @@ public class PartialMember extends User {
         /** The flag value as represented by Discord. */
         private final int flag;
 
+        /** If the flag can be use in {@link Member#edit()} for add/remove flags */
+        private final boolean editable;
+
         /**
          * Constructs a {@code PartialMember.Flag}.
          */
         Flag(final int value) {
+            this(value, false);
+        }
+
+        /**
+         * Constructs a {@code PartialMember.Flag}.
+         */
+        Flag(final int value, final boolean editable) {
             this.value = value;
             this.flag = 1 << value;
+            this.editable = editable;
         }
 
         /**
@@ -762,6 +803,15 @@ public class PartialMember extends User {
          */
         public int getFlag() {
             return flag;
+        }
+
+        /**
+         * Gets if the flag can be use in {@link Member#edit()} for add/remove flags.
+         *
+         * @return true if the flag is editable in member.
+         */
+        public boolean isEditable() {
+            return editable;
         }
 
         /**

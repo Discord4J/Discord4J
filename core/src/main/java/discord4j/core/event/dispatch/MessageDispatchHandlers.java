@@ -23,9 +23,10 @@ import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.MemberData;
 import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.json.PartialMessageData;
+import discord4j.discordjson.json.PartialMessageUpdateData;
 import discord4j.discordjson.json.gateway.*;
 import reactor.core.publisher.Mono;
 
@@ -105,7 +106,7 @@ class MessageDispatchHandlers {
         long userId = Snowflake.asLong(context.getDispatch().userId());
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
         long messageId = Snowflake.asLong(context.getDispatch().messageId());
-        long messageAuthorId = Snowflake.asLong(context.getDispatch().messageAuthorId());
+        long messageAuthorId = Snowflake.asLong(context.getDispatch().messageAuthorId().toOptional().orElse(Id.of(0L)));
         Long guildId = context.getDispatch().guildId()
                 .toOptional()
                 .map(Snowflake::asLong)
@@ -194,7 +195,7 @@ class MessageDispatchHandlers {
 
     static Mono<MessageUpdateEvent> messageUpdate(DispatchContext<MessageUpdate, MessageData> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        PartialMessageData messageData = context.getDispatch().message();
+        PartialMessageUpdateData messageData = context.getDispatch().message();
 
         long channelId = Snowflake.asLong(messageData.channelId());
         long messageId = Snowflake.asLong(messageData.id());

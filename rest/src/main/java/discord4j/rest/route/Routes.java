@@ -445,6 +445,14 @@ public abstract class Routes {
     public static final Route STICKER_PACKS_GET = Route.get("/sticker-packs");
 
     /**
+     * Returns a sticker pack object for the given sticker pack ID.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#get-sticker-pack">
+     * https://discord.com/developers/docs/resources/sticker#get-sticker-pack</a>
+     */
+    public static final Route STICKER_PACK_GET = Route.get("/sticker-packs/{pack.id}");
+
+    /**
      * Returns the list of available sticker packs.
      *
      * @see <a href="https://discord.com/developers/docs/resources/sticker#list-sticker-packs">
@@ -749,6 +757,14 @@ public abstract class Routes {
     public static final Route GUILD_ROLES_GET = Route.get("/guilds/{guild.id}/roles");
 
     /**
+     * Returns a role object for the specified role id. Requires the 'MANAGE_ROLES' permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#get-guild-role">
+     * https://discord.com/developers/docs/resources/guild#get-guild-role</a>
+     */
+    public static final Route GUILD_ROLE_GET = Route.get("/guilds/{guild.id}/roles/{role.id}");
+
+    /**
      * Create a new role for the guild. Requires the 'MANAGE_ROLES' permission. Returns the new role object on success.
      * Fires a Guild Role Create Gateway event. All JSON params are optional.
      *
@@ -887,6 +903,22 @@ public abstract class Routes {
      * https://discord.com/developers/docs/resources/guild#get-guild-preview</a>
      */
     public static final Route GUILD_PREVIEW_GET = Route.get("/guilds/{guild.id}/preview");
+
+    /**
+     * Returns the current user's voice state in the guild.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/voice#get-current-user-voice-state">
+     * https://discord.com/developers/docs/resources/voice#get-current-user-voice-state</a>
+     */
+    public static final Route SELF_VOICE_STATE_GET = Route.get("/guilds/{guild.id}/voice-states/@me");
+
+    /**
+     * Returns the specified user's voice state in the guild.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/voice#get-user-voice-state">
+     * https://discord.com/developers/docs/resources/voice#get-user-voice-state</a>
+     */
+    public static final Route OTHERS_VOICE_STATE_GET = Route.get("/guilds/{guild.id}/voice-states/{user.id}");
 
     /**
      * Updates the current user's voice state.
