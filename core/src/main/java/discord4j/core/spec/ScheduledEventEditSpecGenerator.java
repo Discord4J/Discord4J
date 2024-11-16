@@ -39,20 +39,23 @@ public interface ScheduledEventEditSpecGenerator extends AuditSpec<GuildSchedule
 
     Possible<Image> image();
 
+    Possible<Optional<RecurrenceRuleSpec>> recurrenceRule();
+
     @Override
     default GuildScheduledEventModifyRequest asRequest() {
         return GuildScheduledEventModifyRequest.builder()
-                .channelId(mapPossible(channelId(), optional -> optional.map(snowflake -> Id.of(snowflake.asLong()))))
-                .entityMetadata(mapPossible(entityMetadata(), ScheduledEventEntityMetadataSpecGenerator::asRequest))
-                .name(name())
-                .privacyLevel(mapPossible(privacyLevel(), ScheduledEvent.PrivacyLevel::getValue))
-                .scheduledStartTime(scheduledStartTime())
-                .scheduledEndTime(scheduledEndTime())
-                .description(description())
-                .entityType(mapPossible(entityType(), ScheduledEvent.EntityType::getValue))
-                .status(mapPossible(status(), ScheduledEvent.Status::getValue))
-                .image(mapPossible(image(), Image::getDataUri))
-                .build();
+            .channelId(mapPossible(channelId(), optional -> optional.map(snowflake -> Id.of(snowflake.asLong()))))
+            .entityMetadata(mapPossible(entityMetadata(), ScheduledEventEntityMetadataSpecGenerator::asRequest))
+            .name(name())
+            .privacyLevel(mapPossible(privacyLevel(), ScheduledEvent.PrivacyLevel::getValue))
+            .scheduledStartTime(scheduledStartTime())
+            .scheduledEndTime(scheduledEndTime())
+            .description(description())
+            .entityType(mapPossible(entityType(), ScheduledEvent.EntityType::getValue))
+            .status(mapPossible(status(), ScheduledEvent.Status::getValue))
+            .image(mapPossible(image(), Image::getDataUri))
+            .recurrenceRule(mapPossible(recurrenceRule(), optional -> optional.map(RecurrenceRuleSpecGenerator::asRequest)))
+            .build();
     }
 }
 

@@ -28,47 +28,41 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable
 public interface AutoModRuleEditSpecGenerator extends AuditSpec<AutoModRuleModifyRequest> {
 
-    String name();
+    Possible<String> name();
 
-    int eventType();
+    Possible<Integer> eventType();
 
     Possible<AutoModTriggerMetaData> triggerMetaData();
 
-    @Value.Default
-    default List<AutoModActionData> actions() {
-        return Collections.emptyList();
-    }
+    Possible<List<AutoModActionData>> actions();
 
-    boolean enabled();
+    Possible<Boolean> enabled();
 
-    @Value.Default
-    default List<Snowflake> exemptRoles() {
-        return Collections.emptyList();
-    }
+    Possible<List<Snowflake>> exemptRoles();
 
-    @Value.Default
-    default List<Snowflake> exemptChannels() {
-        return Collections.emptyList();
-    }
+    Possible<List<Snowflake>> exemptChannels();
 
     @Override
     default AutoModRuleModifyRequest asRequest() {
         return AutoModRuleModifyRequest.builder()
-                .name(name())
-                .eventType(eventType())
-                .triggerMetadata(triggerMetaData())
-                .actions(actions())
-                .enabled(enabled())
-                .exemptRoles(exemptRoles().stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList()))
-                .exemptChannels(exemptChannels().stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList()))
-                .build();
+            .name(name())
+            .eventType(eventType())
+            .triggerMetadata(triggerMetaData())
+            .actions(actions())
+            .enabled(enabled())
+            .exemptRoles(mapPossible(exemptRoles(),
+                r -> r.stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList())))
+            .exemptChannels(mapPossible(exemptChannels(),
+                r -> r.stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList())))
+            .build();
     }
 
 }
