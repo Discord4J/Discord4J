@@ -105,7 +105,9 @@ public class IntegrationApplication implements Entity {
      * Gets the summary of the app.
      *
      * @return The description of the app.
+     * @deprecated Discord just return an empty string you can consider use {@link #getDescription()}
      */
+    @Deprecated
     public String getSummary() {
         return data.summary();
     }

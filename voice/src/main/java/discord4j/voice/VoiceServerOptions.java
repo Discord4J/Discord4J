@@ -22,12 +22,14 @@ package discord4j.voice;
  */
 public class VoiceServerOptions {
 
+    private static final int AUDIO_GATEWAY_VERSION = 4;
+
     private final String token;
     private final String endpoint;
 
     public VoiceServerOptions(String token, String endpoint) {
         this.token = token;
-        this.endpoint = endpoint.replace(":80", ""); // discord sends wrong port...
+        this.endpoint = "wss://" + endpoint + "?v=" + AUDIO_GATEWAY_VERSION;
     }
 
     public String getToken() {
