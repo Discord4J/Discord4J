@@ -215,6 +215,15 @@ public final class GuildEmoji extends Emoji {
                 .deleteGuildEmoji(getGuildId().asLong(), getId().asLong(), reason);
     }
 
+    /**
+     * Gets the formatted version of this emoji (i.e., to display in the client).
+     *
+     * @return The formatted version of this emoji (i.e., to display in the client).
+     */
+    public String asFormat() {
+        return '<' + (isAnimated() ? "a" : "") + ':' + getName() + ':' + getId().asString() + '>';
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);

@@ -56,6 +56,7 @@ class ChannelDispatchHandlers {
                 case GUILD_CATEGORY: return new CategoryCreateEvent(gateway, context.getShardInfo(), new Category(gateway, channel));
                 case GUILD_NEWS: return new NewsChannelCreateEvent(gateway, context.getShardInfo(), new NewsChannel(gateway, channel));
                 case GUILD_STORE: return new StoreChannelCreateEvent(gateway, context.getShardInfo(), new StoreChannel(gateway, channel));
+                case GUILD_FORUM: return new ForumChannelCreateEvent(gateway, context.getShardInfo(), new ForumChannel(gateway, channel));
                 default:
                     log.info("Received unknown channel create: {}", channel);
                     return new UnknownChannelCreateEvent(gateway, context.getShardInfo(), new UnknownChannel(gateway, channel));
@@ -80,6 +81,7 @@ class ChannelDispatchHandlers {
                 case GUILD_CATEGORY: return new CategoryDeleteEvent(gateway, context.getShardInfo(), new Category(gateway, channel));
                 case GUILD_NEWS: return new NewsChannelDeleteEvent(gateway, context.getShardInfo(), new NewsChannel(gateway, channel));
                 case GUILD_STORE: return new StoreChannelDeleteEvent(gateway, context.getShardInfo(), new StoreChannel(gateway, channel));
+                case GUILD_FORUM: return new ForumChannelDeleteEvent(gateway, context.getShardInfo(), new ForumChannel(gateway, channel));
                 default:
                     log.info("Received unknown channel delete: {}", channel);
                     return new UnknownChannelDeleteEvent(gateway, context.getShardInfo(), new UnknownChannel(gateway, channel));
@@ -130,6 +132,9 @@ class ChannelDispatchHandlers {
                 case GUILD_STORE: return new StoreChannelUpdateEvent(gateway, context.getShardInfo(),
                         new StoreChannel(gateway, channel),
                         oldData.map(old -> new StoreChannel(gateway, old)).orElse(null));
+                case GUILD_FORUM: return new ForumChannelUpdateEvent(gateway, context.getShardInfo(),
+                        new ForumChannel(gateway, channel),
+                        oldData.map(old -> new ForumChannel(gateway, old)).orElse(null));
                 default:
                     log.info("Received unknown channel update: {}", channel);
                     return new UnknownChannelUpdateEvent(gateway, context.getShardInfo(),

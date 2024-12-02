@@ -67,6 +67,12 @@ public class DispatchStoreLayer {
         add(GuildScheduledEventUserAdd.class::isInstance, GatewayActions::guildScheduledEventUserAdd);
         add(GuildScheduledEventUserRemove.class::isInstance, GatewayActions::guildScheduledEventUserRemove);
         add(GuildUpdate.class::isInstance, GatewayActions::guildUpdate);
+        add(ThreadCreate.class::isInstance, GatewayActions::threadCreate);
+        add(ThreadUpdate.class::isInstance, GatewayActions::threadUpdate);
+        add(ThreadDelete.class::isInstance, GatewayActions::threadDelete);
+        add(ThreadListSync.class::isInstance, GatewayActions::threadListSync);
+        add(ThreadMemberUpdate.class::isInstance, GatewayActions::threadMemberUpdate);
+        add(ThreadMembersUpdate.class::isInstance, GatewayActions::threadMembersUpdate);
         add(MessageCreate.class::isInstance, GatewayActions::messageCreate);
         add(MessageDelete.class::isInstance, GatewayActions::messageDelete);
         add(MessageDeleteBulk.class::isInstance, GatewayActions::messageDeleteBulk);

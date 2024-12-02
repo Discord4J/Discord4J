@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Encapsulate retrying state for reconnect operations.
  * <p>
- * Used as context for {@link reactor.retry.Retry} calls, keeps track of the current retry attempt for backoff
+ * Used as context for {@link reactor.util.retry.Retry} calls, keeps track of the current retry attempt for backoff
  * calculations (through {@link #next()} and restarting the attempt count once a retry has succeeded (through
  * {@link #reset()}).
  */

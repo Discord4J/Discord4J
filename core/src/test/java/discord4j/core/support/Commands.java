@@ -27,6 +27,7 @@ import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.util.MentionUtil;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.rest.util.Image;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,7 @@ public class Commands {
         Message message = context.getMessage();
         return message.getRestChannel().createMessage(
                 MessageCreateRequest.builder()
-                        .content("<@" + message.getUserData().id() + "> " + context.parameters())
+                        .content(MentionUtil.forUser(Snowflake.of(message.getUserData().id())) + " " + context.parameters())
                         .build())
                 .flatMap(data -> context.getClient().rest().restMessage(data)
                         .createReaction("✅"))
@@ -94,7 +95,7 @@ public class Commands {
                 .doOnNext(member -> log.info("{}", member))
                 .then(message.getRestChannel().createMessage(
                         MessageCreateRequest.builder()
-                                .content("<@" + message.getUserData().id() + "> Done!")
+                                .content(MentionUtil.forUser(Snowflake.of(message.getUserData().id())) + " Done!")
                                 .build()))
                 .then();
     }

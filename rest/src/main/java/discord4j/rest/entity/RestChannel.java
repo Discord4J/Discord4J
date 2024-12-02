@@ -18,7 +18,24 @@
 package discord4j.rest.entity;
 
 import discord4j.common.util.Snowflake;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.BulkDeleteRequest;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.ChannelModifyRequest;
+import discord4j.discordjson.json.EmbedData;
+import discord4j.discordjson.json.FollowedChannelData;
+import discord4j.discordjson.json.GroupAddRecipientRequest;
+import discord4j.discordjson.json.InviteCreateRequest;
+import discord4j.discordjson.json.InviteData;
+import discord4j.discordjson.json.ListThreadsData;
+import discord4j.discordjson.json.MessageCreateRequest;
+import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.NewsChannelFollowRequest;
+import discord4j.discordjson.json.PermissionsEditRequest;
+import discord4j.discordjson.json.StartThreadFromMessageRequest;
+import discord4j.discordjson.json.StartThreadWithoutMessageRequest;
+import discord4j.discordjson.json.ThreadMemberData;
+import discord4j.discordjson.json.ThreadMetadata;
+import discord4j.discordjson.json.WebhookData;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.MultipartRequest;
 import discord4j.rest.util.PaginationUtil;
@@ -29,7 +46,13 @@ import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -467,6 +490,52 @@ public class RestChannel {
 
     public Flux<WebhookData> getWebhooks() {
         return restClient.getWebhookService().getChannelWebhooks(id);
+    }
+
+    public Mono<ThreadMemberData> getThreadMember(Snowflake userId) {
+        return restClient.getChannelService().getThreadMember(id, userId.asLong());
+    }
+
+    public Flux<ListThreadsData> listThreads(Function<Map<String, Object>, Mono<ListThreadsData>> doRequest) {
+        Function<ListThreadsData, String> getLastThreadId = response -> {
+            List<ChannelData> threads = response.threads();
+
+            if (!response.hasMore().toOptional().orElse(false)) {
+                return null;
+            }
+
+            if (threads.isEmpty()) {
+                return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now());
+            }
+
+            return threads.get(threads.size() - 1)
+                .threadMetadata()
+                .toOptional()
+                .map(ThreadMetadata::archiveTimestamp)
+                .orElse(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now()));
+        };
+
+        return PaginationUtil.paginateBefore(doRequest.andThen(Mono::flux), getLastThreadId, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now()), 100);
+    }
+
+    public Flux<ListThreadsData> getPublicArchivedThreads() {
+        return listThreads(params -> restClient.getChannelService().listPublicArchivedThreads(id, params));
+    }
+
+    public Flux<ListThreadsData> getPrivateArchivedThreads() {
+        return listThreads(params -> restClient.getChannelService().listPrivateArchivedThreads(id, params));
+    }
+
+    public Flux<ListThreadsData> getJoinedPrivateArchivedThreads() {
+        return listThreads(params -> restClient.getChannelService().listJoinedPrivateArchivedThreads(id, params));
+    }
+
+    public Mono<ChannelData> startThreadWithoutMessage(StartThreadWithoutMessageRequest request) {
+        return restClient.getChannelService().startThreadWithoutMessage(id, request);
+    }
+
+    public Mono<ChannelData> startThreadFromMessage(long messageId, StartThreadFromMessageRequest request) {
+        return restClient.getChannelService().startThreadWithMessage(id, messageId, request);
     }
 
     @Override

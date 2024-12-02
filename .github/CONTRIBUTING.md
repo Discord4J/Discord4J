@@ -18,10 +18,10 @@ Discord4J development is done over multiple branches, starting our oldest suppor
 changes forward. For this reason, it is likely that your PR should target that older maintenance branch instead of 
 `master`.
 
-As a general rule, if our stable releases are from `3.1.x` branch, changes should always target that. This allows
+As a general rule, if our stable releases are from `3.2.x` branch, changes should always target that. This allows
 us to avoid backports and instead merge changes forward applying all needed changes to newer branches up to `master`.
 
-On the other hand, if the change only affects `3.2.x` line, changes should target that branch, or `master` if it's the 
+On the other hand, if the change only affects `3.3.x` line, changes should target that branch, or `master` if it's the 
 latest. For more information about our versions check our [docs](https://docs.discord4j.com/versions)
 
 For more background around this workflow check this issue: [Link](https://github.com/reactor/reactor-core/issues/1225).

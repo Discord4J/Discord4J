@@ -24,6 +24,7 @@ import discord4j.core.spec.CreateTestEntitlementMono;
 import discord4j.core.spec.EntitlementListRequestFlux;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
+import discord4j.core.util.MentionUtil;
 import discord4j.discordjson.json.DMCreateRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
@@ -297,7 +298,7 @@ public class User implements Entity {
      * @return The <i>raw</i> mention.
      */
     public final String getMention() {
-        return "<@" + getId().asString() + ">";
+        return MentionUtil.forUser(getId());
     }
 
     @Override

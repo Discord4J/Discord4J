@@ -409,4 +409,69 @@ public class GatewayActions {
         return new CompleteGuildMembersAction(guildId);
     }
 
+    /**
+     * Creates an action to execute when a {@link ThreadCreate} is received from the gateway.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a new {@link ThreadCreateAction}
+     */
+    public static ThreadCreateAction threadCreate(int shardIndex, ThreadCreate dispatch) {
+        return new ThreadCreateAction(shardIndex, dispatch);
+    }
+
+    /**
+     * Creates an action to execute when a {@link ThreadUpdate} is received from the gateway.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a new {@link ThreadUpdateAction}
+     */
+    public static ThreadUpdateAction threadUpdate(int shardIndex, ThreadUpdate dispatch) {
+        return new ThreadUpdateAction(shardIndex, dispatch);
+    }
+
+    /**
+     * Creates an action to execute when a {@link ThreadDelete} is received from the gateway.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a new {@link ThreadDeleteAction}
+     */
+    public static ThreadDeleteAction threadDelete(int shardIndex, ThreadDelete dispatch) {
+        return new ThreadDeleteAction(shardIndex, dispatch);
+    }
+
+    /**
+     * Creates an action to execute when a {@link ThreadListSync} is received from the gateway.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a new {@link ThreadListSyncAction}
+     */
+    public static ThreadListSyncAction threadListSync(int shardIndex, ThreadListSync dispatch) {
+        return new ThreadListSyncAction(shardIndex, dispatch);
+    }
+
+    /**
+     * Creates an action to execute when a {@link ThreadMemberUpdate} is received from the gateway.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a new {@link ThreadMemberUpdateAction}
+     */
+    public static ThreadMemberUpdateAction threadMemberUpdate(int shardIndex, ThreadMemberUpdate dispatch) {
+        return new ThreadMemberUpdateAction(shardIndex, dispatch);
+    }
+
+    /**
+     * Creates an action to execute when a {@link ThreadMembersUpdate} is received from the gateway.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a new {@link ThreadMembersUpdateAction}
+     */
+    public static ThreadMembersUpdateAction threadMembersUpdate(int shardIndex, ThreadMembersUpdate dispatch) {
+        return new ThreadMembersUpdateAction(shardIndex, dispatch);
+    }
 }

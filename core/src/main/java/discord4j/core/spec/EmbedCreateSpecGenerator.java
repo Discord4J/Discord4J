@@ -17,7 +17,10 @@
 
 package discord4j.core.spec;
 
+import discord4j.discordjson.json.EmbedAuthorData;
 import discord4j.discordjson.json.EmbedData;
+import discord4j.discordjson.json.EmbedFieldData;
+import discord4j.discordjson.json.EmbedFooterData;
 import discord4j.discordjson.json.EmbedImageData;
 import discord4j.discordjson.json.EmbedThumbnailData;
 import discord4j.discordjson.possible.Possible;
@@ -31,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static discord4j.core.spec.InternalSpecUtils.flatMapPossible;
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 import static discord4j.core.spec.InternalSpecUtils.toPossible;
 
@@ -76,5 +80,49 @@ interface EmbedCreateSpecGenerator extends Spec<EmbedData> {
                 .author(mapPossible(toPossible(author()), EmbedCreateFields.Author::asRequest))
                 .fields(fields().stream().map(EmbedCreateFields.Field::asRequest).collect(Collectors.toList()))
                 .build();
+    }
+
+    abstract class Builder {
+        public EmbedCreateSpec.Builder from(final EmbedData data) {
+            final EmbedCreateSpec.Builder $this = EmbedCreateSpec.Builder.class.cast(this)
+                    .title(data.title())
+                    .description(data.description())
+                    .url(data.url())
+                    .timestamp(mapPossible(data.timestamp(), Instant::parse))
+                    .color(mapPossible(data.color(), Color::of))
+                    .image(flatMapPossible(data.image(), EmbedImageData::url))
+                    .thumbnail(flatMapPossible(data.thumbnail(), EmbedThumbnailData::url));
+
+            if (!data.footer().isAbsent()) {
+                final EmbedFooterData footer = data.footer().get();
+                $this.footer(footer.text(), footer.iconUrl().toOptional().orElse(null));
+            } else {
+                $this.footer(null);
+            }
+
+            if (!data.author().isAbsent()) {
+                final EmbedAuthorData author = data.author().get();
+                $this.author(EmbedCreateFields.Author.of(
+                        author.name().toOptional().orElseThrow(IllegalStateException::new),
+                        Possible.flatOpt(author.url()).orElse(null),
+                        author.iconUrl().toOptional().orElse(null)
+                ));
+            } else {
+                $this.author(null);
+            }
+
+            if (!data.fields().isAbsent()) {
+                final List<EmbedFieldData> fields = data.fields().get();
+                $this.fields(
+                        fields.stream()
+                                .map(field -> EmbedCreateFields.Field.of(field.name(), field.value(), field.inline().toOptional().orElse(false)))
+                                .collect(Collectors.toList())
+                );
+            } else {
+                $this.fields(Collections.emptyList());
+            }
+
+            return $this;
+        }
     }
 }

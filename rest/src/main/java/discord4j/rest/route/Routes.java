@@ -29,7 +29,7 @@ public abstract class Routes {
      * @see <a href="https://discord.com/developers/docs/reference#base-url">
      * https://discord.com/developers/docs/reference#base-url</a>
      */
-    public static final String BASE_URL = "https://discord.com/api/v8";
+    public static final String BASE_URL = "https://discord.com/api/v10";
 
     //////////////////////////////////////////////
     ////////////// Gateway Resource //////////////
@@ -278,22 +278,6 @@ public abstract class Routes {
     public static final Route MESSAGE_DELETE_BULK = Route.post("/channels/{channel.id}/messages/bulk-delete");
 
     /**
-     * Enable/disable suppression of embeds on a Message. This endpoint requires the 'MANAGE_MESSAGES' permission to
-     * be present for the current user.
-     * <p>
-     * Returns a 204 empty response on success. Fires a Message Update Gateway event.
-     *
-     * @deprecated - As of April 28, 2021, Discord removed this route in API v9. This {@code Route} will be removed in
-     * a future update. <a href="https://discord.com/developers/docs/change-log#april-28-2021">
-     * https://discord.com/developers/docs/change-log#april-28-2021</a>
-     *
-     * @see <a href="https://discord.com/developers/docs/resources/channel#suppress-message-embeds">
-     * https://discord.com/developers/docs/resources/channel#suppress-message-embeds</a>
-     */
-    @Deprecated
-    public static final Route MESSAGE_SUPPRESS_EMBEDS = Route.post("/channels/{channel.id}/messages/{message.id}/suppress-embeds");
-
-    /**
      * Crosspost a Message into all guilds what follow the news channel indicated. This endpoint requires the
      * 'DISCOVERY' feature to be present for the guild and requires the 'SEND_MESSAGES' permission, if the current user
      * sent the message, or additionally the 'MANAGE_MESSAGES' permission, for all other messages, to be present for
@@ -406,6 +390,30 @@ public abstract class Routes {
      */
     public static final Route GROUP_DM_RECIPIENT_DELETE = Route.delete("/channels/{channel.id}/recipients/{user.id}");
 
+    public static final Route START_THREAD_WITH_MESSAGE = Route.post("/channels/{channel.id}/messages/{message.id}/threads");
+
+    public static final Route START_THREAD_WITHOUT_MESSAGE = Route.post("/channels/{channel.id}/threads");
+
+    public static final Route START_THREAD_IN_FORUM_CHANNEL_MESSAGE = Route.post("/channels/{channel.id}/threads");
+
+    public static final Route JOIN_THREAD = Route.put("/channels/{channel.id}/thread-members/@me");
+
+    public static final Route ADD_THREAD_MEMBER = Route.put("/channels/{channel.id}/thread-members/{user.id}");
+
+    public static final Route LEAVE_THREAD = Route.delete("/channels/{channel.id}/thread-members/@me");
+
+    public static final Route REMOVE_THREAD_MEMBER = Route.delete("/channels/{channel.id}/thread-members/{user.id}");
+
+    public static final Route GET_THREAD_MEMBER = Route.get("/channels/{channel.id}/thread-members/{user.id}");
+
+    public static final Route LIST_THREAD_MEMBERS = Route.get("/channels/{channel.id}/thread-members");
+
+    public static final Route LIST_PUBLIC_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/threads/archived/public");
+
+    public static final Route LIST_PRIVATE_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/threads/archived/private");
+
+    public static final Route LIST_JOINED_PRIVATE_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/users/@me/threads/archived/private");
+
     ///////////////////////////////////////////
     ////////////////// Polls //////////////////
     ///////////////////////////////////////////
@@ -451,17 +459,6 @@ public abstract class Routes {
      * https://discord.com/developers/docs/resources/sticker#get-sticker-pack</a>
      */
     public static final Route STICKER_PACK_GET = Route.get("/sticker-packs/{pack.id}");
-
-    /**
-     * Returns the list of available sticker packs.
-     *
-     * @see <a href="https://discord.com/developers/docs/resources/sticker#list-sticker-packs">
-     * https://discord.com/developers/docs/resources/sticker#list-sticker-packs</a>
-     *
-     * @deprecated Deprecated in favor of {@link #STICKER_PACKS_GET}. <b>To be removed in 3.3.x</b>
-     */
-    @Deprecated
-    public static final Route NITRO_STICKER_PACKS_GET = STICKER_PACKS_GET;
 
     /**
      * Returns an array of sticker objects for the given guild. Includes user fields if the bot has the MANAGE_EMOJIS_AND_STICKERS permission.
@@ -656,17 +653,6 @@ public abstract class Routes {
      * https://discord.com/developers/docs/resources/guild#modify-guild-member</a>
      */
     public static final Route GUILD_MEMBER_MODIFY = Route.patch("/guilds/{guild.id}/members/{user.id}");
-
-    /**
-     * Modifies the nickname of the current user in a guild. Returns a 200 with the nickname on success. Fires a Guild
-     * Member Update Gateway event.
-     *
-     * @see <a href="https://discord.com/developers/docs/resources/guild#modify-current-user-nick">
-     * https://discord.com/developers/docs/resources/guild#modify-current-user-nick</a>
-     * @deprecated use
-     */
-    @Deprecated
-    public static final Route NICKNAME_MODIFY_OWN = Route.patch("/guilds/{guild.id}/members/@me/nick");
 
     /**
      * Modifies the current member in a guild. Returns a 200 with the updated member on success. Fires a Guild
@@ -935,6 +921,8 @@ public abstract class Routes {
      * https://discord.com/developers/docs/resources/guild#update-others-voice-state</a>
      */
     public static final Route OTHERS_VOICE_STATE_MODIFY = Route.patch("/guilds/{guild.id}/voice-states/{user.id}");
+
+    public static final Route LIST_ACTIVE_GUILD_THREADS = Route.get("/guilds/{guild.id}/threads/active");
 
     /////////////////////////////////////////////
     ////////////// Invite Resource //////////////
@@ -1364,6 +1352,18 @@ public abstract class Routes {
     ///////////////////////////////////////////
 
     public static final Route INTERACTION_RESPONSE_CREATE = Route.post("/interactions/{interaction.id}/{interaction.token}/callback");
+
+    ///////////////////////////////////////////
+    //////// Stage Instance Resource /////////
+    ///////////////////////////////////////////
+
+    public static final Route CREATE_STAGE_INSTANCE = Route.post("/stage-instances");
+
+    public static final Route GET_STAGE_INSTANCE = Route.get("/stage-instances/{channel.id}");
+
+    public static final Route MODIFY_STAGE_INSTANCE = Route.patch("/stage-instances/{channel.id}");
+
+    public static final Route DELETE_STAGE_INSTANCE = Route.delete("/stage-instances/{channel.id}");
 
     /////////////////////////////////////////////////////
     ////////// Guild Scheduled Event Resource ///////////

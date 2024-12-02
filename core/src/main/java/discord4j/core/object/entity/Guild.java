@@ -24,7 +24,6 @@ import discord4j.core.object.*;
 import discord4j.core.object.audit.AuditLogPart;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.channel.*;
-import discord4j.core.object.monetization.Entitlement;
 import discord4j.core.object.onboarding.Onboarding;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -32,6 +31,7 @@ import discord4j.core.spec.*;
 import discord4j.core.spec.legacy.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
+import discord4j.core.util.MentionUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
@@ -535,19 +535,6 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the guild emoji as represented by the supplied ID.
-     *
-     * @param id The ID of the guild emoji.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
-     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
-     * @deprecated Deprecated in favor of {@link #getEmojiById(Snowflake)}
-     */
-    @Deprecated
-    public Mono<GuildEmoji> getGuildEmojiById(final Snowflake id) {
-        return this.getEmojiById(id);
-    }
-
-    /**
      * Requests to retrieve the guild emoji as represented by the supplied ID, using the given retrieval strategy.
      *
      * @param id The ID of the guild emoji.
@@ -557,20 +544,6 @@ public final class Guild implements Entity {
      */
     public Mono<GuildEmoji> getEmojiById(final Snowflake id, EntityRetrievalStrategy retrievalStrategy) {
         return gateway.withRetrievalStrategy(retrievalStrategy).getGuildEmojiById(getId(), id);
-    }
-
-    /**
-     * Requests to retrieve the guild emoji as represented by the supplied ID, using the given retrieval strategy.
-     *
-     * @param id The ID of the guild emoji.
-     * @param retrievalStrategy the strategy to use to get the guild emoji
-     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
-     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
-     * @deprecated Deprecated in favor of {@link #getEmojiById(Snowflake, EntityRetrievalStrategy)}
-     */
-    @Deprecated
-    public Mono<GuildEmoji> getGuildEmojiById(final Snowflake id, EntityRetrievalStrategy retrievalStrategy) {
-        return this.getEmojiById(id, retrievalStrategy);
     }
 
     /**
@@ -1503,6 +1476,39 @@ public final class Guild implements Entity {
                 .cast(VoiceChannel.class);
     }
 
+
+    /**
+     * Requests to create a stage channel.
+     *
+     * @param spec an immutable object that specifies how to create the stage channel
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link StageChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<VoiceChannel> createStageChannel(StageChannelCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                        () -> gateway.getRestClient().getGuildService()
+                                .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+                .map(data -> EntityUtil.getChannel(gateway, data))
+                .cast(VoiceChannel.class);
+    }
+
+    /**
+     * Requests to create a forum channel.
+     *
+     * @param spec an immutable object that specifies how to create the forum channel
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link ForumChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ForumChannel> createForumChannel(ForumChannelCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> gateway.getRestClient().getGuildService()
+                    .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+            .map(data -> EntityUtil.getChannel(gateway, data))
+            .cast(ForumChannel.class);
+    }
+
     /**
      * Requests to create an automod rule. Properties specifying how to create the rule can be set via the
      * {@code withXxx} methods of the returned {@link AutoModRuleCreateMono}.
@@ -1977,6 +1983,27 @@ public final class Guild implements Entity {
      */
     public Mono<VoiceConnection> getVoiceConnection() {
         return gateway.getVoiceConnectionRegistry().getVoiceConnection(getId());
+    }
+
+    /**
+     * Requests to retrieve the active threads of the guild.
+     * <p>
+     * The audit log parts can be {@link ThreadListPart#combine(ThreadListPart) combined} for easier querying. For example,
+     * <pre>
+     * {@code
+     * guild.getActiveThreads()
+     *     .take(10)
+     *     .reduce(ThreadListPart::combine)
+     * }
+     * </pre>
+     *
+     * @return A {@link Flux} that continually emits the {@link ThreadListPart threads} of the guild. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Mono<ThreadListPart> getActiveThreads() {
+        return gateway.getRestClient().getGuildService()
+                .listActiveGuildThreads(data.id().asLong())
+                .map(data -> new ThreadListPart(gateway, data));
     }
 
     /**
@@ -2679,7 +2706,7 @@ public final class Guild implements Entity {
          * @return The <i>raw</i> mention.
          */
         public String getMention() {
-            return "<id:" + this.value  + ">";
+            return MentionUtil.forGuildResourceNavigation(this);
         }
 
         /**

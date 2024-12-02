@@ -24,6 +24,7 @@ import discord4j.core.object.DiscordObject;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.ResolvedChannelData;
+import discord4j.discordjson.json.ThreadMetadata;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.PermissionSet;
 import reactor.core.publisher.Mono;
@@ -35,8 +36,8 @@ import java.util.Optional;
  * A Discord channel that was resolved in a command.
  *
  * @see
- * <a href="https://discord.com/developers/docs/interactions/slash-commands#interaction-object-application-command-interaction-data-resolved-structure">
- * Application Command Interaction Data Resolved Object
+ * <a href="https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-resolved-data-structure">
+ * Resolved Data Structure
  * </a>
  */
 @Experimental
@@ -88,7 +89,7 @@ public class ResolvedChannel implements DiscordObject {
      * @return The name of the channel.
      */
     public Optional<String> getName() {
-        return data.name().toOptional().flatMap(opt -> opt);
+        return Possible.flatOpt(data.name());
     }
 
     /**
@@ -108,6 +109,24 @@ public class ResolvedChannel implements DiscordObject {
      */
     public Optional<PermissionSet> getEffectivePermissions() {
         return Possible.flatOpt(data.permissions()).map(PermissionSet::of);
+    }
+
+    /**
+     * Gets the associated thread metadata, if the provided channel is a thread.
+     *
+     * @return Associated {@link ThreadMetadata}, if present.
+     */
+    public Optional<ThreadMetadata> getThreadMetadata() {
+        return data.threadMetadata().toOptional();
+    }
+
+    /**
+     * Gets the thread parent id, if the provided channel is a thread.
+     *
+     * @return The parent ID as a {@link Snowflake}, if present.
+     */
+    public Optional<Snowflake> getParentId() {
+        return Possible.flatOpt(data.parentId()).map(Snowflake::of);
     }
 
     /**

@@ -16,6 +16,7 @@
  */
 package discord4j.core.retriever;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ScheduledEventUser;
 import discord4j.core.object.VoiceState;
@@ -27,7 +28,6 @@ import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -165,6 +165,18 @@ public class RestEntityRetriever implements EntityRetriever {
     }
 
     @Override
+    public Mono<ThreadMember> getThreadMemberById(Snowflake threadId, Snowflake userId) {
+        return rest.getChannelService().getThreadMember(threadId.asLong(), userId.asLong())
+                .map(data -> new ThreadMember(gateway, data));
+    }
+
+    @Override
+    public Flux<ThreadMember> getThreadMembers(Snowflake threadId) {
+        return rest.getChannelService().listThreadMembers(threadId.asLong())
+                .map(data -> new ThreadMember(gateway, data));
+    }
+
+    @Override
     public Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId) {
         return rest.getAutoModService()
             .getAutoModRules(guildId.asLong())
@@ -225,5 +237,12 @@ public class RestEntityRetriever implements EntityRetriever {
                 .large(false) // unable to retrieve this data
                 .memberCount(0) // unable to retrieve this data
                 .build();
+    }
+
+    @Override
+    public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId) {
+        return rest.getStageInstanceService()
+            .getStageInstance(channelId.asLong())
+            .map(data -> new StageInstance(gateway, data));
     }
 }

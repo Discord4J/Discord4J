@@ -148,7 +148,7 @@ public enum Permission {
 
     /** Allows members to use slash commands in text channels.
      *
-     *  @deprecated Deprecated in favor of {@link Permission#USE_APPLICATION_COMMANDS}
+     *  @deprecated use the official permission name: {@link #USE_APPLICATION_COMMANDS}
      */
     @Deprecated
     USE_SLASH_COMMANDS(0x80000000L, false),
@@ -157,7 +157,8 @@ public enum Permission {
     USE_APPLICATION_COMMANDS(0x80000000L, false),
 
     /**
-     * Allows for requesting to speak in stage channels.
+     * Allows for requesting to speak in stage channels. Marked as experimental since Discord treats this feature as
+     * "under active development and may be changed or removed"
      */
     @Experimental
     REQUEST_TO_SPEAK(0x0000000100000000L, false),
@@ -174,8 +175,24 @@ public enum Permission {
     /** Allows for creating public and announcement threads. */
     CREATE_PUBLIC_THREADS(0x0000000800000000L, false),
 
+    /**
+     * Allows for creating and participating in threads.
+     *
+     * @deprecated use the official permission name: {@link #CREATE_PUBLIC_THREADS}
+     */
+    @Deprecated
+    USE_PUBLIC_THREADS(0x0000000800000000L, false),
+
     /** Allows for creating private threads. */
     CREATE_PRIVATE_THREADS(0x0000001000000000L, false),
+
+    /**
+     * Allows for creating and participating in private threads
+     *
+     * @deprecated use the official permission name: {@link #CREATE_PRIVATE_THREADS}
+     */
+    @Deprecated
+    USE_PRIVATE_THREADS(0x0000001000000000L, false),
 
     /** Allows the usage of custom stickers from other servers. */
     USE_EXTERNAL_STICKERS(0x0000002000000000L, false),
@@ -187,7 +204,8 @@ public enum Permission {
     USE_EMBEDDED_ACTIVITIES(0x0000008000000000L, false),
 
     /**
-     * Allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from speaking in voice and stage channels.
+     * Allows for timing out users to prevent them from sending or reacting to messages in chat and threads,
+     * and from speaking in voice and stage channels.
      */
     MODERATE_MEMBERS(0x0000010000000000L, false),
 

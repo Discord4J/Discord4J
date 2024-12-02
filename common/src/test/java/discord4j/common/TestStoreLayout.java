@@ -30,6 +30,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import java.util.List;
 import java.util.Set;
 
 public class TestStoreLayout implements StoreLayout, DataAccessor, GatewayDataUpdater {
@@ -318,6 +319,11 @@ public class TestStoreLayout implements StoreLayout, DataAccessor, GatewayDataUp
     }
 
     @Override
+    public Mono<StageInstanceData> getStageInstanceByChannelId(long channelId) {
+        return Mono.<StageInstanceData>empty().log(name + ".getStageInstanceByChannelId");
+    }
+
+    @Override
     public Mono<Void> onChannelCreate(int shardIndex, ChannelCreate dispatch) {
         return Mono.<Void>empty().log(name + ".onChannelCreate");
     }
@@ -473,6 +479,21 @@ public class TestStoreLayout implements StoreLayout, DataAccessor, GatewayDataUp
     }
 
     @Override
+    public Mono<Void> onStageInstanceCreate(int shardIndex, StageInstanceCreate dispatch) {
+        return Mono.<Void>empty().log(name + ".onStageInstanceCreate");
+    }
+
+    @Override
+    public Mono<StageInstanceData> onStageInstanceUpdate(int shardIndex, StageInstanceUpdate dispatch) {
+        return Mono.<StageInstanceData>empty().log(name + ".onStageInstanceUpdate");
+    }
+
+    @Override
+    public Mono<StageInstanceData> onStageInstanceDelete(int shardIndex, StageInstanceDelete dispatch) {
+        return Mono.<StageInstanceData>empty().log(name + ".onStageInstanceDelete");
+    }
+
+    @Override
     public Mono<UserData> onUserUpdate(int shardIndex, UserUpdate dispatch) {
         return Mono.<UserData>empty().log(name + ".onUserUpdate");
     }
@@ -485,5 +506,35 @@ public class TestStoreLayout implements StoreLayout, DataAccessor, GatewayDataUp
     @Override
     public Mono<Void> onGuildMembersCompletion(long guildId) {
         return Mono.<Void>empty().log(name + ".onGuildMembersCompletion");
+    }
+
+    @Override
+    public Mono<Void> onThreadCreate(int shardIndex, ThreadCreate dispatch) {
+        return Mono.<Void>empty().log(name + ".onThreadCreate");
+    }
+
+    @Override
+    public Mono<ChannelData> onThreadUpdate(int shardIndex, ThreadUpdate dispatch) {
+        return Mono.<ChannelData>empty().log(name + ".onThreadUpdate");
+    }
+
+    @Override
+    public Mono<Void> onThreadDelete(int shardIndex, ThreadDelete dispatch) {
+        return Mono.<Void>empty().log(name + ".onThreadDelete");
+    }
+
+    @Override
+    public Mono<Void> onThreadListSync(int shardIndex, ThreadListSync dispatch) {
+        return Mono.<Void>empty().log(name + ".onThreadListSync");
+    }
+
+    @Override
+    public Mono<ThreadMemberData> onThreadMemberUpdate(int shardIndex, ThreadMemberUpdate dispatch) {
+        return Mono.<ThreadMemberData>empty().log(name + ".onThreadMemberUpdate");
+    }
+
+    @Override
+    public Mono<List<ThreadMemberData>> onThreadMembersUpdate(int shardIndex, ThreadMembersUpdate dispatch) {
+        return Mono.<List<ThreadMemberData>>empty().log(name + ".onThreadMembersUpdate");
     }
 }

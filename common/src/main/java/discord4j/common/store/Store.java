@@ -253,6 +253,18 @@ public final class Store {
                     .map(GetGuildScheduledEventUsersInEventAction.class, action -> dataAccessor.getScheduledEventUsersInEvent(action.getGuildId(), action.getEventId()));
         }
 
+        if (enabled.contains(StoreFlag.THREAD)) {
+            builder = builder
+                    .map(GetThreadMemberByIdAction.class, action -> dataAccessor.getThreadMemberById(action.getThreadId(), action.getUserId()))
+                    .map(GetMembersInThreadAction.class, action -> dataAccessor.getMembersInThread(action.getThreadId()));
+
+        }
+
+        if (enabled.contains(StoreFlag.STAGE_INSTANCE)) {
+            builder = builder
+                    .map(GetStageInstanceByChannelIdAction.class, action -> dataAccessor.getStageInstanceByChannelId(action.getChannelId()));
+        }
+
         return builder.build();
     }
 
@@ -338,6 +350,23 @@ public final class Store {
                     .map(GuildScheduledEventDeleteAction.class, action -> gatewayDataUpdater.onGuildScheduledEventDelete(action.getShardIndex(), action.getGuildScheduledEventDelete()))
                     .map(GuildScheduledEventUserAddAction.class, actions -> gatewayDataUpdater.onGuildScheduledEventUserAdd(actions.getShardIndex(), actions.getUserAdd()))
                     .map(GuildScheduledEventUserRemoveAction.class, actions -> gatewayDataUpdater.onGuildScheduledEventUserRemove(actions.getShardIndex(), actions.getUserRemove()));
+        }
+
+        if (enabled.contains(StoreFlag.THREAD)) {
+            builder = builder
+                    .map(ThreadCreateAction.class, action -> gatewayDataUpdater.onThreadCreate(action.getShardIndex(), action.getThreadCreate()))
+                    .map(ThreadUpdateAction.class, action -> gatewayDataUpdater.onThreadUpdate(action.getShardIndex(), action.getThreadUpdate()))
+                    .map(ThreadDeleteAction.class, action -> gatewayDataUpdater.onThreadDelete(action.getShardIndex(), action.getThreadDelete()))
+                    .map(ThreadListSyncAction.class, action -> gatewayDataUpdater.onThreadListSync(action.getShardIndex(), action.getThreadListSync()))
+                    .map(ThreadMemberUpdateAction.class, action -> gatewayDataUpdater.onThreadMemberUpdate(action.getShardIndex(), action.getThreadMemberUpdate()))
+                    .map(ThreadMembersUpdateAction.class, action -> gatewayDataUpdater.onThreadMembersUpdate(action.getShardIndex(), action.getThreadMembersUpdate()));
+        }
+
+        if (enabled.contains(StoreFlag.STAGE_INSTANCE)) {
+            builder = builder
+                    .map(StageInstanceCreateAction.class, action -> gatewayDataUpdater.onStageInstanceCreate(action.getShardIndex(), action.getStageInstanceCreate()))
+                    .map(StageInstanceUpdateAction.class, action -> gatewayDataUpdater.onStageInstanceUpdate(action.getShardIndex(), action.getStageInstanceUpdate()))
+                    .map(StageInstanceDeleteAction.class, action -> gatewayDataUpdater.onStageInstanceDelete(action.getShardIndex(), action.getStageInstanceDelete()));
         }
 
         return builder.build();

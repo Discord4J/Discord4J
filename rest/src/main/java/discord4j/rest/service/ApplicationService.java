@@ -36,6 +36,14 @@ public class ApplicationService extends RestService {
                 .bodyToMono(ApplicationInfoData.class);
     }
 
+    public Flux<ApplicationCommandData> getGlobalApplicationCommands(long applicationId, boolean withLocalizations) {
+        return Routes.GLOBAL_APPLICATION_COMMANDS_GET.newRequest(applicationId)
+                .query("with_localizations", withLocalizations)
+                .exchange(getRouter())
+                .bodyToMono(ApplicationCommandData[].class)
+                .flatMapMany(Flux::fromArray);
+    }
+
     public Mono<ApplicationInfoData> modifyCurrentApplicationInfo(ApplicationInfoRequest request) {
         return Routes.APPLICATION_INFO_MODIFY.newRequest()
             .body(request)

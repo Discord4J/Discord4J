@@ -40,8 +40,34 @@ import java.util.stream.Collectors;
 public class LegacyVoiceChannelEditSpec implements LegacyAuditSpec<ChannelModifyRequest> {
 
     private final ImmutableChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
+    
     @Nullable
     private String reason;
+
+    /**
+     * Sets the user limit for the modified {@link VoiceChannel}.
+     * <p>
+     * Users with {@link Permission#MOVE_MEMBERS} ignore this limit and can also move other users into the channel
+     * past the limit.
+     *
+     * @param userLimit The maximum number of users that can join the voice channel at once.
+     * @return This spec.
+     */
+    public LegacyVoiceChannelEditSpec setUserLimit(int userLimit) {
+        requestBuilder.userLimit(userLimit);
+        return this;
+    }
+
+    /**
+     * Sets the camera video quality mode of the voice channel.
+     *
+     * @param videoQualityMode The camera video quality mode of the voice channel.
+     * @return This spec.
+     */
+    public LegacyVoiceChannelEditSpec setVideoQualityMode(VoiceChannel.Mode videoQualityMode) {
+        requestBuilder.videoQualityModeOrNull(videoQualityMode.getValue());
+        return this;
+    }
 
     /**
      * Sets the name for the modified {@link VoiceChannel}.
@@ -106,20 +132,6 @@ public class LegacyVoiceChannelEditSpec implements LegacyAuditSpec<ChannelModify
     }
 
     /**
-     * Sets the user limit for the modified {@link VoiceChannel}.
-     * <p>
-     * Users with {@link Permission#MOVE_MEMBERS} ignore this limit and can also move other users into the channel
-     * past the limit.
-     *
-     * @param userLimit The maximum number of users that can join the voice channel at once.
-     * @return This spec.
-     */
-    public LegacyVoiceChannelEditSpec setUserLimit(int userLimit) {
-        requestBuilder.userLimit(userLimit);
-        return this;
-    }
-
-    /**
      * Sets the channel voice region id, automatic if null.
      *
      * @param rtcRegion The channel voice region id, automatic if null.
@@ -127,17 +139,6 @@ public class LegacyVoiceChannelEditSpec implements LegacyAuditSpec<ChannelModify
      */
     public LegacyVoiceChannelEditSpec setRtcRegion(@Nullable String rtcRegion) {
         requestBuilder.rtcRegionOrNull(rtcRegion);
-        return this;
-    }
-
-    /**
-     * Sets the camera video quality mode of the voice channel.
-     *
-     * @param videoQualityMode The camera video quality mode of the voice channel.
-     * @return This spec.
-     */
-    public LegacyVoiceChannelEditSpec setVideoQualityMode(VoiceChannel.Mode videoQualityMode) {
-        requestBuilder.videoQualityModeOrNull(videoQualityMode.getValue());
         return this;
     }
 

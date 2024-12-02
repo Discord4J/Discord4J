@@ -16,7 +16,6 @@
  */
 package discord4j.rest.service;
 
-import discord4j.common.annotations.Experimental;
 import discord4j.discordjson.json.*;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
@@ -41,6 +40,14 @@ public class ChannelService extends RestService {
     }
 
     public Mono<ChannelData> modifyChannel(long channelId, ChannelModifyRequest request, @Nullable String reason) {
+        return Routes.CHANNEL_MODIFY_PARTIAL.newRequest(channelId)
+                .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
+                .exchange(getRouter())
+                .bodyToMono(ChannelData.class);
+    }
+
+    public Mono<ChannelData> modifyThread(long channelId, ThreadModifyRequest request, @Nullable String reason) {
         return Routes.CHANNEL_MODIFY_PARTIAL.newRequest(channelId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
@@ -138,20 +145,6 @@ public class ChannelService extends RestService {
                 .bodyToMono(Void.class);
     }
 
-    /**
-     * @deprecated - As of April 28, 2021, Discord removed the suppress-embeds route in API v9. This method will be
-     * removed in a future update. <a href="https://discord.com/developers/docs/change-log#april-28-2021">
-     * https://discord.com/developers/docs/change-log#april-28-2021</a>
-     */
-    @Deprecated
-    public Mono<Void> suppressEmbeds(long channelId, long messageId, SuppressEmbedsRequest request) {
-        return Routes.MESSAGE_SUPPRESS_EMBEDS.newRequest(channelId, messageId)
-                .header("content-type", "application/json")
-                .body(request)
-                .exchange(getRouter())
-                .bodyToMono(Void.class);
-    }
-
     public Mono<MessageData> publishMessage(long channelId, long messageId) {
         return Routes.CROSSPOST_MESSAGE.newRequest(channelId, messageId)
                 .exchange(getRouter())
@@ -232,5 +225,84 @@ public class ChannelService extends RestService {
         return Routes.GROUP_DM_RECIPIENT_DELETE.newRequest(channelId, userId)
                 .exchange(getRouter())
                 .bodyToMono(Void.class);
+    }
+
+    public Mono<ChannelData> startThreadWithMessage(long channelId, long messageId, StartThreadFromMessageRequest request) {
+        return Routes.START_THREAD_WITH_MESSAGE.newRequest(channelId, messageId)
+                .body(request)
+                .exchange(getRouter())
+                .bodyToMono(ChannelData.class);
+    }
+
+    public Mono<ChannelData> startThreadWithoutMessage(long channelId, StartThreadWithoutMessageRequest request) {
+        return Routes.START_THREAD_WITHOUT_MESSAGE.newRequest(channelId)
+                .body(request)
+                .exchange(getRouter())
+                .bodyToMono(ChannelData.class);
+    }
+
+    public Mono<ChannelData> startThreadInForumChannel(long channelId, StartThreadInForumChannelRequest request) {
+        return Routes.START_THREAD_IN_FORUM_CHANNEL_MESSAGE.newRequest(channelId)
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(ChannelData.class);
+    }
+
+    public Mono<Void> joinThread(long channelId) {
+        return Routes.JOIN_THREAD.newRequest(channelId)
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
+    }
+
+    public Mono<Void> addThreadMember(long channelId, long userId) {
+        return Routes.ADD_THREAD_MEMBER.newRequest(channelId, userId)
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
+    }
+
+    public Mono<Void> leaveThread(long channelId) {
+        return Routes.LEAVE_THREAD.newRequest(channelId)
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
+    }
+
+    public Mono<Void> removeThreadMember(long channelId, long userId) {
+        return Routes.REMOVE_THREAD_MEMBER.newRequest(channelId, userId)
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
+    }
+
+    public Mono<ThreadMemberData> getThreadMember(long channelId, long userId) {
+        return Routes.GET_THREAD_MEMBER.newRequest(channelId, userId)
+                .exchange(getRouter())
+                .bodyToMono(ThreadMemberData.class);
+    }
+
+    public Flux<ThreadMemberData> listThreadMembers(long channelId) {
+        return Routes.LIST_THREAD_MEMBERS.newRequest(channelId)
+                .exchange(getRouter())
+                .bodyToMono(ThreadMemberData[].class)
+                .flatMapMany(Flux::fromArray);
+    }
+
+    public Mono<ListThreadsData> listPublicArchivedThreads(long channelId, Map<String, Object> queryParams) {
+        return Routes.LIST_PUBLIC_ARCHIVED_THREADS.newRequest(channelId)
+                .query(queryParams)
+                .exchange(getRouter())
+                .bodyToMono(ListThreadsData.class);
+    }
+
+    public Mono<ListThreadsData> listPrivateArchivedThreads(long channelId, Map<String, Object> queryParams) {
+        return Routes.LIST_PRIVATE_ARCHIVED_THREADS.newRequest(channelId)
+                .query(queryParams)
+                .exchange(getRouter())
+                .bodyToMono(ListThreadsData.class);
+    }
+
+    public Mono<ListThreadsData> listJoinedPrivateArchivedThreads(long channelId, Map<String, Object> queryParams) {
+        return Routes.LIST_JOINED_PRIVATE_ARCHIVED_THREADS.newRequest(channelId)
+                .query(queryParams)
+                .exchange(getRouter())
+                .bodyToMono(ListThreadsData.class);
     }
 }

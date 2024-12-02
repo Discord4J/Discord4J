@@ -21,8 +21,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
-import reactor.retry.BackoffDelay;
-import reactor.util.retry.Retry;
+import reactor.util.retry.RetryBackoffSpec;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -94,8 +93,7 @@ public class ClockGlobalRateLimiter implements GlobalRateLimiter {
                         sink.success();
                     }
                 })
-                .retryWhen(Retry.withThrowable(reactor.retry.Retry.any()
-                        .backoff(ctx -> new BackoffDelay(Duration.ofNanos(retryIn.get())))))
-                .thenMany(stage);
+            .retryWhen(RetryBackoffSpec.backoff(1, Duration.ofNanos(retryIn.get())))
+            .thenMany(stage);
     }
 }

@@ -39,9 +39,8 @@ public class ExampleButtons {
                             .next()
                             .flatMap(e -> e.getGuild().getChannelById(Snowflake.of(channelId)))
                             .ofType(TextChannel.class)
-                            .flatMap(channel -> channel.createMessage(msg -> {
-                                msg.setContent("Click some buttons!");
-                                msg.setComponents(
+                            .flatMap(channel -> channel.createMessage("Click some buttons!")
+                            		.withComponents(
                                         ActionRow.of(
                                                 //              ID,  label
                                                 Button.primary("1", "1"),
@@ -78,8 +77,8 @@ public class ExampleButtons {
                                                 Button.primary("24", "24"),
                                                 Button.primary("25", "25")
                                         )
-                                );
-                            }));
+                            	)
+                            );
 
                     return sendMessage
                             .map(Message::getId)

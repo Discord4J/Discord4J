@@ -212,11 +212,6 @@ public class RestGuild {
         return restClient.getGuildService().modifyGuildMember(id, userId.asLong(), request, reason);
     }
 
-    @Deprecated
-    public Mono<NicknameModifyData> modifyOwnNickname(NicknameModifyData request) {
-        return restClient.getGuildService().modifyOwnNickname(id, request);
-    }
-
     public Mono<MemberData> modifyCurrentMember(CurrentMemberModifyData request) {
         return restClient.getGuildService().modifyCurrentMember(id, request);
     }
@@ -352,6 +347,10 @@ public class RestGuild {
 
     public Flux<TemplateData> getTemplates() {
         return restClient.getTemplateService().getTemplates(id);
+    }
+
+    public Mono<ListThreadsData> getActiveThreads() {
+        return restClient.getGuildService().listActiveGuildThreads(id);
     }
 
     /**

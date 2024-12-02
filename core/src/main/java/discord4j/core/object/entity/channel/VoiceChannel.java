@@ -16,34 +16,19 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.common.store.action.read.ReadActions;
-import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.Region;
-import discord4j.core.object.VoiceState;
-import discord4j.core.object.entity.Guild;
 import discord4j.core.spec.VoiceChannelEditMono;
 import discord4j.core.spec.VoiceChannelEditSpec;
-import discord4j.core.spec.VoiceChannelJoinMono;
-import discord4j.core.spec.VoiceChannelJoinSpec;
 import discord4j.core.spec.legacy.LegacyVoiceChannelEditSpec;
-import discord4j.core.spec.legacy.LegacyVoiceChannelJoinSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
-import discord4j.discordjson.json.gateway.VoiceStateUpdate;
-import discord4j.discordjson.possible.Possible;
-import discord4j.gateway.GatewayClientGroup;
-import discord4j.gateway.json.ShardGatewayPayload;
-import discord4j.voice.VoiceConnection;
-import discord4j.voice.VoiceConnectionRegistry;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 import java.util.function.Consumer;
 
 /** A Discord voice channel. */
-public final class VoiceChannel extends BaseTopLevelGuildMessageChannel {
+public final class VoiceChannel extends BaseTopLevelGuildChannel implements AudioChannel, TopLevelGuildMessageChannel {
 
     /**
      * Constructs an {@code VoiceChannel} with an associated {@link GatewayDiscordClient} and Discord data.
@@ -51,17 +36,8 @@ public final class VoiceChannel extends BaseTopLevelGuildMessageChannel {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public VoiceChannel(final GatewayDiscordClient gateway, final ChannelData data) {
+    public VoiceChannel(GatewayDiscordClient gateway, ChannelData data) {
         super(gateway, data);
-    }
-
-    /**
-     * Gets the bitrate (in bits) for this voice channel.
-     *
-     * @return Gets the bitrate (in bits) for this voice channel.
-     */
-    public int getBitrate() {
-        return getData().bitrate().toOptional().orElseThrow(IllegalStateException::new);
     }
 
     /**
@@ -71,15 +47,6 @@ public final class VoiceChannel extends BaseTopLevelGuildMessageChannel {
      */
     public int getUserLimit() {
         return getData().userLimit().toOptional().orElseThrow(IllegalStateException::new);
-    }
-
-    /**
-     * Gets the voice region id for the voice channel.
-     *
-     * @return The voice region id for the voice channel.
-     */
-    public Region.Id getRtcRegion() {
-        return Possible.flatOpt(getData().rtcRegion()).map(Region.Id::of).orElse(Region.Id.AUTOMATIC);
     }
 
     /**
@@ -102,8 +69,7 @@ public final class VoiceChannel extends BaseTopLevelGuildMessageChannel {
      */
     @Deprecated
     public Mono<VoiceChannel> edit(final Consumer<? super LegacyVoiceChannelEditSpec> spec) {
-        return Mono.defer(
-                () -> {
+        return Mono.defer(() -> {
                     LegacyVoiceChannelEditSpec mutatedSpec = new LegacyVoiceChannelEditSpec();
                     spec.accept(mutatedSpec);
                     return getClient().getRestClient().getChannelService()
@@ -133,146 +99,10 @@ public final class VoiceChannel extends BaseTopLevelGuildMessageChannel {
      */
     public Mono<VoiceChannel> edit(VoiceChannelEditSpec spec) {
         Objects.requireNonNull(spec);
-        return Mono.defer(
-                () -> getClient().getRestClient().getChannelService()
+        return Mono.defer(() -> getClient().getRestClient().getChannelService()
                         .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(VoiceChannel.class);
-    }
-
-    /**
-     * Requests to retrieve the voice states of this voice channel.
-     *
-     * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of this voice channel. If an
-     * error is received, it is emitted through the {@code Flux}.
-     */
-    public Flux<VoiceState> getVoiceStates() {
-        return Flux.from(getClient().getGatewayResources().getStore()
-                .execute(ReadActions.getVoiceStatesInChannel(getGuildId().asLong(), getId().asLong())))
-                .map(data -> new VoiceState(getClient(), data));
-    }
-
-    /**
-     * Request to join this voice channel upon subscription. The resulting {@link VoiceConnection} will be available to
-     * you from the {@code Mono} but also through a {@link VoiceConnectionRegistry} and can be obtained through {@link
-     * GatewayDiscordClient#getVoiceConnectionRegistry()}. Additionally, the resulting {@code VoiceConnection} can be
-     * retrieved from the associated guild through {@link Guild#getVoiceConnection()} and through {@link
-     * #getVoiceConnection()}.
-     *
-     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyVoiceChannelJoinSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceConnection}, indicating a
-     * connection to the channel has been established. If an error is received, it is emitted through the {@code Mono}.
-     * @deprecated use {@link #join(VoiceChannelJoinSpec)} or {@link #join()} which offer an immutable approach to build
-     * specs
-     */
-    @Deprecated
-    public Mono<VoiceConnection> join(final Consumer<? super LegacyVoiceChannelJoinSpec> spec) {
-        return Mono.defer(() -> {
-            final LegacyVoiceChannelJoinSpec mutatedSpec = new LegacyVoiceChannelJoinSpec(getClient(), this);
-            spec.accept(mutatedSpec);
-
-            return mutatedSpec.asRequest();
-        });
-    }
-
-    /**
-     * Request to join this voice channel upon subscription. Properties specifying how to join this voice channel can be
-     * set via the {@code withXxx} methods of the returned {@link VoiceChannelJoinMono}. The resulting {@link
-     * VoiceConnection} will be available to you from the {@code Mono} but also through a {@link
-     * VoiceConnectionRegistry} and can be obtained through {@link GatewayDiscordClient#getVoiceConnectionRegistry()}.
-     * Additionally, the resulting {@code VoiceConnection} can be retrieved from the associated guild through {@link
-     * Guild#getVoiceConnection()} and through {@link #getVoiceConnection()}.
-     *
-     * @return A {@link VoiceChannelJoinMono} where, upon successful completion, emits a {@link VoiceConnection},
-     * indicating a connection to the channel has been established. If an error is received, it is emitted through the
-     * {@code VoiceChannelJoinMono}.
-     */
-    public VoiceChannelJoinMono join() {
-        return VoiceChannelJoinMono.of(this);
-    }
-
-    /**
-     * Request to join this voice channel upon subscription. The resulting {@link VoiceConnection} will be available to
-     * you from the {@code Mono} but also through a {@link VoiceConnectionRegistry} and can be obtained through {@link
-     * GatewayDiscordClient#getVoiceConnectionRegistry()}. Additionally, the resulting {@code VoiceConnection} can be
-     * retrieved from the associated guild through {@link Guild#getVoiceConnection()} and through {@link
-     * #getVoiceConnection()}.
-     *
-     * @param spec an immutable object that specifies how to join this voice channel
-     * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceConnection}, indicating a
-     * connection to the channel has been established. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<VoiceConnection> join(VoiceChannelJoinSpec spec) {
-        Objects.requireNonNull(spec);
-        return Mono.defer(() -> spec.asRequest().apply(this));
-    }
-
-    /**
-     * Sends a join request to the gateway
-     * <p>
-     * This method does not trigger any logic and requires external state handling
-     *
-     * @param selfMute if the client should be mutes
-     * @param selfDeaf if the client should be deaf
-     * @return An empty mono which completes when the payload was sent to the gateway
-     */
-    public Mono<Void> sendConnectVoiceState(final boolean selfMute, final boolean selfDeaf) {
-        final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
-        final int shardId = clientGroup.computeShardIndex(getGuildId());
-        return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
-                VoiceStateUpdate.builder()
-                        .guildId(getGuildId().asString())
-                        .channelId(getId().asString())
-                        .selfMute(selfMute)
-                        .selfDeaf(selfDeaf)
-                        .build(), shardId));
-    }
-
-    /**
-     * Sends a leave request to the gateway
-     * <p>
-     * This method does not replace {@link VoiceConnection#disconnect()} when the channel was joined by using
-     * {@link VoiceChannel#join(VoiceChannelJoinSpec)}
-     *
-     * @return An empty mono which completes when the payload was sent to the gateway
-     */
-    public Mono<Void> sendDisconnectVoiceState() {
-        final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
-        final int shardId = clientGroup.computeShardIndex(getGuildId());
-        return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
-                VoiceStateUpdate.builder()
-                        .guildId(getGuildId().asString())
-                        .selfMute(false)
-                        .selfDeaf(false)
-                        .build(), shardId));
-    }
-
-    /**
-     * Requests to determine if the member represented by the provided {@link Snowflake} is connected to this voice
-     * channel.
-     *
-     * @param memberId The ID of the member to check.
-     * @return A {@link Mono} where, upon successful completion, emits {@code true} if the member represented by the
-     * provided {@link Snowflake} is connected to this voice channel, {@code false} otherwise. If an error is received,
-     * it is emitted through the {@code Mono}.
-     */
-    public Mono<Boolean> isMemberConnected(final Snowflake memberId) {
-        return getVoiceStates()
-                .map(VoiceState::getUserId)
-                .any(memberId::equals);
-    }
-
-    /**
-     * Returns the current voice connection registered for this voice channel's guild.
-     *
-     * @return A {@link Mono} of {@link VoiceConnection} for this voice channel's guild if present, or empty otherwise.
-     * The resulting {@code Mono} will also complete empty if the registered voice connection is not associated with
-     * this voice channel.
-     */
-    public Mono<VoiceConnection> getVoiceConnection() {
-        return getGuild()
-                .flatMap(Guild::getVoiceConnection)
-                .filterWhen(voiceConnection -> voiceConnection.getChannelId().map(channelId -> channelId.equals(getId())));
     }
 
     @Override
@@ -314,8 +144,8 @@ public final class VoiceChannel extends BaseTopLevelGuildMessageChannel {
         }
 
         /**
-         * Gets the video quality mode. It is guaranteed that invoking {@link #getValue()} from the returned enum will equal
-         * ({@link #equals(Object)}) the supplied {@code value}.
+         * Gets the video quality mode. It is guaranteed that invoking {@link #getValue()} from the returned enum
+         * will equal ({@link #equals(Object)}) the supplied {@code value}.
          *
          * @param value The underlying value as represented by Discord.
          * @return The the video quality mode.

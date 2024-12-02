@@ -23,6 +23,7 @@ import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -383,6 +384,40 @@ public interface GatewayDataUpdater {
     Mono<Void> onReady(Ready dispatch);
 
     /**
+     * Updates the internal state of the store according to the given {@link StageInstanceCreate} gateway dispatch.
+     * This will typically perform an insert operation on the related {@link StageInstanceData}.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done
+     */
+    Mono<Void> onStageInstanceCreate(int shardIndex, StageInstanceCreate dispatch);
+
+    /**
+     * Updates the internal state of the store according to the given {@link StageInstanceCreate} gateway dispatch.
+     * This will typically perform an insert operation on the related {@link StageInstanceData} that is already present
+     * in the store.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done, returning the old state of the
+     * {@link StageInstanceData} before the update
+     */
+    Mono<StageInstanceData> onStageInstanceUpdate(int shardIndex, StageInstanceUpdate dispatch);
+
+    /**
+     * Updates the internal state of the store according to the given {@link StageInstanceCreate} gateway dispatch.
+     * This will typically perform an delete operation on the related {@link StageInstanceData} that is already present
+     * in the store.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done, returning the old state of the
+     * {@link StageInstanceData} before the delete
+     */
+    Mono<StageInstanceData> onStageInstanceDelete(int shardIndex, StageInstanceDelete dispatch);
+
+    /**
      * Updates the internal state of the store according to the given {@link UserUpdate} gateway dispatch. This will
      * typically perform an update operation on a related {@link UserData} that is already present in the store.
      *
@@ -415,4 +450,67 @@ public interface GatewayDataUpdater {
      * @return a {@link Mono} completing when the operation is done
      */
     Mono<Void> onGuildMembersCompletion(long guildId);
+
+    /**
+     * Updates the internal state of the store according to the given {@link ThreadCreate} gateway dispatch. This
+     * will typically perform an insert operation on the related {@link ChannelData}.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done
+     */
+    Mono<Void> onThreadCreate(int shardIndex, ThreadCreate dispatch);
+
+    /**
+     * Updates the internal state of the store according to the given {@link ThreadUpdate} gateway dispatch. This
+     * will typically perform an update operation on a related {@link ChannelData} that is already present in the store.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
+     * {@link ChannelData} before the update
+     */
+    Mono<ChannelData> onThreadUpdate(int shardIndex, ThreadUpdate dispatch);
+
+    /**
+     * Updates the internal state of the store according to the given {@link ThreadDelete} gateway dispatch. This
+     * will typically perform a delete operation on a related {@link ChannelData} that is already present in the store.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done
+     */
+    Mono<Void> onThreadDelete(int shardIndex, ThreadDelete dispatch);
+
+    /**
+     * Updates the internal state of the store according to the given {@link ThreadListSync} gateway dispatch. This
+     * will typically perform an update and delete operation on the related {@link ChannelData} and {@link ThreadMemberData}.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done
+     */
+    Mono<Void> onThreadListSync(int shardIndex, ThreadListSync dispatch);
+
+    /**
+     * Updates the internal state of the store according to the given {@link ThreadMemberUpdate} gateway dispatch. This
+     * will typically perform a delete operation on a related {@link ThreadMemberData} that is already present in the store.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
+     * {@link ThreadMemberUpdate} before the deletion
+     */
+    Mono<ThreadMemberData> onThreadMemberUpdate(int shardIndex, ThreadMemberUpdate dispatch);
+
+    /**
+     * Updates the internal state of the store according to the given {@link ThreadMembersUpdate} gateway dispatch. This
+     * will typically perform a delete operation on a related {@link ThreadMemberData} that is already present in the store.
+     *
+     * @param shardIndex the index of the shard where the dispatch comes from
+     * @param dispatch   the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
+     * list of {@link ThreadMemberData} before the deletion
+     */
+    Mono<List<ThreadMemberData>> onThreadMembersUpdate(int shardIndex, ThreadMembersUpdate dispatch);
 }

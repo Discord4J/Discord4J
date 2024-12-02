@@ -52,16 +52,16 @@ interface NewsChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
     @Override
     default ChannelModifyRequest asRequest() {
         return ChannelModifyRequest.builder()
-                .name(name())
-                .position(position())
-                .rateLimitPerUser(rateLimitPerUser())
-                .topic(topic())
-                .nsfw(nsfw())
-                .permissionOverwrites(InternalSpecUtils.mapPossible(permissionOverwrites(), po -> po.stream()
-                        .map(PermissionOverwrite::getData)
-                        .collect(Collectors.toList())))
-                .parentId(mapPossibleOptional(parentId(), Snowflake::asString))
-                .build();
+            .name(name())
+            .position(position())
+            .rateLimitPerUser(rateLimitPerUser())
+            .topic(topic())
+            .nsfw(nsfw())
+            .permissionOverwrites(InternalSpecUtils.mapPossible(permissionOverwrites(), po -> po.stream()
+                .map(PermissionOverwrite::getData)
+                .collect(Collectors.toList())))
+            .parentId(mapPossibleOptional(parentId(), Snowflake::asString))
+            .build();
     }
 }
 
