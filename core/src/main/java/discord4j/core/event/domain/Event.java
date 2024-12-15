@@ -158,6 +158,9 @@ import discord4j.gateway.intent.Intent;
  *     <li>{@link EntitlementCreateEvent}: a new entitlement was created</li>
  *     <li>{@link EntitlementDeleteEvent}: an entitlement was deleted</li>
  *     <li>{@link EntitlementUpdateEvent}: an entitlement was updated</li>
+ *     <li>{@link SubscriptionCreateEvent}: a new subscription was created</li>
+ *     <li>{@link SubscriptionDeleteEvent}: a subscription was deleted</li>
+ *     <li>{@link SubscriptionUpdateEvent}: a subscription was updated</li>
  * </ul>
  */
 public abstract class Event {
