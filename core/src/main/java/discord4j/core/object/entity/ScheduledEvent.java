@@ -20,6 +20,7 @@ package discord4j.core.object.entity;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ScheduledEventEntityMetadata;
+import discord4j.core.object.RecurrenceRule;
 import discord4j.core.object.ScheduledEventUser;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.spec.ScheduledEventEditMono;
@@ -170,7 +171,7 @@ public class ScheduledEvent implements Entity {
     /**
      * Gets the scheduled end time of the event, if present.
      * <p>
-     * Note: Note: This metadata will always be present when the entity type is {@link EntityType#EXTERNAL external}.
+     * Note: This metadata will always be present when the entity type is {@link EntityType#EXTERNAL external}.
      *
      * @return The scheduled end time of the event, if present.
      */
@@ -248,6 +249,15 @@ public class ScheduledEvent implements Entity {
      */
     public Optional<String> getLocation() {
         return getEntityMetadata().flatMap(ScheduledEventEntityMetadata::getLocation);
+    }
+
+    /**
+     * Gets the recurrence rule of the event, if present.
+     *
+     * @return The recurrence rule of the event, if present.
+     */
+    public Optional<RecurrenceRule> getRecurrenceRule() {
+        return this.data.recurrenceRule().map(RecurrenceRule::new);
     }
 
     /**

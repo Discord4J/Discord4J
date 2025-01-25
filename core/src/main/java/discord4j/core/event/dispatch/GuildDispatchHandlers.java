@@ -213,6 +213,7 @@ class GuildDispatchHandlers {
                 .collect(Collectors.toSet());
         String currentNick = Possible.flatOpt(context.getDispatch().nick()).orElse(null);
         String currentAvatar = context.getDispatch().avatar().orElse(null);
+        String currentBanner = context.getDispatch().banner().orElse(null);
         String currentJoinedAt = context.getDispatch().joinedAt().orElse(null);
         String currentPremiumSince = Possible.flatOpt(context.getDispatch().premiumSince()).orElse(null);
         Boolean currentPending = context.getDispatch().pending().toOptional().orElse(null);
@@ -223,7 +224,7 @@ class GuildDispatchHandlers {
                 .orElse(null);
 
         return Mono.just(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, oldMember,
-                currentRoleIds, currentNick, currentAvatar, currentJoinedAt,
+                currentRoleIds, currentNick, currentAvatar, currentBanner, currentJoinedAt,
                 currentPremiumSince, currentPending, communicationDisabledUntil, avatarDecoration));
     }
 
