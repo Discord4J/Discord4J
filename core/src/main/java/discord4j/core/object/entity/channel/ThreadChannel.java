@@ -40,13 +40,35 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * ThreadChannel implements thread channel operations, for both thread channel that are associated to a text channel or forum channel.
+ * You can fetch a ThreadChannel by id from the guild object using {@link discord4j.core.object.entity.Guild#getChannelById(Snowflake)} and by filtering it using {@link Mono#ofType(Class)} :
+ * <pre>
+ * Guild myGuild;
+ * Mono&lt;ThreadChannel&gt; aThreadChannel = myGuild.getChannelById(Snowflake.of(1234567890123L))
+ * .ofType(ThreadChannel.class);
+ * </pre>
+ */
 @Experimental
 public final class ThreadChannel extends BaseChannel implements GuildMessageChannel {
 
+    /**
+     * Builds a ThreadChannel object by associating it with a gateway client with the provided channel data.
+     * To fetch a build object from the Discord gateway,
+     * please see {@link GatewayDiscordClient#getChannelById(Snowflake)}.
+     *
+     * @param gateway The gateway associated with this client
+     * @param data The parsed JSON data associated with this channel
+     */
     public ThreadChannel(GatewayDiscordClient gateway, ChannelData data) {
         super(gateway, data);
     }
 
+    /**
+     * Gets the user identifier that started this thread.
+     *
+     * @return An {@link Snowflake} representing the unique user identifier.
+     */
     public Snowflake getStarterId() {
         return getData().ownerId().toOptional() // owner_id is repurposed for the starter
                 .map(Snowflake::of)
@@ -65,14 +87,34 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
     }
 
     // TODO: should this be Member? What if they're not in the guild anymore? Do we consider that anywhere else?
+   /**
+     * Gets the {@link User} that initiated this thread.
+     * This method allows fetching a known user even if the user left the guild.
+     * If you need to use a retrieval strategy, see {@link ThreadChannel#getStarter(EntityRetrievalStrategy)}.
+     *
+     * @return A {@link Mono} that, upon completion, emits the {@link User} that started the thread.
+     * If any error occurs, it is emitted through the mono.
+     */
     public Mono<User> getStarter() {
         return getClient().getUserById(getStarterId());
     }
 
+   /**
+     * Gets the {@link User} that initiated this thread.
+     * This method allows fetching a known user even if the user left the guild.
+     *
+     * @return A {@link Mono} that, upon completion, emits the {@link User} that started the thread.
+     * If any error occurs, it is emitted through the mono.
+     */
     public Mono<User> getStarter(EntityRetrievalStrategy retrievalStrategy) {
         return getClient().withRetrievalStrategy(retrievalStrategy).getUserById(getStarterId());
     }
 
+    /**
+     * Gets the parent channel identifier, wrapped in an {@link Optional}.
+     *
+     * @return An {@link Optional}, containing the parent channel identifier as a {@link Snowflake}.
+     */
     public Optional<Snowflake> getParentId() {
         return getData().parentId().toOptional()
                 .flatMap(Function.identity())
@@ -151,46 +193,105 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
                 .getThreadMembers(getId());
     }
 
+    /**
+     * Get the approximate message count within this thread channel.
+     * Messages that are deleted to not decrement the counter, hence the approximation.
+     *
+     * @return The approximate message count
+     */
     public int getApproximateMessageCount() {
         return getData().messageCount().toOptional()
                 .orElseThrow(IllegalStateException::new); // should always be present for threads
     }
 
+    /**
+     * Get the approximate member count that joined this thread.
+     * Stops counting after 50 members.
+     *
+     * @return The approximate member count, from 1 to 50.
+     */
     public int getApproximateMemberCount() {
         return getData().memberCount().toOptional()
                 .orElseThrow(IllegalStateException::new); // should always be present for threads
     }
 
+    /**
+     * Tells if the thread is archived, manually or automatically.
+     * Archived threads are inactive but can be un-archived by different people, depending on the parent channel configuration.
+     *
+     * @return A boolean indicating whether the thread is archived or not.
+     */
     public boolean isArchived() {
         return getMetadata().archived();
     }
 
+    /**
+     * Gets the timestamp when the thread's archive status was last changed.
+     *
+     * @return An {@link Instant} representing the timestamp of the last change on the archival status of the thread.
+     */
     public Instant getArchiveTimestamp() {
         return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(getMetadata().archiveTimestamp(), Instant::from);
     }
 
+    /**
+     * Gets the default auto-archival duration configured for this thread channel.
+     *
+     * @return The {@link AutoArchiveDuration} configured for this channel.
+     */
     public AutoArchiveDuration getAutoArchiveDuration() {
         return AutoArchiveDuration.of(getMetadata().autoArchiveDuration());
     }
 
+    /**
+     * Tells if the thread channel has been locked by a moderator.
+     * This is a different feature from archiving the channel.
+     *
+     * @return Returns a boolean representing whether the channel is locked or not.
+     */
     public boolean isLocked() {
         return getMetadata().locked().toOptional().orElse(false);
     }
 
+    /**
+     * Tells if the thread channel is private or not, based on its type.
+     *
+     * @return A boolean representing if the thread kind allows member join
+     */
+    // TODO Implement the "invitable" field that provide more information about that
     public boolean isPrivate() {
         return Type.of(getData().type()) == Type.GUILD_PRIVATE_THREAD;
     }
 
+    /**
+     * Returns the metadata associated with this thread.
+     *
+     * @return A {@link ThreadMetadata} object containing information about the thread
+     */
     private ThreadMetadata getMetadata() {
         return getData().threadMetadata().toOptional()
                 .orElseThrow(IllegalStateException::new); // should always be present for threads
     }
 
+    /**
+     * Computes permissions given to a specified member regarding this channel.
+     *
+     * @param memberId The ID of the member to get permissions for.
+     * @return A {@link Mono} that, upon completion, emits a {@link PermissionSet} containing all allowed or denied
+     * permissions to the given member.
+     */
     @Override
     public Mono<PermissionSet> getEffectivePermissions(Snowflake memberId) {
         return getParent().flatMap(parent -> parent.getEffectivePermissions(memberId));
     }
 
+    /**
+     * Computes permissions given to a specified member regarding this channel.
+     *
+     * @param member The member to get permissions for.
+     * @return A {@link Mono} that, upon completion, emits a {@link PermissionSet} containing all allowed or denied
+     * permissions to the given member.
+     */
     @Override
     public Mono<PermissionSet> getEffectivePermissions(Member member) {
         return getParent().flatMap(parent -> parent.getEffectivePermissions(member));
