@@ -17,6 +17,7 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.possible.Possible;
 
 public class ThumbnailComponent extends MessageComponent {
 
@@ -45,7 +46,7 @@ public class ThumbnailComponent extends MessageComponent {
     }
 
     public String getDescription() {
-        return this.getData().description().get();
+        return Possible.flatOpt(this.getData().description()).orElse("");
     }
 
     public boolean isSpoiler() {
