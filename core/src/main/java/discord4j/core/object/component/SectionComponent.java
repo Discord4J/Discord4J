@@ -52,11 +52,9 @@ public class SectionComponent extends LayoutComponent {
         super(data);
     }
 
-    public List<MessageComponent> getAccessories() {
+    public MessageComponent getAccessorie() {
         return this.getData().accessory().toOptional()
-                .map(components -> components.stream()
-                        .map(MessageComponent::fromData)
-                        .collect(Collectors.toList()))
+            .map(MessageComponent::fromData)
                 .orElseThrow(IllegalStateException::new); // components should always be present on a layout component
     }
 
@@ -87,40 +85,5 @@ public class SectionComponent extends LayoutComponent {
             .type(this.getType().getValue())
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
             .build());
-    }
-
-    /**
-     * Create a new {@link SectionComponent} instance from {@code this}, adding a given component.
-     *
-     * @param component the child accessorie to be added
-     * @return an {@code SectionComponent} accessorie the existing and added accessorie
-     */
-    public SectionComponent withAddedAccessory(ActionComponent component) {
-        List<MessageComponent> accessories = new ArrayList<>(this.getChildren());
-        accessories.add(component);
-        return new SectionComponent(ComponentData.builder()
-                .type(this.getType().getValue())
-                .accessory(accessories.stream().map(MessageComponent::getData).collect(Collectors.toList()))
-                .build());
-    }
-
-    /**
-     * Create a new {@link SectionComponent} instance from {@code this}, removing any existing accessorie by {@code customId}.
-     *
-     * @param customId the customId of the accessorie to remove
-     * @return an {@code SectionComponent} containing all accessorie that did not match the given {@code customId}
-     */
-    public SectionComponent withRemovedAccessory(String customId) {
-        List<MessageComponent> accessories = this.getAccessories()
-                .stream()
-                .filter(it -> !it.getData().customId()
-                        .toOptional()
-                        .filter(customId::equals)
-                        .isPresent())
-                .collect(Collectors.toList());;
-        return new SectionComponent(ComponentData.builder()
-                .type(this.getType().getValue())
-                .accessory(accessories.stream().map(MessageComponent::getData).collect(Collectors.toList()))
-                .build());
     }
 }
