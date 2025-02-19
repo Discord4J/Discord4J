@@ -17,15 +17,18 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.json.ImmutableComponentData;
 
 public class FileComponent extends MessageComponent {
 
+    private final static ImmutableComponentData.Builder BUILDER = ComponentData.builder().from(ComponentData.builder().type(Type.FILE.getValue()).build());
+
     public static FileComponent of(UnfurledMediaItem file) {
-        return new FileComponent(ComponentData.builder().file(file.getData()).build());
+        return new FileComponent(BUILDER.file(file.getData()).build());
     }
 
     public static FileComponent of(UnfurledMediaItem file, boolean spoiler) {
-        return new FileComponent(ComponentData.builder().file(file.getData()).spoiler(spoiler).build());
+        return new FileComponent(BUILDER.file(file.getData()).spoiler(spoiler).build());
     }
 
     FileComponent(ComponentData data) {

@@ -17,6 +17,7 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.json.ImmutableComponentData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,13 +26,15 @@ import java.util.stream.Collectors;
 
 public class SectionComponent extends LayoutComponent {
 
+    private final static ImmutableComponentData.Builder BUILDER = ComponentData.builder().from(ComponentData.builder().type(Type.SECTION.getValue()).build());
+
     /**
      * Creates an {@code SectionComponent} with the given components.
      *
      * @param components The child components of the section.
      * @return An {@code SectionComponent} containing the given components.
      */
-    public static SectionComponent of(ActionComponent... components) {
+    public static SectionComponent of(MessageComponent... components) {
         return of(Arrays.asList(components));
     }
 
@@ -41,9 +44,20 @@ public class SectionComponent extends LayoutComponent {
      * @param components The child components of the section.
      * @return An {@code SectionComponent} containing the given components.
      */
-    public static SectionComponent of(List<? extends ActionComponent> components) {
-        return new SectionComponent(ComponentData.builder()
-            .type(Type.SECTION.getValue())
+    public static SectionComponent of(List<? extends MessageComponent> components) {
+        return new SectionComponent(BUILDER
+            .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList())).build());
+    }
+
+    /**
+     * Creates an {@code SectionComponent} with the given components.
+     *
+     * @param components The child components of the section.
+     * @return An {@code SectionComponent} containing the given components.
+     */
+    public static SectionComponent of(MessageComponent accessory, List<? extends MessageComponent> components) {
+        return new SectionComponent(BUILDER
+            .accessory(accessory.getData())
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
             .build());
     }

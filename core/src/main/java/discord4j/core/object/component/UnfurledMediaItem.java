@@ -20,6 +20,9 @@ import discord4j.discordjson.json.UnfurledMediaItemData;
 
 public class UnfurledMediaItem {
 
+    public static UnfurledMediaItem of(String url) {
+        return new UnfurledMediaItem(UnfurledMediaItemData.builder().url(url).build());
+    }
 
     private final UnfurledMediaItemData data;
 

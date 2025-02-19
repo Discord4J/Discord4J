@@ -17,8 +17,21 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.MediaGalleryItemData;
+import discord4j.discordjson.possible.Possible;
 
 public class MediaGalleryItem {
+
+    public static MediaGalleryItem of(UnfurledMediaItem mediaItem, String description, boolean spoiler) {
+        return new MediaGalleryItem(MediaGalleryItemData.builder().media(mediaItem.getData()).description(description).spoiler(spoiler).build());
+    }
+
+    public static MediaGalleryItem of(UnfurledMediaItem mediaItem, String description) {
+        return new MediaGalleryItem(MediaGalleryItemData.builder().media(mediaItem.getData()).description(description).build());
+    }
+
+    public static MediaGalleryItem of(UnfurledMediaItem mediaItem) {
+        return new MediaGalleryItem(MediaGalleryItemData.builder().media(mediaItem.getData()).build());
+    }
 
     private final MediaGalleryItemData data;
 

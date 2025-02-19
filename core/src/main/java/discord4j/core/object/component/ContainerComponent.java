@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 
 public class ContainerComponent extends LayoutComponent {
 
+    private final static ImmutableComponentData.Builder BUILDER = ComponentData.builder().from(ComponentData.builder().type(Type.CONTAINER.getValue()).build());
+
     /**
      * Creates an {@code SectionComponent} with the given components.
      *
@@ -76,9 +78,7 @@ public class ContainerComponent extends LayoutComponent {
             }
         }
 
-        ImmutableComponentData.Builder componentData = ComponentData.builder()
-                .type(Type.CONTAINER.getValue())
-                .spoiler(spoiler)
+        ImmutableComponentData.Builder componentData = BUILDER.spoiler(spoiler)
                 .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()));
 
         if (color != null) {

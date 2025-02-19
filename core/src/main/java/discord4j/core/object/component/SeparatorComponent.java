@@ -17,19 +17,18 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.json.ImmutableComponentData;
 
 public class SeparatorComponent extends LayoutComponent {
 
-    public static SeparatorComponent of(ComponentData data) {
-        return new SeparatorComponent(data);
+    private final static ImmutableComponentData.Builder BUILDER = ComponentData.builder().from(ComponentData.builder().type(Type.SEPARATOR.getValue()).build());
+
+    public static SeparatorComponent of(boolean divider) {
+        return new SeparatorComponent(BUILDER.divider(divider).build());
     }
 
-    public SeparatorComponent of(boolean divider) {
-        return new SeparatorComponent(ComponentData.builder().divider(divider).build());
-    }
-
-    public SeparatorComponent of(boolean divider, SpacingSize spacingSize) {
-        return new SeparatorComponent(ComponentData.builder().divider(divider).spacing(spacingSize.getValue()).build());
+    public static SeparatorComponent of(boolean divider, SpacingSize spacingSize) {
+        return new SeparatorComponent(BUILDER.divider(divider).spacing(spacingSize.getValue()).build());
     }
 
     SeparatorComponent(ComponentData data) {
