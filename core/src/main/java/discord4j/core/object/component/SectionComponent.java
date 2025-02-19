@@ -96,11 +96,11 @@ public class SectionComponent extends LayoutComponent {
      * @return an {@code SectionComponent} accessorie the existing and added accessorie
      */
     public SectionComponent withAddedAccessory(ActionComponent component) {
-        List<MessageComponent> components = new ArrayList<>(getChildren());
-        components.add(component);
+        List<MessageComponent> accessories = new ArrayList<>(this.getChildren());
+        accessories.add(component);
         return new SectionComponent(ComponentData.builder()
                 .type(this.getType().getValue())
-                .accesory(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+                .accesory(accessories.stream().map(MessageComponent::getData).collect(Collectors.toList()))
                 .build());
     }
 
@@ -111,10 +111,16 @@ public class SectionComponent extends LayoutComponent {
      * @return an {@code SectionComponent} containing all accessorie that did not match the given {@code customId}
      */
     public SectionComponent withRemovedAccessory(String customId) {
-        List<MessageComponent> components = getChildren(customId);
+        List<MessageComponent> accessories = this.getAccessories()
+                .stream()
+                .filter(it -> !it.getData().customId()
+                        .toOptional()
+                        .filter(customId::equals)
+                        .isPresent())
+                .collect(Collectors.toList());;
         return new SectionComponent(ComponentData.builder()
                 .type(this.getType().getValue())
-                .accesory(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+                .accesory(accessories.stream().map(MessageComponent::getData).collect(Collectors.toList()))
                 .build());
     }
 }
