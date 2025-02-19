@@ -53,7 +53,7 @@ public class SectionComponent extends LayoutComponent {
     }
 
     public List<MessageComponent> getAccessories() {
-        return this.getData().accesory().toOptional()
+        return this.getData().accessory().toOptional()
                 .map(components -> components.stream()
                         .map(MessageComponent::fromData)
                         .collect(Collectors.toList()))
@@ -100,7 +100,7 @@ public class SectionComponent extends LayoutComponent {
         accessories.add(component);
         return new SectionComponent(ComponentData.builder()
                 .type(this.getType().getValue())
-                .accesory(accessories.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+                .accessory(accessories.stream().map(MessageComponent::getData).collect(Collectors.toList()))
                 .build());
     }
 
@@ -120,7 +120,7 @@ public class SectionComponent extends LayoutComponent {
                 .collect(Collectors.toList());;
         return new SectionComponent(ComponentData.builder()
                 .type(this.getType().getValue())
-                .accesory(accessories.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+                .accessory(accessories.stream().map(MessageComponent::getData).collect(Collectors.toList()))
                 .build());
     }
 }
