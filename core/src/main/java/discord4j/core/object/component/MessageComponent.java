@@ -35,6 +35,9 @@ public class MessageComponent {
      */
     public static MessageComponent fromData(ComponentData data) {
         switch (Type.of(data.type())) {
+            case CONTAINER: return new ContainerComponent(data);
+            case SECTION: return new SectionComponent(data);
+            case SEPARATOR: return new SeparatorComponent(data);
             case ACTION_ROW: return new ActionRow(data);
             case BUTTON: return new Button(data);
             case SELECT_MENU_ROLE:
@@ -80,7 +83,15 @@ public class MessageComponent {
         SELECT_MENU_USER(5),
         SELECT_MENU_ROLE(6),
         SELECT_MENU_MENTIONABLE(7),
-        SELECT_MENU_CHANNEL(8);
+        SELECT_MENU_CHANNEL(8),
+        SECTION(9),
+        TEXT_DISPLAY(10),
+        THUMBNAIL(11),
+        MEDIA_GALLERY(12),
+        FILE(13),
+        SEPARATOR(14),
+        CONTAINER(17),
+        ;
 
         private final int value;
 
@@ -102,6 +113,13 @@ public class MessageComponent {
                 case 6: return SELECT_MENU_ROLE;
                 case 7: return SELECT_MENU_MENTIONABLE;
                 case 8: return SELECT_MENU_CHANNEL;
+                case 9: return SECTION;
+                case 10: return TEXT_DISPLAY;
+                case 11: return THUMBNAIL;
+                case 12: return MEDIA_GALLERY;
+                case 13: return FILE;
+                case 14: return SEPARATOR;
+                case 17: return CONTAINER;
                 default: return UNKNOWN;
             }
         }
