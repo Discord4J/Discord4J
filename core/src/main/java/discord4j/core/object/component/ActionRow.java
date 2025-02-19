@@ -67,7 +67,7 @@ public class ActionRow extends LayoutComponent {
         List<MessageComponent> components = new ArrayList<>(getChildren());
         components.add(component);
         return new ActionRow(ComponentData.builder()
-                .type(Type.ACTION_ROW.getValue())
+                .type(this.getType().getValue())
                 .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
                 .build());
     }
@@ -79,15 +79,9 @@ public class ActionRow extends LayoutComponent {
      * @return an {@code ActionRow} containing all components that did not match the given {@code customId}
      */
     public ActionRow withRemovedComponent(String customId) {
-        List<MessageComponent> components = getChildren()
-                .stream()
-                .filter(it -> !it.getData().customId()
-                        .toOptional()
-                        .filter(customId::equals)
-                        .isPresent())
-                .collect(Collectors.toList());
+        List<MessageComponent> components = getChildren(customId);
         return new ActionRow(ComponentData.builder()
-                .type(Type.ACTION_ROW.getValue())
+                .type(this.getType().getValue())
                 .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
                 .build());
     }

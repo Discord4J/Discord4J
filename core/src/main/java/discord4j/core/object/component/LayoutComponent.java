@@ -34,10 +34,20 @@ public abstract class LayoutComponent extends MessageComponent {
     }
 
     public List<MessageComponent> getChildren() {
-        return getData().components().toOptional()
+        return this.getData().components().toOptional()
                 .map(components -> components.stream()
                         .map(MessageComponent::fromData)
                         .collect(Collectors.toList()))
                 .orElseThrow(IllegalStateException::new); // components should always be present on a layout component
+    }
+
+    public List<MessageComponent> getChildren(String customId) {
+        return this.getChildren()
+            .stream()
+            .filter(it -> !it.getData().customId()
+                .toOptional()
+                .filter(customId::equals)
+                .isPresent())
+            .collect(Collectors.toList());
     }
 }

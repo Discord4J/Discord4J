@@ -62,7 +62,7 @@ public class ContainerComponent extends LayoutComponent {
         List<MessageComponent> components = new ArrayList<>(getChildren());
         components.add(component);
         return new ContainerComponent(ComponentData.builder()
-            .type(Type.CONTAINER.getValue())
+            .type(this.getType().getValue())
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
             .build());
     }
@@ -74,15 +74,9 @@ public class ContainerComponent extends LayoutComponent {
      * @return an {@code SectionComponent} containing all components that did not match the given {@code customId}
      */
     public ContainerComponent withRemovedComponent(String customId) {
-        List<MessageComponent> components = getChildren()
-            .stream()
-            .filter(it -> !it.getData().customId()
-                .toOptional()
-                .filter(customId::equals)
-                .isPresent())
-            .collect(Collectors.toList());
+        List<MessageComponent> components = getChildren(customId);
         return new ContainerComponent(ComponentData.builder()
-            .type(Type.CONTAINER.getValue())
+            .type(this.getType().getValue())
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
             .build());
     }
