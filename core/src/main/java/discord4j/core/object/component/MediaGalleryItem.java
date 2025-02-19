@@ -35,7 +35,7 @@ public class MediaGalleryItem {
     }
 
     public String getDescription() {
-        return this.getData().description().toOptional().orElse("");
+        return Possible.flatOpt(this.getData().description()).orElse("");
     }
 
     public boolean isSpoiler() {
