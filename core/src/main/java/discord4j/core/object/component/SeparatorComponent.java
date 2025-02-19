@@ -23,4 +23,33 @@ public class SeparatorComponent extends LayoutComponent {
     SeparatorComponent(ComponentData data) {
         super(data);
     }
+
+    public SpacingSize getSpacingSize() {
+        // we assume spacing exists in this type of Component
+        return SpacingSize.of(this.getData().spacing().get());
+    }
+
+    public enum SpacingSize {
+        SMALL(0),
+        LARGE(1),
+        ;
+
+        private final int value;
+
+        SpacingSize(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public static SpacingSize of(int value) {
+            switch (value) {
+                case 0: return SMALL;
+                case 1: return LARGE;
+                default: throw new UnsupportedOperationException("Unknown SpacingSize: " + value);
+            }
+        }
+    }
 }
