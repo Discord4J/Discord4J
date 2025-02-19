@@ -24,6 +24,10 @@ public class SeparatorComponent extends LayoutComponent {
         super(data);
     }
 
+    public boolean isDivider() {
+        return this.getData().divider().get();
+    }
+
     public SpacingSize getSpacingSize() {
         // we assume spacing exists in this type of Component
         return SpacingSize.of(this.getData().spacing().get());
