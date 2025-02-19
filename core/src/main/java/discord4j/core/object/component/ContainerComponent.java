@@ -36,7 +36,7 @@ public class ContainerComponent extends LayoutComponent {
      * @return An {@code SectionComponent} containing the given components.
      * @throws UnsupportedOperationException if any component added not support being used for ContainerComponent, check {@link Type#isSupportedForContainerComponent()}.
      */
-    public static ContainerComponent of(ActionComponent... components) {
+    public static ContainerComponent of(MessageComponent... components) {
         return of(Arrays.asList(components));
     }
 
@@ -47,7 +47,7 @@ public class ContainerComponent extends LayoutComponent {
      * @return An {@code SectionComponent} containing the given components.
      * @throws UnsupportedOperationException if any component added not support being used for ContainerComponent, check {@link Type#isSupportedForContainerComponent()}.
      */
-    public static ContainerComponent of(Color color, ActionComponent... components) {
+    public static ContainerComponent of(Color color, MessageComponent... components) {
         return of(color, false, Arrays.asList(components));
     }
 
@@ -58,7 +58,7 @@ public class ContainerComponent extends LayoutComponent {
      * @return An {@code SectionComponent} containing the given components.
      * @throws UnsupportedOperationException if any component added not support being used for ContainerComponent, check {@link Type#isSupportedForContainerComponent()}.
      */
-    public static ContainerComponent of(List<? extends ActionComponent> components) {
+    public static ContainerComponent of(List<? extends MessageComponent> components) {
         return of(null, false, components);
     }
 
@@ -69,8 +69,8 @@ public class ContainerComponent extends LayoutComponent {
      * @return An {@code SectionComponent} containing the given components.
      * @throws UnsupportedOperationException if any component added not support being used for ContainerComponent, check {@link Type#isSupportedForContainerComponent()}.
      */
-    public static ContainerComponent of(@Nullable Color color, boolean spoiler, List<? extends ActionComponent> components) {
-        for (ActionComponent component : components) {
+    public static ContainerComponent of(@Nullable Color color, boolean spoiler, List<? extends MessageComponent> components) {
+        for (MessageComponent component : components) {
             if (!component.isSupportedInContainer()) {
                 throw new UnsupportedOperationException("Cannot use " + component.getClass().getSimpleName() + " to build a ContainerComponent because it is not supported");
             }
