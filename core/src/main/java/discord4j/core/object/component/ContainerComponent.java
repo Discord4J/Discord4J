@@ -17,10 +17,14 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.json.ImmutableComponentData;
+import discord4j.rest.util.Color;
+import reactor.util.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ContainerComponent extends LayoutComponent {
@@ -30,6 +34,7 @@ public class ContainerComponent extends LayoutComponent {
      *
      * @param components The child components of the container.
      * @return An {@code SectionComponent} containing the given components.
+     * @throws UnsupportedOperationException if any component added not support being used for ContainerComponent, check {@link Type#isSupportedForContainerComponent()}.
      */
     public static ContainerComponent of(ActionComponent... components) {
         return of(Arrays.asList(components));
@@ -40,12 +45,47 @@ public class ContainerComponent extends LayoutComponent {
      *
      * @param components The child components of the container.
      * @return An {@code SectionComponent} containing the given components.
+     * @throws UnsupportedOperationException if any component added not support being used for ContainerComponent, check {@link Type#isSupportedForContainerComponent()}.
+     */
+    public static ContainerComponent of(Color color, ActionComponent... components) {
+        return of(color, false, Arrays.asList(components));
+    }
+
+    /**
+     * Creates an {@code SectionComponent} with the given components.
+     *
+     * @param components The child components of the container.
+     * @return An {@code SectionComponent} containing the given components.
+     * @throws UnsupportedOperationException if any component added not support being used for ContainerComponent, check {@link Type#isSupportedForContainerComponent()}.
      */
     public static ContainerComponent of(List<? extends ActionComponent> components) {
-        return new ContainerComponent(ComponentData.builder()
-            .type(Type.CONTAINER.getValue())
-            .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
-            .build());
+        return of(null, false, components);
+    }
+
+    /**
+     * Creates an {@code SectionComponent} with the given components.
+     *
+     * @param components The child components of the container.
+     * @return An {@code SectionComponent} containing the given components.
+     * @throws UnsupportedOperationException if any component added not support being used for ContainerComponent, check {@link Type#isSupportedForContainerComponent()}.
+     */
+    public static ContainerComponent of(@Nullable Color color, boolean spoiler, List<? extends ActionComponent> components) {
+        for (ActionComponent component : components) {
+            if (!component.isSupportedInContainer()) {
+                throw new UnsupportedOperationException("Cannot use " + component.getClass().getSimpleName() + " to build a ContainerComponent because it is not supported");
+            }
+        }
+
+        ImmutableComponentData.Builder componentData = ComponentData.builder()
+                .type(Type.CONTAINER.getValue())
+                .spoiler(spoiler)
+                .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()));
+
+        if (color != null) {
+            componentData.accentColor(color.getRGB());
+        }
+
+        return new ContainerComponent(componentData.build());
     }
 
     ContainerComponent(ComponentData data) {
@@ -57,8 +97,12 @@ public class ContainerComponent extends LayoutComponent {
      *
      * @param component the child component to be added
      * @return an {@code SectionComponent} containing the existing and added components
+     * @throws UnsupportedOperationException if any component added not support being used for ContainerComponent, check {@link Type#isSupportedForContainerComponent()}.
      */
-    public ContainerComponent withAddedComponent(ActionComponent component) {
+    private ContainerComponent withAddedComponent(MessageComponent component) {
+        if (!component.isSupportedInContainer()) {
+            throw new UnsupportedOperationException("Cannot add " + component.getClass().getSimpleName() + " to a container component because it is not supported");
+        }
         List<MessageComponent> components = new ArrayList<>(getChildren());
         components.add(component);
         return new ContainerComponent(ComponentData.builder()
@@ -79,5 +123,14 @@ public class ContainerComponent extends LayoutComponent {
             .type(this.getType().getValue())
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
             .build());
+    }
+
+    public Optional<Color> getColor() {
+        return this.getData().accentColor().toOptional()
+                .map(Color::of);
+    }
+
+    public boolean isSpoiler() {
+        return this.getData().spoiler().toOptional().orElse(false);
     }
 }
