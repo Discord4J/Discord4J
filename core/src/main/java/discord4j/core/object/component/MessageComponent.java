@@ -39,6 +39,10 @@ public class MessageComponent {
             case SECTION: return new SectionComponent(data);
             case SEPARATOR: return new SeparatorComponent(data);
             case ACTION_ROW: return new ActionRow(data);
+            case TEXT_DISPLAY: return new TextDisplayComponent(data);
+            case THUMBNAIL: return new ThumbnailComponent(data);
+            case MEDIA_GALLERY: return new MediaGalleryComponent(data);
+            case FILE: return new FileComponent(data);
             case BUTTON: return new Button(data);
             case SELECT_MENU_ROLE:
             case SELECT_MENU_CHANNEL:
