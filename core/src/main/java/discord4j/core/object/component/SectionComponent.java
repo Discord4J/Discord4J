@@ -52,6 +52,14 @@ public class SectionComponent extends LayoutComponent {
         super(data);
     }
 
+    public List<MessageComponent> getAccessories() {
+        return this.getData().accesory().toOptional()
+                .map(components -> components.stream()
+                        .map(MessageComponent::fromData)
+                        .collect(Collectors.toList()))
+                .orElseThrow(IllegalStateException::new); // components should always be present on a layout component
+    }
+
     /**
      * Create a new {@link SectionComponent} instance from {@code this}, adding a given component.
      *
@@ -79,5 +87,34 @@ public class SectionComponent extends LayoutComponent {
             .type(this.getType().getValue())
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
             .build());
+    }
+
+    /**
+     * Create a new {@link SectionComponent} instance from {@code this}, adding a given component.
+     *
+     * @param component the child accessorie to be added
+     * @return an {@code SectionComponent} accessorie the existing and added accessorie
+     */
+    public SectionComponent withAddedAccessorie(ActionComponent component) {
+        List<MessageComponent> components = new ArrayList<>(getChildren());
+        components.add(component);
+        return new SectionComponent(ComponentData.builder()
+                .type(this.getType().getValue())
+                .accesory(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+                .build());
+    }
+
+    /**
+     * Create a new {@link SectionComponent} instance from {@code this}, removing any existing accessorie by {@code customId}.
+     *
+     * @param customId the customId of the accessorie to remove
+     * @return an {@code SectionComponent} containing all accessorie that did not match the given {@code customId}
+     */
+    public SectionComponent withRemovedAccessorie(String customId) {
+        List<MessageComponent> components = getChildren(customId);
+        return new SectionComponent(ComponentData.builder()
+                .type(this.getType().getValue())
+                .accesory(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+                .build());
     }
 }
