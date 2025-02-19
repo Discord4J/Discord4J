@@ -66,6 +66,15 @@ public class MessageComponent {
     }
 
     /**
+     * Gets if these components It's supported to be used in {@link ContainerComponent}.
+     * @return true if can
+     * @see Type#isSupportedInContainer()
+     */
+    public boolean isSupportedInContainer() {
+        return this.getType().isSupportedForContainerComponent();
+    }
+
+    /**
      * Gets the type of the component.
      *
      * @return The type of the component.
@@ -76,7 +85,7 @@ public class MessageComponent {
 
     public enum Type {
         UNKNOWN(-1),
-        ACTION_ROW(1),
+        ACTION_ROW(1, true),
         BUTTON(2),
         SELECT_MENU(3),
         TEXT_INPUT(4),
@@ -84,23 +93,33 @@ public class MessageComponent {
         SELECT_MENU_ROLE(6),
         SELECT_MENU_MENTIONABLE(7),
         SELECT_MENU_CHANNEL(8),
-        SECTION(9),
-        TEXT_DISPLAY(10),
+        SECTION(9, true),
+        TEXT_DISPLAY(10, true),
         THUMBNAIL(11),
-        MEDIA_GALLERY(12),
-        FILE(13),
-        SEPARATOR(14),
+        MEDIA_GALLERY(12, true),
+        FILE(13, true),
+        SEPARATOR(14, true),
         CONTAINER(17),
         ;
 
         private final int value;
+        private final boolean supportedForContainerComponent;
 
         Type(int value) {
+            this(value, false);
+        }
+
+        Type(int value, boolean supportedForContainerComponent) {
             this.value = value;
+            this.supportedForContainerComponent = supportedForContainerComponent;
         }
 
         public int getValue() {
             return value;
+        }
+
+        public boolean isSupportedForContainerComponent() {
+            return supportedForContainerComponent;
         }
 
         public static Type of(int value) {
