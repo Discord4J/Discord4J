@@ -990,7 +990,10 @@ public final class Message implements Entity {
         SUPPRESS_NOTIFICATIONS(12),
 
         /** This message is a voice message. */
-        IS_VOICE_MESSAGE(13);
+        IS_VOICE_MESSAGE(13),
+
+        /** This message use components v2 */
+        IS_COMPONENTS_V2(15);
 
         /**
          * The underlying value as represented by Discord.
