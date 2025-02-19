@@ -95,7 +95,7 @@ public class SectionComponent extends LayoutComponent {
      * @param component the child accessorie to be added
      * @return an {@code SectionComponent} accessorie the existing and added accessorie
      */
-    public SectionComponent withAddedAccessorie(ActionComponent component) {
+    public SectionComponent withAddedAccessory(ActionComponent component) {
         List<MessageComponent> components = new ArrayList<>(getChildren());
         components.add(component);
         return new SectionComponent(ComponentData.builder()
@@ -110,7 +110,7 @@ public class SectionComponent extends LayoutComponent {
      * @param customId the customId of the accessorie to remove
      * @return an {@code SectionComponent} containing all accessorie that did not match the given {@code customId}
      */
-    public SectionComponent withRemovedAccessorie(String customId) {
+    public SectionComponent withRemovedAccessory(String customId) {
         List<MessageComponent> components = getChildren(customId);
         return new SectionComponent(ComponentData.builder()
                 .type(this.getType().getValue())
