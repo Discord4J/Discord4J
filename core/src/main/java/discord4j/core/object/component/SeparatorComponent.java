@@ -20,6 +20,18 @@ import discord4j.discordjson.json.ComponentData;
 
 public class SeparatorComponent extends LayoutComponent {
 
+    public static SeparatorComponent of(ComponentData data) {
+        return new SeparatorComponent(data);
+    }
+
+    public SeparatorComponent of(boolean divider) {
+        return new SeparatorComponent(ComponentData.builder().divider(divider).build());
+    }
+
+    public SeparatorComponent of(boolean divider, SpacingSize spacingSize) {
+        return new SeparatorComponent(ComponentData.builder().divider(divider).spacing(spacingSize.getValue()).build());
+    }
+
     SeparatorComponent(ComponentData data) {
         super(data);
     }
@@ -29,8 +41,7 @@ public class SeparatorComponent extends LayoutComponent {
     }
 
     public SpacingSize getSpacingSize() {
-        // we assume spacing exists in this type of Component
-        return SpacingSize.of(this.getData().spacing().get());
+        return SpacingSize.of(this.getData().spacing().toOptional().orElse(0));
     }
 
     public enum SpacingSize {
