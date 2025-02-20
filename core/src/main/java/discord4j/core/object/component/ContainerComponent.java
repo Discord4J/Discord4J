@@ -27,6 +27,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * A container component for message.
+ * <br>
+ * Currently discord just support this components being added:
+ * <ul>
+ *     <li>{@link ActionRow}</li>
+ *     <li>{@link TextDisplayComponent}</li>
+ *     <li>{@link SectionComponent}</li>
+ *     <li>{@link MediaGalleryComponent}</li>
+ *     <li>{@link SeparatorComponent}</li>
+ *     <li>{@link FileComponent}</li>
+ * </ul>
+ *
+ * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Containers</a>
+ */
 public class ContainerComponent extends LayoutComponent {
 
     /**
@@ -34,7 +49,6 @@ public class ContainerComponent extends LayoutComponent {
      *
      * @param components The child components of the container.
      * @return An {@code SectionComponent} containing the given components.
-     * @throws UnsupportedOperationException if any component added not support being used for ContainerComponent, check {@link Type#isSupportedForContainerComponent()}.
      */
     public static ContainerComponent of(MessageComponent... components) {
         return of(Arrays.asList(components));
@@ -45,7 +59,6 @@ public class ContainerComponent extends LayoutComponent {
      *
      * @param components The child components of the container.
      * @return An {@code SectionComponent} containing the given components.
-     * @throws UnsupportedOperationException if any component added not support being used for ContainerComponent, check {@link Type#isSupportedForContainerComponent()}.
      */
     public static ContainerComponent of(Color color, MessageComponent... components) {
         return of(color, false, Arrays.asList(components));
@@ -56,7 +69,6 @@ public class ContainerComponent extends LayoutComponent {
      *
      * @param components The child components of the container.
      * @return An {@code SectionComponent} containing the given components.
-     * @throws UnsupportedOperationException if any component added not support being used for ContainerComponent, check {@link Type#isSupportedForContainerComponent()}.
      */
     public static ContainerComponent of(List<? extends MessageComponent> components) {
         return of(null, false, components);
@@ -65,17 +77,10 @@ public class ContainerComponent extends LayoutComponent {
     /**
      * Creates an {@code SectionComponent} with the given components.
      *
-     * @param components The child components of the container.
+     * @param components The components of the container.
      * @return An {@code SectionComponent} containing the given components.
-     * @throws UnsupportedOperationException if any component added not support being used for ContainerComponent, check {@link Type#isSupportedForContainerComponent()}.
      */
     public static ContainerComponent of(@Nullable Color color, boolean spoiler, List<? extends MessageComponent> components) {
-        for (MessageComponent component : components) {
-            if (!component.isSupportedInContainer()) {
-                throw new UnsupportedOperationException("Cannot use " + component.getClass().getSimpleName() + " to build a ContainerComponent because it is not supported");
-            }
-        }
-
         ImmutableComponentData.Builder componentData = MessageComponent.getBuilder(Type.CONTAINER).spoiler(spoiler)
                 .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()));
 
@@ -95,12 +100,8 @@ public class ContainerComponent extends LayoutComponent {
      *
      * @param component the child component to be added
      * @return an {@code SectionComponent} containing the existing and added components
-     * @throws UnsupportedOperationException if any component added not support being used for ContainerComponent, check {@link Type#isSupportedForContainerComponent()}.
      */
     private ContainerComponent withAddedComponent(MessageComponent component) {
-        if (!component.isSupportedInContainer()) {
-            throw new UnsupportedOperationException("Cannot add " + component.getClass().getSimpleName() + " to a container component because it is not supported");
-        }
         List<MessageComponent> components = new ArrayList<>(getChildren());
         components.add(component);
         return new ContainerComponent(ComponentData.builder()
