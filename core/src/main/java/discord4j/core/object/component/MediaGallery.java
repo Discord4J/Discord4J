@@ -23,12 +23,29 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * A media gallery component for message.
+ *
+ * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Media Gallery</a>
+ */
 public class MediaGallery extends MessageComponent {
 
+    /**
+     * Creates an {@code MediaGallery} with the given {@code MediaGalleryItem}.
+     *
+     * @param mediaGalleryItems The items for the gallery
+     * @return An {@code SectionComponent} containing the given items
+     */
     public static MediaGallery of(MediaGalleryItem... mediaGalleryItems) {
         return of(Arrays.asList(mediaGalleryItems));
     }
 
+    /**
+     * Creates an {@code MediaGallery} with the given {@code MediaGalleryItem}.
+     *
+     * @param mediaGalleryItems The items for the gallery
+     * @return An {@code SectionComponent} containing the given items
+     */
     public static MediaGallery of(List<MediaGalleryItem> mediaGalleryItems) {
         return new MediaGallery(MessageComponent.getBuilder(Type.MEDIA_GALLERY).addAllItems(mediaGalleryItems.stream().map(MediaGalleryItem::getData).collect(Collectors.toList())).build());
     }
@@ -37,6 +54,11 @@ public class MediaGallery extends MessageComponent {
         super(data);
     }
 
+    /**
+     * Gets the media items.
+     *
+     * @return A list of {@code MediaGalleryItem}
+     */
     public List<MediaGalleryItem> getItems() {
         return this.getData().items().toOptional()
             .orElse(Collections.emptyList()).stream()
