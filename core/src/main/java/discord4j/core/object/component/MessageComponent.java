@@ -26,10 +26,7 @@ import discord4j.discordjson.json.ImmutableComponentData;
  */
 public class MessageComponent {
 
-    static ImmutableComponentData.Builder getBuilder(Type type) {
-        if (type == null) {
-            throw new NullPointerException("Type cannot be null");
-        }
+    static ImmutableComponentData.Builder getBuilder(final Type type) {
         return ImmutableComponentData.builder().type(type.getValue());
     }
 
@@ -78,15 +75,6 @@ public class MessageComponent {
     }
 
     /**
-     * Gets if these components It's supported to be used in {@link ContainerComponent}.
-     * @return true if can
-     * @see Type#isSupportedInContainer()
-     */
-    public boolean isSupportedInContainer() {
-        return this.getType().isSupportedForContainerComponent();
-    }
-
-    /**
      * Gets the type of the component.
      *
      * @return The type of the component.
@@ -97,7 +85,7 @@ public class MessageComponent {
 
     public enum Type {
         UNKNOWN(-1),
-        ACTION_ROW(1, true),
+        ACTION_ROW(1),
         BUTTON(2),
         SELECT_MENU(3),
         TEXT_INPUT(4),
@@ -105,33 +93,22 @@ public class MessageComponent {
         SELECT_MENU_ROLE(6),
         SELECT_MENU_MENTIONABLE(7),
         SELECT_MENU_CHANNEL(8),
-        SECTION(9, true),
-        TEXT_DISPLAY(10, true),
+        SECTION(9),
+        TEXT_DISPLAY(10),
         THUMBNAIL(11),
-        MEDIA_GALLERY(12, true),
-        FILE(13, true),
-        SEPARATOR(14, true),
+        MEDIA_GALLERY(12),
+        FILE(13),
+        SEPARATOR(14),
         CONTAINER(17),
         ;
 
         private final int value;
-        private final boolean supportedForContainerComponent;
-
         Type(int value) {
-            this(value, false);
-        }
-
-        Type(int value, boolean supportedForContainerComponent) {
             this.value = value;
-            this.supportedForContainerComponent = supportedForContainerComponent;
         }
 
         public int getValue() {
             return value;
-        }
-
-        public boolean isSupportedForContainerComponent() {
-            return supportedForContainerComponent;
         }
 
         public static Type of(int value) {
