@@ -19,14 +19,16 @@ package discord4j.core.object.component;
 import discord4j.discordjson.json.MediaGalleryItemData;
 import discord4j.discordjson.possible.Possible;
 
+import java.util.Optional;
+
 public class MediaGalleryItem {
 
     public static MediaGalleryItem of(UnfurledMediaItem mediaItem, String description, boolean spoiler) {
-        return new MediaGalleryItem(MediaGalleryItemData.builder().media(mediaItem.getData()).description(description).spoiler(spoiler).build());
+        return new MediaGalleryItem(MediaGalleryItemData.builder().media(mediaItem.getData()).description(Possible.of(Optional.of(description))).spoiler(spoiler).build());
     }
 
     public static MediaGalleryItem of(UnfurledMediaItem mediaItem, String description) {
-        return new MediaGalleryItem(MediaGalleryItemData.builder().media(mediaItem.getData()).description(description).build());
+        return new MediaGalleryItem(MediaGalleryItemData.builder().media(mediaItem.getData()).description(Possible.of(Optional.of(description))).build());
     }
 
     public static MediaGalleryItem of(UnfurledMediaItem mediaItem) {
