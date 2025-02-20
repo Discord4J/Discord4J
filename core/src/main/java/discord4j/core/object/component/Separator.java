@@ -17,16 +17,40 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
-import discord4j.discordjson.json.ImmutableComponentData;
 
+/**
+ * A separator component for message.
+ *
+ * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Separator</a>
+ */
 public class Separator extends LayoutComponent {
 
-    private final static ImmutableComponentData.Builder BUILDER = ComponentData.builder().from(ComponentData.builder().type(Type.SEPARATOR.getValue()).build());
+    /**
+     * Creates an {@code Separator}.
+     *
+     * @return An {@code Separator}
+     */
+    public static Separator of() {
+        return new Separator(MessageComponent.getBuilder(Type.SEPARATOR).build());
+    }
 
+    /**
+     * Creates an {@code Separator}.
+     *
+     * @param divider If the separator is a divider
+     * @return An {@code Separator}
+     */
     public static Separator of(boolean divider) {
         return new Separator(MessageComponent.getBuilder(Type.SEPARATOR).divider(divider).build());
     }
 
+    /**
+     * Creates an {@code Separator}.
+     *
+     * @param divider If the separator is a divider
+     * @param spacingSize The spacing size for the divider
+     * @return An {@code Separator}
+     */
     public static Separator of(boolean divider, SpacingSize spacingSize) {
         return new Separator(MessageComponent.getBuilder(Type.SEPARATOR).divider(divider).spacing(spacingSize.getValue()).build());
     }
@@ -35,12 +59,22 @@ public class Separator extends LayoutComponent {
         super(data);
     }
 
+    /**
+     * Gets if this separator is a divider.
+     *
+     * @return {@code true} if is a divider, false otherwise
+     */
     public boolean isDivider() {
-        return this.getData().divider().get();
+        return this.getData().divider().toOptional().orElse(true);
     }
 
+    /**
+     * Gets the spacing size for this separator.
+     *
+     * @return An {@code SpacingSize}
+     */
     public SpacingSize getSpacingSize() {
-        return SpacingSize.of(this.getData().spacing().toOptional().orElse(0));
+        return SpacingSize.of(this.getData().spacing().toOptional().orElse(1));
     }
 
     public enum SpacingSize {
