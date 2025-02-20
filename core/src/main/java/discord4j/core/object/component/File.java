@@ -29,7 +29,7 @@ public class File extends MessageComponent {
      * Creates an {@code File} with the given {@code UnfurledMediaItem}.
      *
      * @param file The file component with an {@code attachment://} reference
-     * @return An {@code SectionComponent} containing the given components
+     * @return An {@code File} containing the given item
      */
     public static File of(UnfurledMediaItem file) {
         return new File(MessageComponent.getBuilder(Type.FILE).file(file.getData()).build());
@@ -40,7 +40,7 @@ public class File extends MessageComponent {
      *
      * @param file The file component with an {@code attachment://} reference
      * @param spoiler Sets the spoiler
-     * @return An {@code SectionComponent} containing the given components
+     * @return An {@code File} containing the given item
      */
     public static File of(UnfurledMediaItem file, boolean spoiler) {
         return new File(MessageComponent.getBuilder(Type.FILE).file(file.getData()).spoiler(spoiler).build());
