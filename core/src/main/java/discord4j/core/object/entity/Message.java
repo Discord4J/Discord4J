@@ -992,7 +992,11 @@ public final class Message implements Entity {
         /** This message is a voice message. */
         IS_VOICE_MESSAGE(13),
 
-        /** This message use components v2 */
+        /**
+         * This message use components v2.
+         *
+         * @apiNote this tag restrict the use of content and embeds when create a message
+         */
         IS_COMPONENTS_V2(15);
 
         /**
