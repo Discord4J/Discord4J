@@ -24,6 +24,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * A container component for message.
+ * <br>
+ * <ul>
+ *     <li>Currently accessory only support {@link ThumbnailComponent} and {@link Button}</li>
+ *     <li>Currently the components valid are {@link TextDisplayComponent}</li>
+ * </ul>
+ *
+ * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Containers</a>
+ */
 public class SectionComponent extends LayoutComponent {
 
     /**
@@ -32,7 +42,6 @@ public class SectionComponent extends LayoutComponent {
      * @param accessory The accessory component of the section.
      * @param components The components of the section.
      * @return An {@code SectionComponent} containing the given components.
-     * @see #of(MessageComponent, List)
      */
     public static SectionComponent of(MessageComponent accessory, MessageComponent... components) {
         return of(accessory, Arrays.asList(components));
@@ -40,11 +49,6 @@ public class SectionComponent extends LayoutComponent {
 
     /**
      * Creates an {@code SectionComponent} with the given components.
-     * <br>
-     * <ul>
-     *     <li>Currently accessory only support {@link ThumbnailComponent} and {@link Button}</li>
-     *     <li>Currently the components valid are {@link TextDisplayComponent}</li>
-     * </ul>
      *
      * @param accessory The accessory component of the section.
      * @param components The components of the section.
