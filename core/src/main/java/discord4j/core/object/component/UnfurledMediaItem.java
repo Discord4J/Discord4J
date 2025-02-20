@@ -19,8 +19,16 @@ package discord4j.core.object.component;
 import discord4j.discordjson.json.UnfurledMediaItemData;
 import discord4j.discordjson.possible.Possible;
 
+/**
+ * Represents a unfurled media item.
+ */
 public class UnfurledMediaItem {
 
+    /**
+     * Build
+     * @param url
+     * @return
+     */
     public static UnfurledMediaItem of(String url) {
         return new UnfurledMediaItem(UnfurledMediaItemData.builder().url(url).build());
     }

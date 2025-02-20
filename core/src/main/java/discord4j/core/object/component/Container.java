@@ -129,6 +129,11 @@ public class Container extends LayoutComponent {
                 .map(Color::of);
     }
 
+    /**
+     * Gets if this component is a spoiler.
+     *
+     * @return {@code true} if is spoiler, false otherwise
+     */
     public boolean isSpoiler() {
         return this.getData().spoiler().toOptional().orElse(false);
     }
