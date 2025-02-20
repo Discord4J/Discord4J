@@ -39,7 +39,7 @@ public class File extends MessageComponent {
      * Creates an {@code File} with the given {@code UnfurledMediaItem}.
      *
      * @param file The file component with an {@code attachment://} reference
-     * @param spoiler Sets the spoiler
+     * @param spoiler If this component it's a spoiler
      * @return An {@code File} containing the given item
      */
     public static File of(UnfurledMediaItem file, boolean spoiler) {
