@@ -17,6 +17,7 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.json.ImmutableComponentData;
 
 /**
  * A Discord message component.
@@ -24,6 +25,13 @@ import discord4j.discordjson.json.ComponentData;
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#message-components">Message Components</a>
  */
 public class MessageComponent {
+
+    static ImmutableComponentData.Builder getBuilder(Type type) {
+        if (type == null) {
+            throw new NullPointerException("Type cannot be null");
+        }
+        return ImmutableComponentData.builder().type(type.getValue());
+    }
 
     /**
      * Constructs a {@code MessageComponent} from raw data.
