@@ -24,46 +24,51 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * A container component for message.
+ * A section component for message.
  * <br>
  * <ul>
  *     <li>Currently accessory only support {@link Thumbnail} and {@link Button}</li>
  *     <li>Currently the components valid are {@link TextDisplay}</li>
  * </ul>
  *
- * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Containers</a>
+ * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Section</a>
  */
-public class SectionComponent extends LayoutComponent {
+public class Section extends LayoutComponent {
 
     /**
-     * Creates an {@code SectionComponent} with the given components.
+     * Creates an {@code Section} with the given components.
      *
-     * @param accessory The accessory component of the section.
-     * @param components The components of the section.
-     * @return An {@code SectionComponent} containing the given components.
+     * @param accessory The accessory component of the section
+     * @param components The components of the section
+     * @return An {@code Section} containing the given components
      */
-    public static SectionComponent of(MessageComponent accessory, MessageComponent... components) {
+    public static Section of(MessageComponent accessory, MessageComponent... components) {
         return of(accessory, Arrays.asList(components));
     }
 
     /**
-     * Creates an {@code SectionComponent} with the given components.
+     * Creates an {@code Section} with the given components.
      *
-     * @param accessory The accessory component of the section.
-     * @param components The components of the section.
-     * @return An {@code SectionComponent} containing the given components.
+     * @param accessory The accessory component of the section
+     * @param components The components of the section
+     * @return An {@code Section} containing the given components
      */
-    public static SectionComponent of(MessageComponent accessory, List<? extends MessageComponent> components) {
-        return new SectionComponent(MessageComponent.getBuilder(Type.SECTION)
+    public static Section of(MessageComponent accessory, List<? extends MessageComponent> components) {
+        return new Section(MessageComponent.getBuilder(Type.SECTION)
             .accessory(accessory.getData())
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
             .build());
     }
 
-    SectionComponent(ComponentData data) {
+    Section(ComponentData data) {
         super(data);
     }
 
+    /**
+     * Gets the accessory for this section.
+     *
+     * @return An component
+     */
     public MessageComponent getAccessorie() {
         return this.getData().accessory().toOptional()
             .map(MessageComponent::fromData)
@@ -71,29 +76,29 @@ public class SectionComponent extends LayoutComponent {
     }
 
     /**
-     * Create a new {@link SectionComponent} instance from {@code this}, adding a given component.
+     * Create a new {@link Section} instance from {@code this}, adding a given component.
      *
      * @param component the child component to be added
-     * @return an {@code SectionComponent} containing the existing and added components
+     * @return an {@code Section} containing the existing and added components
      */
-    public SectionComponent withAddedComponent(ActionComponent component) {
+    public Section withAddedComponent(ActionComponent component) {
         List<MessageComponent> components = new ArrayList<>(getChildren());
         components.add(component);
-        return new SectionComponent(ComponentData.builder()
+        return new Section(ComponentData.builder()
             .type(this.getType().getValue())
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
             .build());
     }
 
     /**
-     * Create a new {@link SectionComponent} instance from {@code this}, removing any existing component by {@code customId}.
+     * Create a new {@link Section} instance from {@code this}, removing any existing component by {@code customId}.
      *
      * @param customId the customId of the component to remove
-     * @return an {@code SectionComponent} containing all components that did not match the given {@code customId}
+     * @return an {@code Section} containing all components that did not match the given {@code customId}
      */
-    public SectionComponent withRemovedComponent(String customId) {
+    public Section withRemovedComponent(String customId) {
         List<MessageComponent> components = getChildren(customId);
-        return new SectionComponent(ComponentData.builder()
+        return new Section(ComponentData.builder()
             .type(this.getType().getValue())
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
             .build());
