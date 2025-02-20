@@ -24,11 +24,11 @@ public class SeparatorComponent extends LayoutComponent {
     private final static ImmutableComponentData.Builder BUILDER = ComponentData.builder().from(ComponentData.builder().type(Type.SEPARATOR.getValue()).build());
 
     public static SeparatorComponent of(boolean divider) {
-        return new SeparatorComponent(BUILDER.divider(divider).build());
+        return new SeparatorComponent(MessageComponent.getBuilder(Type.SEPARATOR).divider(divider).build());
     }
 
     public static SeparatorComponent of(boolean divider, SpacingSize spacingSize) {
-        return new SeparatorComponent(BUILDER.divider(divider).spacing(spacingSize.getValue()).build());
+        return new SeparatorComponent(MessageComponent.getBuilder(Type.SEPARATOR).divider(divider).spacing(spacingSize.getValue()).build());
     }
 
     SeparatorComponent(ComponentData data) {

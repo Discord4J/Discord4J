@@ -24,18 +24,16 @@ import java.util.Optional;
 
 public class ThumbnailComponent extends MessageComponent {
 
-    private final static ImmutableComponentData.Builder BUILDER = ComponentData.builder().from(ComponentData.builder().type(Type.THUMBNAIL.getValue()).build());
-
     public static ThumbnailComponent of(UnfurledMediaItem media) {
-        return new ThumbnailComponent(BUILDER.media(media.getData()).build());
+        return new ThumbnailComponent(MessageComponent.getBuilder(Type.THUMBNAIL).media(media.getData()).build());
     }
 
     public static ThumbnailComponent of(UnfurledMediaItem media, String description) {
-        return new ThumbnailComponent(BUILDER.media(media.getData()).description(Possible.of(Optional.of(description))).build());
+        return new ThumbnailComponent(MessageComponent.getBuilder(Type.THUMBNAIL).media(media.getData()).description(Possible.of(Optional.of(description))).build());
     }
 
     public static ThumbnailComponent of(UnfurledMediaItem media, String description, boolean spoiler) {
-        return new ThumbnailComponent(BUILDER.media(media.getData()).description(Possible.of(Optional.of(description))).spoiler(spoiler).build());
+        return new ThumbnailComponent(MessageComponent.getBuilder(Type.THUMBNAIL).media(media.getData()).description(Possible.of(Optional.of(description))).spoiler(spoiler).build());
     }
 
     ThumbnailComponent(ComponentData data) {

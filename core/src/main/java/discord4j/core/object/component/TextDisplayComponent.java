@@ -17,14 +17,11 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
-import discord4j.discordjson.json.ImmutableComponentData;
 
 public class TextDisplayComponent extends MessageComponent {
 
-    private final static ImmutableComponentData.Builder BUILDER = ComponentData.builder().from(ComponentData.builder().type(Type.TEXT_DISPLAY.getValue()).build());
-
     public static TextDisplayComponent of(String content) {
-        return new TextDisplayComponent(BUILDER.content(content).build());
+        return new TextDisplayComponent(MessageComponent.getBuilder(Type.TEXT_DISPLAY).content(content).build());
     }
 
     TextDisplayComponent(ComponentData data) {
