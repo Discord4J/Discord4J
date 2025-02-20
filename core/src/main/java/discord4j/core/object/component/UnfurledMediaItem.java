@@ -25,9 +25,10 @@ import discord4j.discordjson.possible.Possible;
 public class UnfurledMediaItem {
 
     /**
-     * Build
-     * @param url
-     * @return
+     * Creates a {@code UnfurledMediaItem} with a given url.
+     *
+     * @param url The url to use
+     * @return An {@code UnfurledMediaItem}
      */
     public static UnfurledMediaItem of(String url) {
         return new UnfurledMediaItem(UnfurledMediaItemData.builder().url(url).build());
@@ -43,6 +44,11 @@ public class UnfurledMediaItem {
         return this.data;
     }
 
+    /**
+     * Gets the URL for this item.
+     *
+     * @return The url
+     */
     public String getURL() {
         return this.getData().url();
     }
