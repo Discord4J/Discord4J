@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  * <ul>
  *     <li>{@link ActionRow}</li>
  *     <li>{@link TextDisplay}</li>
- *     <li>{@link SectionComponent}</li>
+ *     <li>{@link Section}</li>
  *     <li>{@link MediaGallery}</li>
  *     <li>{@link Separator}</li>
  *     <li>{@link File}</li>
@@ -124,6 +124,11 @@ public class Container extends LayoutComponent {
             .build());
     }
 
+    /**
+     * Gets the accent color for this container.
+     *
+     * @return An optional color.
+     */
     public Optional<Color> getColor() {
         return this.getData().accentColor().toOptional()
                 .map(Color::of);
