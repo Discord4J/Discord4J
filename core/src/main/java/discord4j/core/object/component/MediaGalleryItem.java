@@ -21,16 +21,40 @@ import discord4j.discordjson.possible.Possible;
 
 import java.util.Optional;
 
+/**
+ * Represents a Media Gallery item.
+ */
 public class MediaGalleryItem {
 
+    /**
+     * Creates an {@code MediaGalleryItem}.
+     *
+     * @param mediaItem The {@link UnfurledMediaItem} item for display
+     * @param description The description for this item
+     * @param spoiler If this component it's a spoiler
+     * @return An {@code MediaGalleryItem} containing the given items
+     */
     public static MediaGalleryItem of(UnfurledMediaItem mediaItem, String description, boolean spoiler) {
         return new MediaGalleryItem(MediaGalleryItemData.builder().media(mediaItem.getData()).description(Possible.of(Optional.of(description))).spoiler(spoiler).build());
     }
 
+    /**
+     * Creates an {@code MediaGalleryItem}.
+     *
+     * @param mediaItem The {@link UnfurledMediaItem} item for display
+     * @param description The description for this item
+     * @return An {@code MediaGalleryItem} containing the given items
+     */
     public static MediaGalleryItem of(UnfurledMediaItem mediaItem, String description) {
         return new MediaGalleryItem(MediaGalleryItemData.builder().media(mediaItem.getData()).description(Possible.of(Optional.of(description))).build());
     }
 
+    /**
+     * Creates an {@code MediaGalleryItem}.
+     *
+     * @param mediaItem The {@link UnfurledMediaItem} item for display
+     * @return An {@code MediaGalleryItem} containing the given items
+     */
     public static MediaGalleryItem of(UnfurledMediaItem mediaItem) {
         return new MediaGalleryItem(MediaGalleryItemData.builder().media(mediaItem.getData()).build());
     }
