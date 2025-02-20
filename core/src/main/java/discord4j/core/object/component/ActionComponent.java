@@ -19,7 +19,7 @@ package discord4j.core.object.component;
 import discord4j.discordjson.json.ComponentData;
 
 /**
- * A message component that is placed in a {@link LayoutComponent}.
+ * A message component who can trigger an action.
  */
 public abstract class ActionComponent extends MessageComponent {
 
