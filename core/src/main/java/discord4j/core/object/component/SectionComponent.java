@@ -31,8 +31,9 @@ public class SectionComponent extends LayoutComponent {
     /**
      * Creates an {@code SectionComponent} with the given components.
      *
-     * @param components The child components of the section.
+     * @param components The components of the section.
      * @return An {@code SectionComponent} containing the given components.
+     * @see #of(MessageComponent, List)
      */
     public static SectionComponent of(MessageComponent... components) {
         return of(Arrays.asList(components));
@@ -41,8 +42,9 @@ public class SectionComponent extends LayoutComponent {
     /**
      * Creates an {@code SectionComponent} with the given components.
      *
-     * @param components The child components of the section.
+     * @param components The components of the section.
      * @return An {@code SectionComponent} containing the given components.
+     * @see #of(MessageComponent, List)
      */
     public static SectionComponent of(List<? extends MessageComponent> components) {
         return new SectionComponent(BUILDER
@@ -51,8 +53,14 @@ public class SectionComponent extends LayoutComponent {
 
     /**
      * Creates an {@code SectionComponent} with the given components.
+     * <br>
+     * <ul>
+     *     <li>Currently accessory only support {@link ThumbnailComponent} and {@link Button}</li>
+     *     <li>Currently the components valid are {@link TextDisplayComponent}</li>
+     * </ul>
      *
-     * @param components The child components of the section.
+     * @param accessory The accessory component of the section.
+     * @param components The components of the section.
      * @return An {@code SectionComponent} containing the given components.
      */
     public static SectionComponent of(MessageComponent accessory, List<? extends MessageComponent> components) {
