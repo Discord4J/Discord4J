@@ -41,7 +41,7 @@ public class MessageComponent {
     public static MessageComponent fromData(ComponentData data) {
         switch (Type.of(data.type())) {
             case CONTAINER: return new Container(data);
-            case SECTION: return new SectionComponent(data);
+            case SECTION: return new Section(data);
             case SEPARATOR: return new Separator(data);
             case ACTION_ROW: return new ActionRow(data);
             case TEXT_DISPLAY: return new TextDisplay(data);
