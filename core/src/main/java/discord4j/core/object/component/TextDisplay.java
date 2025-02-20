@@ -18,8 +18,30 @@ package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
 
+/**
+ * A text display component for message.
+ * <br>
+ * <b>Note:</b> the components in the entire message support a max of {@link #MAX_DISPLAY_CHARACTERS_LENGTH} characters in TextDisplay.
+ * <br>
+ * If consider 4000 for limit then consider you can:
+ * <ul>
+ *     <li>two {@link TextDisplay} each with 2000 characters</li>
+ *     <li>one {@link TextDisplay} each with 4000 characters</li>
+ *     <li>three {@link TextDisplay}, one with 2000 characters and two with 1000 characters</li>
+ * </ul>
+ * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Text Display</a>
+ */
 public class TextDisplay extends MessageComponent {
 
+    /** The maximum amount of characters that can be in the sum of these components. */
+    public static final int MAX_DISPLAY_CHARACTERS_LENGTH = 4000;
+
+    /**
+     * Creates an {@code TextDisplay}.
+     *
+     * @param content The content
+     * @return An {@code TextDisplay}
+     */
     public static TextDisplay of(String content) {
         return new TextDisplay(MessageComponent.getBuilder(Type.TEXT_DISPLAY).content(content).build());
     }
@@ -28,6 +50,11 @@ public class TextDisplay extends MessageComponent {
         super(data);
     }
 
+    /**
+     * Gets the content for this text display.
+     *
+     * @return The content
+     */
     public String getContent() {
         return this.getData().content().get();
     }
