@@ -26,29 +26,16 @@ import java.util.stream.Collectors;
 
 public class SectionComponent extends LayoutComponent {
 
-    private final static ImmutableComponentData.Builder BUILDER = ComponentData.builder().from(ComponentData.builder().type(Type.SECTION.getValue()).build());
-
     /**
      * Creates an {@code SectionComponent} with the given components.
      *
+     * @param accessory The accessory component of the section.
      * @param components The components of the section.
      * @return An {@code SectionComponent} containing the given components.
      * @see #of(MessageComponent, List)
      */
-    public static SectionComponent of(MessageComponent... components) {
-        return of(Arrays.asList(components));
-    }
-
-    /**
-     * Creates an {@code SectionComponent} with the given components.
-     *
-     * @param components The components of the section.
-     * @return An {@code SectionComponent} containing the given components.
-     * @see #of(MessageComponent, List)
-     */
-    public static SectionComponent of(List<? extends MessageComponent> components) {
-        return new SectionComponent(BUILDER
-            .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList())).build());
+    public static SectionComponent of(MessageComponent accessory, MessageComponent... components) {
+        return of(accessory, Arrays.asList(components));
     }
 
     /**
@@ -64,7 +51,7 @@ public class SectionComponent extends LayoutComponent {
      * @return An {@code SectionComponent} containing the given components.
      */
     public static SectionComponent of(MessageComponent accessory, List<? extends MessageComponent> components) {
-        return new SectionComponent(BUILDER
+        return new SectionComponent(MessageComponent.getBuilder(Type.SECTION)
             .accessory(accessory.getData())
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
             .build());
