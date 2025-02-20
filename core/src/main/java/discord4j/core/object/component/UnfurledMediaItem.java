@@ -17,6 +17,7 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.UnfurledMediaItemData;
+import discord4j.discordjson.possible.Possible;
 
 public class UnfurledMediaItem {
 
@@ -36,6 +37,18 @@ public class UnfurledMediaItem {
 
     public String getURL() {
         return this.getData().url();
+    }
+
+    public int getWidth() {
+        return Possible.flatOpt(this.getData().width()).orElse(0);
+    }
+
+    public int getHeight() {
+        return Possible.flatOpt(this.getData().height()).orElse(0);
+    }
+
+    public String getContentType() {
+        return Possible.flatOpt(this.getData().contentType()).orElse("");
     }
 
 }
