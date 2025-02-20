@@ -17,7 +17,6 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
-import discord4j.discordjson.json.ImmutableComponentData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,8 +27,8 @@ import java.util.stream.Collectors;
  * A container component for message.
  * <br>
  * <ul>
- *     <li>Currently accessory only support {@link ThumbnailComponent} and {@link Button}</li>
- *     <li>Currently the components valid are {@link TextDisplayComponent}</li>
+ *     <li>Currently accessory only support {@link Thumbnail} and {@link Button}</li>
+ *     <li>Currently the components valid are {@link TextDisplay}</li>
  * </ul>
  *
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Containers</a>

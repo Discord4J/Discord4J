@@ -33,16 +33,16 @@ import java.util.stream.Collectors;
  * Currently discord just support this components being added:
  * <ul>
  *     <li>{@link ActionRow}</li>
- *     <li>{@link TextDisplayComponent}</li>
+ *     <li>{@link TextDisplay}</li>
  *     <li>{@link SectionComponent}</li>
- *     <li>{@link MediaGalleryComponent}</li>
- *     <li>{@link SeparatorComponent}</li>
- *     <li>{@link FileComponent}</li>
+ *     <li>{@link MediaGallery}</li>
+ *     <li>{@link Separator}</li>
+ *     <li>{@link File}</li>
  * </ul>
  *
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Containers</a>
  */
-public class ContainerComponent extends LayoutComponent {
+public class Container extends LayoutComponent {
 
     /**
      * Creates an {@code SectionComponent} with the given components.
@@ -50,7 +50,7 @@ public class ContainerComponent extends LayoutComponent {
      * @param components The child components of the container.
      * @return An {@code SectionComponent} containing the given components.
      */
-    public static ContainerComponent of(MessageComponent... components) {
+    public static Container of(MessageComponent... components) {
         return of(Arrays.asList(components));
     }
 
@@ -60,7 +60,7 @@ public class ContainerComponent extends LayoutComponent {
      * @param components The child components of the container.
      * @return An {@code SectionComponent} containing the given components.
      */
-    public static ContainerComponent of(Color color, MessageComponent... components) {
+    public static Container of(Color color, MessageComponent... components) {
         return of(color, false, Arrays.asList(components));
     }
 
@@ -70,7 +70,7 @@ public class ContainerComponent extends LayoutComponent {
      * @param components The child components of the container.
      * @return An {@code SectionComponent} containing the given components.
      */
-    public static ContainerComponent of(List<? extends MessageComponent> components) {
+    public static Container of(List<? extends MessageComponent> components) {
         return of(null, false, components);
     }
 
@@ -80,7 +80,7 @@ public class ContainerComponent extends LayoutComponent {
      * @param components The components of the container.
      * @return An {@code SectionComponent} containing the given components.
      */
-    public static ContainerComponent of(@Nullable Color color, boolean spoiler, List<? extends MessageComponent> components) {
+    public static Container of(@Nullable Color color, boolean spoiler, List<? extends MessageComponent> components) {
         ImmutableComponentData.Builder componentData = MessageComponent.getBuilder(Type.CONTAINER).spoiler(spoiler)
                 .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()));
 
@@ -88,37 +88,37 @@ public class ContainerComponent extends LayoutComponent {
             componentData.accentColor(color.getRGB());
         }
 
-        return new ContainerComponent(componentData.build());
+        return new Container(componentData.build());
     }
 
-    ContainerComponent(ComponentData data) {
+    Container(ComponentData data) {
         super(data);
     }
 
     /**
-     * Create a new {@link ContainerComponent} instance from {@code this}, adding a given component.
+     * Create a new {@link Container} instance from {@code this}, adding a given component.
      *
      * @param component the child component to be added
      * @return an {@code SectionComponent} containing the existing and added components
      */
-    private ContainerComponent withAddedComponent(MessageComponent component) {
+    private Container withAddedComponent(MessageComponent component) {
         List<MessageComponent> components = new ArrayList<>(getChildren());
         components.add(component);
-        return new ContainerComponent(ComponentData.builder()
+        return new Container(ComponentData.builder()
             .type(this.getType().getValue())
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
             .build());
     }
 
     /**
-     * Create a new {@link ContainerComponent} instance from {@code this}, removing any existing component by {@code customId}.
+     * Create a new {@link Container} instance from {@code this}, removing any existing component by {@code customId}.
      *
      * @param customId the customId of the component to remove
      * @return an {@code SectionComponent} containing all components that did not match the given {@code customId}
      */
-    public ContainerComponent withRemovedComponent(String customId) {
+    public Container withRemovedComponent(String customId) {
         List<MessageComponent> components = getChildren(customId);
-        return new ContainerComponent(ComponentData.builder()
+        return new Container(ComponentData.builder()
             .type(this.getType().getValue())
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
             .build());

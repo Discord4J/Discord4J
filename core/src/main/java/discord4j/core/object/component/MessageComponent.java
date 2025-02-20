@@ -40,14 +40,14 @@ public class MessageComponent {
      */
     public static MessageComponent fromData(ComponentData data) {
         switch (Type.of(data.type())) {
-            case CONTAINER: return new ContainerComponent(data);
+            case CONTAINER: return new Container(data);
             case SECTION: return new SectionComponent(data);
-            case SEPARATOR: return new SeparatorComponent(data);
+            case SEPARATOR: return new Separator(data);
             case ACTION_ROW: return new ActionRow(data);
-            case TEXT_DISPLAY: return new TextDisplayComponent(data);
-            case THUMBNAIL: return new ThumbnailComponent(data);
-            case MEDIA_GALLERY: return new MediaGalleryComponent(data);
-            case FILE: return new FileComponent(data);
+            case TEXT_DISPLAY: return new TextDisplay(data);
+            case THUMBNAIL: return new Thumbnail(data);
+            case MEDIA_GALLERY: return new MediaGallery(data);
+            case FILE: return new File(data);
             case BUTTON: return new Button(data);
             case SELECT_MENU_ROLE:
             case SELECT_MENU_CHANNEL:

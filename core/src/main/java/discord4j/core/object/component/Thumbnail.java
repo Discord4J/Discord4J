@@ -17,26 +17,25 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
-import discord4j.discordjson.json.ImmutableComponentData;
 import discord4j.discordjson.possible.Possible;
 
 import java.util.Optional;
 
-public class ThumbnailComponent extends MessageComponent {
+public class Thumbnail extends MessageComponent {
 
-    public static ThumbnailComponent of(UnfurledMediaItem media) {
-        return new ThumbnailComponent(MessageComponent.getBuilder(Type.THUMBNAIL).media(media.getData()).build());
+    public static Thumbnail of(UnfurledMediaItem media) {
+        return new Thumbnail(MessageComponent.getBuilder(Type.THUMBNAIL).media(media.getData()).build());
     }
 
-    public static ThumbnailComponent of(UnfurledMediaItem media, String description) {
-        return new ThumbnailComponent(MessageComponent.getBuilder(Type.THUMBNAIL).media(media.getData()).description(Possible.of(Optional.of(description))).build());
+    public static Thumbnail of(UnfurledMediaItem media, String description) {
+        return new Thumbnail(MessageComponent.getBuilder(Type.THUMBNAIL).media(media.getData()).description(Possible.of(Optional.of(description))).build());
     }
 
-    public static ThumbnailComponent of(UnfurledMediaItem media, String description, boolean spoiler) {
-        return new ThumbnailComponent(MessageComponent.getBuilder(Type.THUMBNAIL).media(media.getData()).description(Possible.of(Optional.of(description))).spoiler(spoiler).build());
+    public static Thumbnail of(UnfurledMediaItem media, String description, boolean spoiler) {
+        return new Thumbnail(MessageComponent.getBuilder(Type.THUMBNAIL).media(media.getData()).description(Possible.of(Optional.of(description))).spoiler(spoiler).build());
     }
 
-    ThumbnailComponent(ComponentData data) {
+    Thumbnail(ComponentData data) {
         super(data);
     }
 

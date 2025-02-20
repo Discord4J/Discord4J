@@ -18,13 +18,13 @@ package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
 
-public class TextDisplayComponent extends MessageComponent {
+public class TextDisplay extends MessageComponent {
 
-    public static TextDisplayComponent of(String content) {
-        return new TextDisplayComponent(MessageComponent.getBuilder(Type.TEXT_DISPLAY).content(content).build());
+    public static TextDisplay of(String content) {
+        return new TextDisplay(MessageComponent.getBuilder(Type.TEXT_DISPLAY).content(content).build());
     }
 
-    TextDisplayComponent(ComponentData data) {
+    TextDisplay(ComponentData data) {
         super(data);
     }
 

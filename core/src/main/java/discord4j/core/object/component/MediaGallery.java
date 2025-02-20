@@ -17,24 +17,23 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
-import discord4j.discordjson.json.ImmutableComponentData;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MediaGalleryComponent extends MessageComponent {
+public class MediaGallery extends MessageComponent {
 
-    public static MediaGalleryComponent of(MediaGalleryItem... mediaGalleryItems) {
+    public static MediaGallery of(MediaGalleryItem... mediaGalleryItems) {
         return of(Arrays.asList(mediaGalleryItems));
     }
 
-    public static MediaGalleryComponent of(List<MediaGalleryItem> mediaGalleryItems) {
-        return new MediaGalleryComponent(MessageComponent.getBuilder(Type.MEDIA_GALLERY).addAllItems(mediaGalleryItems.stream().map(MediaGalleryItem::getData).collect(Collectors.toList())).build());
+    public static MediaGallery of(List<MediaGalleryItem> mediaGalleryItems) {
+        return new MediaGallery(MessageComponent.getBuilder(Type.MEDIA_GALLERY).addAllItems(mediaGalleryItems.stream().map(MediaGalleryItem::getData).collect(Collectors.toList())).build());
     }
 
-    MediaGalleryComponent(ComponentData data) {
+    MediaGallery(ComponentData data) {
         super(data);
     }
 
