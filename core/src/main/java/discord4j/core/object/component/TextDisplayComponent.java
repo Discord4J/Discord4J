@@ -21,7 +21,7 @@ import discord4j.discordjson.json.ImmutableComponentData;
 
 public class TextDisplayComponent extends MessageComponent {
 
-    private final static ImmutableComponentData.Builder BUILDER = ComponentData.builder().from(ComponentData.builder().type(Type.THUMBNAIL.getValue()).build());
+    private final static ImmutableComponentData.Builder BUILDER = ComponentData.builder().from(ComponentData.builder().type(Type.TEXT_DISPLAY.getValue()).build());
 
     public static TextDisplayComponent of(String content) {
         return new TextDisplayComponent(BUILDER.content(content).build());
