@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
  *     <li>Currently the components valid are {@link TextDisplay}</li>
  * </ul>
  *
+ * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Section</a>
  */
 public class Section extends LayoutComponent {

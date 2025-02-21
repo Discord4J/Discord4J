@@ -21,6 +21,7 @@ import discord4j.discordjson.json.ComponentData;
 /**
  * A separator component for message.
  *
+ * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Separator</a>
  */
 public class Separator extends LayoutComponent {

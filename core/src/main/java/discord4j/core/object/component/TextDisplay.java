@@ -29,6 +29,8 @@ import discord4j.discordjson.json.ComponentData;
  *     <li>one {@link TextDisplay} each with 4000 characters</li>
  *     <li>three {@link TextDisplay}, one with 2000 characters and two with 1000 characters</li>
  * </ul>
+ *
+ * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Text Display</a>
  */
 public class TextDisplay extends MessageComponent {

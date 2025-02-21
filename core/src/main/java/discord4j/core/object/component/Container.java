@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
  *     <li>{@link File}</li>
  * </ul>
  *
+ * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Containers</a>
  */
 public class Container extends LayoutComponent {

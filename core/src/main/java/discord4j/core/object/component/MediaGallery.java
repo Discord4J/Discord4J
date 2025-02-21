@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 /**
  * A media gallery component for message.
  *
+ * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Media Gallery</a>
  */
 public class MediaGallery extends MessageComponent {

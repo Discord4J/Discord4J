@@ -21,6 +21,7 @@ import discord4j.discordjson.json.ComponentData;
 /**
  * A file component for message.
  *
+ * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">File</a>
  */
 public class File extends MessageComponent {
