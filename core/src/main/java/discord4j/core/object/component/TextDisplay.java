@@ -33,7 +33,7 @@ import discord4j.discordjson.json.ComponentData;
  * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Text Display</a>
  */
-public class TextDisplay extends MessageComponent {
+public class TextDisplay extends MessageComponent implements TopLevelComponent {
 
     /** The maximum amount of characters that can be in the sum of these components. */
     public static final int MAX_DISPLAY_CHARACTERS_LENGTH = 4000;

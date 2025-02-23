@@ -24,7 +24,7 @@ import discord4j.discordjson.json.ImmutableComponentData;
  *
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#message-components">Message Components</a>
  */
-public class MessageComponent {
+public class MessageComponent implements BaseMessageComponent {
 
     static ImmutableComponentData.Builder getBuilder(final Type type) {
         return ImmutableComponentData.builder().type(type.getValue());
@@ -70,6 +70,7 @@ public class MessageComponent {
      *
      * @return The data of the component.
      */
+    @Override
     public ComponentData getData() {
         return data;
     }
@@ -79,6 +80,7 @@ public class MessageComponent {
      *
      * @return The type of the component.
      */
+    @Override
     public Type getType() {
         return Type.of(data.type());
     }

@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Containers</a>
  */
-public class Container extends LayoutComponent {
+public class Container extends LayoutComponent implements TopLevelComponent {
 
     /**
      * Creates an {@code SectionComponent} with the given components.

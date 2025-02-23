@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * A message component that determines how components are laid out in a message and has {@link ActionComponent}
+ * A message component that determines how components are laid out in a message and has {@link MessageComponent}
  * children.
  */
 @Experimental
