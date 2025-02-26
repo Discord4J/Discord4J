@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#actionrow">ActionRow</a>
  */
-public class ActionRow extends LayoutComponent implements TopLevelComponent {
+public class ActionRow extends LayoutComponent implements TopLevelMessageComponent {
 
     /**
      * Creates an {@code ActionRow} with the given components.

@@ -20,8 +20,7 @@ package discord4j.core.spec;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
 import discord4j.core.object.component.BaseMessageComponent;
-import discord4j.core.object.component.LayoutComponent;
-import discord4j.core.object.component.TopLevelComponent;
+import discord4j.core.object.component.TopLevelMessageComponent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.PollCreateData;
@@ -61,14 +60,7 @@ interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<Webhoo
 
     Possible<Optional<AllowedMentions>> allowedMentions();
 
-    /**
-     * @deprecated this only allow Layouts but components v2 include more components not valid in layout,
-     * {@link #componentsV2()} can override this
-     */
-    @Deprecated
-    Possible<Optional<List<LayoutComponent>>> components();
-
-    Possible<Optional<List<TopLevelComponent>>> componentsV2();
+    Possible<Optional<List<TopLevelMessageComponent>>> components();
 
     Possible<PollCreateData> poll();
 
@@ -82,15 +74,11 @@ interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<Webhoo
                 .map(EmbedCreateSpec::asRequest)
                 .collect(Collectors.toList())))
             .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
-            .components((componentsV2().isAbsent() ? mapPossible(components(), components -> components
+            .components(mapPossible(components(), components -> components
                 .map(list -> list.stream()
                     .map(BaseMessageComponent::getData)
                     .collect(Collectors.toList()))
-                .orElse(Collections.emptyList())) : mapPossible(componentsV2(), components -> components
-                .map(list -> list.stream()
-                    .map(BaseMessageComponent::getData)
-                    .collect(Collectors.toList()))
-                .orElse(Collections.emptyList()))))
+                .orElse(Collections.emptyList())))
             .poll(poll())
             // TODO upon v10 upgrade, it is required to also include new files as attachment here
             .attachments(mapPossibleOptional(attachments(), attachments -> attachments.stream()

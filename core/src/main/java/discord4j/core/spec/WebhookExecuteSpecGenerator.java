@@ -19,8 +19,7 @@ package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.component.BaseMessageComponent;
-import discord4j.core.object.component.LayoutComponent;
-import discord4j.core.object.component.TopLevelComponent;
+import discord4j.core.object.component.TopLevelMessageComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
 import discord4j.discordjson.json.WebhookExecuteRequest;
@@ -69,14 +68,7 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
 
     Possible<AllowedMentions> allowedMentions();
 
-    /**
-     * @deprecated this only allow Layouts but components v2 include more components not valid in layout,
-     * {@link #componentsV2()} can override this
-     */
-    @Deprecated
-    Possible<List<LayoutComponent>> components();
-
-    Possible<List<TopLevelComponent>> componentsV2();
+    Possible<List<TopLevelMessageComponent>> components();
 
     Possible<String> threadName();
 
@@ -93,13 +85,9 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
             .tts(tts())
             .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
             .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
-            .components((componentsV2().isAbsent() ? mapPossible(components(),
-                components -> components.stream()
-                    .map(BaseMessageComponent::getData)
-                    .collect(Collectors.toList())) : mapPossible(componentsV2(),
-                components -> components.stream()
-                    .map(BaseMessageComponent::getData)
-                    .collect(Collectors.toList()))))
+            .components(mapPossible(components(), components -> components.stream()
+                .map(BaseMessageComponent::getData)
+                .collect(Collectors.toList())))
             .threadName(threadName())
             .flags(mapPossible(flags(), f -> f.stream()
                 .mapToInt(Message.Flag::getFlag)

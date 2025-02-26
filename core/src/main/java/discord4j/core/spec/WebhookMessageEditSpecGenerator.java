@@ -19,8 +19,7 @@ package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.component.BaseMessageComponent;
-import discord4j.core.object.component.LayoutComponent;
-import discord4j.core.object.component.TopLevelComponent;
+import discord4j.core.object.component.TopLevelMessageComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
 import discord4j.discordjson.json.WebhookMessageEditRequest;
@@ -62,14 +61,7 @@ public interface WebhookMessageEditSpecGenerator extends Spec<MultipartRequest<W
 
     Possible<Optional<AllowedMentions>> allowedMentions();
 
-    /**
-     * @deprecated this only allow Layouts but components v2 include more components not valid in layout,
-     * {@link #componentsV2()} can override this
-     */
-    @Deprecated
-    Possible<List<LayoutComponent>> components();
-
-    Possible<List<TopLevelComponent>> componentsV2();
+    Possible<List<TopLevelMessageComponent>> components();
 
     Possible<Snowflake> threadId();
 
@@ -79,13 +71,9 @@ public interface WebhookMessageEditSpecGenerator extends Spec<MultipartRequest<W
             .content(content())
             .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
             .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
-            .components((componentsV2().isAbsent() ? mapPossible(components(),
-                components -> components.stream()
-                    .map(BaseMessageComponent::getData)
-                    .collect(Collectors.toList())) : mapPossible(componentsV2(),
-                components -> components.stream()
-                    .map(BaseMessageComponent::getData)
-                    .collect(Collectors.toList()))))
+            .components(mapPossible(components(), components -> components.stream()
+                .map(BaseMessageComponent::getData)
+                .collect(Collectors.toList())))
             .build();
         return MultipartRequest.ofRequestAndFiles(request, Stream.concat(files().stream(), fileSpoilers().stream())
             .map(MessageCreateFields.File::asRequest)

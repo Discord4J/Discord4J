@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.component;
 
+import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.json.ImmutableComponentData;
 
@@ -95,18 +96,34 @@ public class MessageComponent implements BaseMessageComponent {
         SELECT_MENU_ROLE(6),
         SELECT_MENU_MENTIONABLE(7),
         SELECT_MENU_CHANNEL(8),
-        SECTION(9),
-        TEXT_DISPLAY(10),
-        THUMBNAIL(11),
-        MEDIA_GALLERY(12),
-        FILE(13),
-        SEPARATOR(14),
-        CONTAINER(17),
+        SECTION(9, true),
+        TEXT_DISPLAY(10, true),
+        THUMBNAIL(11, true),
+        MEDIA_GALLERY(12, true),
+        FILE(13, true),
+        SEPARATOR(14, true),
+        CONTAINER(17, true),
         ;
 
         private final int value;
+        private final boolean requireFlag;
+
         Type(int value) {
+            this(value, false);
+        }
+
+        Type(int value, boolean requireFlag) {
             this.value = value;
+            this.requireFlag = requireFlag;
+        }
+
+        /**
+         * Gets if this Type require the use of {@link Message.Flag#IS_COMPONENTS_V2}.
+         *
+         * @return {@code true} if need the use of the flag, {@code false} otherwise
+         */
+        public boolean isRequiredFlag() {
+            return requireFlag;
         }
 
         public int getValue() {

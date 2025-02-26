@@ -23,8 +23,8 @@ import discord4j.core.object.Embed;
 import discord4j.core.object.MessageInteraction;
 import discord4j.core.object.MessageReference;
 import discord4j.core.object.MessageSnapshot;
-import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
+import discord4j.core.object.component.TopLevelMessageComponent;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.poll.Poll;
@@ -595,13 +595,13 @@ public final class Message implements Entity {
      * the content cannot be accessed
      * @return The components on the message.
      */
-    public List<LayoutComponent> getComponents() {
-        List<LayoutComponent> components = data.components().toOptional()
+    public List<TopLevelMessageComponent> getComponents() {
+        List<TopLevelMessageComponent> components = data.components().toOptional()
                 .map(componentList -> componentList.stream()
                         .map(MessageComponent::fromData)
-                        // top level message components should only be LayoutComponents
-                        .filter(component -> component instanceof LayoutComponent)
-                        .map(component -> (LayoutComponent) component)
+                        // top level message components should only be TopLevelMessageComponent
+                        .filter(component -> component instanceof TopLevelMessageComponent)
+                        .map(component -> (TopLevelMessageComponent) component)
                         .collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
 

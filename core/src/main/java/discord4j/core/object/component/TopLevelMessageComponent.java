@@ -19,6 +19,6 @@ package discord4j.core.object.component;
 /**
  * Represents a component valid for the Top in the components of a Message
  */
-public interface TopLevelComponent extends BaseMessageComponent {
+public interface TopLevelMessageComponent extends BaseMessageComponent {
 
 }

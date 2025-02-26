@@ -18,8 +18,7 @@
 package discord4j.core.spec;
 
 import discord4j.core.object.component.BaseMessageComponent;
-import discord4j.core.object.component.LayoutComponent;
-import discord4j.core.object.component.TopLevelComponent;
+import discord4j.core.object.component.TopLevelMessageComponent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.MessageEditRequest;
@@ -59,14 +58,7 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
 
     Possible<Optional<List<Message.Flag>>> flags();
 
-    /**
-     * @deprecated this only allow Layouts but components v2 include more components not valid in layout,
-     * {@link #componentsV2()} can override this
-     */
-    @Deprecated
-    Possible<Optional<List<LayoutComponent>>> components();
-
-    Possible<Optional<List<TopLevelComponent>>> componentsV2();
+    Possible<Optional<List<TopLevelMessageComponent>>> components();
 
     Possible<Optional<List<Attachment>>> attachments();
 
@@ -81,11 +73,9 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
             .flags(mapPossibleOptional(flags(), f -> f.stream()
                 .mapToInt(Message.Flag::getFlag)
                 .reduce(0, (left, right) -> left | right)))
-            .components((componentsV2().isAbsent() ? mapPossibleOptional(components(), components -> components.stream()
-                .map(LayoutComponent::getData)
-                .collect(Collectors.toList())) : mapPossibleOptional(componentsV2(), components -> components.stream()
+            .components(mapPossibleOptional(components(), components -> components.stream()
                 .map(BaseMessageComponent::getData)
-                .collect(Collectors.toList()))))
+                .collect(Collectors.toList())))
             // TODO upon v10 upgrade, it is required to also include new files as attachment here
             .attachments(mapPossibleOptional(attachments(), attachments -> attachments.stream()
                 .map(Attachment::getData)
