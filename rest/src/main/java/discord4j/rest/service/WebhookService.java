@@ -120,6 +120,27 @@ public class WebhookService extends RestService {
      * Executes the specified webhook.
      *
      * @param wait true if you want to return message data and errors for the webhook.
+     * @param withComponents true if you want to allow sending (non-interactive) components for non-application-owned webhooks
+     * @return If wait is true, a mono that contains the message information of the execution or an
+     * error if the webhook is unsuccessful. If wait is false, the mono completes as soon as the request
+     * is finished sending, and DOES NOT result in an error if the message is not saved.
+     */
+    public Mono<MessageData> executeWebhook(long webhookId, String token, boolean wait, boolean withComponents,
+                                            MultipartRequest<? extends WebhookExecuteRequest> request) {
+        return Routes.WEBHOOK_EXECUTE
+            .newRequest(webhookId, token)
+            .query("wait", wait)
+            .query("with_components", withComponents)
+            .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
+            .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
+            .exchange(getRouter())
+            .bodyToMono(MessageData.class);
+    }
+
+    /**
+     * Executes the specified webhook.
+     *
+     * @param wait true if you want to return message data and errors for the webhook.
      * @param threadId specify the thread id within a webhook's channel.
      * @return If wait is true, a mono that contains the message information of the execution or an
      * error if the webhook is unsuccessful. If wait is false, the mono completes as soon as the request
@@ -131,6 +152,29 @@ public class WebhookService extends RestService {
             .newRequest(webhookId, token)
             .query("wait", wait)
             .query("thread_id", threadId)
+            .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
+            .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
+            .exchange(getRouter())
+            .bodyToMono(MessageData.class);
+    }
+
+    /**
+     * Executes the specified webhook.
+     *
+     * @param wait true if you want to return message data and errors for the webhook.
+     * @param threadId specify the thread id within a webhook's channel.
+     * @param withComponents true if you want to allow sending (non-interactive) components for non-application-owned webhooks
+     * @return If wait is true, a mono that contains the message information of the execution or an
+     * error if the webhook is unsuccessful. If wait is false, the mono completes as soon as the request
+     * is finished sending, and DOES NOT result in an error if the message is not saved.
+     */
+    public Mono<MessageData> executeWebhook(long webhookId, String token, boolean wait, long threadId, boolean withComponents,
+                                            MultipartRequest<? extends WebhookExecuteRequest> request) {
+        return Routes.WEBHOOK_EXECUTE
+            .newRequest(webhookId, token)
+            .query("wait", wait)
+            .query("thread_id", threadId)
+            .query("with_components", withComponents)
             .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
             .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
             .exchange(getRouter())

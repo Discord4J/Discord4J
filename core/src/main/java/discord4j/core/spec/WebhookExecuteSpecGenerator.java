@@ -105,14 +105,16 @@ abstract class WebhookExecuteMonoGenerator extends Mono<Message> implements Webh
 
     abstract boolean waitForMessage();
 
+    abstract boolean allowComponents();
+
     abstract Webhook webhook();
 
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
         if (threadId().isAbsent()) {
-            webhook().execute(waitForMessage(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
+            webhook().execute(waitForMessage(), allowComponents(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
         } else {
-            webhook().execute(waitForMessage(), threadId().get(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
+            webhook().execute(waitForMessage(), allowComponents(), threadId().get(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
         }
     }
 
