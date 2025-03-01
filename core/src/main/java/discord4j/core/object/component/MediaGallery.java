@@ -17,6 +17,7 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.possible.Possible;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,26 +30,60 @@ import java.util.stream.Collectors;
  * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Media Gallery</a>
  */
-public class MediaGallery extends MessageComponent implements TopLevelMessageComponent {
+public class MediaGallery extends MessageComponent implements TopLevelMessageComponent, ICanBeUsedInContainerComponent {
 
     /**
-     * Creates an {@code MediaGallery} with the given {@code MediaGalleryItem}.
+     * Creates an {@link MediaGallery} with the given {@link MediaGalleryItem}.
      *
      * @param mediaGalleryItems The items for the gallery
-     * @return An {@code SectionComponent} containing the given items
+     * @return A {@link MediaGallery} containing the given items
      */
     public static MediaGallery of(MediaGalleryItem... mediaGalleryItems) {
         return of(Arrays.asList(mediaGalleryItems));
     }
 
     /**
-     * Creates an {@code MediaGallery} with the given {@code MediaGalleryItem}.
+     * Creates an {@link MediaGallery} with the given {@link MediaGalleryItem}.
      *
      * @param mediaGalleryItems The items for the gallery
-     * @return An {@code SectionComponent} containing the given items
+     * @return A {@link MediaGallery} containing the given items
      */
     public static MediaGallery of(List<MediaGalleryItem> mediaGalleryItems) {
-        return new MediaGallery(MessageComponent.getBuilder(Type.MEDIA_GALLERY).addAllItems(mediaGalleryItems.stream().map(MediaGalleryItem::getData).collect(Collectors.toList())).build());
+        return new MediaGallery(MessageComponent.getBuilder(Type.MEDIA_GALLERY)
+            .addAllItems(mediaGalleryItems.stream().map(MediaGalleryItem::getData).collect(Collectors.toList()))
+            .build());
+    }
+
+    /**
+     * Creates an {@link MediaGallery} with the given {@link MediaGalleryItem}.
+     *
+     * @param id the component id
+     * @param mediaGalleryItems The items for the gallery
+     * @return A {@link MediaGallery} containing the given items
+     */
+    public static MediaGallery of(int id, MediaGalleryItem... mediaGalleryItems) {
+        return of(id, Arrays.asList(mediaGalleryItems));
+    }
+
+    /**
+     * Creates an {@link MediaGallery} with the given {@link MediaGalleryItem}.
+     *
+     * @param id the component id
+     * @param mediaGalleryItems The items for the gallery
+     * @return A {@link MediaGallery} containing the given items
+     */
+    public static MediaGallery of(int id, List<MediaGalleryItem> mediaGalleryItems) {
+        return new MediaGallery(MessageComponent.getBuilder(Type.MEDIA_GALLERY)
+            .id(id)
+            .addAllItems(mediaGalleryItems.stream().map(MediaGalleryItem::getData).collect(Collectors.toList()))
+            .build());
+    }
+
+    protected MediaGallery(Integer id, List<MediaGalleryItem> mediaGalleryItems) {
+        this(MessageComponent.getBuilder(Type.MEDIA_GALLERY)
+            .id(Possible.ofNullable(id))
+            .addAllItems(mediaGalleryItems.stream().map(MediaGalleryItem::getData).collect(Collectors.toList()))
+            .build());
     }
 
     MediaGallery(ComponentData data) {
@@ -58,7 +93,7 @@ public class MediaGallery extends MessageComponent implements TopLevelMessageCom
     /**
      * Gets the media items.
      *
-     * @return A list of {@code MediaGalleryItem}
+     * @return A list of {@link MediaGalleryItem}
      */
     public List<MediaGalleryItem> getItems() {
         return this.getData().items().toOptional()

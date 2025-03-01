@@ -20,8 +20,25 @@ import discord4j.discordjson.json.ComponentData;
 
 public interface BaseMessageComponent {
 
+    /**
+     * Get the component id
+     *
+     * @return the component id
+     */
+    int getId();
+
+    /**
+     * Get the component data
+     *
+     * @return the component data
+     */
     ComponentData getData();
 
+    /**
+     * Get the component type
+     *
+     * @return the component type
+     */
     MessageComponent.Type getType();
 
 }

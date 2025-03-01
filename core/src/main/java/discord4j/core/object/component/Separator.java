@@ -17,6 +17,7 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.possible.Possible;
 
 /**
  * A separator component for message.
@@ -24,36 +25,117 @@ import discord4j.discordjson.json.ComponentData;
  * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Separator</a>
  */
-public class Separator extends LayoutComponent implements TopLevelMessageComponent {
+public class Separator extends LayoutComponent implements TopLevelMessageComponent, ICanBeUsedInContainerComponent {
 
     /**
-     * Creates an {@code Separator}.
+     * Creates a {@link Separator}.
      *
-     * @return An {@code Separator}
+     * @return A {@link Separator}
      */
     public static Separator of() {
         return new Separator(MessageComponent.getBuilder(Type.SEPARATOR).build());
     }
 
     /**
-     * Creates an {@code Separator}.
+     * Creates a {@link Separator}.
      *
      * @param divider If the separator is a divider
-     * @return An {@code Separator}
+     * @return A {@link Separator}
      */
     public static Separator of(boolean divider) {
-        return new Separator(MessageComponent.getBuilder(Type.SEPARATOR).divider(divider).build());
+        return new Separator(MessageComponent.getBuilder(Type.SEPARATOR)
+            .divider(divider)
+            .build());
     }
 
     /**
-     * Creates an {@code Separator}.
+     * Creates a {@link Separator}.
+     *
+     * @param spacingSize The spacing size for the divider
+     * @return A {@link Separator}
+     */
+    public static Separator of(SpacingSize spacingSize) {
+        return new Separator(MessageComponent.getBuilder(Type.SEPARATOR)
+            .spacing(spacingSize.getValue())
+            .build());
+    }
+
+    /**
+     * Creates a {@link Separator}.
      *
      * @param divider If the separator is a divider
      * @param spacingSize The spacing size for the divider
-     * @return An {@code Separator}
+     * @return A {@link Separator}
      */
     public static Separator of(boolean divider, SpacingSize spacingSize) {
-        return new Separator(MessageComponent.getBuilder(Type.SEPARATOR).divider(divider).spacing(spacingSize.getValue()).build());
+        return new Separator(MessageComponent.getBuilder(Type.SEPARATOR)
+            .divider(divider)
+            .spacing(spacingSize.getValue())
+            .build());
+    }
+
+    /**
+     * Creates a {@link Separator}.
+     *
+     * @param id the component id
+     * @return A {@link Separator}
+     */
+    public static Separator of(int id) {
+        return new Separator(MessageComponent.getBuilder(Type.SEPARATOR)
+            .id(id)
+            .build());
+    }
+
+    /**
+     * Creates a {@link Separator}.
+     *
+     * @param id the component id
+     * @param divider If the separator is a divider
+     * @return A {@link Separator}
+     */
+    public static Separator of(int id, boolean divider) {
+        return new Separator(MessageComponent.getBuilder(Type.SEPARATOR)
+            .id(id)
+            .divider(divider)
+            .build());
+    }
+
+    /**
+     * Creates a {@link Separator}.
+     *
+     * @param id the component id
+     * @param spacingSize The spacing size for the divider
+     * @return A {@link Separator}
+     */
+    public static Separator of(int id, SpacingSize spacingSize) {
+        return new Separator(MessageComponent.getBuilder(Type.SEPARATOR)
+            .id(id)
+            .spacing(spacingSize.getValue())
+            .build());
+    }
+
+    /**
+     * Creates a {@link Separator}.
+     *
+     * @param id the component id
+     * @param divider If the separator is a divider
+     * @param spacingSize The spacing size for the divider
+     * @return A {@link Separator}
+     */
+    public static Separator of(int id, boolean divider, SpacingSize spacingSize) {
+        return new Separator(MessageComponent.getBuilder(Type.SEPARATOR)
+            .id(id)
+            .divider(divider)
+            .spacing(spacingSize.getValue())
+            .build());
+    }
+
+    protected Separator(Integer id, boolean divider, SpacingSize spacingSize) {
+        this(MessageComponent.getBuilder(Type.SEPARATOR)
+            .id(Possible.ofNullable(id))
+            .divider(divider)
+            .spacing(spacingSize.getValue())
+            .build());
     }
 
     Separator(ComponentData data) {
@@ -95,9 +177,12 @@ public class Separator extends LayoutComponent implements TopLevelMessageCompone
 
         public static SpacingSize of(int value) {
             switch (value) {
-                case 0: return SMALL;
-                case 1: return LARGE;
-                default: throw new UnsupportedOperationException("Unknown SpacingSize: " + value);
+                case 0:
+                    return SMALL;
+                case 1:
+                    return LARGE;
+                default:
+                    throw new UnsupportedOperationException("Unknown SpacingSize: " + value);
             }
         }
     }

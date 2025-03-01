@@ -23,6 +23,9 @@ import discord4j.core.object.Embed;
 import discord4j.core.object.MessageInteraction;
 import discord4j.core.object.MessageReference;
 import discord4j.core.object.MessageSnapshot;
+import discord4j.core.object.component.ActionComponent;
+import discord4j.core.object.component.BaseMessageComponent;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.component.TopLevelMessageComponent;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -57,6 +60,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A Discord message.
@@ -619,6 +623,46 @@ public final class Message implements Entity {
 
         // Well, we should have access to the components, but it's actually empty
         return components;
+    }
+
+    /**
+     * Get an {@link ActionComponent} from its custom id
+     *
+     * @param customId The custom id to search
+     * @return An {@link Optional} containing the component if found
+     */
+    public Optional<ActionComponent> getActionComponentById(String customId) {
+        return getComponents()
+            .stream()
+            .filter(component -> component instanceof LayoutComponent)
+            .map(LayoutComponent.class::cast)
+            .flatMap(layoutComponent -> layoutComponent.getAllChildren().stream())
+            .filter(component -> component instanceof ActionComponent)
+            .map(ActionComponent.class::cast)
+            .filter(actionComponent -> customId.equalsIgnoreCase(actionComponent.getCustomId()))
+            .findFirst();
+    }
+
+    /**
+     * Get a {@link BaseMessageComponent} from its id
+     *
+     * @param componentId the component id to search
+     * @return An {@link Optional} containing the component if found
+     */
+    public Optional<BaseMessageComponent> getComponentById(int componentId) {
+        return getComponents()
+            .stream()
+            .flatMap(component -> {
+                Stream<TopLevelMessageComponent> selfStream = Stream.of(component);
+
+                if (component instanceof LayoutComponent) {
+                    return Stream.concat(selfStream, ((LayoutComponent) component).getAllChildren().stream());
+                } else {
+                    return selfStream;
+                }
+            })
+            .filter(component -> componentId == component.getId())
+            .findFirst();
     }
 
     /**

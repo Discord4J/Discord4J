@@ -17,7 +17,7 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
-import discord4j.discordjson.json.ImmutableComponentData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import reactor.util.annotation.Nullable;
 
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 /**
  * A container component for message.
  * <br>
- * Currently discord just support this components being added:
+ * Currently discord just support these components being added:
  * <ul>
  *     <li>{@link ActionRow}</li>
  *     <li>{@link TextDisplay}</li>
@@ -46,50 +46,222 @@ import java.util.stream.Collectors;
 public class Container extends LayoutComponent implements TopLevelMessageComponent {
 
     /**
-     * Creates an {@code SectionComponent} with the given components.
+     * Creates a {@link Container} with the given components.
      *
      * @param components The child components of the container.
-     * @return An {@code SectionComponent} containing the given components.
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return A {@link Container} containing the given components.
      */
-    public static Container of(MessageComponent... components) {
-        return of(Arrays.asList(components));
+    @SafeVarargs
+    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(C... components) {
+        return new Container(null, null, false, Arrays.asList(components));
     }
 
     /**
-     * Creates an {@code SectionComponent} with the given components.
+     * Creates a {@link Container} with the given components.
      *
+     * @param color The accent color
      * @param components The child components of the container.
-     * @return An {@code SectionComponent} containing the given components.
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return A {@link Container} containing the given components.
      */
-    public static Container of(Color color, MessageComponent... components) {
-        return of(color, false, Arrays.asList(components));
+    @SafeVarargs
+    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(@Nullable Color color, C... components) {
+        return new Container(null, color, false, Arrays.asList(components));
     }
 
     /**
-     * Creates an {@code SectionComponent} with the given components.
+     * Creates a {@link Container} with the given components.
      *
+     * @param spoiler If the container should be blurred
      * @param components The child components of the container.
-     * @return An {@code SectionComponent} containing the given components.
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return A {@link Container} containing the given components.
      */
-    public static Container of(List<? extends MessageComponent> components) {
-        return of(null, false, components);
+    @SafeVarargs
+    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(boolean spoiler, C... components) {
+        return new Container(null, null, spoiler, Arrays.asList(components));
     }
 
     /**
-     * Creates an {@code SectionComponent} with the given components.
+     * Creates a {@link Container} with the given components.
      *
+     * @param color The accent color
+     * @param spoiler If the container should be blurred
+     * @param components The child components of the container.
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return A {@link Container} containing the given components.
+     */
+    @SafeVarargs
+    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(@Nullable Color color, boolean spoiler, C... components) {
+        return new Container(null, color, spoiler, Arrays.asList(components));
+    }
+
+    /**
+     * Creates a {@link Container} with the given components.
+     *
+     * @param components The child components of the container.
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return A {@link Container} containing the given components.
+     */
+    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(List<C> components) {
+        return new Container(null, null, false, components);
+    }
+
+    /**
+     * Creates a {@link Container} with the given components.
+     *
+     * @param spoiler If the container should be blurred
+     * @param components The child components of the container.
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return A {@link Container} containing the given components.
+     */
+    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(boolean spoiler, List<C> components) {
+        return new Container(null, null, spoiler, components);
+    }
+
+    /**
+     * Creates a {@link Container} with the given components.
+     *
+     * @param color The accent color
      * @param components The components of the container.
-     * @return An {@code SectionComponent} containing the given components.
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return A {@link Container} containing the given components.
      */
-    public static Container of(@Nullable Color color, boolean spoiler, List<? extends MessageComponent> components) {
-        ImmutableComponentData.Builder componentData = MessageComponent.getBuilder(Type.CONTAINER).spoiler(spoiler)
-                .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()));
+    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(@Nullable Color color, List<C> components) {
+        return new Container(null, color, false, components);
+    }
 
-        if (color != null) {
-            componentData.accentColor(color.getRGB());
-        }
+    /**
+     * Creates a {@link Container} with the given components.
+     *
+     * @param color The accent color
+     * @param spoiler If the container should be blurred
+     * @param components The components of the container.
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return A {@link Container} containing the given components.
+     */
+    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(@Nullable Color color, boolean spoiler, List<C> components) {
+        return new Container(null, color, spoiler, components);
+    }
 
-        return new Container(componentData.build());
+    /**
+     * Creates a {@link Container} with the given components.
+     *
+     * @param id the component id
+     * @param components The child components of the container.
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return A {@link Container} containing the given components.
+     */
+    @SafeVarargs
+    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(int id, C... components) {
+        return new Container(id, null, false, Arrays.asList(components));
+    }
+
+    /**
+     * Creates a {@link Container} with the given components.
+     *
+     * @param id the component id
+     * @param spoiler If the container should be blurred
+     * @param components The child components of the container.
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return A {@link Container} containing the given components.
+     */
+    @SafeVarargs
+    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(int id, boolean spoiler, C... components) {
+        return new Container(id, null, spoiler, Arrays.asList(components));
+    }
+
+    /**
+     * Creates a {@link Container} with the given components.
+     *
+     * @param id the component id
+     * @param color The accent color
+     * @param components The child components of the container.
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return A {@link Container} containing the given components.
+     */
+    @SafeVarargs
+    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(int id, @Nullable Color color, C... components) {
+        return new Container(id, color, false, Arrays.asList(components));
+    }
+
+    /**
+     * Creates a {@link Container} with the given components.
+     *
+     * @param id the component id
+     * @param color The accent color
+     * @param spoiler If the container should be blurred
+     * @param components The child components of the container.
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return A {@link Container} containing the given components.
+     */
+    @SafeVarargs
+    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(int id, @Nullable Color color, boolean spoiler, C... components) {
+        return new Container(id, color, spoiler, Arrays.asList(components));
+    }
+
+    /**
+     * Creates a {@link Container} with the given components.
+     *
+     * @param id the component id
+     * @param components The child components of the container.
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return A {@link Container} containing the given components.
+     */
+    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(int id, List<C> components) {
+        return new Container(id, null, false, components);
+    }
+
+    /**
+     * Creates a {@link Container} with the given components.
+     *
+     * @param id the component id
+     * @param color The accent color
+     * @param components The components of the container.
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return A {@link Container} containing the given components.
+     */
+    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(int id, @Nullable Color color, List<C> components) {
+        return new Container(id, color, false, components);
+    }
+
+    /**
+     * Creates a {@link Container} with the given components.
+     *
+     * @param id the component id
+     * @param spoiler If the container should be blurred
+     * @param components The components of the container.
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return A {@link Container} containing the given components.
+     */
+    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(int id, boolean spoiler, List<C> components) {
+        return new Container(id, null, spoiler, components);
+    }
+
+    /**
+     * Creates a {@link Container} with the given components.
+     *
+     * @param id the component id
+     * @param color The accent color
+     * @param spoiler If the container should be blurred
+     * @param components The components of the container.
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return A {@link Container} containing the given components.
+     */
+    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(int id, @Nullable Color color, boolean spoiler, List<C> components) {
+        return new Container(id, color, spoiler, components);
+    }
+
+    protected <C extends MessageComponent & ICanBeUsedInContainerComponent> Container(@Nullable Integer id, @Nullable Color color, boolean spoiler, List<C> components) {
+        this(
+            MessageComponent.getBuilder(Type.CONTAINER)
+                .id(Possible.ofNullable(id))
+                .spoiler(spoiler)
+                .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+                .accentColor(Possible.ofNullable(color).map(Color::getRGB))
+                .build()
+        );
     }
 
     Container(ComponentData data) {
@@ -100,28 +272,41 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * Create a new {@link Container} instance from {@code this}, adding a given component.
      *
      * @param component the child component to be added
-     * @return an {@code SectionComponent} containing the existing and added components
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return a {@link Container} containing the existing and added components
      */
-    private Container withAddedComponent(MessageComponent component) {
+    private <C extends MessageComponent & ICanBeUsedInContainerComponent> Container withAddedComponent(C component) {
         List<MessageComponent> components = new ArrayList<>(getChildren());
         components.add(component);
-        return new Container(ComponentData.builder()
-            .type(this.getType().getValue())
-            .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
-            .build());
+        return new Container(ComponentData.builder().from(this.getData()).components(components.stream().map(MessageComponent::getData).collect(Collectors.toList())).build());
     }
 
     /**
      * Create a new {@link Container} instance from {@code this}, removing any existing component by {@code customId}.
      *
-     * @param customId the customId of the component to remove
-     * @return an {@code SectionComponent} containing all components that did not match the given {@code customId}
+     * @param componentId the id of the component to remove
+     * @return a {@link Container} containing all components that did not match the given {@code customId}
      */
-    public Container withRemovedComponent(String customId) {
-        List<MessageComponent> components = getChildren(customId);
+    public Container withRemovedComponent(int componentId) {
+        List<MessageComponent> components = new ArrayList<>(getChildren());
+        components.removeIf(messageComponent -> componentId == messageComponent.getId());
+
         return new Container(ComponentData.builder()
-            .type(this.getType().getValue())
+            .from(this.getData())
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+            .build());
+    }
+
+    /**
+     * Create a new {@link Container} instance from {@code this}, changing the accent color or removing it
+     *
+     * @param color The new accent color or null to remove it
+     * @return The newly created {@link Container}
+     */
+    public Container withColor(@Nullable Color color) {
+        return new Container(ComponentData.builder()
+            .from(this.getData())
+            .accentColor(Possible.ofNullable(color).map(Color::getRGB))
             .build());
     }
 
@@ -131,8 +316,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @return An optional color.
      */
     public Optional<Color> getColor() {
-        return this.getData().accentColor().toOptional()
-                .map(Color::of);
+        return this.getData().accentColor().toOptional().map(Color::of);
     }
 
     /**

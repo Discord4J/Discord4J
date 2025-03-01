@@ -17,6 +17,7 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.possible.Possible;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#actionrow">ActionRow</a>
  */
-public class ActionRow extends LayoutComponent implements TopLevelMessageComponent {
+public class ActionRow extends LayoutComponent implements TopLevelMessageComponent, ICanBeUsedInContainerComponent {
 
     /**
      * Creates an {@code ActionRow} with the given components.
@@ -47,10 +48,41 @@ public class ActionRow extends LayoutComponent implements TopLevelMessageCompone
      * @return An {@code ActionRow} containing the given components.
      */
     public static ActionRow of(List<? extends ActionComponent> components) {
-        return new ActionRow(ComponentData.builder()
-                .type(Type.ACTION_ROW.getValue())
+        return new ActionRow(MessageComponent.getBuilder(Type.ACTION_ROW)
                 .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
                 .build());
+    }
+
+    /**
+     * Creates an {@code ActionRow} with the given components.
+     *
+     * @param id the component id
+     * @param components The child components of the row.
+     * @return An {@code ActionRow} containing the given components.
+     */
+    public static ActionRow of(int id, ActionComponent... components) {
+        return of(id, Arrays.asList(components));
+    }
+
+    /**
+     * Creates an {@code ActionRow} with the given components.
+     *
+     * @param id the component id
+     * @param components The child components of the row.
+     * @return An {@code ActionRow} containing the given components.
+     */
+    public static ActionRow of(int id, List<? extends ActionComponent> components) {
+        return new ActionRow(MessageComponent.getBuilder(Type.ACTION_ROW)
+            .id(id)
+            .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+            .build());
+    }
+
+    protected ActionRow(Integer id, List<? extends ActionComponent> components) {
+        this(MessageComponent.getBuilder(Type.ACTION_ROW)
+            .id(Possible.ofNullable(id))
+            .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+            .build());
     }
 
     ActionRow(ComponentData data) {
@@ -79,7 +111,10 @@ public class ActionRow extends LayoutComponent implements TopLevelMessageCompone
      * @return an {@code ActionRow} containing all components that did not match the given {@code customId}
      */
     public ActionRow withRemovedComponent(String customId) {
-        List<MessageComponent> components = getChildren(customId);
+        List<MessageComponent> components = getChildren();
+        components.removeIf(messageComponent -> {
+            return messageComponent instanceof ActionComponent && customId.equals(((ActionComponent) messageComponent).getCustomId());
+        });
         return new ActionRow(ComponentData.builder()
                 .type(this.getType().getValue())
                 .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))

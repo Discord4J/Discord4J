@@ -17,35 +17,59 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.possible.Possible;
 
 /**
  * A text display component for message.
  * <br>
- * <b>Note:</b> the components in the entire message support a max of {@link #MAX_DISPLAY_CHARACTERS_LENGTH} characters in TextDisplay.
+ * <b>Note:</b> the components in the entire message support a max of {@link #MAX_DISPLAY_CHARACTERS_LENGTH} characters.
  * <br>
- * If consider 4000 for limit then consider you can:
+ * For example, you can have:
  * <ul>
- *     <li>two {@link TextDisplay} each with 2000 characters</li>
- *     <li>one {@link TextDisplay} each with 4000 characters</li>
+ *     <li>two {@link TextDisplay}, each with 2000 characters</li>
+ *     <li>one {@link TextDisplay}, each with 4000 characters</li>
  *     <li>three {@link TextDisplay}, one with 2000 characters and two with 1000 characters</li>
  * </ul>
  *
- * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
+ * @apiNote This component requires {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Text Display</a>
  */
-public class TextDisplay extends MessageComponent implements TopLevelMessageComponent {
+public class TextDisplay extends MessageComponent implements TopLevelMessageComponent, ICanBeUsedInContainerComponent, ICanBeUsedInSectionComponent {
 
     /** The maximum amount of characters that can be in the sum of these components. */
     public static final int MAX_DISPLAY_CHARACTERS_LENGTH = 4000;
 
     /**
-     * Creates an {@code TextDisplay}.
+     * Creates a {@link TextDisplay}.
      *
      * @param content The content
-     * @return An {@code TextDisplay}
+     * @return A {@link TextDisplay}
      */
     public static TextDisplay of(String content) {
-        return new TextDisplay(MessageComponent.getBuilder(Type.TEXT_DISPLAY).content(content).build());
+        return new TextDisplay(MessageComponent.getBuilder(Type.TEXT_DISPLAY)
+            .content(content)
+            .build());
+    }
+
+    /**
+     * Creates a {@link TextDisplay}.
+     *
+     * @param id the component id
+     * @param content The content
+     * @return A {@link TextDisplay}
+     */
+    public static TextDisplay of(int id, String content) {
+        return new TextDisplay(MessageComponent.getBuilder(Type.TEXT_DISPLAY)
+            .id(id)
+            .content(content)
+            .build());
+    }
+
+    protected TextDisplay(Integer id, String content) {
+        this(MessageComponent.getBuilder(Type.TEXT_DISPLAY)
+            .id(Possible.ofNullable(id))
+            .content(content)
+            .build());
     }
 
     TextDisplay(ComponentData data) {

@@ -17,6 +17,7 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.possible.Possible;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,28 +35,69 @@ import java.util.stream.Collectors;
  * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Section</a>
  */
-public class Section extends LayoutComponent implements TopLevelMessageComponent {
+public class Section extends LayoutComponent implements TopLevelMessageComponent, ICanBeUsedInContainerComponent {
 
     /**
-     * Creates an {@code Section} with the given components.
+     * Creates a {@link Section} with the given components.
      *
      * @param accessory The accessory component of the section
      * @param components The components of the section
-     * @return An {@code Section} containing the given components
+     * @param <C> The type of component, must implement {@link ICanBeUsedInSectionComponent}
+     * @return A {@link Section} containing the given components
      */
-    public static Section of(MessageComponent accessory, MessageComponent... components) {
+    public static <C extends MessageComponent & ICanBeUsedInSectionComponent> Section of(IAccessoryComponent accessory, C... components) {
         return of(accessory, Arrays.asList(components));
     }
 
     /**
-     * Creates an {@code Section} with the given components.
+     * Creates a {@link Section} with the given components.
      *
      * @param accessory The accessory component of the section
      * @param components The components of the section
-     * @return An {@code Section} containing the given components
+     * @param <C> The type of component, must implement {@link ICanBeUsedInSectionComponent}
+     * @return A {@link Section} containing the given components
      */
-    public static Section of(MessageComponent accessory, List<? extends MessageComponent> components) {
+    public static <C extends MessageComponent & ICanBeUsedInSectionComponent> Section of(IAccessoryComponent accessory, List<C> components) {
         return new Section(MessageComponent.getBuilder(Type.SECTION)
+            .accessory(accessory.getData())
+            .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+            .build());
+    }
+
+    /**
+     * Creates a {@link Section} with the given components.
+     *
+     * @param id the component id
+     * @param accessory The accessory component of the section
+     * @param components The components of the section
+     * @param <C> The type of component, must implement {@link ICanBeUsedInSectionComponent}
+     * @return A {@link Section} containing the given components
+     */
+    public static <C extends MessageComponent & ICanBeUsedInSectionComponent> Section of(int id, IAccessoryComponent accessory, C... components) {
+        return of(id, accessory, Arrays.asList(components));
+    }
+
+    /**
+     * Creates a {@link Section} with the given components.
+     *
+     * @param id the component id
+     * @param accessory The accessory component of the section
+     * @param components The components of the section
+     * @param <C> The type of component, must implement {@link ICanBeUsedInSectionComponent}
+     * @return A {@link Section} containing the given components
+     */
+    public static <C extends MessageComponent & ICanBeUsedInSectionComponent> Section of(int id, IAccessoryComponent accessory, List<C> components) {
+        return new Section(MessageComponent.getBuilder(Type.SECTION)
+            .id(id)
+            .accessory(accessory.getData())
+            .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+            .build());
+    }
+
+
+    protected <C extends MessageComponent & ICanBeUsedInSectionComponent> Section(Integer id, IAccessoryComponent accessory, List<C> components) {
+        this(MessageComponent.getBuilder(Type.SECTION)
+            .id(Possible.ofNullable(id))
             .accessory(accessory.getData())
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
             .build());
@@ -70,10 +112,14 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      *
      * @return An component
      */
-    public MessageComponent getAccessorie() {
-        return this.getData().accessory().toOptional()
+    public IAccessoryComponent getAccessory() {
+        return this.getData()
+            .accessory()
+            .toOptional()
             .map(MessageComponent::fromData)
-                .orElseThrow(IllegalStateException::new); // components should always be present on a layout component
+            .filter(IAccessoryComponent.class::isInstance)
+            .map(IAccessoryComponent.class::cast)
+            .orElseThrow(IllegalStateException::new); // accessory should always exist in a section
     }
 
     /**
@@ -86,7 +132,7 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
         List<MessageComponent> components = new ArrayList<>(getChildren());
         components.add(component);
         return new Section(ComponentData.builder()
-            .type(this.getType().getValue())
+            .from(getData())
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
             .build());
     }
@@ -97,10 +143,12 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * @param customId the customId of the component to remove
      * @return an {@code Section} containing all components that did not match the given {@code customId}
      */
-    public Section withRemovedComponent(String customId) {
-        List<MessageComponent> components = getChildren(customId);
+    public Section withRemovedComponent(int componentId) {
+        List<MessageComponent> components = getChildren();
+        components.removeIf(messageComponent -> componentId == messageComponent.getId());
+
         return new Section(ComponentData.builder()
-            .type(this.getType().getValue())
+            .from(getData())
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
             .build());
     }

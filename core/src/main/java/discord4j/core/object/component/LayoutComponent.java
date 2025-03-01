@@ -19,6 +19,8 @@ package discord4j.core.object.component;
 import discord4j.common.annotations.Experimental;
 import discord4j.discordjson.json.ComponentData;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,21 +35,38 @@ public abstract class LayoutComponent extends MessageComponent implements TopLev
         super(data);
     }
 
+    /**
+     * Get the direct children of this {@link LayoutComponent}
+     *
+     * @return The direct children of this component
+     */
     public List<MessageComponent> getChildren() {
-        return this.getData().components().toOptional()
-                .map(components -> components.stream()
-                        .map(MessageComponent::fromData)
-                        .collect(Collectors.toList()))
-                .orElseThrow(IllegalStateException::new); // components should always be present on a layout component
+        return this.getData()
+            .components()
+            .toOptional()
+            .map(components -> components.stream()
+                .map(MessageComponent::fromData)
+                .collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
     }
 
-    public List<MessageComponent> getChildren(String customId) {
-        return this.getChildren()
-            .stream()
-            .filter(it -> !it.getData().customId()
-                .toOptional()
-                .filter(customId::equals)
-                .isPresent())
-            .collect(Collectors.toList());
+    /**
+     * Get all the children of this {@link LayoutComponent}: the direct children and all the children of the children...
+     *
+     * @return All the children of this component
+     */
+    public List<BaseMessageComponent> getAllChildren() {
+        List<BaseMessageComponent> components = new ArrayList<>();
+
+        for (MessageComponent child : getChildren()) {
+            if (child instanceof LayoutComponent) {
+                components.addAll(((LayoutComponent) child).getAllChildren());
+            }
+
+            components.add(child);
+        }
+
+        return components;
     }
+
 }

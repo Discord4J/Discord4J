@@ -16,9 +16,12 @@
  */
 package discord4j.core.object.component;
 
+import discord4j.core.DiscordClientBuilder;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.json.ImmutableComponentData;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 /**
  * A Discord message component.
@@ -26,6 +29,8 @@ import discord4j.discordjson.json.ImmutableComponentData;
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#message-components">Message Components</a>
  */
 public class MessageComponent implements BaseMessageComponent {
+
+    private static final Logger LOGGER = Loggers.getLogger(MessageComponent.class);
 
     static ImmutableComponentData.Builder getBuilder(final Type type) {
         return ImmutableComponentData.builder().type(type.getValue());
@@ -56,7 +61,10 @@ public class MessageComponent implements BaseMessageComponent {
             case SELECT_MENU_USER:
             case SELECT_MENU: return new SelectMenu(data);
             case TEXT_INPUT: return new TextInput(data);
-            default: return new MessageComponent(data);
+            default: {
+                MessageComponent.LOGGER.warn("Unhandled component type: " + data.type());
+                return new MessageComponent(data);
+            }
         }
     }
 
@@ -64,6 +72,16 @@ public class MessageComponent implements BaseMessageComponent {
 
     MessageComponent(ComponentData data) {
         this.data = data;
+    }
+
+    /**
+     * Get the component id
+     *
+     * @return the component id
+     */
+    @Override
+    public int getId() {
+        return data.id().toOptional().orElseThrow(IllegalStateException::new);
     }
 
     /**

@@ -17,6 +17,7 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.possible.Possible;
 
 /**
  * A file component for message.
@@ -24,7 +25,7 @@ import discord4j.discordjson.json.ComponentData;
  * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">File</a>
  */
-public class File extends MessageComponent implements TopLevelMessageComponent {
+public class File extends MessageComponent implements TopLevelMessageComponent, ICanBeUsedInContainerComponent {
 
     /**
      * Creates an {@code File} with the given {@code UnfurledMediaItem}.
@@ -33,7 +34,9 @@ public class File extends MessageComponent implements TopLevelMessageComponent {
      * @return An {@code File} containing the given item
      */
     public static File of(UnfurledMediaItem file) {
-        return new File(MessageComponent.getBuilder(Type.FILE).file(file.getData()).build());
+        return new File(MessageComponent.getBuilder(Type.FILE)
+            .file(file.getData())
+            .build());
     }
 
     /**
@@ -44,7 +47,49 @@ public class File extends MessageComponent implements TopLevelMessageComponent {
      * @return An {@code File} containing the given item
      */
     public static File of(UnfurledMediaItem file, boolean spoiler) {
-        return new File(MessageComponent.getBuilder(Type.FILE).file(file.getData()).spoiler(spoiler).build());
+        return new File(MessageComponent.getBuilder(Type.FILE)
+            .file(file.getData())
+            .spoiler(spoiler)
+            .build());
+    }
+
+    /**
+     * Creates an {@code File} with the given {@code UnfurledMediaItem}.
+     *
+     * @param id the component id
+     * @param file The file component with an {@code attachment://} reference
+     * @return An {@code File} containing the given item
+     */
+    public static File of(int id, UnfurledMediaItem file) {
+        return new File(MessageComponent.getBuilder(Type.FILE)
+            .id(id)
+            .file(file.getData())
+            .build());
+    }
+
+    /**
+     * Creates an {@code File} with the given {@code UnfurledMediaItem}.
+     *
+     * @param id the component id
+     * @param file The file component with an {@code attachment://} reference
+     * @param spoiler If this component it's a spoiler
+     * @return An {@code File} containing the given item
+     */
+    public static File of(int id, UnfurledMediaItem file, boolean spoiler) {
+        return new File(MessageComponent.getBuilder(Type.FILE)
+            .id(id)
+            .file(file.getData())
+            .spoiler(spoiler)
+            .build());
+    }
+
+
+    protected File(Integer id, UnfurledMediaItem file, boolean spoiler) {
+        this(MessageComponent.getBuilder(Type.FILE)
+            .id(Possible.ofNullable(id))
+            .file(file.getData())
+            .spoiler(spoiler)
+            .build());
     }
 
     File(ComponentData data) {

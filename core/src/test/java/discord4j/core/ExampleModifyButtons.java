@@ -71,7 +71,13 @@ public class ExampleModifyButtons {
                             TopLevelMessageComponent last = message.getComponents().get(lastIndex);
                             int count = message.getComponents()
                                     .stream()
-                                    .mapToInt(it -> (it instanceof LayoutComponent) ? ((LayoutComponent) it).getChildren().size() : 0)
+                                    .mapToInt(it -> {
+                                            if (it instanceof LayoutComponent) {
+                                                return ((LayoutComponent) it).getChildren().size();
+                                            } else {
+                                                return 1;
+                                            }
+                                        })
                                     .sum();
 
                             if (last instanceof ActionRow) {

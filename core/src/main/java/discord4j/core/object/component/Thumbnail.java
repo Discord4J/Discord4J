@@ -27,39 +27,135 @@ import java.util.Optional;
  * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Thumbnail</a>
  */
-public class Thumbnail extends MessageComponent {
+public class Thumbnail extends MessageComponent implements IAccessoryComponent {
 
     /**
-     * Creates an {@code Thumbnail}.
+     * Creates a {@link Thumbnail}.
      *
-     * @param media The media
-     * @return An {@code Thumbnail}
+     * @param media The media for this thumbnail
+     * @return A {@link Thumbnail}
      */
     public static Thumbnail of(UnfurledMediaItem media) {
-        return new Thumbnail(MessageComponent.getBuilder(Type.THUMBNAIL).media(media.getData()).build());
+        return new Thumbnail(MessageComponent.getBuilder(Type.THUMBNAIL)
+            .media(media.getData())
+            .build());
     }
 
     /**
-     * Creates an {@code Thumbnail}.
+     * Creates a {@link Thumbnail}.
      *
-     * @param media The media
-     * @param description The description
-     * @return An {@code Thumbnail}
+     * @param media The media for this thumbnail
+     * @param description The description for this thumbnail
+     * @return A {@link Thumbnail}
      */
     public static Thumbnail of(UnfurledMediaItem media, String description) {
-        return new Thumbnail(MessageComponent.getBuilder(Type.THUMBNAIL).media(media.getData()).description(Possible.of(Optional.of(description))).build());
+        return new Thumbnail(MessageComponent.getBuilder(Type.THUMBNAIL)
+            .media(media.getData())
+            .description(Possible.of(Optional.of(description)))
+            .build());
     }
 
     /**
-     * Creates an {@code Thumbnail}.
+     * Creates a {@link Thumbnail}.
      *
-     * @param media The media
-     * @param description The description
+     * @param media The media for this thumbnail
      * @param spoiler If this component is a spoiler
-     * @return An {@code Thumbnail}
+     * @return A {@link Thumbnail}
+     */
+    public static Thumbnail of(UnfurledMediaItem media, boolean spoiler) {
+        return new Thumbnail(MessageComponent.getBuilder(Type.THUMBNAIL)
+            .media(media.getData())
+            .spoiler(spoiler)
+            .build());
+    }
+
+    /**
+     * Creates a {@link Thumbnail}.
+     *
+     * @param media The media for this thumbnail
+     * @param description The description for this thumbnail
+     * @param spoiler If this component is a spoiler
+     * @return A {@link Thumbnail}
      */
     public static Thumbnail of(UnfurledMediaItem media, String description, boolean spoiler) {
-        return new Thumbnail(MessageComponent.getBuilder(Type.THUMBNAIL).media(media.getData()).description(Possible.of(Optional.of(description))).spoiler(spoiler).build());
+        return new Thumbnail(MessageComponent.getBuilder(Type.THUMBNAIL)
+            .media(media.getData())
+            .description(Possible.of(Optional.of(description)))
+            .spoiler(spoiler)
+            .build());
+    }
+
+    /**
+     * Creates a {@link Thumbnail}.
+     *
+     * @param id the component id
+     * @param media The media for this thumbnail
+     * @return A {@link Thumbnail}
+     */
+    public static Thumbnail of(int id, UnfurledMediaItem media) {
+        return new Thumbnail(MessageComponent.getBuilder(Type.THUMBNAIL)
+            .id(id)
+            .media(media.getData())
+            .build());
+    }
+
+    /**
+     * Creates a {@link Thumbnail}.
+     *
+     * @param id the component id
+     * @param media The media for this thumbnail
+     * @param description The description for this thumbnail
+     * @return A {@link Thumbnail}
+     */
+    public static Thumbnail of(int id, UnfurledMediaItem media, String description) {
+        return new Thumbnail(MessageComponent.getBuilder(Type.THUMBNAIL)
+            .id(id)
+            .media(media.getData())
+            .description(Possible.of(Optional.of(description)))
+            .build());
+    }
+
+    /**
+     * Creates a {@link Thumbnail}.
+     *
+     * @param id the component id
+     * @param media The media for this thumbnail
+     * @param spoiler If this component is a spoiler
+     * @return A {@link Thumbnail}
+     */
+    public static Thumbnail of(int id, UnfurledMediaItem media, boolean spoiler) {
+        return new Thumbnail(MessageComponent.getBuilder(Type.THUMBNAIL)
+            .id(id)
+            .media(media.getData())
+            .spoiler(spoiler)
+            .build());
+    }
+
+    /**
+     * Creates a {@link Thumbnail}.
+     *
+     * @param id the component id
+     * @param media The media for this thumbnail
+     * @param description The description for this thumbnail
+     * @param spoiler If this component is a spoiler
+     * @return A {@link Thumbnail}
+     */
+    public static Thumbnail of(int id, UnfurledMediaItem media, String description, boolean spoiler) {
+        return new Thumbnail(MessageComponent.getBuilder(Type.THUMBNAIL)
+            .id(id)
+            .media(media.getData())
+            .description(Possible.of(Optional.of(description)))
+            .spoiler(spoiler)
+            .build());
+    }
+
+    protected Thumbnail(Integer id, UnfurledMediaItem media, String description, boolean spoiler) {
+        this(MessageComponent.getBuilder(Type.THUMBNAIL)
+            .id(Possible.ofNullable(id))
+            .media(media.getData())
+            .description(Possible.of(Optional.of(description)))
+            .spoiler(spoiler)
+            .build());
     }
 
     Thumbnail(ComponentData data) {
@@ -69,7 +165,7 @@ public class Thumbnail extends MessageComponent {
     /**
      * Gets the media related to this thumbnail.
      *
-     * @return An {@code UnfurledMediaItem}
+     * @return An {@link UnfurledMediaItem}
      */
     public UnfurledMediaItem getMedia() {
         return new UnfurledMediaItem(this.getData().media().get());
@@ -80,8 +176,8 @@ public class Thumbnail extends MessageComponent {
      *
      * @return The description
      */
-    public String getDescription() {
-        return Possible.flatOpt(this.getData().description()).orElse("");
+    public Optional<String> getDescription() {
+        return Possible.flatOpt(this.getData().description());
     }
 
     /**
@@ -90,7 +186,7 @@ public class Thumbnail extends MessageComponent {
      * @return {@code true} if is spoiler, false otherwise
      */
     public boolean isSpoiler() {
-        return this.getData().spoiler().get();
+        return this.getData().spoiler().toOptional().orElse(false);
     }
 
 }

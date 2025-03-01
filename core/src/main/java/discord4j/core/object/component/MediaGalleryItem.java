@@ -30,12 +30,10 @@ public class MediaGalleryItem {
      * Creates an {@code MediaGalleryItem}.
      *
      * @param mediaItem The {@link UnfurledMediaItem} item for display
-     * @param description The description for this item
-     * @param spoiler If this component it's a spoiler
      * @return An {@code MediaGalleryItem} containing the given items
      */
-    public static MediaGalleryItem of(UnfurledMediaItem mediaItem, String description, boolean spoiler) {
-        return new MediaGalleryItem(MediaGalleryItemData.builder().media(mediaItem.getData()).description(Possible.of(Optional.of(description))).spoiler(spoiler).build());
+    public static MediaGalleryItem of(UnfurledMediaItem mediaItem) {
+        return new MediaGalleryItem(MediaGalleryItemData.builder().media(mediaItem.getData()).build());
     }
 
     /**
@@ -46,22 +44,53 @@ public class MediaGalleryItem {
      * @return An {@code MediaGalleryItem} containing the given items
      */
     public static MediaGalleryItem of(UnfurledMediaItem mediaItem, String description) {
-        return new MediaGalleryItem(MediaGalleryItemData.builder().media(mediaItem.getData()).description(Possible.of(Optional.of(description))).build());
+        return new MediaGalleryItem(MediaGalleryItemData.builder()
+            .media(mediaItem.getData())
+            .description(Possible.of(Optional.of(description)))
+            .build());
     }
 
     /**
      * Creates an {@code MediaGalleryItem}.
      *
      * @param mediaItem The {@link UnfurledMediaItem} item for display
+     * @param spoiler If this component it's a spoiler
      * @return An {@code MediaGalleryItem} containing the given items
      */
-    public static MediaGalleryItem of(UnfurledMediaItem mediaItem) {
-        return new MediaGalleryItem(MediaGalleryItemData.builder().media(mediaItem.getData()).build());
+    public static MediaGalleryItem of(UnfurledMediaItem mediaItem, boolean spoiler) {
+        return new MediaGalleryItem(MediaGalleryItemData.builder()
+            .media(mediaItem.getData())
+            .spoiler(spoiler)
+            .build());
+    }
+
+    /**
+     * Creates an {@code MediaGalleryItem}.
+     *
+     * @param mediaItem The {@link UnfurledMediaItem} item for display
+     * @param description The description for this item
+     * @param spoiler If this component it's a spoiler
+     * @return An {@code MediaGalleryItem} containing the given items
+     */
+    public static MediaGalleryItem of(UnfurledMediaItem mediaItem, String description, boolean spoiler) {
+        return new MediaGalleryItem(MediaGalleryItemData.builder()
+            .media(mediaItem.getData())
+            .description(Possible.of(Optional.of(description)))
+            .spoiler(spoiler)
+            .build());
     }
 
     private final MediaGalleryItemData data;
 
-    public MediaGalleryItem(MediaGalleryItemData data) {
+    protected MediaGalleryItem(UnfurledMediaItem mediaItem, String description, boolean spoiler) {
+        this(MediaGalleryItemData.builder()
+            .media(mediaItem.getData())
+            .description(Possible.of(Optional.of(description)))
+            .spoiler(spoiler)
+            .build());
+    }
+
+    MediaGalleryItem(MediaGalleryItemData data) {
         this.data = data;
     }
 
