@@ -22,7 +22,7 @@ import discord4j.discordjson.possible.Possible;
 /**
  * A text display component for message.
  * <br>
- * <b>Note:</b> the components in the entire message support a max of {@link #MAX_DISPLAY_CHARACTERS_LENGTH} characters.
+ * <b>Note:</b> the components in the entire message support a max of {@value #MAX_DISPLAY_CHARACTERS_LENGTH} characters.
  * <br>
  * For example, you can have:
  * <ul>
