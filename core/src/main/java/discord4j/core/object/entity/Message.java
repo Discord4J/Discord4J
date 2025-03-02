@@ -81,6 +81,16 @@ public final class Message implements Entity {
     public static final int MAX_TOTAL_EMBEDS_CHARACTER_LENGTH = 6000;
 
     /**
+     * The maximum amount of {@link TopLevelMessageComponent} that can be added to a message's {@link #getComponents() root component list} when using the V2 component system ({@link Flag#IS_COMPONENTS_V2}). ({@value})
+     */
+    public static final int MAX_COMPONENT_COUNT_COMPONENTS_V2 = 10;
+
+    /**
+     * The maximum amount of {@link BaseMessageComponent components} that can be added to a message including nested components. ({@value})
+     */
+    public static final int MAX_COMPONENT_COUNT_NESTED = 30;
+
+    /**
      * The gateway associated to this object.
      */
     private final GatewayDiscordClient gateway;
