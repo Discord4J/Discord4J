@@ -14,28 +14,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package discord4j.core.object.component;
 
-import discord4j.discordjson.json.ComponentData;
-
-import java.util.Optional;
-
 /**
- * A message component who can trigger an action.
+ * A special type of {@link MessageComponent} that can be used as accessory for {@link Section}
  */
-public abstract class ActionComponent extends MessageComponent {
-
-    protected ActionComponent(ComponentData data) {
-        super(data);
-    }
-
-    /**
-     * Get this action component's custom id if present
-     *
-     * @return An {@link Optional} containing the custom id if present
-     */
-    public String getCustomId() {
-        return getData().customId().toOptional().orElseThrow(IllegalStateException::new);
-    }
-
+public interface IAccessoryComponent extends BaseMessageComponent {
 }

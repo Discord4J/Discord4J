@@ -16,26 +16,9 @@
  */
 package discord4j.core.object.component;
 
-import discord4j.discordjson.json.ComponentData;
-
-import java.util.Optional;
-
 /**
- * A message component who can trigger an action.
+ * Represents a component valid for the Top in the components of a Message
  */
-public abstract class ActionComponent extends MessageComponent {
-
-    protected ActionComponent(ComponentData data) {
-        super(data);
-    }
-
-    /**
-     * Get this action component's custom id if present
-     *
-     * @return An {@link Optional} containing the custom id if present
-     */
-    public String getCustomId() {
-        return getData().customId().toOptional().orElseThrow(IllegalStateException::new);
-    }
+public interface TopLevelMessageComponent extends BaseMessageComponent {
 
 }
