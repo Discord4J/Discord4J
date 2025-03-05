@@ -17,7 +17,8 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.object.component.LayoutComponent;
+import discord4j.core.object.component.BaseMessageComponent;
+import discord4j.core.object.component.TopLevelMessageComponent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.MessageEditRequest;
@@ -57,32 +58,32 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
 
     Possible<Optional<List<Message.Flag>>> flags();
 
-    Possible<Optional<List<LayoutComponent>>> components();
+    Possible<Optional<List<TopLevelMessageComponent>>> components();
 
     Possible<Optional<List<Attachment>>> attachments();
 
     @Override
     default MultipartRequest<MessageEditRequest> asRequest() {
         MessageEditRequest json = MessageEditRequest.builder()
-                .content(content())
-                .embeds(mapPossibleOptional(embeds(), embeds -> embeds.stream()
-                        .map(EmbedCreateSpec::asRequest)
-                        .collect(Collectors.toList())))
-                .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
-                .flags(mapPossibleOptional(flags(), f -> f.stream()
-                        .mapToInt(Message.Flag::getFlag)
-                        .reduce(0, (left, right) -> left | right)))
-                .components(mapPossibleOptional(components(), components -> components.stream()
-                        .map(LayoutComponent::getData)
-                        .collect(Collectors.toList())))
-                // TODO upon v10 upgrade, it is required to also include new files as attachment here
-                .attachments(mapPossibleOptional(attachments(), attachments -> attachments.stream()
-                        .map(Attachment::getData)
-                        .collect(Collectors.toList())))
-                .build();
+            .content(content())
+            .embeds(mapPossibleOptional(embeds(), embeds -> embeds.stream()
+                .map(EmbedCreateSpec::asRequest)
+                .collect(Collectors.toList())))
+            .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
+            .flags(mapPossibleOptional(flags(), f -> f.stream()
+                .mapToInt(Message.Flag::getFlag)
+                .reduce(0, (left, right) -> left | right)))
+            .components(mapPossibleOptional(components(), components -> components.stream()
+                .map(BaseMessageComponent::getData)
+                .collect(Collectors.toList())))
+            // TODO upon v10 upgrade, it is required to also include new files as attachment here
+            .attachments(mapPossibleOptional(attachments(), attachments -> attachments.stream()
+                .map(Attachment::getData)
+                .collect(Collectors.toList())))
+            .build();
         return MultipartRequest.ofRequestAndFiles(json, Stream.concat(files().stream(), fileSpoilers().stream())
-                .map(MessageCreateFields.File::asRequest)
-                .collect(Collectors.toList()));
+            .map(MessageCreateFields.File::asRequest)
+            .collect(Collectors.toList()));
     }
 }
 

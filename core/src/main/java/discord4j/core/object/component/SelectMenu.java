@@ -17,12 +17,14 @@
 package discord4j.core.object.component;
 
 import discord4j.common.util.Snowflake;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.json.ImmutableComponentData;
 import discord4j.discordjson.json.SelectDefaultValueData;
 import discord4j.discordjson.json.SelectOptionData;
+import discord4j.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 
 import java.util.*;
@@ -192,17 +194,190 @@ public class SelectMenu extends ActionComponent {
         return new SelectMenu(builder.build());
     }
 
-    SelectMenu(ComponentData data) {
-        super(data);
+
+    /**
+     * Creates a string select menu.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the select menu.
+     * @param options The options that can be selected in the menu.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu of(int id, String customId, Option... options) {
+        return of(id, Type.SELECT_MENU, customId, Arrays.asList(options), null, null);
     }
 
     /**
-     * Gets the select menu's custom id.
+     * Creates a string select menu.
      *
-     * @return The select menu's custom id.
+     * @param id the component id
+     * @param customId A developer-defined identifier for the select menu.
+     * @param options The options that can be selected in the menu.
+     * @return A select menu with the given data.
      */
-    public String getCustomId() {
-        return getData().customId().toOptional().orElseThrow(IllegalStateException::new);
+    public static SelectMenu of(int id, String customId, List<Option> options) {
+        Objects.requireNonNull(options);
+        return of(id, Type.SELECT_MENU, customId, options, null, null);
+    }
+
+    /**
+     * Creates a role select menu.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the select menu.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofRole(int id, String customId) {
+        return of(id, Type.SELECT_MENU_ROLE, customId, null, null, null);
+    }
+
+    /**
+     * Creates a role select menu.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the select menu.
+     * @param defaultValues The default values for auto-populated select menus.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofRole(int id, String customId, List<DefaultValue> defaultValues) {
+        return of(id, Type.SELECT_MENU_ROLE, customId, null, null, defaultValues);
+    }
+
+    /**
+     * Creates a user select menu.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the select menu.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofUser(int id, String customId) {
+        return of(id, Type.SELECT_MENU_USER, customId, null, null, null);
+    }
+
+    /**
+     * Creates a user select menu.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the select menu.
+     * @param defaultValues The default values for auto-populated select menus.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofUser(int id, String customId, List<DefaultValue> defaultValues) {
+        return of(id, Type.SELECT_MENU_USER, customId, null, null, defaultValues);
+    }
+
+    /**
+     * Creates a mentionable select menu.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the select menu.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofMentionable(int id, String customId) {
+        return of(id, Type.SELECT_MENU_MENTIONABLE, customId, null, null, null);
+    }
+
+    /**
+     * Creates a mentionable select menu.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the select menu.
+     * @param defaultValues The default values for auto-populated select menus.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofMentionable(int id, String customId, List<DefaultValue> defaultValues) {
+        return of(id, Type.SELECT_MENU_MENTIONABLE, customId, null, null, defaultValues);
+    }
+
+    /**
+     * Creates a channel select menu.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the select menu.
+     * @param channelTypes The allowed channel types.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofChannel(int id, String customId, Channel.Type... channelTypes) {
+        return of(id, Type.SELECT_MENU_CHANNEL, customId, null, Arrays.asList(channelTypes), null);
+    }
+
+    /**
+     * Creates a channel select menu.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the select menu.
+     * @param defaultValues The default values for auto-populated select menus.
+     * @param channelTypes The allowed channel types.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofChannel(int id, String customId, List<DefaultValue> defaultValues, Channel.Type... channelTypes) {
+        return of(id, Type.SELECT_MENU_CHANNEL, customId, null, Arrays.asList(channelTypes), defaultValues);
+    }
+
+    /**
+     * Creates a channel select menu.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the select menu.
+     * @param channelTypes The allowed channel types.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofChannel(int id, String customId, List<Channel.Type> channelTypes) {
+        return of(id, Type.SELECT_MENU_CHANNEL, customId, null, channelTypes, null);
+    }
+
+    /**
+     * Creates a channel select menu.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the select menu.
+     * @param defaultValues The default values for auto-populated select menus.
+     * @param channelTypes The allowed channel types.
+     * @return A select menu with the given data.
+     */
+    public static SelectMenu ofChannel(int id, String customId, List<DefaultValue> defaultValues, List<Channel.Type> channelTypes) {
+        return of(id, Type.SELECT_MENU_CHANNEL, customId, null, channelTypes, defaultValues);
+    }
+
+    private static SelectMenu of(int id, Type type, String customId, @Nullable List<Option> options, @Nullable List<Channel.Type> channelTypes, @Nullable List<DefaultValue> defaultValues) {
+        ImmutableComponentData.Builder builder = ComponentData.builder()
+            .id(id)
+            .type(type.getValue())
+            .customId(customId);
+
+        if (options != null) {
+            builder.options(options.stream().map(opt -> opt.data).collect(Collectors.toList()));
+        }
+
+        if (channelTypes != null) {
+            builder.channelTypes(channelTypes.stream()
+                .map(Channel.Type::getValue)
+                .collect(Collectors.toList()));
+        }
+
+        if (defaultValues != null) {
+            builder.defaultValues(defaultValues.stream()
+                .map(DefaultValue::getData)
+                .collect(Collectors.toList()));
+        }
+
+        return new SelectMenu(builder.build());
+    }
+
+    protected SelectMenu(Integer id, Type type, String customId, @Nullable List<Option> options, @Nullable List<Channel.Type> channelTypes, @Nullable List<DefaultValue> defaultValues) {
+        this(
+            MessageComponent.getBuilder(type)
+                .id(Possible.ofNullable(id))
+                .customId(customId)
+                .options(Possible.ofNullable(options).map(opts -> opts.stream().map(opt -> opt.data).collect(Collectors.toList())))
+                .channelTypes(Possible.ofNullable(channelTypes).map(cts -> cts.stream().map(Channel.Type::getValue).collect(Collectors.toList())))
+                .defaultValues(Possible.ofNullable(defaultValues).map(dvs -> dvs.stream().map(DefaultValue::getData).collect(Collectors.toList())))
+                .build()
+        );
+    }
+
+    SelectMenu(ComponentData data) {
+        super(data);
     }
 
     /**

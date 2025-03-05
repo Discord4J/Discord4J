@@ -19,25 +19,54 @@ package discord4j.core.object.component;
 import discord4j.common.annotations.Experimental;
 import discord4j.discordjson.json.ComponentData;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * A message component that determines how components are laid out in a message and has {@link ActionComponent}
+ * A message component that determines how components are laid out in a message and has {@link MessageComponent}
  * children.
  */
 @Experimental
-public abstract class LayoutComponent extends MessageComponent {
+public abstract class LayoutComponent extends MessageComponent implements TopLevelMessageComponent {
 
     LayoutComponent(ComponentData data) {
         super(data);
     }
 
+    /**
+     * Get the direct children of this {@link LayoutComponent}
+     *
+     * @return The direct children of this component
+     */
     public List<MessageComponent> getChildren() {
-        return getData().components().toOptional()
-                .map(components -> components.stream()
-                        .map(MessageComponent::fromData)
-                        .collect(Collectors.toList()))
-                .orElseThrow(IllegalStateException::new); // components should always be present on a layout component
+        return this.getData()
+            .components()
+            .toOptional()
+            .map(components -> components.stream()
+                .map(MessageComponent::fromData)
+                .collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
     }
+
+    /**
+     * Get all the children of this {@link LayoutComponent}: the direct children and all the children of the children...
+     *
+     * @return All the children of this component
+     */
+    public List<BaseMessageComponent> getAllChildren() {
+        List<BaseMessageComponent> components = new ArrayList<>();
+
+        for (MessageComponent child : getChildren()) {
+            if (child instanceof LayoutComponent) {
+                components.addAll(((LayoutComponent) child).getAllChildren());
+            }
+
+            components.add(child);
+        }
+
+        return components;
+    }
+
 }
