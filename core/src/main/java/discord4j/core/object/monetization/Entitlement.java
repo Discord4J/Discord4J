@@ -35,6 +35,25 @@ public class Entitlement implements Entity {
         this.data = data;
     }
 
+    @Override
+    public GatewayDiscordClient getClient() {
+        return gateway;
+    }
+
+    @Override
+    public Snowflake getId() {
+        return Snowflake.of(data.id());
+    }
+
+    /**
+     * Gets the data of the entitlement.
+     *
+     * @return The data of the entitlement.
+     */
+    public EntitlementData getData() {
+        return data;
+    }
+
     /**
      * Gets the SKU ID associated with this entitlement.
      *
@@ -97,7 +116,8 @@ public class Entitlement implements Entity {
      * Gets the guild of the entitlement.
      *
      * @return A {@link Mono} that completes with the guild of the entitlement. If an error occurs, it will be emitted
-     * through the {@link Mono}. If the entitlement is not associated with a guild, the {@link Mono} will complete empty.
+     * through the {@link Mono}. If the entitlement is not associated with a guild, the {@link Mono} will complete
+     * empty.
      */
     public Mono<Guild> getGuild() {
         return getGuildId().map(gateway::getGuildById).orElse(Mono.empty());
@@ -128,10 +148,10 @@ public class Entitlement implements Entity {
 
     /**
      * Gets whether the entitlement has been deleted. Entitlement deletions are infrequent, and occur when:
-     *<ul>
+     * <ul>
      * <li>Discord issues a refund for a subscription</li>
      * <li>Discord removes an entitlement from a user via internal tooling</li>
-     *</ul>
+     * </ul>
      * Entitlements are not deleted when they expire.
      *
      * @return Whether the entitlement has been deleted.
@@ -179,7 +199,8 @@ public class Entitlement implements Entity {
      * emitted through the {@link Mono}.
      */
     public Mono<Void> consume() {
-        return gateway.getRestClient().getMonetizationService().consumeEntitlement(getApplicationId().asLong(), getId().asLong());
+        return gateway.getRestClient().getMonetizationService().consumeEntitlement(getApplicationId().asLong(),
+            getId().asLong());
     }
 
     /**
@@ -189,25 +210,6 @@ public class Entitlement implements Entity {
      */
     public boolean isConsumed() {
         return data.consumed().toOptional().orElse(false);
-    }
-
-    /**
-     * Gets the data of the entitlement.
-     *
-     * @return The data of the entitlement.
-     */
-    public EntitlementData getData() {
-        return data;
-    }
-
-    @Override
-    public GatewayDiscordClient getClient() {
-        return gateway;
-    }
-
-    @Override
-    public Snowflake getId() {
-        return Snowflake.of(data.id());
     }
 
     public enum OwnerType {
