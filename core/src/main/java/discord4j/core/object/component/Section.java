@@ -140,7 +140,7 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
     /**
      * Create a new {@link Section} instance from {@code this}, removing any existing component by {@code customId}.
      *
-     * @param customId the customId of the component to remove
+     * @param componentId the customId of the component to remove
      * @return an {@code Section} containing all components that did not match the given {@code customId}
      */
     public Section withRemovedComponent(int componentId) {

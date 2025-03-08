@@ -259,7 +259,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
                 .id(Possible.ofNullable(id))
                 .spoiler(spoiler)
                 .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
-                .accentColor(Possible.ofNullable(color).map(Color::getRGB))
+                .accentColor(Possible.of(Optional.ofNullable(color).map(Color::getRGB)))
                 .build()
         );
     }
@@ -306,7 +306,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
     public Container withColor(@Nullable Color color) {
         return new Container(ComponentData.builder()
             .from(this.getData())
-            .accentColor(Possible.ofNullable(color).map(Color::getRGB))
+            .accentColor(Possible.of(Optional.ofNullable(color).map(Color::getRGB)))
             .build());
     }
 
@@ -316,7 +316,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @return An optional color.
      */
     public Optional<Color> getColor() {
-        return this.getData().accentColor().toOptional().map(Color::of);
+        return Possible.flatOpt(this.getData().accentColor()).map(Color::of);
     }
 
     /**
