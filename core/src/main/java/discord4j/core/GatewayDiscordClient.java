@@ -31,6 +31,7 @@ import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
 import discord4j.core.object.ScheduledEventUser;
+import discord4j.core.object.SoundboardSound;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
@@ -58,6 +59,7 @@ import discord4j.discordjson.json.GuildUpdateData;
 import discord4j.discordjson.json.RoleData;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
+import discord4j.discordjson.json.gateway.RequestSoundboardSounds;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayClientGroup;
@@ -718,6 +720,11 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public EntityRetriever withRetrievalStrategy(EntityRetrievalStrategy retrievalStrategy) {
         return retrievalStrategy.apply(this);
+    }
+
+    public Flux<SoundboardSound> requestSoundboardSound(RequestSoundboardSounds request) {
+        // TODO: This require the shard method? still need tests
+        return Flux.empty();
     }
 
     @Override
