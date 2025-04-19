@@ -401,7 +401,7 @@ public final class Webhook implements Entity {
      * WebhookExecuteMono} only if {@code withWaitForMessage(true)}.
      */
     public WebhookExecuteMono execute() {
-        return WebhookExecuteMono.of(false,this);
+        return WebhookExecuteMono.of(false, false,this);
     }
 
     /**
@@ -483,6 +483,37 @@ public final class Webhook implements Entity {
      *
      * @param wait True to specify to wait for server confirmation that the message was saved or there was an error
      *             saving the message.
+     * @param withComponents True for allow the use of components
+     * @param spec an immutable object that specifies how to execute this webhook
+     * @return A {@link Mono} where, upon successful webhook execution, emits a Message if {@code wait = true}. If the
+     * message fails to save, an error is emitted through the {@code Mono} only if {@code wait = true}.
+     */
+    public Mono<Message> execute(boolean wait, boolean withComponents, WebhookExecuteSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+            () -> {
+                if (!getToken().isPresent()) {
+                    throw new IllegalArgumentException("Can't execute webhook.");
+                }
+
+                if (spec.threadId().isAbsent()) {
+                    return gateway.getRestClient().getWebhookService()
+                        .executeWebhook(getId().asLong(), getToken().get(), wait, withComponents, spec.asRequest())
+                        .map(data -> new Message(gateway, data));
+                } else {
+                    return gateway.getRestClient().getWebhookService()
+                        .executeWebhook(getId().asLong(), getToken().get(), wait, spec.threadId().get().asLong(), spec.asRequest())
+                        .map(data -> new Message(gateway, data));
+                }
+            }
+        );
+    }
+
+    /**
+     * Executes this webhook.
+     *
+     * @param wait True to specify to wait for server confirmation that the message was saved or there was an error
+     *             saving the message.
      * @param threadId The ID of the thread to execute the webhook in. Overrides the thread ID in the spec.
      * @param spec an immutable object that specifies how to execute this webhook
      * @return A {@link Mono} where, upon successful webhook execution, emits a Message if {@code wait = true}. If the
@@ -497,6 +528,31 @@ public final class Webhook implements Entity {
                 }
                 return gateway.getRestClient().getWebhookService()
                     .executeWebhook(getId().asLong(), getToken().get(), wait, threadId.asLong(), spec.asRequest())
+                    .map(data -> new Message(gateway, data));
+            }
+        );
+    }
+
+    /**
+     * Executes this webhook.
+     *
+     * @param wait True to specify to wait for server confirmation that the message was saved or there was an error
+     *             saving the message.
+     * @param withComponents True for allow the use of components
+     * @param threadId The ID of the thread to execute the webhook in. Overrides the thread ID in the spec.
+     * @param spec an immutable object that specifies how to execute this webhook
+     * @return A {@link Mono} where, upon successful webhook execution, emits a Message if {@code wait = true}. If the
+     * message fails to save, an error is emitted through the {@code Mono} only if {@code wait = true}.
+     */
+    public Mono<Message> execute(boolean wait, boolean withComponents, Snowflake threadId, WebhookExecuteSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+            () -> {
+                if (!getToken().isPresent()) {
+                    throw new IllegalArgumentException("Can't execute webhook.");
+                }
+                return gateway.getRestClient().getWebhookService()
+                    .executeWebhook(getId().asLong(), getToken().get(), wait, threadId.asLong(), withComponents, spec.asRequest())
                     .map(data -> new Message(gateway, data));
             }
         );
