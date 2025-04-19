@@ -18,7 +18,8 @@
 package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.component.LayoutComponent;
+import discord4j.core.object.component.BaseMessageComponent;
+import discord4j.core.object.component.TopLevelMessageComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
 import discord4j.discordjson.json.WebhookExecuteRequest;
@@ -67,29 +68,34 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
 
     Possible<AllowedMentions> allowedMentions();
 
-    Possible<List<LayoutComponent>> components();
+    Possible<List<TopLevelMessageComponent>> components();
 
     Possible<String> threadName();
 
     Possible<Snowflake> threadId();
 
+    Possible<List<Message.Flag>> flags();
+
     @Override
     default MultipartRequest<WebhookExecuteRequest> asRequest() {
         WebhookExecuteRequest request = WebhookExecuteRequest.builder()
-                .content(content())
-                .username(username())
-                .avatarUrl(avatarUrl())
-                .tts(tts())
-                .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
-                .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
-                .components(mapPossible(components(), components -> components.stream()
-                        .map(LayoutComponent::getData)
-                        .collect(Collectors.toList())))
-                .threadName(threadName())
-                .build();
+            .content(content())
+            .username(username())
+            .avatarUrl(avatarUrl())
+            .tts(tts())
+            .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
+            .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
+            .components(mapPossible(components(), components -> components.stream()
+                .map(BaseMessageComponent::getData)
+                .collect(Collectors.toList())))
+            .threadName(threadName())
+            .flags(mapPossible(flags(), f -> f.stream()
+                .mapToInt(Message.Flag::getFlag)
+                .reduce(0, (left, right) -> left | right)))
+            .build();
         return MultipartRequest.ofRequestAndFiles(request, Stream.concat(files().stream(), fileSpoilers().stream())
-                .map(MessageCreateFields.File::asRequest)
-                .collect(Collectors.toList()));
+            .map(MessageCreateFields.File::asRequest)
+            .collect(Collectors.toList()));
     }
 }
 
@@ -99,14 +105,16 @@ abstract class WebhookExecuteMonoGenerator extends Mono<Message> implements Webh
 
     abstract boolean waitForMessage();
 
+    abstract boolean allowComponents();
+
     abstract Webhook webhook();
 
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
         if (threadId().isAbsent()) {
-            webhook().execute(waitForMessage(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
+            webhook().execute(waitForMessage(), allowComponents(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
         } else {
-            webhook().execute(waitForMessage(), threadId().get(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
+            webhook().execute(waitForMessage(), allowComponents(), threadId().get(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
         }
     }
 

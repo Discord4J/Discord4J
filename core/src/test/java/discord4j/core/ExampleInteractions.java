@@ -215,7 +215,7 @@ public class ExampleInteractions {
                 .block();
     }
 
-    private static Iterable<LayoutComponent> getComponents(boolean disabled) {
+    private static Iterable<TopLevelMessageComponent> getComponents(boolean disabled) {
         return Arrays.asList(ActionRow.of(SelectMenu.of(REPLY_MODE_SELECT,
                                 SelectMenu.Option.ofDefault("Deferred reply", DEFER_REPLY),
                                 SelectMenu.Option.of("Reply", REPLY),

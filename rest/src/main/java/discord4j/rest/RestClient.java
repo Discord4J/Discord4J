@@ -357,7 +357,7 @@ public class RestClient {
                 this.getUserService()
                         .getCurrentUserGuilds(params);
 
-        return PaginationUtil.paginateAfter(makeRequest, data -> Snowflake.asLong(data.id()), 0L, 100);
+        return PaginationUtil.paginateAfter(makeRequest, data -> Snowflake.asLong(data.id()), 0L, 200);
     }
 
     /**

@@ -2659,6 +2659,24 @@ public final class Guild implements Entity {
         BROWSE("browse"),
         /** Server Guide */
         GUIDE("guide"),
+        /**
+         * Linked Roles
+         *
+         * @see <a href="https://support.discord.com/hc/en-us/articles/10388356626711">Discord Article</a>
+         **/
+        LINKED_ROLES("linked-roles"),
+        /**
+         * Linked Role Connection
+         * <br>
+         * You can use this tag like this:
+         * <code>
+         *     LINKED_ROLE.getMention(role.getId().asString());
+         * </code>
+         *
+         * @see #getMention(String...)
+         * @see <a href="https://support.discord.com/hc/en-us/articles/10388356626711">Discord Article</a>
+         **/
+        LINKED_ROLE("linked-roles:%s"),
         ;
 
         /** The underlying value as represented by Discord. */
@@ -2689,6 +2707,15 @@ public final class Guild implements Entity {
          */
         public String getMention() {
             return MentionUtil.forGuildResourceNavigation(this);
+        }
+
+        /**
+         * Gets the <i>raw</i> mention passing args for complete the mention arguments. This is the format utilized to directly mention guild resource.
+         *
+         * @return The <i>raw</i> mention.
+         */
+        public String getMention(String... args) {
+            return String.format(this.getMention(), Arrays.asList(args).toArray());
         }
     }
 

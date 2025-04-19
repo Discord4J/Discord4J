@@ -200,6 +200,12 @@ public class GuildService extends RestService {
             .flatMapMany(Flux::fromArray);
     }
 
+    public Mono<RoleData> getGuildRole(long guildId, long roleId) {
+        return Routes.GUILD_ROLE_GET.newRequest(guildId, roleId)
+            .exchange(getRouter())
+            .bodyToMono(RoleData.class);
+    }
+
     public Mono<RoleData> createGuildRole(long guildId, RoleCreateRequest request, @Nullable String reason) {
         return Routes.GUILD_ROLE_CREATE.newRequest(guildId)
             .body(request)

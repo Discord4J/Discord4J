@@ -36,8 +36,8 @@ import java.util.Optional;
  * A Discord channel that was resolved in a command.
  *
  * @see
- * <a href="https://discord.com/developers/docs/interactions/slash-commands#interaction-object-application-command-interaction-data-resolved-structure">
- * Application Command Interaction Data Resolved Object
+ * <a href="https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-resolved-data-structure">
+ * Resolved Data Structure
  * </a>
  */
 @Experimental
@@ -89,7 +89,7 @@ public class ResolvedChannel implements DiscordObject {
      * @return The name of the channel.
      */
     public Optional<String> getName() {
-        return data.name().toOptional().flatMap(opt -> opt);
+        return Possible.flatOpt(data.name());
     }
 
     /**
@@ -126,7 +126,7 @@ public class ResolvedChannel implements DiscordObject {
      * @return The parent ID as a {@link Snowflake}, if present.
      */
     public Optional<Snowflake> getParentId() {
-        return data.parentId().toOptional().map(Snowflake::of);
+        return Possible.flatOpt(data.parentId()).map(Snowflake::of);
     }
 
     /**

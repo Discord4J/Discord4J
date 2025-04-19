@@ -197,7 +197,7 @@ public class RestGuild {
     public Flux<MemberData> getMembers() {
         Function<Map<String, Object>, Flux<MemberData>> doRequest =
                 params -> restClient.getGuildService().getGuildMembers(id, params);
-        return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 100);
+        return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 1000);
     }
 
     public Flux<MemberData> searchMembers(Map<String, Object> queryParams) {

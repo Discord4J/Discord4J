@@ -94,9 +94,7 @@ public class RestEntityRetriever implements EntityRetriever {
     @Override
     public Mono<Role> getRoleById(Snowflake guildId, Snowflake roleId) {
         return rest.getGuildService()
-                .getGuildRoles(guildId.asLong())
-                .filter(response -> response.id().asString().equals(roleId.asString()))
-                .singleOrEmpty()
+                .getGuildRole(guildId.asLong(), roleId.asLong())
                 .map(data -> new Role(gateway, data, guildId.asLong()));
     }
 
@@ -111,7 +109,7 @@ public class RestEntityRetriever implements EntityRetriever {
     public Flux<Guild> getGuilds() {
         final Function<Map<String, Object>, Flux<UserGuildData>> makeRequest = params ->
                 rest.getUserService().getCurrentUserGuilds(params);
-        return PaginationUtil.paginateAfter(makeRequest, data -> Snowflake.asLong(data.id()), 0L, 100)
+        return PaginationUtil.paginateAfter(makeRequest, data -> Snowflake.asLong(data.id()), 0L, 200)
                 .map(UserGuildData::id)
                 .flatMap(id -> rest.getGuildService().getGuild(Snowflake.asLong(id)))
                 .map(this::toGuildData)
@@ -133,7 +131,7 @@ public class RestEntityRetriever implements EntityRetriever {
         Function<Map<String, Object>, Flux<MemberData>> doRequest = params ->
                 rest.getGuildService().getGuildMembers(guildId.asLong(), params);
 
-       return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 100)
+       return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 1000)
                         .map(data -> new Member(gateway, data, guildId.asLong()));
     }
 

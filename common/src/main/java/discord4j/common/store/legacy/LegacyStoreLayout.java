@@ -64,9 +64,9 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         return this;
     }
 
-    /////////////////////////////////////////////////////////////////////////////
-    //// Query model methods
-    /////////////////////////////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////////////////////////////
+    /// / Query model methods
+    /// //////////////////////////////////////////////////////////////////////////
 
     @Override
     public Mono<Long> countChannels() {
@@ -177,8 +177,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     @Override
     public Flux<ChannelData> getChannelsInGuild(long guildId) {
         return stateHolder.getGuildStore().find(guildId)
-                .flatMapMany(guild -> Flux.fromStream(guild.channels().stream().map(Snowflake::asLong)))
-                .flatMap(id -> stateHolder.getChannelStore().find(id));
+            .flatMapMany(guild -> Flux.fromStream(guild.channels().stream().map(Snowflake::asLong)))
+            .flatMap(id -> stateHolder.getChannelStore().find(id));
     }
 
     @Override
@@ -211,8 +211,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     @Override
     public Flux<EmojiData> getEmojisInGuild(long guildId) {
         return stateHolder.getGuildStore().find(guildId)
-                .flatMapMany(guild -> Flux.fromStream(guild.emojis().stream().map(Snowflake::asLong)))
-                .flatMap(id -> stateHolder.getGuildEmojiStore().find(id));
+            .flatMapMany(guild -> Flux.fromStream(guild.emojis().stream().map(Snowflake::asLong)))
+            .flatMap(id -> stateHolder.getGuildEmojiStore().find(id));
     }
 
     @Override
@@ -257,13 +257,13 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     @Override
     public Flux<MemberData> getMembersInGuild(long guildId) {
         return stateHolder.getMemberStore()
-                .findInRange(LongLongTuple2.of(guildId, 0), LongLongTuple2.of(guildId, Long.MAX_VALUE));
+            .findInRange(LongLongTuple2.of(guildId, 0), LongLongTuple2.of(guildId, Long.MAX_VALUE));
     }
 
     @Override
     public Flux<MemberData> getExactMembersInGuild(long guildId) {
         return stateHolder.getMemberStore()
-                .findInRange(LongLongTuple2.of(guildId, 0), LongLongTuple2.of(guildId, Long.MAX_VALUE));
+            .findInRange(LongLongTuple2.of(guildId, 0), LongLongTuple2.of(guildId, Long.MAX_VALUE));
     }
 
     @Override
@@ -279,7 +279,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     @Override
     public Flux<MessageData> getMessagesInChannel(long channelId) {
         return stateHolder.getMessageStore().values()
-                .filter(data -> Snowflake.asLong(data.channelId()) == channelId);
+            .filter(data -> Snowflake.asLong(data.channelId()) == channelId);
     }
 
     @Override
@@ -295,7 +295,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     @Override
     public Flux<PresenceData> getPresencesInGuild(long guildId) {
         return stateHolder.getPresenceStore()
-                .findInRange(LongLongTuple2.of(guildId, 0), LongLongTuple2.of(guildId, Long.MAX_VALUE));
+            .findInRange(LongLongTuple2.of(guildId, 0), LongLongTuple2.of(guildId, Long.MAX_VALUE));
     }
 
     @Override
@@ -311,8 +311,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     @Override
     public Flux<RoleData> getRolesInGuild(long guildId) {
         return stateHolder.getGuildStore().find(guildId)
-                .flatMapMany(guild -> Flux.fromStream(guild.roles().stream().map(Snowflake::asLong)))
-                .flatMap(id -> stateHolder.getRoleStore().find(id));
+            .flatMapMany(guild -> Flux.fromStream(guild.roles().stream().map(Snowflake::asLong)))
+            .flatMap(id -> stateHolder.getRoleStore().find(id));
     }
 
     @Override
@@ -338,16 +338,16 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     @Override
     public Flux<VoiceStateData> getVoiceStatesInChannel(long guildId, long channelId) {
         return stateHolder.getVoiceStateStore()
-                .findInRange(LongLongTuple2.of(guildId, 0), LongLongTuple2.of(guildId, Long.MAX_VALUE))
-                .filter(data -> data.channelId()
-                        .filter(id -> Snowflake.asLong(id) == channelId)
-                        .isPresent());
+            .findInRange(LongLongTuple2.of(guildId, 0), LongLongTuple2.of(guildId, Long.MAX_VALUE))
+            .filter(data -> data.channelId()
+                .filter(id -> Snowflake.asLong(id) == channelId)
+                .isPresent());
     }
 
     @Override
     public Flux<VoiceStateData> getVoiceStatesInGuild(long guildId) {
         return stateHolder.getVoiceStateStore()
-                .findInRange(LongLongTuple2.of(guildId, 0), LongLongTuple2.of(guildId, Long.MAX_VALUE));
+            .findInRange(LongLongTuple2.of(guildId, 0), LongLongTuple2.of(guildId, Long.MAX_VALUE));
     }
 
     @Override
@@ -371,9 +371,9 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .findInRange(LongLongTuple2.of(threadId, 0), LongLongTuple2.of(threadId, Long.MAX_VALUE));
     }
 
-    /////////////////////////////////////////////////////////////////////////////
-    //// Command model methods
-    /////////////////////////////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////////////////////////////
+    /// / Command model methods
+    /// //////////////////////////////////////////////////////////////////////////
 
     @Override
     public Mono<Void> onChannelCreate(int shardIndex, ChannelCreate dispatch) {
@@ -395,15 +395,15 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         ChannelData channel = data.channel();
 
         Mono<Void> addChannelToGuild = stateHolder.getGuildStore()
-                .find(Snowflake.asLong(channel.guildId().get()))
-                .map(guildData -> GuildData.builder()
-                        .from(guildData)
-                        .channels(ListUtil.add(guildData.channels(), channel.id()))
-                        .build())
-                .flatMap(guild -> stateHolder.getGuildStore().save(Snowflake.asLong(guild.id()), guild));
+            .find(Snowflake.asLong(channel.guildId().get()))
+            .map(guildData -> GuildData.builder()
+                .from(guildData)
+                .channels(ListUtil.add(guildData.channels(), channel.id()))
+                .build())
+            .flatMap(guild -> stateHolder.getGuildStore().save(Snowflake.asLong(guild.id()), guild));
 
         Mono<Void> saveChannel = stateHolder.getChannelStore()
-                .save(Snowflake.asLong(channel.id()), channel);
+            .save(Snowflake.asLong(channel.id()), channel);
 
         return addChannelToGuild.then(saveChannel);
     }
@@ -428,15 +428,15 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         ChannelData channel = data.channel();
 
         Mono<Void> removeChannelFromGuild = stateHolder.getGuildStore()
-                .find(Snowflake.asLong(channel.guildId().get()))
-                .map(guildData -> GuildData.builder()
-                        .from(guildData)
-                        .channels(ListUtil.remove(guildData.channels(), ch -> channel.id().equals(ch)))
-                        .build())
-                .flatMap(guild -> stateHolder.getGuildStore().save(Snowflake.asLong(guild.id()), guild));
+            .find(Snowflake.asLong(channel.guildId().get()))
+            .map(guildData -> GuildData.builder()
+                .from(guildData)
+                .channels(ListUtil.remove(guildData.channels(), ch -> channel.id().equals(ch)))
+                .build())
+            .flatMap(guild -> stateHolder.getGuildStore().save(Snowflake.asLong(guild.id()), guild));
 
         Mono<Void> deleteChannel = stateHolder.getChannelStore()
-                .delete(Snowflake.asLong(channel.id()));
+            .delete(Snowflake.asLong(channel.id()));
 
         return removeChannelFromGuild.then(deleteChannel).thenReturn(channel);
     }
@@ -503,9 +503,9 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         Mono<Void> saveNew = stateHolder.getChannelStore().save(Snowflake.asLong(channel.id()), channel);
 
         return stateHolder.getChannelStore()
-                .find(Snowflake.asLong(channel.id()))
-                .flatMap(saveNew::thenReturn)
-                .switchIfEmpty(saveNew.then(Mono.empty()));
+            .find(Snowflake.asLong(channel.id()))
+            .flatMap(saveNew::thenReturn)
+            .switchIfEmpty(saveNew.then(Mono.empty()));
     }
 
     @Override
@@ -519,83 +519,83 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             // be duplicated, but array addition in GuildBean can
             //guildBean.setMembers(new long[0]);
             createData = GuildCreateData.builder()
-                    .from(dispatch.guild())
-                    .members(Collections.emptyList())
-                    .build();
+                .from(dispatch.guild())
+                .members(Collections.emptyList())
+                .build();
             guild = GuildData.builder()
-                    .from(createData)
-                    .roles(createData.roles().stream().map(RoleData::id).collect(Collectors.toList()))
-                    .emojis(createData.emojis().stream().map(EmojiData::id).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()))
-                    .channels(createData.channels().stream().map(ChannelData::id).collect(Collectors.toList()))
-                    .build();
+                .from(createData)
+                .roles(createData.roles().stream().map(RoleData::id).collect(Collectors.toList()))
+                .emojis(createData.emojis().stream().map(EmojiData::id).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()))
+                .channels(createData.channels().stream().map(ChannelData::id).collect(Collectors.toList()))
+                .build();
         } else {
             createData = dispatch.guild();
             guild = GuildData.builder()
-                    .from(createData)
-                    .roles(createData.roles().stream().map(RoleData::id).collect(Collectors.toList()))
-                    .emojis(createData.emojis().stream().map(EmojiData::id).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()))
-                    .members(createData.members().stream().map(data -> data.user().id()).distinct().collect(Collectors.toList()))
-                    .channels(createData.channels().stream().map(ChannelData::id).collect(Collectors.toList()))
-                    .build();
+                .from(createData)
+                .roles(createData.roles().stream().map(RoleData::id).collect(Collectors.toList()))
+                .emojis(createData.emojis().stream().map(EmojiData::id).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()))
+                .members(createData.members().stream().map(data -> data.user().id()).distinct().collect(Collectors.toList()))
+                .channels(createData.channels().stream().map(ChannelData::id).collect(Collectors.toList()))
+                .build();
         }
 
         long guildId = Snowflake.asLong(guild.id());
 
         Mono<Void> saveGuild = stateHolder.getGuildStore().save(guildId, guild)
-                .doOnSubscribe(s -> log.trace("GuildCreate doOnSubscribe {}", guildId))
-                .doFinally(s -> log.trace("GuildCreate doFinally {}: {}", guildId, s));
+            .doOnSubscribe(s -> log.trace("GuildCreate doOnSubscribe {}", guildId))
+            .doFinally(s -> log.trace("GuildCreate doFinally {}: {}", guildId, s));
 
         Mono<Void> saveChannels = stateHolder.getChannelStore()
-                .save(Flux.fromIterable(createData.channels())
-                        .map(channel -> Tuples.of(Snowflake.asLong(channel.id()),
-                                ChannelData.builder().from(channel).guildId(guild.id()).build())));
+            .save(Flux.fromIterable(createData.channels())
+                .map(channel -> Tuples.of(Snowflake.asLong(channel.id()),
+                    ChannelData.builder().from(channel).guildId(guild.id()).build())));
 
         Mono<Void> saveRoles = stateHolder.getRoleStore()
-                .save(Flux.fromIterable(createData.roles())
-                        .map(role -> Tuples.of(Snowflake.asLong(role.id()), role)));
+            .save(Flux.fromIterable(createData.roles())
+                .map(role -> Tuples.of(Snowflake.asLong(role.id()), role)));
 
         Mono<Void> saveEmojis = stateHolder.getGuildEmojiStore()
-                .save(Flux.fromIterable(createData.emojis())
-                        .map(emoji -> Tuples.of(Snowflake.asLong(emoji.id()
-                                .orElseThrow(NoSuchElementException::new)), emoji)));
+            .save(Flux.fromIterable(createData.emojis())
+                .map(emoji -> Tuples.of(Snowflake.asLong(emoji.id()
+                    .orElseThrow(NoSuchElementException::new)), emoji)));
 
         Mono<Void> saveMembers = stateHolder.getMemberStore()
-                .save(Flux.fromIterable(createData.members())
-                        .map(member -> Tuples.of(LongLongTuple2.of(guildId,
-                                Snowflake.asLong(member.user().id())), member)));
+            .save(Flux.fromIterable(createData.members())
+                .map(member -> Tuples.of(LongLongTuple2.of(guildId,
+                    Snowflake.asLong(member.user().id())), member)));
 
         Mono<Void> saveUsers = stateHolder.getUserStore()
-                .save(Flux.fromIterable(createData.members())
-                        .map(MemberData::user)
-                        .map(user -> Tuples.of(Snowflake.asLong(user.id()), user)));
+            .save(Flux.fromIterable(createData.members())
+                .map(MemberData::user)
+                .map(user -> Tuples.of(Snowflake.asLong(user.id()), user)));
 
         Mono<Void> saveVoiceStates = stateHolder.getVoiceStateStore()
-                .save(Flux.fromIterable(createData.voiceStates())
-                        .map(voiceState -> Tuples.of(LongLongTuple2.of(guildId,
-                                Snowflake.asLong(voiceState.userId())),
-                                VoiceStateData.builder()
-                                        .from(voiceState)
-                                        .guildId(guild.id())
-                                        .build())));
+            .save(Flux.fromIterable(createData.voiceStates())
+                .map(voiceState -> Tuples.of(LongLongTuple2.of(guildId,
+                        Snowflake.asLong(voiceState.userId())),
+                    VoiceStateData.builder()
+                        .from(voiceState)
+                        .guildId(guild.id())
+                        .build())));
 
         Mono<Void> saveThreads = stateHolder.getChannelStore()
                 .save(Flux.fromIterable(createData.threads())
                         .map(thread -> Tuples.of(Snowflake.asLong(thread.id()), thread)));
 
         Mono<Void> savePresences = stateHolder.getPresenceStore()
-                .save(Flux.fromIterable(createData.presences())
-                        .map(presence -> Tuples.of(LongLongTuple2.of(guildId,
-                                Snowflake.asLong(presence.user().id())), presence)));
+            .save(Flux.fromIterable(createData.presences())
+                .map(presence -> Tuples.of(LongLongTuple2.of(guildId,
+                    Snowflake.asLong(presence.user().id())), presence)));
 
         Mono<Void> saveOfflinePresences = Flux.fromIterable(createData.members())
-                .filterWhen(member -> stateHolder.getPresenceStore()
-                        .find(LongLongTuple2.of(guildId, Snowflake.asLong(member.user().id())))
-                        .hasElement()
-                        .map(id -> !id))
-                .flatMap(member -> stateHolder.getPresenceStore()
-                        .save(LongLongTuple2.of(guildId, Snowflake.asLong(member.user().id())),
-                                createPresence(member)))
-                .then();
+            .filterWhen(member -> stateHolder.getPresenceStore()
+                .find(LongLongTuple2.of(guildId, Snowflake.asLong(member.user().id())))
+                .hasElement()
+                .map(id -> !id))
+            .flatMap(member -> stateHolder.getPresenceStore()
+                .save(LongLongTuple2.of(guildId, Snowflake.asLong(member.user().id())),
+                    createPresence(member)))
+            .then();
 
         return saveGuild
                 .and(saveChannels)
@@ -611,29 +611,29 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
     private PresenceData createPresence(MemberData member) {
         return PresenceData.builder()
-                .user(PartialUserData.builder()
-                        .id(member.user().id())
-                        .globalName(Possible.of(member.user().globalName()))
-                        .username(member.user().username())
-                        .discriminator(member.user().discriminator())
-                        .avatar(Possible.of(member.user().avatar()))
-                        .bot(member.user().bot())
-                        .system(member.user().system())
-                        .mfaEnabled(member.user().mfaEnabled())
-                        .locale(member.user().locale())
-                        .verified(member.user().verified())
-                        .email(member.user().email().isAbsent() ? Possible.absent() :
-                                member.user().email().get().map(Possible::of).orElse(Possible.absent()))
-                        .flags(member.user().flags())
-                        .premiumType(member.user().premiumType())
-                        .build())
-                .status("offline")
-                .clientStatus(ClientStatusData.builder()
-                        .desktop(Possible.absent())
-                        .mobile(Possible.absent())
-                        .web(Possible.absent())
-                        .build())
-                .build();
+            .user(PartialUserData.builder()
+                .id(member.user().id())
+                .globalName(Possible.of(member.user().globalName()))
+                .username(member.user().username())
+                .discriminator(member.user().discriminator())
+                .avatar(Possible.of(member.user().avatar()))
+                .bot(member.user().bot())
+                .system(member.user().system())
+                .mfaEnabled(member.user().mfaEnabled())
+                .locale(member.user().locale())
+                .verified(member.user().verified())
+                .email(member.user().email().isAbsent() ? Possible.absent() :
+                    member.user().email().get().map(Possible::of).orElse(Possible.absent()))
+                .flags(member.user().flags())
+                .premiumType(member.user().premiumType())
+                .build())
+            .status("offline")
+            .clientStatus(ClientStatusData.builder()
+                .desktop(Possible.absent())
+                .mobile(Possible.absent())
+                .web(Possible.absent())
+                .build())
+            .build();
     }
 
     @Override
@@ -643,10 +643,10 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         Mono<Void> deleteGuild = stateHolder.getGuildStore().delete(guildId);
 
         return stateHolder.getGuildStore().find(guildId)
-                .flatMap(guild -> {
-                    Flux<Long> channels = Flux.fromIterable(guild.channels()).map(Snowflake::asLong);
-                    Flux<Long> roles = Flux.fromIterable(guild.roles()).map(Snowflake::asLong);
-                    Flux<Long> emojis = Flux.fromIterable(guild.emojis()).map(Snowflake::asLong);
+            .flatMap(guild -> {
+                Flux<Long> channels = Flux.fromIterable(guild.channels()).map(Snowflake::asLong);
+                Flux<Long> roles = Flux.fromIterable(guild.roles()).map(Snowflake::asLong);
+                Flux<Long> emojis = Flux.fromIterable(guild.emojis()).map(Snowflake::asLong);
 
                     Mono<Void> deleteChannels = stateHolder.getChannelStore().delete(channels);
                     Mono<Void> deleteRoles = stateHolder.getRoleStore().delete(roles);
@@ -661,15 +661,15 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                     Mono<Void> deletePresences = stateHolder.getPresenceStore()
                             .deleteInRange(LongLongTuple2.of(guildId, 0), LongLongTuple2.of(guildId, -1));
 
-                    return deleteChannels
-                            .and(deleteRoles)
-                            .and(deleteEmojis)
-                            .and(deleteMembers)
-                            .and(deleteVoiceStates)
-                            .and(deletePresences)
-                            .thenReturn(guild);
-                })
-                .flatMap(deleteGuild::thenReturn);
+                return deleteChannels
+                    .and(deleteRoles)
+                    .and(deleteEmojis)
+                    .and(deleteMembers)
+                    .and(deleteVoiceStates)
+                    .and(deletePresences)
+                    .thenReturn(guild);
+            })
+            .flatMap(deleteGuild::thenReturn);
     }
 
     @Override
@@ -706,32 +706,32 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         long guildId = Snowflake.asLong(dispatch.guildId());
 
         Mono<Void> updateGuildBean = stateHolder.getGuildStore()
-                .find(guildId)
-                .map(guild -> GuildData.builder()
-                        .from(guild)
-                        .emojis(dispatch.emojis().stream()
-                                .map(EmojiData::id)
-                                .filter(Optional::isPresent)
-                                .map(Optional::get)
-                                .collect(Collectors.toList()))
-                        .build())
-                .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
-                .doOnSubscribe(s -> log.trace("GuildEmojisUpdate doOnSubscribe {}", guildId))
-                .doFinally(s -> log.trace("GuildEmojisUpdate doFinally {}: {}", guildId, s));
+            .find(guildId)
+            .map(guild -> GuildData.builder()
+                .from(guild)
+                .emojis(dispatch.emojis().stream()
+                    .map(EmojiData::id)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toList()))
+                .build())
+            .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
+            .doOnSubscribe(s -> log.trace("GuildEmojisUpdate doOnSubscribe {}", guildId))
+            .doFinally(s -> log.trace("GuildEmojisUpdate doFinally {}: {}", guildId, s));
 
         Mono<Void> saveEmojis = stateHolder.getGuildEmojiStore()
-                .saveWithLong(Flux.fromIterable(dispatch.emojis())
-                        .map(emoji -> LongObjTuple2.of(emoji.id()
-                                .map(Snowflake::asLong)
-                                .orElseThrow(NoSuchElementException::new), emoji)));
+            .saveWithLong(Flux.fromIterable(dispatch.emojis())
+                .map(emoji -> LongObjTuple2.of(emoji.id()
+                    .map(Snowflake::asLong)
+                    .orElseThrow(NoSuchElementException::new), emoji)));
 
         return stateHolder.getGuildStore()
-                .find(guildId)
-                .flatMapMany(guild -> updateGuildBean
-                        .and(saveEmojis)
-                        .thenMany(Flux.fromIterable(guild.emojis()).map(Snowflake::asLong)
-                                .flatMap(id -> stateHolder.getGuildEmojiStore().find(id))))
-                .collect(Collectors.toSet());
+            .find(guildId)
+            .flatMapMany(guild -> updateGuildBean
+                .and(saveEmojis)
+                .thenMany(Flux.fromIterable(guild.emojis()).map(Snowflake::asLong)
+                    .flatMap(id -> stateHolder.getGuildEmojiStore().find(id))))
+            .collect(Collectors.toSet());
     }
 
     @Override
@@ -742,25 +742,25 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         long userId = Snowflake.asLong(user.id());
 
         Mono<Void> addMemberId = stateHolder.getGuildStore()
-                .find(guildId)
-                .map(guild -> GuildData.builder()
-                        .from(guild)
-                        .members(ListUtil.add(guild.members(), member.user().id()))
-                        .memberCount(guild.memberCount() + 1)
-                        .build())
-                .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
-                .doOnSubscribe(s -> log.trace("GuildMemberAdd doOnSubscribe {}", guildId))
-                .doFinally(s -> log.trace("GuildMemberAdd doFinally {}: {}", guildId, s));
+            .find(guildId)
+            .map(guild -> GuildData.builder()
+                .from(guild)
+                .members(ListUtil.add(guild.members(), member.user().id()))
+                .memberCount(guild.memberCount() + 1)
+                .build())
+            .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
+            .doOnSubscribe(s -> log.trace("GuildMemberAdd doOnSubscribe {}", guildId))
+            .doFinally(s -> log.trace("GuildMemberAdd doFinally {}: {}", guildId, s));
 
         Mono<Void> saveMember = stateHolder.getMemberStore()
-                .save(LongLongTuple2.of(guildId, userId), member);
+            .save(LongLongTuple2.of(guildId, userId), member);
 
         Mono<Void> saveUser = stateHolder.getUserStore()
-                .save(userId, user);
+            .save(userId, user);
 
         return addMemberId
-                .and(saveMember)
-                .and(saveUser);
+            .and(saveMember)
+            .and(saveUser);
     }
 
     @Override
@@ -770,34 +770,34 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         long userId = Snowflake.asLong(userData.id());
 
         Mono<Void> removeMemberId = stateHolder.getGuildStore()
-                .find(guildId)
-                .map(guild -> GuildData.builder()
-                        .from(guild)
-                        .members(ListUtil.remove(guild.members(), member -> member.equals(userData.id())))
-                        .memberCount(guild.memberCount() - 1)
-                        .build())
-                .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
-                .doOnSubscribe(s -> log.trace("GuildMemberRemove doOnSubscribe {}", guildId))
-                .doFinally(s -> log.trace("GuildMemberRemove doFinally {}: {}", guildId, s));
+            .find(guildId)
+            .map(guild -> GuildData.builder()
+                .from(guild)
+                .members(ListUtil.remove(guild.members(), member -> member.equals(userData.id())))
+                .memberCount(guild.memberCount() - 1)
+                .build())
+            .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
+            .doOnSubscribe(s -> log.trace("GuildMemberRemove doOnSubscribe {}", guildId))
+            .doFinally(s -> log.trace("GuildMemberRemove doFinally {}: {}", guildId, s));
 
         Mono<MemberData> member = stateHolder.getMemberStore()
-                .find(LongLongTuple2.of(guildId, userId));
+            .find(LongLongTuple2.of(guildId, userId));
 
         Mono<Void> deleteMember = stateHolder.getMemberStore()
-                .delete(LongLongTuple2.of(guildId, userId));
+            .delete(LongLongTuple2.of(guildId, userId));
 
         Mono<Void> deletePresence = stateHolder.getPresenceStore()
-                .delete(LongLongTuple2.of(guildId, userId));
+            .delete(LongLongTuple2.of(guildId, userId));
 
         Mono<Void> deleteOrphanUser = stateHolder.getMemberStore()
-                .keys().filter(key -> key.getT1() != guildId && key.getT2() == userId)
-                .hasElements()
-                .flatMap(hasMutualServers -> Mono.just(userId)
-                        .filter(__ -> !hasMutualServers)
-                        .flatMap(stateHolder.getUserStore()::delete));
+            .keys().filter(key -> key.getT1() != guildId && key.getT2() == userId)
+            .hasElements()
+            .flatMap(hasMutualServers -> Mono.just(userId)
+                .filter(__ -> !hasMutualServers)
+                .flatMap(stateHolder.getUserStore()::delete));
 
         return member.flatMap(value -> Mono.when(removeMemberId, deleteMember, deletePresence, deleteOrphanUser)
-                .thenReturn(value));
+            .thenReturn(value));
     }
 
     @Override
@@ -806,42 +806,42 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         List<MemberData> members = dispatch.members();
 
         Flux<Tuple2<LongLongTuple2, MemberData>> memberPairs = Flux.fromIterable(members)
-                .map(data -> Tuples.of(LongLongTuple2.of(guildId, Snowflake.asLong(data.user().id())),
-                        data));
+            .map(data -> Tuples.of(LongLongTuple2.of(guildId, Snowflake.asLong(data.user().id())),
+                data));
 
         Flux<Tuple2<Long, UserData>> userPairs = Flux.fromIterable(members)
-                .map(data -> Tuples.of(Snowflake.asLong(data.user().id()), data.user()));
+            .map(data -> Tuples.of(Snowflake.asLong(data.user().id()), data.user()));
 
         Mono<Void> addMemberIds = stateHolder.getGuildStore()
-                .find(guildId)
-                .map(guild -> GuildData.builder()
-                        .from(guild)
-                        .members(ListUtil.addAllDistinct(guild.members(), members.stream()
-                                .map(data -> data.user().id())
-                                .collect(Collectors.toList())))
-                        .build())
-                .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
-                .doOnSubscribe(s -> log.trace("GuildMembersChunk doOnSubscribe {}", guildId))
-                .doFinally(s -> log.trace("GuildMembersChunk doFinally {}: {}", guildId, s));
+            .find(guildId)
+            .map(guild -> GuildData.builder()
+                .from(guild)
+                .members(ListUtil.addAllDistinct(guild.members(), members.stream()
+                    .map(data -> data.user().id())
+                    .collect(Collectors.toList())))
+                .build())
+            .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
+            .doOnSubscribe(s -> log.trace("GuildMembersChunk doOnSubscribe {}", guildId))
+            .doFinally(s -> log.trace("GuildMembersChunk doFinally {}: {}", guildId, s));
 
         Mono<Void> saveMembers = stateHolder.getMemberStore().save(memberPairs);
 
         Mono<Void> saveUsers = stateHolder.getUserStore().save(userPairs);
 
         Mono<Void> saveOfflinePresences = Flux.fromIterable(members)
-                .filterWhen(member -> stateHolder.getPresenceStore()
-                        .find(LongLongTuple2.of(guildId, Snowflake.asLong(member.user().id())))
-                        .hasElement()
-                        .map(identity -> !identity))
-                .flatMap(member -> stateHolder.getPresenceStore()
-                        .save(LongLongTuple2.of(guildId, Snowflake.asLong(member.user().id())),
-                                createPresence(member)))
-                .then();
+            .filterWhen(member -> stateHolder.getPresenceStore()
+                .find(LongLongTuple2.of(guildId, Snowflake.asLong(member.user().id())))
+                .hasElement()
+                .map(identity -> !identity))
+            .flatMap(member -> stateHolder.getPresenceStore()
+                .save(LongLongTuple2.of(guildId, Snowflake.asLong(member.user().id())),
+                    createPresence(member)))
+            .then();
 
         return addMemberIds
-                .and(saveMembers)
-                .and(saveUsers)
-                .and(saveOfflinePresences);
+            .and(saveMembers)
+            .and(saveUsers)
+            .and(saveOfflinePresences);
     }
 
     @Override
@@ -852,20 +852,22 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         LongLongTuple2 key = LongLongTuple2.of(guildId, memberId);
 
         return stateHolder.getMemberStore()
-                .find(key)
-                .flatMap(oldMember -> {
-                    MemberData newMember = MemberData.builder()
-                            .from(oldMember)
-                            .roles(dispatch.roles().stream().map(Id::of).collect(Collectors.toList()))
-                            .user(dispatch.user())
-                            .nick(dispatch.nick())
-                            .joinedAt(dispatch.joinedAt())
-                            .premiumSince(dispatch.premiumSince())
-                            .pending(dispatch.pending())
-                            .build();
+            .find(key)
+            .flatMap(oldMember -> {
+                MemberData newMember = MemberData.builder()
+                    .from(oldMember)
+                    .avatar(dispatch.avatar())
+                    .banner(Possible.of(dispatch.banner()))
+                    .roles(dispatch.roles().stream().map(Id::of).collect(Collectors.toList()))
+                    .user(dispatch.user())
+                    .nick(dispatch.nick())
+                    .joinedAt(dispatch.joinedAt())
+                    .premiumSince(dispatch.premiumSince())
+                    .pending(dispatch.pending())
+                    .build();
 
-                    return stateHolder.getMemberStore().save(key, newMember).thenReturn(oldMember);
-                });
+                return stateHolder.getMemberStore().save(key, newMember).thenReturn(oldMember);
+            });
     }
 
     @Override
@@ -874,17 +876,17 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         RoleData role = dispatch.role();
 
         Mono<Void> addRoleId = stateHolder.getGuildStore()
-                .find(guildId)
-                .map(guild -> GuildData.builder()
-                        .from(guild)
-                        .addRole(role.id())
-                        .build())
-                .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
-                .doOnSubscribe(s -> log.trace("GuildRoleCreate doOnSubscribe {}", guildId))
-                .doFinally(s -> log.trace("GuildRoleCreate doFinally {}: {}", guildId, s));
+            .find(guildId)
+            .map(guild -> GuildData.builder()
+                .from(guild)
+                .addRole(role.id())
+                .build())
+            .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
+            .doOnSubscribe(s -> log.trace("GuildRoleCreate doOnSubscribe {}", guildId))
+            .doFinally(s -> log.trace("GuildRoleCreate doFinally {}: {}", guildId, s));
 
         Mono<Void> saveRole = stateHolder.getRoleStore()
-                .save(Snowflake.asLong(role.id()), role);
+            .save(Snowflake.asLong(role.id()), role);
 
         return addRoleId.and(saveRole);
     }
@@ -896,39 +898,39 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
         @SuppressWarnings("ReactiveStreamsUnusedPublisher")
         Mono<Void> removeRoleId = stateHolder.getGuildStore()
-                .find(guildId)
-                .map(guild -> GuildData.builder()
-                        .from(guild)
-                        .roles(ListUtil.remove(guild.roles(), role -> role.equals(dispatch.roleId())))
-                        .build())
-                .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
-                .doOnSubscribe(s -> log.trace("GuildRoleDelete doOnSubscribe {}", guildId))
-                .doFinally(s -> log.trace("GuildRoleDelete doFinally {}: {}", guildId, s));
+            .find(guildId)
+            .map(guild -> GuildData.builder()
+                .from(guild)
+                .roles(ListUtil.remove(guild.roles(), role -> role.equals(dispatch.roleId())))
+                .build())
+            .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
+            .doOnSubscribe(s -> log.trace("GuildRoleDelete doOnSubscribe {}", guildId))
+            .doFinally(s -> log.trace("GuildRoleDelete doFinally {}: {}", guildId, s));
 
         Mono<Void> deleteRole = stateHolder.getRoleStore().delete(roleId);
 
         @SuppressWarnings("ReactiveStreamsUnusedPublisher")
         Mono<Void> removeRoleFromMembers = stateHolder.getGuildStore()
-                .find(guildId)
-                .flatMapMany(guild -> Flux.fromIterable(guild.members())
-                        .map(Snowflake::asLong))
-                .flatMap(memberId -> stateHolder.getMemberStore()
-                        .find(LongLongTuple2.of(guildId, memberId)))
-                .filter(member -> member.roles().contains(dispatch.roleId()))
-                .map(member -> MemberData.builder()
-                        .from(member)
-                        .roles(ListUtil.remove(member.roles(),
-                                role -> role.equals(dispatch.roleId())))
-                        .build())
-                .flatMap(member -> stateHolder.getMemberStore()
-                        .save(LongLongTuple2.of(guildId, Snowflake.asLong(member.user().id())), member))
-                .then();
+            .find(guildId)
+            .flatMapMany(guild -> Flux.fromIterable(guild.members())
+                .map(Snowflake::asLong))
+            .flatMap(memberId -> stateHolder.getMemberStore()
+                .find(LongLongTuple2.of(guildId, memberId)))
+            .filter(member -> member.roles().contains(dispatch.roleId()))
+            .map(member -> MemberData.builder()
+                .from(member)
+                .roles(ListUtil.remove(member.roles(),
+                    role -> role.equals(dispatch.roleId())))
+                .build())
+            .flatMap(member -> stateHolder.getMemberStore()
+                .save(LongLongTuple2.of(guildId, Snowflake.asLong(member.user().id())), member))
+            .then();
 
         return stateHolder.getRoleStore()
-                .find(roleId)
-                .flatMap(removeRoleId::thenReturn)
-                .flatMap(deleteRole::thenReturn)
-                .flatMap(removeRoleFromMembers::thenReturn);
+            .find(roleId)
+            .flatMap(removeRoleId::thenReturn)
+            .flatMap(deleteRole::thenReturn)
+            .flatMap(removeRoleFromMembers::thenReturn);
     }
 
     @Override
@@ -939,21 +941,24 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         Mono<Void> saveNew = stateHolder.getRoleStore().save(roleId, role);
 
         return stateHolder.getRoleStore()
-                .find(roleId)
-                .flatMap(saveNew::thenReturn)
-                .switchIfEmpty(saveNew.then(Mono.empty()));
+            .find(roleId)
+            .flatMap(saveNew::thenReturn)
+            .switchIfEmpty(saveNew.then(Mono.empty()));
     }
 
     @Override
     public Mono<Void> onGuildScheduledEventCreate(int shardIndex, GuildScheduledEventCreate dispatch) {
-        LongLongTuple2 key = LongLongTuple2.of(dispatch.scheduledEvent().guildId().asLong(), dispatch.scheduledEvent().id().asLong());
+        LongLongTuple2 key = LongLongTuple2.of(dispatch.scheduledEvent().guildId().asLong(),
+            dispatch.scheduledEvent().id().asLong());
 
         return stateHolder.getGuildEventsStore().save(key, dispatch.scheduledEvent());
     }
 
     @Override
-    public Mono<GuildScheduledEventData> onGuildScheduledEventUpdate(int shardIndex, GuildScheduledEventUpdate dispatch) {
-        LongLongTuple2 key = LongLongTuple2.of(dispatch.scheduledEvent().guildId().asLong(), dispatch.scheduledEvent().id().asLong());
+    public Mono<GuildScheduledEventData> onGuildScheduledEventUpdate(int shardIndex,
+                                                                     GuildScheduledEventUpdate dispatch) {
+        LongLongTuple2 key = LongLongTuple2.of(dispatch.scheduledEvent().guildId().asLong(),
+            dispatch.scheduledEvent().id().asLong());
 
         Mono<Void> saveNew = stateHolder.getGuildEventsStore().save(key, dispatch.scheduledEvent());
 
@@ -964,8 +969,10 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     }
 
     @Override
-    public Mono<GuildScheduledEventData> onGuildScheduledEventDelete(int shardIndex, GuildScheduledEventDelete dispatch) {
-        LongLongTuple2 key = LongLongTuple2.of(dispatch.scheduledEvent().guildId().asLong(), dispatch.scheduledEvent().id().asLong());
+    public Mono<GuildScheduledEventData> onGuildScheduledEventDelete(int shardIndex,
+                                                                     GuildScheduledEventDelete dispatch) {
+        LongLongTuple2 key = LongLongTuple2.of(dispatch.scheduledEvent().guildId().asLong(),
+            dispatch.scheduledEvent().id().asLong());
 
         Mono<Void> deletion = stateHolder.getGuildEventsStore().delete(key);
 
@@ -1008,27 +1015,27 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         long guildId = Snowflake.asLong(dispatch.guild().id());
 
         return stateHolder.getGuildStore()
-                .find(guildId)
-                .flatMap(oldGuildData -> {
-                    GuildData newGuildData = GuildData.builder()
-                            .from(oldGuildData)
-                            .from(dispatch.guild())
-                            .roles(dispatch.guild().roles().stream()
-                                    .map(RoleData::id)
-                                    .collect(Collectors.toList()))
-                            .emojis(dispatch.guild().emojis().stream()
-                                    .map(EmojiData::id)
-                                    .filter(Optional::isPresent)
-                                    .map(Optional::get)
-                                    .collect(Collectors.toList()))
-                            .build();
+            .find(guildId)
+            .flatMap(oldGuildData -> {
+                GuildData newGuildData = GuildData.builder()
+                    .from(oldGuildData)
+                    .from(dispatch.guild())
+                    .roles(dispatch.guild().roles().stream()
+                        .map(RoleData::id)
+                        .collect(Collectors.toList()))
+                    .emojis(dispatch.guild().emojis().stream()
+                        .map(EmojiData::id)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toList()))
+                    .build();
 
-                    return stateHolder.getGuildStore()
-                            .save(guildId, newGuildData)
-                            .doOnSubscribe(s -> log.trace("GuildUpdate doOnSubscribe {}", guildId))
-                            .doFinally(s -> log.trace("GuildUpdate doFinally {}: {}", guildId, s))
-                            .thenReturn(oldGuildData);
-                });
+                return stateHolder.getGuildStore()
+                    .save(guildId, newGuildData)
+                    .doOnSubscribe(s -> log.trace("GuildUpdate doOnSubscribe {}", guildId))
+                    .doFinally(s -> log.trace("GuildUpdate doFinally {}: {}", guildId, s))
+                    .thenReturn(oldGuildData);
+            });
     }
 
     @Override
@@ -1044,15 +1051,15 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         long channelId = Snowflake.asLong(message.channelId());
 
         Mono<Void> saveMessage = stateHolder.getMessageStore()
-                .save(messageId, message);
+            .save(messageId, message);
 
         Mono<Void> editLastMessageId = stateHolder.getChannelStore()
-                .find(channelId)
-                .map(channel -> ChannelData.builder()
-                        .from(channel)
-                        .lastMessageId(message.id())
-                        .build())
-                .flatMap(channelBean -> stateHolder.getChannelStore().save(channelId, channelBean));
+            .find(channelId)
+            .map(channel -> ChannelData.builder()
+                .from(channel)
+                .lastMessageId(message.id())
+                .build())
+            .flatMap(channelBean -> stateHolder.getChannelStore().save(channelId, channelBean));
 
         return saveMessage.and(editLastMessageId);
     }
@@ -1064,23 +1071,23 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         Mono<Void> deleteMessage = stateHolder.getMessageStore().delete(messageId);
 
         return stateHolder.getMessageStore()
-                .find(messageId)
-                .flatMap(deleteMessage::thenReturn);
+            .find(messageId)
+            .flatMap(deleteMessage::thenReturn);
     }
 
     @Override
     public Mono<Set<MessageData>> onMessageDeleteBulk(int shardIndex, MessageDeleteBulk dispatch) {
         List<Long> messageIds = dispatch.ids().stream()
-                .map(Snowflake::asLong)
-                .collect(Collectors.toList());
+            .map(Snowflake::asLong)
+            .collect(Collectors.toList());
 
         Mono<Void> deleteMessages = stateHolder.getMessageStore()
-                .delete(Flux.fromIterable(messageIds));
+            .delete(Flux.fromIterable(messageIds));
 
         return Flux.fromIterable(messageIds)
-                .flatMap(stateHolder.getMessageStore()::find)
-                .flatMap(deleteMessages::thenReturn)
-                .collect(Collectors.toSet());
+            .flatMap(stateHolder.getMessageStore()::find)
+            .flatMap(deleteMessages::thenReturn)
+            .collect(Collectors.toSet());
     }
 
     @Override
@@ -1091,86 +1098,86 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
         // add reaction to message
         return stateHolder.getMessageStore()
-                .find(messageId)
-                .map(oldMessage -> {
-                    boolean me = Objects.equals(userId, selfId);
-                    ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
+            .find(messageId)
+            .map(oldMessage -> {
+                boolean me = Objects.equals(userId, selfId);
+                ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
 
-                    if (oldMessage.reactions().isAbsent()) {
-                        // If burst, increment the burst count, otherwise the normal count
-                        ReactionCountDetailsData countDetailsData = ReactionCountDetailsData.builder()
-                                .normal(dispatch.burst() ? 0 : 1)
-                                .burst(dispatch.burst() ? 1 : 0)
+                if (oldMessage.reactions().isAbsent()) {
+                    // If burst, increment the burst count, otherwise the normal count
+                    ReactionCountDetailsData countDetailsData = ReactionCountDetailsData.builder()
+                        .normal(dispatch.burst() ? 0 : 1)
+                        .burst(dispatch.burst() ? 1 : 0)
+                        .build();
+
+                    ImmutableReactionData.Builder reactionBuilder = ReactionData.builder()
+                        .count(1)
+                        .countDetails(countDetailsData)
+                        .me(me)
+                        // If I added the reaction, and this is a burst, this is a me_burst
+                        .meBurst(me && dispatch.burst())
+                        .emoji(dispatch.emoji());
+
+                    if (!dispatch.burstColors().isAbsent()) {
+                        reactionBuilder.burstColors(dispatch.burstColors().get());
+                    }
+
+                    newMessageBuilder.addReaction(reactionBuilder.build());
+                } else {
+                    List<ReactionData> reactions = oldMessage.reactions().get();
+                    int i = indexOfReactionByEmojiData(reactions, dispatch.emoji());
+
+                    if (i < reactions.size()) {
+                        // message already has this reaction: bump 1
+                        ReactionData oldExisting = reactions.get(i);
+
+                        // Prepare the updated ReactionCountDetails object depending on if this is a burst or not
+                        ReactionCountDetailsData countDetailsData;
+                        if (dispatch.burst()) {
+                            countDetailsData = ReactionCountDetailsData.builder()
+                                .normal(oldExisting.countDetails().normal())
+                                .burst(oldExisting.countDetails().burst() + 1)
                                 .build();
+                        } else {
+                            countDetailsData = ReactionCountDetailsData.builder()
+                                .normal(oldExisting.countDetails().normal() + 1)
+                                .burst(oldExisting.countDetails().burst())
+                                .build();
+                        }
 
-                        ImmutableReactionData.Builder reactionBuilder = ReactionData.builder()
+                        ReactionData newExisting = ReactionData.builder()
+                            .from(oldExisting)
+                            .me(oldExisting.me() || me)
+                            // If the change is me adding a reaction, and this is a burst that was dispatched
+                            // then this is a me_burst
+                            .meBurst(!oldExisting.me() && me && dispatch.burst())
+                            .count(oldExisting.count() + 1)
+                            .countDetails(countDetailsData)
+                            .build();
+                        newMessageBuilder.reactions(ListUtil.replace(reactions,
+                            oldExisting, newExisting));
+                    } else {
+                        // message doesn't have this reaction: create
+                        ReactionCountDetailsData countDetailsData = ReactionCountDetailsData.builder()
+                            .normal(dispatch.burst() ? 0 : 1)
+                            .burst(dispatch.burst() ? 1 : 0)
+                            .build();
+
+                        ReactionData reaction = ReactionData.builder()
+                            .emoji(dispatch.emoji())
                             .count(1)
                             .countDetails(countDetailsData)
                             .me(me)
                             // If I added the reaction, and this is a burst, this is a me_burst
                             .meBurst(me && dispatch.burst())
-                            .emoji(dispatch.emoji());
-
-                        if (!dispatch.burstColors().isAbsent()) {
-                            reactionBuilder.burstColors(dispatch.burstColors().get());
-                        }
-
-                        newMessageBuilder.addReaction(reactionBuilder.build());
-                    } else {
-                        List<ReactionData> reactions = oldMessage.reactions().get();
-                        int i = indexOfReactionByEmojiData(reactions, dispatch.emoji());
-
-                        if (i < reactions.size()) {
-                            // message already has this reaction: bump 1
-                            ReactionData oldExisting = reactions.get(i);
-
-                            // Prepare the updated ReactionCountDetails object depending on if this is a burst or not
-                            ReactionCountDetailsData countDetailsData;
-                            if (dispatch.burst()) {
-                                countDetailsData = ReactionCountDetailsData.builder()
-                                    .normal(oldExisting.countDetails().normal())
-                                    .burst(oldExisting.countDetails().burst() + 1)
-                                    .build();
-                            } else {
-                                countDetailsData = ReactionCountDetailsData.builder()
-                                    .normal(oldExisting.countDetails().normal() + 1)
-                                    .burst(oldExisting.countDetails().burst())
-                                    .build();
-                            }
-
-                            ReactionData newExisting = ReactionData.builder()
-                                    .from(oldExisting)
-                                    .me(oldExisting.me() || me)
-                                    // If the change is me adding a reaction, and this is a burst that was dispatched
-                                    // then this is a me_burst
-                                    .meBurst(!oldExisting.me() && me && dispatch.burst())
-                                    .count(oldExisting.count() + 1)
-                                    .countDetails(countDetailsData)
-                                    .build();
-                            newMessageBuilder.reactions(ListUtil.replace(reactions,
-                                    oldExisting, newExisting));
-                        } else {
-                            // message doesn't have this reaction: create
-                            ReactionCountDetailsData countDetailsData = ReactionCountDetailsData.builder()
-                                .normal(dispatch.burst() ? 0 : 1)
-                                .burst(dispatch.burst() ? 1 : 0)
-                                .build();
-
-                            ReactionData reaction = ReactionData.builder()
-                                    .emoji(dispatch.emoji())
-                                    .count(1)
-                                    .countDetails(countDetailsData)
-                                    .me(me)
-                                    // If I added the reaction, and this is a burst, this is a me_burst
-                                    .meBurst(me && dispatch.burst())
-                                    .build();
-                            newMessageBuilder.reactions(ListUtil.add(reactions, reaction));
-                        }
+                            .build();
+                        newMessageBuilder.reactions(ListUtil.add(reactions, reaction));
                     }
+                }
 
-                    return newMessageBuilder.build();
-                })
-                .flatMap(message -> stateHolder.getMessageStore().save(messageId, message));
+                return newMessageBuilder.build();
+            })
+            .flatMap(message -> stateHolder.getMessageStore().save(messageId, message));
     }
 
     @Override
@@ -1181,47 +1188,47 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
         // remove reactor from message
         return stateHolder.getMessageStore()
-                .find(messageId)
-                .filter(message -> !message.reactions().isAbsent())
-                .map(oldMessage -> {
-                    boolean me = Objects.equals(userId, selfId);
-                    ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
+            .find(messageId)
+            .filter(message -> !message.reactions().isAbsent())
+            .map(oldMessage -> {
+                boolean me = Objects.equals(userId, selfId);
+                ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
 
-                    List<ReactionData> reactions = oldMessage.reactions().get();
-                    int i = indexOfReactionByEmojiData(reactions, dispatch.emoji());
+                List<ReactionData> reactions = oldMessage.reactions().get();
+                int i = indexOfReactionByEmojiData(reactions, dispatch.emoji());
 
-                    if (i < reactions.size()) {
-                        ReactionData existing = reactions.get(i);
-                        if (existing.count() - 1 == 0) {
-                            newMessageBuilder.reactions(ListUtil.remove(reactions,
-                                    reaction -> reaction.equals(existing)));
+                if (i < reactions.size()) {
+                    ReactionData existing = reactions.get(i);
+                    if (existing.count() - 1 == 0) {
+                        newMessageBuilder.reactions(ListUtil.remove(reactions,
+                            reaction -> reaction.equals(existing)));
+                    } else {
+                        ReactionCountDetailsData countDetailsData;
+                        if (dispatch.burst()) {
+                            countDetailsData = ReactionCountDetailsData.builder()
+                                .normal(existing.countDetails().normal())
+                                .burst(existing.countDetails().burst() - 1)
+                                .build();
                         } else {
-                            ReactionCountDetailsData countDetailsData;
-                            if (dispatch.burst()) {
-                                countDetailsData = ReactionCountDetailsData.builder()
-                                    .normal(existing.countDetails().normal())
-                                    .burst(existing.countDetails().burst() - 1)
-                                    .build();
-                            } else {
-                                countDetailsData = ReactionCountDetailsData.builder()
-                                    .normal(existing.countDetails().normal() - 1)
-                                    .burst(existing.countDetails().burst())
-                                    .build();
-                            }
-
-                            ReactionData newExisting = ReactionData.builder()
-                                    .from(existing)
-                                    .count(existing.count() - 1)
-                                    .countDetails(countDetailsData)
-                                    .me(!me && existing.me())
-                                    .meBurst(existing.meBurst() && me)
-                                    .build();
-                            newMessageBuilder.reactions(ListUtil.replace(reactions, existing, newExisting));
+                            countDetailsData = ReactionCountDetailsData.builder()
+                                .normal(existing.countDetails().normal() - 1)
+                                .burst(existing.countDetails().burst())
+                                .build();
                         }
+
+                        ReactionData newExisting = ReactionData.builder()
+                            .from(existing)
+                            .count(existing.count() - 1)
+                            .countDetails(countDetailsData)
+                            .me(!me && existing.me())
+                            .meBurst(existing.meBurst() && me)
+                            .build();
+                        newMessageBuilder.reactions(ListUtil.replace(reactions, existing, newExisting));
                     }
-                    return newMessageBuilder.build();
-                })
-                .flatMap(message -> stateHolder.getMessageStore().save(messageId, message));
+                }
+                return newMessageBuilder.build();
+            })
+            .flatMap(message -> stateHolder.getMessageStore().save(messageId, message));
     }
 
     @Override
@@ -1229,12 +1236,12 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         long messageId = Snowflake.asLong(dispatch.messageId());
 
         return stateHolder.getMessageStore()
-                .find(messageId)
-                .map(message -> MessageData.builder()
-                        .from(message)
-                        .reactions(Possible.absent())
-                        .build())
-                .flatMap(message -> stateHolder.getMessageStore().save(messageId, message));
+            .find(messageId)
+            .map(message -> MessageData.builder()
+                .from(message)
+                .reactions(Possible.absent())
+                .build())
+            .flatMap(message -> stateHolder.getMessageStore().save(messageId, message));
     }
 
     @Override
@@ -1242,22 +1249,22 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         long messageId = Snowflake.asLong(dispatch.messageId());
 
         return stateHolder.getMessageStore()
-                .find(messageId)
-                .filter(message -> !message.reactions().isAbsent())
-                .map(oldMessage -> {
-                    ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
+            .find(messageId)
+            .filter(message -> !message.reactions().isAbsent())
+            .map(oldMessage -> {
+                ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
 
-                    List<ReactionData> reactions = oldMessage.reactions().get();
-                    int i = indexOfReactionByEmojiData(reactions, dispatch.emoji());
+                List<ReactionData> reactions = oldMessage.reactions().get();
+                int i = indexOfReactionByEmojiData(reactions, dispatch.emoji());
 
-                    if (i < reactions.size()) {
-                        ReactionData existing = reactions.get(i);
-                        newMessageBuilder.reactions(ListUtil.remove(reactions,
-                                reaction -> reaction.equals(existing)));
-                    }
-                    return newMessageBuilder.build();
-                })
-                .flatMap(message -> stateHolder.getMessageStore().save(messageId, message));
+                if (i < reactions.size()) {
+                    ReactionData existing = reactions.get(i);
+                    newMessageBuilder.reactions(ListUtil.remove(reactions,
+                        reaction -> reaction.equals(existing)));
+                }
+                return newMessageBuilder.build();
+            })
+            .flatMap(message -> stateHolder.getMessageStore().save(messageId, message));
     }
 
     private int indexOfReactionByEmojiData(List<ReactionData> reactions, EmojiData emojiData) {
@@ -1267,7 +1274,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             // (non-null id && matching id) OR (null id && matching name)
             boolean emojiHasId = emojiData.id().isPresent();
             if ((emojiHasId && emojiData.id().equals(r.emoji().id()))
-                    || (!emojiHasId && emojiData.name().equals(r.emoji().name()))) {
+                || (!emojiHasId && emojiData.name().equals(r.emoji().name()))) {
                 break;
             }
         }
@@ -1276,33 +1283,33 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
     @Override
     public Mono<MessageData> onMessageUpdate(int shardIndex, MessageUpdate dispatch) {
-        PartialMessageData messageData = dispatch.message();
+        PartialMessageUpdateData messageData = dispatch.message();
         long messageId = Snowflake.asLong(messageData.id());
 
         return stateHolder.getMessageStore()
-                .find(messageId)
-                .flatMap(oldMessageData -> {
-                    // updating the content and embed of the bean in the store
-                    boolean contentChanged = !messageData.content().isAbsent() &&
-                            !Objects.equals(oldMessageData.content(), messageData.content().get());
-                    boolean embedsChanged = !Objects.equals(oldMessageData.embeds(), messageData.embeds());
+            .find(messageId)
+            .flatMap(oldMessageData -> {
+                // updating the content and embed of the bean in the store
+                boolean contentChanged = !messageData.content().isAbsent() &&
+                    !Objects.equals(oldMessageData.content(), messageData.content().get());
+                boolean embedsChanged = !Objects.equals(oldMessageData.embeds(), messageData.embeds());
 
-                    MessageData newMessageData = MessageData.builder()
-                            .from(oldMessageData)
-                            .content(messageData.content().toOptional()
-                                    .orElse(oldMessageData.content()))
-                            .embeds(messageData.embeds())
-                            .mentions(messageData.mentions())
-                            .mentionRoles(messageData.mentionRoles())
-                            .mentionEveryone(messageData.mentionEveryone().toOptional()
-                                    .orElse(oldMessageData.mentionEveryone()))
-                            .editedTimestamp(messageData.editedTimestamp())
-                            .build();
+                MessageData newMessageData = MessageData.builder()
+                    .from(oldMessageData)
+                    .content(messageData.content().toOptional()
+                        .orElse(oldMessageData.content()))
+                    .embeds(messageData.embeds())
+                    .mentions(messageData.mentions())
+                    .mentionRoles(messageData.mentionRoles())
+                    .mentionEveryone(messageData.mentionEveryone().toOptional()
+                        .orElse(oldMessageData.mentionEveryone()))
+                    .editedTimestamp(messageData.editedTimestamp())
+                    .build();
 
-                    return stateHolder.getMessageStore()
-                            .save(messageId, newMessageData)
-                            .thenReturn(oldMessageData);
-                });
+                return stateHolder.getMessageStore()
+                    .save(messageId, newMessageData)
+                    .thenReturn(oldMessageData);
+            });
     }
 
     @Override
@@ -1312,42 +1319,42 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         long userId = Snowflake.asLong(userData.id());
         LongLongTuple2 key = LongLongTuple2.of(guildId, userId);
         PresenceData presenceData = PresenceData.builder()
-                .user(dispatch.user())
-                .status(dispatch.status())
-                .activities(dispatch.activities())
-                .clientStatus(dispatch.clientStatus())
-                .build();
+            .user(dispatch.user())
+            .status(dispatch.status())
+            .activities(dispatch.activities())
+            .clientStatus(dispatch.clientStatus())
+            .build();
 
         Mono<Void> saveNew = stateHolder.getPresenceStore().save(key, presenceData);
 
         Mono<Optional<PresenceData>> savePresence = stateHolder.getPresenceStore()
-                .find(key)
-                .flatMap(saveNew::thenReturn)
-                .map(Optional::of)
-                .switchIfEmpty(saveNew.thenReturn(Optional.empty()));
+            .find(key)
+            .flatMap(saveNew::thenReturn)
+            .map(Optional::of)
+            .switchIfEmpty(saveNew.thenReturn(Optional.empty()));
 
         Mono<Optional<UserData>> saveUser = stateHolder.getUserStore()
-                .find(userId)
-                .flatMap(oldUserData -> {
-                    UserData newUserData = UserData.builder()
-                            .from(oldUserData)
-                            .globalName(userData.globalName().isAbsent() ? oldUserData.globalName() :
-                                Possible.flatOpt(userData.globalName()))
-                            .username(userData.username().toOptional()
-                                    .orElse(oldUserData.username()))
-                            .discriminator(userData.discriminator().toOptional()
-                                    .orElse(oldUserData.discriminator()))
-                            .avatar(userData.avatar().isAbsent() ? oldUserData.avatar() :
-                                    Possible.flatOpt(userData.avatar()))
-                            .build();
+            .find(userId)
+            .flatMap(oldUserData -> {
+                UserData newUserData = UserData.builder()
+                    .from(oldUserData)
+                    .globalName(userData.globalName().isAbsent() ? oldUserData.globalName() :
+                        Possible.flatOpt(userData.globalName()))
+                    .username(userData.username().toOptional()
+                        .orElse(oldUserData.username()))
+                    .discriminator(userData.discriminator().toOptional()
+                        .orElse(oldUserData.discriminator()))
+                    .avatar(userData.avatar().isAbsent() ? oldUserData.avatar() :
+                        Possible.flatOpt(userData.avatar()))
+                    .build();
 
-                    return stateHolder.getUserStore().save(userId, newUserData).thenReturn(oldUserData);
-                })
-                .map(Optional::of)
-                .defaultIfEmpty(Optional.empty());
+                return stateHolder.getUserStore().save(userId, newUserData).thenReturn(oldUserData);
+            })
+            .map(Optional::of)
+            .defaultIfEmpty(Optional.empty());
 
         return Mono.zip(savePresence, saveUser,
-                (p, u) -> PresenceAndUserData.of(p.orElse(null), u.orElse(null)));
+            (p, u) -> PresenceAndUserData.of(p.orElse(null), u.orElse(null)));
     }
 
     @Override
@@ -1374,9 +1381,9 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         Mono<Void> saveNew = stateHolder.getStageInstanceStore().save(channelId, stageInstance);
 
         return stateHolder.getStageInstanceStore()
-                .find(channelId)
-                .flatMap(saveNew::thenReturn)
-                .switchIfEmpty(saveNew.then(Mono.empty()));
+            .find(channelId)
+            .flatMap(saveNew::thenReturn)
+            .switchIfEmpty(saveNew.then(Mono.empty()));
     }
 
     @Override
@@ -1387,9 +1394,9 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         Mono<Void> delete = stateHolder.getStageInstanceStore().delete(channelId);
 
         return stateHolder.getStageInstanceStore()
-                .find(channelId)
-                .flatMap(delete::thenReturn)
-                .switchIfEmpty(delete.then(Mono.empty()));
+            .find(channelId)
+            .flatMap(delete::thenReturn)
+            .switchIfEmpty(delete.then(Mono.empty()));
     }
 
     @Override
@@ -1400,9 +1407,9 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         Mono<Void> saveNew = stateHolder.getUserStore().save(userId, userData);
 
         return stateHolder.getUserStore()
-                .find(userId)
-                .flatMap(saveNew::thenReturn)
-                .switchIfEmpty(saveNew.then(Mono.empty()));
+            .find(userId)
+            .flatMap(saveNew::thenReturn)
+            .switchIfEmpty(saveNew.then(Mono.empty()));
     }
 
     @Override
@@ -1415,13 +1422,13 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         LongLongTuple2 key = LongLongTuple2.of(guildId, userId);
 
         Mono<Void> saveNewOrRemove = voiceStateData.channelId().isPresent()
-                ? stateHolder.getVoiceStateStore().save(key, voiceStateData)
-                : stateHolder.getVoiceStateStore().delete(key);
+            ? stateHolder.getVoiceStateStore().save(key, voiceStateData)
+            : stateHolder.getVoiceStateStore().delete(key);
 
         return stateHolder.getVoiceStateStore()
-                .find(key)
-                .flatMap(saveNewOrRemove::thenReturn)
-                .switchIfEmpty(saveNewOrRemove.then(Mono.empty()));
+            .find(key)
+            .flatMap(saveNewOrRemove::thenReturn)
+            .switchIfEmpty(saveNewOrRemove.then(Mono.empty()));
     }
 
     @Override
@@ -1433,7 +1440,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     @Override
     public Mono<Void> onThreadCreate(int shardIndex, ThreadCreate dispatch) {
         return stateHolder.getChannelStore()
-                .save(dispatch.thread().id().asLong(), dispatch.thread());
+            .save(dispatch.thread().id().asLong(), dispatch.thread());
     }
 
     @Override
@@ -1445,10 +1452,10 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     public Mono<Void> onThreadDelete(int shardIndex, ThreadDelete dispatch) {
         long threadId = Snowflake.asLong(dispatch.thread().id());
         Mono<Void> deleteThread = stateHolder.getChannelStore()
-                .delete(threadId);
+            .delete(threadId);
 
         Mono<Void> deleteThreadMembers = stateHolder.getThreadMemberStore()
-                .deleteInRange(LongLongTuple2.of(threadId, 0), LongLongTuple2.of(threadId, -1));
+            .deleteInRange(LongLongTuple2.of(threadId, 0), LongLongTuple2.of(threadId, -1));
 
         return deleteThread.and(deleteThreadMembers);
     }
@@ -1457,15 +1464,16 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     public Mono<Void> onThreadListSync(int shardIndex, ThreadListSync dispatch) {
 
         Mono<Void> saveThreads = Flux.fromIterable(dispatch.threads())
-                .flatMap(thread -> stateHolder.getChannelStore().save(thread.id().asLong(), thread))
-                .then();
+            .flatMap(thread -> stateHolder.getChannelStore().save(thread.id().asLong(), thread))
+            .then();
 
         Mono<Void> saveThreadMembers = Flux.fromIterable(dispatch.members())
-                .flatMap(threadMember -> {
-                    LongLongTuple2 id = LongLongTuple2.of(threadMember.id().get().asLong(), threadMember.userId().get().asLong());
-                    return stateHolder.getThreadMemberStore().save(id, threadMember);
-                })
-                .then();
+            .flatMap(threadMember -> {
+                LongLongTuple2 id = LongLongTuple2.of(threadMember.id().get().asLong(),
+                    threadMember.userId().get().asLong());
+                return stateHolder.getThreadMemberStore().save(id, threadMember);
+            })
+            .then();
 
         return saveThreads.and(saveThreadMembers);
     }
@@ -1478,32 +1486,33 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         Mono<Void> saveNew = stateHolder.getThreadMemberStore().save(id, member);
 
         return stateHolder.getThreadMemberStore().find(id)
-                .flatMap(saveNew::thenReturn)
-                .switchIfEmpty(saveNew.then(Mono.empty()));
+            .flatMap(saveNew::thenReturn)
+            .switchIfEmpty(saveNew.then(Mono.empty()));
     }
 
     @Override
     public Mono<List<ThreadMemberData>> onThreadMembersUpdate(int shardIndex, ThreadMembersUpdate dispatch) {
         Mono<Void> addThreadMembers = Mono.justOrEmpty(dispatch.addedMembers().toOptional())
-                .flatMapIterable(it -> it)
-                .flatMap(threadMember -> {
-                    LongLongTuple2 id = LongLongTuple2.of(threadMember.id().get().asLong(), threadMember.userId().get().asLong());
-                    return stateHolder.getThreadMemberStore().save(id, threadMember);
-                })
-                .then();
+            .flatMapIterable(it -> it)
+            .flatMap(threadMember -> {
+                LongLongTuple2 id = LongLongTuple2.of(threadMember.id().get().asLong(),
+                    threadMember.userId().get().asLong());
+                return stateHolder.getThreadMemberStore().save(id, threadMember);
+            })
+            .then();
 
         long threadId = dispatch.id().asLong();
         Mono<List<ThreadMemberData>> removeThreadMembers = Mono.justOrEmpty(dispatch.removedMemberIds().toOptional())
-                .flatMapIterable(it -> it)
-                .map(id -> LongLongTuple2.of(threadId, id.asLong()))
-                .flatMap(id -> {
-                    Mono<Void> delete = stateHolder.getThreadMemberStore().delete(id);
+            .flatMapIterable(it -> it)
+            .map(id -> LongLongTuple2.of(threadId, id.asLong()))
+            .flatMap(id -> {
+                Mono<Void> delete = stateHolder.getThreadMemberStore().delete(id);
 
-                    return stateHolder.getThreadMemberStore().find(id)
-                            .flatMap(delete::thenReturn)
-                            .switchIfEmpty(delete.then(Mono.empty()));
-                })
-                .collectList();
+                return stateHolder.getThreadMemberStore().find(id)
+                    .flatMap(delete::thenReturn)
+                    .switchIfEmpty(delete.then(Mono.empty()));
+            })
+            .collectList();
 
         return addThreadMembers.then(removeThreadMembers);
     }

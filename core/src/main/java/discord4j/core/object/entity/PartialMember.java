@@ -65,6 +65,9 @@ public class PartialMember extends User {
     /** The path for member avatar image URLs. */
     private static final String AVATAR_IMAGE_PATH = "guilds/%s/users/%s/avatars/%s";
 
+    /** The path for member banner image URLs. */
+    private static final String BANNER_IMAGE_PATH = "banners/%s/%s";
+
     private final PartialMemberData data;
 
     private final long guildId;
@@ -325,6 +328,79 @@ public class PartialMember extends User {
      */
     public final Mono<Image> getEffectiveAvatar() {
         return Image.ofUrl(getEffectiveAvatarUrl());
+    }
+
+    /**
+     * Gets if the member's banner is animated.
+     *
+     * @return {@code true} if the member's banner is animated, {@code false} otherwise.
+     */
+    public final boolean hasAnimatedGuildBanner() {
+        final String banner = Possible.flatOpt(data.banner()).orElse(null);
+        return (banner != null) && banner.startsWith("a_");
+    }
+
+    /**
+     * Gets the member's banner URL, if present.
+     *
+     * @param format The format for the URL.
+     * @return The member's banner URL, if present.
+     */
+    public final Optional<String> getGuildBannerUrl(final Image.Format format) {
+        return Possible.flatOpt(data.banner()).map(banner -> ImageUtil.getUrl(
+            String.format(BANNER_IMAGE_PATH, getId().asString(), banner), format));
+    }
+
+    /**
+     * Gets the member's effective banner URL.
+     *
+     * @return The member's effective banner URL.
+     */
+    public final Optional<String> getGuildBannerUrl() {
+        final boolean animated = hasAnimatedBanner();
+        return getBannerUrl(animated ? GIF : PNG);
+    }
+
+    /**
+     * Gets the member's banner. This is the banner at the url given by {@link #getBannerUrl(Image.Format)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image banner} of the member. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getGuildBanner(final Image.Format format) {
+        return Mono.justOrEmpty(getGuildBannerUrl(format)).flatMap(Image::ofUrl);
+    }
+
+    /**
+     * Gets the user's effective banner. This is the banner at the url given by {@link #getBannerUrl()}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image banner} of the user. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<Image> getGuildBanner() {
+        return Mono.justOrEmpty(getGuildBannerUrl()).flatMap(Image::ofUrl);
+    }
+
+    /**
+     * Gets the member's effective banner URL.
+     * If the member does not have a guild banner, this defaults to the user's global banner.
+     *
+     * @return The member's effective banner URL.
+     */
+    public final Optional<String> getEffectiveBannerUrl() {
+        final boolean animated = hasAnimatedGuildBanner();
+        Optional<String> optionalGuildBanner = getGuildBannerUrl(animated ? GIF : PNG);
+        return optionalGuildBanner.isPresent() ? optionalGuildBanner : getBannerUrl();
+    }
+
+    /**
+     * Gets the member's effective banner. This is the avatar at the url given by {@link #getEffectiveBannerUrl()}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image banner} of the member.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<Image> getEffectiveBanner() {
+        return getEffectiveBannerUrl().map(Image::ofUrl).orElse(Mono.empty());
     }
 
     /**
@@ -763,24 +839,45 @@ public class PartialMember extends User {
      **/
     public enum Flag {
         /**
-         * Member has left and rejoined the guild
+         * Member has left and rejoined the guild.
          */
         DID_REJOIN(0),
         /**
-         * Member has completed onboarding
+         * Member has completed onboarding.
          */
         COMPLETED_ONBOARDING(1),
         /**
-         * Member has completed onboarding
+         * Member is exempt from guild verification requirements.
          * <br>
          * <b>Note:</b> this flag allows a member who does not meet verification requirements to participate in a
          * server.
          */
-        BYPASSES_VERIFICATION(2),
+        BYPASSES_VERIFICATION(2, true),
         /**
-         * Member has started onboarding
+         * Member has started onboarding.
          */
-        STARTED_ONBOARDING(3);
+        STARTED_ONBOARDING(3),
+        /**
+         * Member is a guest and can only access the voice channel they were invited to.
+         */
+        IS_GUEST(4),
+        /**
+         * Member has started Server Guide new member actions.
+         */
+        STARTED_HOME_ACTIONS(5),
+        /**
+         * Member has completed Server Guide new member actions.
+         */
+        COMPLETED_HOME_ACTIONS(6),
+        /**
+         * Member's username, display name, or nickname is blocked by AutoMod.
+         */
+        AUTOMOD_QUARANTINED_USERNAME(7),
+        /**
+         * Member has dismissed the DM settings upsell.
+         */
+        DM_SETTINGS_UPSELL_ACKNOWLEDGED(9),
+        ;
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -788,12 +885,23 @@ public class PartialMember extends User {
         /** The flag value as represented by Discord. */
         private final int flag;
 
+        /** If the flag can be use in {@link Member#edit()} for add/remove flags */
+        private final boolean editable;
+
         /**
          * Constructs a {@code PartialMember.Flag}.
          */
         Flag(final int value) {
+            this(value, false);
+        }
+
+        /**
+         * Constructs a {@code PartialMember.Flag}.
+         */
+        Flag(final int value, final boolean editable) {
             this.value = value;
             this.flag = 1 << value;
+            this.editable = editable;
         }
 
         /**
@@ -812,6 +920,15 @@ public class PartialMember extends User {
          */
         public int getFlag() {
             return flag;
+        }
+
+        /**
+         * Gets if the flag can be use in {@link Member#edit()} for add/remove flags.
+         *
+         * @return true if the flag is editable in member.
+         */
+        public boolean isEditable() {
+            return editable;
         }
 
         /**

@@ -137,20 +137,6 @@ public class AutoModRule implements Entity {
     }
 
     /**
-     * Requests to edit this AutoMod rule. Properties specifying how to edit this rule can be set via the {@code
-     * withXxx} methods of the returned {@link AutoModRuleEditMono}.
-     *
-     * @param name new name to set
-     * @param eventType type of event to set
-     * @param enabled status of the rule
-     * @return A {@link AutoModRuleEditMono} where, upon successful completion, emits the edited {@link AutoModRule}. If
-     * an error is received, it is emitted through the {@code AutoModRuleEditMono}.
-     */
-    public AutoModRuleEditMono edit(String name, EventType eventType, boolean enabled) {
-        return AutoModRuleEditMono.of(name, eventType.value, enabled, this);
-    }
-
-    /**
      * Requests to edit this AutoMod rule.
      *
      * @param spec an immutable object that specifies how to edit this AutoMod Rule

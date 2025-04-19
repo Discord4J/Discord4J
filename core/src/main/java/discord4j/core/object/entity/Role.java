@@ -301,6 +301,17 @@ public final class Role implements Entity {
     }
 
     /**
+     * Gets the <i>raw</i> mention for linked role. This is the format utilized to directly mention another role (assuming the role
+     * exists in context of the mention and is linked).
+     *
+     * @see RoleTags#isGuildLinkedRole()
+     * @return The <i>raw</i> mention.
+     */
+    public String getLinkedMention() {
+        return Guild.ResourceNavigation.LINKED_ROLE.getMention(this.getId().asString());
+    }
+
+    /**
      * Gets the tags this role has, if present.
      *
      * @return The tags this role has, if present.
