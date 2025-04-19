@@ -10,6 +10,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -126,8 +127,17 @@ public class Subscription implements Entity {
      *
      * @return A list of entitlement ids related to this Subscription.
      */
-    public List<Snowflake> getEntitlementId() {
+    public List<Snowflake> getEntitlementIds() {
         return this.data.entitlementIds().stream().map(Snowflake::of).collect(Collectors.toList());
+    }
+
+    /**
+     * Gets the renewal sku ids related to this Subscription.
+     *
+     * @return A list of renewal sku ids related to this Subscription.
+     */
+    public List<Snowflake> getRenewalSkuIds() {
+        return this.data.renewalSkuIds().map(ids -> ids.stream().map(Snowflake::of).collect(Collectors.toList())).orElse(new ArrayList<>());
     }
 
     /**
