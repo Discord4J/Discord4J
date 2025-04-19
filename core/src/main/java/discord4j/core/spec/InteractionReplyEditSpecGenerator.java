@@ -19,7 +19,8 @@ package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
-import discord4j.core.object.component.LayoutComponent;
+import discord4j.core.object.component.BaseMessageComponent;
+import discord4j.core.object.component.TopLevelMessageComponent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.PollCreateData;
@@ -59,7 +60,7 @@ interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<Webhoo
 
     Possible<Optional<AllowedMentions>> allowedMentions();
 
-    Possible<Optional<List<LayoutComponent>>> components();
+    Possible<Optional<List<TopLevelMessageComponent>>> components();
 
     Possible<PollCreateData> poll();
 
@@ -75,7 +76,7 @@ interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<Webhoo
             .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
             .components(mapPossible(components(), components -> components
                 .map(list -> list.stream()
-                    .map(LayoutComponent::getData)
+                    .map(BaseMessageComponent::getData)
                     .collect(Collectors.toList()))
                 .orElse(Collections.emptyList())))
             .poll(poll())

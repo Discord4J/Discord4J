@@ -18,7 +18,8 @@
 package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.component.LayoutComponent;
+import discord4j.core.object.component.BaseMessageComponent;
+import discord4j.core.object.component.TopLevelMessageComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
 import discord4j.discordjson.json.WebhookExecuteRequest;
@@ -67,7 +68,7 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
 
     Possible<AllowedMentions> allowedMentions();
 
-    Possible<List<LayoutComponent>> components();
+    Possible<List<TopLevelMessageComponent>> components();
 
     Possible<String> threadName();
 
@@ -85,7 +86,7 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
             .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
             .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
             .components(mapPossible(components(), components -> components.stream()
-                .map(LayoutComponent::getData)
+                .map(BaseMessageComponent::getData)
                 .collect(Collectors.toList())))
             .threadName(threadName())
             .flags(mapPossible(flags(), f -> f.stream()
@@ -104,14 +105,16 @@ abstract class WebhookExecuteMonoGenerator extends Mono<Message> implements Webh
 
     abstract boolean waitForMessage();
 
+    abstract boolean allowComponents();
+
     abstract Webhook webhook();
 
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
         if (threadId().isAbsent()) {
-            webhook().execute(waitForMessage(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
+            webhook().execute(waitForMessage(), allowComponents(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
         } else {
-            webhook().execute(waitForMessage(), threadId().get(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
+            webhook().execute(waitForMessage(), allowComponents(), threadId().get(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
         }
     }
 

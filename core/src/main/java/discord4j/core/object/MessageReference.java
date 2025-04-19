@@ -74,9 +74,76 @@ public class MessageReference implements DiscordObject {
                 .map(Snowflake::of);
     }
 
+    /**
+     * Gets the type of reference.
+     *
+     * @return The type of reference.
+     */
+    public Type getType() {
+        return Type.of(data.type());
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
+    }
+
+    /**
+     * Represents the various types of reference.
+     */
+    public enum Type {
+
+        /**
+         * Unknown type.
+         */
+        UNKNOWN(-1),
+        /**
+         * A standard reference used by replies.
+         */
+        DEFAULT(0),
+        /**
+         * Reference used to point to a message at a point in time.
+         */
+        FORWARD(1)
+        ;
+
+        /**
+         * The underlying value as represented by Discord.
+         */
+        private final int value;
+
+        /**
+         * Constructs a {@code MessageReference.Type}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        Type(final int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the type of the message reference. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
+         * equal ({@code ==}) to the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The type of reference.
+         */
+        public static Type of(final int value) {
+            switch (value) {
+                case 0: return DEFAULT;
+                case 1: return FORWARD;
+                default: return UNKNOWN;
+            }
+        }
     }
 
     @Override

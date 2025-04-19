@@ -22,19 +22,25 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
 import discord4j.core.object.MessageInteraction;
 import discord4j.core.object.MessageReference;
+import discord4j.core.object.MessageSnapshot;
+import discord4j.core.object.component.ActionComponent;
+import discord4j.core.object.component.BaseMessageComponent;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
+import discord4j.core.object.component.TopLevelMessageComponent;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.MessageEditMono;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.spec.legacy.LegacyMessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.MessageReferenceData;
 import discord4j.discordjson.json.PollData;
 import discord4j.discordjson.json.SuppressEmbedsRequest;
 import discord4j.discordjson.json.UserData;
@@ -54,6 +60,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A Discord message.
@@ -72,6 +79,16 @@ public final class Message implements Entity {
      * field.value, footer.text, and author.name fields of all embeds for this message.
      */
     public static final int MAX_TOTAL_EMBEDS_CHARACTER_LENGTH = 6000;
+
+    /**
+     * The maximum amount of {@link TopLevelMessageComponent} that can be added to a message's {@link #getComponents() root component list} when using the V2 component system ({@link Flag#IS_COMPONENTS_V2}). ({@value})
+     */
+    public static final int MAX_COMPONENT_COUNT_COMPONENTS_V2 = 10;
+
+    /**
+     * The maximum amount of {@link BaseMessageComponent components} that can be added to a message including nested components. ({@value})
+     */
+    public static final int MAX_COMPONENT_COUNT_NESTED = 30;
 
     /**
      * The gateway associated to this object.
@@ -473,6 +490,19 @@ public final class Message implements Entity {
     }
 
     /**
+     * Returns a list of {@link MessageSnapshot} sent with the forward message.
+     *
+     * @return A list of {@link MessageSnapshot} sent with the forward message.
+     */
+    public List<MessageSnapshot> getMessageSnapshots() {
+        return data.messageSnapshots().toOptional()
+            .map(messageSnapshotsData -> messageSnapshotsData.stream()
+                .map(data -> new MessageSnapshot(gateway, data))
+                .collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
+    }
+
+    /**
      * Returns the flags of this {@link Message}, describing its features.
      *
      * @return A {@code EnumSet} with the flags of this message.
@@ -579,13 +609,13 @@ public final class Message implements Entity {
      * the content cannot be accessed
      * @return The components on the message.
      */
-    public List<LayoutComponent> getComponents() {
-        List<LayoutComponent> components = data.components().toOptional()
+    public List<TopLevelMessageComponent> getComponents() {
+        List<TopLevelMessageComponent> components = data.components().toOptional()
                 .map(componentList -> componentList.stream()
                         .map(MessageComponent::fromData)
-                        // top level message components should only be LayoutComponents
-                        .filter(component -> component instanceof LayoutComponent)
-                        .map(component -> (LayoutComponent) component)
+                        // top level message components should only be TopLevelMessageComponent
+                        .filter(component -> component instanceof TopLevelMessageComponent)
+                        .map(component -> (TopLevelMessageComponent) component)
                         .collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
 
@@ -603,6 +633,46 @@ public final class Message implements Entity {
 
         // Well, we should have access to the components, but it's actually empty
         return components;
+    }
+
+    /**
+     * Get an {@link ActionComponent} from its custom id
+     *
+     * @param customId The custom id to search
+     * @return An {@link Optional} containing the component if found
+     */
+    public Optional<ActionComponent> getActionComponentById(String customId) {
+        return getComponents()
+            .stream()
+            .filter(component -> component instanceof LayoutComponent)
+            .map(LayoutComponent.class::cast)
+            .flatMap(layoutComponent -> layoutComponent.getAllChildren().stream())
+            .filter(component -> component instanceof ActionComponent)
+            .map(ActionComponent.class::cast)
+            .filter(actionComponent -> customId.equalsIgnoreCase(actionComponent.getCustomId()))
+            .findFirst();
+    }
+
+    /**
+     * Get a {@link BaseMessageComponent} from its id
+     *
+     * @param componentId the component id to search
+     * @return An {@link Optional} containing the component if found
+     */
+    public Optional<BaseMessageComponent> getComponentById(int componentId) {
+        return getComponents()
+            .stream()
+            .flatMap(component -> {
+                Stream<TopLevelMessageComponent> selfStream = Stream.of(component);
+
+                if (component instanceof LayoutComponent) {
+                    return Stream.concat(selfStream, ((LayoutComponent) component).getAllChildren().stream());
+                } else {
+                    return selfStream;
+                }
+            })
+            .filter(component -> componentId == component.getId())
+            .findFirst();
     }
 
     /**
@@ -700,6 +770,30 @@ public final class Message implements Entity {
      */
     public MessageEditMono edit() {
         return MessageEditMono.of(this);
+    }
+
+    /**
+     * Request to forward this message.
+     *
+     * @param messageChannel The message channel where the forward is going to be sent.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Message> forward(MessageChannel messageChannel) {
+        Objects.requireNonNull(messageChannel);
+        return messageChannel.createMessage(MessageCreateSpec.create().withMessageReference(MessageReferenceData.builder().type(MessageReference.Type.FORWARD.getValue()).messageId(this.data.id()).channelId(this.data.channelId()).guildId(this.data.guildId()).build()));
+    }
+
+    /**
+     * Request to forward this message.
+     *
+     * @param channelId The id of the message channel where the forward is going to be sent.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Message> forward(Snowflake channelId) {
+        Objects.requireNonNull(channelId);
+        return this.getClient().getChannelById(channelId).cast(MessageChannel.class).flatMap(this::forward);
     }
 
     /**
@@ -950,7 +1044,14 @@ public final class Message implements Entity {
         SUPPRESS_NOTIFICATIONS(12),
 
         /** This message is a voice message. */
-        IS_VOICE_MESSAGE(13);
+        IS_VOICE_MESSAGE(13),
+
+        /**
+         * This message use components v2.
+         *
+         * @apiNote this tag restrict the use of content and embeds when create a message
+         */
+        IS_COMPONENTS_V2(15);
 
         /**
          * The underlying value as represented by Discord.

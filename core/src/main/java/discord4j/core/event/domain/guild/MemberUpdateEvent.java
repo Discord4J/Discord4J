@@ -46,6 +46,8 @@ public class MemberUpdateEvent extends GuildEvent {
 
     /** The path for member avatar image URLs. */
     private static final String AVATAR_IMAGE_PATH = "guilds/%s/users/%s/avatars/%s";
+    /** The path for member banner image URLs. */
+    private static final String BANNER_IMAGE_PATH = "banners/%s/%s";
 
     private final long guildId;
     private final long memberId;
@@ -59,6 +61,8 @@ public class MemberUpdateEvent extends GuildEvent {
     @Nullable
     private final String currentAvatar;
     @Nullable
+    private final String currentBanner;
+    @Nullable
     private final String currentJoinedAt;
     @Nullable
     private final String currentPremiumSince;
@@ -71,7 +75,7 @@ public class MemberUpdateEvent extends GuildEvent {
 
     public MemberUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long memberId,
                              @Nullable Member old, Set<Long> currentRoleIds, @Nullable String currentNickname,
-                             @Nullable String currentAvatar, @Nullable String currentJoinedAt,
+                             @Nullable String currentAvatar, @Nullable String currentBanner, @Nullable String currentJoinedAt,
                              @Nullable String currentPremiumSince,
                              @Nullable Boolean currentPending, @Nullable String communicationDisabledUntil,
                              @Nullable AvatarDecoration avatarDecoration) {
@@ -83,6 +87,7 @@ public class MemberUpdateEvent extends GuildEvent {
         this.currentRoleIds = currentRoleIds;
         this.currentNickname = currentNickname;
         this.currentAvatar = currentAvatar;
+        this.currentBanner = currentBanner;
         this.currentJoinedAt = currentJoinedAt;
         this.currentPremiumSince = currentPremiumSince;
         this.currentPending = currentPending;
@@ -192,6 +197,32 @@ public class MemberUpdateEvent extends GuildEvent {
      */
     public Mono<Image> getCurrentGuildAvatar(Image.Format format) {
         return Mono.justOrEmpty(getCurrentGuildAvatarUrl(format)).flatMap(Image::ofUrl);
+    }
+
+    /**
+     * Gets the current member's guild banner URL, if present.
+     *
+     * @param format the format for the URL.
+     * @return The current member's guild banner URL, if present.
+     */
+    public Optional<String> getCurrentGuildBannerUrl(Image.Format format) {
+        return Optional.ofNullable(currentBanner)
+            .map(avatar -> ImageUtil.getUrl(String.format(BANNER_IMAGE_PATH,
+                guildId, Snowflake.asString(memberId), avatar), format));
+    }
+
+
+    /**
+     * Gets the current member's guild banner. This is the banner at the url given by
+     * {@link #getCurrentGuildBannerUrl(Image.Format)}.
+     *
+     * @param format The format for the banner.
+     * @return a {@link Mono} where, upon successful completion, emits the current {@link Image guild banner} of the
+     * member.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getCurrentGuildBanner(Image.Format format) {
+        return Mono.justOrEmpty(getCurrentGuildBannerUrl(format)).flatMap(Image::ofUrl);
     }
 
     /**

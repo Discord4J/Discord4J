@@ -135,6 +135,7 @@ Here are some real-world examples of large bots using Discord4J:
 * [ZeroTwo](https://zerotwo.bot/) - An anime multi-purpose bot used in over 1 million servers.
 * [DisCal](https://www.discalbot.com/) - Implements Google Calendar into Discord as seamlessly and comprehensively as possible; serving over 21k servers.
 * [Shadbot](https://github.com/Shadorc/Shadbot) - A configurable multipurpose bot with music, gambling mini-games, video game stats, and more; serving nearly 12K servers before its shutdown in August 2021.
+* [See-Bot](https://seebot.dev) - A Fortnite focused bot with stat tracking, player lookup, mission alerts, and much more; in over 10k servers.
 
 Do you own a large bot using Discord4J? Ask an admin in our Discord or submit a pull request to add your bot to the list!
 

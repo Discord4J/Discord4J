@@ -19,6 +19,7 @@ package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.json.ImmutableComponentData;
+import discord4j.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
@@ -31,92 +32,92 @@ import java.util.Optional;
 public class TextInput extends ActionComponent {
 
     /**
-     * Creates a {@link TextInput.Style#SHORT short} button.
+     * Creates a {@link TextInput.Style#SHORT short} text input.
      *
-     * @param customId A developer-defined identifier for the button.
-     * @return A button with the given data.
+     * @param customId A developer-defined identifier for the text input.
+     * @return A text input with the given data.
      */
     public static TextInput small(String customId) {
         return of(Style.SHORT, customId, null, null, null, null, null);
     }
 
     /**
-     * Creates a {@link TextInput.Style#SHORT short} button.
+     * Creates a {@link TextInput.Style#SHORT short} text input.
      *
-     * @param customId A developer-defined identifier for the button.
+     * @param customId A developer-defined identifier for the text input.
      * @param label The text that appears above the input
-     * @return A button with the given data.
+     * @return A text input with the given data.
      */
     public static TextInput small(String customId, String label) {
         return of(Style.SHORT, customId, label, null, null, null, null);
     }
 
     /**
-     * Creates a {@link TextInput.Style#SHORT short} button.
+     * Creates a {@link TextInput.Style#SHORT short} text input.
      *
-     * @param customId A developer-defined identifier for the button.
+     * @param customId A developer-defined identifier for the text input.
      * @param label The text that appears above the input
      * @param placeholder The placeholder text to be displayed
-     * @return A button with the given data.
+     * @return A text input with the given data.
      */
     public static TextInput small(String customId, String label, String placeholder) {
         return of(Style.SHORT, customId, label, null, null, null, placeholder);
     }
 
     /**
-     * Creates a {@link TextInput.Style#SHORT short} button.
+     * Creates a {@link TextInput.Style#SHORT short} text input.
      *
-     * @param customId A developer-defined identifier for the button.
+     * @param customId A developer-defined identifier for the text input.
      * @param label The text that appears above the input
      * @param minLength The minimum length the user is required to input
      * @param maxLength The maximum length the user is required to input
-     * @return A button with the given data.
+     * @return A text input with the given data.
      */
     public static TextInput small(String customId, String label, int minLength, int maxLength) {
         return of(Style.SHORT, customId, label, minLength, maxLength, null, null);
     }
 
     /**
-     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} button.
+     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
      *
-     * @param customId A developer-defined identifier for the button.
-     * @return A button with the given data.
+     * @param customId A developer-defined identifier for the text input.
+     * @return A text input with the given data.
      */
     public static TextInput paragraph(String customId) {
         return of(Style.PARAGRAPH, customId, null, null, null, null, null);
     }
 
     /**
-     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} button.
+     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
      *
-     * @param customId A developer-defined identifier for the button.
+     * @param customId A developer-defined identifier for the text input.
      * @param label The text that appears above the input
-     * @return A button with the given data.
+     * @return A text input with the given data.
      */
     public static TextInput paragraph(String customId, String label) {
         return of(Style.PARAGRAPH, customId, label, null, null, null, null);
     }
 
     /**
-     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} button.
+     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
      *
-     * @param customId A developer-defined identifier for the button.
+     * @param customId A developer-defined identifier for the text input.
      * @param label The text that appears above the input
      * @param placeholder The placeholder text to display
-     * @return A button with the given data.
+     * @return A text input with the given data.
      */
     public static TextInput paragraph(String customId, String label, String placeholder) {
         return of(Style.PARAGRAPH, customId, label, null, null, null, placeholder);
     }
 
     /**
-     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} button.
+     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
      *
-     * @param customId A developer-defined identifier for the button.
+     * @param customId A developer-defined identifier for the text input.
      * @param label The text that appears above the input
      * @param minLength The minimum length the user is required to input
      * @param maxLength The maximum length the user is required to input
-     * @return A button with the given data.
+     * @return A text input with the given data.
      */
     public static TextInput paragraph(String customId, String label, int minLength, int maxLength) {
         return of(Style.PARAGRAPH, customId, label, minLength, maxLength, null, null);
@@ -152,6 +153,151 @@ public class TextInput extends ActionComponent {
         return new TextInput(builder.build());
     }
 
+    /**
+     * Creates a {@link TextInput.Style#SHORT short} text input.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the text input.
+     * @return A text input with the given data.
+     */
+    public static TextInput small(int id, String customId) {
+        return of(id, Style.SHORT, customId, null, null, null, null, null);
+    }
+
+    /**
+     * Creates a {@link TextInput.Style#SHORT short} text input.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the text input.
+     * @param label The text that appears above the input
+     * @return A text input with the given data.
+     */
+    public static TextInput small(int id, String customId, String label) {
+        return of(id, Style.SHORT, customId, label, null, null, null, null);
+    }
+
+    /**
+     * Creates a {@link TextInput.Style#SHORT short} text input.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the text input.
+     * @param label The text that appears above the input
+     * @param placeholder The placeholder text to be displayed
+     * @return A text input with the given data.
+     */
+    public static TextInput small(int id, String customId, String label, String placeholder) {
+        return of(id, Style.SHORT, customId, label, null, null, null, placeholder);
+    }
+
+    /**
+     * Creates a {@link TextInput.Style#SHORT short} text input.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the text input.
+     * @param label The text that appears above the input
+     * @param minLength The minimum length the user is required to input
+     * @param maxLength The maximum length the user is required to input
+     * @return A text input with the given data.
+     */
+    public static TextInput small(int id, String customId, String label, int minLength, int maxLength) {
+        return of(id, Style.SHORT, customId, label, minLength, maxLength, null, null);
+    }
+
+    /**
+     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the text input.
+     * @return A text input with the given data.
+     */
+    public static TextInput paragraph(int id, String customId) {
+        return of(id, Style.PARAGRAPH, customId, null, null, null, null, null);
+    }
+
+    /**
+     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the text input.
+     * @param label The text that appears above the input
+     * @return A text input with the given data.
+     */
+    public static TextInput paragraph(int id, String customId, String label) {
+        return of(id, Style.PARAGRAPH, customId, label, null, null, null, null);
+    }
+
+    /**
+     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the text input.
+     * @param label The text that appears above the input
+     * @param placeholder The placeholder text to display
+     * @return A text input with the given data.
+     */
+    public static TextInput paragraph(int id, String customId, String label, String placeholder) {
+        return of(id, Style.PARAGRAPH, customId, label, null, null, null, placeholder);
+    }
+
+    /**
+     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the text input.
+     * @param label The text that appears above the input
+     * @param minLength The minimum length the user is required to input
+     * @param maxLength The maximum length the user is required to input
+     * @return A text input with the given data.
+     */
+    public static TextInput paragraph(int id, String customId, String label, int minLength, int maxLength) {
+        return of(Style.PARAGRAPH, customId, label, minLength, maxLength, null, null);
+    }
+
+    private static TextInput of(int id, Style style, String customId, @Nullable String label, @Nullable Integer minLength,
+                                @Nullable Integer maxLength, @Nullable String value, @Nullable String placeholder) {
+        ImmutableComponentData.Builder builder = ComponentData.builder()
+            .type(MessageComponent.Type.TEXT_INPUT.getValue())
+            .id(id)
+            .style(style.getValue())
+            .customId(customId);
+
+        if (label != null) {
+            builder.label(label);
+        }
+
+        if (minLength != null) {
+            builder.minLength(minLength);
+        }
+
+        if (maxLength != null) {
+            builder.maxLength(maxLength);
+        }
+
+        if (value != null) {
+            builder.value(value);
+        }
+
+        if (placeholder != null) {
+            builder.placeholder(placeholder);
+        }
+
+        return new TextInput(builder.build());
+    }
+
+    protected TextInput(Integer id, Style style, String customId, @Nullable String label, @Nullable Integer minLength,
+                        @Nullable Integer maxLength, @Nullable String value, @Nullable String placeholder) {
+        this(MessageComponent.getBuilder(Type.TEXT_INPUT)
+            .id(Possible.ofNullable(id))
+            .style(style.getValue())
+            .customId(customId)
+            .label(Possible.ofNullable(label))
+            .minLength(Possible.ofNullable(minLength))
+            .maxLength(Possible.ofNullable(maxLength))
+            .value(Possible.ofNullable(value))
+            .placeholder(Possible.ofNullable(placeholder))
+            .build());
+    }
+
     TextInput(ComponentData data) {
         super(data);
     }
@@ -165,16 +311,6 @@ public class TextInput extends ActionComponent {
         return getData().style().toOptional()
                 .map(Style::of)
                 .orElseThrow(IllegalStateException::new); // style should always be present on text inputs
-    }
-
-    /**
-     * Gets the text input's custom id.
-     *
-     * @return the custom id of the text input
-     */
-    public String getCustomId() {
-        return getData().customId().toOptional()
-                .orElseThrow(IllegalStateException::new); // custom id should always be present on text inputs
     }
 
     /**
@@ -245,7 +381,7 @@ public class TextInput extends ActionComponent {
      * or not.
      *
      * @param value True if the text input should be required otherwise False.
-     * @return A new possibly required button with the same data as this one.
+     * @return A new possibly required text input with the same data as this one.
      */
     public TextInput required(boolean value) {
         return new TextInput(ComponentData.builder().from(getData()).required(value).build());

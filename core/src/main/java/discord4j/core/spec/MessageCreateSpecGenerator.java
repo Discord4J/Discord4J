@@ -17,7 +17,8 @@
 package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.component.LayoutComponent;
+import discord4j.core.object.component.BaseMessageComponent;
+import discord4j.core.object.component.TopLevelMessageComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.discordjson.Id;
@@ -63,9 +64,15 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
 
     Possible<AllowedMentions> allowedMentions();
 
-    Possible<Snowflake> messageReference();
+    /**
+     * @deprecated this just map to a reply message for modify behaviour you need use {@link MessageReferenceData}
+     */
+    @Deprecated
+    Possible<Snowflake> messageReferenceId();
 
-    Possible<List<LayoutComponent>> components();
+    Possible<MessageReferenceData> messageReference();
+
+    Possible<List<TopLevelMessageComponent>> components();
 
     Possible<List<Snowflake>> stickersIds();
 
@@ -84,12 +91,12 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
                 .map(EmbedCreateSpec::asRequest)
                 .collect(Collectors.toList())))
             .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
-            .messageReference(mapPossible(messageReference(),
+            .messageReference((messageReference().isAbsent() ? mapPossible(messageReferenceId(),
                 ref -> MessageReferenceData.builder()
                     .messageId(ref.asString())
-                    .build()))
+                    .build()) : messageReference()))
             .components(mapPossible(components(), components -> components.stream()
-                .map(LayoutComponent::getData)
+                .map(BaseMessageComponent::getData)
                 .collect(Collectors.toList())))
             .stickerIds(mapPossible(stickersIds(),
                 r -> r.stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList())))
