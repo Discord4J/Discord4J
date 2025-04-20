@@ -69,8 +69,9 @@ public class SoundboardService extends RestService {
             .bodyToMono(SoundboardSoundData.class);
     }
 
-    public Mono<Void> deleteGuildSoundboardSound(long guildId, long soundBoardId) {
+    public Mono<Void> deleteGuildSoundboardSound(long guildId, long soundBoardId, @Nullable String reason) {
         return Routes.DELETE_GUILD_SOUNDBOARD_SOUND.newRequest(guildId, soundBoardId)
+            .optionalHeader("X-Audit-Log-Reason", reason)
             .exchange(getRouter())
             .bodyToMono(Void.class);
     }
