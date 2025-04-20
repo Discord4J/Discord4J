@@ -26,6 +26,7 @@ import discord4j.discordjson.json.ImmutableSendSoundboardSoundRequest;
 import discord4j.discordjson.json.SendSoundboardSoundRequest;
 import discord4j.discordjson.json.SoundboardSoundData;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 
@@ -129,6 +130,30 @@ public class SoundboardSound implements Entity {
             builder.sourceGuildId(this.getGuildId().get().asLong());
         }
         return this.getClient().getRestClient().getSoundboardService().sendSoundboardSound(voiceChannelId.asLong(), builder.build());
+    }
+
+    /**
+     * Request to delete this soundboard sound.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the sound has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete() {
+        return this.delete(null);
+    }
+
+    /**
+     * Request to delete this soundboard sound.
+     *
+     * @param reason the reason to remove
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the sound has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete(@Nullable final String reason) {
+        if (!this.getGuildId().isPresent()) {
+            return Mono.error(new IllegalStateException("Cannot delete soundboard sound without guild id."));
+        }
+        return this.getClient().getRestClient().getSoundboardService().deleteGuildSoundboardSound(this.getGuildId().get().asLong(), this.getId().asLong(), reason);
     }
 
     public SoundboardSoundData getData() {
