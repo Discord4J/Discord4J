@@ -282,7 +282,7 @@ public final class VoiceChannel extends BaseTopLevelGuildMessageChannel {
      * @param soundboardSound the sound to send
      * @return An empty mono which completes when the request was sent
      */
-    public Mono<Void> sendSound(SoundboardSound soundboardSound) {
+    public Mono<Void> sendSoundBoard(SoundboardSound soundboardSound) {
         return soundboardSound.sendSound(this.getId());
     }
 
