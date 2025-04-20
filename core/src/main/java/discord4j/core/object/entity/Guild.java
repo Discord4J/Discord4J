@@ -2102,6 +2102,20 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Request to create a soundboard sound for this guild with the provided spec.
+     *
+     * @param spec spec specifying how to create the soundboard sound
+     * @return A {@link Mono} which, upon completion, emits the edited {@link SoundboardSound} object. Any error, if occurs,
+     * is emitted through the {@link Mono}.
+     */
+    public Mono<SoundboardSound> createSoundboardSound(SoundboardSoundCreateSpec spec) {
+        return this.getClient().getRestClient()
+            .getSoundboardService()
+            .createGuildSoundboardSound(this.getId().asLong(), spec.asRequest(), spec.reason())
+            .map(data -> new SoundboardSound(this.getClient(), data));
+    }
+
+    /**
      * Get all the soundboard sounds of this guild.
      *
      * @return A {@link Flux} emitting the soundboard sounds

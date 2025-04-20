@@ -62,8 +62,8 @@ public class SoundboardService extends RestService {
             .bodyToMono(SoundboardSoundData.class);
     }
 
-    public Mono<SoundboardSoundData> createGuildSoundboardSound(long guildId, long soundBoardId, SoundboardSoundCreateRequest request, @Nullable String reason) {
-        return Routes.CREATE_GUILD_SOUNDBOARD_SOUND.newRequest(guildId, soundBoardId)
+    public Mono<SoundboardSoundData> createGuildSoundboardSound(long guildId, SoundboardSoundCreateRequest request, @Nullable String reason) {
+        return Routes.CREATE_GUILD_SOUNDBOARD_SOUND.newRequest(guildId)
             .body(request)
             .optionalHeader("X-Audit-Log-Reason", reason)
             .exchange(getRouter())

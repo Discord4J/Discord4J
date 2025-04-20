@@ -21,6 +21,8 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.spec.SoundboardSoundEditMono;
+import discord4j.core.spec.SoundboardSoundEditSpec;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.ImmutableSendSoundboardSoundRequest;
 import discord4j.discordjson.json.SendSoundboardSoundRequest;
@@ -28,6 +30,7 @@ import discord4j.discordjson.json.SoundboardSoundData;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -130,6 +133,35 @@ public class SoundboardSound implements Entity {
             builder.sourceGuildId(this.getGuildId().get().asLong());
         }
         return this.getClient().getRestClient().getSoundboardService().sendSoundboardSound(voiceChannelId.asLong(), builder.build());
+    }
+
+    /**
+     * Requests to edit this soundboard sound.
+     *
+     * @return A {@link Mono} which, upon completion, emits the new {@link SoundboardSound soundboard sound} update. If an error
+     * occurs, it is emitted through the {@link Mono}.
+     */
+    public SoundboardSoundEditMono edit() {
+        if (!this.getGuildId().isPresent()) {
+            throw new IllegalStateException("Cannot edit a soundboard sound without guild id.");
+        }
+        return SoundboardSoundEditMono.of(this);
+    }
+
+    /**
+     * Requests to edit this soundboard sound with the provided spec.
+     *
+     * @param spec the parameters to update
+     * @return A {@link Mono} which, upon completion, emits the new {@link SoundboardSound soundboard sound} update. If an error
+     * occurs, it is emitted through the {@link Mono}.
+     */
+    public Mono<SoundboardSound> edit(SoundboardSoundEditSpec spec) {
+        if (!this.getGuildId().isPresent()) {
+            return Mono.error(new IllegalStateException("Cannot edit a soundboard sound without guild id."));
+        }
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> gateway.getRestClient().getSoundboardService().modifyGuildSoundboardSound(this.getGuildId().get().asLong(), this.getId().asLong(), spec.asRequest(), spec.reason())
+            .map(data -> new SoundboardSound(gateway, data)));
     }
 
     /**
