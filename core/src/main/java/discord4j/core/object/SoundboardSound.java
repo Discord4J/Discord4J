@@ -1,3 +1,19 @@
+/*
+ * This file is part of Discord4J.
+ *
+ * Discord4J is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Discord4J is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package discord4j.core.object;
 
 import discord4j.common.util.Snowflake;
@@ -41,18 +57,38 @@ public class SoundboardSound implements Entity {
         return Snowflake.of(this.data.soundId());
     }
 
+    /**
+     * Gets the name of the sound.
+     *
+     * @return the name of the sound
+     */
     public String getName() {
         return this.data.name();
     }
 
+    /**
+     * Gets the volume of the sound.
+     *
+     * @return the volumen of sound between 0 and 1
+     */
     public double getVolume() {
         return this.data.volume();
     }
 
+    /**
+     * Gets whether this sound can be used.
+     *
+     * @return {@code true} if is available to use, {@code false} otherwise
+     */
     public boolean isAvailable() {
         return this.data.available();
     }
 
+    /**
+     * Gets the emoji associated with this sound, if present.
+     *
+     * @return the emoji
+     */
     public Optional<ReactionEmoji> getEmoji() {
         if (this.data.emojiId().isPresent() || this.data.emojiName().isPresent()) {
             return Optional.of(ReactionEmoji.of(EmojiData.builder().id(this.data.emojiId()).name(this.data.emojiName()).build()));
@@ -60,14 +96,32 @@ public class SoundboardSound implements Entity {
         return Optional.empty();
     }
 
+    /**
+     * Gets the guild id of the sound, if present.
+     *
+     * @return the guild id
+     */
     public Optional<Snowflake> getGuildId() {
         return this.data.guildId().toOptional().map(Snowflake::of);
     }
 
+    /**
+     * Gets the user who creates the sound, if present.
+     *
+     * @return a user
+     */
     public Optional<User> getUser() {
         return this.data.user().toOptional().map(userData -> new User(this.gateway, userData)) ;
     }
 
+    /**
+     * Request sends this sound to a voice channel.
+     * <br>
+     * <b>Note:</b> this requires the BOT being connected to that voice channel.
+     *
+     * @param voiceChannelId the channel id of the voice channel to send the sound to.
+     * @return a {@link Mono} that completes when the sound has been sent.
+     */
     public Mono<Void> sendSound(Snowflake voiceChannelId) {
         ImmutableSendSoundboardSoundRequest.Builder builder = SendSoundboardSoundRequest.builder();
         builder.soundId(this.data.soundId());
