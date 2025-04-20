@@ -53,4 +53,16 @@ public class SoundboardService extends RestService {
             .flatMapMany(Flux::fromIterable);
     }
 
+    public Mono<SoundboardSoundData> getGuildSoundboardSound(long guildId, long soundBoardId) {
+        return Routes.GET_GUILD_SOUNDBOARD_SOUND.newRequest(guildId, soundBoardId)
+            .exchange(getRouter())
+            .bodyToMono(SoundboardSoundData.class);
+    }
+
+    public Mono<Void> deleteGuildSoundboardSound(long guildId, long soundBoardId) {
+        return Routes.DELETE_GUILD_SOUNDBOARD_SOUND.newRequest(guildId, soundBoardId)
+            .exchange(getRouter())
+            .bodyToMono(Void.class);
+    }
+
 }
