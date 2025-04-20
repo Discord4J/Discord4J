@@ -6,7 +6,10 @@ import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.json.EmojiData;
+import discord4j.discordjson.json.ImmutableSendSoundboardSoundRequest;
+import discord4j.discordjson.json.SendSoundboardSoundRequest;
 import discord4j.discordjson.json.SoundboardSoundData;
+import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
@@ -63,6 +66,15 @@ public class SoundboardSound implements Entity {
 
     public Optional<User> getUser() {
         return this.data.user().toOptional().map(userData -> new User(this.gateway, userData)) ;
+    }
+
+    public Mono<Void> sendSound(Snowflake voiceChannelId) {
+        ImmutableSendSoundboardSoundRequest.Builder builder = SendSoundboardSoundRequest.builder();
+        builder.soundId(this.data.soundId());
+        if (this.getGuildId().isPresent()) {
+            builder.sourceGuildId(this.getGuildId().get().asLong());
+        }
+        return this.getClient().getRestClient().getSoundboardService().sendSoundboardSound(voiceChannelId.asLong(), builder.build());
     }
 
     public SoundboardSoundData getData() {
