@@ -18,6 +18,7 @@
 package discord4j.rest.service;
 
 import discord4j.discordjson.json.SendSoundboardSoundRequest;
+import discord4j.discordjson.json.SoundboardSoundCreateRequest;
 import discord4j.discordjson.json.SoundboardSoundData;
 import discord4j.discordjson.json.SoundboardSoundDataList;
 import discord4j.discordjson.json.SoundboardSoundModifyRequest;
@@ -57,6 +58,14 @@ public class SoundboardService extends RestService {
 
     public Mono<SoundboardSoundData> getGuildSoundboardSound(long guildId, long soundBoardId) {
         return Routes.GET_GUILD_SOUNDBOARD_SOUND.newRequest(guildId, soundBoardId)
+            .exchange(getRouter())
+            .bodyToMono(SoundboardSoundData.class);
+    }
+
+    public Mono<SoundboardSoundData> createGuildSoundboardSound(long guildId, long soundBoardId, SoundboardSoundCreateRequest request, @Nullable String reason) {
+        return Routes.CREATE_GUILD_SOUNDBOARD_SOUND.newRequest(guildId, soundBoardId)
+            .body(request)
+            .optionalHeader("X-Audit-Log-Reason", reason)
             .exchange(getRouter())
             .bodyToMono(SoundboardSoundData.class);
     }
