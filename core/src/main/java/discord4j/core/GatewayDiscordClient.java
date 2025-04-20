@@ -56,7 +56,9 @@ import discord4j.core.util.ValidationUtil;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.GuildData;
 import discord4j.discordjson.json.GuildUpdateData;
+import discord4j.discordjson.json.ImmutableSendSoundboardSoundRequest;
 import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.SendSoundboardSoundRequest;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.discordjson.json.gateway.RequestSoundboardSounds;
@@ -722,11 +724,6 @@ public class GatewayDiscordClient implements EntityRetriever {
         return retrievalStrategy.apply(this);
     }
 
-    public Flux<SoundboardSound> requestSoundboardSound(RequestSoundboardSounds request) {
-        // TODO: This require the shard method? still need tests
-        return Flux.empty();
-    }
-
     @Override
     public Mono<Channel> getChannelById(Snowflake channelId) {
         return entityRetriever.getChannelById(channelId);
@@ -912,6 +909,29 @@ public class GatewayDiscordClient implements EntityRetriever {
             return getRestClient().getMonetizationService()
                 .deleteTestEntitlement(applicationInfo.getId().asLong(), entitlementId.asLong());
         });
+    }
+
+    public Mono<Void> sendSoundboardSound(Snowflake guildId, SoundboardSound sound) {
+        return getVoiceConnectionRegistry()
+            .getVoiceConnection(guildId)
+            .flatMap(VoiceConnection::getChannelId)
+            .flatMap(channelId -> {
+                ImmutableSendSoundboardSoundRequest.Builder builder = SendSoundboardSoundRequest.builder()
+                    .soundId(sound.getId().asLong());
+
+                if (sound.getGuildId().isPresent()) {
+                    builder.sourceGuildId(sound.getGuildId().get().asLong());
+                }
+
+                return rest().getSoundboardService().sendSoundboardSound(channelId.asLong(), builder.build());
+            });
+    }
+
+    public Flux<SoundboardSound> getDefaultSoundboardSounds() {
+        return rest()
+            .getSoundboardService()
+            .getDefaultSoundboardSounds()
+            .map(data -> new SoundboardSound(this, data));
     }
 
 }

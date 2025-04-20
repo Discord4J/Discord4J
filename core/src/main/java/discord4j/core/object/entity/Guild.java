@@ -2101,6 +2101,18 @@ public final class Guild implements Entity {
         return OnboardingEditMono.of(this);
     }
 
+    /**
+     * Get all the soundboard sounds of this guild
+     *
+     * @return A {@link Flux} emitting the soundboard sounds
+     */
+    public Flux<SoundboardSound> getSoundboardSounds() {
+        return gateway.rest()
+            .getSoundboardService()
+            .getGuildSoundboardSounds(data.id().asLong())
+            .map(data -> new SoundboardSound(gateway, data));
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
