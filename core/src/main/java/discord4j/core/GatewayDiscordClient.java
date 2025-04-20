@@ -911,6 +911,13 @@ public class GatewayDiscordClient implements EntityRetriever {
         });
     }
 
+    /**
+     * Request send a soundboard sound to the current connected voice channel in a guild.
+     *
+     * @param guildId the guild for get the current voice connection
+     * @param sound the sound to play
+     * @return A {@link Mono} that completes upon successful request
+     */
     public Mono<Void> sendSoundboardSound(Snowflake guildId, SoundboardSound sound) {
         return getVoiceConnectionRegistry()
             .getVoiceConnection(guildId)
