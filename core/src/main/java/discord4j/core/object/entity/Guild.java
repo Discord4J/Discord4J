@@ -2102,7 +2102,7 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Get all the soundboard sounds of this guild
+     * Get all the soundboard sounds of this guild.
      *
      * @return A {@link Flux} emitting the soundboard sounds
      */
@@ -2110,6 +2110,18 @@ public final class Guild implements Entity {
         return gateway.rest()
             .getSoundboardService()
             .getGuildSoundboardSounds(data.id().asLong())
+            .map(data -> new SoundboardSound(gateway, data));
+    }
+
+    /**
+     * Get a soundboard sounds of this guild.
+     *
+     * @return A {@link Mono} emitting the soundboard sound
+     */
+    public Mono<SoundboardSound> getSoundboardSound(Snowflake id) {
+        return gateway.rest()
+            .getSoundboardService()
+            .getGuildSoundboardSound(data.id().asLong(), id.asLong())
             .map(data -> new SoundboardSound(gateway, data));
     }
 
