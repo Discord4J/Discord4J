@@ -275,10 +275,23 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
      * @return a {@link Container} containing the existing and added components
      */
-    private <C extends MessageComponent & ICanBeUsedInContainerComponent> Container withAddedComponent(C component) {
+    public <C extends MessageComponent & ICanBeUsedInContainerComponent> Container withAddedComponent(C component) {
         List<MessageComponent> components = new ArrayList<>(getChildren());
         components.add(component);
         return new Container(ComponentData.builder().from(this.getData()).components(components.stream().map(MessageComponent::getData).collect(Collectors.toList())).build());
+    }
+
+    /**
+     * Create a new {@link Container} instance from {@code this}, adding given components.
+     *
+     * @param components the child components to be added
+     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
+     * @return a {@link Container} containing the existing and added components
+     */
+    public <C extends MessageComponent & ICanBeUsedInContainerComponent> Container withAddedComponents(C... components) {
+        List<MessageComponent> componentsToAdd = new ArrayList<>(getChildren());
+        componentsToAdd.addAll(Arrays.asList(components));
+        return new Container(ComponentData.builder().from(this.getData()).components(componentsToAdd.stream().map(MessageComponent::getData).collect(Collectors.toList())).build());
     }
 
     /**

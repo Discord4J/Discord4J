@@ -139,6 +139,22 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
     }
 
     /**
+     * Create a new {@link Section} instance from {@code this}, adding given components.
+     *
+     * @param components the child components to be added
+     * @return an {@code Section} containing the existing and added components with the current accessory
+     */
+    public <C extends MessageComponent & ICanBeUsedInSectionComponent> Section withAddedComponents(C... components) {
+        List<MessageComponent> componentsToAdd = new ArrayList<>(getChildren());
+        componentsToAdd.addAll(Arrays.asList(components));
+        return new Section(ComponentData.builder()
+            .from(getData())
+            .accessory(Possible.ofNullable(this.getData().accessory().toOptional().orElse(null)))
+            .components(componentsToAdd.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+            .build());
+    }
+
+    /**
      * Create a new {@link Section} instance from {@code this}, using a given accessory.
      *
      * @param accessory the child component to be added
