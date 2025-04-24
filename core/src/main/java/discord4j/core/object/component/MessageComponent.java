@@ -16,7 +16,6 @@
  */
 package discord4j.core.object.component;
 
-import discord4j.core.DiscordClientBuilder;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.json.ImmutableComponentData;
@@ -26,7 +25,7 @@ import reactor.util.Loggers;
 /**
  * A Discord message component.
  *
- * @see <a href="https://discord.com/developers/docs/interactions/message-components#message-components">Message Components</a>
+ * @see <a href="https://discord.com/developers/docs/components/using-message-components">Message Components</a>
  */
 public class MessageComponent implements BaseMessageComponent {
 

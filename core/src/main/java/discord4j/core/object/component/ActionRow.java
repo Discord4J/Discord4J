@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 /**
  * A row of {@link ActionComponent action components}.
  *
- * @see <a href="https://discord.com/developers/docs/interactions/message-components#actionrow">ActionRow</a>
+ * @see <a href="https://discord.com/developers/docs/components/reference#action-row">ActionRow</a>
  */
 public class ActionRow extends LayoutComponent implements TopLevelMessageComponent, ICanBeUsedInContainerComponent {
 
