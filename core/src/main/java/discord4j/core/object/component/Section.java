@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * </ul>
  *
  * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
- * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Section</a>
+ * @see <a href="https://discord.com/developers/docs/components/reference#section">Section</a>
  */
 public class Section extends LayoutComponent implements TopLevelMessageComponent, ICanBeUsedInContainerComponent {
 
@@ -126,13 +126,29 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * Create a new {@link Section} instance from {@code this}, adding a given component.
      *
      * @param component the child component to be added
-     * @return an {@code Section} containing the existing and added components
+     * @return an {@code Section} containing the existing and added components with the current accessory
      */
-    public Section withAddedComponent(ActionComponent component) {
+    public <C extends MessageComponent & ICanBeUsedInSectionComponent> Section withAddedComponent(C component) {
         List<MessageComponent> components = new ArrayList<>(getChildren());
         components.add(component);
         return new Section(ComponentData.builder()
             .from(getData())
+            .accessory(Possible.ofNullable(this.getData().accessory().toOptional().orElse(null)))
+            .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+            .build());
+    }
+
+    /**
+     * Create a new {@link Section} instance from {@code this}, using a given accessory.
+     *
+     * @param accessory the child component to be added
+     * @return an {@code Section} containing the existing and added components with an accessory
+     */
+    public <C extends MessageComponent & ICanBeUsedInSectionComponent> Section withAddedAccessory(IAccessoryComponent accessory) {
+        List<MessageComponent> components = new ArrayList<>(getChildren());
+        return new Section(ComponentData.builder()
+            .from(getData())
+            .accessory(Possible.of(accessory.getData()))
             .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
             .build());
     }
