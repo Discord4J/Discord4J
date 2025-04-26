@@ -36,9 +36,10 @@ import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.entity.channel.StageChannel;
 import discord4j.core.object.monetization.Entitlement;
 import discord4j.core.object.monetization.SKU;
-import discord4j.core.object.entity.channel.StageChannel;
+import discord4j.core.object.monetization.Subscription;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -48,6 +49,7 @@ import discord4j.core.spec.CreateTestEntitlementMono;
 import discord4j.core.spec.EntitlementListRequestFlux;
 import discord4j.core.spec.GuildCreateMono;
 import discord4j.core.spec.GuildCreateSpec;
+import discord4j.core.spec.SubscriptionListRequestFlux;
 import discord4j.core.spec.UserEditMono;
 import discord4j.core.spec.UserEditSpec;
 import discord4j.core.spec.legacy.LegacyGuildCreateSpec;
@@ -972,6 +974,18 @@ public class GatewayDiscordClient implements EntityRetriever {
             return getRestClient().getMonetizationService()
                 .deleteTestEntitlement(applicationInfo.getId().asLong(), entitlementId.asLong());
         });
+    }
+
+    /**
+     * Request to retrieve all the {@link Subscription} for an {@link SKU}.
+     * The request can be filtered using the "withXXX" methods of the returned {@link SubscriptionListRequestFlux}.
+     *
+     * @return A {@link SubscriptionListRequestFlux} that emits the {@link Subscription} for the SKU with the given ID upon successful
+     * completion. If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public SubscriptionListRequestFlux getAllSubscriptionsForSku(Snowflake skuId) {
+        return SubscriptionListRequestFlux.of(this, discordClient, skuId);
     }
 
 }

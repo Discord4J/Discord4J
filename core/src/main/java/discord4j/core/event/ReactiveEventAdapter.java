@@ -36,6 +36,9 @@ import discord4j.core.event.domain.message.*;
 import discord4j.core.event.domain.monetization.EntitlementCreateEvent;
 import discord4j.core.event.domain.monetization.EntitlementDeleteEvent;
 import discord4j.core.event.domain.monetization.EntitlementUpdateEvent;
+import discord4j.core.event.domain.monetization.SubscriptionCreateEvent;
+import discord4j.core.event.domain.monetization.SubscriptionDeleteEvent;
+import discord4j.core.event.domain.monetization.SubscriptionUpdateEvent;
 import discord4j.core.event.domain.poll.PollVoteAddEvent;
 import discord4j.core.event.domain.poll.PollVoteRemoveEvent;
 import discord4j.core.event.domain.role.RoleCreateEvent;
@@ -1169,6 +1172,39 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    /**
+     * Invoked when a subscription is created.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onSubscriptionCreate(SubscriptionCreateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a subscription is updated.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onSubscriptionUpdate(SubscriptionUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when a subscription is deleted.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onSubscriptionDelete(SubscriptionDeleteEvent event) {
+        return Mono.empty();
+    }
+
     // ================= Core methods ================= //
 
     /**
@@ -1281,6 +1317,9 @@ public abstract class ReactiveEventAdapter {
         if (event instanceof EntitlementCreateEvent) compatibleHooks.add(onEntitlementCreate((EntitlementCreateEvent) event));
         if (event instanceof EntitlementUpdateEvent) compatibleHooks.add(onEntitlementUpdate((EntitlementUpdateEvent) event));
         if (event instanceof EntitlementDeleteEvent) compatibleHooks.add(onEntitlementDelete((EntitlementDeleteEvent) event));
+        if (event instanceof SubscriptionCreateEvent) compatibleHooks.add(onSubscriptionCreate((SubscriptionCreateEvent) event));
+        if (event instanceof SubscriptionUpdateEvent) compatibleHooks.add(onSubscriptionUpdate((SubscriptionUpdateEvent) event));
+        if (event instanceof SubscriptionDeleteEvent) compatibleHooks.add(onSubscriptionDelete((SubscriptionDeleteEvent) event));
         // @formatter:on
         return Mono.whenDelayError(compatibleHooks);
     }
