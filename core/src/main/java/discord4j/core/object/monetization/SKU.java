@@ -4,7 +4,9 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
+import discord4j.core.spec.SubscriptionListRequestFlux;
 import discord4j.discordjson.json.SkuData;
+import reactor.core.publisher.Mono;
 
 import java.util.EnumSet;
 
@@ -30,6 +32,20 @@ public class SKU implements Entity {
     public SKU(final GatewayDiscordClient gateway, final SkuData data) {
         this.gateway = gateway;
         this.data = data;
+    }
+
+    @Override
+    public GatewayDiscordClient getClient() {
+        return gateway;
+    }
+
+    @Override
+    public Snowflake getId() {
+        return Snowflake.of(data.id());
+    }
+
+    public SkuData getData() {
+        return this.data;
     }
 
     /**
@@ -98,14 +114,29 @@ public class SKU implements Entity {
         return String.format(SKU.SKU_URL_SCHEME, data.applicationId().asString(), data.id().asString());
     }
 
-    @Override
-    public GatewayDiscordClient getClient() {
-        return gateway;
+    /**
+     * Request to retrieve all the {@link Subscription} for this SKU.
+     * The request can be filtered using the "withXXX" methods of the returned {@link SubscriptionListRequestFlux}.
+     *
+     * @return A {@link SubscriptionListRequestFlux} that emits the {@link Subscription} for the SKU with the given ID upon successful
+     * completion. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public SubscriptionListRequestFlux getSubscriptions() {
+        return SubscriptionListRequestFlux.of(this.gateway, this.gateway.rest(), this.getId());
     }
 
-    @Override
-    public Snowflake getId() {
-        return Snowflake.of(data.id());
+    /**
+     * Get a subscription for this SKU.
+     *
+     * @param subscriptionId id of the {@link Subscription}
+     *
+     * @return A {@link Mono} that completes with the Subscription associated with this SKU. If an error occurs, it will
+     * be emitted through the {@link Mono}.
+     */
+    public Mono<Subscription> getSubscription(Snowflake subscriptionId) {
+        return this.gateway.getRestClient().getMonetizationService()
+            .getSkuSubscription(this.getId().asLong(), subscriptionId.asLong())
+            .map(subscriptionData -> new Subscription(this.gateway, subscriptionData));
     }
 
     public enum Type {

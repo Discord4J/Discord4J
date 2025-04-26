@@ -1487,6 +1487,20 @@ public abstract class Routes {
      */
     public static final Route CONSUME_ENTITLEMENT = Route.post("/applications/{application.id}/entitlements/{entitlement.id}/consume");
 
+    /**
+     * Returns all subscriptions containing the SKU, filtered by user. Returns a list of subscription objects.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/subscription#list-sku-subscriptions">Docs</a>
+     */
+    public static final Route LIST_SKU_SUBSCRIPTIONS = Route.get("/skus/{sku.id}/subscriptions");
+
+    /**
+     * Get a subscription by its ID. Returns a subscription object.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/subscription#get-sku-subscription">Docs</a>
+     */
+    public static final Route GET_SKU_SUBSCRIPTION = Route.get("/sku/{sku.id}/subscriptions/{subscription.id}");
+
     ////////////////////////////////////////
     ////////////// Soundboard //////////////
     ////////////////////////////////////////
