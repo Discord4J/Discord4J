@@ -948,6 +948,12 @@ public class GatewayDiscordClient implements EntityRetriever {
             });
     }
 
+    /**
+     * Request the discord defaults soundboard sounds.
+     *
+     * @return A {@link Flux} that emits the {@link SoundboardSound SoundboardSounds} upon successful completion. If an
+     * error is received, it is emitted through the {@code Flux}.
+     */
     public Flux<SoundboardSound> getDefaultSoundboardSounds() {
         return rest()
             .getSoundboardService()
