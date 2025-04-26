@@ -2101,6 +2101,44 @@ public final class Guild implements Entity {
         return OnboardingEditMono.of(this);
     }
 
+    /**
+     * Request to create a soundboard sound for this guild with the provided spec.
+     *
+     * @param spec spec specifying how to create the soundboard sound
+     * @return A {@link Mono} which, upon completion, emits the edited {@link SoundboardSound} object. Any error, if occurs,
+     * is emitted through the {@link Mono}.
+     */
+    public Mono<SoundboardSound> createSoundboardSound(SoundboardSoundCreateSpec spec) {
+        return this.getClient().getRestClient()
+            .getSoundboardService()
+            .createGuildSoundboardSound(this.getId().asLong(), spec.asRequest(), spec.reason())
+            .map(data -> new SoundboardSound(this.getClient(), data));
+    }
+
+    /**
+     * Get all the soundboard sounds of this guild.
+     *
+     * @return A {@link Flux} emitting the soundboard sounds
+     */
+    public Flux<SoundboardSound> getSoundboardSounds() {
+        return gateway.rest()
+            .getSoundboardService()
+            .getGuildSoundboardSounds(data.id().asLong())
+            .map(data -> new SoundboardSound(gateway, data));
+    }
+
+    /**
+     * Get a soundboard sounds of this guild.
+     *
+     * @return A {@link Mono} emitting the soundboard sound
+     */
+    public Mono<SoundboardSound> getSoundboardSound(Snowflake id) {
+        return gateway.rest()
+            .getSoundboardService()
+            .getGuildSoundboardSound(data.id().asLong(), id.asLong())
+            .map(data -> new SoundboardSound(gateway, data));
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);

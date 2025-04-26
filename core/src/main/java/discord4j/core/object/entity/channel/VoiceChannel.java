@@ -20,6 +20,7 @@ import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Region;
+import discord4j.core.object.SoundboardSound;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.spec.VoiceChannelEditMono;
@@ -273,6 +274,16 @@ public final class VoiceChannel extends BaseTopLevelGuildMessageChannel {
         return getGuild()
                 .flatMap(Guild::getVoiceConnection)
                 .filterWhen(voiceConnection -> voiceConnection.getChannelId().map(channelId -> channelId.equals(getId())));
+    }
+
+    /**
+     * Request to send a sound to this voice channel.
+     *
+     * @param soundboardSound the sound to send
+     * @return An empty mono which completes when the request was sent
+     */
+    public Mono<Void> sendSoundBoard(SoundboardSound soundboardSound) {
+        return soundboardSound.sendSound(this.getId());
     }
 
     @Override
