@@ -39,19 +39,19 @@ public class Separator extends LayoutComponent implements TopLevelMessageCompone
     /**
      * Creates a {@link Separator}.
      *
-     * @param divider If the separator is a divider
+     * @param visible If the separator is visible
      * @return A {@link Separator}
      */
-    public static Separator of(boolean divider) {
+    public static Separator of(boolean visible) {
         return new Separator(MessageComponent.getBuilder(Type.SEPARATOR)
-            .divider(divider)
+            .divider(visible)
             .build());
     }
 
     /**
      * Creates a {@link Separator}.
      *
-     * @param spacingSize The spacing size for the divider
+     * @param spacingSize The spacing size for the separator
      * @return A {@link Separator}
      */
     public static Separator of(SpacingSize spacingSize) {
@@ -63,13 +63,13 @@ public class Separator extends LayoutComponent implements TopLevelMessageCompone
     /**
      * Creates a {@link Separator}.
      *
-     * @param divider If the separator is a divider
-     * @param spacingSize The spacing size for the divider
+     * @param visible If the separator is visible
+     * @param spacingSize The spacing size for the separator
      * @return A {@link Separator}
      */
-    public static Separator of(boolean divider, SpacingSize spacingSize) {
+    public static Separator of(boolean visible, SpacingSize spacingSize) {
         return new Separator(MessageComponent.getBuilder(Type.SEPARATOR)
-            .divider(divider)
+            .divider(visible)
             .spacing(spacingSize.getValue())
             .build());
     }
@@ -90,13 +90,13 @@ public class Separator extends LayoutComponent implements TopLevelMessageCompone
      * Creates a {@link Separator}.
      *
      * @param id the component id
-     * @param divider If the separator is a divider
+     * @param visible If the separator is visible
      * @return A {@link Separator}
      */
-    public static Separator of(int id, boolean divider) {
+    public static Separator of(int id, boolean visible) {
         return new Separator(MessageComponent.getBuilder(Type.SEPARATOR)
             .id(id)
-            .divider(divider)
+            .divider(visible)
             .build());
     }
 
@@ -104,7 +104,7 @@ public class Separator extends LayoutComponent implements TopLevelMessageCompone
      * Creates a {@link Separator}.
      *
      * @param id the component id
-     * @param spacingSize The spacing size for the divider
+     * @param spacingSize The spacing size for the separator
      * @return A {@link Separator}
      */
     public static Separator of(int id, SpacingSize spacingSize) {
@@ -118,22 +118,22 @@ public class Separator extends LayoutComponent implements TopLevelMessageCompone
      * Creates a {@link Separator}.
      *
      * @param id the component id
-     * @param divider If the separator is a divider
-     * @param spacingSize The spacing size for the divider
+     * @param visible If the separator is visible
+     * @param spacingSize The spacing size for the separator
      * @return A {@link Separator}
      */
-    public static Separator of(int id, boolean divider, SpacingSize spacingSize) {
+    public static Separator of(int id, boolean visible, SpacingSize spacingSize) {
         return new Separator(MessageComponent.getBuilder(Type.SEPARATOR)
             .id(id)
-            .divider(divider)
+            .divider(visible)
             .spacing(spacingSize.getValue())
             .build());
     }
 
-    protected Separator(Integer id, boolean divider, SpacingSize spacingSize) {
+    protected Separator(Integer id, boolean visible, SpacingSize spacingSize) {
         this(MessageComponent.getBuilder(Type.SEPARATOR)
             .id(Possible.ofNullable(id))
-            .divider(divider)
+            .divider(visible)
             .spacing(spacingSize.getValue())
             .build());
     }
@@ -152,6 +152,15 @@ public class Separator extends LayoutComponent implements TopLevelMessageCompone
     }
 
     /**
+     * Gets if the separator is visible
+     *
+     * @return {@code true} if visible, false otherwise
+     */
+    public boolean isVisible() {
+        return this.isDivider();
+    }
+
+    /**
      * Gets the spacing size for this separator.
      *
      * @return An {@code SpacingSize}
@@ -161,8 +170,8 @@ public class Separator extends LayoutComponent implements TopLevelMessageCompone
     }
 
     public enum SpacingSize {
-        SMALL(0),
-        LARGE(1),
+        SMALL(1),
+        LARGE(2),
         ;
 
         private final int value;
@@ -177,9 +186,9 @@ public class Separator extends LayoutComponent implements TopLevelMessageCompone
 
         public static SpacingSize of(int value) {
             switch (value) {
-                case 0:
-                    return SMALL;
                 case 1:
+                    return SMALL;
+                case 2:
                     return LARGE;
                 default:
                     throw new UnsupportedOperationException("Unknown SpacingSize: " + value);
