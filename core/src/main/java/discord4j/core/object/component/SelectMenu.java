@@ -34,7 +34,11 @@ import java.util.stream.StreamSupport;
 /**
  * A message select menu.
  *
- * @see <a href="https://discord.com/developers/docs/interactions/message-components#select-menus">Select Menus</a>
+ * @see <a href="https://discord.com/developers/docs/components/reference#string-select">String Select Menu</a>
+ * @see <a href="https://discord.com/developers/docs/components/reference#user-select">User Select Menu</a>
+ * @see <a href="https://discord.com/developers/docs/components/reference#role-select">Role Select Menu</a>
+ * @see <a href="https://discord.com/developers/docs/components/reference#mentionable-select">Mentionable Select Menu</a>
+ * @see <a href="https://discord.com/developers/docs/components/reference#channel-select">Channel Select Menu</a>
  */
 public class SelectMenu extends ActionComponent {
 

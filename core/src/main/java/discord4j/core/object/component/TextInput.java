@@ -27,7 +27,7 @@ import java.util.Optional;
 /**
  * A modal-only text input field
  *
- * @see <a href="https://discord.com/developers/docs/interactions/message-components#text-inputs">Text Inputs</a>
+ * @see <a href="https://discord.com/developers/docs/components/reference#text-input">Text Inputs</a>
  */
 public class TextInput extends ActionComponent {
 

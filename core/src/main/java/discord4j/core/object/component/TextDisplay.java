@@ -32,7 +32,7 @@ import discord4j.discordjson.possible.Possible;
  * </ul>
  *
  * @apiNote This component requires {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
- * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">Text Display</a>
+ * @see <a href="https://discord.com/developers/docs/components/reference#text-display">Text Display</a>
  */
 public class TextDisplay extends MessageComponent implements TopLevelMessageComponent, ICanBeUsedInContainerComponent, ICanBeUsedInSectionComponent {
 

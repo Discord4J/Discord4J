@@ -23,7 +23,7 @@ import discord4j.discordjson.possible.Possible;
  * A file component for message.
  *
  * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
- * @see <a href="https://discord.com/developers/docs/interactions/message-components#???">File</a>
+ * @see <a href="https://discord.com/developers/docs/components/reference#file">File</a>
  */
 public class File extends MessageComponent implements TopLevelMessageComponent, ICanBeUsedInContainerComponent {
 
