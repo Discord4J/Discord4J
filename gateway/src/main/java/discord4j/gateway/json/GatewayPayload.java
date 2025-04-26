@@ -76,6 +76,10 @@ public class GatewayPayload<T extends PayloadData> {
         return new GatewayPayload<>(Opcode.REQUEST_GUILD_MEMBERS, data, null, null);
     }
 
+    public static GatewayPayload<RequestSoundboardSounds> requestSoundboardSounds(RequestSoundboardSounds data) {
+        return new GatewayPayload<>(Opcode.REQUEST_SOUNDBOARD_SOUNDS, data, null, null);
+    }
+
     public Opcode<T> getOp() {
         return op;
     }
