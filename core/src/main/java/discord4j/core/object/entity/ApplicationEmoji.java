@@ -18,7 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.emoji.EmojiCustom;
+import discord4j.core.object.emoji.CustomEmoji;
 import discord4j.core.spec.ApplicationEmojiEditMono;
 import discord4j.core.spec.ApplicationEmojiEditSpec;
 import discord4j.core.util.EntityUtil;
@@ -32,9 +32,9 @@ import java.util.Objects;
 /**
  * A Discord application emoji.
  * <br>
- * <a href="https://discord.com/developers/docs/resources/emoji#emoji-resource">Emoji Resource</a>
+ * <a href="https://discord.com/developers/docs/resources/emoji#emoji-object-applicationowned-emoji">Application-Owned Emoji Resource</a>
  */
-public final class ApplicationEmoji extends EmojiCustom implements Entity {
+public final class ApplicationEmoji extends CustomEmoji implements Entity {
 
     /** The gateway associated to this object. */
     final GatewayDiscordClient gateway;

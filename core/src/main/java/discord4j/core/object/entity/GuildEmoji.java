@@ -18,7 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.emoji.EmojiCustom;
+import discord4j.core.object.emoji.CustomEmoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.GuildEmojiEditMono;
 import discord4j.core.spec.GuildEmojiEditSpec;
@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  * <p>
  * <a href="https://discord.com/developers/docs/resources/emoji#emoji-resource">Emoji Resource</a>
  */
-public final class GuildEmoji extends EmojiCustom implements Entity {
+public final class GuildEmoji extends CustomEmoji implements Entity {
 
     /** The gateway associated to this object. */
     final GatewayDiscordClient gateway;

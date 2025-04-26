@@ -1,3 +1,19 @@
+/*
+ * This file is part of Discord4J.
+ *
+ * Discord4J is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Discord4J is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package discord4j.core.object.emoji;
 
 import discord4j.common.util.Snowflake;
@@ -18,7 +34,7 @@ import static discord4j.rest.util.Image.Format.PNG;
  * <p>
  * <a href="https://discord.com/developers/docs/resources/emoji#emoji-resource">Emoji Resource</a>
  */
-public class EmojiCustom extends Emoji {
+public class CustomEmoji extends Emoji {
 
     /** The path for {@code Emoji} image URLs. */
     static final String EMOJI_IMAGE_PATH = "emojis/%s";
@@ -26,11 +42,11 @@ public class EmojiCustom extends Emoji {
     /** The raw data as represented by Discord. */
     final EmojiData data;
 
-    public EmojiCustom(EmojiData data) {
+    public CustomEmoji(EmojiData data) {
         this.data = Objects.requireNonNull(data);
     }
 
-    EmojiCustom(long id, @Nullable String name, boolean isAnimated) {
+    CustomEmoji(long id, @Nullable String name, boolean isAnimated) {
         this.data = EmojiData.builder()
             .id(id)
             .name(Optional.ofNullable(name))
@@ -170,7 +186,7 @@ public class EmojiCustom extends Emoji {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        EmojiCustom custom = (EmojiCustom) o;
+        CustomEmoji custom = (CustomEmoji) o;
         return getId().asLong() == custom.getId().asLong();
     }
 

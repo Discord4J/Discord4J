@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 /**
- * An abstracted emoji used by things like {@link Reaction message reactions} or {@link EmojiCustom emoji custom for Guild/Application}.
+ * An abstracted emoji used by things like {@link Reaction message reactions} or {@link CustomEmoji emoji custom for Guild/Application}.
  * <br>
  * Also provides factory methods such as {@link #unicode(String)} for Unicode emotes
  */
@@ -40,8 +40,8 @@ public abstract class Emoji {
      * @param isAnimated Whether the custom emoji is animated.
      * @return A custom emoji using the given information.
      */
-    public static EmojiCustom custom(Snowflake id, @Nullable String name, boolean isAnimated) {
-        return new EmojiCustom(id.asLong(), name, isAnimated);
+    public static CustomEmoji custom(Snowflake id, @Nullable String name, boolean isAnimated) {
+        return new CustomEmoji(id.asLong(), name, isAnimated);
     }
 
     /**
@@ -61,8 +61,8 @@ public abstract class Emoji {
      * @param raw The raw Unicode string for the emoji.
      * @return A reaction emoji using the given information.
      */
-    public static EmojiUnicode unicode(String raw) {
-        return new EmojiUnicode(raw);
+    public static UnicodeEmoji unicode(String raw) {
+        return new UnicodeEmoji(raw);
     }
 
     /**
@@ -79,7 +79,7 @@ public abstract class Emoji {
      * @param codepoints The codepoints that make up the emoji.
      * @return A reaction emoji using the given information.
      */
-    public static EmojiUnicode codepoints(String... codepoints) {
+    public static UnicodeEmoji codepoints(String... codepoints) {
         String combined = Arrays.stream(codepoints)
                 .map(c -> Integer.parseInt(c.substring(2), 16))
                 .reduce(new StringBuilder(), StringBuilder::appendCodePoint, StringBuilder::append)
@@ -118,7 +118,7 @@ public abstract class Emoji {
      */
     public static Emoji of(EmojiData data) {
         if (data.id().isPresent()) {
-            return new EmojiCustom(data);
+            return new CustomEmoji(data);
         }
         return unicode(data.name().orElseThrow(IllegalArgumentException::new));
     }
@@ -131,21 +131,21 @@ public abstract class Emoji {
     public abstract String asFormat();
 
     /**
-     * Gets this emoji as downcasted to {@link EmojiCustom a custom reaction emoji}.
+     * Gets this emoji as downcasted to {@link CustomEmoji a custom reaction emoji}.
      *
      * @return This emoji downcasted to a custom emoji, if possible.
      */
-    public Optional<EmojiCustom> asCustomEmoji() {
-        return this instanceof EmojiCustom ? Optional.of((EmojiCustom) this) : Optional.empty();
+    public Optional<CustomEmoji> asCustomEmoji() {
+        return this instanceof CustomEmoji ? Optional.of((CustomEmoji) this) : Optional.empty();
     }
 
     /**
-     * Gets this emoji downcasted to {@link EmojiUnicode a unicode reaction emoji}.
+     * Gets this emoji downcasted to {@link UnicodeEmoji a unicode reaction emoji}.
      *
      * @return This emoji downcasted to a unicode emoji, if possible.
      */
-    public Optional<EmojiUnicode> asUnicodeEmoji() {
-        return this instanceof EmojiUnicode ? Optional.of((EmojiUnicode) this) : Optional.empty();
+    public Optional<UnicodeEmoji> asUnicodeEmoji() {
+        return this instanceof UnicodeEmoji ? Optional.of((UnicodeEmoji) this) : Optional.empty();
     }
 
     /**
