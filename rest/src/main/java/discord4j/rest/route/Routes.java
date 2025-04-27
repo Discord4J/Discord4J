@@ -1487,4 +1487,70 @@ public abstract class Routes {
      */
     public static final Route CONSUME_ENTITLEMENT = Route.post("/applications/{application.id}/entitlements/{entitlement.id}/consume");
 
+    /**
+     * Returns all subscriptions containing the SKU, filtered by user. Returns a list of subscription objects.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/subscription#list-sku-subscriptions">Docs</a>
+     */
+    public static final Route LIST_SKU_SUBSCRIPTIONS = Route.get("/skus/{sku.id}/subscriptions");
+
+    /**
+     * Get a subscription by its ID. Returns a subscription object.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/subscription#get-sku-subscription">Docs</a>
+     */
+    public static final Route GET_SKU_SUBSCRIPTION = Route.get("/sku/{sku.id}/subscriptions/{subscription.id}");
+
+    ////////////////////////////////////////
+    ////////////// Soundboard //////////////
+    ////////////////////////////////////////
+
+    /**
+     * Send a soundboard sound to a voice channel the user is connected to.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/soundboard#send-soundboard-sound">Docs</a>
+     */
+    public static final Route SEND_SOUNDBOARD_SOUND = Route.post("/channels/{channel.id}/send-soundboard-sound");
+
+    /**
+     * Returns an array of soundboard sound objects that can be used by all users.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/soundboard#list-default-soundboard-sounds">Docs</a>
+     */
+    public static final Route LIST_DEFAULT_SOUNDBOARD_SOUNDS = Route.get("/soundboard-default-sounds");
+
+    /**
+     * Returns a list of the guild's soundboard sounds.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/soundboard#list-guild-soundboard-sounds">Docs</a>
+     */
+    public static final Route LIST_GUILD_SOUNDBOARD_SOUNDS = Route.get("/guilds/{guild.id}/soundboard-sounds");
+
+    /**
+     * Returns a soundboard sound object for the given sound id.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/soundboard#get-guild-soundboard-sound">Docs</a>
+     */
+    public static final Route GET_GUILD_SOUNDBOARD_SOUND = Route.get("/guilds/{guild.id}/soundboard-sounds/{sound.id}");
+
+    /**
+     * Create a new soundboard sound for the guild.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/soundboard#create-guild-soundboard-sound">Docs</a>
+     */
+    public static final Route CREATE_GUILD_SOUNDBOARD_SOUND = Route.post("/guilds/{guild.id}/soundboard-sounds");
+
+    /**
+     * Modify the given soundboard sound.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/soundboard#modify-guild-soundboard-sound">Docs</a>
+     */
+    public static final Route MODIFY_GUILD_SOUNDBOARD_SOUND = Route.patch("/guilds/{guild.id}/soundboard-sounds/{sound.id}");
+
+    /**
+     * Delete the given soundboard sound.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/soundboard#delete-guild-soundboard-sound">Docs</a>
+     */
+    public static final Route DELETE_GUILD_SOUNDBOARD_SOUND = Route.delete("/guilds/{guild.id}/soundboard-sounds/{sound.id}");
 }

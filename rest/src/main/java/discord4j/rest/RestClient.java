@@ -57,6 +57,7 @@ public class RestClient {
     private final AutoModService autoModService;
     private final PollService pollService;
     private final MonetizationService monetizationService;
+    private final SoundboardService soundboardService;
 
     /**
      * Create a {@link RestClient} with default options, using the given token for authentication.
@@ -104,6 +105,7 @@ public class RestClient {
         this.autoModService = new AutoModService(router);
         this.pollService = new PollService(router);
         this.monetizationService = new MonetizationService(router);
+        this.soundboardService = new SoundboardService(router);
 
         this.applicationIdMono = getApplicationInfo()
                 .map(app -> Snowflake.asLong(app.id()))
@@ -630,5 +632,9 @@ public class RestClient {
 
     public PollService getPollService() {
         return this.pollService;
+    }
+
+    public SoundboardService getSoundboardService() {
+        return this.soundboardService;
     }
 }

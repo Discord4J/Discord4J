@@ -17,6 +17,7 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.SoundboardSound;
 import discord4j.core.spec.VoiceChannelEditMono;
 import discord4j.core.spec.VoiceChannelEditSpec;
 import discord4j.core.spec.legacy.LegacyVoiceChannelEditSpec;
@@ -103,6 +104,16 @@ public final class VoiceChannel extends BaseTopLevelGuildChannel implements Audi
                         .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(VoiceChannel.class);
+    }
+
+    /**
+     * Request to send a sound to this voice channel.
+     *
+     * @param soundboardSound the sound to send
+     * @return An empty mono which completes when the request was sent
+     */
+    public Mono<Void> sendSoundBoard(SoundboardSound soundboardSound) {
+        return soundboardSound.sendSound(this.getId());
     }
 
     @Override

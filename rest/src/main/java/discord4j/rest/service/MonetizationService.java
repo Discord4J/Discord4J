@@ -4,6 +4,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.discordjson.json.CreateTestEntitlementRequest;
 import discord4j.discordjson.json.EntitlementData;
 import discord4j.discordjson.json.SkuData;
+import discord4j.discordjson.json.SubscriptionData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import discord4j.rest.util.Multimap;
@@ -53,6 +54,20 @@ public class MonetizationService extends RestService {
         return Routes.CONSUME_ENTITLEMENT.newRequest(applicationId, entitlementId)
             .exchange(getRouter())
             .skipBody();
+    }
+
+    public Flux<SubscriptionData> getSkuSubscriptions(long skuId, Multimap<String, Object> params) {
+        return Routes.LIST_SKU_SUBSCRIPTIONS.newRequest(skuId)
+            .query(params)
+            .exchange(getRouter())
+            .bodyToMono(SubscriptionData[].class)
+            .flatMapMany(Flux::fromArray);
+    }
+
+    public Mono<SubscriptionData> getSkuSubscription(long skuId, long subscriptionId) {
+        return Routes.GET_SKU_SUBSCRIPTION.newRequest(skuId, subscriptionId)
+            .exchange(getRouter())
+            .bodyToMono(SubscriptionData.class);
     }
 
 }

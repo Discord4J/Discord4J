@@ -31,14 +31,16 @@ import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
 import discord4j.core.object.ScheduledEventUser;
+import discord4j.core.object.SoundboardSound;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.entity.channel.StageChannel;
 import discord4j.core.object.monetization.Entitlement;
 import discord4j.core.object.monetization.SKU;
-import discord4j.core.object.entity.channel.StageChannel;
+import discord4j.core.object.monetization.Subscription;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -48,6 +50,7 @@ import discord4j.core.spec.CreateTestEntitlementMono;
 import discord4j.core.spec.EntitlementListRequestFlux;
 import discord4j.core.spec.GuildCreateMono;
 import discord4j.core.spec.GuildCreateSpec;
+import discord4j.core.spec.SubscriptionListRequestFlux;
 import discord4j.core.spec.UserEditMono;
 import discord4j.core.spec.UserEditSpec;
 import discord4j.core.spec.legacy.LegacyGuildCreateSpec;
@@ -56,10 +59,13 @@ import discord4j.core.util.ValidationUtil;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.GuildData;
 import discord4j.discordjson.json.GuildUpdateData;
+import discord4j.discordjson.json.ImmutableSendSoundboardSoundRequest;
 import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.SendSoundboardSoundRequest;
 import discord4j.discordjson.json.UpdateCurrentUserVoiceStateRequest;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
+import discord4j.discordjson.json.gateway.RequestSoundboardSounds;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayClientGroup;
@@ -972,6 +978,54 @@ public class GatewayDiscordClient implements EntityRetriever {
             return getRestClient().getMonetizationService()
                 .deleteTestEntitlement(applicationInfo.getId().asLong(), entitlementId.asLong());
         });
+    }
+
+    /**
+     * Request to retrieve all the {@link Subscription} for an {@link SKU}.
+     * The request can be filtered using the "withXXX" methods of the returned {@link SubscriptionListRequestFlux}.
+     *
+     * @return A {@link SubscriptionListRequestFlux} that emits the {@link Subscription} for the SKU with the given ID upon successful
+     * completion. If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public SubscriptionListRequestFlux getAllSubscriptionsForSku(Snowflake skuId) {
+        return SubscriptionListRequestFlux.of(this, discordClient, skuId);
+    }
+
+    /**
+     * Request send a soundboard sound to the current connected voice channel in a guild.
+     *
+     * @param guildId the guild for get the current voice connection
+     * @param sound the sound to play
+     * @return A {@link Mono} that completes upon successful request
+     */
+    public Mono<Void> sendSoundboardSound(Snowflake guildId, SoundboardSound sound) {
+        return getVoiceConnectionRegistry()
+            .getVoiceConnection(guildId)
+            .flatMap(VoiceConnection::getChannelId)
+            .flatMap(channelId -> {
+                ImmutableSendSoundboardSoundRequest.Builder builder = SendSoundboardSoundRequest.builder()
+                    .soundId(sound.getId().asLong());
+
+                if (sound.getGuildId().isPresent()) {
+                    builder.sourceGuildId(sound.getGuildId().get().asLong());
+                }
+
+                return rest().getSoundboardService().sendSoundboardSound(channelId.asLong(), builder.build());
+            });
+    }
+
+    /**
+     * Request the discord defaults soundboard sounds.
+     *
+     * @return A {@link Flux} that emits the {@link SoundboardSound SoundboardSounds} upon successful completion. If an
+     * error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<SoundboardSound> getDefaultSoundboardSounds() {
+        return rest()
+            .getSoundboardService()
+            .getDefaultSoundboardSounds()
+            .map(data -> new SoundboardSound(this, data));
     }
 
 }

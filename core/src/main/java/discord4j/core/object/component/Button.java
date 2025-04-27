@@ -29,7 +29,7 @@ import java.util.Optional;
 /**
  * A message button.
  *
- * @see <a href="https://discord.com/developers/docs/interactions/message-components#buttons">Buttons</a>
+ * @see <a href="https://discord.com/developers/docs/components/reference#button">Buttons</a>
  */
 public class Button extends ActionComponent implements IAccessoryComponent {
 
