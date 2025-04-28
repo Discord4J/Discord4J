@@ -80,9 +80,9 @@ public class UnicodeEmoji extends Emoji {
      * <p>
      * The string argument to this method should be the exact UTF-16 encoded string of the desired emoji. For example,
      * <pre>
-     * Emoji.unicode("&#92;u2764") // "heart"
-     * Emoji.unicode("&#92;uD83D&#92;uDE00") // "grinning face"
-     * Emoji.unicode("&#92;uD83D&#92;uDC68&#92;u200D&#92;uD83E&#92;uDDB0") // "man: red hair"
+     * UnicodeEmoji.of("&#92;u2764") // "heart"
+     * UnicodeEmoji.of("&#92;uD83D&#92;uDE00") // "grinning face"
+     * UnicodeEmoji.of("&#92;uD83D&#92;uDC68&#92;u200D&#92;uD83E&#92;uDDB0") // "man: red hair"
      * </pre>
      * A full list of emoji can be found <a href="https://unicode.org/emoji/charts/full-emoji-list.html">here</a>.
      * <p>
@@ -101,9 +101,9 @@ public class UnicodeEmoji extends Emoji {
      * <p>
      * The argument(s) to this method should use the "U+" notation for codepoints. For example,
      * <pre>
-     * Emoji.codepoints("U+2764") // "heart"
-     * Emoji.codepoints("U+1F600") // "grinning face"
-     * Emoji.codepoints("U+1F468", "U+200D", "U+1F9B0") // "man: red hair"
+     * UnicodeEmoji.ofCodePoints("U+2764") // "heart"
+     * UnicodeEmoji.ofCodePoints("U+1F600") // "grinning face"
+     * UnicodeEmoji.ofCodePoints("U+1F468", "U+200D", "U+1F9B0") // "man: red hair"
      * </pre>
      * A full list of emoji can be found <a href="https://unicode.org/emoji/charts/full-emoji-list.html">here</a>.
      *

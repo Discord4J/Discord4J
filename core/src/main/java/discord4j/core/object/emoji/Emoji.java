@@ -39,6 +39,7 @@ public abstract class Emoji {
      * @param name The name of the custom emoji.
      * @param isAnimated Whether the custom emoji is animated.
      * @return A custom emoji using the given information.
+     * @see CustomEmoji#of(Long, String, boolean) 
      */
     public static CustomEmoji custom(Snowflake id, @Nullable String name, boolean isAnimated) {
         return CustomEmoji.of(id, name, isAnimated);
@@ -60,6 +61,7 @@ public abstract class Emoji {
      *
      * @param raw The raw Unicode string for the emoji.
      * @return A Unicode emoji using the given information.
+     * @see UnicodeEmoji#of(String) 
      */
     public static UnicodeEmoji unicode(String raw) {
         return UnicodeEmoji.of(raw);
@@ -78,6 +80,7 @@ public abstract class Emoji {
      *
      * @param codepoints The codepoints that make up the emoji.
      * @return A Unicode emoji using the given information.
+     * @see UnicodeEmoji#ofCodePoints(String...) 
      */
     public static UnicodeEmoji codepoints(String... codepoints) {
         return UnicodeEmoji.ofCodePoints(codepoints);
@@ -92,7 +95,7 @@ public abstract class Emoji {
      * @return An emoji using the given information.
      */
     public static Emoji of(@Nullable Long id, String name, boolean isAnimated) {
-        return id == null ? unicode(name) : custom(Snowflake.of(id), name, isAnimated);
+        return id == null ? Emoji.unicode(name) : Emoji.custom(Snowflake.of(id), name, isAnimated);
     }
 
     /**
@@ -102,7 +105,7 @@ public abstract class Emoji {
      * @return An emoji using the given information.
      */
     public static Emoji of(ReactionData data) {
-        return of(data.emoji());
+        return Emoji.of(data.emoji());
     }
 
     /**
