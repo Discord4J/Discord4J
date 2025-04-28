@@ -307,7 +307,7 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
      * <br>
      * When the channel does not support tagging, returned values from {@link ThreadChannel#getAppliedTagsIds()} and
      * {@link ThreadChannel#getAppliedTags()} return an empty list or {@link Flux}.
-     * <br>
+     *
      * @return A boolean indicating if the thread channel can be tagged.
      */
     public boolean canBeTagged() {
@@ -317,11 +317,10 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
     /**
      * Returns the list of the applied forum tags on this thread. If the thread channel does not support tagging, the
      * list is empty. To know if the thread supports tagging, use {@link ThreadChannel#canBeTagged()}.
-     * @see ThreadChannel#canBeTagged()
-     * @see ThreadChannel#getAppliedTagsIds()
      *
      * @return An {@link Optional} item, wrapping a list of applied forum or media channel tags to this thread channel.
      * The optional item will be empty if the thread channel cannot contain tags, otherwise the list is empty.
+     * @see ThreadChannel#canBeTagged()
      * @see ThreadChannel#getAppliedTags()
      */
     public List<Snowflake> getAppliedTagsIds() {
@@ -337,6 +336,7 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
      *
      * @return A {@link Flux}, that emits all the applied tags on this thread channel. If an error occurs, it is emitted
      * through the flux. Only emits if the thread channel can have tags applied.
+     * @see ThreadChannel#canBeTagged()
      * @see ThreadChannel#getAppliedTagsIds()
      */
     public Flux<ForumTag> getAppliedTags() {
