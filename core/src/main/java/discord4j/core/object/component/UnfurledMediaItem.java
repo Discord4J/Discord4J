@@ -16,6 +16,8 @@
  */
 package discord4j.core.object.component;
 
+import discord4j.core.object.entity.Attachment;
+import discord4j.core.spec.MessageCreateFields;
 import discord4j.discordjson.json.UnfurledMediaItemData;
 import discord4j.discordjson.possible.Possible;
 
@@ -25,6 +27,8 @@ import java.util.Optional;
  * Represents an unfurled media item.
  */
 public class UnfurledMediaItem {
+
+    private static final String PREFIX_DISCORD_ATTACHMENT_REFERENCE = "attachment://";
 
     /**
      * Creates an {@link UnfurledMediaItem} with a given url.
@@ -36,6 +40,14 @@ public class UnfurledMediaItem {
         return new UnfurledMediaItem(UnfurledMediaItemData.builder()
             .url(url)
             .build());
+    }
+
+    public static UnfurledMediaItem of(MessageCreateFields.File file) {
+        return UnfurledMediaItem.of(PREFIX_DISCORD_ATTACHMENT_REFERENCE.concat(file.name()));
+    }
+
+    public static UnfurledMediaItem of(Attachment attachment) {
+        return UnfurledMediaItem.of(PREFIX_DISCORD_ATTACHMENT_REFERENCE.concat(attachment.getFilename()));
     }
 
     private final UnfurledMediaItemData data;
