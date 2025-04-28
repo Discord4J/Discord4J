@@ -36,6 +36,7 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
@@ -301,26 +302,38 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
     }
 
     /**
-     * Returns the list of the applied forum tags on this thread.
-     * Those are only available on threads within a forum or media channel.
+     * Tells if this thread channel supports tagging using {@link ForumTag} objects.
+     * The ability to tag a thread channel is currently related to the kind of parent channel.
      * <br>
+     * When the channel does not support tagging, returned values from {@link ThreadChannel#getAppliedTagsIds()} and
+     * {@link ThreadChannel#getAppliedTags()} return an empty list or {@link Flux}.
+     * <br>
+     * @return A boolean indicating if the thread channel can be tagged.
+     */
+    public boolean canBeTagged() {
+        return !getData().appliedTags().isAbsent();
+    }
+
+    /**
+     * Returns the list of the applied forum tags on this thread. If the thread channel does not support tagging, the
+     * list is empty. To know if the thread supports tagging, use {@link ThreadChannel#canBeTagged()}.
+     * @see ThreadChannel#canBeTagged()
+     * @see ThreadChannel#getAppliedTagsIds()
      *
      * @return An {@link Optional} item, wrapping a list of applied forum or media channel tags to this thread channel.
      * The optional item will be empty if the thread channel cannot contain tags, otherwise the list is empty.
      * @see ThreadChannel#getAppliedTags()
      */
-    public Optional<List<Snowflake>> getAppliedTagsIds() {
-        return getData().appliedTags()
-            .map(ids -> ids.stream().map(Snowflake::of).collect(Collectors.toList()))
-            .toOptional();
+    public List<Snowflake> getAppliedTagsIds() {
+        return getData().appliedTags().toOptional()
+            .orElse(new ArrayList<>())
+            .stream().map(Snowflake::of).collect(Collectors.toList());
     }
 
     /**
      * Returns the list of applied tags to this thread channel directly in the form of {@link ForumTag} objects.
-     * To only fetch the identifiers, use the provided counterpart method.
-     * <br>
-     * <b>Note: As tags are only applied on forum or media channel issued threads, the returned {@link Flux} will only
-     * emit if the thread channel kind is appropriate.</b>
+     * To only fetch the identifiers, use {@link ThreadChannel#getAppliedTagsIds()}.
+     * If the thread channel does not support tags,
      *
      * @return A {@link Flux}, that emits all the applied tags on this thread channel. If an error occurs, it is emitted
      * through the flux. Only emits if the thread channel can have tags applied.
