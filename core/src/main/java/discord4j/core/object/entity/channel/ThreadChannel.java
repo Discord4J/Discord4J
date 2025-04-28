@@ -19,6 +19,7 @@ package discord4j.core.object.entity.channel;
 import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.ForumTag;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.ThreadMember;
 import discord4j.core.object.entity.User;
@@ -36,9 +37,11 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * ThreadChannel implements thread channel operations, for both thread channel that are associated to a text channel or forum channel.
@@ -295,6 +298,44 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
     @Override
     public Mono<PermissionSet> getEffectivePermissions(Member member) {
         return getParent().flatMap(parent -> parent.getEffectivePermissions(member));
+    }
+
+    /**
+     * Returns the list of the applied forum tags on this thread.
+     * Those are only available on threads within a forum or media channel.
+     * <br>
+     *
+     * @return An {@link Optional} item, wrapping a list of applied forum or media channel tags to this thread channel.
+     * The optional item will be empty if the thread channel cannot contain tags, otherwise the list is empty.
+     * @see ThreadChannel#getAppliedTags()
+     */
+    public Optional<List<Snowflake>> getAppliedTagsIds() {
+        return getData().appliedTags()
+            .map(ids -> ids.stream().map(Snowflake::of).collect(Collectors.toList()))
+            .toOptional();
+    }
+
+    /**
+     * Returns the list of applied tags to this thread channel directly in the form of {@link ForumTag} objects.
+     * To only fetch the identifiers, use the provided counterpart method.
+     * <br>
+     * <b>Note: As tags are only applied on forum or media channel issued threads, the returned {@link Flux} will only
+     * emit if the thread channel kind is appropriate.</b>
+     *
+     * @return A {@link Flux}, that emits all the applied tags on this thread channel. If an error occurs, it is emitted
+     * through the flux. Only emits if the thread channel can have tags applied.
+     * @see ThreadChannel#getAppliedTagsIds()
+     */
+    public Flux<ForumTag> getAppliedTags() {
+        // We first the list inside a Mono, to directly emit an empty signal if the list is not available
+        // The other approach would be to use a Flux on the list, but see below why we did not
+        return Mono.justOrEmpty(getAppliedTagsIds())
+            // This lets us work directly on the cast ForumChannel object and do so only once
+            .flatMapMany(list -> getParent().ofType(ForumChannel.class)
+                .flatMapIterable(ForumChannel::getAvailableTags)
+                // Note the usage of the List#remove instead of the List#contains method to avoid iterating
+                // over already found tags
+                .filter(tag -> list.remove(tag.getId())));
     }
 
     /**
