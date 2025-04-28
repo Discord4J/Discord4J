@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  */
 public final class GuildEmoji extends CustomEmoji implements Entity {
 
-    /** The gateway associated to this object. */
+    /** The gateway associated with this object. */
     final GatewayDiscordClient gateway;
 
     /** The ID of the guild this emoji is associated to. */
@@ -53,7 +53,7 @@ public final class GuildEmoji extends CustomEmoji implements Entity {
      * Constructs a {@code GuildEmoji} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data The raw data as represented by Discord, must be non-null.
+     * @param data The raw data, as represented by Discord, must be non-null.
      * @param guildId The ID of the guild this emoji is associated to.
      */
     public GuildEmoji(final GatewayDiscordClient gateway, final EmojiData data, final long guildId) {

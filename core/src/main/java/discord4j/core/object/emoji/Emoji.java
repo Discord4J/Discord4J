@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 /**
- * An abstracted emoji used by things like {@link Reaction message reactions} or {@link CustomEmoji emoji custom for Guild/Application}.
+ * An abstracted emoji used by things like {@link Reaction reactions} or {@link CustomEmoji custom emoji for Guild/Application}.
  * <br>
  * Also provides factory methods such as {@link #unicode(String)} for Unicode emotes
  */
@@ -41,7 +41,7 @@ public abstract class Emoji {
      * @return A custom emoji using the given information.
      */
     public static CustomEmoji custom(Snowflake id, @Nullable String name, boolean isAnimated) {
-        return new CustomEmoji(id.asLong(), name, isAnimated);
+        return CustomEmoji.of(id, name, isAnimated);
     }
 
     /**
@@ -59,10 +59,10 @@ public abstract class Emoji {
      * {@link #codepoints(String...)}.
      *
      * @param raw The raw Unicode string for the emoji.
-     * @return A reaction emoji using the given information.
+     * @return A Unicode emoji using the given information.
      */
     public static UnicodeEmoji unicode(String raw) {
-        return new UnicodeEmoji(raw);
+        return UnicodeEmoji.of(raw);
     }
 
     /**
@@ -77,15 +77,10 @@ public abstract class Emoji {
      * A full list of emoji can be found <a href="https://unicode.org/emoji/charts/full-emoji-list.html">here</a>.
      *
      * @param codepoints The codepoints that make up the emoji.
-     * @return A reaction emoji using the given information.
+     * @return A Unicode emoji using the given information.
      */
     public static UnicodeEmoji codepoints(String... codepoints) {
-        String combined = Arrays.stream(codepoints)
-                .map(c -> Integer.parseInt(c.substring(2), 16))
-                .reduce(new StringBuilder(), StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
-
-        return unicode(combined);
+        return UnicodeEmoji.ofCodePoints(codepoints);
     }
 
     /**
@@ -94,7 +89,7 @@ public abstract class Emoji {
      * @param id The ID of the custom emoji OR null if the emoji is a Unicode emoji.
      * @param name The name of the custom emoji OR the raw Unicode string for the emoji.
      * @param isAnimated Whether the emoji is animated OR false if the emoji is a Unicode emoji.
-     * @return A reaction emoji using the given information.
+     * @return An emoji using the given information.
      */
     public static Emoji of(@Nullable Long id, String name, boolean isAnimated) {
         return id == null ? unicode(name) : custom(Snowflake.of(id), name, isAnimated);
@@ -104,7 +99,7 @@ public abstract class Emoji {
      * Constructs a {@code Emoji} from a {@link ReactionData} representation.
      *
      * @param data the {@link ReactionData} wrapper.
-     * @return a reaction emoji using the given information.
+     * @return An emoji using the given information.
      */
     public static Emoji of(ReactionData data) {
         return of(data.emoji());
@@ -114,13 +109,13 @@ public abstract class Emoji {
      * Constructs a {@code Emoji} from a {@link EmojiData} representation.
      *
      * @param data the {@link EmojiData} wrapper.
-     * @return a reaction emoji using the given information.
+     * @return An emoji using the given information.
      */
     public static Emoji of(EmojiData data) {
         if (data.id().isPresent()) {
-            return new CustomEmoji(data);
+            return CustomEmoji.of(data);
         }
-        return unicode(data.name().orElseThrow(IllegalArgumentException::new));
+        return UnicodeEmoji.of(data.name().orElseThrow(IllegalArgumentException::new));
     }
 
     /**
@@ -131,7 +126,7 @@ public abstract class Emoji {
     public abstract String asFormat();
 
     /**
-     * Gets this emoji as downcasted to {@link CustomEmoji a custom reaction emoji}.
+     * Gets this emoji as downcasted to {@link CustomEmoji a custom emoji}.
      *
      * @return This emoji downcasted to a custom emoji, if possible.
      */
@@ -140,9 +135,9 @@ public abstract class Emoji {
     }
 
     /**
-     * Gets this emoji downcasted to {@link UnicodeEmoji a unicode reaction emoji}.
+     * Gets this emoji downcasted to {@link UnicodeEmoji a unicode emoji}.
      *
-     * @return This emoji downcasted to a unicode emoji, if possible.
+     * @return This emoji downcasted to a Unicode emoji, if possible.
      */
     public Optional<UnicodeEmoji> asUnicodeEmoji() {
         return this instanceof UnicodeEmoji ? Optional.of((UnicodeEmoji) this) : Optional.empty();

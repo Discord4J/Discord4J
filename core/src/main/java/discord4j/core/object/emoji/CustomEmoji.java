@@ -42,7 +42,7 @@ public class CustomEmoji extends Emoji {
     /** The raw data as represented by Discord. */
     final EmojiData data;
 
-    public CustomEmoji(EmojiData data) {
+    protected CustomEmoji(EmojiData data) {
         this.data = Objects.requireNonNull(data);
     }
 
@@ -193,5 +193,27 @@ public class CustomEmoji extends Emoji {
     @Override
     public int hashCode() {
         return Objects.hash(getId().asLong());
+    }
+
+    /**
+     * Constructs a {@code CustomEmoji} using the given information.
+     *
+     * @param id The ID of the custom emoji.
+     * @param name The name of the custom emoji.
+     * @param isAnimated Whether the custom emoji is animated.
+     * @return A custom emoji using the given information.
+     */
+    public static CustomEmoji of(Snowflake id, @Nullable String name, boolean isAnimated) {
+        return new CustomEmoji(id.asLong(), name, isAnimated);
+    }
+
+    /**
+     * Constructs a {@code CustomEmoji} from a {@link EmojiData} representation.
+     *
+     * @param data the {@link EmojiData} wrapper.
+     * @return a custom emoji using the given information.
+     */
+    public static CustomEmoji of(EmojiData data) {
+        return new CustomEmoji(data);
     }
 }

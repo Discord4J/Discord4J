@@ -19,6 +19,7 @@ package discord4j.core.object.emoji;
 import discord4j.discordjson.json.EmojiData;
 import reactor.util.annotation.Nullable;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -72,6 +73,50 @@ public class UnicodeEmoji extends Emoji {
     @Override
     public int hashCode() {
         return raw.hashCode();
+    }
+
+    /**
+     * Constructs a {@code UnicodeEmoji} for a raw emoji.
+     * <p>
+     * The string argument to this method should be the exact UTF-16 encoded string of the desired emoji. For example,
+     * <pre>
+     * Emoji.unicode("&#92;u2764") // "heart"
+     * Emoji.unicode("&#92;uD83D&#92;uDE00") // "grinning face"
+     * Emoji.unicode("&#92;uD83D&#92;uDC68&#92;u200D&#92;uD83E&#92;uDDB0") // "man: red hair"
+     * </pre>
+     * A full list of emoji can be found <a href="https://unicode.org/emoji/charts/full-emoji-list.html">here</a>.
+     * <p>
+     * This method does <i>not</i> accept the "U+" notation for codepoints. For that, use
+     * {@link #ofCodePoints(String...)}.
+     *
+     * @param raw The raw Unicode string for the emoji.
+     * @return A Unicode emoji using the given information.
+     */
+    public static UnicodeEmoji of(String raw) {
+        return new UnicodeEmoji(raw);
+    }
+
+    /**
+     * Constructs a {@code UnicodeEmoji} for a Codepoint Unicode emoji.
+     * <p>
+     * The argument(s) to this method should use the "U+" notation for codepoints. For example,
+     * <pre>
+     * Emoji.codepoints("U+2764") // "heart"
+     * Emoji.codepoints("U+1F600") // "grinning face"
+     * Emoji.codepoints("U+1F468", "U+200D", "U+1F9B0") // "man: red hair"
+     * </pre>
+     * A full list of emoji can be found <a href="https://unicode.org/emoji/charts/full-emoji-list.html">here</a>.
+     *
+     * @param codepoints The codepoints that make up the emoji.
+     * @return A reaction emoji using the given information.
+     */
+    public static UnicodeEmoji ofCodePoints(String... codepoints) {
+        String combined = Arrays.stream(codepoints)
+            .map(c -> Integer.parseInt(c.substring(2), 16))
+            .reduce(new StringBuilder(), StringBuilder::appendCodePoint, StringBuilder::append)
+            .toString();
+
+        return UnicodeEmoji.of(combined);
     }
 
 }
