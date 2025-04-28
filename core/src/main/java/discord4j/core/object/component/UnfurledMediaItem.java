@@ -21,6 +21,7 @@ import discord4j.core.spec.MessageCreateFields;
 import discord4j.discordjson.json.UnfurledMediaItemData;
 import discord4j.discordjson.possible.Possible;
 
+import java.io.InputStream;
 import java.util.Optional;
 
 /**
@@ -42,12 +43,28 @@ public class UnfurledMediaItem {
             .build());
     }
 
+    /**
+     * Creates an {@link UnfurledMediaItem} with a given {@link MessageCreateFields.File file}.
+     *
+     * @apiNote The file passed is supposed to be used in the creation of the message for use with the format {@code attachment://}
+     * @param file The file to use
+     * @return An {@link UnfurledMediaItem}
+     * @see MessageCreateFields.File#of(String, InputStream)
+     */
     public static UnfurledMediaItem of(MessageCreateFields.File file) {
         return UnfurledMediaItem.of(PREFIX_DISCORD_ATTACHMENT_REFERENCE.concat(file.name()));
     }
 
+    /**
+     * Creates an {@link UnfurledMediaItem} with a given {@link Attachment}.
+     *
+     * @apiNote The attachment passed is supposed to be in the message
+     * @param attachment The attachment to use
+     * @return An {@link UnfurledMediaItem}
+     * @see Attachment#getUrl()
+     */
     public static UnfurledMediaItem of(Attachment attachment) {
-        return UnfurledMediaItem.of(PREFIX_DISCORD_ATTACHMENT_REFERENCE.concat(attachment.getFilename()));
+        return UnfurledMediaItem.of(attachment.getUrl());
     }
 
     private final UnfurledMediaItemData data;
@@ -77,7 +94,7 @@ public class UnfurledMediaItem {
     /**
      * Gets the proxy url for this item
      *
-     * @return The proxy url for this item if it exist
+     * @return The proxy url for this item if it exists
      */
     public Optional<String> getProxyUrl() {
         return this.getData().proxyUrl().toOptional();
