@@ -50,6 +50,8 @@ public class UnfurledMediaItem {
      * @param file The file to use
      * @return An {@link UnfurledMediaItem}
      * @see MessageCreateFields.File#of(String, InputStream)
+     * @see discord4j.core.spec.MessageCreateSpec#withFiles(MessageCreateFields.File...) MessageCreateSpec#withFiles(MessageCreateFields.File...)
+     * @see discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono#withFiles(MessageCreateFields.File...) InteractionApplicationCommandCallbackReplyMono#withFiles(MessageCreateFields.File...)
      */
     public static UnfurledMediaItem of(MessageCreateFields.File file) {
         return UnfurledMediaItem.of(PREFIX_DISCORD_ATTACHMENT_REFERENCE.concat(file.name()));
