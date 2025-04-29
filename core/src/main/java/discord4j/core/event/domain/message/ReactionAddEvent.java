@@ -23,7 +23,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.reaction.Reaction;
-import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.emoji.Emoji;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.util.Color;
@@ -50,7 +50,7 @@ public class ReactionAddEvent extends MessageEvent {
     private final long messageId;
     @Nullable
     private final Long guildId;
-    private final ReactionEmoji emoji;
+    private final Emoji emoji;
     @Nullable
     private final Member member;
     private final long messageAuthorId;
@@ -59,7 +59,7 @@ public class ReactionAddEvent extends MessageEvent {
     private final int type;
 
     public ReactionAddEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long userId, long channelId, long messageId, @Nullable Long guildId,
-                            ReactionEmoji emoji, @Nullable Member member, long messageAuthorId, boolean burst, List<String> burstColors, int type) {
+                            Emoji emoji, @Nullable Member member, long messageAuthorId, boolean burst, List<String> burstColors, int type) {
         super(gateway, shardInfo);
         this.userId = userId;
         this.channelId = channelId;
@@ -152,11 +152,11 @@ public class ReactionAddEvent extends MessageEvent {
     }
 
     /**
-     * Gets the {@link ReactionEmoji} that was added to the {@link Message} in this event.
+     * Gets the {@link Emoji} that was added to the {@link Message} in this event.
      *
      * @return The {@code Emoji} added to the {@link Message} as a reaction.
      */
-    public ReactionEmoji getEmoji() {
+    public Emoji getEmoji() {
         return emoji;
     }
 

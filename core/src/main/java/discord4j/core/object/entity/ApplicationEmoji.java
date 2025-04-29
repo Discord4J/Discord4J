@@ -18,6 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.emoji.CustomEmoji;
 import discord4j.core.spec.ApplicationEmojiEditMono;
 import discord4j.core.spec.ApplicationEmojiEditSpec;
 import discord4j.core.util.EntityUtil;
@@ -31,9 +32,12 @@ import java.util.Objects;
 /**
  * A Discord application emoji.
  * <br>
- * <a href="https://discord.com/developers/docs/resources/emoji#emoji-resource">Emoji Resource</a>
+ * <a href="https://discord.com/developers/docs/resources/emoji#emoji-object-applicationowned-emoji">Application-Owned Emoji Resource</a>
  */
-public final class ApplicationEmoji extends Emoji {
+public final class ApplicationEmoji extends CustomEmoji implements Entity {
+
+    /** The gateway associated to this object. */
+    final GatewayDiscordClient gateway;
 
     /** The ID of the application this emoji is associated to. */
     private final long applicationId;
@@ -46,8 +50,26 @@ public final class ApplicationEmoji extends Emoji {
      * @param applicationId The ID of the application this emoji is associated to.
      */
     public ApplicationEmoji(final GatewayDiscordClient gateway, final EmojiData data, final long applicationId) {
-        super(gateway, data);
+        super(data);
+        this.gateway = gateway;
         this.applicationId = applicationId;
+    }
+
+    @Override
+    public GatewayDiscordClient getClient() {
+        return gateway;
+    }
+
+    /**
+     * Gets the id of the emoji.
+     *
+     * @return The id of the emoji.
+     */
+    @Override
+    public Snowflake getId() {
+        return getData().id()
+            .map(Snowflake::of)
+            .orElseThrow(IllegalStateException::new); // this should be safe for emojis
     }
 
     /**
@@ -112,9 +134,8 @@ public final class ApplicationEmoji extends Emoji {
      * @return A {@link Mono} where, upon successful completion, emits the {@link User user} that created this emoji. If
      * an error is received, it is emitted through the {@code Mono}.
      */
-    @Override
     public Mono<User> getUser() {
-        UserData user = data.user().toOptional()
+        UserData user = getData().user().toOptional()
             .orElseThrow(IllegalStateException::new); // this should be safe for application emojis
 
         return gateway.getRestClient().getEmojiService()
@@ -135,7 +156,7 @@ public final class ApplicationEmoji extends Emoji {
     @Override
     public String toString() {
         return "ApplicationEmoji{" +
-                "data=" + data +
+                "data=" + getData() +
                 ", applicationId=" + applicationId +
                 '}';
     }

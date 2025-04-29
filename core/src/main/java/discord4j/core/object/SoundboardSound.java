@@ -18,9 +18,9 @@ package discord4j.core.object;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.emoji.Emoji;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.spec.SoundboardSoundEditMono;
 import discord4j.core.spec.SoundboardSoundEditSpec;
 import discord4j.discordjson.json.EmojiData;
@@ -93,9 +93,9 @@ public class SoundboardSound implements Entity {
      *
      * @return the emoji
      */
-    public Optional<ReactionEmoji> getEmoji() {
+    public Optional<Emoji> getEmoji() {
         if (this.data.emojiId().isPresent() || this.data.emojiName().isPresent()) {
-            return Optional.of(ReactionEmoji.of(EmojiData.builder().id(this.data.emojiId()).name(this.data.emojiName()).build()));
+            return Optional.of(Emoji.of(EmojiData.builder().id(this.data.emojiId()).name(this.data.emojiName()).build()));
         }
         return Optional.empty();
     }

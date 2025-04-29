@@ -17,7 +17,7 @@
 package discord4j.core.object.presence;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.emoji.Emoji;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ActivityData;
 import discord4j.discordjson.possible.Possible;
@@ -247,13 +247,13 @@ public class Activity {
      *
      * @return The emoji used for a custom status, if present.
      */
-    public Optional<ReactionEmoji> getEmoji() {
+    public Optional<Emoji> getEmoji() {
         return Possible.flatOpt(data.emoji())
                 .map(emoji -> {
                     // TODO FIXME
                     String sid = emoji.id().toOptional().map(Id::asString).orElse(null);
                     Long id = sid == null ? null : Snowflake.asLong(sid);
-                    return ReactionEmoji.of(id, emoji.name(),
+                    return Emoji.of(id, emoji.name(),
                             emoji.animated().toOptional().orElse(false));
                 });
     }

@@ -17,7 +17,7 @@
 package discord4j.core.object.component;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.emoji.Emoji;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.json.ImmutableComponentData;
@@ -51,7 +51,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param emoji The emoji that appears on the button.
      * @return A button with the given data.
      */
-    public static Button primary(String customId, ReactionEmoji emoji) {
+    public static Button primary(String customId, Emoji emoji) {
         return of(Button.Style.PRIMARY, customId, emoji, null, null, null);
     }
 
@@ -63,7 +63,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param label The text that appears on the button.
      * @return A button with the given data.
      */
-    public static Button primary(String customId, ReactionEmoji emoji, String label) {
+    public static Button primary(String customId, Emoji emoji, String label) {
         return of(Button.Style.PRIMARY, customId, emoji, label, null, null);
     }
 
@@ -85,7 +85,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param emoji The emoji that appears on the button.
      * @return A button with the given data.
      */
-    public static Button secondary(String customId, ReactionEmoji emoji) {
+    public static Button secondary(String customId, Emoji emoji) {
         return of(Button.Style.SECONDARY, customId, emoji, null, null, null);
     }
 
@@ -97,7 +97,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param label The text that appears on the button.
      * @return A button with the given data.
      */
-    public static Button secondary(String customId, ReactionEmoji emoji, String label) {
+    public static Button secondary(String customId, Emoji emoji, String label) {
         return of(Button.Style.SECONDARY, customId, emoji, label, null, null);
     }
 
@@ -119,7 +119,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param emoji The emoji that appears on the button.
      * @return A button with the given data.
      */
-    public static Button success(String customId, ReactionEmoji emoji) {
+    public static Button success(String customId, Emoji emoji) {
         return of(Button.Style.SUCCESS, customId, emoji, null, null, null);
     }
 
@@ -131,7 +131,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param label The text that appears on the button.
      * @return A button with the given data.
      */
-    public static Button success(String customId, ReactionEmoji emoji, String label) {
+    public static Button success(String customId, Emoji emoji, String label) {
         return of(Button.Style.SUCCESS, customId, emoji, label, null, null);
     }
 
@@ -153,7 +153,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param emoji The emoji that appears on the button.
      * @return A button with the given data.
      */
-    public static Button danger(String customId, ReactionEmoji emoji) {
+    public static Button danger(String customId, Emoji emoji) {
         return of(Button.Style.DANGER, customId, emoji, null, null, null);
     }
 
@@ -165,7 +165,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param label The text that appears on the button.
      * @return A button with the given data.
      */
-    public static Button danger(String customId, ReactionEmoji emoji, String label) {
+    public static Button danger(String customId, Emoji emoji, String label) {
         return of(Button.Style.DANGER, customId, emoji, label, null, null);
     }
 
@@ -187,7 +187,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param emoji The emoji that appears on the button.
      * @return A button with the given data.
      */
-    public static Button link(String url, ReactionEmoji emoji) {
+    public static Button link(String url, Emoji emoji) {
         return of(Button.Style.LINK, null, emoji, null, url, null);
     }
 
@@ -199,7 +199,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param label The text that appears on the button.
      * @return A button with the given data.
      */
-    public static Button link(String url, ReactionEmoji emoji, String label) {
+    public static Button link(String url, Emoji emoji, String label) {
         return of(Button.Style.LINK, null, emoji, label, url, null);
     }
 
@@ -213,7 +213,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
         return of(Button.Style.PREMIUM, null, null, null, null, skuId.asString());
     }
 
-    private static Button of(Style style, @Nullable String customId, @Nullable ReactionEmoji emoji,
+    private static Button of(Style style, @Nullable String customId, @Nullable Emoji emoji,
                              @Nullable String label, @Nullable String url, @Nullable String skuId) {
         ImmutableComponentData.Builder builder = ComponentData.builder()
             .type(MessageComponent.Type.BUTTON.getValue())
@@ -262,7 +262,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param emoji The emoji that appears on the button.
      * @return A button with the given data.
      */
-    public static Button primary(int id, String customId, ReactionEmoji emoji) {
+    public static Button primary(int id, String customId, Emoji emoji) {
         return of(id, Button.Style.PRIMARY, customId, emoji, null, null, null);
     }
 
@@ -275,7 +275,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param label The text that appears on the button.
      * @return A button with the given data.
      */
-    public static Button primary(int id, String customId, ReactionEmoji emoji, String label) {
+    public static Button primary(int id, String customId, Emoji emoji, String label) {
         return of(id, Button.Style.PRIMARY, customId, emoji, label, null, null);
     }
 
@@ -299,7 +299,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param emoji The emoji that appears on the button.
      * @return A button with the given data.
      */
-    public static Button secondary(int id, String customId, ReactionEmoji emoji) {
+    public static Button secondary(int id, String customId, Emoji emoji) {
         return of(id, Button.Style.SECONDARY, customId, emoji, null, null, null);
     }
 
@@ -312,7 +312,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param label The text that appears on the button.
      * @return A button with the given data.
      */
-    public static Button secondary(int id, String customId, ReactionEmoji emoji, String label) {
+    public static Button secondary(int id, String customId, Emoji emoji, String label) {
         return of(id, Button.Style.SECONDARY, customId, emoji, label, null, null);
     }
 
@@ -336,7 +336,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param emoji The emoji that appears on the button.
      * @return A button with the given data.
      */
-    public static Button success(int id, String customId, ReactionEmoji emoji) {
+    public static Button success(int id, String customId, Emoji emoji) {
         return of(id, Button.Style.SUCCESS, customId, emoji, null, null, null);
     }
 
@@ -349,7 +349,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param label The text that appears on the button.
      * @return A button with the given data.
      */
-    public static Button success(int id, String customId, ReactionEmoji emoji, String label) {
+    public static Button success(int id, String customId, Emoji emoji, String label) {
         return of(id, Button.Style.SUCCESS, customId, emoji, label, null, null);
     }
 
@@ -373,7 +373,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param emoji The emoji that appears on the button.
      * @return A button with the given data.
      */
-    public static Button danger(int id, String customId, ReactionEmoji emoji) {
+    public static Button danger(int id, String customId, Emoji emoji) {
         return of(id, Button.Style.DANGER, customId, emoji, null, null, null);
     }
 
@@ -386,7 +386,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param label The text that appears on the button.
      * @return A button with the given data.
      */
-    public static Button danger(int id, String customId, ReactionEmoji emoji, String label) {
+    public static Button danger(int id, String customId, Emoji emoji, String label) {
         return of(id, Button.Style.DANGER, customId, emoji, label, null, null);
     }
 
@@ -410,7 +410,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param emoji The emoji that appears on the button.
      * @return A button with the given data.
      */
-    public static Button link(int id, String url, ReactionEmoji emoji) {
+    public static Button link(int id, String url, Emoji emoji) {
         return of(id, Button.Style.LINK, null, emoji, null, url, null);
     }
 
@@ -423,7 +423,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @param label The text that appears on the button.
      * @return A button with the given data.
      */
-    public static Button link(int id, String url, ReactionEmoji emoji, String label) {
+    public static Button link(int id, String url, Emoji emoji, String label) {
         return of(id, Button.Style.LINK, null, emoji, label, url, null);
     }
 
@@ -438,7 +438,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
         return of(id, Button.Style.PREMIUM, null, null, null, null, skuId.asString());
     }
 
-    private static Button of(int id, Style style, @Nullable String customId, @Nullable ReactionEmoji emoji,
+    private static Button of(int id, Style style, @Nullable String customId, @Nullable Emoji emoji,
                              @Nullable String label, @Nullable String url, @Nullable String skuId) {
         ImmutableComponentData.Builder builder = ComponentData.builder()
             .type(MessageComponent.Type.BUTTON.getValue())
@@ -468,13 +468,13 @@ public class Button extends ActionComponent implements IAccessoryComponent {
         return new Button(builder.build());
     }
 
-    protected Button(Integer id, Style style, @Nullable String customId, @Nullable ReactionEmoji emoji,
+    protected Button(Integer id, Style style, @Nullable String customId, @Nullable Emoji emoji,
                      @Nullable String label, @Nullable String url, @Nullable String skuId) {
         super(MessageComponent.getBuilder(Type.BUTTON)
             .id(Possible.ofNullable(id))
             .style(style.getValue())
             .customId(Possible.ofNullable(customId))
-            .emoji(Possible.ofNullable(emoji).map(ReactionEmoji::asEmojiData))
+            .emoji(Possible.ofNullable(emoji).map(Emoji::asEmojiData))
             .label(Possible.ofNullable(label))
             .url(Possible.ofNullable(url))
             .skuId(Possible.ofNullable(skuId).map(Id::of))
@@ -511,9 +511,9 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      *
      * @return The button's emoji.
      */
-    public Optional<ReactionEmoji> getEmoji() {
+    public Optional<Emoji> getEmoji() {
         return getData().emoji().toOptional()
-            .map(ReactionEmoji::of);
+            .map(Emoji::of);
     }
 
     /**

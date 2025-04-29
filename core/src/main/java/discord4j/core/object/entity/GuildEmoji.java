@@ -18,6 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.emoji.CustomEmoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.GuildEmojiEditMono;
 import discord4j.core.spec.GuildEmojiEditSpec;
@@ -40,7 +41,10 @@ import java.util.stream.Collectors;
  * <p>
  * <a href="https://discord.com/developers/docs/resources/emoji#emoji-resource">Emoji Resource</a>
  */
-public final class GuildEmoji extends Emoji {
+public final class GuildEmoji extends CustomEmoji implements Entity {
+
+    /** The gateway associated with this object. */
+    final GatewayDiscordClient gateway;
 
     /** The ID of the guild this emoji is associated to. */
     private final long guildId;
@@ -49,12 +53,30 @@ public final class GuildEmoji extends Emoji {
      * Constructs a {@code GuildEmoji} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data The raw data as represented by Discord, must be non-null.
+     * @param data The raw data, as represented by Discord, must be non-null.
      * @param guildId The ID of the guild this emoji is associated to.
      */
     public GuildEmoji(final GatewayDiscordClient gateway, final EmojiData data, final long guildId) {
-        super(gateway, data);
+        super(data);
+        this.gateway = gateway;
         this.guildId = guildId;
+    }
+
+    @Override
+    public GatewayDiscordClient getClient() {
+        return gateway;
+    }
+
+    /**
+     * Gets the id of the emoji.
+     *
+     * @return The id of the emoji.
+     */
+    @Override
+    public Snowflake getId() {
+        return getData().id()
+            .map(Snowflake::of)
+            .orElseThrow(IllegalStateException::new); // this should be safe for emojis
     }
 
     /**
@@ -63,7 +85,7 @@ public final class GuildEmoji extends Emoji {
      * @return The IDs of the roles this emoji is whitelisted to.
      */
     public Set<Snowflake> getRoleIds() {
-        return data.roles().toOptional()
+        return getData().roles().toOptional()
                 .map(roles -> roles.stream()
                         .map(Snowflake::of)
                         .collect(Collectors.toSet()))
@@ -104,9 +126,8 @@ public final class GuildEmoji extends Emoji {
      * @return A {@link Mono} where, upon successful completion, emits the {@link User user} that created this emoji. If
      * an error is received, it is emitted through the {@code Mono}.
      */
-    @Override
     public Mono<User> getUser() {
-        UserData user = data.user().toOptional()
+        UserData user = getData().user().toOptional()
                 .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
 
         return gateway.getRestClient().getEmojiService()
@@ -237,7 +258,7 @@ public final class GuildEmoji extends Emoji {
     @Override
     public String toString() {
         return "GuildEmoji{" +
-                "data=" + data +
+                "data=" + getData() +
                 ", guildId=" + guildId +
                 '}';
     }

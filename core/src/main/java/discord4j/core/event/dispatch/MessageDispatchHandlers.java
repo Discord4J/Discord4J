@@ -20,9 +20,9 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.*;
 import discord4j.core.object.Embed;
+import discord4j.core.object.emoji.Emoji;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.MemberData;
 import discord4j.discordjson.json.MessageData;
@@ -125,7 +125,7 @@ class MessageDispatchHandlers {
         boolean emojiAnimated = context.getDispatch().emoji().animated()
                 .toOptional()
                 .orElse(false);
-        ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
+        Emoji emoji = Emoji.of(emojiId, emojiName, emojiAnimated);
         @SuppressWarnings("ConstantConditions")
         Member member = memberData != null ? new Member(gateway, memberData, guildId) : null;
 
@@ -153,7 +153,7 @@ class MessageDispatchHandlers {
         boolean emojiAnimated = context.getDispatch().emoji().animated()
                 .toOptional()
                 .orElse(false);
-        ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
+        Emoji emoji = Emoji.of(emojiId, emojiName, emojiAnimated);
         return Mono.just(new ReactionRemoveEvent(gateway, context.getShardInfo(), userId,
                 channelId, messageId, guildId, emoji, burst, type));
     }
@@ -175,7 +175,7 @@ class MessageDispatchHandlers {
         boolean emojiAnimated = context.getDispatch().emoji().animated()
                 .toOptional()
                 .orElse(false);
-        ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
+        Emoji emoji = Emoji.of(emojiId, emojiName, emojiAnimated);
         return Mono.just(new ReactionRemoveEmojiEvent(gateway, context.getShardInfo(), channelId,
                 messageId, guildId, emoji));
     }

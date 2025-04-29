@@ -33,7 +33,7 @@ import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.object.reaction.Reaction;
-import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.emoji.Emoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.MessageEditMono;
@@ -452,7 +452,7 @@ public final class Message implements Entity {
      * @return A {@link Flux} that continually emits the {@link User reactors} for the specified emoji for this message.
      * If an error is received, it is emitted through the {@code Flux}.
      */
-    public Flux<User> getReactors(final ReactionEmoji emoji) {
+    public Flux<User> getReactors(final Emoji emoji) {
         final Function<Map<String, Object>, Flux<UserData>> makeRequest = params ->
                 gateway.getRestClient().getChannelService()
                         .getReactions(getChannelId().asLong(), getId().asLong(),
@@ -828,7 +828,7 @@ public final class Message implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the reaction was added on
      * this message. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> addReaction(final ReactionEmoji emoji) {
+    public Mono<Void> addReaction(final Emoji emoji) {
         return gateway.getRestClient().getChannelService()
                 .createReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
     }
@@ -841,7 +841,7 @@ public final class Message implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the reaction from the
      * specified user was removed on this message. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> removeReaction(final ReactionEmoji emoji, final Snowflake userId) {
+    public Mono<Void> removeReaction(final Emoji emoji, final Snowflake userId) {
         return gateway.getRestClient().getChannelService()
                 .deleteReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji),
                         userId.asLong());
@@ -854,7 +854,7 @@ public final class Message implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the reaction from the
      * specified user was removed on this message. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> removeReactions(final ReactionEmoji emoji) {
+    public Mono<Void> removeReactions(final Emoji emoji) {
         return gateway.getRestClient().getChannelService()
                 .deleteReactions(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
     }
@@ -866,7 +866,7 @@ public final class Message implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the reaction from the current
      * user was removed on this message. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> removeSelfReaction(final ReactionEmoji emoji) {
+    public Mono<Void> removeSelfReaction(final Emoji emoji) {
         return gateway.getRestClient().getChannelService()
                 .deleteOwnReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
     }
