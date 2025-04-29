@@ -16,15 +16,20 @@
  */
 package discord4j.core.object.component;
 
+import discord4j.core.object.entity.Attachment;
+import discord4j.core.spec.MessageCreateFields;
 import discord4j.discordjson.json.UnfurledMediaItemData;
 import discord4j.discordjson.possible.Possible;
 
+import java.io.InputStream;
 import java.util.Optional;
 
 /**
  * Represents an unfurled media item.
  */
 public class UnfurledMediaItem {
+
+    private static final String PREFIX_DISCORD_ATTACHMENT_REFERENCE = "attachment://";
 
     /**
      * Creates an {@link UnfurledMediaItem} with a given url.
@@ -36,6 +41,32 @@ public class UnfurledMediaItem {
         return new UnfurledMediaItem(UnfurledMediaItemData.builder()
             .url(url)
             .build());
+    }
+
+    /**
+     * Creates an {@link UnfurledMediaItem} with a given {@link MessageCreateFields.File file}.
+     *
+     * @apiNote The file passed is supposed to be used in the creation of the message for use with the format {@code attachment://}
+     * @param file The file to use
+     * @return An {@link UnfurledMediaItem}
+     * @see MessageCreateFields.File#of(String, InputStream)
+     * @see discord4j.core.spec.MessageCreateSpec#withFiles(MessageCreateFields.File...) MessageCreateSpec#withFiles(MessageCreateFields.File...)
+     * @see discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono#withFiles(MessageCreateFields.File...) InteractionApplicationCommandCallbackReplyMono#withFiles(MessageCreateFields.File...)
+     */
+    public static UnfurledMediaItem of(MessageCreateFields.File file) {
+        return UnfurledMediaItem.of(PREFIX_DISCORD_ATTACHMENT_REFERENCE.concat(file.name()));
+    }
+
+    /**
+     * Creates an {@link UnfurledMediaItem} with a given {@link Attachment}.
+     *
+     * @apiNote The attachment passed is supposed to be in the message
+     * @param attachment The attachment to use
+     * @return An {@link UnfurledMediaItem}
+     * @see Attachment#getUrl()
+     */
+    public static UnfurledMediaItem of(Attachment attachment) {
+        return UnfurledMediaItem.of(attachment.getUrl());
     }
 
     private final UnfurledMediaItemData data;
@@ -65,7 +96,7 @@ public class UnfurledMediaItem {
     /**
      * Gets the proxy url for this item
      *
-     * @return The proxy url for this item if it exist
+     * @return The proxy url for this item if it exists
      */
     public Optional<String> getProxyUrl() {
         return this.getData().proxyUrl().toOptional();
