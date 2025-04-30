@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A section component for message.
@@ -57,10 +58,13 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * @param <C> The type of component, must implement {@link ICanBeUsedInSectionComponent}
      * @return A {@link Section} containing the given components
      */
-    public static <C extends MessageComponent & ICanBeUsedInSectionComponent> Section of(IAccessoryComponent accessory, List<C> components) {
+    public static <C extends ICanBeUsedInSectionComponent> Section of(IAccessoryComponent accessory, List<C> components) {
         return new Section(MessageComponent.getBuilder(Type.SECTION)
             .accessory(accessory.getData())
-            .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+            .components(components.stream()
+                .filter(c -> c instanceof MessageComponent)
+                .map(c -> ((MessageComponent) c).getData())
+                .collect(Collectors.toList()))
             .build());
     }
 
@@ -86,20 +90,26 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * @param <C> The type of component, must implement {@link ICanBeUsedInSectionComponent}
      * @return A {@link Section} containing the given components
      */
-    public static <C extends MessageComponent & ICanBeUsedInSectionComponent> Section of(int id, IAccessoryComponent accessory, List<C> components) {
+    public static <C extends ICanBeUsedInSectionComponent> Section of(int id, IAccessoryComponent accessory, List<C> components) {
         return new Section(MessageComponent.getBuilder(Type.SECTION)
             .id(id)
             .accessory(accessory.getData())
-            .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+            .components(components.stream()
+                .filter(c -> c instanceof MessageComponent)
+                .map(c -> ((MessageComponent) c).getData())
+                .collect(Collectors.toList()))
             .build());
     }
 
 
-    protected <C extends MessageComponent & ICanBeUsedInSectionComponent> Section(Integer id, IAccessoryComponent accessory, List<C> components) {
+    protected <C extends ICanBeUsedInSectionComponent> Section(Integer id, IAccessoryComponent accessory, List<C> components) {
         this(MessageComponent.getBuilder(Type.SECTION)
             .id(Possible.ofNullable(id))
             .accessory(accessory.getData())
-            .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+            .components(components.stream()
+                .filter(c -> c instanceof MessageComponent)
+                .map(c -> ((MessageComponent) c).getData())
+                .collect(Collectors.toList()))
             .build());
     }
 
@@ -155,12 +165,29 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
     }
 
     /**
+     * Create a new {@link Section} instance from {@code this}, adding given components.
+     *
+     * @param components the child components to be added
+     * @return an {@code Section} containing the existing and added components with the current accessory
+     */
+    public <C extends ICanBeUsedInSectionComponent> Section withAddedComponents(List<C> components) {
+        return new Section(ComponentData.builder()
+            .from(getData())
+            .accessory(Possible.ofNullable(this.getData().accessory().toOptional().orElse(null)))
+            .components(Stream.concat(getChildren().stream(), components.stream())
+                .filter(c -> c instanceof MessageComponent)
+                .map(c -> ((MessageComponent) c).getData())
+                .collect(Collectors.toList()))
+            .build());
+    }
+
+    /**
      * Create a new {@link Section} instance from {@code this}, using a given accessory.
      *
      * @param accessory the child component to be added
      * @return an {@code Section} containing the existing and added components with an accessory
      */
-    public <C extends MessageComponent & ICanBeUsedInSectionComponent> Section withAddedAccessory(IAccessoryComponent accessory) {
+    public Section withAddedAccessory(IAccessoryComponent accessory) {
         List<MessageComponent> components = new ArrayList<>(getChildren());
         return new Section(ComponentData.builder()
             .from(getData())
