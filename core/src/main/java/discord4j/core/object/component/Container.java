@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A container component for message.
@@ -104,7 +105,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
      * @return A {@link Container} containing the given components.
      */
-    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(List<C> components) {
+    public static <C extends ICanBeUsedInContainerComponent> Container of(List<C> components) {
         return new Container(null, null, false, components);
     }
 
@@ -116,7 +117,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
      * @return A {@link Container} containing the given components.
      */
-    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(boolean spoiler, List<C> components) {
+    public static <C extends ICanBeUsedInContainerComponent> Container of(boolean spoiler, List<C> components) {
         return new Container(null, null, spoiler, components);
     }
 
@@ -128,7 +129,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
      * @return A {@link Container} containing the given components.
      */
-    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(@Nullable Color color, List<C> components) {
+    public static <C extends ICanBeUsedInContainerComponent> Container of(@Nullable Color color, List<C> components) {
         return new Container(null, color, false, components);
     }
 
@@ -141,7 +142,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
      * @return A {@link Container} containing the given components.
      */
-    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(@Nullable Color color, boolean spoiler, List<C> components) {
+    public static <C extends ICanBeUsedInContainerComponent> Container of(@Nullable Color color, boolean spoiler, List<C> components) {
         return new Container(null, color, spoiler, components);
     }
 
@@ -209,7 +210,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
      * @return A {@link Container} containing the given components.
      */
-    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(int id, List<C> components) {
+    public static <C extends ICanBeUsedInContainerComponent> Container of(int id, List<C> components) {
         return new Container(id, null, false, components);
     }
 
@@ -222,7 +223,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
      * @return A {@link Container} containing the given components.
      */
-    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(int id, @Nullable Color color, List<C> components) {
+    public static <C extends ICanBeUsedInContainerComponent> Container of(int id, @Nullable Color color, List<C> components) {
         return new Container(id, color, false, components);
     }
 
@@ -235,7 +236,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
      * @return A {@link Container} containing the given components.
      */
-    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(int id, boolean spoiler, List<C> components) {
+    public static <C extends ICanBeUsedInContainerComponent> Container of(int id, boolean spoiler, List<C> components) {
         return new Container(id, null, spoiler, components);
     }
 
@@ -249,16 +250,19 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
      * @return A {@link Container} containing the given components.
      */
-    public static <C extends MessageComponent & ICanBeUsedInContainerComponent> Container of(int id, @Nullable Color color, boolean spoiler, List<C> components) {
+    public static <C extends ICanBeUsedInContainerComponent> Container of(int id, @Nullable Color color, boolean spoiler, List<C> components) {
         return new Container(id, color, spoiler, components);
     }
 
-    protected <C extends MessageComponent & ICanBeUsedInContainerComponent> Container(@Nullable Integer id, @Nullable Color color, boolean spoiler, List<C> components) {
+    protected <C extends ICanBeUsedInContainerComponent> Container(@Nullable Integer id, @Nullable Color color, boolean spoiler, List<C> components) {
         this(
             MessageComponent.getBuilder(Type.CONTAINER)
                 .id(Possible.ofNullable(id))
                 .spoiler(spoiler)
-                .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+                .components(components.stream()
+                    .filter(c -> c instanceof MessageComponent)
+                    .map(c -> ((MessageComponent) c).getData())
+                    .collect(Collectors.toList()))
                 .accentColor(Possible.of(Optional.ofNullable(color).map(Color::getRGB)))
                 .build()
         );
@@ -292,6 +296,23 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
         List<MessageComponent> componentsToAdd = new ArrayList<>(getChildren());
         componentsToAdd.addAll(Arrays.asList(components));
         return new Container(ComponentData.builder().from(this.getData()).components(componentsToAdd.stream().map(MessageComponent::getData).collect(Collectors.toList())).build());
+    }
+
+    /**
+     * Create a new {@link Container} instance from {@code this}, adding given components.
+     *
+     * @param components the child components to be added
+     * @param <C> The type of components to add, needs to be {@link ICanBeUsedInContainerComponent}
+     * @return a {@link Container} containing the existing and added components
+     */
+    public <C extends ICanBeUsedInContainerComponent> Container withAddedComponents(List<C> components) {
+        return new Container(ComponentData.builder()
+            .from(this.getData())
+            .components(Stream.concat(getChildren().stream(), components.stream())
+                .filter(c -> c instanceof MessageComponent)
+                .map(c -> ((MessageComponent) c).getData())
+                .collect(Collectors.toList()))
+            .build());
     }
 
     /**
