@@ -194,9 +194,28 @@ public class WebhookService extends RestService {
             .bodyToMono(MessageData.class);
     }
 
+    public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId, boolean withComponents,
+                                                  WebhookMessageEditRequest request) {
+        return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
+            .query("with_components", withComponents)
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(MessageData.class);
+    }
+
     public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId,
                                                   WebhookMessageEditRequest request) {
         return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(MessageData.class);
+    }
+
+    public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId, long threadId, boolean withComponents,
+                                                  WebhookMessageEditRequest request) {
+        return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
+            .query("thread_id", threadId)
+            .query("with_components", withComponents)
             .body(request)
             .exchange(getRouter())
             .bodyToMono(MessageData.class);
@@ -211,6 +230,16 @@ public class WebhookService extends RestService {
             .bodyToMono(MessageData.class);
     }
 
+    public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId, boolean withComponents,
+                                                  MultipartRequest<WebhookMessageEditRequest> request) {
+        return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
+            .query("with_components", withComponents)
+            .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
+            .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
+            .exchange(getRouter())
+            .bodyToMono(MessageData.class);
+    }
+
     public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId,
                                                   MultipartRequest<WebhookMessageEditRequest> request) {
         return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
@@ -218,6 +247,17 @@ public class WebhookService extends RestService {
                 .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
                 .exchange(getRouter())
                 .bodyToMono(MessageData.class);
+    }
+
+    public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId, long threadId, boolean withComponents,
+                                                  MultipartRequest<WebhookMessageEditRequest> request) {
+        return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
+            .query("thread_id", threadId)
+            .query("with_components", withComponents)
+            .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
+            .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
+            .exchange(getRouter())
+            .bodyToMono(MessageData.class);
     }
 
     public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId, long threadId,

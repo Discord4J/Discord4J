@@ -656,13 +656,15 @@ public final class Webhook implements Entity {
                     throw new IllegalArgumentException("Can't edit message with this webhook.");
                 }
 
+                boolean withComponents = !spec.components().isAbsent();
+
                 if (spec.threadId().isAbsent()) {
                     return gateway.getRestClient().getWebhookService()
-                        .modifyWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(), spec.asRequest())
+                        .modifyWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(), withComponents, spec.asRequest())
                         .map(data -> new Message(gateway, data));
                 } else {
                     return gateway.getRestClient().getWebhookService()
-                        .modifyWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(), spec.threadId().get().asLong(), spec.asRequest())
+                        .modifyWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(), spec.threadId().get().asLong(), withComponents, spec.asRequest())
                         .map(data -> new Message(gateway, data));
                 }
             }
@@ -686,8 +688,9 @@ public final class Webhook implements Entity {
                 if (!getToken().isPresent()) {
                     throw new IllegalArgumentException("Can't edit message with this webhook.");
                 }
+                boolean withComponents = !spec.components().isAbsent();
                 return gateway.getRestClient().getWebhookService()
-                    .modifyWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(), threadId.asLong(), spec.asRequest())
+                    .modifyWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(), threadId.asLong(), withComponents, spec.asRequest())
                     .map(data -> new Message(gateway, data));
             }
         );
