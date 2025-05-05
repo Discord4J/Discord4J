@@ -174,6 +174,7 @@ public class RestChannel {
      * Request to create a message using a given {@link MessageCreateRequest} as body. If you want to include
      * attachments to your message, see {@link #createMessage(MultipartRequest)}.
      *
+     * @apiNote this method takes a raw data and not applies any modification (ex: adding the USE_COMPONENTS_V2 tag if the request contains components v2)
      * @param request request body used to create a new message
      * @return a {@link Mono} where, upon successful completion, emits the created {@link MessageData}. If an
      * error is received, it is emitted through the {@code Mono}.
@@ -187,6 +188,7 @@ public class RestChannel {
      * Request to create a message using a given {@link MultipartRequest} as body. A {@link MultipartRequest} is a
      * custom object allowing you to add attachments to a message.
      *
+     * @apiNote this method takes a raw data and not applies any modification (ex: adding the USE_COMPONENTS_V2 tag if the request contains components v2)
      * @param request request body used to create a new message
      * @return a {@link Mono} where, upon successful completion, emits the created {@link MessageData}. If an
      * error is received, it is emitted through the {@code Mono}.
