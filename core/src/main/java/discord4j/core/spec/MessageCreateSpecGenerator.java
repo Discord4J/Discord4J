@@ -34,7 +34,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -83,11 +85,11 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
 
     @Override
     default MultipartRequest<MessageCreateRequest> asRequest() {
-        List<Message.Flag> flagsToApply = new ArrayList<>(this.flags().toOptional().orElse(new ArrayList<>()));
-        if (!flagsToApply.contains(Message.Flag.IS_COMPONENTS_V2) && !this.components().isAbsent() && this.components().get().stream().anyMatch(topLevelComponent -> topLevelComponent.getType().isRequiredFlag())) {
+        Set<Message.Flag> flagsToApply = new HashSet<>(this.flags().toOptional().orElse(new ArrayList<>()));
+        if (!this.components().isAbsent() && this.components().get().stream().anyMatch(topLevelComponent -> topLevelComponent.getType().isRequiredFlag())) {
             flagsToApply.add(Message.Flag.IS_COMPONENTS_V2);
         }
-        Possible<List<Message.Flag>> pFlagsToApply = Possible.of(flagsToApply);
+        Possible<List<Message.Flag>> pFlagsToApply = Possible.of(new ArrayList<>(flagsToApply));
 
         MessageCreateRequest json = MessageCreateRequest.builder()
             .content(content())

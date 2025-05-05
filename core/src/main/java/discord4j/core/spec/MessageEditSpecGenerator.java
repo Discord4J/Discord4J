@@ -31,8 +31,10 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,11 +67,11 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
 
     @Override
     default MultipartRequest<MessageEditRequest> asRequest() {
-        List<Message.Flag> flagsToApply = new ArrayList<>(this.flags().map(Optional::get).toOptional().orElse(Collections.emptyList()));
-        if (!flagsToApply.contains(Message.Flag.IS_COMPONENTS_V2) && !this.components().isAbsent() && this.components().map(Optional::get).get().stream().anyMatch(topLevelComponent -> topLevelComponent.getType().isRequiredFlag())) {
+        Set<Message.Flag> flagsToApply = new HashSet<>(this.flags().map(Optional::get).toOptional().orElse(Collections.emptyList()));
+        if (!this.components().isAbsent() && this.components().map(Optional::get).get().stream().anyMatch(topLevelComponent -> topLevelComponent.getType().isRequiredFlag())) {
             flagsToApply.add(Message.Flag.IS_COMPONENTS_V2);
         }
-        Possible<Optional<List<Message.Flag>>> pFlagsToApply = Possible.of(Optional.of(flagsToApply));
+        Possible<Optional<List<Message.Flag>>> pFlagsToApply = Possible.of(Optional.of(new ArrayList<>(flagsToApply)));
 
         MessageEditRequest json = MessageEditRequest.builder()
             .content(content())
