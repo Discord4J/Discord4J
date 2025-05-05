@@ -29,6 +29,7 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -64,13 +65,19 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
 
     @Override
     default MultipartRequest<MessageEditRequest> asRequest() {
+        List<Message.Flag> flagsToApply = new ArrayList<>(this.flags().map(Optional::get).toOptional().orElse(Collections.emptyList()));
+        if (!flagsToApply.contains(Message.Flag.IS_COMPONENTS_V2) && !this.components().isAbsent() && this.components().map(Optional::get).get().stream().anyMatch(topLevelComponent -> topLevelComponent.getType().isRequiredFlag())) {
+            flagsToApply.add(Message.Flag.IS_COMPONENTS_V2);
+        }
+        Possible<Optional<List<Message.Flag>>> pFlagsToApply = Possible.of(Optional.of(flagsToApply));
+
         MessageEditRequest json = MessageEditRequest.builder()
             .content(content())
             .embeds(mapPossibleOptional(embeds(), embeds -> embeds.stream()
                 .map(EmbedCreateSpec::asRequest)
                 .collect(Collectors.toList())))
             .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
-            .flags(mapPossibleOptional(flags(), f -> f.stream()
+            .flags(mapPossibleOptional(pFlagsToApply, f -> f.stream()
                 .mapToInt(Message.Flag::getFlag)
                 .reduce(0, (left, right) -> left | right)))
             .components(mapPossibleOptional(components(), components -> components.stream()
