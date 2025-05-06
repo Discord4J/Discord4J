@@ -32,26 +32,26 @@ final class InternalMessageSpecUtils {
         throw new AssertionError();
     }
 
-    @Nullable
-    static Set<Message.Flag> decorateFlags(final Collection<Message.Flag> oldFlags,
-                                                  final Possible<Boolean> ephemeral,
-                                                  final Possible<Boolean> suppressEmbeds,
-                                                  final Possible<List<TopLevelMessageComponent>> components) {
-        final Set<Message.Flag> newFlags = new HashSet<>(oldFlags);
+    public static @Nullable Set<Message.Flag> decorateFlags(final @Nullable Collection<Message.Flag> oldFlags, final Possible<Boolean> ephemeral, final Possible<Boolean> suppressEmbeds, final Possible<List<TopLevelMessageComponent>> components) {
+        final Set<Message.Flag> newFlags = new HashSet<>();
         if (ephemeral.toOptional().orElse(false)) {
             newFlags.add(Message.Flag.EPHEMERAL);
         }
         if (suppressEmbeds.toOptional().orElse(false)) {
             newFlags.add(Message.Flag.SUPPRESS_EMBEDS);
         }
-
         if (!components.isAbsent() && components.get().stream().anyMatch(component -> component.getType().isRequiredFlag())) {
             newFlags.add(Message.Flag.IS_COMPONENTS_V2);
         }
-
-        if (newFlags.isEmpty()) {
+        if (!newFlags.isEmpty()) {
+            if (oldFlags != null) {
+                newFlags.addAll(oldFlags);
+            }
+            return newFlags;
+        } else if (oldFlags != null) {
+            return new HashSet<>(oldFlags);
+        } else {
             return null;
         }
-        return new HashSet<>(newFlags);
     }
 }

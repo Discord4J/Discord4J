@@ -74,7 +74,7 @@ interface InteractionFollowupCreateSpecGenerator extends Spec<MultipartRequest<F
 
     @Override
     default MultipartRequest<FollowupMessageRequest> asRequest() {
-        final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(Collections.emptySet(), this.ephemeral(), Possible.absent(), this.components());
+        final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(null, this.ephemeral(), Possible.absent(), this.components());
 
         FollowupMessageRequest request = FollowupMessageRequest.builder()
                 .content(content())

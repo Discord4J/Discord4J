@@ -85,7 +85,7 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
 
     @Override
     default MultipartRequest<MessageCreateRequest> asRequest() {
-        final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(this.flags().toOptional().orElse(new ArrayList<>()), Possible.absent(), Possible.absent(), this.components());
+        final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(this.flags().toOptional().orElse(null), Possible.absent(), Possible.absent(), this.components());
 
         MessageCreateRequest json = MessageCreateRequest.builder()
             .content(content())

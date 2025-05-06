@@ -65,7 +65,7 @@ interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<Multip
 
     @Override
     default MultipartRequest<InteractionApplicationCommandCallbackData> asRequest() {
-        final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(Collections.emptySet(), this.ephemeral(), Possible.absent(), this.components());
+        final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(null, this.ephemeral(), Possible.absent(), this.components());
 
         InteractionApplicationCommandCallbackData json = InteractionApplicationCommandCallbackData.builder()
                 .content(content())
