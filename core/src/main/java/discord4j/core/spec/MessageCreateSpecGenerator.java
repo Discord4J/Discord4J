@@ -89,7 +89,7 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
         if (!this.components().isAbsent() && this.components().get().stream().anyMatch(topLevelComponent -> topLevelComponent.getType().isRequiredFlag())) {
             flagsToApply.add(Message.Flag.IS_COMPONENTS_V2);
         }
-        Possible<List<Message.Flag>> pFlagsToApply = Possible.of(new ArrayList<>(flagsToApply));
+        Possible<List<Message.Flag>> pFlagsToApply = flagsToApply.isEmpty() ? Possible.absent() : Possible.of(new ArrayList<>(flagsToApply));
 
         MessageCreateRequest json = MessageCreateRequest.builder()
             .content(content())
