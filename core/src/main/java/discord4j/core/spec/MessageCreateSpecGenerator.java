@@ -85,11 +85,7 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
 
     @Override
     default MultipartRequest<MessageCreateRequest> asRequest() {
-        Set<Message.Flag> flagsToApply = new HashSet<>(this.flags().toOptional().orElse(new ArrayList<>()));
-        if (!this.components().isAbsent() && this.components().get().stream().anyMatch(topLevelComponent -> topLevelComponent.getType().isRequiredFlag())) {
-            flagsToApply.add(Message.Flag.IS_COMPONENTS_V2);
-        }
-        Possible<List<Message.Flag>> pFlagsToApply = flagsToApply.isEmpty() ? Possible.absent() : Possible.of(new ArrayList<>(flagsToApply));
+        final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(this.flags().toOptional().orElse(new ArrayList<>()), Possible.absent(), Possible.absent(), this.components());
 
         MessageCreateRequest json = MessageCreateRequest.builder()
             .content(content())
@@ -110,7 +106,7 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
             .stickerIds(mapPossible(stickersIds(),
                 r -> r.stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList())))
             .poll(poll())
-            .flags(mapPossible(pFlagsToApply, f -> f.stream()
+            .flags(mapPossible(Possible.ofNullable(flagsToApply), f -> f.stream()
                 .mapToInt(Message.Flag::getFlag)
                 .reduce(0, (left, right) -> left | right)))
             .build();

@@ -32,10 +32,11 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -71,14 +72,8 @@ interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<Webhoo
 
     @Override
     default MultipartRequest<WebhookMessageEditRequest> asRequest() {
-        List<Message.Flag> flagsToApply = new ArrayList<>();
-        if (this.suppressEmbeds().toOptional().orElse(false)) {
-            flagsToApply.add(Message.Flag.SUPPRESS_EMBEDS);
-        }
-        if (!this.components().isAbsent() && this.components().map(Optional::get).get().stream().anyMatch(topLevelComponent -> topLevelComponent.getType().isRequiredFlag())) {
-            flagsToApply.add(Message.Flag.IS_COMPONENTS_V2);
-        }
-        Possible<Optional<List<Message.Flag>>> pFlagsToApply = Possible.of(Optional.of(flagsToApply));
+        final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(Collections.emptySet(), Possible.absent(), this.suppressEmbeds(), this.components().map(Optional::get));
+
         WebhookMessageEditRequest json = WebhookMessageEditRequest.builder()
             .content(content())
             .embeds(mapPossibleOptional(embeds(), embeds -> embeds.stream()
@@ -91,7 +86,7 @@ interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<Webhoo
                     .collect(Collectors.toList()))
                 .orElse(Collections.emptyList())))
             .poll(poll())
-            .flags(mapPossibleOptional(pFlagsToApply, f -> f.stream()
+            .flags(mapPossibleOptional(Possible.of(Optional.ofNullable(flagsToApply)), f -> f.stream()
                 .mapToInt(Message.Flag::getFlag)
                 .reduce(0, (left, right) -> left | right)))
             // TODO upon v10 upgrade, it is required to also include new files as attachment here

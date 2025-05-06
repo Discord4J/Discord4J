@@ -29,9 +29,9 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -74,14 +74,8 @@ interface InteractionFollowupCreateSpecGenerator extends Spec<MultipartRequest<F
 
     @Override
     default MultipartRequest<FollowupMessageRequest> asRequest() {
-        List<Message.Flag> flagsToApply = new ArrayList<>();
-        if (this.ephemeral().toOptional().orElse(false)) {
-            flagsToApply.add(Message.Flag.EPHEMERAL);
-        }
-        if (!this.components().isAbsent() && this.components().get().stream().anyMatch(topLevelComponent -> topLevelComponent.getType().isRequiredFlag())) {
-            flagsToApply.add(Message.Flag.IS_COMPONENTS_V2);
-        }
-        Possible<List<Message.Flag>> pFlagsToApply = Possible.of(flagsToApply);
+        final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(Collections.emptySet(), this.ephemeral(), Possible.absent(), this.components());
+
         FollowupMessageRequest request = FollowupMessageRequest.builder()
                 .content(content())
                 .username(username())
@@ -92,7 +86,7 @@ interface InteractionFollowupCreateSpecGenerator extends Spec<MultipartRequest<F
                 .components(mapPossible(components(), components -> components.stream()
                     .map(BaseMessageComponent::getData)
                     .collect(Collectors.toList())))
-                .flags(mapPossible(pFlagsToApply, f -> f.stream()
+                .flags(mapPossible(Possible.ofNullable(flagsToApply), f -> f.stream()
                     .mapToInt(Message.Flag::getFlag)
                     .reduce(0, (left, right) -> left | right)))
                 .build();

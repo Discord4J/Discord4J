@@ -67,11 +67,7 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
 
     @Override
     default MultipartRequest<MessageEditRequest> asRequest() {
-        Set<Message.Flag> flagsToApply = new HashSet<>(this.flags().map(Optional::get).toOptional().orElse(Collections.emptyList()));
-        if (!this.components().isAbsent() && this.components().map(Optional::get).get().stream().anyMatch(topLevelComponent -> topLevelComponent.getType().isRequiredFlag())) {
-            flagsToApply.add(Message.Flag.IS_COMPONENTS_V2);
-        }
-        Possible<Optional<List<Message.Flag>>> pFlagsToApply = Possible.of(Optional.of(new ArrayList<>(flagsToApply)));
+        final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(this.flags().map(Optional::get).toOptional().orElse(Collections.emptyList()), Possible.absent(), Possible.absent(), this.components().map(Optional::get));
 
         MessageEditRequest json = MessageEditRequest.builder()
             .content(content())
@@ -79,7 +75,7 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
                 .map(EmbedCreateSpec::asRequest)
                 .collect(Collectors.toList())))
             .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
-            .flags(mapPossibleOptional(pFlagsToApply, f -> f.stream()
+            .flags(mapPossibleOptional(Possible.of(Optional.of(flagsToApply)), f -> f.stream()
                 .mapToInt(Message.Flag::getFlag)
                 .reduce(0, (left, right) -> left | right)))
             .components(mapPossibleOptional(components(), components -> components.stream()
