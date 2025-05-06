@@ -197,6 +197,7 @@ public class RestChannel {
      * Request to create a message using a given {@link MessageCreateRequest} as body. If you want to include
      * attachments to your message, see {@link #createMessage(MultipartRequest)}.
      *
+     * @apiNote if the request comes from a {@code Spec} class can be different from a raw {@link ImmutableMessageCreateRequest.Builder#build()} for flags and another internal behaviours
      * @param request request body used to create a new message
      * @return a {@link Mono} where, upon successful completion, emits the created {@link MessageData}. If an
      * error is received, it is emitted through the {@code Mono}.
