@@ -32,6 +32,7 @@ import reactor.core.publisher.Mono;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -64,13 +65,15 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
 
     @Override
     default MultipartRequest<MessageEditRequest> asRequest() {
+        final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(this.flags().map(Optional::get).toOptional().orElse(null), Possible.absent(), Possible.absent(), this.components().map(Optional::get));
+
         MessageEditRequest json = MessageEditRequest.builder()
             .content(content())
             .embeds(mapPossibleOptional(embeds(), embeds -> embeds.stream()
                 .map(EmbedCreateSpec::asRequest)
                 .collect(Collectors.toList())))
             .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
-            .flags(mapPossibleOptional(flags(), f -> f.stream()
+            .flags(mapPossibleOptional(Possible.of(Optional.ofNullable(flagsToApply)), f -> f.stream()
                 .mapToInt(Message.Flag::getFlag)
                 .reduce(0, (left, right) -> left | right)))
             .components(mapPossibleOptional(components(), components -> components.stream()

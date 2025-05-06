@@ -34,6 +34,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -82,6 +83,8 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
 
     @Override
     default MultipartRequest<MessageCreateRequest> asRequest() {
+        final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(this.flags().toOptional().orElse(null), Possible.absent(), Possible.absent(), this.components());
+
         MessageCreateRequest json = MessageCreateRequest.builder()
             .content(content())
             .nonce(nonce())
@@ -101,7 +104,7 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
             .stickerIds(mapPossible(stickersIds(),
                 r -> r.stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList())))
             .poll(poll())
-            .flags(mapPossible(flags(), f -> f.stream()
+            .flags(mapPossible(Possible.ofNullable(flagsToApply), f -> f.stream()
                 .mapToInt(Message.Flag::getFlag)
                 .reduce(0, (left, right) -> left | right)))
             .build();
