@@ -75,7 +75,7 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
                 .map(EmbedCreateSpec::asRequest)
                 .collect(Collectors.toList())))
             .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
-            .flags(mapPossibleOptional(Possible.of(Optional.of(flagsToApply)), f -> f.stream()
+            .flags(mapPossibleOptional(Possible.of(Optional.ofNullable(flagsToApply)), f -> f.stream()
                 .mapToInt(Message.Flag::getFlag)
                 .reduce(0, (left, right) -> left | right)))
             .components(mapPossibleOptional(components(), components -> components.stream()
