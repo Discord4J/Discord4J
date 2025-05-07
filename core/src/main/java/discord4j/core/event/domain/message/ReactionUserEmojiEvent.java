@@ -28,7 +28,7 @@ import reactor.util.annotation.Nullable;
 /**
  * Represents an event related to a {@link discord4j.core.object.reaction.Reaction} with a user and more data of the reaction.
  */
-public class ReactionUserEmojiEvent extends ReactionBaseEmojiEvent {
+public abstract class ReactionUserEmojiEvent extends ReactionBaseEmojiEvent {
 
     private final long userId;
     private final boolean burst;

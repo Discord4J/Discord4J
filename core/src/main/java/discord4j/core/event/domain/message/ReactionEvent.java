@@ -30,7 +30,7 @@ import java.util.Optional;
 /**
  * Represents an event related to a {@link discord4j.core.object.reaction.Reaction}.
  */
-public class ReactionEvent extends MessageEvent {
+public abstract class ReactionEvent extends MessageEvent {
 
     private final long channelId;
     private final long messageId;
