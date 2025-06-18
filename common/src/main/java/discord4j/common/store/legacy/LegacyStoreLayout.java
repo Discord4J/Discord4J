@@ -384,7 +384,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_CATEGORY:
             case GUILD_NEWS:
             case GUILD_STORE:
-            case GUILD_STAGE_VOICE: return saveChannel(dispatch);
+            case GUILD_STAGE_VOICE:
+            case GUILD_FORUM: return saveChannel(dispatch);
             case DM:
             case GROUP_DM: return Mono.empty();
             default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
@@ -417,7 +418,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_CATEGORY:
             case GUILD_NEWS:
             case GUILD_STORE:
-            case GUILD_STAGE_VOICE: return deleteChannel(dispatch);
+            case GUILD_STAGE_VOICE:
+            case GUILD_FORUM: return deleteChannel(dispatch);
             case DM:
             case GROUP_DM: return Mono.empty();
             default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
@@ -450,7 +452,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_CATEGORY:
             case GUILD_NEWS:
             case GUILD_STORE:
-            case GUILD_STAGE_VOICE: return updateChannel(dispatch.channel());
+            case GUILD_STAGE_VOICE:
+            case GUILD_FORUM: return updateChannel(dispatch.channel());
             case DM:
             case GROUP_DM: return Mono.empty();
             default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
@@ -469,7 +472,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         GUILD_NEWS_THREAD(10),
         GUILD_PUBLIC_THREAD(11),
         GUILD_PRIVATE_THREAD(12),
-        GUILD_STAGE_VOICE(13);
+        GUILD_STAGE_VOICE(13),
+        GUILD_FORUM(15);
 
         private final int value;
 
@@ -494,6 +498,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 case 11: return GUILD_PUBLIC_THREAD;
                 case 12: return GUILD_PRIVATE_THREAD;
                 case 13: return GUILD_STAGE_VOICE;
+                case 15: return GUILD_FORUM;
                 default: return UNKNOWN;
             }
         }
