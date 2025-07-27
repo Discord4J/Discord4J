@@ -37,7 +37,7 @@ public class OnboardingPromptOption implements Entity {
                 .map(Snowflake::of)
                 .collect(Collectors.toList());
 
-        this.emoji = data.emoji().toOptional().map(Emoji::of).orElse(null);
+        this.emoji = data.emoji().toOptional().filter(emoji -> emoji.name().isPresent()).map(Emoji::of).orElse(null);
     }
 
     /**
