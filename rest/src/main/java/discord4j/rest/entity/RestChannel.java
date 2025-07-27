@@ -217,7 +217,7 @@ public class RestChannel {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageData> createMessage(EmbedData embed) {
-        return createMessage(MessageCreateRequest.builder().embed(embed).build());
+        return createMessage(MessageCreateRequest.builder().addEmbed(embed).build());
     }
 
     /*
