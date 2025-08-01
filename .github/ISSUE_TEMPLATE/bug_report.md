@@ -1,6 +1,7 @@
 ---
 name: Bug Report
 about: Report a bug to help us improve
+type: "Bug"
 
 ---
 
@@ -8,7 +9,7 @@ about: Report a bug to help us improve
 YOUR ISSUE MAY BE CLOSED IF YOU DO NOT FOLLOW THIS TEMPLATE
 
 Consider searching for similar issues before submitting yours:
-https://github.com/Discord4J/Discord4J/issues?q=is%3Aissue+label%3Abug
+https://github.com/Discord4J/Discord4J/issues?q=is%3Aissue%20state%3Aopen%20type%3ABug
 -->
 
 **To Reproduce:** <!-- A simple set of reproduction steps or a MINIMAL reproducible example -->
