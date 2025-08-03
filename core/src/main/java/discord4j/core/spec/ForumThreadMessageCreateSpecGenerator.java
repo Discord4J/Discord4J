@@ -21,7 +21,7 @@ public interface ForumThreadMessageCreateSpecGenerator extends Spec<ForumThreadM
 
     Possible<List<EmbedCreateSpec>> embeds();
 
-    Possible<List<AllowedMentions>> allowedMentions();
+    Possible<AllowedMentions> allowedMentions();
 
     Possible<List<MessageComponent>> components();
 
@@ -33,7 +33,7 @@ public interface ForumThreadMessageCreateSpecGenerator extends Spec<ForumThreadM
 
         return builder.content(content())
             .embeds(mapPossible(embeds(), list -> list.stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList())))
-            .allowedMentions(mapPossible(allowedMentions(), list -> list.stream().map(AllowedMentions::toData).collect(Collectors.toList())))
+            .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
             .components(mapPossible(components(), list -> list.stream().map(MessageComponent::getData).collect(Collectors.toList())))
             .stickerIds(mapPossible(stickerIds(), list -> list.stream().map(snowflake -> Id.of(snowflake.asLong())).collect(Collectors.toList())))
             .build();
