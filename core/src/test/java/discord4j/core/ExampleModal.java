@@ -71,7 +71,13 @@ public class ExampleModal {
                             String story = "";
                             String comments = "";
 
-                            for (TextInput component : event.getComponents(TextInput.class)) {
+                            List<TextInput> components = event.getComponents(TextInput.class);
+
+                            if (components.isEmpty()) {
+                                return event.reply("No components found!");
+                            }
+
+                            for (TextInput component : components) {
                                 if (PARAGRAPHINPUT_CUSTOM_ID.equals(component.getCustomId())) {
                                     story = component.getValue().orElse("untiteled");
                                 } else if (INPUT_CUSTOM_ID.equals(component.getCustomId())) {
