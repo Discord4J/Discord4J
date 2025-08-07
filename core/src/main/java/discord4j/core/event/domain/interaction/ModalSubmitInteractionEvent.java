@@ -23,6 +23,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.Label;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.spec.InteractionPresentModalSpec;
 import discord4j.gateway.ShardInfo;
@@ -111,6 +112,9 @@ public class ModalSubmitInteractionEvent extends ComponentInteractionEvent {
                     if (it instanceof ActionRow) {
                         ActionRow row = (ActionRow) it;
                         return row.getChildren().stream();
+                    } else if (it instanceof Label) {
+                        Label label = (Label) it;
+                        return label.getChildren().stream();
                     }
                     return Stream.empty();
                 })

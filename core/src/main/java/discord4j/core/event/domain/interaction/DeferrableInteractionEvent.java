@@ -301,7 +301,7 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      */
     public Mono<Void> presentModal(InteractionPresentModalSpec spec) {
         Objects.requireNonNull(spec);
-        return Mono.defer(() -> createInteractionResponse(InteractionResponseType.MODAL, spec.asRequest()));
+        return Mono.defer(() -> createInteractionResponse(InteractionResponseType.MODAL, MultipartRequest.ofRequest(spec.asRequest())));
     }
 
     /**

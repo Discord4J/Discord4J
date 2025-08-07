@@ -57,9 +57,10 @@ public class MessageComponent implements BaseMessageComponent {
             case SELECT_MENU_ROLE:
             case SELECT_MENU_CHANNEL:
             case SELECT_MENU_MENTIONABLE:
-            case SELECT_MENU_USER:
-            case SELECT_MENU: return new SelectMenu(data);
+            case SELECT_MENU_USER: return new SelectMenu(data);
+            case SELECT_MENU_STRING: return new StringSelectMenu(data);
             case TEXT_INPUT: return new TextInput(data);
+            case LABEL: return new Label(data);
             default: {
                 MessageComponent.LOGGER.warn("Unhandled component type: " + data.type());
                 return new MessageComponent(data);
@@ -107,7 +108,7 @@ public class MessageComponent implements BaseMessageComponent {
         UNKNOWN(-1),
         ACTION_ROW(1),
         BUTTON(2),
-        SELECT_MENU(3),
+        SELECT_MENU_STRING(3),
         TEXT_INPUT(4),
         SELECT_MENU_USER(5),
         SELECT_MENU_ROLE(6),
@@ -120,7 +121,14 @@ public class MessageComponent implements BaseMessageComponent {
         FILE(13, true),
         SEPARATOR(14, true),
         CONTAINER(17, true),
+        LABEL(18),
         ;
+
+        /**
+         * @deprecated Use {@link #SELECT_MENU_STRING} instead.
+         */
+        @Deprecated
+        public static final Type SELECT_MENU = SELECT_MENU_STRING;
 
         private final int value;
         private final boolean requireFlag;
@@ -151,7 +159,7 @@ public class MessageComponent implements BaseMessageComponent {
             switch (value) {
                 case 1: return ACTION_ROW;
                 case 2: return BUTTON;
-                case 3: return SELECT_MENU;
+                case 3: return SELECT_MENU_STRING;
                 case 4: return TEXT_INPUT;
                 case 5: return SELECT_MENU_USER;
                 case 6: return SELECT_MENU_ROLE;
@@ -164,6 +172,7 @@ public class MessageComponent implements BaseMessageComponent {
                 case 13: return FILE;
                 case 14: return SEPARATOR;
                 case 17: return CONTAINER;
+                case 18: return LABEL;
                 default: return UNKNOWN;
             }
         }
