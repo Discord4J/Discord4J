@@ -20,7 +20,7 @@ package discord4j.core;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.ModalSubmitInteractionEvent;
-import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.Label;
 import discord4j.core.object.component.TextInput;
 import discord4j.core.spec.InteractionPresentModalSpec;
 import discord4j.rest.interaction.GuildCommandRegistrar;
@@ -58,8 +58,8 @@ public class ExampleModal {
                                     .title("Example modal")
                                     .customId(MODAL_CUSTOM_ID)
                                     .addAllComponents(Arrays.asList(
-                                            ActionRow.of(TextInput.small(INPUT_CUSTOM_ID, "A title?").required(false)),
-                                            ActionRow.of(TextInput.paragraph(PARAGRAPHINPUT_CUSTOM_ID, "Tell us something...", 250, 928).placeholder("...in more than 250 characters but less than 928").required(true))
+                                            Label.of("A title?", "A Desc...", TextInput.small(INPUT_CUSTOM_ID).required(false)),
+                                            Label.of("Tell us something...", TextInput.paragraph(PARAGRAPHINPUT_CUSTOM_ID, 250, 928).placeholder("...in more than 250 characters but less than 928").required(false))
                                     ))
                                     .build());
                         }
