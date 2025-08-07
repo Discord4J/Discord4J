@@ -57,9 +57,10 @@ public class MessageComponent implements BaseMessageComponent {
             case SELECT_MENU_ROLE:
             case SELECT_MENU_CHANNEL:
             case SELECT_MENU_MENTIONABLE:
-            case SELECT_MENU_USER:
-            case SELECT_MENU: return new SelectMenu(data);
+            case SELECT_MENU_USER: return new SelectMenu(data);
+            case SELECT_MENU: return new StringSelectMenu(data);
             case TEXT_INPUT: return new TextInput(data);
+            case LABEL: return new Label(data);
             default: {
                 MessageComponent.LOGGER.warn("Unhandled component type: " + data.type());
                 return new MessageComponent(data);
@@ -120,6 +121,7 @@ public class MessageComponent implements BaseMessageComponent {
         FILE(13, true),
         SEPARATOR(14, true),
         CONTAINER(17, true),
+        LABEL(18),
         ;
 
         private final int value;
@@ -164,6 +166,7 @@ public class MessageComponent implements BaseMessageComponent {
                 case 13: return FILE;
                 case 14: return SEPARATOR;
                 case 17: return CONTAINER;
+                case 18: return LABEL;
                 default: return UNKNOWN;
             }
         }
