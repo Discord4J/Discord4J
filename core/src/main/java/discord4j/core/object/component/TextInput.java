@@ -29,7 +29,7 @@ import java.util.Optional;
  *
  * @see <a href="https://discord.com/developers/docs/components/reference#text-input">Text Inputs</a>
  */
-public class TextInput extends ActionComponent {
+public class TextInput extends ActionComponent implements ICanBeUsedInLabelComponent {
 
     /**
      * Creates a {@link TextInput.Style#SHORT short} text input.
