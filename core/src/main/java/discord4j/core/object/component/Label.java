@@ -100,13 +100,4 @@ public class Label extends LayoutComponent {
     public MessageComponent getComponent() {
         return this.getChildren().get(0);
     }
-
-    /**
-     * Get this label component's custom id if present
-     *
-     * @return An {@link Optional} containing the custom id if present
-     */
-    public String getCustomId() {
-        return getData().customId().toOptional().orElseThrow(IllegalStateException::new);
-    }
 }
