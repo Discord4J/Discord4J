@@ -565,10 +565,13 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                 }
                 return new WithUser<>(ImmutableMemberData.builder()
                         .from(old.get())
+                        .avatar(dispatch.avatar())
+                        .banner(Possible.of(dispatch.banner()))
                         .nick(dispatch.nick())
                         .roles(dispatch.roles().stream().map(Id::of).collect(Collectors.toList()))
                         .joinedAt(dispatch.joinedAt())
                         .premiumSince(dispatch.premiumSince())
+                        .pending(dispatch.pending())
                         .build(), ref, ImmutableMemberData::withUser);
             });
             return oldData;
