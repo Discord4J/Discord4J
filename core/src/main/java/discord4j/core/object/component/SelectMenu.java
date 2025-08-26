@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
- * A message select menu.
+ * A select menu.
  *
  * @see <a href="https://discord.com/developers/docs/components/reference#string-select">String Select Menu</a>
  * @see <a href="https://discord.com/developers/docs/components/reference#user-select">User Select Menu</a>
@@ -50,7 +50,7 @@ public class SelectMenu extends ActionComponent {
      * @return A select menu with the given data.
      */
     public static SelectMenu of(String customId, Option... options) {
-        return of(Type.SELECT_MENU, customId, Arrays.asList(options), null, null);
+        return StringSelectMenu.of(customId, options);
     }
 
     /**
@@ -61,8 +61,7 @@ public class SelectMenu extends ActionComponent {
      * @return A select menu with the given data.
      */
     public static SelectMenu of(String customId, List<Option> options) {
-        Objects.requireNonNull(options);
-        return of(Type.SELECT_MENU, customId, options, null, null);
+        return StringSelectMenu.of(customId, options);
     }
 
     /**
@@ -644,6 +643,10 @@ public class SelectMenu extends ActionComponent {
 
         Option(SelectOptionData data) {
             this.data = data;
+        }
+
+        public SelectOptionData getData() {
+            return data;
         }
 
         /**

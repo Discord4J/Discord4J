@@ -228,7 +228,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
         }
 
         if (label != null) {
-            builder.label(label);
+            builder.label(Possible.of(Optional.of(label)));
         }
 
         if (url != null) {
@@ -475,7 +475,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
             .style(style.getValue())
             .customId(Possible.ofNullable(customId))
             .emoji(Possible.ofNullable(emoji).map(Emoji::asEmojiData))
-            .label(Possible.ofNullable(label))
+            .label(Possible.ofNullable(label).map(Optional::ofNullable))
             .url(Possible.ofNullable(url))
             .skuId(Possible.ofNullable(skuId).map(Id::of))
             .build()
@@ -503,7 +503,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @return The button's label.
      */
     public Optional<String> getLabel() {
-        return getData().label().toOptional();
+        return Possible.flatOpt(getData().label());
     }
 
     /**

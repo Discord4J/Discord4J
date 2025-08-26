@@ -29,7 +29,7 @@ import java.util.Optional;
  *
  * @see <a href="https://discord.com/developers/docs/components/reference#text-input">Text Inputs</a>
  */
-public class TextInput extends ActionComponent {
+public class TextInput extends ActionComponent implements ICanBeUsedInLabelComponent {
 
     /**
      * Creates a {@link TextInput.Style#SHORT short} text input.
@@ -38,7 +38,19 @@ public class TextInput extends ActionComponent {
      * @return A text input with the given data.
      */
     public static TextInput small(String customId) {
-        return of(Style.SHORT, customId, null, null, null, null, null);
+        return of(Style.SHORT, customId, null, null, null, null);
+    }
+
+    /**
+     * Creates a {@link TextInput.Style#SHORT short} text input.
+     *
+     * @param customId A developer-defined identifier for the text input.
+     * @param minLength The minimum length the user is required to input
+     * @param maxLength The maximum length the user is required to input
+     * @return A text input with the given data.
+     */
+    public static TextInput small(String customId, int minLength, int maxLength) {
+        return of(Style.SHORT, customId, minLength, maxLength, null, null);
     }
 
     /**
@@ -47,7 +59,9 @@ public class TextInput extends ActionComponent {
      * @param customId A developer-defined identifier for the text input.
      * @param label The text that appears above the input
      * @return A text input with the given data.
+     * @deprecated deprecated by discord
      */
+    @Deprecated
     public static TextInput small(String customId, String label) {
         return of(Style.SHORT, customId, label, null, null, null, null);
     }
@@ -59,7 +73,9 @@ public class TextInput extends ActionComponent {
      * @param label The text that appears above the input
      * @param placeholder The placeholder text to be displayed
      * @return A text input with the given data.
+     * @deprecated deprecated by discord
      */
+    @Deprecated
     public static TextInput small(String customId, String label, String placeholder) {
         return of(Style.SHORT, customId, label, null, null, null, placeholder);
     }
@@ -72,7 +88,9 @@ public class TextInput extends ActionComponent {
      * @param minLength The minimum length the user is required to input
      * @param maxLength The maximum length the user is required to input
      * @return A text input with the given data.
+     * @deprecated deprecated by discord
      */
+    @Deprecated
     public static TextInput small(String customId, String label, int minLength, int maxLength) {
         return of(Style.SHORT, customId, label, minLength, maxLength, null, null);
     }
@@ -93,7 +111,9 @@ public class TextInput extends ActionComponent {
      * @param customId A developer-defined identifier for the text input.
      * @param label The text that appears above the input
      * @return A text input with the given data.
+     * @deprecated deprecated by discord
      */
+    @Deprecated
     public static TextInput paragraph(String customId, String label) {
         return of(Style.PARAGRAPH, customId, label, null, null, null, null);
     }
@@ -105,9 +125,23 @@ public class TextInput extends ActionComponent {
      * @param label The text that appears above the input
      * @param placeholder The placeholder text to display
      * @return A text input with the given data.
+     * @deprecated deprecated by discord
      */
+    @Deprecated
     public static TextInput paragraph(String customId, String label, String placeholder) {
         return of(Style.PARAGRAPH, customId, label, null, null, null, placeholder);
+    }
+
+    /**
+     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
+     *
+     * @param customId A developer-defined identifier for the text input.
+     * @param minLength The minimum length the user is required to input
+     * @param maxLength The maximum length the user is required to input
+     * @return A text input with the given data.
+     */
+    public static TextInput paragraph(String customId, int minLength, int maxLength) {
+        return of(Style.PARAGRAPH, customId, minLength, maxLength, null, null);
     }
 
     /**
@@ -118,11 +152,40 @@ public class TextInput extends ActionComponent {
      * @param minLength The minimum length the user is required to input
      * @param maxLength The maximum length the user is required to input
      * @return A text input with the given data.
+     * @deprecated deprecated by discord
      */
+    @Deprecated
     public static TextInput paragraph(String customId, String label, int minLength, int maxLength) {
         return of(Style.PARAGRAPH, customId, label, minLength, maxLength, null, null);
     }
 
+    public static TextInput of(Style style, String customId, @Nullable Integer minLength,
+                                @Nullable Integer maxLength, @Nullable String value, @Nullable String placeholder) {
+        ImmutableComponentData.Builder builder = ComponentData.builder()
+            .type(MessageComponent.Type.TEXT_INPUT.getValue())
+            .style(style.getValue())
+            .customId(customId);
+
+        if (minLength != null) {
+            builder.minLength(minLength);
+        }
+
+        if (maxLength != null) {
+            builder.maxLength(maxLength);
+        }
+
+        if (value != null) {
+            builder.value(value);
+        }
+
+        if (placeholder != null) {
+            builder.placeholder(placeholder);
+        }
+
+        return new TextInput(builder.build());
+    }
+
+    @Deprecated
     private static TextInput of(Style style, String customId, @Nullable String label, @Nullable Integer minLength,
                                 @Nullable Integer maxLength, @Nullable String value, @Nullable String placeholder) {
         ImmutableComponentData.Builder builder = ComponentData.builder()
@@ -131,7 +194,7 @@ public class TextInput extends ActionComponent {
                 .customId(customId);
 
         if (label != null) {
-            builder.label(label);
+            builder.label(Possible.ofNullable(label).map(Optional::ofNullable));
         }
 
         if (minLength != null) {
@@ -284,13 +347,27 @@ public class TextInput extends ActionComponent {
         return new TextInput(builder.build());
     }
 
+    protected TextInput(Integer id, Style style, String customId, @Nullable Integer minLength,
+                        @Nullable Integer maxLength, @Nullable String value, @Nullable String placeholder) {
+        this(MessageComponent.getBuilder(Type.TEXT_INPUT)
+            .id(Possible.ofNullable(id))
+            .style(style.getValue())
+            .customId(customId)
+            .minLength(Possible.ofNullable(minLength))
+            .maxLength(Possible.ofNullable(maxLength))
+            .value(Possible.ofNullable(value))
+            .placeholder(Possible.ofNullable(placeholder))
+            .build());
+    }
+
+    @Deprecated
     protected TextInput(Integer id, Style style, String customId, @Nullable String label, @Nullable Integer minLength,
                         @Nullable Integer maxLength, @Nullable String value, @Nullable String placeholder) {
         this(MessageComponent.getBuilder(Type.TEXT_INPUT)
             .id(Possible.ofNullable(id))
             .style(style.getValue())
             .customId(customId)
-            .label(Possible.ofNullable(label))
+            .label(Possible.ofNullable(label).map(Optional::ofNullable))
             .minLength(Possible.ofNullable(minLength))
             .maxLength(Possible.ofNullable(maxLength))
             .value(Possible.ofNullable(value))
@@ -317,9 +394,11 @@ public class TextInput extends ActionComponent {
      * Gets the text input's label
      *
      * @return The text input's label
+     * @deprecated deprecated by discord
      */
+    @Deprecated
     public Optional<String> getLabel() {
-        return getData().label().toOptional();
+        return Possible.flatOpt(getData().label());
     }
 
     /**

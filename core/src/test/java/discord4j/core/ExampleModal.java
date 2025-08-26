@@ -20,7 +20,9 @@ package discord4j.core;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.ModalSubmitInteractionEvent;
-import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.Label;
+import discord4j.core.object.component.SelectMenu;
+import discord4j.core.object.component.StringSelectMenu;
 import discord4j.core.object.component.TextInput;
 import discord4j.core.spec.InteractionPresentModalSpec;
 import discord4j.rest.interaction.GuildCommandRegistrar;
@@ -31,6 +33,7 @@ import reactor.core.publisher.Mono;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.StringJoiner;
 
 public class ExampleModal {
 
@@ -41,6 +44,7 @@ public class ExampleModal {
     static final String MODAL_CUSTOM_ID = "my-modal";
     static final String PARAGRAPHINPUT_CUSTOM_ID = "my-paragraph-input";
     static final String INPUT_CUSTOM_ID = "my-input";
+    static final String SELECT_CUSTOM_ID = "my-select";
 
     public static void main(String[] args) {
         DiscordClient.create(token)
@@ -58,8 +62,14 @@ public class ExampleModal {
                                     .title("Example modal")
                                     .customId(MODAL_CUSTOM_ID)
                                     .addAllComponents(Arrays.asList(
-                                            ActionRow.of(TextInput.small(INPUT_CUSTOM_ID, "A title?").required(false)),
-                                            ActionRow.of(TextInput.paragraph(PARAGRAPHINPUT_CUSTOM_ID, "Tell us something...", 250, 928).placeholder("...in more than 250 characters but less than 928").required(true))
+                                            Label.of("A title?", "Add a title for this", TextInput.small(INPUT_CUSTOM_ID).required(false)),
+                                            Label.of("Tell us something...", TextInput.paragraph(PARAGRAPHINPUT_CUSTOM_ID, 250, 928).placeholder("...in more than 250 characters but less than 928").required(false)),
+                                            Label.of("Type", "What type the text is", StringSelectMenu.of(SELECT_CUSTOM_ID, Arrays.asList(
+                                                SelectMenu.Option.ofDefault("Other", "other"),
+                                                SelectMenu.Option.of("Novel", "Novel"),
+                                                SelectMenu.Option.of("Fable", "Fable"),
+                                                SelectMenu.Option.of("Poetry", "Poetry")
+                                            )))
                                     ))
                                     .build());
                         }
@@ -68,18 +78,36 @@ public class ExampleModal {
 
                     Publisher<?> onModal = client.on(ModalSubmitInteractionEvent.class, event -> {
                         if (MODAL_CUSTOM_ID.equals(event.getCustomId())) {
-                            String story = "";
+                            String title = "";
                             String comments = "";
+                            String type = "";
 
-                            for (TextInput component : event.getComponents(TextInput.class)) {
+                            List<TextInput> textInputComponents = event.getComponents(TextInput.class);
+                            List<StringSelectMenu> stringSelectComponents = event.getComponents(StringSelectMenu.class);
+
+                            if (textInputComponents.isEmpty() && stringSelectComponents.isEmpty()) {
+                                return event.reply("No components found!");
+                            }
+
+                            for (TextInput component : textInputComponents) {
                                 if (PARAGRAPHINPUT_CUSTOM_ID.equals(component.getCustomId())) {
-                                    story = component.getValue().orElse("untiteled");
+                                    title = component.getValue().orElse("untiteled");
                                 } else if (INPUT_CUSTOM_ID.equals(component.getCustomId())) {
                                     comments = component.getValue().orElse("");
                                 }
                             }
 
-                            return event.reply("You wrote: " + story + "\n\nComments: " + comments);
+                            for (StringSelectMenu component : stringSelectComponents) {
+                                if (SELECT_CUSTOM_ID.equals(component.getCustomId())) {
+                                    type = component.getValues().map(values -> {
+                                        StringJoiner stringJoiner = new StringJoiner(", ");
+                                        values.forEach(stringJoiner::add);
+                                        return stringJoiner.toString();
+                                    }).orElse("other?");
+                                }
+                            }
+
+                            return event.reply(String.format("You wrote a `%s` named %s\n\nComments:%s", type, title, comments));
                         }
                         return Mono.empty();
                     });
