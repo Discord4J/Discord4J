@@ -31,10 +31,10 @@ import discord4j.discordjson.possible.Possible;
  *     <li>three {@link TextDisplay}, one with 2000 characters and two with 1000 characters</li>
  * </ul>
  *
- * @apiNote This component requires {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
+ * @apiNote This component requires {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2} if used in messages
  * @see <a href="https://discord.com/developers/docs/components/reference#text-display">Text Display</a>
  */
-public class TextDisplay extends MessageComponent implements TopLevelMessageComponent, ICanBeUsedInContainerComponent, ICanBeUsedInSectionComponent {
+public class TextDisplay extends MessageComponent implements TopLevelMessageComponent, TopLevelModalComponent, ICanBeUsedInContainerComponent, ICanBeUsedInSectionComponent {
 
     /** The maximum amount of characters that can be in the sum of these components. */
     public static final int MAX_DISPLAY_CHARACTERS_LENGTH = 4000;
