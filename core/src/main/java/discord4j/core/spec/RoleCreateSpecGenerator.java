@@ -17,9 +17,11 @@
 
 package discord4j.core.spec;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
+import discord4j.discordjson.json.ImmutableRoleColorData;
+import discord4j.discordjson.json.ImmutableRoleCreateRequest;
+import discord4j.discordjson.json.RoleColorData;
 import discord4j.discordjson.json.RoleCreateRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
@@ -38,7 +40,14 @@ interface RoleCreateSpecGenerator extends AuditSpec<RoleCreateRequest> {
 
     Possible<PermissionSet> permissions();
 
+    @Deprecated
     Possible<Color> color();
+
+    Possible<Color> primaryColor();
+
+    Possible<Optional<Color>> secondaryColor();
+
+    Possible<Optional<Color>> tertiaryColor();
 
     Possible<Boolean> hoist();
 
@@ -50,15 +59,24 @@ interface RoleCreateSpecGenerator extends AuditSpec<RoleCreateRequest> {
 
     @Override
     default RoleCreateRequest asRequest() {
-        return RoleCreateRequest.builder()
-                .name(name())
-                .permissions(mapPossible(permissions(), PermissionSet::getRawValue))
-                .color(mapPossible(color(), Color::getRGB))
-                .hoist(hoist())
-                .mentionable(mentionable())
-                .icon(icon())
-                .unicodeEmoji(unicodeEmoji())
-                .build();
+        ImmutableRoleCreateRequest.Builder builder = RoleCreateRequest.builder()
+            .name(name())
+            .permissions(mapPossible(permissions(), PermissionSet::getRawValue))
+            .color(mapPossible(color(), Color::getRGB))
+            .hoist(hoist())
+            .mentionable(mentionable())
+            .icon(icon())
+            .unicodeEmoji(unicodeEmoji());
+
+        if (!primaryColor().isAbsent()) {
+            ImmutableRoleColorData.Builder builderRoleColor = RoleColorData.builder();
+            builderRoleColor.primaryColor(primaryColor().get().getRGB());
+            builderRoleColor.secondaryColor(secondaryColor().get().map(Color::getRGB));
+            builderRoleColor.tertiaryColor(tertiaryColor().get().map(Color::getRGB));
+            builder.colors(builderRoleColor.build());
+        }
+
+        return builder.build();
     }
 }
 

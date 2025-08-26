@@ -207,9 +207,38 @@ public final class Role implements Entity {
      * Gets the color assigned to this role.
      *
      * @return The color assigned to this role.
+     * @deprecated Use {@link #getPrimaryColor()} instead.
      */
+    @Deprecated
     public Color getColor() {
         return Color.of(data.color());
+    }
+
+    /**
+     * Gets the primary color assigned to this role.
+     *
+     * @return The primary color assigned to this role.
+     */
+    public Color getPrimaryColor() {
+        return Color.of(data.colors().primaryColor());
+    }
+
+    /**
+     * Gets the secondary color assigned to this role.
+     *
+     * @return The secondary color assigned to this role.
+     */
+    public Optional<Color> getSecondaryColor() {
+        return this.data.colors().secondaryColor().map(Color::of);
+    }
+
+    /**
+     * Gets the tertiary color assigned to this role.
+     *
+     * @return The tertiary color assigned to this role.
+     */
+    public Optional<Color> getTertiaryColor() {
+        return this.data.colors().tertiaryColor().map(Color::of);
     }
 
     /**
