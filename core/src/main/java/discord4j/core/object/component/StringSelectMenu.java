@@ -52,12 +52,16 @@ public class StringSelectMenu extends SelectMenu implements ICanBeUsedInLabelCom
     public static StringSelectMenu of(String customId, List<Option> options) {
         Objects.requireNonNull(options);
         ImmutableComponentData.Builder builder = ComponentData.builder()
-            .type(Type.SELECT_MENU.getValue())
+            .type(Type.SELECT_MENU_STRING.getValue())
             .customId(customId);
 
         builder.options(options.stream().map(Option::getData).collect(Collectors.toList()));
 
         return new StringSelectMenu(builder.build());
+    }
+
+    protected StringSelectMenu of(ComponentData data) {
+        return new StringSelectMenu(data);
     }
 
     StringSelectMenu(ComponentData data) {
@@ -71,8 +75,63 @@ public class StringSelectMenu extends SelectMenu implements ICanBeUsedInLabelCom
      *
      * @param value True if the select menu should be required otherwise False.
      * @return A new possibly required select menu with the same data as this one.
+     * @apiNote This value is ignored in messages
      */
     public StringSelectMenu required(boolean value) {
-        return new StringSelectMenu(ComponentData.builder().from(getData()).required(value).build());
+        return of(ComponentData.builder().from(getData()).required(value).build());
+    }
+
+    /**
+     * Creates a new select menu with the same data as this one, but disabled.
+     *
+     * @return A new disabled select menu with the same data as this one.
+     * @apiNote The disabled field on String Selects is not currently allowed in modals and will trigger an error if
+     * used
+     */
+    public SelectMenu disabled() {
+        return this.disabled(true);
+    }
+
+    /**
+     * Creates a new select menu with the same data as this one, but depending on the value param it may be disabled or
+     * not.
+     *
+     * @param value True if the select menu should be disabled otherwise False.
+     * @return A new possibly disabled select menu with the same data as this one.
+     * @apiNote The disabled field on String Selects is not currently allowed in modals and will trigger an error if
+     * used
+     */
+    public StringSelectMenu disabled(boolean value) {
+        return of(ComponentData.builder().from(getData()).disabled(value).build());
+    }
+
+    /**
+     * Creates a new select menu with the same data as this one, but with the given placeholder text.
+     *
+     * @param placeholder The new placeholder text.
+     * @return A new select menu with the given placeholder text.
+     */
+    public StringSelectMenu withPlaceholder(String placeholder) {
+        return of(ComponentData.builder().from(getData()).placeholder(placeholder).build());
+    }
+
+    /**
+     * Creates a new select menu with the same data as this one, but with the given minimum values.
+     *
+     * @param minValues The new minimum values.
+     * @return A new select menu with the given minimum values.
+     */
+    public StringSelectMenu withMinValues(int minValues) {
+        return of(ComponentData.builder().from(getData()).minValues(minValues).build());
+    }
+
+    /**
+     * Creates a new select menu with the same data as this one, but with the given maximum values.
+     *
+     * @param maxValues The new maximum values.
+     * @return A new select menu with the given maximum values.
+     */
+    public StringSelectMenu withMaxValues(int maxValues) {
+        return of(ComponentData.builder().from(getData()).maxValues(maxValues).build());
     }
 }
