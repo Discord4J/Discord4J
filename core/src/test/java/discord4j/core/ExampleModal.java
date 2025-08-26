@@ -45,7 +45,8 @@ public class ExampleModal {
     static final String MODAL_CUSTOM_ID = "my-modal";
     static final String PARAGRAPHINPUT_CUSTOM_ID = "my-paragraph-input";
     static final String INPUT_CUSTOM_ID = "my-input";
-    static final String SELECT_CUSTOM_ID = "my-select";
+    static final String SELECT_STRING_CUSTOM_ID = "my-select-string";
+    static final String SELECT_USER_CUSTOM_ID = "my-select-user";
 
     public static void main(String[] args) {
         DiscordClient.create(token)
@@ -68,13 +69,14 @@ public class ExampleModal {
                                     TextInput.small(INPUT_CUSTOM_ID).required(false)),
                                 Label.of("Tell us something...", TextInput.paragraph(PARAGRAPHINPUT_CUSTOM_ID, 250,
                                     928).placeholder("...in more than 250 characters but less than 928").required(false)),
-                                Label.of("Type", "What type the text is", StringSelectMenu.of(SELECT_CUSTOM_ID,
+                                Label.of("Type", "What type the text is", StringSelectMenu.of(SELECT_STRING_CUSTOM_ID,
                                     Arrays.asList(
                                     SelectMenu.Option.ofDefault("Other", "other"),
                                     SelectMenu.Option.of("Novel", "Novel"),
                                     SelectMenu.Option.of("Fable", "Fable"),
                                     SelectMenu.Option.of("Poetry", "Poetry")
-                                )))
+                                ))),
+                                Label.of("Attach an user", SelectMenu.ofUser(SELECT_USER_CUSTOM_ID))
                             ))
                             .build());
                     }
@@ -86,33 +88,36 @@ public class ExampleModal {
                         String title = "";
                         String comments = "";
                         String type = "";
+                        String attachedUser = "";
 
                         List<TextInput> textInputComponents = event.getComponents(TextInput.class);
-                        List<StringSelectMenu> stringSelectComponents = event.getComponents(StringSelectMenu.class);
+                        List<SelectMenu> selectComponents = event.getComponents(SelectMenu.class);
 
-                        if (textInputComponents.isEmpty() && stringSelectComponents.isEmpty()) {
+                        if (textInputComponents.isEmpty() && selectComponents.isEmpty()) {
                             return event.reply("No components found!");
                         }
 
                         for (TextInput component : textInputComponents) {
-                            if (PARAGRAPHINPUT_CUSTOM_ID.equals(component.getCustomId())) {
+                            if (INPUT_CUSTOM_ID.equals(component.getCustomId())) {
                                 title = component.getValue().orElse("untiteled");
-                            } else if (INPUT_CUSTOM_ID.equals(component.getCustomId())) {
+                            } else if (PARAGRAPHINPUT_CUSTOM_ID.equals(component.getCustomId())) {
                                 comments = component.getValue().orElse("");
                             }
                         }
 
-                        for (StringSelectMenu component : stringSelectComponents) {
-                            if (SELECT_CUSTOM_ID.equals(component.getCustomId())) {
+                        for (SelectMenu component : selectComponents) {
+                            if (SELECT_STRING_CUSTOM_ID.equals(component.getCustomId())) {
                                 type = component.getValues().map(values -> {
                                     StringJoiner stringJoiner = new StringJoiner(", ");
                                     values.forEach(stringJoiner::add);
                                     return stringJoiner.toString();
                                 }).orElse("other?");
+                            } else if (SELECT_USER_CUSTOM_ID.equals(component.getCustomId())) {
+                                attachedUser = component.getValues().map(values -> values.get(0)).orElse("none");
                             }
                         }
 
-                        return event.reply(String.format("You wrote a `%s` named %s\n\nComments:%s", type, title,
+                        return event.reply(String.format("You wrote a `%s` named %s\nUser: `%s`\n\nComments:%s", type, title, attachedUser,
                             comments));
                     }
                     return Mono.empty();
