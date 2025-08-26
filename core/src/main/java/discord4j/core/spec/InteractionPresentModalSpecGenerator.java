@@ -18,7 +18,8 @@
 package discord4j.core.spec;
 
 import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
-import discord4j.core.object.component.LayoutComponent;
+import discord4j.core.object.component.BaseMessageComponent;
+import discord4j.core.object.component.TopLevelModalComponent;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
@@ -37,24 +38,25 @@ interface InteractionPresentModalSpecGenerator extends Spec<InteractionApplicati
 
     Possible<String> customId();
 
-    Possible<List<LayoutComponent>> components();
+    Possible<List<TopLevelModalComponent>> components();
 
     @Override
     default InteractionApplicationCommandCallbackData asRequest() {
         return InteractionApplicationCommandCallbackData.builder()
-                .title(title())
-                .customId(customId())
-                .components(mapPossible(components(), components -> components.stream()
-                        .map(LayoutComponent::getData)
-                        .collect(Collectors.toList())))
-                .build();
+            .title(title())
+            .customId(customId())
+            .components(mapPossible(components(), components -> components.stream()
+                .map(BaseMessageComponent.class::cast)
+                .map(BaseMessageComponent::getData)
+                .collect(Collectors.toList())))
+            .build();
     }
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class InteractionPresentModalMonoGenerator extends Mono<Void>
-        implements InteractionPresentModalSpecGenerator {
+    implements InteractionPresentModalSpecGenerator {
 
     abstract DeferrableInteractionEvent event();
 
