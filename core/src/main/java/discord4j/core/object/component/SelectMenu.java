@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
- * A message select menu.
+ * A select menu.
  *
  * @see <a href="https://discord.com/developers/docs/components/reference#string-select">String Select Menu</a>
  * @see <a href="https://discord.com/developers/docs/components/reference#user-select">User Select Menu</a>
