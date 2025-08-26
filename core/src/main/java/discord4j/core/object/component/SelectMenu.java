@@ -40,7 +40,7 @@ import java.util.stream.StreamSupport;
  * @see <a href="https://discord.com/developers/docs/components/reference#mentionable-select">Mentionable Select Menu</a>
  * @see <a href="https://discord.com/developers/docs/components/reference#channel-select">Channel Select Menu</a>
  */
-public class SelectMenu extends ActionComponent {
+public class SelectMenu extends ActionComponent implements ICanBeUsedInLabelComponent {
 
     /**
      * Creates a string select menu.
@@ -487,6 +487,19 @@ public class SelectMenu extends ActionComponent {
      */
     public SelectMenu disabled(boolean value) {
         return new SelectMenu(ComponentData.builder().from(getData()).disabled(value).build());
+    }
+
+    /**
+     * Creates a new select menu with the same data as this one, but depending on the value param it may be
+     * required
+     * or not.
+     *
+     * @param value True if the select menu should be required otherwise False.
+     * @return A new possibly required select menu with the same data as this one.
+     * @apiNote This value is ignored in messages
+     */
+    public SelectMenu withRequired(boolean value) {
+        return new SelectMenu(ComponentData.builder().from(getData()).required(value).build());
     }
 
     /**
