@@ -77,7 +77,7 @@ public class StringSelectMenu extends SelectMenu implements ICanBeUsedInLabelCom
      * @return A new possibly required select menu with the same data as this one.
      * @apiNote This value is ignored in messages
      */
-    public StringSelectMenu required(boolean value) {
+    public StringSelectMenu withRequired(boolean value) {
         return of(ComponentData.builder().from(getData()).required(value).build());
     }
 
