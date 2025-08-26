@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * children.
  */
 @Experimental
-public abstract class LayoutComponent extends MessageComponent implements TopLevelMessageComponent {
+public abstract class LayoutComponent extends MessageComponent implements TopLevelMessageComponent, TopLevelModalComponent {
 
     LayoutComponent(ComponentData data) {
         super(data);
