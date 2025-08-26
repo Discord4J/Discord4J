@@ -498,7 +498,7 @@ public class SelectMenu extends ActionComponent implements ICanBeUsedInLabelComp
      * @return A new possibly required select menu with the same data as this one.
      * @apiNote This value is ignored in messages
      */
-    public SelectMenu withRequired(boolean value) {
+    public SelectMenu required(boolean value) {
         return new SelectMenu(ComponentData.builder().from(getData()).required(value).build());
     }
 
