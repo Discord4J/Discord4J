@@ -351,28 +351,29 @@ public abstract class Routes {
 
     /**
      * Returns all pinned messages in the channel as an array of message objects.
+     * Requires the `VIEW_CHANNEL` permission. If the user is missing the `READ_MESSAGE_HISTORY` permission in the channel, then no pins will be returned.
      *
      * @see <a href="https://discord.com/developers/docs/resources/channel#get-pinned-messages">
      * https://discord.com/developers/docs/resources/channel#get-pinned-messages</a>
      */
-    public static final Route MESSAGES_PINNED_GET = Route.get("/channels/{channel.id}/pins");
+    public static final Route MESSAGES_PINNED_GET = Route.get("/channels/{channel.id}/messages/pins");
 
     /**
-     * Pin a message in a channel. Requires the 'MANAGE_MESSAGES' permission. Returns a 204 empty response on success.
+     * Pin a message in a channel. Requires the 'PIN_MESSAGES' permission. Returns a 204 empty response on success.
      *
      * @see <a href="https://discord.com/developers/docs/resources/channel#add-pinned-channel-message">
      * https://discord.com/developers/docs/resources/channel#add-pinned-channel-message</a>
      */
-    public static final Route MESSAGES_PINNED_ADD = Route.put("/channels/{channel.id}/pins/{message.id}");
+    public static final Route MESSAGES_PINNED_ADD = Route.put("/channels/{channel.id}/messages/pins/{message.id}");
 
     /**
-     * Delete a pinned message in a channel. Requires the 'MANAGE_MESSAGES' permission. Returns a 204 empty response on
+     * Delete a pinned message in a channel. Requires the 'PIN_MESSAGES' permission. Returns a 204 empty response on
      * success.
      *
      * @see <a href="https://discord.com/developers/docs/resources/channel#delete-pinned-channel-message">
      * https://discord.com/developers/docs/resources/channel#delete-pinned-channel-message</a>
      */
-    public static final Route MESSAGES_PINNED_DELETE = Route.delete("/channels/{channel.id}/pins/{message.id}");
+    public static final Route MESSAGES_PINNED_DELETE = Route.delete("/channels/{channel.id}/messages/pins/{message.id}");
 
     /**
      * Adds a recipient to a Group DM using their access token.
