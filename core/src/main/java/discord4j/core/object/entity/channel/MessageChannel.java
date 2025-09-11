@@ -364,22 +364,10 @@ public interface MessageChannel extends Channel {
 
     default Flux<PinnedMessageReference> getPinnedMessages(PinnedMessagesQuerySpec spec) {
         Objects.requireNonNull(spec);
-        final Function<Map<String, Object>, Flux<PinnedMessagesResponseData>> makeRequest = params -> {
-            params.putAll(spec.asRequest());
-            return getClient().getRestClient().getChannelService()
-                .getPinnedMessages(getId().asLong(), params);
-        };
-
-        // TODO: Broken since this because need handle ISO dates and not IDs
-        final ToLongFunction<PinnedMessagesResponseData> getLastEntryId = response -> {
-            final List<PinnedMessageData> entries = response.items();
-            return (entries.isEmpty()) ? Long.MAX_VALUE :
-                Snowflake.asLong(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(entries.get(entries.size() - 1).message().id().get));
-        };
-
-        return PaginationUtil.paginateBefore(makeRequest, getLastEntryId, Long.MAX_VALUE, 50)
+        return getClient().getRestClient().getChannelService()
+            .getPinnedMessages(getId().asLong(), spec.asRequest())
             .map(PinnedMessagesResponseData::items)
-            .flatMap(pinnedMessagesData -> Flux.fromIterable(pinnedMessagesData)
+            .flatMapMany(pinnedMessagesData -> Flux.fromIterable(pinnedMessagesData)
                 .map(pinnedMessageData -> new PinnedMessageReference(getClient(), pinnedMessageData)));
     }
 }
