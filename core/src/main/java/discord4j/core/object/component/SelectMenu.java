@@ -17,7 +17,6 @@
 package discord4j.core.object.component;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.emoji.Emoji;
 import discord4j.discordjson.json.ComponentData;
@@ -473,6 +472,8 @@ public class SelectMenu extends ActionComponent implements ICanBeUsedInLabelComp
      * Creates a new select menu with the same data as this one, but disabled.
      *
      * @return A new disabled select menu with the same data as this one.
+     * @apiNote The disabled field on Selects is not currently allowed in modals and will trigger an error if
+     * used
      */
     public SelectMenu disabled() {
         return disabled(true);
@@ -484,9 +485,21 @@ public class SelectMenu extends ActionComponent implements ICanBeUsedInLabelComp
      *
      * @param value True if the select menu should be disabled otherwise False.
      * @return A new possibly disabled select menu with the same data as this one.
+     * @apiNote The disabled field on Selects is not currently allowed in modals and will trigger an error if
+     * used
      */
     public SelectMenu disabled(boolean value) {
         return new SelectMenu(ComponentData.builder().from(getData()).disabled(value).build());
+    }
+
+    /**
+     * Gets whether the select menu is required (i.e., the user is prevented from selecting any options).
+     *
+     * @return Whether the select menu is disabled.
+     * @apiNote This value is ignored in messages
+     */
+    public boolean isRequired() {
+        return getData().required().toOptional().orElse(true);
     }
 
     /**
