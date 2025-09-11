@@ -195,19 +195,17 @@ public class ChannelService extends RestService {
             .bodyToMono(Void.class);
     }
 
-    public Flux<MessageData> getPinnedMessages(long channelId) {
+    public Mono<PinnedMessagesResponseData> getPinnedMessages(long channelId) {
         return Routes.MESSAGES_PINNED_GET.newRequest(channelId)
             .exchange(getRouter())
-            .bodyToMono(MessageData[].class)
-            .flatMapMany(Flux::fromArray);
+            .bodyToMono(PinnedMessagesResponseData.class);
     }
 
-    public Flux<PinnedMessagesResponseData> getPinnedMessages(long channelId, Map<String, Object> queryParams) {
+    public Mono<PinnedMessagesResponseData> getPinnedMessages(long channelId, Map<String, Object> queryParams) {
         return Routes.MESSAGES_PINNED_GET.newRequest(channelId)
             .query(queryParams)
             .exchange(getRouter())
-            .bodyToMono(PinnedMessagesResponseData[].class)
-            .flatMapMany(Flux::fromArray);
+            .bodyToMono(PinnedMessagesResponseData.class);
     }
 
     public Mono<Void> addPinnedMessage(long channelId, long messageId) {
