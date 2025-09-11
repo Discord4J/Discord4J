@@ -73,6 +73,9 @@ public enum Permission {
     /** Allows for deletion of other users messages. */
     MANAGE_MESSAGES(0x00002000, true),
 
+    /** Allows users to pin and unpin messages in channels. */
+    PIN_MESSAGES(0x00080000, false),
+
     /** Links sent by users with this permission will be auto-embedded. */
     EMBED_LINKS(0x00004000, false),
 
