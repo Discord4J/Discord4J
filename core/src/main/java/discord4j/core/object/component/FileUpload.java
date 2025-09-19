@@ -56,16 +56,16 @@ public class FileUpload extends MessageComponent implements ICanBeUsedInLabelCom
     }
 
     /**
-     * Get this file upload's custom id if present
+     * Get this file upload's custom id.
      *
-     * @return An {@link Optional} containing the custom id if present
+     * @return A developer-defined custom id
      */
     public String getCustomId() {
         return getData().customId().toOptional().orElseThrow(IllegalStateException::new);
     }
 
     /**
-     * Gets the file upload values, if any. Can be present with an empty list if no elements was added.
+     * Gets the file upload values, if any. Can be present with an empty list if no elements were added.
      *
      * @return the file upload's values
      */
@@ -74,7 +74,7 @@ public class FileUpload extends MessageComponent implements ICanBeUsedInLabelCom
     }
 
     /**
-     * Creates a new file upload with the same data as this one, but depending on the value param it may be
+     * Creates a new file upload with the same data as this one, but depending on the value param, it may be
      * required or not.
      *
      * @param value True if the component should be required otherwise False.
