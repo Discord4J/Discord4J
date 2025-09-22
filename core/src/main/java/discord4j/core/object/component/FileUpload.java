@@ -61,7 +61,7 @@ public class FileUpload extends MessageComponent implements ICanBeUsedInLabelCom
      * @return A developer-defined custom id
      */
     public String getCustomId() {
-        return getData().customId().toOptional().orElseThrow(IllegalStateException::new);
+        return this.getData().customId().toOptional().orElseThrow(IllegalStateException::new);
     }
 
     /**
@@ -70,7 +70,7 @@ public class FileUpload extends MessageComponent implements ICanBeUsedInLabelCom
      * @return the file upload's values
      */
     public Optional<List<Snowflake>> getValues() {
-        return getData().values().toOptional().map(strings -> strings.stream().map(Snowflake::of).collect(Collectors.toList()));
+        return this.getData().values().toOptional().map(strings -> strings.stream().map(Snowflake::of).collect(Collectors.toList()));
     }
 
     /**
@@ -91,7 +91,7 @@ public class FileUpload extends MessageComponent implements ICanBeUsedInLabelCom
      * @return A new file upload with the given minimum values.
      */
     public FileUpload withMinValues(int minValues) {
-        return new FileUpload(ComponentData.builder().from(getData()).minValues(minValues).build());
+        return new FileUpload(ComponentData.builder().from(this.getData()).minValues(minValues).build());
     }
 
     /**
@@ -101,6 +101,6 @@ public class FileUpload extends MessageComponent implements ICanBeUsedInLabelCom
      * @return A new file upload with the given maximum values.
      */
     public FileUpload withMaxValues(int maxValues) {
-        return new FileUpload(ComponentData.builder().from(getData()).maxValues(maxValues).build());
+        return new FileUpload(ComponentData.builder().from(this.getData()).maxValues(maxValues).build());
     }
 }
