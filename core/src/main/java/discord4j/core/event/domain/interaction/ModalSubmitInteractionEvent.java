@@ -21,6 +21,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
+import discord4j.core.object.command.ApplicationCommandInteractionResolved;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Label;
@@ -31,6 +32,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -86,6 +88,15 @@ public class ModalSubmitInteractionEvent extends ComponentInteractionEvent {
         return getInteraction().getCommandInteraction()
                 .flatMap(ApplicationCommandInteraction::getCustomId)
                 .orElseThrow(IllegalStateException::new); // should always be present for modal submits
+    }
+
+    /**
+     * Gets the converted users + roles + channels + attachments.
+     *
+     * @return The converted users + roles + channels + attachments.
+     */
+    public Optional<ApplicationCommandInteractionResolved> getResolved() {
+        return getInteraction().getCommandInteraction().flatMap(ApplicationCommandInteraction::getResolved);
     }
 
     /**

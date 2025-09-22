@@ -67,6 +67,10 @@ public class ApplicationCommandInteraction implements DiscordObject {
         this.guildId = guildId;
     }
 
+    public ApplicationCommandInteractionData getData() {
+        return data;
+    }
+
     /**
      * Gets	the id of the invoked command.
      *

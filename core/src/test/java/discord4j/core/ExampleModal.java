@@ -20,17 +20,26 @@ package discord4j.core;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.ModalSubmitInteractionEvent;
+import discord4j.core.object.component.Container;
+import discord4j.core.object.component.FileUpload;
+import discord4j.core.object.component.ICanBeUsedInContainerComponent;
 import discord4j.core.object.component.Label;
+import discord4j.core.object.component.Section;
 import discord4j.core.object.component.SelectMenu;
 import discord4j.core.object.component.StringSelectMenu;
 import discord4j.core.object.component.TextDisplay;
 import discord4j.core.object.component.TextInput;
+import discord4j.core.object.component.Thumbnail;
+import discord4j.core.object.component.UnfurledMediaItem;
+import discord4j.core.object.entity.Attachment;
+import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.core.spec.InteractionPresentModalSpec;
 import discord4j.rest.interaction.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +56,7 @@ public class ExampleModal {
     static final String INPUT_CUSTOM_ID = "my-input";
     static final String SELECT_STRING_CUSTOM_ID = "my-select-string";
     static final String SELECT_USER_CUSTOM_ID = "my-select-user";
+    static final String FILE_UPLOAD_CUSTOM_ID = "my-file-upload";
 
     public static void main(String[] args) {
         DiscordClient.create(token)
@@ -64,7 +74,6 @@ public class ExampleModal {
                             .title("Example modal")
                             .customId(MODAL_CUSTOM_ID)
                             .addAllComponents(Arrays.asList(
-                                TextDisplay.of("You can make many things here."),
                                 Label.of("A title?", "Add a title for this",
                                     TextInput.small(INPUT_CUSTOM_ID).required(false)),
                                 Label.of("Tell us something...", TextInput.paragraph(PARAGRAPHINPUT_CUSTOM_ID, 250,
@@ -76,7 +85,8 @@ public class ExampleModal {
                                     SelectMenu.Option.of("Fable", "Fable"),
                                     SelectMenu.Option.of("Poetry", "Poetry")
                                 ))),
-                                Label.of("Attach an user", SelectMenu.ofUser(SELECT_USER_CUSTOM_ID))
+                                Label.of("Attach the author", SelectMenu.ofUser(SELECT_USER_CUSTOM_ID)),
+                                Label.of("Add a thumbnail", FileUpload.of(FILE_UPLOAD_CUSTOM_ID).required(true))
                             ))
                             .build());
                     }
@@ -89,9 +99,11 @@ public class ExampleModal {
                         String comments = "";
                         String type = "";
                         String attachedUser = "";
+                        Attachment attachment = null;
 
                         List<TextInput> textInputComponents = event.getComponents(TextInput.class);
                         List<SelectMenu> selectComponents = event.getComponents(SelectMenu.class);
+                        List<FileUpload> fileUploadComponents = event.getComponents(FileUpload.class);
 
                         if (textInputComponents.isEmpty() && selectComponents.isEmpty()) {
                             return event.reply("No components found!");
@@ -117,8 +129,26 @@ public class ExampleModal {
                             }
                         }
 
-                        return event.reply(String.format("You wrote a `%s` named %s\nUser: `%s`\n\nComments:%s", type, title, attachedUser,
-                            comments));
+                        for (FileUpload component : fileUploadComponents) {
+                            if (FILE_UPLOAD_CUSTOM_ID.equals(component.getCustomId())) {
+                                Snowflake attachmentId = component.getValues().orElse(Collections.emptyList()).get(0);
+                                attachment = event.getResolved().orElseThrow(RuntimeException::new).getAttachments().get(attachmentId);
+                            }
+                        }
+
+                        List<ICanBeUsedInContainerComponent> firstComponents = new ArrayList<>();
+                        firstComponents.add(TextDisplay.of(String.format("<@%s> Wrote a `%s` named %s", attachedUser, type, title)));
+                        if (attachment != null) {
+                            firstComponents.add(Section.of(Thumbnail.of(UnfurledMediaItem.of(attachment.getUrl())), TextDisplay.of("The Thumbnail")));
+                        } else {
+                            firstComponents.add(Section.of(Thumbnail.of(UnfurledMediaItem.of("https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Minecraft_missing_texture_block.svg/32px-Minecraft_missing_texture_block.svg.png")), TextDisplay.of("The Thumbnail")));
+                        }
+                        firstComponents.add(TextDisplay.of(String.format("Comments: %s", comments)));
+
+
+                        Container container = Container.of(firstComponents);
+
+                        return event.reply(InteractionApplicationCommandCallbackSpec.builder().addComponent(container).build());
                     }
                     return Mono.empty();
                 });

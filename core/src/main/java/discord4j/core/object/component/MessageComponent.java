@@ -61,6 +61,7 @@ public class MessageComponent implements BaseMessageComponent {
             case SELECT_MENU_STRING: return new StringSelectMenu(data);
             case TEXT_INPUT: return new TextInput(data);
             case LABEL: return new Label(data);
+            case FILE_UPLOAD: return new FileUpload(data);
             default: {
                 MessageComponent.LOGGER.warn("Unhandled component type: " + data.type());
                 return new MessageComponent(data);
@@ -122,6 +123,7 @@ public class MessageComponent implements BaseMessageComponent {
         SEPARATOR(14, true),
         CONTAINER(17, true),
         LABEL(18),
+        FILE_UPLOAD(19),
         ;
 
         /**
@@ -173,6 +175,7 @@ public class MessageComponent implements BaseMessageComponent {
                 case 14: return SEPARATOR;
                 case 17: return CONTAINER;
                 case 18: return LABEL;
+                case 19: return FILE_UPLOAD;
                 default: return UNKNOWN;
             }
         }
