@@ -30,6 +30,7 @@ import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -60,7 +61,7 @@ public class Invite implements DiscordObject {
 
     @Override
     public final GatewayDiscordClient getClient() {
-        return gateway;
+        return this.gateway;
     }
 
     /**
@@ -69,7 +70,7 @@ public class Invite implements DiscordObject {
      * @return The invite code (unique ID).
      */
     public final String getCode() {
-        return data.code();
+        return this.getData().code();
     }
 
     /**
@@ -87,7 +88,7 @@ public class Invite implements DiscordObject {
      * @return The ID of the guild this invite is associated to.
      */
     public final Optional<Snowflake> getGuildId() {
-        return data.guild().toOptional()
+        return this.getData().guild().toOptional()
             .map(PartialGuildData::id)
             .map(Snowflake::of);
     }
@@ -99,7 +100,7 @@ public class Invite implements DiscordObject {
      * to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<Guild> getGuild() {
-        return getGuildId().map(gateway::getGuildById).orElse(Mono.empty());
+        return this.getGuildId().map(this.getClient()::getGuildById).orElse(Mono.empty());
     }
 
     /**
@@ -110,8 +111,8 @@ public class Invite implements DiscordObject {
      * to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
-        return getGuildId()
-                .map(id -> gateway.withRetrievalStrategy(retrievalStrategy).getGuildById(id))
+        return this.getGuildId()
+                .map(id -> this.getClient().withRetrievalStrategy(retrievalStrategy).getGuildById(id))
                 .orElse(Mono.empty());
     }
 
@@ -121,7 +122,7 @@ public class Invite implements DiscordObject {
      * @return The ID of the channel this invite is associated to.
      */
     public final Snowflake getChannelId() {
-        return Snowflake.of(data.channel().id());
+        return Snowflake.of(this.getData().channel().id());
     }
 
     /**
@@ -131,7 +132,7 @@ public class Invite implements DiscordObject {
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<CategorizableChannel> getChannel() {
-        return gateway.getChannelById(getChannelId()).cast(CategorizableChannel.class);
+        return this.getClient().getChannelById(getChannelId()).cast(CategorizableChannel.class);
     }
 
     /**
@@ -142,7 +143,7 @@ public class Invite implements DiscordObject {
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<CategorizableChannel> getChannel(EntityRetrievalStrategy retrievalStrategy) {
-        return gateway.withRetrievalStrategy(retrievalStrategy)
+        return this.getClient().withRetrievalStrategy(retrievalStrategy)
                 .getChannelById(getChannelId())
                 .cast(CategorizableChannel.class);
     }
@@ -153,7 +154,7 @@ public class Invite implements DiscordObject {
      * @return The ID of the user who created the invite, if present.
      */
     public final Optional<Snowflake> getInviterId() {
-        return data.inviter().toOptional()
+        return this.getData().inviter().toOptional()
             .map(UserData::id)
             .map(Snowflake::of);
     }
@@ -164,8 +165,8 @@ public class Invite implements DiscordObject {
      * @return The user who created the invite, if present.
      */
     public final Optional<User> getInviter() {
-        return data.inviter().toOptional()
-                .map(data -> new User(gateway, data));
+        return this.getData().inviter().toOptional()
+                .map(data -> new User(this.getClient(), data));
     }
 
     /**
@@ -174,7 +175,7 @@ public class Invite implements DiscordObject {
      * @return The ID of the target user this invite is associated to, if present.
      */
     public final Optional<Snowflake> getTargetUserId() {
-        return data.targetUser().toOptional()
+        return this.getData().targetUser().toOptional()
             .map(UserData::id)
             .map(Snowflake::of);
     }
@@ -185,8 +186,8 @@ public class Invite implements DiscordObject {
      * @return The target user this invite is associated to, if present.
      */
     public final Optional<User> getTargetUser() {
-        return data.targetUser().toOptional()
-                .map(data -> new User(gateway, data));
+        return this.getData().targetUser().toOptional()
+                .map(data -> new User(this.getClient(), data));
     }
 
     /**
@@ -197,7 +198,7 @@ public class Invite implements DiscordObject {
      */
     @Deprecated
     public final Optional<Type> getTargetUserType() {
-        return getTargetType();
+        return this.getTargetType();
     }
 
     /**
@@ -206,8 +207,19 @@ public class Invite implements DiscordObject {
      * @return The type of target for this voice channel invite, if present.
      */
     public final Optional<Type> getTargetType() {
-        return data.targetType().toOptional()
+        return this.getData().targetType().toOptional()
             .map(Type::of);
+    }
+
+    /**
+     * Return the flags of this invite.
+     *
+     * @return A {@code EnumSet} with the flags of this invite.
+     */
+    public EnumSet<Flag> getFlags() {
+        return this.getData().flags().toOptional()
+            .map(Invite.Flag::of)
+            .orElse(EnumSet.noneOf(Invite.Flag.class));
     }
 
     /**
@@ -218,7 +230,7 @@ public class Invite implements DiscordObject {
      * endpoint when {@code with_counts} is true.
      */
     public final OptionalInt getApproximatePresenceCount() {
-        return data.approximatePresenceCount().toOptional()
+        return this.getData().approximatePresenceCount().toOptional()
             .map(OptionalInt::of)
             .orElse(OptionalInt.empty());
     }
@@ -231,7 +243,7 @@ public class Invite implements DiscordObject {
      * endpoint when {@code with_counts} is true.
      */
     public final OptionalInt getApproximateMemberCount() {
-        return data.approximateMemberCount().toOptional()
+        return this.getData().approximateMemberCount().toOptional()
             .map(OptionalInt::of)
             .orElse(OptionalInt.empty());
     }
@@ -254,7 +266,7 @@ public class Invite implements DiscordObject {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<Void> delete(@Nullable final String reason) {
-        return gateway.getRestClient().getInviteService()
+        return this.getClient().getRestClient().getInviteService()
                 .deleteInvite(getCode(), reason)
                 .then();
     }
@@ -265,7 +277,7 @@ public class Invite implements DiscordObject {
      * @return The raw data as represented by Discord.
      */
     InviteData getData() {
-        return data;
+        return this.data;
     }
 
     /** Represents the various types of target user for an invite. */
@@ -316,6 +328,71 @@ public class Invite implements DiscordObject {
             }
         }
 
+    }
+
+    /** Represents the guild invite flags for guild invites. */
+    public enum Flag {
+        /** Unknown type. */
+        UNKNOWN(-1),
+
+        /** this invite is a guest invite for a voice channel */
+        IS_GUEST_INVITE(0);
+
+        /**
+         * The underlying value as represented by Discord.
+         */
+        private final int value;
+
+        /**
+         * The flag value as represented by Discord.
+         */
+        private final int flag;
+
+        /**
+         * Constructs a {@code Invite.Flag}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        Flag(final int value) {
+            this.value = value;
+            this.flag = 1 << value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the flags of invite. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
+         * equal ({@code ==}) to the supplied {@code value}.
+         *
+         * @param value The flags value as represented by Discord.
+         * @return The {@link EnumSet} of flags.
+         */
+        public static EnumSet<Invite.Flag> of(final int value) {
+            final EnumSet<Invite.Flag> inviteFlags = EnumSet.noneOf(Invite.Flag.class);
+            for (Invite.Flag flag : Invite.Flag.values()) {
+                long flagValue = flag.getFlag();
+                if ((flagValue & value) == flagValue) {
+                    inviteFlags.add(flag);
+                }
+            }
+            return inviteFlags;
+        }
     }
 
     @Override
