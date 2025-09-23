@@ -1543,7 +1543,9 @@ public final class Guild implements Entity {
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the guild has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
+     * @deprecated BOTs cannot delete a Guild
      */
+    @Deprecated
     public Mono<Void> delete() {
         return gateway.getRestClient().getGuildService()
                 .deleteGuild(getId().asLong());
