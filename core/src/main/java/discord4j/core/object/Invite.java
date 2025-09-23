@@ -28,6 +28,8 @@ import discord4j.discordjson.json.UserData;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -68,6 +70,15 @@ public class Invite implements DiscordObject {
      */
     public final String getCode() {
         return data.code();
+    }
+
+    /**
+     * Gets the instant this invite expires, if possible.
+     *
+     * @return The instant this invite expires, if empty, invite is never expiring.
+     */
+    public final Optional<Instant> getExpiration() {
+        return this.getData().expiresAt().map(srtExpiresAt -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(srtExpiresAt, Instant::from));
     }
 
     /**

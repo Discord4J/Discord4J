@@ -26,7 +26,6 @@ import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 /**
@@ -45,13 +44,15 @@ public class InviteCreateEvent extends Event {
     @Nullable
     private final User inviter;
     private final Instant createdAt;
+    @Nullable
+    private final Instant expiresAt;
     private final int uses;
     private final int maxUses;
     private final int maxAge;
     private final boolean temporary;
 
     public InviteCreateEvent(GatewayDiscordClient client, ShardInfo shardInfo, Long guildId, long channelId,
-                             String code, @Nullable User inviter, Instant createdAt, int uses, int maxUses, int maxAge,
+                             String code, @Nullable User inviter, Instant createdAt, @Nullable Instant expiresAt, int uses, int maxUses, int maxAge,
                              boolean temporary) {
         super(client, shardInfo);
         this.guildId = guildId;
@@ -59,6 +60,7 @@ public class InviteCreateEvent extends Event {
         this.code = code;
         this.inviter = inviter;
         this.createdAt = createdAt;
+        this.expiresAt = expiresAt;
         this.uses = uses;
         this.maxAge = maxAge;
         this.maxUses = maxUses;
@@ -71,7 +73,7 @@ public class InviteCreateEvent extends Event {
      * @return The ID of the guild involved, if present.
      */
     public Optional<Snowflake> getGuildId() {
-        return Optional.ofNullable(guildId).map(Snowflake::of);
+        return Optional.ofNullable(this.guildId).map(Snowflake::of);
     }
 
     /**
@@ -81,7 +83,7 @@ public class InviteCreateEvent extends Event {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
+        return Mono.justOrEmpty(this.getGuildId()).flatMap(this.getClient()::getGuildById);
     }
 
     /**
@@ -90,7 +92,7 @@ public class InviteCreateEvent extends Event {
      * @return The ID of the channel involved.
      */
     public Snowflake getChannelId() {
-        return Snowflake.of(channelId);
+        return Snowflake.of(this.channelId);
     }
 
     /**
@@ -99,7 +101,7 @@ public class InviteCreateEvent extends Event {
      * @return The invite code (unique ID).
      */
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     /**
@@ -108,7 +110,7 @@ public class InviteCreateEvent extends Event {
      * @return The user that created the invite, if present.
      */
     public Optional<User> getInviter() {
-        return Optional.ofNullable(inviter);
+        return Optional.ofNullable(this.inviter);
     }
 
     /**
@@ -117,7 +119,7 @@ public class InviteCreateEvent extends Event {
      * @return The number of times this invite has been used (always will be 0).
      */
     public int getUses() {
-        return uses;
+        return this.uses;
     }
 
     /**
@@ -126,7 +128,7 @@ public class InviteCreateEvent extends Event {
      * @return The max number of times this invite can be used.
      */
     public int getMaxUses() {
-        return maxUses;
+        return this.maxUses;
     }
 
     /**
@@ -135,7 +137,7 @@ public class InviteCreateEvent extends Event {
      * @return How long the invite is valid for (in seconds).
      */
     public int getMaxAge() {
-        return maxAge;
+        return this.maxAge;
     }
 
     /**
@@ -144,7 +146,7 @@ public class InviteCreateEvent extends Event {
      * @return {@code true} if this invite only grants temporary membership
      */
     public boolean isTemporary() {
-        return temporary;
+        return this.temporary;
     }
 
     /**
@@ -153,7 +155,7 @@ public class InviteCreateEvent extends Event {
      * @return When this invite was created.
      */
     public Instant getCreation() {
-        return createdAt;
+        return this.createdAt;
     }
 
     /**
@@ -162,7 +164,7 @@ public class InviteCreateEvent extends Event {
      * @return The instant this invite expires, if possible.
      */
     public Optional<Instant> getExpiration() {
-        return maxAge > 0 ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)): Optional.empty();
+        return Optional.ofNullable(this.expiresAt);
     }
 
     /**
@@ -172,21 +174,22 @@ public class InviteCreateEvent extends Event {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Invite> getInvite() {
-        return getClient().getInvite(code);
+        return getClient().getInvite(this.code);
     }
 
     @Override
     public String toString() {
         return "InviteCreateEvent{" +
-            "code='" + code + '\'' +
-            ", guildId=" + guildId +
-            ", channelId=" + channelId +
-            ", inviter=" + inviter +
-            ", uses=" + uses +
-            ", maxUses=" + maxUses +
-            ", maxAge=" + maxAge +
-            ", temporary=" + temporary +
-            ", createdAt='" + createdAt + '\'' +
+            "code='" + this.code + '\'' +
+            ", guildId=" + this.guildId +
+            ", channelId=" + this.channelId +
+            ", inviter=" + this.inviter +
+            ", uses=" + this.uses +
+            ", maxUses=" + this.maxUses +
+            ", maxAge=" + this.maxAge +
+            ", temporary=" + this.temporary +
+            ", expiresAt=" + this.expiresAt +
+            ", createdAt='" + this.createdAt + '\'' +
             '}';
     }
 }

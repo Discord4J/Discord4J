@@ -18,6 +18,7 @@ package discord4j.core.object;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.discordjson.json.InviteData;
+import discord4j.discordjson.possible.Possible;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -61,16 +62,6 @@ public final class ExtendedInvite extends Invite {
     public int getMaxUses() {
         return getData().maxUses().toOptional()
                 .orElseThrow(IllegalStateException::new);
-    }
-
-    /**
-     * Gets the instant this invite expires, if possible.
-     *
-     * @return The instant this invite expires, if empty, invite is never expiring.
-     */
-    public Optional<Instant> getExpiration() {
-        final int maxAge = getData().maxAge().toOptional().orElseThrow(IllegalStateException::new);
-        return maxAge > 0 ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)): Optional.empty();
     }
 
     /**
