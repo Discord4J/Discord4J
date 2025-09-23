@@ -272,6 +272,7 @@ public class DispatchHandlers implements DispatchEventMapper {
         String code = context.getDispatch().code();
         Instant createdAt = DateTimeFormatter.ISO_OFFSET_DATE_TIME
                 .parse(context.getDispatch().createdAt(), Instant::from);
+        Instant expiresAt = context.getDispatch().expiresAt().map(srtExpiresAt -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(srtExpiresAt, Instant::from)).orElse(null);
         int uses = context.getDispatch().uses();
         int maxUses = context.getDispatch().maxUses();
         int maxAge = context.getDispatch().maxAge();
@@ -282,7 +283,7 @@ public class DispatchHandlers implements DispatchEventMapper {
                 .orElse(null);
 
         return Mono.just(new InviteCreateEvent(context.getGateway(), context.getShardInfo(), guildId, channelId, code,
-                current, createdAt, uses, maxUses, maxAge, temporary));
+                current, createdAt, expiresAt, uses, maxUses, maxAge, temporary));
     }
 
     private static Mono<InviteDeleteEvent> inviteDelete(DispatchContext<InviteDelete, Void> context) {
