@@ -553,7 +553,7 @@ public final class Guild implements Entity {
      * <a href="https://discord.com/developers/docs/resources/guild#guild-object-guild-features">guild features</a>
      *
      * @return The enabled guild features.
-     * @deprecated Use {@code Guild#getGuildFeatures} instead
+     * @deprecated Use {@link #getGuildFeatures} instead
      */
     @Deprecated
     public Set<String> getFeatures() {
@@ -2687,7 +2687,14 @@ public final class Guild implements Entity {
         /* guild has access to set 384kbps bitrate in voice (previously VIP voice servers) */
         VIP_REGIONS("VIP_REGIONS", false),
         /* guild has enabled the welcome screen */
-        WELCOME_SCREEN_ENABLED("WELCOME_SCREEN_ENABLED", false);
+        WELCOME_SCREEN_ENABLED("WELCOME_SCREEN_ENABLED", false),
+        /* guild has access to guest invites */
+        GUESTS_ENABLED("GUESTS_ENABLED", false),
+        /* guild has access to set guild tags */
+        GUILD_TAGS("GUILD_TAGS", false),
+        /* guild is able to set gradient colors to roles */
+        ENHANCED_ROLE_COLORS("ENHANCED_ROLE_COLORS", false);
+        ;
 
         private final String value;
 
