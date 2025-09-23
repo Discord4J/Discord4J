@@ -212,6 +212,10 @@ public class RestGuild {
         return restClient.getGuildService().modifyGuildMember(id, userId.asLong(), request, reason);
     }
 
+    public Mono<MemberData> modifyCurrentMember(CurrentMemberModifyData request, @Nullable String reason) {
+        return restClient.getGuildService().modifyCurrentMember(id, request, reason);
+    }
+
     public Mono<MemberData> modifyCurrentMember(CurrentMemberModifyData request) {
         return restClient.getGuildService().modifyCurrentMember(id, request);
     }

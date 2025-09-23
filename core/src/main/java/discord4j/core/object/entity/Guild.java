@@ -1962,18 +1962,58 @@ public final class Guild implements Entity {
      * is emitted through the {@code Mono}.
      */
     public Mono<String> changeSelfNickname(@Nullable final String nickname) {
+        return this.changeSelfNickname(nickname, null);
+    }
+
+    /**
+     * Requests to change the bot user's nickname in this guild.
+     *
+     * @param nickname The new nickname for the bot user in this guild, or {@code null} to remove it.
+     * @param reason The reason for the change
+     * @return A {@link Mono} where, upon successful completion, emits the bot user's new nickname in this guild. If
+     * the nickname was set to {@code null}, then this {@link Mono} will complete empty. If an error is received, it
+     * is emitted through the {@code Mono}.
+     * @see #editSelfMember()
+     */
+    public Mono<String> changeSelfNickname(@Nullable final String nickname, @Nullable final String reason) {
         return gateway.getRestClient().getGuildService()
-                .modifyCurrentMember(getId().asLong(), CurrentMemberModifyData.builder()
-                        .nick(Optional.ofNullable(nickname))
-                        .build())
-                .handle((data, sink) -> {
-                    String nick = Possible.flatOpt(data.nick()).orElse(null);
-                    if (nick != null) {
-                        sink.next(nick);
-                    } else {
-                        sink.complete();
-                    }
-                });
+            .modifyCurrentMember(getId().asLong(), CurrentMemberModifyData.builder()
+                .nickOrNull(nickname)
+                .build(), reason)
+            .handle((data, sink) -> {
+                String nick = Possible.flatOpt(data.nick()).orElse(null);
+                if (nick != null) {
+                    sink.next(nick);
+                } else {
+                    sink.complete();
+                }
+            });
+    }
+
+    /**
+     * Requests to edit this current bot member. Properties specifying how to edit this member can be set via the {@code withXxx}
+     * methods of the returned {@link GuildSelfMemberEditMono}.
+     *
+     * @return A {@link GuildSelfMemberEditMono} where, upon successful completion, emits the modified {@link Member}. If an
+     * error is received, it is emitted through the {@code GuildSelfMemberEditMono}.
+     */
+    public GuildSelfMemberEditMono editSelfMember() {
+        return GuildSelfMemberEditMono.of(this);
+    }
+
+    /**
+     * Requests to edit this current bot member.
+     *
+     * @param spec an immutable object that specifies how to edit this member
+     * @return A {@link Mono} where, upon successful completion, emits the modified {@link Member}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Member> editSelfMember(GuildSelfMemberEditSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+            () -> this.getClient().getRestClient().getGuildService()
+                .modifyCurrentMember(this.getId().asLong(), spec.asRequest(), spec.reason())
+                .map(data -> new Member(this.getClient(), data, this.getId().asLong())));
     }
 
     /**

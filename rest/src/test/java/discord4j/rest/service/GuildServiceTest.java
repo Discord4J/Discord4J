@@ -123,7 +123,7 @@ public class GuildServiceTest {
 
     @Test
     public void testModifyCurrentMember() {
-        CurrentMemberModifyData req = CurrentMemberModifyData.builder().nick("nickname").build();
+        CurrentMemberModifyData req = CurrentMemberModifyData.builder().nickOrNull("nickname").build();
         guildService.modifyCurrentMember(guild, req).block();
     }
 
