@@ -29,6 +29,9 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.PermissionSet;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -70,7 +73,7 @@ public class ResolvedChannel implements DiscordObject {
      * @return the raw data
      */
     public ResolvedChannelData getData() {
-        return data;
+        return this.data;
     }
 
     /**
@@ -79,7 +82,16 @@ public class ResolvedChannel implements DiscordObject {
      * @return The id of the channel.
      */
     public Snowflake getId() {
-        return Snowflake.of(data.id());
+        return Snowflake.of(this.getData().id());
+    }
+
+    /**
+     * Gets the id of the guild if the channel is a guild channel.
+     *
+     * @return The id of the guild, if present.
+     */
+    public Optional<Snowflake> getGuildId() {
+        return this.getData().guildId().map(Snowflake::of).toOptional();
     }
 
     /**
@@ -89,7 +101,25 @@ public class ResolvedChannel implements DiscordObject {
      * @return The name of the channel.
      */
     public Optional<String> getName() {
-        return Possible.flatOpt(data.name());
+        return Possible.flatOpt(this.getData().name());
+    }
+
+    /**
+     * Gets the channel topic, if present.
+     *
+     * @return The channel topic, if present.
+     */
+    public Optional<String> getTopic() {
+        return Possible.flatOpt(this.getData().topic());
+    }
+
+    /**
+     * Gets the position of the channel in the guild, if present.
+     *
+     * @return The position of the channel in the guild, if present.
+     */
+    public Optional<Integer> getPosition() {
+        return this.getData().position().toOptional();
     }
 
     /**
@@ -102,13 +132,25 @@ public class ResolvedChannel implements DiscordObject {
     }
 
     /**
+     * Gets the channels {@link Channel.Flag} associated to this resolved channel
+     * Unknown flags are currently ignored.
+     *
+     * @return An {@link EnumSet} representing the <b>known flags</b> for this resolved channel.
+     */
+    public EnumSet<Channel.Flag> getFlags() {
+        return getData().flags().toOptional()
+            .map(Channel.Flag::valueOf)
+            .orElse(EnumSet.noneOf(Channel.Flag.class));
+    }
+
+    /**
      * Gets the computed permissions for the invoking user in the channel, including overwrites.
      * This field can be absent when you are not in a guild, e.g. when providing a DM channel.
      *
      * @return The permissions of the channel.
      */
     public Optional<PermissionSet> getEffectivePermissions() {
-        return Possible.flatOpt(data.permissions()).map(PermissionSet::of);
+        return Possible.flatOpt(this.getData().permissions()).map(PermissionSet::of);
     }
 
     /**
@@ -117,7 +159,7 @@ public class ResolvedChannel implements DiscordObject {
      * @return Associated {@link ThreadMetadata}, if present.
      */
     public Optional<ThreadMetadata> getThreadMetadata() {
-        return data.threadMetadata().toOptional();
+        return this.getData().threadMetadata().toOptional();
     }
 
     /**
@@ -126,7 +168,47 @@ public class ResolvedChannel implements DiscordObject {
      * @return The parent ID as a {@link Snowflake}, if present.
      */
     public Optional<Snowflake> getParentId() {
-        return Possible.flatOpt(data.parentId()).map(Snowflake::of);
+        return Possible.flatOpt(this.getData().parentId()).map(Snowflake::of);
+    }
+
+    /**
+     * Gets the ID of the last message sent in this channel, if present.
+     *
+     * @return The ID of the last message sent in this channel, if present.
+     */
+    public Optional<Snowflake> getLastMessageId() {
+        return Possible.flatOpt(this.getData().lastMessageId())
+            .map(Snowflake::of);
+    }
+
+    /**
+     * Gets when the last pinned message was pinned, if present.
+     *
+     * @return When the last pinned message was pinned, if present.
+     */
+    public Optional<Instant> getLastPinTimestamp() {
+        return Possible.flatOpt(this.getData().lastPinTimestamp())
+            .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+    }
+
+    /**
+     * Gets whether this channel is considered NSFW (Not Safe For Work).
+     *
+     * @return {@code true} if this channel is considered NSFW (Not Safe For Work), {@code false} otherwise.
+     */
+    public boolean isNsfw() {
+        return this.getData().nsfw().toOptional().orElse(false);
+    }
+
+    /**
+     * Gets the amount of seconds a user has to wait before sending another message (0-21600).
+     * <p>
+     * Bots, as well as users with the permission {@code manage_messages} or {@code manage_channel}, are unaffected.
+     *
+     * @return The amount of seconds a user has to wait before sending another message (0-21600).
+     */
+    public Optional<Integer> getRateLimitPerUser() {
+        return this.getData().rateLimitPerUser().toOptional();
     }
 
     /**
@@ -136,7 +218,7 @@ public class ResolvedChannel implements DiscordObject {
      * to this resolved channel. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Channel> asFullChannel() {
-        return gateway.getChannelById(getId());
+        return this.gateway.getChannelById(getId());
     }
 
     /**
@@ -152,13 +234,13 @@ public class ResolvedChannel implements DiscordObject {
 
     @Override
     public GatewayDiscordClient getClient() {
-        return gateway;
+        return this.gateway;
     }
 
     @Override
     public String toString() {
         return "ResolvedChannel{" +
-                "data=" + data +
+                "data=" + this.data +
                 '}';
     }
 }
