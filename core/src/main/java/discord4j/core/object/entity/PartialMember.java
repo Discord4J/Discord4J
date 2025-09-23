@@ -877,6 +877,10 @@ public class PartialMember extends User {
          * Member has dismissed the DM settings upsell.
          */
         DM_SETTINGS_UPSELL_ACKNOWLEDGED(9),
+        /**
+         * Member's guild tag is blocked by AutoMod
+         */
+        AUTOMOD_QUARANTINED_GUILD_TAG(10),
         ;
 
         /** The underlying value as represented by Discord. */
