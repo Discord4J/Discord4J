@@ -17,121 +17,30 @@
 package discord4j.core.event.domain.message;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.emoji.Emoji;
 import discord4j.gateway.ShardInfo;
-import discord4j.common.util.Snowflake;
-import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
-import java.util.Optional;
-
 /**
- * Dispatched when a reactions of one emoji are removed on a message.
+ * Dispatched when a reaction of one emoji is removed on a message.
  * <p>
- * {@link #guildId} may not be present if the message was in a private channel.
+ * {@link #getGuildId()} may not be present if the message was in a private channel.
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discord.com/developers/docs/topics/gateway#message-reaction-remove-emoji">Message Reaction
+ * @see <a href="https://discord.com/developers/docs/events/gateway-events#message-reaction-remove-emoji">Message Reaction
  * Remove Emoji</a>
  */
-public class ReactionRemoveEmojiEvent extends MessageEvent {
-
-    private final long channelId;
-    private final long messageId;
-    @Nullable
-    private final Long guildId;
-    private final Emoji emoji;
+public class ReactionRemoveEmojiEvent extends ReactionBaseEmojiEvent {
 
     public ReactionRemoveEmojiEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long channelId, long messageId,
                                     @Nullable Long guildId, Emoji emoji) {
-        super(gateway, shardInfo);
-        this.channelId = channelId;
-        this.messageId = messageId;
-        this.guildId = guildId;
-        this.emoji = emoji;
-    }
-
-
-    /**
-     * Gets the {@link Snowflake} ID of the {@link MessageChannel} containing the {@link Message} the reaction
-     * was removed from.
-     *
-     * @return The ID of the {@link MessageChannel} involved.
-     */
-    public Snowflake getChannelId() {
-        return Snowflake.of(channelId);
-    }
-
-    /**
-     * Requests to retrieve the {@link MessageChannel} containing the {@link Message} the reaction was removed from.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel} containing the
-     * {@link Message} involved. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<MessageChannel> getChannel() {
-        return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
-    }
-
-    /**
-     * Gets the {@link Snowflake} ID of the {@link Message} the reaction was removed from.
-     *
-     * @return The ID of the {@link Message} involved.
-     */
-    public Snowflake getMessageId() {
-        return Snowflake.of(messageId);
-    }
-
-    /**
-     * Requests to retrieve the {@link Message} the reaction was removed from.
-     *
-     * @return A {@link Mono} where, upon completion, emits the {@link Message} the reaction was removed from.
-     * If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Message> getMessage() {
-        return getClient().getMessageById(getChannelId(), getMessageId());
-    }
-
-    /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} the {@link Message} involved is in, if present.
-     * This may not be available if the {@code Message} was sent in a private channel.
-     *
-     * @return The ID of the {@link Guild} involved, if present.
-     */
-    public Optional<Snowflake> getGuildId() {
-        return Optional.ofNullable(guildId).map(Snowflake::of);
-    }
-
-    /**
-     * Requests to retrieve the {@link Guild} the {@link Message} involved is in, if present.
-     * This may not be available if the {@code Message} was sent in a private channel.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} containing the
-     * {@link Message} involved, if present. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Guild> getGuild() {
-        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
-    }
-
-    /**
-     * The {@link Emoji} that was removed from a message.
-     *
-     * @return The {@code Emoji} that has been removed.
-     */
-    public Emoji getEmoji() {
-        return emoji;
+        super(gateway, shardInfo, channelId, messageId, guildId, emoji);
     }
 
     @Override
     public String toString() {
         return "ReactionRemoveEvent{" +
-                "channelId=" + channelId +
-                ", messageId=" + messageId +
-                ", guildId=" + guildId +
-                ", emoji=" + emoji +
-                '}';
+            "} " + super.toString();
     }
 }
