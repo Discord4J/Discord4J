@@ -132,7 +132,7 @@ public class ResolvedChannel implements DiscordObject {
     }
 
     /**
-     * Gets the channels {@link Channel.Flag} associated to this resolved channel
+     * Gets the channels {@link discord4j.core.object.entity.channel.Channel.Flag} associated to this resolved channel
      * Unknown flags are currently ignored.
      *
      * @return An {@link EnumSet} representing the <b>known flags</b> for this resolved channel.

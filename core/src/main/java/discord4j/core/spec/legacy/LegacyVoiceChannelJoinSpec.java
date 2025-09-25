@@ -165,7 +165,7 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
      * Set the maximum amount of time to wait before the connection to the voice channel timeouts.
      * For example, the connection may get stuck when the bot does not have {@link Permission#VIEW_CHANNEL} or
      * when the voice channel is full.
-     * The default value is {@value #DEFAULT_TIMEOUT} seconds.
+     * The default value is {@link #DEFAULT_TIMEOUT} seconds.
      *
      * @param timeout the maximum amount of time to wait before the connection to the voice channel timeouts
      * @return this spec

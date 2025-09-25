@@ -36,7 +36,7 @@ import static discord4j.common.LogUtil.format;
  * Distributes events to subscribers using a Reactor {@link FluxProcessor} as backend.
  * <p>
  * The underlying processor can be configured at construction time. Thread affinity can also be configured by
- * supplying a {@link Scheduler}, while an {@link FluxSink.OverflowStrategy} is applied to handle
+ * supplying a {@link Scheduler}, while an {@link reactor.core.publisher.FluxSink.OverflowStrategy} is applied to handle
  * back-pressure of inbound Events, especially during startup.
  */
 public class DefaultEventDispatcher implements EventDispatcher {
@@ -53,7 +53,7 @@ public class DefaultEventDispatcher implements EventDispatcher {
      *
      * @param eventProcessor a {@link FluxProcessor} of {@link Event}, used to bridge gateway events to the dispatcher
      * subscribers
-     * @param overflowStrategy an overflow strategy, see {@link FluxSink.OverflowStrategy} for the available strategies
+     * @param overflowStrategy an overflow strategy, see {@link reactor.core.publisher.FluxSink.OverflowStrategy} for the available strategies
      * @param eventScheduler a {@link Scheduler} to ensure a certain thread model on each published signal
      */
     public DefaultEventDispatcher(FluxProcessor<Event, Event> eventProcessor,

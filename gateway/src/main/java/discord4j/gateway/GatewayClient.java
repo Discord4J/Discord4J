@@ -96,10 +96,10 @@ public interface GatewayClient {
     <T> Flux<T> receiver(Function<ByteBuf, Publisher<? extends T>> mapper);
 
     /**
-     * Retrieves a new {@link Sinks.Many} to safely produce outbound values using
-     * {@link Sinks.Many#tryEmitNext(Object)} or {@link Sinks.Many#emitNext(Object, Sinks.EmitFailureHandler)}.
+     * Retrieves a new {@link reactor.core.publisher.Sinks.Many} to safely produce outbound values using
+     * {@link reactor.core.publisher.Sinks.Many#tryEmitNext(Object)} or {@link reactor.core.publisher.Sinks.Many#emitNext(Object, reactor.core.publisher.Sinks.EmitFailureHandler)}.
      *
-     * @return a serializing {@link Sinks.Many}
+     * @return a serializing {@link reactor.core.publisher.Sinks.Many}
      */
     Sinks.Many<GatewayPayload<?>> sender();
 

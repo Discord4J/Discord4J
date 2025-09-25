@@ -56,13 +56,13 @@ public interface RequestQueueFactory {
     }
 
     /**
-     * Returns a factory of {@link RequestQueue} backed by a {@link Sinks.Many} instance.
+     * Returns a factory of {@link RequestQueue} backed by a {@link reactor.core.publisher.Sinks.Many} instance.
      *
      * @param requestSinkFactory a Function that provides a sink. The factory <b>must</b> provide a new instance
      * every time it is called, and the processor must not be pre-filled with any elements, otherwise it may lead to
      * non-deterministic behavior.
      * @param emissionStrategy the strategy to handle request submission (emission) failures
-     * @return a {@link RequestQueueFactory} backed by a {@link Sinks.Many}
+     * @return a {@link RequestQueueFactory} backed by a {@link reactor.core.publisher.Sinks.Many}
      */
     static RequestQueueFactory createFromSink(Function<Sinks.ManySpec, Sinks.Many<Object>> requestSinkFactory,
                                               EmissionStrategy emissionStrategy) {
@@ -73,7 +73,7 @@ public interface RequestQueueFactory {
      * Returns a factory of {@link RequestQueue} with default parameters capable of buffering requests up to a
      * reasonable capacity, then applying a delay on overflowing requests.
      *
-     * @return a {@link RequestQueueFactory} backed by a multicasting {@link Sinks.Many} with capacity given by
+     * @return a {@link RequestQueueFactory} backed by a multicasting {@link reactor.core.publisher.Sinks.Many} with capacity given by
      * {@link Queues#SMALL_BUFFER_SIZE} and a parking {@link EmissionStrategy}.
      */
     static RequestQueueFactory buffering() {

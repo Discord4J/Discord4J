@@ -17,6 +17,7 @@
 package discord4j.rest.http;
 
 import io.netty.buffer.ByteBufAllocator;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufFlux;
 import reactor.netty.http.client.HttpClient;
@@ -28,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Write to a request from a {@code String} using reactor-netty's {@link
- * HttpClient.RequestSender#send(org.reactivestreams.Publisher)}.
+ * reactor.netty.http.client.HttpClient.RequestSender#send(Publisher)}.
  */
 public class FormUrlEncodedWriterStrategy implements WriterStrategy<String> {
 

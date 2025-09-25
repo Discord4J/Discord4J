@@ -28,11 +28,11 @@ public final class ImageUtil {
     private static final String URL_FORMAT = BASE_URL + "%s.%s";
 
     /**
-     * Gets the URL utilizing a path and the {@link Image.Format} the URL should represent.
+     * Gets the URL utilizing a path and the {@link discord4j.rest.util.Image.Format} the URL should represent.
      *
      * @param path The path of the image; excluding the extension. Must be non-null.
-     * @param format The {@link Image.Format} the URL should represent. Must be non-null.
-     * @return The URL utilizing the path and the {@link Image.Format} the URL represents.
+     * @param format The {@link discord4j.rest.util.Image.Format} the URL should represent. Must be non-null.
+     * @return The URL utilizing the path and the {@link discord4j.rest.util.Image.Format} the URL represents.
      */
     public static String getUrl(final String path, final Image.Format format) {
         return String.format(URL_FORMAT, path, format.getExtension());

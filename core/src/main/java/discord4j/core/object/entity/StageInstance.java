@@ -45,12 +45,12 @@ public final class StageInstance implements Entity {
     }
 
     /**
-     * Requests to invite the specified {@param member} to the speakers of the stage channel associated with this
+     * Requests to invite the specified {@code member} to the speakers of the stage channel associated with this
      * stage instance.
      *
      * @param member The member to invite to the stage speakers
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating that the specified
-     * {@param member} has been invited to the speakers of the stage channel associated with this stage instance.
+     * {@code member} has been invited to the speakers of the stage channel associated with this stage instance.
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> inviteMemberToStageSpeakers(Member member) {
@@ -60,12 +60,12 @@ public final class StageInstance implements Entity {
     }
 
     /**
-     * Requests to move the specified {@param member} to the audience of the stage channel associated with this
+     * Requests to move the specified {@code member} to the audience of the stage channel associated with this
      * stage instance.
      *
      * @param member The member to move to the stage audience
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating that the specified
-     * {@param member} has been moved to the audience of the stage channel associated with this stage instance.
+     * {@code member} has been moved to the audience of the stage channel associated with this stage instance.
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> moveMemberToStageAudience(Member member) {

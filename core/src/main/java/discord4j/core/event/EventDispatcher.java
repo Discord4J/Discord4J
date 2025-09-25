@@ -195,8 +195,8 @@ public interface EventDispatcher {
     // Factories
 
     /**
-     * Create an {@link EventDispatcher} builder. It can be configured with a custom {@link FluxProcessor} for
-     * events, a custom {@link FluxSink.OverflowStrategy} to handle backpressure and a custom {@link Scheduler} to
+     * Create an {@link EventDispatcher} builder. It can be configured with a custom {@link reactor.core.publisher.Sinks} for
+     * events, a custom {@link reactor.core.publisher.FluxSink.OverflowStrategy} to handle backpressure and a custom {@link Scheduler} to
      * dispatch events.
      *
      * @return a {@link Builder}
@@ -210,7 +210,7 @@ public interface EventDispatcher {
      * shard connects at the cost of increased memory usage and potential {@link OutOfMemoryError} if events are not
      * consumed. Startup events collected before the first subscription are only forwarded to that subscriber.
      *
-     * @return a buffering {@link EventDispatcher} backed by an {@link EmitterProcessor}
+     * @return a buffering {@link EventDispatcher} backed by an {@link reactor.core.publisher.Sinks}
      */
     static EventDispatcher buffering() {
         return builder().build();
@@ -296,7 +296,7 @@ public interface EventDispatcher {
     interface Builder {
 
         /**
-         * Set the underlying {@link Sinks.Many} the dispatcher will use to queue and distribute events. Defaults
+         * Set the underlying {@link reactor.core.publisher.Sinks.Many} the dispatcher will use to queue and distribute events. Defaults
          * to using a multicast buffering sink.
          *
          * @param eventSinkFactory the custom sink factory for events
@@ -322,12 +322,12 @@ public interface EventDispatcher {
         DefaultEventDispatcher.Builder eventProcessor(FluxProcessor<Event, Event> eventProcessor);
 
         /**
-         * Set the {@link FluxSink.OverflowStrategy} for dealing with overflow scenarios where too many events are
-         * being published. Defaults to using {@link FluxSink.OverflowStrategy#BUFFER} to ensure all events are
+         * Set the {@link reactor.core.publisher.FluxSink.OverflowStrategy} for dealing with overflow scenarios where too many events are
+         * being published. Defaults to using {@link reactor.core.publisher.FluxSink.OverflowStrategy#BUFFER} to ensure all events are
          * delivered at the cost of higher memory footprint and potential {@link OutOfMemoryError} scenarios.
          * <p>
-         * To only keep the earliest events you can use {@link FluxSink.OverflowStrategy#DROP}, and to only keep the
-         * most recent events, use {@link FluxSink.OverflowStrategy#LATEST}. The number of events that can be queued
+         * To only keep the earliest events you can use {@link reactor.core.publisher.FluxSink.OverflowStrategy#DROP}, and to only keep the
+         * most recent events, use {@link reactor.core.publisher.FluxSink.OverflowStrategy#LATEST}. The number of events that can be queued
          * until this strategy is applied depends on the underlying processor implementation.
          *
          * @param overflowStrategy the custom backpressure strategy

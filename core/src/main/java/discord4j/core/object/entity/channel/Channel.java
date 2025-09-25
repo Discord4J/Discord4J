@@ -216,10 +216,10 @@ public interface Channel extends Entity {
         }
 
         /**
-         * Translate a bitfield value into an {@link EnumSet < ForumChannelFlag >} related to known flags
+         * Translate a bitfield value into an {@link EnumSet} of {@link Flag} related to known flags
          *
          * @param bitfield An integer representing the flags, one per bit
-         * @return An {@link EnumSet<Flag>} of known flags associated to this bit field
+         * @return An {@link EnumSet} of known flags associated to this bit field
          * @implNote This implementation ignores unknown flags
          */
         public static EnumSet<Flag> valueOf(final int bitfield) {
@@ -233,7 +233,7 @@ public interface Channel extends Entity {
         }
 
         /**
-         * Translates an {@link EnumSet< Flag >} to a binary bitfield
+         * Translates an {@link EnumSet} of {@link Flag} to a binary bitfield.
          *
          * @param flags Set of known forum channel flags
          * @return An integer representing the given set as an integer

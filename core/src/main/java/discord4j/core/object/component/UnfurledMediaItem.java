@@ -44,14 +44,14 @@ public class UnfurledMediaItem {
     }
 
     /**
-     * Creates an {@link UnfurledMediaItem} with a given {@link MessageCreateFields.File file}.
+     * Creates an {@link UnfurledMediaItem} with a given {@link discord4j.core.spec.MessageCreateFields.File}.
      *
      * @apiNote The file passed is supposed to be used in the creation of the message for use with the format {@code attachment://}
      * @param file The file to use
      * @return An {@link UnfurledMediaItem}
-     * @see MessageCreateFields.File#of(String, InputStream)
-     * @see discord4j.core.spec.MessageCreateSpec#withFiles(MessageCreateFields.File...) MessageCreateSpec#withFiles(MessageCreateFields.File...)
-     * @see discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono#withFiles(MessageCreateFields.File...) InteractionApplicationCommandCallbackReplyMono#withFiles(MessageCreateFields.File...)
+     * @see discord4j.core.spec.MessageCreateFields.File#of(String, InputStream)
+     * @see discord4j.core.spec.MessageCreateSpec#withFiles(discord4j.core.spec.MessageCreateFields.File...) MessageCreateSpec#withFiles(MessageCreateFields.File...)
+     * @see discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono#withFiles(discord4j.core.spec.MessageCreateFields.File...) InteractionApplicationCommandCallbackReplyMono#withFiles(MessageCreateFields.File...)
      */
     public static UnfurledMediaItem of(MessageCreateFields.File file) {
         return UnfurledMediaItem.of(PREFIX_DISCORD_ATTACHMENT_REFERENCE.concat(file.name()));

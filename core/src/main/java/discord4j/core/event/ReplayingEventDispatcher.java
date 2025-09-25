@@ -72,7 +72,7 @@ public class ReplayingEventDispatcher implements EventDispatcher {
      * given parameters.
      *
      * @param eventProcessor a processor used to bridge gateway events to the dispatcher connected subscribers
-     * @param overflowStrategy an overflow strategy, see {@link FluxSink.OverflowStrategy} for the available strategies
+     * @param overflowStrategy an overflow strategy, see {@link reactor.core.publisher.FluxSink.OverflowStrategy} for the available strategies
      * @param eventScheduler a {@link Scheduler} to ensure a certain thread model on each published signal
      * @param replayEventProcessor a processor used to store events while no subscribers are connected and will be
      * forwarded to all late subscribers

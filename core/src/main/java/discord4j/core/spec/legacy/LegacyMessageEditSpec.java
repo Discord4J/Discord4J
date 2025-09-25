@@ -122,7 +122,7 @@ public class LegacyMessageEditSpec implements LegacySpec<MessageEditRequest> {
     /**
      * Sets the flags for the edited {@link Message}.
      *
-     * @param flags An array of {@link Message.Flag} to set on the edited message.
+     * @param flags An array of {@link discord4j.core.object.entity.Message.Flag} to set on the edited message.
      * @return This spec.
      */
     public LegacyMessageEditSpec setFlags(@Nullable Message.Flag... flags) {

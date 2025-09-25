@@ -69,7 +69,7 @@ public class GatewayWebsocketHandler {
     /**
      * Create a new handler with the given data pipelines.
      *
-     * @param inbound the {@link Sinks.Many} of {@link ByteBuf} to process inbound payloads
+     * @param inbound the {@link reactor.core.publisher.Sinks.Many} of {@link ByteBuf} to process inbound payloads
      * @param outbound the {@link Flux} of {@link ByteBuf} to process outbound payloads
      * @param context the Reactor {@link ContextView} that owns this handler, to enrich logging
      */

@@ -52,7 +52,7 @@ public final class EntityUtil {
 
     /**
      * A utility that converts some instance of {@code ChannelData} to its associated {@code Channel}
-     * {@link Channel.Type type}. That is to say, {@code data.getType() == Channel#getType().getValue()}.
+     * {@link discord4j.core.object.entity.channel.Channel.Type type}. That is to say, {@code data.getType() == Channel#getType().getValue()}.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The {@code ChannelBean} to convert.

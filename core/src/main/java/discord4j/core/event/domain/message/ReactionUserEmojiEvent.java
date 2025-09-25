@@ -70,9 +70,9 @@ public abstract class ReactionUserEmojiEvent extends ReactionBaseEmojiEvent {
     }
 
     /**
-     * Gets the {@link Reaction.Type} of the reaction.
+     * Gets the {@link discord4j.core.object.reaction.Reaction.Type} of the reaction.
      *
-     * @return A {@link Reaction.Type}
+     * @return A {@link discord4j.core.object.reaction.Reaction.Type}
      */
     public Reaction.Type getType() {
         return Reaction.Type.of(this.type);

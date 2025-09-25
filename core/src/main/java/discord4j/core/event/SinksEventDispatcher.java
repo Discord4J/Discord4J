@@ -116,7 +116,7 @@ public class SinksEventDispatcher implements EventDispatcher {
         }
 
         /**
-         * Set the underlying {@link Sinks.Many} the dispatcher will use to queue and distribute events. Defaults
+         * Set the underlying {@link reactor.core.publisher.Sinks.Many} the dispatcher will use to queue and distribute events. Defaults
          * to using a multicast buffering sink.
          *
          * @param eventSinkFactory the custom sink factory for events

@@ -23,7 +23,7 @@ import reactor.core.publisher.Sinks;
 import java.time.Duration;
 
 /**
- * A strategy to handle emission failures to a {@link Sinks.Many} instance.
+ * A strategy to handle emission failures to a {@link reactor.core.publisher.Sinks.Many} instance.
  */
 @Experimental
 public interface EmissionStrategy {
@@ -63,9 +63,9 @@ public interface EmissionStrategy {
 
     /**
      * Try emitting a given {@code element} to the specified {@code sink}, respecting the semantics of
-     * {@link Sinks.Many#tryEmitNext(Object)} and the failure handling of
-     * {@link Sinks.Many#emitNext(Object, Sinks.EmitFailureHandler)}. Returns whether the emission was successful.
-     * Implementations can throw unchecked exceptions like {@link Sinks.EmissionException} or perform side-effects
+     * {@link reactor.core.publisher.Sinks.Many#tryEmitNext(Object)} and the failure handling of
+     * {@link reactor.core.publisher.Sinks.Many#emitNext(Object, Sinks.EmitFailureHandler)}. Returns whether the emission was successful.
+     * Implementations can throw unchecked exceptions like {@link reactor.core.publisher.Sinks.EmissionException} or perform side-effects
      * like waiting to determine a result.
      *
      * @param sink the target sink where this emission is attempted
@@ -77,9 +77,9 @@ public interface EmissionStrategy {
 
     /**
      * Try to terminate the given {@code sink} successfully, respecting the semantics of
-     * {@link Sinks.Many#tryEmitComplete()} and the failure handling of
-     * {@link Sinks.Many#emitComplete(Sinks.EmitFailureHandler)}. Returns whether the emission was successful.
-     * Implementations can throw unchecked exceptions like {@link Sinks.EmissionException} or perform side-effects
+     * {@link reactor.core.publisher.Sinks.Many#tryEmitComplete()} and the failure handling of
+     * {@link reactor.core.publisher.Sinks.Many#emitComplete(Sinks.EmitFailureHandler)}. Returns whether the emission was successful.
+     * Implementations can throw unchecked exceptions like {@link reactor.core.publisher.Sinks.EmissionException} or perform side-effects
      * like waiting to determine a result.
      *
      * @param sink the target sink where this emission is attempted
@@ -89,9 +89,9 @@ public interface EmissionStrategy {
     <T> boolean emitComplete(Sinks.Many<T> sink);
 
     /**
-     * Try to fail the given {@code sink}, respecting the semantics of {@link Sinks.Many#tryEmitError(Throwable)} and
-     * the failure handling of {@link Sinks.Many#emitError(Throwable, Sinks.EmitFailureHandler)}. Returns whether the
-     * emission was successful. Implementations can throw unchecked exceptions like {@link Sinks.EmissionException}
+     * Try to fail the given {@code sink}, respecting the semantics of {@link reactor.core.publisher.Sinks.Many#tryEmitError(Throwable)} and
+     * the failure handling of {@link reactor.core.publisher.Sinks.Many#emitError(Throwable, Sinks.EmitFailureHandler)}. Returns whether the
+     * emission was successful. Implementations can throw unchecked exceptions like {@link reactor.core.publisher.Sinks.EmissionException}
      * or perform side-effects like waiting to determine a result.
      *
      * @param sink the target sink where this emission is attempted

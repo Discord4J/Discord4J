@@ -55,10 +55,10 @@ public class SelectMenuInteractionEvent extends ComponentInteractionEvent {
 
     /**
      * Get the string values selected in the menu.
-     * If type of select menu is not {@link MessageComponent.Type#SELECT_MENU} then ids of entities will be returned.
+     * If type of select menu is not {@link discord4j.core.object.component.MessageComponent.Type#SELECT_MENU_STRING} then ids of entities will be returned.
      *
      * @return The string values selected in the menu.
-     * @see SelectMenu.Option#getValue()
+     * @see discord4j.core.object.component.SelectMenu.Option#getValue()
      */
     public List<String> getValues() {
         return getInteraction().getCommandInteraction()

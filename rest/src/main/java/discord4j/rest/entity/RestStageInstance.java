@@ -44,7 +44,7 @@ public class RestStageInstance {
      *
      * @param restClient the client to make API requests
      * @param channelId the channel ID of this entity
-     * @return a {@link RestStageInstance} represented by this {@param channelId}.
+     * @return a {@link RestStageInstance} represented by this {@code channelId}.
      */
     public static RestStageInstance create(RestClient restClient, Snowflake channelId) {
         return new RestStageInstance(restClient, channelId.asLong());

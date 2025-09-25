@@ -51,7 +51,7 @@ public final class MentionUtil {
     }
 
     /**
-     * Gets a <i>raw</i> mention for a {@link Guild.ResourceNavigation}.
+     * Gets a <i>raw</i> mention for a {@link discord4j.core.object.entity.Guild.ResourceNavigation}.
      *
      * <p>This is the format utilized to directly mention a Guild Resource Navigation.</p>
      *

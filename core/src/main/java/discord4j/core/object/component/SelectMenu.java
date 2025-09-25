@@ -393,7 +393,7 @@ public class SelectMenu extends ActionComponent implements ICanBeUsedInLabelComp
 
     /**
      * Returns a set of acceptable channel types the user may select.
-     * Only applies to {@link Type#SELECT_MENU_CHANNEL} type menus, if empty, no restriction on channel types is placed.
+     * Only applies to {@link MessageComponent.Type#SELECT_MENU_CHANNEL} type menus, if empty, no restriction on channel types is placed.
      *
      * @return A set of channel types a user may select. Empty set means no restriction is applied.
      */

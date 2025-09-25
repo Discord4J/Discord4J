@@ -50,7 +50,7 @@ public final class ForumChannel extends BaseTopLevelGuildChannel implements Cate
     }
 
     /**
-     * Gets the channels {@link Flag} associated to this forum channel
+     * Gets the channels {@link discord4j.core.object.entity.Message.Flag} associated to this forum channel
      * Unknown flags are currently ignored.
      *
      * @return An {@link EnumSet} representing the <b>known flags</b> for this forum channel.

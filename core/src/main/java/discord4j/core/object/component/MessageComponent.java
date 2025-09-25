@@ -16,7 +16,6 @@
  */
 package discord4j.core.object.component;
 
-import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.json.ImmutableComponentData;
 import reactor.util.Logger;
@@ -145,7 +144,7 @@ public class MessageComponent implements BaseMessageComponent {
         }
 
         /**
-         * Gets if this Type require the use of {@link Message.Flag#IS_COMPONENTS_V2}.
+         * Gets if this Type require the use of {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}.
          *
          * @return {@code true} if need the use of the flag, {@code false} otherwise
          */

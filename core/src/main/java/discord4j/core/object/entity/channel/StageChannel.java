@@ -145,7 +145,7 @@ public final class StageChannel extends BaseTopLevelGuildChannel implements Audi
      * @param topic The topic of this {@link StageInstance}
      * @param reason The reason, if present
      * @return A {@link Mono} where, upon successful completion, emits a {@link StageInstance} created
-     *         for this channel with the specified {@param topic}. If an error is received, it is emitted
+     *         for this channel with the specified {@code topic}. If an error is received, it is emitted
      *         through the {@code Mono}
      */
     public Mono<StageInstance> startStageLive(String topic, @Nullable String reason) {
