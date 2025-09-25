@@ -38,6 +38,7 @@ import static discord4j.common.LogUtil.format;
  * The underlying processor can be configured at construction time. Thread affinity can also be configured by
  * supplying a {@link Scheduler}, while an {@link reactor.core.publisher.FluxSink.OverflowStrategy} is applied to handle
  * back-pressure of inbound Events, especially during startup.
+ * @see SinksEventDispatcher
  */
 public class DefaultEventDispatcher implements EventDispatcher {
 
@@ -103,6 +104,7 @@ public class DefaultEventDispatcher implements EventDispatcher {
 
     /**
      * A builder to create {@link EventDispatcher} instances.
+     * @see DefaultEventDispatcher.Builder#eventSink(Function)
      */
     public static class Builder implements EventDispatcher.Builder {
 
@@ -117,12 +119,13 @@ public class DefaultEventDispatcher implements EventDispatcher {
         public SinksEventDispatcher.Builder eventSink(Function<Sinks.ManySpec, Sinks.Many<Event>> eventSinkFactory) {
             SinksEventDispatcher.Builder builder = new SinksEventDispatcher.Builder()
                     .eventSink(Objects.requireNonNull(eventSinkFactory));
-            if (eventScheduler != null) {
-                builder.eventScheduler(eventScheduler);
+            if (this.eventScheduler != null) {
+                builder.eventScheduler(this.eventScheduler);
             }
             return builder;
         }
 
+        @Deprecated
         @Override
         public Builder eventProcessor(FluxProcessor<Event, Event> eventProcessor) {
             this.eventProcessor = Objects.requireNonNull(eventProcessor);
@@ -141,6 +144,7 @@ public class DefaultEventDispatcher implements EventDispatcher {
             return this;
         }
 
+        @Deprecated
         @Override
         public EventDispatcher build() {
             if (eventProcessor == null) {
