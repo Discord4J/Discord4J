@@ -1,8 +1,6 @@
 package discord4j.core.spec;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.core.object.entity.ApplicationInfo;
-import discord4j.discordjson.json.ApplicationInfoData;
 import discord4j.discordjson.json.ApplicationInfoRequest;
 import discord4j.discordjson.json.InstallParamsData;
 import discord4j.discordjson.possible.Possible;
