@@ -27,12 +27,16 @@ import java.util.stream.Collectors;
 /**
  * A row of {@link ActionComponent action components}.
  *
+ * @apiNote {@link Label} is recommended for use over an Action Row in modals. Action Row with {@link TextInput} in modals are now deprecated.
+ *
  * @see <a href="https://discord.com/developers/docs/components/reference#action-row">ActionRow</a>
  */
 public class ActionRow extends LayoutComponent implements TopLevelMessageComponent, ICanBeUsedInContainerComponent {
 
     /**
      * Creates an {@code ActionRow} with the given components.
+     *
+     * @apiNote Discord doesn't recommend use {@link TextInput} in {@code ActionRow}, for that you can use {@link Label}.
      *
      * @param components The child components of the row.
      * @return An {@code ActionRow} containing the given components.
@@ -43,6 +47,8 @@ public class ActionRow extends LayoutComponent implements TopLevelMessageCompone
 
     /**
      * Creates an {@code ActionRow} with the given components.
+     *
+     * @apiNote Discord doesn't recommend use {@link TextInput} in {@code ActionRow}, for that you can use {@link Label}.
      *
      * @param components The child components of the row.
      * @return An {@code ActionRow} containing the given components.
@@ -56,6 +62,8 @@ public class ActionRow extends LayoutComponent implements TopLevelMessageCompone
     /**
      * Creates an {@code ActionRow} with the given components.
      *
+     * @apiNote Discord doesn't recommend use {@link TextInput} in {@code ActionRow}, for that you can use {@link Label}.
+     *
      * @param id the component id
      * @param components The child components of the row.
      * @return An {@code ActionRow} containing the given components.
@@ -66,6 +74,8 @@ public class ActionRow extends LayoutComponent implements TopLevelMessageCompone
 
     /**
      * Creates an {@code ActionRow} with the given components.
+     *
+     * @apiNote Discord doesn't recommend use {@link TextInput} in {@code ActionRow}, for that you can use {@link Label}.
      *
      * @param id the component id
      * @param components The child components of the row.
@@ -96,7 +106,7 @@ public class ActionRow extends LayoutComponent implements TopLevelMessageCompone
      * @return an {@code ActionRow} containing the existing and added components
      */
     public ActionRow withAddedComponent(ActionComponent component) {
-        List<MessageComponent> components = new ArrayList<>(getChildren());
+        List<MessageComponent> components = new ArrayList<>(this.getChildren());
         components.add(component);
         return new ActionRow(ComponentData.builder()
                 .type(this.getType().getValue())
@@ -111,7 +121,7 @@ public class ActionRow extends LayoutComponent implements TopLevelMessageCompone
      * @return an {@code ActionRow} containing all components that did not match the given {@code customId}
      */
     public ActionRow withRemovedComponent(String customId) {
-        List<MessageComponent> components = getChildren();
+        List<MessageComponent> components = this.getChildren();
         components.removeIf(messageComponent -> {
             return messageComponent instanceof ActionComponent && customId.equals(((ActionComponent) messageComponent).getCustomId());
         });

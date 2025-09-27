@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
@@ -59,7 +58,8 @@ public class TextInput extends ActionComponent implements ICanBeUsedInLabelCompo
      * @param customId A developer-defined identifier for the text input.
      * @param label The text that appears above the input
      * @return A text input with the given data.
-     * @deprecated deprecated by discord
+     * @deprecated Use a {@link Label} component to set the name and description for your input field, as Discord now
+     * deprecates direct labels
      */
     @Deprecated
     public static TextInput small(String customId, String label) {
@@ -73,7 +73,8 @@ public class TextInput extends ActionComponent implements ICanBeUsedInLabelCompo
      * @param label The text that appears above the input
      * @param placeholder The placeholder text to be displayed
      * @return A text input with the given data.
-     * @deprecated deprecated by discord
+     * @deprecated Use a {@link Label} component to set the name and description for your input field, as Discord now
+     * deprecates direct labels
      */
     @Deprecated
     public static TextInput small(String customId, String label, String placeholder) {
@@ -88,11 +89,68 @@ public class TextInput extends ActionComponent implements ICanBeUsedInLabelCompo
      * @param minLength The minimum length the user is required to input
      * @param maxLength The maximum length the user is required to input
      * @return A text input with the given data.
-     * @deprecated deprecated by discord
+     * @deprecated Use a {@link Label} component to set the name and description for your input field, as Discord now
+     * deprecates direct labels
      */
     @Deprecated
     public static TextInput small(String customId, String label, int minLength, int maxLength) {
         return of(Style.SHORT, customId, label, minLength, maxLength, null, null);
+    }
+
+    /**
+     * Creates a {@link TextInput.Style#SHORT short} text input.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the text input.
+     * @return A text input with the given data.
+     */
+    public static TextInput small(int id, String customId) {
+        return of(id, Style.SHORT, customId, null, null, null, null);
+    }
+
+    /**
+     * Creates a {@link TextInput.Style#SHORT short} text input.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the text input.
+     * @param label The text that appears above the input
+     * @return A text input with the given data.
+     * @deprecated Use a {@link Label} component to set the name and description for your input field, as Discord now deprecates direct labels
+     */
+    @Deprecated
+    public static TextInput small(int id, String customId, String label) {
+        return of(id, Style.SHORT, customId, label, null, null, null, null);
+    }
+
+    /**
+     * Creates a {@link TextInput.Style#SHORT short} text input.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the text input.
+     * @param label The text that appears above the input
+     * @param placeholder The placeholder text to be displayed
+     * @return A text input with the given data.
+     * @deprecated Use a {@link Label} component to set the name and description for your input field, as Discord now deprecates direct labels
+     */
+    @Deprecated
+    public static TextInput small(int id, String customId, String label, String placeholder) {
+        return of(id, Style.SHORT, customId, label, null, null, null, placeholder);
+    }
+
+    /**
+     * Creates a {@link TextInput.Style#SHORT short} text input.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the text input.
+     * @param label The text that appears above the input
+     * @param minLength The minimum length the user is required to input
+     * @param maxLength The maximum length the user is required to input
+     * @return A text input with the given data.
+     * @deprecated Use a {@link Label} component to set the name and description for your input field, as Discord now deprecates direct labels
+     */
+    @Deprecated
+    public static TextInput small(int id, String customId, String label, int minLength, int maxLength) {
+        return of(id, Style.SHORT, customId, label, minLength, maxLength, null, null);
     }
 
     /**
@@ -111,7 +169,8 @@ public class TextInput extends ActionComponent implements ICanBeUsedInLabelCompo
      * @param customId A developer-defined identifier for the text input.
      * @param label The text that appears above the input
      * @return A text input with the given data.
-     * @deprecated deprecated by discord
+     * @deprecated Use a {@link Label} component to set the name and description for your input field, as Discord now
+     * deprecates direct labels
      */
     @Deprecated
     public static TextInput paragraph(String customId, String label) {
@@ -125,7 +184,8 @@ public class TextInput extends ActionComponent implements ICanBeUsedInLabelCompo
      * @param label The text that appears above the input
      * @param placeholder The placeholder text to display
      * @return A text input with the given data.
-     * @deprecated deprecated by discord
+     * @deprecated Use a {@link Label} component to set the name and description for your input field, as Discord now
+     * deprecates direct labels
      */
     @Deprecated
     public static TextInput paragraph(String customId, String label, String placeholder) {
@@ -152,15 +212,133 @@ public class TextInput extends ActionComponent implements ICanBeUsedInLabelCompo
      * @param minLength The minimum length the user is required to input
      * @param maxLength The maximum length the user is required to input
      * @return A text input with the given data.
-     * @deprecated deprecated by discord
+     * @deprecated Use a {@link Label} component to set the name and description for your input field, as Discord now
+     * deprecates direct labels
      */
     @Deprecated
     public static TextInput paragraph(String customId, String label, int minLength, int maxLength) {
         return of(Style.PARAGRAPH, customId, label, minLength, maxLength, null, null);
     }
 
-    public static TextInput of(Style style, String customId, @Nullable Integer minLength,
+    /**
+     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the text input.
+     * @return A text input with the given data.
+     */
+    public static TextInput paragraph(int id, String customId) {
+        return of(id, Style.PARAGRAPH, customId, null, null, null, null);
+    }
+
+    /**
+     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the text input.
+     * @param label The text that appears above the input
+     * @return A text input with the given data.
+     * @deprecated Use a {@link Label} component to set the name and description for your input field, as Discord now deprecates direct labels
+     */
+    @Deprecated
+    public static TextInput paragraph(int id, String customId, String label) {
+        return of(id, Style.PARAGRAPH, customId, label, null, null, null, null);
+    }
+
+    /**
+     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the text input.
+     * @param label The text that appears above the input
+     * @param placeholder The placeholder text to display
+     * @return A text input with the given data.
+     * @deprecated Use a {@link Label} component to set the name and description for your input field, as Discord now deprecates direct labels
+     */
+    @Deprecated
+    public static TextInput paragraph(int id, String customId, String label, String placeholder) {
+        return of(id, Style.PARAGRAPH, customId, label, null, null, null, placeholder);
+    }
+
+    /**
+     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
+     *
+     * @param id the component id
+     * @param customId A developer-defined identifier for the text input.
+     * @param label The text that appears above the input
+     * @param minLength The minimum length the user is required to input
+     * @param maxLength The maximum length the user is required to input
+     * @return A text input with the given data.
+     * @deprecated Use a {@link Label} component to set the name and description for your input field, as Discord now deprecates direct labels
+     */
+    @Deprecated
+    public static TextInput paragraph(int id, String customId, String label, int minLength, int maxLength) {
+        return of(id, Style.PARAGRAPH, customId, label, minLength, maxLength, null, null);
+    }
+
+    @Deprecated
+    private static TextInput of(int id, Style style, String customId, @Nullable String label,
+                                @Nullable Integer minLength,
                                 @Nullable Integer maxLength, @Nullable String value, @Nullable String placeholder) {
+        ImmutableComponentData.Builder builder = ComponentData.builder()
+            .type(MessageComponent.Type.TEXT_INPUT.getValue())
+            .id(id)
+            .style(style.getValue())
+            .customId(customId);
+
+        if (label != null) {
+            builder.label(label);
+        }
+
+        if (minLength != null) {
+            builder.minLength(minLength);
+        }
+
+        if (maxLength != null) {
+            builder.maxLength(maxLength);
+        }
+
+        if (value != null) {
+            builder.value(value);
+        }
+
+        if (placeholder != null) {
+            builder.placeholder(placeholder);
+        }
+
+        return new TextInput(builder.build());
+    }
+
+    private static TextInput of(int id, Style style, String customId,
+                                @Nullable Integer minLength,
+                                @Nullable Integer maxLength, @Nullable String value, @Nullable String placeholder) {
+        ImmutableComponentData.Builder builder = ComponentData.builder()
+            .type(MessageComponent.Type.TEXT_INPUT.getValue())
+            .id(id)
+            .style(style.getValue())
+            .customId(customId);
+
+        if (minLength != null) {
+            builder.minLength(minLength);
+        }
+
+        if (maxLength != null) {
+            builder.maxLength(maxLength);
+        }
+
+        if (value != null) {
+            builder.value(value);
+        }
+
+        if (placeholder != null) {
+            builder.placeholder(placeholder);
+        }
+
+        return new TextInput(builder.build());
+    }
+
+    public static TextInput of(Style style, String customId, @Nullable Integer minLength,
+                               @Nullable Integer maxLength, @Nullable String value, @Nullable String placeholder) {
         ImmutableComponentData.Builder builder = ComponentData.builder()
             .type(MessageComponent.Type.TEXT_INPUT.getValue())
             .style(style.getValue())
@@ -189,143 +367,12 @@ public class TextInput extends ActionComponent implements ICanBeUsedInLabelCompo
     private static TextInput of(Style style, String customId, @Nullable String label, @Nullable Integer minLength,
                                 @Nullable Integer maxLength, @Nullable String value, @Nullable String placeholder) {
         ImmutableComponentData.Builder builder = ComponentData.builder()
-                .type(MessageComponent.Type.TEXT_INPUT.getValue())
-                .style(style.getValue())
-                .customId(customId);
-
-        if (label != null) {
-            builder.label(Possible.ofNullable(label).map(Optional::ofNullable));
-        }
-
-        if (minLength != null) {
-            builder.minLength(minLength);
-        }
-
-        if (maxLength != null) {
-            builder.maxLength(maxLength);
-        }
-
-        if (value != null) {
-            builder.value(value);
-        }
-
-        if (placeholder != null) {
-            builder.placeholder(placeholder);
-        }
-
-        return new TextInput(builder.build());
-    }
-
-    /**
-     * Creates a {@link TextInput.Style#SHORT short} text input.
-     *
-     * @param id the component id
-     * @param customId A developer-defined identifier for the text input.
-     * @return A text input with the given data.
-     */
-    public static TextInput small(int id, String customId) {
-        return of(id, Style.SHORT, customId, null, null, null, null, null);
-    }
-
-    /**
-     * Creates a {@link TextInput.Style#SHORT short} text input.
-     *
-     * @param id the component id
-     * @param customId A developer-defined identifier for the text input.
-     * @param label The text that appears above the input
-     * @return A text input with the given data.
-     */
-    public static TextInput small(int id, String customId, String label) {
-        return of(id, Style.SHORT, customId, label, null, null, null, null);
-    }
-
-    /**
-     * Creates a {@link TextInput.Style#SHORT short} text input.
-     *
-     * @param id the component id
-     * @param customId A developer-defined identifier for the text input.
-     * @param label The text that appears above the input
-     * @param placeholder The placeholder text to be displayed
-     * @return A text input with the given data.
-     */
-    public static TextInput small(int id, String customId, String label, String placeholder) {
-        return of(id, Style.SHORT, customId, label, null, null, null, placeholder);
-    }
-
-    /**
-     * Creates a {@link TextInput.Style#SHORT short} text input.
-     *
-     * @param id the component id
-     * @param customId A developer-defined identifier for the text input.
-     * @param label The text that appears above the input
-     * @param minLength The minimum length the user is required to input
-     * @param maxLength The maximum length the user is required to input
-     * @return A text input with the given data.
-     */
-    public static TextInput small(int id, String customId, String label, int minLength, int maxLength) {
-        return of(id, Style.SHORT, customId, label, minLength, maxLength, null, null);
-    }
-
-    /**
-     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
-     *
-     * @param id the component id
-     * @param customId A developer-defined identifier for the text input.
-     * @return A text input with the given data.
-     */
-    public static TextInput paragraph(int id, String customId) {
-        return of(id, Style.PARAGRAPH, customId, null, null, null, null, null);
-    }
-
-    /**
-     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
-     *
-     * @param id the component id
-     * @param customId A developer-defined identifier for the text input.
-     * @param label The text that appears above the input
-     * @return A text input with the given data.
-     */
-    public static TextInput paragraph(int id, String customId, String label) {
-        return of(id, Style.PARAGRAPH, customId, label, null, null, null, null);
-    }
-
-    /**
-     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
-     *
-     * @param id the component id
-     * @param customId A developer-defined identifier for the text input.
-     * @param label The text that appears above the input
-     * @param placeholder The placeholder text to display
-     * @return A text input with the given data.
-     */
-    public static TextInput paragraph(int id, String customId, String label, String placeholder) {
-        return of(id, Style.PARAGRAPH, customId, label, null, null, null, placeholder);
-    }
-
-    /**
-     * Creates a {@link TextInput.Style#PARAGRAPH paragraph} text input.
-     *
-     * @param id the component id
-     * @param customId A developer-defined identifier for the text input.
-     * @param label The text that appears above the input
-     * @param minLength The minimum length the user is required to input
-     * @param maxLength The maximum length the user is required to input
-     * @return A text input with the given data.
-     */
-    public static TextInput paragraph(int id, String customId, String label, int minLength, int maxLength) {
-        return of(Style.PARAGRAPH, customId, label, minLength, maxLength, null, null);
-    }
-
-    private static TextInput of(int id, Style style, String customId, @Nullable String label, @Nullable Integer minLength,
-                                @Nullable Integer maxLength, @Nullable String value, @Nullable String placeholder) {
-        ImmutableComponentData.Builder builder = ComponentData.builder()
             .type(MessageComponent.Type.TEXT_INPUT.getValue())
-            .id(id)
             .style(style.getValue())
             .customId(customId);
 
         if (label != null) {
-            builder.label(label);
+            builder.label(Possible.ofNullable(label).map(Optional::ofNullable));
         }
 
         if (minLength != null) {
@@ -385,20 +432,20 @@ public class TextInput extends ActionComponent implements ICanBeUsedInLabelCompo
      * @return the style of the text input
      */
     public Style getStyle() {
-        return getData().style().toOptional()
-                .map(Style::of)
-                .orElseThrow(IllegalStateException::new); // style should always be present on text inputs
+        return this.getData().style().toOptional()
+            .map(Style::of)
+            .orElseThrow(IllegalStateException::new); // style should always be present on text inputs
     }
 
     /**
      * Gets the text input's label
      *
      * @return The text input's label
-     * @deprecated deprecated by discord
+     * @deprecated deprecated by discord, if this component was used in {@link Label} you need check that component
      */
     @Deprecated
     public Optional<String> getLabel() {
-        return Possible.flatOpt(getData().label());
+        return Possible.flatOpt(this.getData().label());
     }
 
     /**
@@ -407,7 +454,7 @@ public class TextInput extends ActionComponent implements ICanBeUsedInLabelCompo
      * @return The text input's minimum length
      */
     public int getMinLength() {
-        return getData().minLength().toOptional().orElse(0);
+        return this.getData().minLength().toOptional().orElse(0);
     }
 
     /**
@@ -416,7 +463,7 @@ public class TextInput extends ActionComponent implements ICanBeUsedInLabelCompo
      * @return The text input's maximum length
      */
     public int getMaxLength() {
-        return getData().maxLength().toOptional().orElse(4000);
+        return this.getData().maxLength().toOptional().orElse(4000);
     }
 
     /**
@@ -425,7 +472,7 @@ public class TextInput extends ActionComponent implements ICanBeUsedInLabelCompo
      * @return Whether the text input is required
      */
     public boolean isRequired() {
-        return getData().required().toOptional().orElse(true);
+        return this.getData().required().toOptional().orElse(true);
     }
 
     /**
@@ -434,7 +481,7 @@ public class TextInput extends ActionComponent implements ICanBeUsedInLabelCompo
      * @return The text input's value
      */
     public Optional<String> getValue() {
-        return getData().value().toOptional();
+        return this.getData().value().toOptional();
     }
 
     /**
@@ -443,7 +490,7 @@ public class TextInput extends ActionComponent implements ICanBeUsedInLabelCompo
      * @return The text input's placeholder
      */
     public Optional<String> getPlaceholder() {
-        return getData().placeholder().toOptional();
+        return this.getData().placeholder().toOptional();
     }
 
     /**
@@ -463,7 +510,7 @@ public class TextInput extends ActionComponent implements ICanBeUsedInLabelCompo
      * @return A new possibly required text input with the same data as this one.
      */
     public TextInput required(boolean value) {
-        return new TextInput(ComponentData.builder().from(getData()).required(value).build());
+        return new TextInput(ComponentData.builder().from(this.getData()).required(value).build());
     }
 
     /**
@@ -473,7 +520,7 @@ public class TextInput extends ActionComponent implements ICanBeUsedInLabelCompo
      * @return A new text input with the same data as this one.
      */
     public TextInput prefilled(String value) {
-        return new TextInput(ComponentData.builder().from(getData()).value(value).build());
+        return new TextInput(ComponentData.builder().from(this.getData()).value(value).build());
     }
 
     /**
@@ -483,13 +530,14 @@ public class TextInput extends ActionComponent implements ICanBeUsedInLabelCompo
      * @return A new text input with the same data as this one.
      */
     public TextInput placeholder(String value) {
-        return new TextInput(ComponentData.builder().from(getData()).placeholder(value).build());
+        return new TextInput(ComponentData.builder().from(this.getData()).placeholder(value).build());
     }
 
     /**
      * A text input's style is what determines its size and behavior
      *
-     * @see <a href="https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-styles">Text Input Styles</a>
+     * @see
+     * <a href="https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-styles">Text Input Styles</a>
      */
     public enum Style {
         UNKNOWN(-1),
