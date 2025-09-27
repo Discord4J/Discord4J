@@ -31,6 +31,7 @@ import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.NewsChannelFollowRequest;
 import discord4j.discordjson.json.PermissionsEditRequest;
+import discord4j.discordjson.json.PinnedMessagesResponseData;
 import discord4j.discordjson.json.StartThreadFromMessageRequest;
 import discord4j.discordjson.json.StartThreadWithoutMessageRequest;
 import discord4j.discordjson.json.ThreadMemberData;
@@ -457,8 +458,20 @@ public class RestChannel {
      * it is emitted through the {@code Flux}.
      * @see <a href="https://discord.com/developers/docs/resources/channel#get-pinned-messages">Get Pinned Messages</a>
      */
-    public Flux<MessageData> getPinnedMessages() {
+    public Mono<PinnedMessagesResponseData> getPinnedMessages() {
         return restClient.getChannelService().getPinnedMessages(id);
+    }
+
+    /**
+     * Request to pin a message in this channel.
+     *
+     * @param messageId The ID of the message to pin
+     * @param reason The reason for pinning the message
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the messaged was pinned. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> addPinnedMessage(Snowflake messageId, @Nullable String reason) {
+        return restClient.getChannelService().addPinnedMessage(id, messageId.asLong(), reason);
     }
 
     /**
@@ -469,6 +482,18 @@ public class RestChannel {
      */
     public Mono<Void> addPinnedMessage(Snowflake messageId) {
         return restClient.getChannelService().addPinnedMessage(id, messageId.asLong());
+    }
+
+    /**
+     * Request to unpin a message in this channel.
+     *
+     * @param messageId The ID of the message to unpin
+     * @param reason The reason for unpinning the message
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message was unpinned. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> deletePinnedMessage(Snowflake messageId, @Nullable String reason) {
+        return restClient.getChannelService().deletePinnedMessage(id, messageId.asLong(), reason);
     }
 
     /**

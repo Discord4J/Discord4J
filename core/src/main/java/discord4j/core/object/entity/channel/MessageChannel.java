@@ -18,16 +18,21 @@ package discord4j.core.object.entity.channel;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.PinnedMessageReference;
 import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateMono;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.core.spec.PinnedMessagesQueryFlux;
+import discord4j.core.spec.PinnedMessagesQuerySpec;
 import discord4j.core.spec.PollCreateMono;
 import discord4j.core.spec.PollCreateSpec;
 import discord4j.core.spec.legacy.LegacyEmbedCreateSpec;
 import discord4j.core.spec.legacy.LegacyMessageCreateSpec;
 import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.PinnedMessageData;
+import discord4j.discordjson.json.PinnedMessagesResponseData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.PaginationUtil;
 import org.reactivestreams.Publisher;
@@ -38,12 +43,14 @@ import reactor.core.scheduler.Scheduler;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToLongFunction;
 
 /**
  * A Discord channel that can utilize messages.
@@ -344,14 +351,23 @@ public interface MessageChannel extends Channel {
     }
 
     /**
-     * Requests to retrieve all the pinned messages for this channel.
+     * Requests to retrieve all the pinned messages for this channel. Properties specifying how to query a pinned message can be set via
+     * {@code withXxx} methods of the returned {@link PinnedMessagesQueryFlux}.
      *
-     * @return A {@link Flux} that continually emits all the pinned messages for this channel. If an error is received,
-     * it is emitted through the {@code Flux}.
+     * @return A {@link PinnedMessagesQueryFlux} that continually emits all the pinned messages possible for this channel. If an error is
+     * received, it is emitted
+     * through the {@code Flux}.
      */
-    default Flux<Message> getPinnedMessages() {
+    default PinnedMessagesQueryFlux getPinnedMessages() {
+        return PinnedMessagesQueryFlux.of(this);
+    }
+
+    default Flux<PinnedMessageReference> getPinnedMessages(PinnedMessagesQuerySpec spec) {
+        Objects.requireNonNull(spec);
         return getClient().getRestClient().getChannelService()
-                .getPinnedMessages(getId().asLong())
-                .map(data -> new Message(getClient(), data));
+            .getPinnedMessages(getId().asLong(), spec.asRequest())
+            .map(PinnedMessagesResponseData::items)
+            .flatMapMany(pinnedMessagesData -> Flux.fromIterable(pinnedMessagesData)
+                .map(pinnedMessageData -> new PinnedMessageReference(getClient(), pinnedMessageData)));
     }
 }
