@@ -18,20 +18,11 @@ package discord4j.core;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
-import discord4j.core.object.audit.AuditLogEntry;
-import discord4j.core.object.audit.AuditLogPart;
-import discord4j.core.object.audit.ChangeKey;
-import discord4j.core.object.emoji.Emoji;
-import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.PinnedMessageReference;
-import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.object.entity.poll.Poll;
-import discord4j.core.object.entity.poll.PollAnswer;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-import java.util.List;
+import java.time.Instant;
 
 public class ExamplePinnedMessages {
 
@@ -47,7 +38,7 @@ public class ExamplePinnedMessages {
                     .next()
                     .flatMap(e -> e.getGuild().getChannelById(Snowflake.of(channelId)))
                     .ofType(TextChannel.class)
-                    .flatMapMany(MessageChannel::getPinnedMessages)
+                    .flatMapMany(textChannel -> textChannel.getPinnedMessages().withBefore(Instant.now())) // you can change or ignore the before spec
                     .map(pinnedMessageReference -> {
                         System.out.println(pinnedMessageReference.getData());
                         return pinnedMessageReference;
