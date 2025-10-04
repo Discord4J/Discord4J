@@ -16,8 +16,6 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.util.Snowflake;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.PinnedMessageReference;
 import discord4j.core.object.entity.channel.MessageChannel;
 import org.immutables.value.Value;
@@ -25,6 +23,7 @@ import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.util.annotation.Nullable;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +34,7 @@ import static discord4j.core.spec.InternalSpecUtils.putIfNotNull;
 interface PinnedMessagesQuerySpecGenerator extends Spec<Map<String, Object>> {
 
     @Nullable
-    Snowflake before();
+    Instant before();
 
     @Nullable
     Integer limit();
@@ -43,7 +42,7 @@ interface PinnedMessagesQuerySpecGenerator extends Spec<Map<String, Object>> {
     @Override
     default Map<String, Object> asRequest() {
         Map<String, Object> request = new HashMap<>(2);
-        putIfNotNull(request, "before", mapNullable(before(), Snowflake::asString));
+        putIfNotNull(request, "before", mapNullable(before(), Instant::toString));
         putIfNotNull(request, "limit", limit());
         return request;
     }
