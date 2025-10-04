@@ -353,16 +353,16 @@ public abstract class Routes {
      * Returns all pinned messages in the channel as an array of message objects.
      * Requires the `VIEW_CHANNEL` permission. If the user is missing the `READ_MESSAGE_HISTORY` permission in the channel, then no pins will be returned.
      *
-     * @see <a href="https://discord.com/developers/docs/resources/channel#get-pinned-messages">
-     * https://discord.com/developers/docs/resources/channel#get-pinned-messages</a>
+     * @see <a href="https://discord.com/developers/docs/resources/message#get-channel-pins">
+     * https://discord.com/developers/docs/resources/message#get-channel-pins</a>
      */
     public static final Route MESSAGES_PINNED_GET = Route.get("/channels/{channel.id}/messages/pins");
 
     /**
      * Pin a message in a channel. Requires the 'PIN_MESSAGES' permission. Returns a 204 empty response on success.
      *
-     * @see <a href="https://discord.com/developers/docs/resources/channel#add-pinned-channel-message">
-     * https://discord.com/developers/docs/resources/channel#add-pinned-channel-message</a>
+     * @see <a href="https://discord.com/developers/docs/resources/message#pin-message">
+     * https://discord.com/developers/docs/resources/message#pin-message</a>
      */
     public static final Route MESSAGES_PINNED_ADD = Route.put("/channels/{channel.id}/messages/pins/{message.id}");
 
@@ -370,8 +370,8 @@ public abstract class Routes {
      * Delete a pinned message in a channel. Requires the 'PIN_MESSAGES' permission. Returns a 204 empty response on
      * success.
      *
-     * @see <a href="https://discord.com/developers/docs/resources/channel#delete-pinned-channel-message">
-     * https://discord.com/developers/docs/resources/channel#delete-pinned-channel-message</a>
+     * @see <a href="https://discord.com/developers/docs/resources/message#unpin-message">
+     * https://discord.com/developers/docs/resources/message#unpin-message</a>
      */
     public static final Route MESSAGES_PINNED_DELETE = Route.delete("/channels/{channel.id}/messages/pins/{message.id}");
 
