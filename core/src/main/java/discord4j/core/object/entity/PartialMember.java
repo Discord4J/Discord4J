@@ -66,7 +66,7 @@ public class PartialMember extends User {
     private static final String AVATAR_IMAGE_PATH = "guilds/%s/users/%s/avatars/%s";
 
     /** The path for member banner image URLs. */
-    private static final String BANNER_IMAGE_PATH = "banners/%s/%s";
+    private static final String BANNER_IMAGE_PATH = "guilds/%s/users/%s/banners/%s";
 
     private final PartialMemberData data;
 
@@ -348,7 +348,7 @@ public class PartialMember extends User {
      */
     public final Optional<String> getGuildBannerUrl(final Image.Format format) {
         return Possible.flatOpt(data.banner()).map(banner -> ImageUtil.getUrl(
-            String.format(BANNER_IMAGE_PATH, getId().asString(), banner), format));
+            String.format(BANNER_IMAGE_PATH, this.getGuildId().asString(), this.getId().asString(), banner), format));
     }
 
     /**

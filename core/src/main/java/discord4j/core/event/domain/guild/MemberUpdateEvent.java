@@ -47,7 +47,7 @@ public class MemberUpdateEvent extends GuildEvent {
     /** The path for member avatar image URLs. */
     private static final String AVATAR_IMAGE_PATH = "guilds/%s/users/%s/avatars/%s";
     /** The path for member banner image URLs. */
-    private static final String BANNER_IMAGE_PATH = "banners/%s/%s";
+    private static final String BANNER_IMAGE_PATH = "guilds/%s/users/%s/banners/%s";
 
     private final long guildId;
     private final long memberId;
@@ -206,9 +206,9 @@ public class MemberUpdateEvent extends GuildEvent {
      * @return The current member's guild banner URL, if present.
      */
     public Optional<String> getCurrentGuildBannerUrl(Image.Format format) {
-        return Optional.ofNullable(currentBanner)
+        return Optional.ofNullable(this.currentBanner)
             .map(avatar -> ImageUtil.getUrl(String.format(BANNER_IMAGE_PATH,
-                guildId, Snowflake.asString(memberId), avatar), format));
+                this.guildId, Snowflake.asString(this.memberId), avatar), format));
     }
 
 
@@ -282,6 +282,7 @@ public class MemberUpdateEvent extends GuildEvent {
             ", old=" + old +
             ", currentRoleIds=" + currentRoleIds +
             ", currentNickname='" + currentNickname + '\'' +
+            ", currentBanner='" + currentBanner + '\'' +
             ", currentAvatar='" + currentAvatar + '\'' +
             ", currentJoinedAt='" + currentJoinedAt + '\'' +
             ", currentPremiumSince='" + currentPremiumSince + '\'' +
