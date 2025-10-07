@@ -885,12 +885,36 @@ public final class Message implements Entity {
     /**
      * Requests to pin this message.
      *
+     * @param reason The reason
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the messaged was pinned. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> pin(@Nullable final String reason) {
+        return gateway.getRestClient().getChannelService()
+            .addPinnedMessage(getChannelId().asLong(), getId().asLong(), reason);
+    }
+
+    /**
+     * Requests to pin this message.
+     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the messaged was pinned. If
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> pin() {
         return gateway.getRestClient().getChannelService()
                 .addPinnedMessage(getChannelId().asLong(), getId().asLong());
+    }
+
+    /**
+     * Requests to unpin this message.
+     *
+     * @param reason The reason
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message was unpinned. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> unpin(@Nullable final String reason) {
+        return gateway.getRestClient().getChannelService()
+            .deletePinnedMessage(getChannelId().asLong(), getId().asLong(), reason);
     }
 
     /**
