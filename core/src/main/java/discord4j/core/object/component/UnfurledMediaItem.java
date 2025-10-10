@@ -138,7 +138,7 @@ public class UnfurledMediaItem {
         return Possible.flatOpt(this.getData().loadingState()).map(LoadingState::of);
     }
 
-    enum LoadingState {
+    public enum LoadingState {
         UNKNOWN(0),
         LOADING(1),
         LOADED_SUCCESS(2),
