@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package discord4j.core.spec;
 
 import discord4j.core.object.entity.Role;
@@ -61,19 +60,20 @@ interface RoleEditSpecGenerator extends AuditSpec<RoleModifyRequest> {
         ImmutableRoleModifyRequest.Builder builder = RoleModifyRequest.builder()
             .name(name())
             .permissions(mapPossible(permissions(), PermissionSet::getRawValue))
-            .color(mapPossible(color(), Color::getRGB))
             .hoist(hoist())
             .mentionable(mentionable())
             .icon(icon())
             .unicodeEmoji(unicodeEmoji());
 
+        ImmutableRoleColorData.Builder builderRoleColor = RoleColorData.builder();
         if (!primaryColor().isAbsent()) {
-            ImmutableRoleColorData.Builder builderRoleColor = RoleColorData.builder();
             builderRoleColor.primaryColor(primaryColor().get().getRGB());
-            builderRoleColor.secondaryColor(secondaryColor().get().map(Color::getRGB));
-            builderRoleColor.tertiaryColor(tertiaryColor().get().map(Color::getRGB));
-            builder.colors(builderRoleColor.build());
+        } else if (!color().isAbsent()) {
+            builderRoleColor.primaryColor(color().get().getRGB());
         }
+        builderRoleColor.secondaryColor(Possible.flatOpt(secondaryColor()).map(Color::getRGB));
+        builderRoleColor.tertiaryColor(Possible.flatOpt(tertiaryColor()).map(Color::getRGB));
+        builder.colors(builderRoleColor.build());
 
         return builder.build();
     }
