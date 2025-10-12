@@ -25,9 +25,7 @@ ext {
 
     // Dependencies
     reactor_bom_version = '2023.0.17'
-    jackson_databind_version = '2.17.0'
-    jackson_datatype_jsr310_version = '2.17.0'
-    jackson_datatype_jdk8_version = '2.17.0'
+    jackson_bom_version = '2.18.4'
     caffeine_version = '2.9.3'
     immutables_group = 'org.immutables'
     immutables_version = '2.10.1'
@@ -62,7 +60,8 @@ allprojects {
 
     dependencies {
         api platform("io.projectreactor:reactor-bom:$reactor_bom_version")
-        api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_datatype_jsr310_version"
+        api platform("com.fasterxml.jackson:jackson-bom:$jackson_bom_version")
+        api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
         api "com.discord4j:discord-json:$discordJsonVersion"
 
         compileOnly "com.google.code.findbugs:jsr305:3.0.1"
@@ -95,7 +94,7 @@ allprojects {
             // adding links to javadocs for filling specific classes when not existing inside current javadoc
             links = [
                 jdk_javadoc,
-                "https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/2.17.0/",
+                "https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/2.18.4/",
                 "https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
                 "https://projectreactor.io/docs/core/3.6.16/api/",
                 "https://projectreactor.io/docs/netty/1.1.29/api/",

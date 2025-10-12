@@ -3,8 +3,8 @@ apply plugin: 'com.gorylenko.gradle-git-properties'
 dependencies {
     api "io.projectreactor.netty:reactor-netty-http"
     api "io.projectreactor.addons:reactor-extra"
-    api "com.fasterxml.jackson.core:jackson-databind:$jackson_databind_version"
-    api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jackson_datatype_jdk8_version"
+    api "com.fasterxml.jackson.core:jackson-databind"
+    api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
     api "com.github.ben-manes.caffeine:caffeine:$caffeine_version"
 
     api "com.discord4j:stores-api:$storesVersion"
