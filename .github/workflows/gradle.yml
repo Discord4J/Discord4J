@@ -34,7 +34,7 @@ jobs:
       - name: PR Check (PR Blocked by Dependency)
         if: ${{ contains(toJson(github.event.pull_request.labels.*.name), 'PR depends on PR') }}
         run: echo "::warning::This PR was marked with the label 'PR depends on PR' this can cause issues in building"
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/cache@v4
         with:
           path: ~/.gradle/caches
@@ -42,7 +42,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: ${{ matrix.java }}
           distribution: 'temurin'
@@ -63,7 +63,7 @@ jobs:
             echo 'This repository does not have all required secrets: signingKey, signingPassword, sonatypeUsername or sonatypePassword).' >> $GITHUB_STEP_SUMMARY
             echo "::error::This repository does not have all required secrets: signingKey, signingPassword, sonatypeUsername or sonatypePassword)."
             exit -1
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: actions/cache@v4
@@ -73,7 +73,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: 17
           distribution: 'temurin'
