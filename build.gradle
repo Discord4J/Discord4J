@@ -24,7 +24,7 @@ ext {
     }
 
     // Dependencies
-    reactor_bom_version = '2023.0.17'
+    reactor_bom_version = '2023.0.19'
     jackson_bom_version = '2.18.4'
     caffeine_version = '2.9.3'
     immutables_group = 'org.immutables'
@@ -96,8 +96,8 @@ allprojects {
                 jdk_javadoc,
                 "https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/2.18.4/",
                 "https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
-                "https://projectreactor.io/docs/core/3.6.16/api/",
-                "https://projectreactor.io/docs/netty/1.1.29/api/",
+                "https://projectreactor.io/docs/core/3.6.17/api/", // TODO: https://github.com/reactor/reactor/issues/767
+                "https://projectreactor.io/docs/netty/1.1.30/api/", // TODO: https://github.com/reactor/reactor/issues/767
                 "https://projectreactor.io/docs/extra/3.5.2/api/",
                 "https://netty.io/4.1/api/"
             ]
