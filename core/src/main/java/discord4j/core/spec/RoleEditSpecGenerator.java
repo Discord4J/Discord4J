@@ -17,9 +17,9 @@
 package discord4j.core.spec;
 
 import discord4j.core.object.entity.Role;
-import discord4j.discordjson.json.ImmutableRoleColorData;
+import discord4j.discordjson.json.ImmutableRoleColorRequest;
 import discord4j.discordjson.json.ImmutableRoleModifyRequest;
-import discord4j.discordjson.json.RoleColorData;
+import discord4j.discordjson.json.RoleColorRequest;
 import discord4j.discordjson.json.RoleModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
@@ -30,6 +30,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
+import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 
 @Value.Immutable(singleton = true)
 interface RoleEditSpecGenerator extends AuditSpec<RoleModifyRequest> {
@@ -41,7 +42,7 @@ interface RoleEditSpecGenerator extends AuditSpec<RoleModifyRequest> {
     @Deprecated
     Possible<Color> color();
 
-    Possible<Color> primaryColor();
+    Possible<Optional<Color>> primaryColor();
 
     Possible<Optional<Color>> secondaryColor();
 
@@ -65,15 +66,20 @@ interface RoleEditSpecGenerator extends AuditSpec<RoleModifyRequest> {
             .icon(icon())
             .unicodeEmoji(unicodeEmoji());
 
-        ImmutableRoleColorData.Builder builderRoleColor = RoleColorData.builder();
-        if (!primaryColor().isAbsent()) {
-            builderRoleColor.primaryColor(primaryColor().get().getRGB());
-        } else if (!color().isAbsent()) {
-            builderRoleColor.primaryColor(color().get().getRGB());
+        if (primaryColor().isPresent() || color().isPresent() || secondaryColor().isPresent() || tertiaryColor().isPresent()) {
+            ImmutableRoleColorRequest.Builder builderRoleColor = RoleColorRequest.builder();
+            // Handle primary color or color
+            Possible<Optional<Integer>> primaryColorRGB = primaryColor().isPresent()
+                ? mapPossibleOptional(primaryColor(), Color::getRGB)
+                : mapPossibleOptional(color().map(Optional::of), Color::getRGB);
+            builderRoleColor.primaryColor(primaryColorRGB);
+
+            // Handle secondary and tertiary colors
+            builderRoleColor.secondaryColor(mapPossibleOptional(secondaryColor(), Color::getRGB));
+            builderRoleColor.tertiaryColor(mapPossibleOptional(tertiaryColor(), Color::getRGB));
+
+            builder.colors(builderRoleColor.build());
         }
-        builderRoleColor.secondaryColor(Possible.flatOpt(secondaryColor()).map(Color::getRGB));
-        builderRoleColor.tertiaryColor(Possible.flatOpt(tertiaryColor()).map(Color::getRGB));
-        builder.colors(builderRoleColor.build());
 
         return builder.build();
     }
