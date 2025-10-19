@@ -83,7 +83,7 @@ allprojects {
     }
 
     tasks.withType(Javadoc).configureEach {
-        setFailOnError(false) // TODO: This is just for the issue with links, need handle this better
+        //setFailOnError(false) // NOTE: Use this if any javadoc url is down and wanna ignore that errors
         options {
             encoding = 'UTF-8'
             tags = ["apiNote:a:API Note:",
@@ -92,13 +92,14 @@ allprojects {
             addStringOption 'Xdoclint:none', '-quiet'
             addStringOption 'encoding', 'UTF-8'
             // adding links to javadocs for filling specific classes when not existing inside current javadoc
+            // io.projectreactor: https://github.com/reactor/reactor/issues/767
             links = [
                 jdk_javadoc,
-                "https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/2.18.4/",
+                "https://www.javadocs.dev/com.fasterxml.jackson.core/jackson-databind/2.18.4/",
                 "https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
-                "https://projectreactor.io/docs/core/3.6.17/api/", // TODO: https://github.com/reactor/reactor/issues/767
-                "https://projectreactor.io/docs/netty/1.1.30/api/", // TODO: https://github.com/reactor/reactor/issues/767
-                "https://projectreactor.io/docs/extra/3.5.2/api/",
+                "https://www.javadocs.dev/io.projectreactor/reactor-core/3.6.18/",
+                "https://www.javadocs.dev/io.projectreactor.netty/reactor-netty/1.1.30/",
+                "https://www.javadocs.dev/io.projectreactor.addons/reactor-extra/3.5.2/",
                 "https://netty.io/4.1/api/"
             ]
         }
@@ -239,7 +240,7 @@ nexusPublishing {
 
 def buildDocsUrl(String project) {
     def docVersion = isRelease ? "$version" : "3.2"
-    return "https://javadoc.io/doc/com.discord4j/$project/$docVersion/" as String
+    return "https://www.javadocs.dev/com.discord4j/$project/$docVersion/" as String
 }
 
 release {
