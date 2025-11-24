@@ -62,10 +62,15 @@ public enum Permission {
     VIEW_CHANNEL(0x00000400, false),
 
     /**
-     * Allows for sending messages in a channel and creating threads in a forum(does not allow sending messages in
-     * threads)
+     * Allows for sending messages in a channel and creating threads in a forum (does not allow sending messages in
+     * threads).
      */
     SEND_MESSAGES(0x00000800, false),
+
+    /**
+     * Allows bypassing slow mode restrictions.
+     */
+    BYPASS_SLOWMODE(0x0010000000000000L, false),
 
     /** Allows for sending of /tts messages. */
     SEND_TTS_MESSAGES(0x00001000, false),
