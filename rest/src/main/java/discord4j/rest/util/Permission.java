@@ -25,34 +25,54 @@ import discord4j.common.annotations.Experimental;
  */
 public enum Permission {
 
-    /** Allows creation of instant invites. */
+    /**
+     * Allows creation of instant invites.
+     */
     CREATE_INSTANT_INVITE(0x00000001, false),
 
-    /** Allows kicking members. */
+    /**
+     * Allows kicking members.
+     */
     KICK_MEMBERS(0x00000002, true),
 
-    /** Allows banning members. */
+    /**
+     * Allows banning members.
+     */
     BAN_MEMBERS(0x00000004, true),
 
-    /** Allows all permissions and bypasses channel permission overwrites. */
+    /**
+     * Allows all permissions and bypasses channel permission overwrites.
+     */
     ADMINISTRATOR(0x00000008, true),
 
-    /** Allows management and editing of channels. */
+    /**
+     * Allows management and editing of channels.
+     */
     MANAGE_CHANNELS(0x00000010, true),
 
-    /** Allows management and editing of the guild. */
+    /**
+     * Allows management and editing of the guild.
+     */
     MANAGE_GUILD(0x00000020, true),
 
-    /** Allows for the addition of reactions to messages. */
+    /**
+     * Allows for the addition of reactions to messages.
+     */
     ADD_REACTIONS(0x00000040, false),
 
-    /** Allows for viewing of audit logs. */
+    /**
+     * Allows for viewing of audit logs.
+     */
     VIEW_AUDIT_LOG(0x00000080, false),
 
-    /** Allows for using priority speaker in a voice channel. */
+    /**
+     * Allows for using priority speaker in a voice channel.
+     */
     PRIORITY_SPEAKER(0x00000100, false),
 
-    /** Allows for Stream in voice channel. */
+    /**
+     * Allows for Stream in voice channel.
+     */
     STREAM(0x00000200, false),
 
     /**
@@ -68,26 +88,28 @@ public enum Permission {
     SEND_MESSAGES(0x00000800, false),
 
     /**
-     * Allows bypassing slow mode restrictions.
+     * Allows for sending of /tts messages.
      */
-    BYPASS_SLOWMODE(0x0010000000000000L, false),
-
-    /** Allows for sending of /tts messages. */
     SEND_TTS_MESSAGES(0x00001000, false),
 
-    /** Allows for deletion of other users messages. */
+    /**
+     * Allows for deletion of other users messages.
+     */
     MANAGE_MESSAGES(0x00002000, true),
 
-    /** Allows users to pin and unpin messages in channels. */
-    PIN_MESSAGES(0x00080000, false),
-
-    /** Links sent by users with this permission will be auto-embedded. */
+    /**
+     * Links sent by users with this permission will be auto-embedded.
+     */
     EMBED_LINKS(0x00004000, false),
 
-    /** Allows for uploading images and files. */
+    /**
+     * Allows for uploading images and files.
+     */
     ATTACH_FILES(0x00008000, false),
 
-    /** Allows for reading of message history. */
+    /**
+     * Allows for reading of message history.
+     */
     READ_MESSAGE_HISTORY(0x00010000, false),
 
     /**
@@ -96,72 +118,74 @@ public enum Permission {
      */
     MENTION_EVERYONE(0x00020000, false),
 
-    /** Allows the usage of custom emojis from other servers. */
+    /**
+     * Allows the usage of custom emojis from other servers.
+     */
     USE_EXTERNAL_EMOJIS(0x00040000, false),
 
-    /** Allows for viewing guild insights. */
+    /**
+     * Allows for viewing guild insights.
+     */
     VIEW_GUILD_INSIGHTS(0x00080000, false),
 
-    /** Allows for joining of a voice channel. */
+    /**
+     * Allows for joining of a voice channel.
+     */
     CONNECT(0x00100000, false),
 
-    /** Allows for speaking in a voice channel. */
+    /**
+     * Allows for speaking in a voice channel.
+     */
     SPEAK(0x00200000, false),
 
-    /** Allows for muting members in a voice channel. */
+    /**
+     * Allows for muting members in a voice channel.
+     */
     MUTE_MEMBERS(0x00400000, false),
 
-    /** Allows for deafening of members in a voice channel. */
+    /**
+     * Allows for deafening of members in a voice channel.
+     */
     DEAFEN_MEMBERS(0x00800000, false),
 
-    /** Allows for moving of members between voice channels. */
+    /**
+     * Allows for moving of members between voice channels.
+     */
     MOVE_MEMBERS(0x01000000, false),
 
-    /** Allows for using voice-activity-detection in a voice channel. */
+    /**
+     * Allows for using voice-activity-detection in a voice channel.
+     */
     USE_VAD(0x02000000, false),
 
-    /** Allows for modification of own nickname. */
+    /**
+     * Allows for modification of own nickname.
+     */
     CHANGE_NICKNAME(0x04000000, false),
 
-    /** Allows for modification of other users nicknames. */
+    /**
+     * Allows for modification of other users nicknames.
+     */
     MANAGE_NICKNAMES(0x08000000, false),
 
-    /** Allows management and editing of roles. */
+    /**
+     * Allows management and editing of roles.
+     */
     MANAGE_ROLES(0x10000000, true),
 
-    /** Allows management and editing of webhooks. */
+    /**
+     * Allows management and editing of webhooks.
+     */
     MANAGE_WEBHOOKS(0x20000000, true),
 
     /**
-     * Allows management and editing of emojis.
-     *
-     * @deprecated use the official permission name: {@link #MANAGE_GUILD_EXPRESSIONS}
+     * Allows for editing and deleting emojis, stickers, and soundboard sounds created by all users.
      */
-    @Deprecated
-    MANAGE_EMOJIS(0x40000000, true),
-
-    /**
-     * Allows management and editing of emojis and stickers.
-     *
-     * @deprecated use the official permission name: {@link #MANAGE_GUILD_EXPRESSIONS}
-     */
-    @Deprecated
-    MANAGE_EMOJIS_AND_STICKERS(0x40000000, true),
-
-    /** Allows for editing and deleting emojis, stickers, and soundboard sounds created by all users. */
     MANAGE_GUILD_EXPRESSIONS(0x40000000, true),
 
-    /** Allows for creating emojis, stickers, and soundboard sounds, and editing and deleting those created by the current user. **/
-    CREATE_GUILD_EXPRESSIONS(0x0000080000000000L, false),
-
-    /** Allows members to use slash commands in text channels.
-     *
-     *  @deprecated use the official permission name: {@link #USE_APPLICATION_COMMANDS}
+    /**
+     * Allows members to use application commands, including slash commands and context menu commands.
      */
-    @Deprecated
-    USE_SLASH_COMMANDS(0x80000000L, false),
-
-    /** Allows members to use application commands, including slash commands and context menu commands. */
     USE_APPLICATION_COMMANDS(0x80000000L, false),
 
     /**
@@ -171,44 +195,39 @@ public enum Permission {
     @Experimental
     REQUEST_TO_SPEAK(0x0000000100000000L, false),
 
-    /** Allows for editing and deleting scheduled events created by all users. */
+    /**
+     * Allows for editing and deleting scheduled events created by all users.
+     */
     MANAGE_EVENTS(0x0000000200000000L, false),
 
-    /** Allows for creating scheduled events, and editing and deleting those created by the current user. */
-    CREATE_EVENTS(0x0000100000000000L, false),
-
-    /** Allows for deleting and archiving threads, and viewing all private threads. */
+    /**
+     * Allows for deleting and archiving threads, and viewing all private threads.
+     */
     MANAGE_THREADS(0x0000000400000000L, true),
 
-    /** Allows for creating public and announcement threads. */
+    /**
+     * Allows for creating public and announcement threads.
+     */
     CREATE_PUBLIC_THREADS(0x0000000800000000L, false),
 
     /**
-     * Allows for creating and participating in threads.
-     *
-     * @deprecated use the official permission name: {@link #CREATE_PUBLIC_THREADS}
+     * Allows for creating private threads.
      */
-    @Deprecated
-    USE_PUBLIC_THREADS(0x0000000800000000L, false),
-
-    /** Allows for creating private threads. */
     CREATE_PRIVATE_THREADS(0x0000001000000000L, false),
 
     /**
-     * Allows for creating and participating in private threads
-     *
-     * @deprecated use the official permission name: {@link #CREATE_PRIVATE_THREADS}
+     * Allows the usage of custom stickers from other servers.
      */
-    @Deprecated
-    USE_PRIVATE_THREADS(0x0000001000000000L, false),
-
-    /** Allows the usage of custom stickers from other servers. */
     USE_EXTERNAL_STICKERS(0x0000002000000000L, false),
 
-    /** Allows for sending messages in threads */
+    /**
+     * Allows for sending messages in threads
+     */
     SEND_MESSAGES_IN_THREADS(0x0000004000000000L, false),
 
-    /** Allows for using Activities (applications with the EMBEDDED flag) in a voice channel. */
+    /**
+     * Allows for using Activities (applications with the EMBEDDED flag) in a voice channel.
+     */
     USE_EMBEDDED_ACTIVITIES(0x0000008000000000L, false),
 
     /**
@@ -217,28 +236,101 @@ public enum Permission {
      */
     MODERATE_MEMBERS(0x0000010000000000L, false),
 
-    /** Allows for viewing role subscription insights */
+    /**
+     * Allows for viewing role subscription insights
+     */
     VIEW_CREATOR_MONETIZATION_ANALYTICS(0x0000020000000000L, true),
 
-    /** Allows for using soundboard in a voice channel */
+    /**
+     * Allows for using soundboard in a voice channel
+     */
     USE_SOUNDBOARD(0x0000040000000000L, false),
 
-    /** Allows the usage of custom soundboard sounds from other servers */
+    /**
+     * Allows for creating emojis, stickers, and soundboard sounds, and editing and deleting those created by the
+     * current user.
+     **/
+    CREATE_GUILD_EXPRESSIONS(0x0000080000000000L, false),
+
+    /**
+     * Allows for creating scheduled events, and editing and deleting those created by the current user.
+     */
+    CREATE_EVENTS(0x0000100000000000L, false),
+
+    /**
+     * Allows the usage of custom soundboard sounds from other servers.
+     */
     USE_EXTERNAL_SOUNDS(0x0000200000000000L, false),
 
-    /** Allows sending voice messages. */
+    /**
+     * Allows sending voice messages.
+     */
     SEND_VOICE_MESSAGES(0x0000400000000000L, false),
 
-    /** Allows creating polls */
+    /**
+     * Allows creating polls.
+     */
     SEND_POLLS(0x0002000000000000L, false),
 
-    /** Allows user-installed apps to send public responses.
+    /**
+     * Allows user-installed apps to send public responses.
      * <br>
      * When disabled, users will still be allowed to use their apps but the responses will be ephemeral.
      * <br>
      * <b>Note:</b> This only applies to apps not also installed to the server.
-     * */
-    USE_EXTERNAL_APPS(0x0004000000000000L, false);
+     *
+     */
+    USE_EXTERNAL_APPS(0x0004000000000000L, false),
+
+    /**
+     * Allows users to pin and unpin messages in channels.
+     */
+    PIN_MESSAGES(0x0008000000000000L, false),
+
+    /**
+     * Allows bypassing slow mode restrictions.
+     */
+    BYPASS_SLOWMODE(0x0010000000000000L, false);
+
+    /**
+     * Allows management and editing of emojis.
+     *
+     * @deprecated use the official permission name: {@link #MANAGE_GUILD_EXPRESSIONS}
+     */
+    @Deprecated
+    public static final Permission MANAGE_EMOJIS = Permission.MANAGE_GUILD_EXPRESSIONS;
+
+    /**
+     * Allows management and editing of emojis and stickers.
+     *
+     * @deprecated use the official permission name: {@link #MANAGE_GUILD_EXPRESSIONS}
+     */
+    @Deprecated
+    public static final Permission MANAGE_EMOJIS_AND_STICKERS = Permission.MANAGE_GUILD_EXPRESSIONS;
+
+    /**
+     * Allows members to use slash commands in text channels.
+     *
+     * @deprecated use the official permission name: {@link #USE_APPLICATION_COMMANDS}
+     */
+    @Deprecated
+    public static final Permission USE_SLASH_COMMANDS = Permission.USE_APPLICATION_COMMANDS;
+
+    /**
+     * Allows for creating and participating in private threads.
+     *
+     * @deprecated use the official permission name: {@link #CREATE_PRIVATE_THREADS}
+     */
+    @Deprecated
+    public static final Permission USE_PRIVATE_THREADS = Permission.CREATE_PRIVATE_THREADS;
+
+    /**
+     * Allows for creating and participating in threads.
+     *
+     * @deprecated use the official permission name: {@link #CREATE_PUBLIC_THREADS}
+     */
+    @Deprecated
+    public static final Permission USE_PUBLIC_THREADS = Permission.CREATE_PUBLIC_THREADS;
 
     /** Whether MFA is required. */
     private final boolean mfa;
