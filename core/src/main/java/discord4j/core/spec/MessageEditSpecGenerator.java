@@ -65,7 +65,12 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
 
     @Override
     default MultipartRequest<MessageEditRequest> asRequest() {
-        final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(this.flags().map(Optional::get).toOptional().orElse(null), Possible.absent(), Possible.absent(), this.components().map(Optional::get));
+        final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(
+            Possible.flatOpt(this.flags()).orElse(null),
+            Possible.absent(),
+            Possible.absent(),
+            Possible.ofNullable(Possible.flatOpt(this.components()).orElse(null))
+        );
 
         MessageEditRequest json = MessageEditRequest.builder()
             .content(content())

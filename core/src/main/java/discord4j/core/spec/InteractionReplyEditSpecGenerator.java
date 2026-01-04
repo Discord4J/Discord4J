@@ -71,7 +71,12 @@ interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<Webhoo
 
     @Override
     default MultipartRequest<WebhookMessageEditRequest> asRequest() {
-        final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(null, Possible.absent(), this.suppressEmbeds(), this.components().map(Optional::get));
+        final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(
+            null,
+            Possible.absent(),
+            this.suppressEmbeds(),
+            Possible.ofNullable(Possible.flatOpt(this.components()).orElse(null))
+        );
 
         WebhookMessageEditRequest json = WebhookMessageEditRequest.builder()
             .content(content())
