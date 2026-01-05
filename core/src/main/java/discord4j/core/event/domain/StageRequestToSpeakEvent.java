@@ -25,7 +25,6 @@ import discord4j.core.object.entity.StageInstance;
 import discord4j.discordjson.json.VoiceStateData;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 /**
  * Dispatched when a user connected to a stage channel makes a request to speak.

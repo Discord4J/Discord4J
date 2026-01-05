@@ -16,7 +16,7 @@
  */
 package discord4j.core.spec;
 
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /** A spec which can optionally have a reason in the audit logs when built. */
 public interface AuditSpec<T> extends Spec<T> {

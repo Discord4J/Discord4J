@@ -19,7 +19,7 @@ package discord4j.core.event.domain;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.StageInstance;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -34,6 +34,7 @@ import java.util.Optional;
  */
 public class StageInstanceDeleteEvent extends Event {
 
+    @Nullable
     private final StageInstance old;
 
     public StageInstanceDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, @Nullable final StageInstance old) {

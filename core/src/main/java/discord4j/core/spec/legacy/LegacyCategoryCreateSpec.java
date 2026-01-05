@@ -22,7 +22,7 @@ import discord4j.core.object.entity.channel.Channel;
 import discord4j.discordjson.json.ChannelCreateRequest;
 import discord4j.discordjson.json.ImmutableChannelCreateRequest;
 import discord4j.discordjson.json.OverwriteData;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;

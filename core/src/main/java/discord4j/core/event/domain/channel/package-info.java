@@ -17,7 +17,7 @@
 /**
  * Domain model for channel events.
  */
-@NonNullApi
+@NullMarked
 package discord4j.core.event.domain.channel;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

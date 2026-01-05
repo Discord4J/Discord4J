@@ -17,7 +17,7 @@
 /**
  * Classes supporting {@link discord4j.gateway.GatewayClient} automatic reconnection.
  */
-@NonNullApi
+@NullMarked
 package discord4j.gateway.retry;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

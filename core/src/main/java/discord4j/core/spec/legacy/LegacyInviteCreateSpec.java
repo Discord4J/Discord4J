@@ -20,7 +20,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.Invite;
 import discord4j.discordjson.json.ImmutableInviteCreateRequest;
 import discord4j.discordjson.json.InviteCreateRequest;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * LegacySpec used to create guild channel {@link Invite} objects.

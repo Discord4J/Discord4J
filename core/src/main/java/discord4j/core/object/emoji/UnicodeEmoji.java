@@ -17,7 +17,7 @@
 package discord4j.core.object.emoji;
 
 import discord4j.discordjson.json.EmojiData;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Objects;

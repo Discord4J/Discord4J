@@ -20,7 +20,7 @@ import discord4j.core.object.entity.GuildEmoji;
 import discord4j.discordjson.json.GuildEmojiCreateRequest;
 import discord4j.rest.util.Image;
 import discord4j.common.util.Snowflake;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Set;

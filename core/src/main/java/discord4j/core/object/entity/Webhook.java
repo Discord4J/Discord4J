@@ -28,8 +28,8 @@ import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.WebhookData;
 import discord4j.discordjson.json.WebhookPartialChannelData;
 import discord4j.discordjson.json.WebhookPartialGuildData;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;

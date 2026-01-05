@@ -20,8 +20,8 @@ package discord4j.rest.entity;
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.InviteData;
 import discord4j.rest.RestClient;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -27,7 +27,6 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.discordjson.json.ApplicationCommandInteractionResolvedData;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
 import java.util.Objects;

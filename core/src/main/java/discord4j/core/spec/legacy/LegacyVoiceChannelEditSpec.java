@@ -25,7 +25,7 @@ import discord4j.discordjson.json.OverwriteData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Permission;
 import discord4j.common.util.Snowflake;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 public class LegacyVoiceChannelEditSpec implements LegacyAuditSpec<ChannelModifyRequest> {
 
     private final ImmutableChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
-    
+
     @Nullable
     private String reason;
 

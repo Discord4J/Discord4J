@@ -21,7 +21,6 @@ import discord4j.gateway.SessionInfo;
 import discord4j.gateway.ShardInfo;
 import discord4j.gateway.limiter.PayloadTransformer;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 /**
  * A {@link ShardCoordinator} defines key operations to leverage shard coordination across boundaries.

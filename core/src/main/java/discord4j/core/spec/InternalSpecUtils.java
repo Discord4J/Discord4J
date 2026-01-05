@@ -18,7 +18,7 @@ package discord4j.core.spec;
 
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Multimap;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;

@@ -20,7 +20,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -38,6 +38,7 @@ import java.util.Optional;
 public class GuildDeleteEvent extends GuildEvent {
 
     private final long guildId;
+    @Nullable
     private final Guild guild;
     private final boolean unavailable;
 

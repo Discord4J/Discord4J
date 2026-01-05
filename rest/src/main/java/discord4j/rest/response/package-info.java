@@ -17,7 +17,7 @@
 /**
  * Components to manipulate and transform responses.
  */
-@NonNullApi
+@NullMarked
 package discord4j.rest.response;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

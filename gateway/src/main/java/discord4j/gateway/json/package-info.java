@@ -17,7 +17,7 @@
 /**
  * Statically typed representations of Discord's gateway domain.
  */
-@NonNullApi
+@NullMarked
 package discord4j.gateway.json;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

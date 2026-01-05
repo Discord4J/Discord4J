@@ -34,6 +34,6 @@ import java.lang.annotation.Target;
         allMandatoryParameters = true,
         depluralize = true,
         instance = "create",
-        allowedClasspathAnnotations = Nullable.class
+        allowedClasspathAnnotations = {Nullable.class, org.jspecify.annotations.Nullable.class}
 )
 public @interface SpecStyle {}

@@ -20,7 +20,7 @@ package discord4j.core.spec.legacy;
 import discord4j.common.util.Snowflake;
 import discord4j.rest.util.Multimap;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.stream.Collectors;

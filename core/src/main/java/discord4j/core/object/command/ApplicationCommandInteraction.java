@@ -23,7 +23,6 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.discordjson.json.ApplicationCommandInteractionData;
-import reactor.util.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.List;

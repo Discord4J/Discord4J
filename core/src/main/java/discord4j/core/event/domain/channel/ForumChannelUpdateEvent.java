@@ -17,11 +17,9 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.object.entity.channel.ForumChannel;
-import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 

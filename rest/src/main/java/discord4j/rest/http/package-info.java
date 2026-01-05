@@ -17,7 +17,7 @@
 /**
  * Classes supporting HTTP processes like encoding and decoding data.
  */
-@NonNullApi
+@NullMarked
 package discord4j.rest.http;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

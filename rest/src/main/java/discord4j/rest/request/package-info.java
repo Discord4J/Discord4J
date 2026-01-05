@@ -17,7 +17,7 @@
 /**
  * Components to build and route requests to the Discord REST API.
  */
-@NonNullApi
+@NullMarked
 package discord4j.rest.request;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

@@ -27,7 +27,7 @@ import discord4j.discordjson.json.PartialChannelCreateRequest;
 import discord4j.discordjson.json.RoleCreateRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;

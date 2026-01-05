@@ -19,7 +19,7 @@ package discord4j.gateway;
 
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.gateway.intent.IntentSet;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -101,6 +101,7 @@ public class IdentifyOptions {
         private StatusUpdate initialStatus;
         private IntentSet intents;
         private int largeThreshold = 250;
+        @Nullable
         private SessionInfo resumeSession;
 
         /**

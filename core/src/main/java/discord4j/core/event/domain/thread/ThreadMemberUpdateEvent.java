@@ -20,7 +20,6 @@ package discord4j.core.event.domain.thread;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.ThreadMember;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 

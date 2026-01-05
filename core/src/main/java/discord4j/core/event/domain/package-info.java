@@ -17,7 +17,7 @@
 /**
  * Domain model for general events.
  */
-@NonNullApi
+@NullMarked
 package discord4j.core.event.domain;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;
