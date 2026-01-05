@@ -24,7 +24,7 @@ ext {
     }
 
     // Dependencies
-    reactor_bom_version = '2023.0.19'
+    reactor_bom_version = '2025.0.1'
     jackson_bom_version = '2.18.4'
     caffeine_version = '2.9.3'
     immutables_group = 'org.immutables'
