@@ -19,8 +19,8 @@ package discord4j.rest.service;
 import discord4j.discordjson.json.InviteData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.Map;

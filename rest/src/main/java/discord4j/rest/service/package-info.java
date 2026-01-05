@@ -17,7 +17,7 @@
 /**
  * Mediator components grouping API endpoint functionality.
  */
-@NonNullApi
+@NullMarked
 package discord4j.rest.service;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

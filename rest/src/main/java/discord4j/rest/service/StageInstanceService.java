@@ -21,8 +21,8 @@ import discord4j.discordjson.json.StageInstanceData;
 import discord4j.discordjson.json.StageInstanceModifyRequest;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 public class StageInstanceService extends RestService {
 

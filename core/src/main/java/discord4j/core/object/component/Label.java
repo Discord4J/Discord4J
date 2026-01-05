@@ -18,7 +18,6 @@ package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.possible.Possible;
-import reactor.util.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.List;

@@ -27,8 +27,8 @@ import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Route;
 import discord4j.rest.route.Routes;
 import discord4j.rest.util.AllowedMentions;
+import org.jspecify.annotations.Nullable;
 import reactor.netty.http.client.HttpClient;
-import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.util.*;
@@ -43,11 +43,16 @@ public class RestClientBuilder<C, O extends RouterOptions> {
     protected final Function<RouterOptions, O> optionsModifier;
 
     protected String token;
+    @Nullable
     protected ReactorResources reactorResources;
+    @Nullable
     protected JacksonResources jacksonResources;
+    @Nullable
     protected ExchangeStrategies exchangeStrategies;
     protected List<ResponseFunction> responseTransformers = new ArrayList<>();
+    @Nullable
     protected GlobalRateLimiter globalRateLimiter;
+    @Nullable
     protected RequestQueueFactory requestQueueFactory;
     @Nullable
     protected AllowedMentions allowedMentions;
@@ -309,6 +314,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         private final List<ResponseFunction> responseTransformers;
         private final GlobalRateLimiter globalRateLimiter;
         private final Router router;
+        @Nullable
         private final AllowedMentions allowedMentions;
 
         public Config(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
@@ -353,7 +359,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         }
 
         public Optional<AllowedMentions> getAllowedMentions() {
-            return Optional.ofNullable(allowedMentions);
+            return Optional.ofNullable(this.allowedMentions);
         }
     }
 }

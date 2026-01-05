@@ -24,7 +24,6 @@ import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
-import reactor.util.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;

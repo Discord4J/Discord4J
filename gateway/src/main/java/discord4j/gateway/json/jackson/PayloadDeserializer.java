@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.dispatch.EventNames;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.HashMap;

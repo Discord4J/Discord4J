@@ -24,7 +24,6 @@ import discord4j.discordjson.json.ImmutableComponentData;
 import discord4j.discordjson.json.SelectDefaultValueData;
 import discord4j.discordjson.json.SelectOptionData;
 import discord4j.discordjson.possible.Possible;
-import reactor.util.annotation.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;

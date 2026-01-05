@@ -26,7 +26,6 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.ShardInfo;
 import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 

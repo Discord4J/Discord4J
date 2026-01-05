@@ -16,7 +16,7 @@
  */
 package discord4j.rest.util;
 
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 

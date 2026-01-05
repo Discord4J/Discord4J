@@ -23,9 +23,9 @@ import discord4j.discordjson.json.GuildScheduledEventModifyRequest;
 import discord4j.discordjson.json.GuildScheduledEventUserData;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.PaginationUtil;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;

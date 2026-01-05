@@ -24,8 +24,8 @@ import discord4j.core.spec.ApplicationEmojiEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.UserData;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 

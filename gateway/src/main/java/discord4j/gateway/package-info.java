@@ -17,7 +17,7 @@
 /**
  * Components to create websocket clients targeting Discord gateway.
  */
-@NonNullApi
+@NullMarked
 package discord4j.gateway;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

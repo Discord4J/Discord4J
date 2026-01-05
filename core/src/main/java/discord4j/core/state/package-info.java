@@ -17,7 +17,7 @@
 /**
  * Components to hold and safely expose entity caches.
  */
-@NonNullApi
+@NullMarked
 package discord4j.core.state;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

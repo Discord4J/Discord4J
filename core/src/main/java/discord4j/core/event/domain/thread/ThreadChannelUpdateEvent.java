@@ -20,7 +20,7 @@ package discord4j.core.event.domain.thread;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -32,6 +32,7 @@ import java.util.Optional;
 public class ThreadChannelUpdateEvent extends ThreadEvent {
 
     private final ThreadChannel channel;
+    @Nullable
     private final ThreadChannel old;
 
     public ThreadChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, ThreadChannel channel,

@@ -17,7 +17,7 @@
 /**
  * Domain model for application command events.
  */
-@NonNullApi
+@NullMarked
 package discord4j.core.event.domain.command;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

@@ -21,8 +21,8 @@ import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.StageInstanceData;
 import discord4j.discordjson.json.StageInstanceModifyRequest;
 import discord4j.rest.RestClient;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 

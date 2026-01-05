@@ -17,7 +17,7 @@
 /**
  * Components to build and maintain voice connections.
  */
-@NonNullApi
+@NullMarked
 package discord4j.voice;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

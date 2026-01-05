@@ -19,7 +19,7 @@ package discord4j.common.store.impl;
 
 
 import discord4j.common.store.api.object.InvalidationCause;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.EnumSet;
 
@@ -73,6 +73,7 @@ public class StorageConfig {
 
     public static class Builder {
 
+        @Nullable
         private StorageBackend messageBackend;
         private EnumSet<InvalidationCause> invalidationFilter;
 

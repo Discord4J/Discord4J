@@ -23,7 +23,6 @@ import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.User;
 import discord4j.core.util.AuditLogUtil;
 import discord4j.discordjson.json.AuditLogEntryData;
-import reactor.util.annotation.Nullable;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;

@@ -22,7 +22,7 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.core.object.entity.Member;
 import discord4j.rest.util.Permission;
 import discord4j.common.util.Snowflake;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.Set;

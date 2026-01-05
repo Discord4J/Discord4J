@@ -22,7 +22,7 @@ import discord4j.common.ReactorResources;
 import discord4j.rest.RestResources;
 import discord4j.rest.request.Router;
 import discord4j.rest.util.AllowedMentions;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A set of resources required to build {@link DiscordClient} instances and are used for core Discord4J operations

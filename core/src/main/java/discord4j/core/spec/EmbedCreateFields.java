@@ -22,7 +22,7 @@ import discord4j.discordjson.json.EmbedFieldData;
 import discord4j.discordjson.json.EmbedFooterData;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 

@@ -20,7 +20,7 @@ package discord4j.core.spec.legacy;
 import discord4j.discordjson.json.WebhookModifyWithTokenRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class LegacyWebhookEditWithTokenSpec implements LegacySpec<WebhookModifyWithTokenRequest> {
 

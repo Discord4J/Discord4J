@@ -26,7 +26,7 @@ import discord4j.discordjson.json.EmbedThumbnailData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import org.immutables.value.Value;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -51,15 +51,14 @@ interface EmbedCreateSpecGenerator extends Spec<EmbedData> {
 
     Possible<Color> color();
 
-    @Nullable // deepImmutablesDetection doesn't work for Possible types
-    EmbedCreateFields.Footer footer();
+    // deepImmutablesDetection doesn't work for Possible types
+    EmbedCreateFields.@Nullable Footer footer();
 
     Possible<String> image();
 
     Possible<String> thumbnail();
 
-    @Nullable
-    EmbedCreateFields.Author author();
+    EmbedCreateFields.@Nullable Author author();
 
     @Value.Default
     default List<EmbedCreateFields.Field> fields() {

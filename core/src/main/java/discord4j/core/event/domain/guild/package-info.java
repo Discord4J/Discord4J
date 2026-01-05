@@ -17,7 +17,7 @@
 /**
  * Domain model for guild events.
  */
-@NonNullApi
+@NullMarked
 package discord4j.core.event.domain.guild;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

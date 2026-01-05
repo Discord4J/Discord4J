@@ -17,7 +17,7 @@
 /**
  * Domain of websocket inbound and outbound data.
  */
-@NonNullApi
+@NullMarked
 package discord4j.gateway.json.dispatch;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

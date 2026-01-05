@@ -21,7 +21,7 @@ import discord4j.discordjson.json.WebhookModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import discord4j.common.util.Snowflake;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * LegacySpec to modify a {@link Webhook} entity.

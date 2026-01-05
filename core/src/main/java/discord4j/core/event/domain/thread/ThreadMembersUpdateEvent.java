@@ -22,7 +22,6 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.ThreadMember;
 import discord4j.discordjson.json.gateway.ThreadMembersUpdate;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.List;

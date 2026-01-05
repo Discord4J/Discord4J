@@ -30,8 +30,8 @@ import discord4j.rest.RestClient;
 import discord4j.rest.interaction.InteractionResponse;
 import discord4j.rest.util.InteractionResponseType;
 import discord4j.rest.util.MultipartRequest;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 /**
  * Dispatched when a user in a guild interacts with an application command, component, or other interaction based UI
@@ -77,7 +77,7 @@ public class InteractionCreateEvent extends Event {
     /**
      * Gets the {@link discord4j.core.object.entity.User} associated with the event.
      * The User is retrieved from the {@link #getInteraction} method.
-     * 
+     *
      * @return The {@link discord4j.core.object.entity.User} associated with the event.
      */
     public User getUser() {

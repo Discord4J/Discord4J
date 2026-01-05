@@ -19,8 +19,8 @@ package discord4j.rest.http;
 import discord4j.rest.json.response.ErrorResponse;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.IllegalReferenceCountException;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.nio.charset.StandardCharsets;
 

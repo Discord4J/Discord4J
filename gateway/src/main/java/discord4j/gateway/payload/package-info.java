@@ -17,7 +17,7 @@
 /**
  * Websocket payload readers and writers, converting to and from raw bytes.
  */
-@NonNullApi
+@NullMarked
 package discord4j.gateway.payload;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;
