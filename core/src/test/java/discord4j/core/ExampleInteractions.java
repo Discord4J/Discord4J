@@ -228,6 +228,6 @@ public class ExampleInteractions {
     }
 
     private static LayoutComponent getModalComponent() {
-        return ActionRow.of(TextInput.small(REPLY_MODE_SELECT, "What should happen next?", 4, 10).required());
+        return Label.of("What should happen next?", TextInput.small(REPLY_MODE_SELECT, 4, 10).required());
     }
 }
