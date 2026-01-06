@@ -21,6 +21,7 @@ import discord4j.discordjson.json.ChannelData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.common.util.Snowflake;
 import discord4j.rest.entity.RestChannel;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 

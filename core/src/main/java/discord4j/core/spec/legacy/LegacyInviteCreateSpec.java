@@ -31,8 +31,7 @@ import org.jspecify.annotations.Nullable;
 public class LegacyInviteCreateSpec implements LegacyAuditSpec<InviteCreateRequest> {
 
     private final ImmutableInviteCreateRequest.Builder requestBuilder = InviteCreateRequest.builder();
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Sets the duration of the created {@link Invite} in seconds before expiration, or {@code 0} to never expire. If
@@ -124,8 +123,7 @@ public class LegacyInviteCreateSpec implements LegacyAuditSpec<InviteCreateReque
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

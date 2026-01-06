@@ -16,6 +16,8 @@
  */
 package discord4j.core.spec.legacy;
 
+import org.jspecify.annotations.Nullable;
+
 /** A spec which can optionally have a reason in the audit logs when built. */
 public interface LegacyAuditSpec<T> extends LegacySpec<T> {
 
@@ -32,6 +34,5 @@ public interface LegacyAuditSpec<T> extends LegacySpec<T> {
      *
      * @return The current audit log reason.
      */
-    @Nullable
-    String getReason();
+    @Nullable String getReason();
 }

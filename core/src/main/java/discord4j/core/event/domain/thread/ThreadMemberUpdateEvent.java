@@ -20,6 +20,7 @@ package discord4j.core.event.domain.thread;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.ThreadMember;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -32,7 +33,7 @@ import java.util.Optional;
 public class ThreadMemberUpdateEvent extends ThreadEvent {
 
     private final ThreadMember member;
-    private final ThreadMember old;
+    private final @Nullable ThreadMember old;
 
     public ThreadMemberUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, ThreadMember member,
                                    @Nullable ThreadMember old) {
@@ -45,7 +46,7 @@ public class ThreadMemberUpdateEvent extends ThreadEvent {
         return member;
     }
 
-    public Optional<ThreadMember> getOld() {
+    public Optional<@Nullable ThreadMember> getOld() {
         return Optional.ofNullable(old);
     }
 

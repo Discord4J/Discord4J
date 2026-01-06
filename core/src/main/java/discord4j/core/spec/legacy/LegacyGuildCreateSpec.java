@@ -32,6 +32,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -68,7 +69,7 @@ public class LegacyGuildCreateSpec implements LegacySpec<GuildCreateRequest> {
      * @return This spec.
      */
     public LegacyGuildCreateSpec setRegion(Region.Id regionId) {
-        builder.region(regionId.getValue());
+        builder.region(regionId.getValue() == null ? Possible.absent() : Possible.of(regionId.getValue()));
         return this;
     }
 
@@ -100,7 +101,7 @@ public class LegacyGuildCreateSpec implements LegacySpec<GuildCreateRequest> {
      * @param verificationLevel The verification level for the guild.
      * @return This spec.
      */
-    public LegacyGuildCreateSpec setVerificationLevel(@Nullable Guild.VerificationLevel verificationLevel) {
+    public LegacyGuildCreateSpec setVerificationLevel(Guild.@Nullable VerificationLevel verificationLevel) {
         builder.verificationLevel(verificationLevel == null ?
                 Possible.absent() : Possible.of(verificationLevel.getValue()));
         return this;
@@ -112,7 +113,7 @@ public class LegacyGuildCreateSpec implements LegacySpec<GuildCreateRequest> {
      * @param notificationLevel The default notification level for the guild.
      * @return This spec.
      */
-    public LegacyGuildCreateSpec setDefaultMessageNotificationLevel(@Nullable Guild.NotificationLevel notificationLevel) {
+    public LegacyGuildCreateSpec setDefaultMessageNotificationLevel(Guild.@Nullable NotificationLevel notificationLevel) {
         builder.defaultMessageNotifications(notificationLevel == null ?
                 Possible.absent() : Possible.of(notificationLevel.getValue()));
         return this;
@@ -124,7 +125,7 @@ public class LegacyGuildCreateSpec implements LegacySpec<GuildCreateRequest> {
      * @param explicitContentFilter The explicit content filter level for the guild.
      * @return This spec.
      */
-    public LegacyGuildCreateSpec setExplicitContentFilter(@Nullable Guild.ContentFilterLevel explicitContentFilter) {
+    public LegacyGuildCreateSpec setExplicitContentFilter(Guild.@Nullable ContentFilterLevel explicitContentFilter) {
         builder.explicitContentFilter(explicitContentFilter == null ?
                 Possible.absent() : Possible.of(explicitContentFilter.getValue()));
         return this;
@@ -215,9 +216,9 @@ public class LegacyGuildCreateSpec implements LegacySpec<GuildCreateRequest> {
      * @param flags The system channel flags.
      * @return This spec.
      */
-    public LegacyGuildCreateSpec setSystemChannelFlags(@Nullable Guild.SystemChannelFlag... flags) {
+    public LegacyGuildCreateSpec setSystemChannelFlags(Guild.@Nullable SystemChannelFlag... flags) {
         if (flags != null) {
-            builder.systemChannelFlags(Possible.of(Arrays.stream(flags)
+            builder.systemChannelFlags(Possible.of(Arrays.stream(flags).filter(Objects::nonNull)
                     .mapToInt(Guild.SystemChannelFlag::getValue)
                     .reduce(0, (left, right) -> left | right)));
         } else {

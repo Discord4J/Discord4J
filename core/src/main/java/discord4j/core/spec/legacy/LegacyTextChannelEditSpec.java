@@ -39,8 +39,7 @@ import java.util.stream.Collectors;
 public class LegacyTextChannelEditSpec implements LegacyAuditSpec<ChannelModifyRequest> {
 
     private final ImmutableChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Sets the name of the modified {@link TextChannel}.

@@ -38,8 +38,7 @@ import java.util.stream.Collectors;
 public class LegacyNewsChannelEditSpec implements LegacyAuditSpec<ChannelModifyRequest> {
 
     private final ImmutableChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Sets the name of the modified {@link NewsChannel}.
@@ -118,8 +117,7 @@ public class LegacyNewsChannelEditSpec implements LegacyAuditSpec<ChannelModifyR
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

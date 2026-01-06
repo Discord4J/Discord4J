@@ -39,8 +39,7 @@ public class LegacyNewsChannelCreateSpec implements LegacyAuditSpec<ChannelCreat
 
     private final ImmutableChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
             .type(Channel.Type.GUILD_NEWS.getValue());
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Sets the name of the created {@link NewsChannel}.
@@ -119,8 +118,7 @@ public class LegacyNewsChannelCreateSpec implements LegacyAuditSpec<ChannelCreat
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

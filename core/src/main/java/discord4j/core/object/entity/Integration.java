@@ -22,6 +22,7 @@ import discord4j.core.object.IntegrationAccount;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.IntegrationData;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;

@@ -14,17 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.spec;
+@NullMarked
+package discord4j.core.object.monetization;
 
-import org.jspecify.annotations.Nullable;
-
-/** A spec which can optionally have a reason in the audit logs when built. */
-public interface AuditSpec<T> extends Spec<T> {
-
-    /**
-     * Returns the current audit log reason set on the spec.
-     *
-     * @return The current audit log reason.
-     */
-    @Nullable String reason();
-}
+import org.jspecify.annotations.NullMarked;

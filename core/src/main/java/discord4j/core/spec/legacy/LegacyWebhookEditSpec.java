@@ -32,8 +32,7 @@ public class LegacyWebhookEditSpec implements LegacyAuditSpec<WebhookModifyReque
 
     private Possible<String> name = Possible.absent();
     private Possible<String> avatar = Possible.absent();
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
     private Possible<String> channelId = Possible.absent();
 
     /**
@@ -70,14 +69,13 @@ public class LegacyWebhookEditSpec implements LegacyAuditSpec<WebhookModifyReque
     }
 
     @Override
-    public LegacyWebhookEditSpec setReason(final String reason) {
+    public LegacyWebhookEditSpec setReason(@Nullable final String reason) {
         this.reason = reason;
         return this;
     }
 
-    @Nullable
     @Override
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

@@ -24,6 +24,7 @@ import discord4j.gateway.GatewayConnection;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.ShardGatewayPayload;
 import io.netty.buffer.ByteBuf;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -38,7 +39,7 @@ import static reactor.core.publisher.Sinks.EmitFailureHandler.FAIL_FAST;
 
 class SingleGatewayClientGroup implements GatewayClientGroupManager {
 
-    private final AtomicReference<GatewayClient> client = new AtomicReference<>();
+    private final AtomicReference<@Nullable GatewayClient> client = new AtomicReference<>();
 
     @Override
     public void add(int key, GatewayClient gatewayClient) {
@@ -50,7 +51,7 @@ class SingleGatewayClientGroup implements GatewayClientGroupManager {
         client.set(null);
     }
 
-    private Optional<GatewayClient> instance() {
+    private Optional<@Nullable GatewayClient> instance() {
         return Optional.ofNullable(client.get());
     }
 
