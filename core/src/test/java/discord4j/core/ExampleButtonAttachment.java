@@ -82,13 +82,6 @@ public class ExampleButtonAttachment {
                     // to update an interaction initial response with a new attachment
                     Publisher<?> onButtonInteraction = client.on(ButtonInteractionEvent.class, press -> {
                         if (append.equals(press.getCustomId())) {
-
-                            Guild guild = press.getInteraction().getGuild().block();
-                            System.out.println("Count Roles for " + guild.getName());
-                            guild.getRoles().collectList().block().forEach(role -> {
-                                System.out.println("Count for role " + role.getName() + " - " + role.getMemberCount().block());
-                            });
-
                             Mono<Message> edit = press.editReply()
                                     .withContentOrNull("Added a new attachment")
                                     .withFiles(getFile())
