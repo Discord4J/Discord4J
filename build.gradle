@@ -114,7 +114,6 @@ allprojects {
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
         options.incremental = true
-        options.compilerArgs += ['-Xdiags:verbose']
     }
 
     tasks.register('downloadDependencies') {
