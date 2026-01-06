@@ -73,9 +73,8 @@ public class StorageConfig {
 
     public static class Builder {
 
-        @Nullable
-        private StorageBackend messageBackend;
-        private EnumSet<InvalidationCause> invalidationFilter;
+        private @Nullable StorageBackend messageBackend;
+        private @Nullable EnumSet<InvalidationCause> invalidationFilter;
 
         private Builder() {
         }

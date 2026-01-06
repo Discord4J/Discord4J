@@ -20,6 +20,7 @@ import discord4j.core.object.reaction.Reaction;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.ReactionData;
 import discord4j.common.util.Snowflake;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 

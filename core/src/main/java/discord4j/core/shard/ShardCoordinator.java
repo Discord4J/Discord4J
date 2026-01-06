@@ -20,6 +20,7 @@ package discord4j.core.shard;
 import discord4j.gateway.SessionInfo;
 import discord4j.gateway.ShardInfo;
 import discord4j.gateway.limiter.PayloadTransformer;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 /**

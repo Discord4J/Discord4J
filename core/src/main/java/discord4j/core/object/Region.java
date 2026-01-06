@@ -18,6 +18,7 @@ package discord4j.core.object;
 
 import discord4j.discordjson.json.RegionData;
 import discord4j.core.GatewayDiscordClient;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -155,7 +156,7 @@ public final class Region implements DiscordObject {
         INDIA("india");
 
         /** The underlying value as represented by Discord. */
-        private final String value;
+        private final @Nullable String value;
 
         /**
          * Constructs a {@code Region.Id}.
@@ -171,8 +172,7 @@ public final class Region implements DiscordObject {
          *
          * @return The underlying value as represented by Discord.
          */
-        @Nullable
-        public String getValue() {
+        public @Nullable String getValue() {
             return value;
         }
 

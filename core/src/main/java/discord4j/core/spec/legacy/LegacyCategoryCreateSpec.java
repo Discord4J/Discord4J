@@ -33,8 +33,7 @@ public class LegacyCategoryCreateSpec implements LegacyAuditSpec<ChannelCreateRe
 
     private final ImmutableChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
             .type(Channel.Type.GUILD_CATEGORY.getValue());
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Sets the name for the created {@link Category}.

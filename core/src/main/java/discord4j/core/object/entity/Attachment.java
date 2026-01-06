@@ -21,6 +21,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.common.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.possible.Possible;
+import org.jspecify.annotations.Nullable;
 
 import java.util.EnumSet;
 import java.util.Objects;

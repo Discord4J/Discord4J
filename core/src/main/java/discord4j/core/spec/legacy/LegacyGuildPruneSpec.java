@@ -33,8 +33,7 @@ import java.util.stream.Collectors;
 public class LegacyGuildPruneSpec implements LegacyAuditSpec<Multimap<String, Object>> {
 
     private final Multimap<String, Object> map = new Multimap<>();
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Set the number of days to prune.
@@ -85,13 +84,13 @@ public class LegacyGuildPruneSpec implements LegacyAuditSpec<Multimap<String, Ob
     }
 
     @Override
-    public LegacyGuildPruneSpec setReason(String reason) {
+    public LegacyGuildPruneSpec setReason(@Nullable String reason) {
         this.reason = reason;
         return this;
     }
 
     @Override
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

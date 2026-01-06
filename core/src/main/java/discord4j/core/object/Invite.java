@@ -25,6 +25,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.InviteData;
 import discord4j.discordjson.json.PartialGuildData;
 import discord4j.discordjson.json.UserData;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;

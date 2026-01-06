@@ -19,6 +19,7 @@ package discord4j.core.event.domain;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.StageInstance;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -34,7 +35,7 @@ import java.util.Optional;
 public class StageInstanceUpdateEvent extends Event {
 
     private final StageInstance current;
-    private final StageInstance old;
+    private final @Nullable StageInstance old;
 
     public StageInstanceUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, final StageInstance current, @Nullable final StageInstance old) {
         super(gateway, shardInfo);
@@ -56,7 +57,7 @@ public class StageInstanceUpdateEvent extends Event {
      *
      * @return The old {@link StageInstance}, if present
      */
-    public Optional<StageInstance> getOld() {
+    public Optional<@Nullable StageInstance> getOld() {
         return Optional.ofNullable(old);
     }
 

@@ -37,8 +37,7 @@ interface BanQuerySpecGenerator extends AuditSpec<Map<String, Object>> {
     Integer deleteMessageSeconds();
 
     @Deprecated
-    @Nullable
-    Integer deleteMessageDays();
+    @Nullable Integer deleteMessageDays();
 
     @Override
     default Map<String, Object> asRequest() {

@@ -23,6 +23,7 @@ import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.User;
 import discord4j.core.util.AuditLogUtil;
 import discord4j.discordjson.json.AuditLogEntryData;
+import org.jspecify.annotations.Nullable;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -52,7 +53,7 @@ public class AuditLogEntry implements Entity {
     private final GatewayDiscordClient gateway;
 
     /** The audit log part this entry belongs to. Can be {@code null} */
-    private final AuditLogPart auditLogPart;
+    private final @Nullable AuditLogPart auditLogPart;
 
     /** The raw data as represented by Discord. */
     private final AuditLogEntryData data;

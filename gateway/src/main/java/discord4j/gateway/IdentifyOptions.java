@@ -98,11 +98,10 @@ public class IdentifyOptions {
     public static class Builder {
 
         private final ShardInfo shardInfo;
-        private StatusUpdate initialStatus;
-        private IntentSet intents;
+        private @Nullable StatusUpdate initialStatus;
+        private @Nullable IntentSet intents;
         private int largeThreshold = 250;
-        @Nullable
-        private SessionInfo resumeSession;
+        private @Nullable SessionInfo resumeSession;
 
         /**
          * Create a builder using the given shard information.
@@ -210,7 +209,7 @@ public class IdentifyOptions {
      *
      * @return the presence used to identify bots
      */
-    public Optional<StatusUpdate> getInitialStatus() {
+    public Optional<@Nullable StatusUpdate> getInitialStatus() {
         return Optional.ofNullable(initialStatus);
     }
 
@@ -219,7 +218,7 @@ public class IdentifyOptions {
      *
      * @return {@code Possible.absent()} when no intents are set or the raw intent value which should be subscribed
      */
-    public Optional<IntentSet> getIntents() {
+    public Optional<@Nullable IntentSet> getIntents() {
         return Optional.ofNullable(intents);
     }
 
@@ -238,7 +237,7 @@ public class IdentifyOptions {
      *
      * @return the session details for resumption
      */
-    public Optional<SessionInfo> getResumeSession() {
+    public Optional<@Nullable SessionInfo> getResumeSession() {
         return Optional.ofNullable(resumeSession);
     }
 

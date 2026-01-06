@@ -22,6 +22,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
@@ -36,21 +37,18 @@ import java.util.Optional;
  */
 public class InviteCreateEvent extends Event {
 
-    @Nullable
-    private final Long guildId;
+    private final @Nullable Long guildId;
     private final long channelId;
     private final String code;
-    @Nullable
-    private final User inviter;
+    private final @Nullable User inviter;
     private final Instant createdAt;
-    @Nullable
-    private final Instant expiresAt;
+    private final @Nullable Instant expiresAt;
     private final int uses;
     private final int maxUses;
     private final int maxAge;
     private final boolean temporary;
 
-    public InviteCreateEvent(GatewayDiscordClient client, ShardInfo shardInfo, Long guildId, long channelId,
+    public InviteCreateEvent(GatewayDiscordClient client, ShardInfo shardInfo, @Nullable Long guildId, long channelId,
                              String code, @Nullable User inviter, Instant createdAt, @Nullable Instant expiresAt, int uses, int maxUses, int maxAge,
                              boolean temporary) {
         super(client, shardInfo);
@@ -71,7 +69,7 @@ public class InviteCreateEvent extends Event {
      *
      * @return The ID of the guild involved, if present.
      */
-    public Optional<Snowflake> getGuildId() {
+    public Optional<@Nullable Snowflake> getGuildId() {
         return Optional.ofNullable(this.guildId).map(Snowflake::of);
     }
 

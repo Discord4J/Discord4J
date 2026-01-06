@@ -24,6 +24,7 @@ import discord4j.core.object.entity.PartialMember;
 import discord4j.core.object.entity.StageInstance;
 import discord4j.discordjson.json.VoiceStateData;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 /**

@@ -22,6 +22,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.discordjson.json.ApplicationCommandInteractionOptionData;
 import discord4j.discordjson.json.ApplicationCommandInteractionResolvedData;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -45,11 +46,9 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     /** The raw data as represented by Discord. */
     private final ApplicationCommandInteractionOptionData data;
 
-    @Nullable
-    private final Long guildId;
+    private final @Nullable Long guildId;
 
-    @Nullable
-    private final ApplicationCommandInteractionResolvedData resolved;
+    private final @Nullable ApplicationCommandInteractionResolvedData resolved;
 
     /**
      * Constructs an {@code ApplicationCommandInteractionOption} with an associated {@link GatewayDiscordClient} and

@@ -33,11 +33,10 @@ import java.util.stream.Collectors;
  */
 public class LegacyGuildEmojiCreateSpec implements LegacyAuditSpec<GuildEmojiCreateRequest> {
 
-    private String name;
-    private String image;
+    private @Nullable String name;
+    private @Nullable String image;
     private final Set<Snowflake> roles = new HashSet<>();
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Sets the name for the created {@link GuildEmoji}.
@@ -86,6 +85,9 @@ public class LegacyGuildEmojiCreateSpec implements LegacyAuditSpec<GuildEmojiCre
 
     @Override
     public GuildEmojiCreateRequest asRequest() {
+        if (name == null || image == null) {
+            throw new IllegalStateException("Name and image must be set.");
+        }
         return GuildEmojiCreateRequest.builder()
                 .name(name)
                 .image(image)

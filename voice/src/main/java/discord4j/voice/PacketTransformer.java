@@ -59,8 +59,7 @@ final class PacketTransformer {
         this.encryptCounter = Math.abs(random.nextInt()) % 513 + 1;
     }
 
-    @Nullable
-    byte[] nextSend(byte[] audio) {
+    byte @Nullable [] nextSend(byte[] audio) {
         byte[] header = this.getRtpHeader(this.seq++);
 
         byte[] nonce = new byte[this.encryptionAdapter.getNonceLength()];

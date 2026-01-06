@@ -26,6 +26,7 @@ import discord4j.discordjson.json.OverwriteData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Permission;
 import discord4j.common.util.Snowflake;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -36,8 +37,7 @@ public class LegacyVoiceChannelCreateSpec implements LegacyAuditSpec<ChannelCrea
 
     private final ImmutableChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
             .type(Channel.Type.GUILD_VOICE.getValue());
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Sets the name for the created {@link VoiceChannel}.

@@ -22,6 +22,7 @@ import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.json.ImmutableComponentData;
 import discord4j.discordjson.possible.Possible;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 

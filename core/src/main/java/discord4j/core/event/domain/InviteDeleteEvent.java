@@ -21,6 +21,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
@@ -34,12 +35,11 @@ import java.util.Optional;
  */
 public class InviteDeleteEvent extends Event {
 
-    @Nullable
-    private final Long guildId;
+    private final @Nullable Long guildId;
     private final long channelId;
     private final String code;
 
-    public InviteDeleteEvent(GatewayDiscordClient client, ShardInfo shardInfo, Long guildId, long channelId, String code) {
+    public InviteDeleteEvent(GatewayDiscordClient client, ShardInfo shardInfo, @Nullable Long guildId, long channelId, String code) {
         super(client, shardInfo);
         this.guildId = guildId;
         this.channelId = channelId;
@@ -51,7 +51,7 @@ public class InviteDeleteEvent extends Event {
      *
      * @return The ID of the guild involved, if present.
      */
-    public Optional<Snowflake> getGuildId() {
+    public Optional<@Nullable Snowflake> getGuildId() {
         return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 

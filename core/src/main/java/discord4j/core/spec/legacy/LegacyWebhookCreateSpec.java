@@ -31,11 +31,9 @@ import java.util.Optional;
  */
 public class LegacyWebhookCreateSpec implements LegacyAuditSpec<WebhookCreateRequest> {
 
-    private String name;
-    @Nullable
-    private String avatar;
-    @Nullable
-    private String reason;
+    private @Nullable String name;
+    private @Nullable String avatar;
+    private @Nullable String reason;
 
     /**
      * Sets the name of the created {@link Webhook}.
@@ -73,6 +71,9 @@ public class LegacyWebhookCreateSpec implements LegacyAuditSpec<WebhookCreateReq
 
     @Override
     public WebhookCreateRequest asRequest() {
+        if (name == null) {
+            throw new IllegalStateException("Name must be set.");
+        }
         return WebhookCreateRequest.builder()
                 .name(name)
                 .avatar(Possible.of(Optional.ofNullable(avatar)))
