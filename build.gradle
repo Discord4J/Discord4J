@@ -28,7 +28,7 @@ ext {
     jackson_bom_version = '2.18.4'
     caffeine_version = '2.9.3'
     immutables_group = 'org.immutables'
-    immutables_version = '2.12.0'
+    immutables_version = '2.10.1'
 
     // Test dependencies
     junit_version = '5.7.1'
