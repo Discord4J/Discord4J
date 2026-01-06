@@ -51,7 +51,7 @@ public class InviteDeleteEvent extends Event {
      *
      * @return The ID of the guild involved, if present.
      */
-    public Optional<@Nullable Snowflake> getGuildId() {
+    public Optional<Snowflake> getGuildId() {
         return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 

@@ -69,7 +69,7 @@ public class InviteCreateEvent extends Event {
      *
      * @return The ID of the guild involved, if present.
      */
-    public Optional<@Nullable Snowflake> getGuildId() {
+    public Optional<Snowflake> getGuildId() {
         return Optional.ofNullable(this.guildId).map(Snowflake::of);
     }
 
