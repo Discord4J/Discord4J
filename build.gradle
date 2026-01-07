@@ -97,9 +97,9 @@ allprojects {
                 jdk_javadoc,
                 "https://www.javadocs.dev/com.fasterxml.jackson.core/jackson-databind/2.18.4/",
                 "https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
-                "https://www.javadocs.dev/io.projectreactor/reactor-core/3.6.18/",
-                "https://www.javadocs.dev/io.projectreactor.netty/reactor-netty/1.1.30/",
-                "https://www.javadocs.dev/io.projectreactor.addons/reactor-extra/3.5.2/",
+                "https://www.javadocs.dev/io.projectreactor/reactor-core/3.8.1/",
+                "https://www.javadocs.dev/io.projectreactor.netty/reactor-netty/1.3.1/",
+                "https://www.javadocs.dev/io.projectreactor.addons/reactor-extra/3.6.0/",
                 "https://netty.io/4.1/api/"
             ]
         }
