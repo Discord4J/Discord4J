@@ -16,8 +16,9 @@ ext {
     project_version = "$version".toString()
     project_description = 'Java interface for the Discord API'
     project_url = 'https://discord4j.com'
-    project_jdk = '1.8'
+    project_jdk = 8
     jdk = JavaVersion.current().majorVersion
+
     jdk_javadoc = "https://docs.oracle.com/javase/$jdk/docs/api/".toString()
     if (JavaVersion.current().isJava11Compatible()) {
         jdk_javadoc = "https://docs.oracle.com/en/java/javase/$jdk/docs/api/".toString()
@@ -121,7 +122,7 @@ allprojects {
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
         options.incremental = true
-        options.release = 8
+        options.release = project_jdk
     }
 
     tasks.withType(AbstractTestTask).configureEach {
