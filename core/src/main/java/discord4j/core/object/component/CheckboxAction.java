@@ -70,35 +70,4 @@ public class CheckboxAction extends ActionComponent implements ICanBeUsedInLabel
         return getData().value().toOptional().map(Boolean::parseBoolean);
     }
 
-    /**
-     * Creates a new checkbox with the same data as this one, but depending on the value param it may be
-     * required
-     * or not.
-     *
-     * @param value True if the checkbox should be required otherwise False.
-     * @return A new possibly required checkbox with the same data as this one.
-     */
-    public CheckboxAction required(boolean value) {
-        return of(ComponentData.builder().from(getData()).required(value).build());
-    }
-
-    /**
-     * Creates a new checkbox with the same data as this one, but disabled.
-     *
-     * @return A new disabled checkbox with the same data as this one.
-     */
-    public CheckboxAction disabled() {
-        return this.disabled(true);
-    }
-
-    /**
-     * Creates a new checkbox with the same data as this one, but depending on the value param, it may be disabled or
-     * not.
-     *
-     * @param value True if the checkbox should be disabled otherwise False.
-     * @return A new possibly disabled checkbox with the same data as this one.
-     */
-    public CheckboxAction disabled(boolean value) {
-        return of(ComponentData.builder().from(getData()).disabled(value).build());
-    }
 }
