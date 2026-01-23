@@ -114,6 +114,26 @@ public class CheckboxGroupAction extends ActionComponent implements ICanBeUsedIn
     }
 
     /**
+     * Creates a new checkbox group with the same data as this one, but with the given minimum values.
+     *
+     * @param minValues The new minimum values (0-10)
+     * @return A new checkbox group with the given minimum values.
+     */
+    public CheckboxGroupAction withMinValues(int minValues) {
+        return of(ComponentData.builder().from(this.getData()).minValues(minValues).build());
+    }
+
+    /**
+     * Creates a new checkbox group with the same data as this one, but with the given maximum values.
+     *
+     * @param maxValues The new maximum values (1-10)
+     * @return A new checkbox group with the given maximum values.
+     */
+    public CheckboxGroupAction withMaxValues(int maxValues) {
+        return of(ComponentData.builder().from(this.getData()).maxValues(maxValues).build());
+    }
+
+    /**
      * An option displayed in a checkbox group.
      */
     public static class Option {
