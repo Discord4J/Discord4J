@@ -466,7 +466,7 @@ public final class Message implements Entity {
      */
     public Flux<User> getReactors(final Emoji emoji, final Reaction.Type reactionType) {
         final Function<Map<String, Object>, Flux<UserData>> makeRequest = params -> {
-            params.put("type", reactionType == Reaction.Type.BURST ? 1 : 0);
+            params.put("type", reactionType.getValue());
 
             return gateway.getRestClient().getChannelService()
                     .getReactions(getChannelId().asLong(), getId().asLong(),
