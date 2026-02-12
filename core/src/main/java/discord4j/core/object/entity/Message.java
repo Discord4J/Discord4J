@@ -457,7 +457,7 @@ public final class Message implements Entity {
     }
 
     /**
-     * Requests to retrieve the reactors (users) for the specified emoji for this message.
+     * Requests to retrieve the reactors (users) for the specified emoji and reaction type for this message.
      *
      * @param emoji The emoji to get the reactors (users) for this message.
      * @param reactionType The type of reaction to get for this message.
