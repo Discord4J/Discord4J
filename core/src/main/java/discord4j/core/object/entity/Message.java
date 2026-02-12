@@ -470,8 +470,8 @@ public final class Message implements Entity {
 
             return gateway.getRestClient().getChannelService()
                     .getReactions(getChannelId().asLong(), getId().asLong(),
-                        EntityUtil.getEmojiString(emoji),
-                        params);
+                            EntityUtil.getEmojiString(emoji),
+                            params);
         };
 
         return PaginationUtil.paginateAfter(makeRequest, data -> Snowflake.asLong(data.id()), 0L, 100)
