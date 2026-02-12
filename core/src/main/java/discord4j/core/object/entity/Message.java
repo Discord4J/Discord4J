@@ -453,11 +453,26 @@ public final class Message implements Entity {
      * If an error is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getReactors(final Emoji emoji) {
-        final Function<Map<String, Object>, Flux<UserData>> makeRequest = params ->
-                gateway.getRestClient().getChannelService()
-                        .getReactions(getChannelId().asLong(), getId().asLong(),
-                                EntityUtil.getEmojiString(emoji),
-                                params);
+        return getReactors(emoji, Reaction.Type.NORMAL);
+    }
+
+    /**
+     * Requests to retrieve the reactors (users) for the specified emoji for this message.
+     *
+     * @param emoji The emoji to get the reactors (users) for this message.
+     * @param reactionType The type of reaction for this message.
+     * @return A {@link Flux} that continually emits the {@link User reactors} for the specified emoji for this message.
+     * If an error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<User> getReactors(final Emoji emoji, final Reaction.Type reactionType) {
+        final Function<Map<String, Object>, Flux<UserData>> makeRequest = params -> {
+            params.put("type", reactionType == Reaction.Type.BURST ? 1 : 0);
+
+            return gateway.getRestClient().getChannelService()
+                    .getReactions(getChannelId().asLong(), getId().asLong(),
+                        EntityUtil.getEmojiString(emoji),
+                        params);
+        };
 
         return PaginationUtil.paginateAfter(makeRequest, data -> Snowflake.asLong(data.id()), 0L, 100)
                 .map(data -> new User(gateway, data));
