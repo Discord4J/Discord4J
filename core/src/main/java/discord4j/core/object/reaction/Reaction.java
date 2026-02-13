@@ -112,6 +112,8 @@ public final class Reaction implements DiscordObject  {
 
     /**
      * Gets this reaction's emoji.
+     * <br>
+     * <b>Note:</b> this Emoji can have partial data for reactions or onboarding.
      *
      * @return This reaction's emoji.
      */
