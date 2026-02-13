@@ -28,11 +28,11 @@ import java.util.stream.Collectors;
 public class CheckboxGroupAction extends ActionComponent implements ICanBeUsedInLabelComponent {
 
     /**
-     * Creates a radio group.
+     * Creates a checkbox group.
      *
-     * @param customId A developer-defined identifier for the radio group.
+     * @param customId A developer-defined identifier for the checkbox group.
      * @param options The options that can be selected in the menu.
-     * @return A radio group with the given data.
+     * @return A checkbox group with the given data.
      */
     public static CheckboxGroupAction of(String customId, List<CheckboxGroupAction.Option> options) {
         Objects.requireNonNull(options);
@@ -46,11 +46,11 @@ public class CheckboxGroupAction extends ActionComponent implements ICanBeUsedIn
     }
 
     /**
-     * Creates a radio group.
+     * Creates a checkbox group.
      *
-     * @param customId A developer-defined identifier for the radio group.
+     * @param customId A developer-defined identifier for the checkbox group.
      * @param options The options that can be selected in the menu.
-     * @return A radio group with the given data.
+     * @return A checkbox group with the given data.
      */
     public static CheckboxGroupAction of(int id, String customId, List<CheckboxGroupAction.Option> options) {
         Objects.requireNonNull(options);
