@@ -34,7 +34,6 @@ import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.emoji.Emoji;
-import discord4j.core.object.reaction.Reaction.Type;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.MessageEditMono;
@@ -454,7 +453,7 @@ public final class Message implements Entity {
      * If an error is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getReactors(final Emoji emoji) {
-        return getReactors(emoji, Reaction.Type.NORMAL);
+        return this.getReactors(emoji, Reaction.Type.NORMAL);
     }
 
     /**
@@ -473,14 +472,14 @@ public final class Message implements Entity {
         final Function<Map<String, Object>, Flux<UserData>> makeRequest = params -> {
             params.put("type", reactionType.getValue());
 
-            return gateway.getRestClient().getChannelService()
+            return this.gateway.getRestClient().getChannelService()
                     .getReactions(getChannelId().asLong(), getId().asLong(),
                             EntityUtil.getEmojiString(emoji),
                             params);
         };
 
         return PaginationUtil.paginateAfter(makeRequest, data -> Snowflake.asLong(data.id()), 0L, 100)
-                .map(data -> new User(gateway, data));
+                .map(data -> new User(this.gateway, data));
     }
 
     /**
