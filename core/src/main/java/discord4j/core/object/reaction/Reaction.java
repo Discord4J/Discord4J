@@ -128,13 +128,13 @@ public final class Reaction implements DiscordObject  {
 
     /**
      * Represents the various type of Reaction.
-     * See <a href="https://discord.com/developers/docs/resources/channel#get-reactions-reaction-types">
+     * See <a href="https://docs.discord.com/developers/resources/message#get-reactions-reaction-types">
      *  Reaction Types</a>
      */
     public enum Type {
         UNKNOWN(-1),
-        NORMAL(1),
-        BURST(2);
+        NORMAL(0),
+        BURST(1);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -161,8 +161,8 @@ public final class Reaction implements DiscordObject  {
          */
         public static Type of(final int value) {
             switch (value) {
-                case 1: return NORMAL;
-                case 2: return BURST;
+                case 0: return NORMAL;
+                case 1: return BURST;
                 default: return UNKNOWN;
             }
         }
