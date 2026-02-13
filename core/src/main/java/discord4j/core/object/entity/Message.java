@@ -34,6 +34,7 @@ import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.emoji.Emoji;
+import discord4j.core.object.reaction.Reaction.Type;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.MessageEditMono;
@@ -460,11 +461,15 @@ public final class Message implements Entity {
      * Requests to retrieve the reactors (users) for the specified emoji and reaction type for this message.
      *
      * @param emoji The emoji to get the reactors (users) for this message.
-     * @param reactionType The type of reaction to get for this message.
+     * @param reactionType The type of reaction to get for this message, will error if {@link Reaction.Type#UNKNOWN} reaction type is passed.
      * @return A {@link Flux} that continually emits the {@link User reactors} for the specified emoji for this message.
      * If an error is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getReactors(final Emoji emoji, final Reaction.Type reactionType) {
+        if (reactionType == Reaction.Type.UNKNOWN) {
+            return Flux.error(new IllegalArgumentException("Reaction Type cannot be " + reactionType));
+        }
+
         final Function<Map<String, Object>, Flux<UserData>> makeRequest = params -> {
             params.put("type", reactionType.getValue());
 
