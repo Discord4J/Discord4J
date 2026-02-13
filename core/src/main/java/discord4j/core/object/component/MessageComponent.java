@@ -61,6 +61,9 @@ public class MessageComponent implements BaseMessageComponent {
             case TEXT_INPUT: return new TextInput(data);
             case LABEL: return new Label(data);
             case FILE_UPLOAD: return new FileUpload(data);
+            case RADIO_GROUP: return new RadioGroupAction(data);
+            case CHECKBOX_GROUP: return new CheckboxGroupAction(data);
+            case CHECKBOX: return new CheckboxAction(data);
             default: {
                 MessageComponent.LOGGER.warn("Unhandled component type: " + data.type());
                 return new MessageComponent(data);
@@ -123,6 +126,9 @@ public class MessageComponent implements BaseMessageComponent {
         CONTAINER(17, true),
         LABEL(18),
         FILE_UPLOAD(19),
+        RADIO_GROUP(21),
+        CHECKBOX_GROUP(22),
+        CHECKBOX(23),
         ;
 
         /**
@@ -175,6 +181,9 @@ public class MessageComponent implements BaseMessageComponent {
                 case 17: return CONTAINER;
                 case 18: return LABEL;
                 case 19: return FILE_UPLOAD;
+                case 21: return RADIO_GROUP;
+                case 22: return CHECKBOX_GROUP;
+                case 23: return CHECKBOX;
                 default: return UNKNOWN;
             }
         }
