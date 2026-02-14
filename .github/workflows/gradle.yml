@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ 8, 11, 17, 21 ]
+        java: [ 25 ]
     steps:
       - name: PR Check (PR Blocked by Dependency)
         if: ${{ contains(toJson(github.event.pull_request.labels.*.name), 'PR depends on PR') }}
