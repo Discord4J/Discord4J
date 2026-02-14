@@ -19,7 +19,7 @@ package discord4j.core.event.domain.role;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Role;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -35,6 +35,7 @@ import java.util.Optional;
 public class RoleUpdateEvent extends RoleEvent {
 
     private final Role current;
+    @Nullable
     private final Role old;
 
     public RoleUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Role current, @Nullable Role old) {

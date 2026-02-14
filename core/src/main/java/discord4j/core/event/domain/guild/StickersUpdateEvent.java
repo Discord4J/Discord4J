@@ -21,8 +21,8 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildSticker;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 import java.util.Optional;
 import java.util.Set;
 
@@ -42,7 +42,7 @@ public class StickersUpdateEvent extends GuildEvent {
     @Nullable
     private final Set<GuildSticker> old;
 
-    public StickersUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<GuildSticker> stickers, Set<GuildSticker> old) {
+    public StickersUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<GuildSticker> stickers, @Nullable Set<GuildSticker> old) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.stickers = stickers;

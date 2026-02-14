@@ -17,7 +17,7 @@
 /**
  * Classes supporting the conversion between gateway objects using Jackson.
  */
-@NonNullApi
+@NullMarked
 package discord4j.gateway.json.jackson;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

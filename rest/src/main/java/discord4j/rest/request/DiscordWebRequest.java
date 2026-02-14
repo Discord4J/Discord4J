@@ -20,7 +20,7 @@ import discord4j.rest.http.client.AuthorizationScheme;
 import discord4j.rest.route.Route;
 import discord4j.rest.util.Multimap;
 import discord4j.rest.util.RouteUtils;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;

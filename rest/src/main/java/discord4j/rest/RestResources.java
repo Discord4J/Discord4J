@@ -24,7 +24,7 @@ import discord4j.common.util.TokenUtil;
 import discord4j.rest.http.client.AuthorizationScheme;
 import discord4j.rest.request.Router;
 import discord4j.rest.util.AllowedMentions;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 

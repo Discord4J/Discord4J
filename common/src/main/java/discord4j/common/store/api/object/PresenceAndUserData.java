@@ -19,7 +19,7 @@ package discord4j.common.store.api.object;
 
 import discord4j.discordjson.json.PresenceData;
 import discord4j.discordjson.json.UserData;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -29,7 +29,9 @@ import java.util.Optional;
  */
 public class PresenceAndUserData {
 
+    @Nullable
     private final PresenceData presenceData;
+    @Nullable
     private final UserData userData;
 
     private PresenceAndUserData(@Nullable PresenceData presenceData, @Nullable UserData userData) {

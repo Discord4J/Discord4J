@@ -22,7 +22,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.ThreadMember;
 import discord4j.discordjson.json.gateway.ThreadMembersUpdate;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +40,7 @@ public class ThreadMembersUpdateEvent extends ThreadEvent {
 
     private final ThreadMembersUpdate dispatch;
     private final List<ThreadMember> members;
-    private final List<ThreadMember> old;
+    private final @Nullable List<ThreadMember> old;
 
     public ThreadMembersUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, ThreadMembersUpdate dispatch,
                                     List<ThreadMember> members, @Nullable List<ThreadMember> old) {
@@ -81,7 +81,7 @@ public class ThreadMembersUpdateEvent extends ThreadEvent {
      *
      * @return a list of {@link ThreadMember} in the thread before the event, if present
      */
-    public Optional<List<ThreadMember>> getOld() {
+    public Optional<@Nullable List<ThreadMember>> getOld() {
         return Optional.ofNullable(old);
     }
 

@@ -17,7 +17,7 @@
 package discord4j.gateway.state;
 
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 

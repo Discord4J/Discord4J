@@ -24,8 +24,8 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.common.util.Snowflake;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 

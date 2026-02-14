@@ -19,7 +19,7 @@ package discord4j.core.event.domain;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.User;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -33,7 +33,7 @@ import java.util.Optional;
 public class UserUpdateEvent extends Event {
 
     private final User current;
-    private final User old;
+    private final @Nullable User old;
 
     public UserUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, User current, @Nullable User old) {
         super(gateway, shardInfo);
@@ -56,7 +56,7 @@ public class UserUpdateEvent extends Event {
      *
      * @return The old version of the {@link User} that has been updated in this event, if present.
      */
-    public Optional<User> getOld() {
+    public Optional<@Nullable User> getOld() {
         return Optional.ofNullable(old);
     }
 

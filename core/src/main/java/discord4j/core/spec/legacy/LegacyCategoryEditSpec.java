@@ -21,7 +21,7 @@ import discord4j.core.object.entity.channel.Category;
 import discord4j.discordjson.json.ChannelModifyRequest;
 import discord4j.discordjson.json.ImmutableChannelModifyRequest;
 import discord4j.discordjson.json.OverwriteData;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -31,8 +31,7 @@ import java.util.stream.Collectors;
 public class LegacyCategoryEditSpec implements LegacyAuditSpec<ChannelModifyRequest> {
 
     private final ImmutableChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Sets the name for the {@link Category}.

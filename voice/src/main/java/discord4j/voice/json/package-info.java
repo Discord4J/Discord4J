@@ -17,7 +17,7 @@
 /**
  * Contains JSON mappings for voice connection lifecycle.
  */
-@NonNullApi
+@NullMarked
 package discord4j.voice.json;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

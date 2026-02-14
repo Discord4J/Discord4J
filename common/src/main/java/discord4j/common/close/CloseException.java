@@ -17,7 +17,7 @@
 
 package discord4j.common.close;
 
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import reactor.util.context.ContextView;
 
 import java.util.Optional;

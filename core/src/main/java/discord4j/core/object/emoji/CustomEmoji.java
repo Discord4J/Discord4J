@@ -20,8 +20,8 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.util.ImageUtil;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.rest.util.Image;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;

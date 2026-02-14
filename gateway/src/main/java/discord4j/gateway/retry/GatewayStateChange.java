@@ -20,7 +20,7 @@ package discord4j.gateway.retry;
 import discord4j.common.close.CloseStatus;
 import discord4j.common.close.DisconnectBehavior;
 import discord4j.discordjson.json.gateway.Dispatch;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 
@@ -65,6 +65,7 @@ public class GatewayStateChange implements Dispatch {
 
     private final State state;
     private final long currentAttempt;
+    @Nullable
     private final Duration backoff;
 
     protected GatewayStateChange(State state, long currentAttempt, @Nullable Duration backoff) {

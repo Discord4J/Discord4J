@@ -17,7 +17,7 @@
 
 package discord4j.common.close;
 
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Encapsulates a strategy to deal with the closing and release of a resource.

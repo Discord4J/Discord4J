@@ -20,7 +20,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.emoji.Emoji;
 import discord4j.core.object.entity.Message;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents an event related to a {@link discord4j.core.object.reaction.Reaction} with an Emoji.

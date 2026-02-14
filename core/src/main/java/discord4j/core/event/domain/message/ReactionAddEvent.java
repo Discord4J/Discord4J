@@ -24,7 +24,7 @@ import discord4j.core.object.emoji.Emoji;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.util.Color;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;

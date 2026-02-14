@@ -22,8 +22,8 @@ import discord4j.core.object.emoji.Emoji;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 /**
  * Represents an event related to a {@link discord4j.core.object.reaction.Reaction} with a user and more data of the reaction.

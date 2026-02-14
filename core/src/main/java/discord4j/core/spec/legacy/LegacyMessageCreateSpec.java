@@ -30,7 +30,7 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
 import discord4j.rest.util.MultipartRequest;
 import discord4j.rest.util.Permission;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
@@ -50,17 +50,15 @@ import java.util.stream.Collectors;
  */
 public class LegacyMessageCreateSpec implements LegacySpec<MultipartRequest<MessageCreateRequest>> {
 
-    @Nullable
-    private String content;
-    @Nullable
-    private String nonce;
-    private Boolean enforceNonce;
+    private @Nullable String content;
+    private @Nullable String nonce;
+    private @Nullable Boolean enforceNonce;
     private boolean tts;
-    private List<EmbedData> embeds;
-    private List<Tuple2<String, InputStream>> files;
-    private AllowedMentionsData allowedMentionsData;
-    private MessageReferenceData messageReferenceData;
-    private List<LayoutComponent> components;
+    private @Nullable List<EmbedData> embeds;
+    private @Nullable List<Tuple2<String, InputStream>> files;
+    private @Nullable AllowedMentionsData allowedMentionsData;
+    private @Nullable MessageReferenceData messageReferenceData;
+    private @Nullable List<LayoutComponent> components;
 
     /**
      * Sets the created {@link Message} contents, up to 2000 characters.

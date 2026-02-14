@@ -18,7 +18,7 @@
 /**
  * Supporting classes for operating with Reactor Sinks API.
  */
-@NonNullApi
+@NullMarked
 package discord4j.common.sinks;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

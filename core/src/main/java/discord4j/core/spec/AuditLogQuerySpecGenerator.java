@@ -23,9 +23,9 @@ import discord4j.core.object.audit.ActionType;
 import discord4j.core.object.audit.AuditLogPart;
 import discord4j.core.object.entity.Guild;
 import org.immutables.value.Value;
+import org.jspecify.annotations.Nullable;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Flux;
-import reactor.util.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,16 +35,16 @@ import static discord4j.core.spec.InternalSpecUtils.putIfNotNull;
 
 @Value.Immutable(singleton = true)
 interface AuditLogQuerySpecGenerator extends Spec<Map<String, Object>> {
-    
+
     @Nullable
     Snowflake userId();
-    
+
     @Nullable
     ActionType actionType();
-    
+
     @Nullable
     Snowflake before();
-    
+
     @Nullable
     Integer limit();
 

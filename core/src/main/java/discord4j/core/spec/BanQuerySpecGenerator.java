@@ -21,9 +21,9 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.PartialMember;
 import org.immutables.value.Value;
+import org.jspecify.annotations.Nullable;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,8 +37,7 @@ interface BanQuerySpecGenerator extends AuditSpec<Map<String, Object>> {
     Integer deleteMessageSeconds();
 
     @Deprecated
-    @Nullable
-    Integer deleteMessageDays();
+    @Nullable Integer deleteMessageDays();
 
     @Override
     default Map<String, Object> asRequest() {

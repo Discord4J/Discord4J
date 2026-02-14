@@ -17,7 +17,7 @@
 /**
  * Classes representing the audit log domain model.
  */
-@NonNullApi
+@NullMarked
 package discord4j.core.object.command;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

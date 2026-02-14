@@ -20,7 +20,7 @@ package discord4j.common.store.impl;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.PresenceData;
 import discord4j.discordjson.json.gateway.PresenceUpdate;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;

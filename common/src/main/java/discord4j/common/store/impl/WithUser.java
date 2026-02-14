@@ -18,7 +18,7 @@
 package discord4j.common.store.impl;
 
 import discord4j.discordjson.json.ImmutableUserData;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -27,6 +27,7 @@ import java.util.function.UnaryOperator;
 class WithUser<T> {
 
     private final T value;
+    @Nullable
     private final AtomicReference<ImmutableUserData> ref;
     private final BiFunction<T, ImmutableUserData, T> setter;
 

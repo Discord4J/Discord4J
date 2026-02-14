@@ -18,7 +18,7 @@ package discord4j.rest.util;
 
 import discord4j.common.annotations.Experimental;
 import io.netty.handler.codec.http.QueryStringEncoder;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;

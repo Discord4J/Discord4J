@@ -25,8 +25,8 @@ import discord4j.discordjson.json.PartialUserData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.ShardInfo;
 import discord4j.common.util.Snowflake;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 
@@ -42,10 +42,10 @@ import java.util.Optional;
 public class PresenceUpdateEvent extends Event {
 
     private final long guildId;
-    private final User oldUser;
+    private final @Nullable User oldUser;
     private final PartialUserData user;
     private final Presence current;
-    private final Presence old;
+    private final @Nullable Presence old;
 
     public PresenceUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, @Nullable User oldUser,
                                PartialUserData user, Presence current, @Nullable Presence old) {
@@ -81,7 +81,7 @@ public class PresenceUpdateEvent extends Event {
      *
      * @return The old version of the {@link User}, if present.
      */
-    public Optional<User> getOldUser() {
+    public Optional<@Nullable User> getOldUser() {
         return Optional.ofNullable(oldUser);
     }
 
@@ -171,7 +171,7 @@ public class PresenceUpdateEvent extends Event {
      *
      * @return The old version of the {@link Presence}, if present.
      */
-    public Optional<Presence> getOld() {
+    public Optional<@Nullable Presence> getOld() {
         return Optional.ofNullable(old);
     }
 

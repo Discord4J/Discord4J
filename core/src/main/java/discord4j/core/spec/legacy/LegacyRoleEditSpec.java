@@ -21,7 +21,7 @@ import discord4j.discordjson.json.ImmutableRoleModifyRequest;
 import discord4j.discordjson.json.RoleModifyRequest;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.PermissionSet;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 
 /**
@@ -32,8 +32,7 @@ import reactor.util.annotation.Nullable;
 public class LegacyRoleEditSpec implements LegacyAuditSpec<RoleModifyRequest> {
 
     private final ImmutableRoleModifyRequest.Builder requestBuilder = RoleModifyRequest.builder();
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Sets the new name of the {@link Role}.
@@ -97,8 +96,7 @@ public class LegacyRoleEditSpec implements LegacyAuditSpec<RoleModifyRequest> {
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

@@ -16,7 +16,7 @@
  */
 package discord4j.core.spec.legacy;
 
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +24,7 @@ import java.util.Map;
 /** A spec used to configure a user ban. */
 public final class LegacyBanQuerySpec implements LegacyAuditSpec<Map<String, Object>> {
 
-    private final Map<String, Object> request = new HashMap<>(2);
+    private final Map<String, @Nullable Object> request = new HashMap<>(2);
 
     /**
      * Sets the number of days to delete messages for (0-7).
@@ -50,7 +50,7 @@ public final class LegacyBanQuerySpec implements LegacyAuditSpec<Map<String, Obj
     }
 
     @Override
-    public Map<String, Object> asRequest() {
+    public Map<String, @Nullable Object> asRequest() {
         return request;
     }
 }

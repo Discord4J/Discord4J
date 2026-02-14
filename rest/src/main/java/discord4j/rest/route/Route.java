@@ -18,7 +18,7 @@ package discord4j.rest.route;
 
 import discord4j.rest.request.DiscordWebRequest;
 import io.netty.handler.codec.http.HttpMethod;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
