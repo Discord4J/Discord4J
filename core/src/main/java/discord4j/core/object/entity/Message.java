@@ -446,7 +446,7 @@ public final class Message implements Entity {
     }
 
     /**
-     * Requests to retrieve the reactors (users) for the specified emoji for this message.
+     * Requests to retrieve the reactors (users) for the specified emoji in the normal reaction type for this message.
      *
      * @param emoji The emoji to get the reactors (users) for this message.
      * @return A {@link Flux} that continually emits the {@link User reactors} for the specified emoji for this message.
@@ -460,7 +460,7 @@ public final class Message implements Entity {
      * Requests to retrieve the reactors (users) for the specified emoji and reaction type for this message.
      *
      * @param emoji The emoji to get the reactors (users) for this message.
-     * @param reactionType The type of reaction to get for this message, will throw an error if {@link Reaction.Type#UNKNOWN} is passed.
+     * @param reactionType The type of reaction to get for this message, will throw an error if {@link discord4j.core.object.reaction.Reaction.Type#UNKNOWN} is passed.
      * @return A {@link Flux} that continually emits the {@link User reactors} for the specified emoji for this message.
      * If an error is received, it is emitted through the {@code Flux}.
      */
