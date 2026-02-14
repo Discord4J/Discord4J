@@ -18,6 +18,8 @@
 package discord4j.rest.entity;
 
 import discord4j.common.util.Snowflake;
+import discord4j.discordjson.Id;
+import discord4j.discordjson.json.GuildFields;
 import discord4j.discordjson.json.RolePositionModifyRequest;
 import discord4j.discordjson.json.RoleData;
 import discord4j.discordjson.json.RoleModifyRequest;
@@ -26,6 +28,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -133,6 +137,21 @@ public class RestRole {
      */
     public Flux<RoleData> changePosition(final int position) {
         return changePosition(position, null);
+    }
+
+    /**
+     * Requests the count of members in this role.
+     *
+     * @return a {@link Mono} where, upon successful completion, emits the {@link Integer} belonging to this role.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Integer> getMemberCount() {
+        if (this.id == this.guildId) {
+            Map<String, Object> queryParams = new HashMap<>();
+            queryParams.put("with_counts", true);
+            return this.restClient.getGuildService().getGuild(this.guildId, queryParams).map(GuildFields::approximateMemberCount).map(integerPossible -> integerPossible.toOptional().orElse(0));
+        }
+        return this.restClient.getGuildService().getGuildRoleMemberCounts(this.guildId).map(roleMemberCountsData -> roleMemberCountsData.data().getOrDefault(Id.of(this.id), 0));
     }
 
     /**
