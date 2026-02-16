@@ -248,6 +248,7 @@ release {
     newVersionCommitMessage = 'Next development version'
     git {
         requireBranch.set('')
+        pushToRemote.set(false)
     }
 }
 
