@@ -16,8 +16,9 @@ ext {
     project_version = "$version".toString()
     project_description = 'Java interface for the Discord API'
     project_url = 'https://discord4j.com'
-    project_jdk = '1.8'
+    project_jdk = 8
     jdk = JavaVersion.current().majorVersion
+
     jdk_javadoc = "https://docs.oracle.com/javase/$jdk/docs/api/".toString()
     if (JavaVersion.current().isJava11Compatible()) {
         jdk_javadoc = "https://docs.oracle.com/en/java/javase/$jdk/docs/api/".toString()
@@ -54,8 +55,9 @@ allprojects {
     description = project_description
 
     java {
-        sourceCompatibility = project_jdk
-        targetCompatibility = project_jdk
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
     }
 
     dependencies {
@@ -72,10 +74,16 @@ allprojects {
         mavenLocal()
         mavenCentral()
         if (!isRelease || isJitpack) {
-            maven { url 'https://central.sonatype.com/repository/maven-snapshots' }
+            maven {
+                url = 'https://central.sonatype.com/repository/maven-snapshots'
+            }
         }
-        maven { url 'https://m2.dv8tion.net/releases' }
-        maven { url 'https://jitpack.io' }
+        maven {
+            url = 'https://m2.dv8tion.net/releases'
+        }
+        maven {
+            url = 'https://jitpack.io'
+        }
     }
 
     configurations.configureEach {
@@ -103,7 +111,7 @@ allprojects {
                 "https://netty.io/4.2/api/"
             ]
         }
-        if (JavaVersion.current().isJava9Compatible()) {
+        if (JavaVersion.current() == JavaVersion.VERSION_1_9) {
             options.addBooleanOption('html5', true)
         }
         if (JavaVersion.current().isJava11Compatible() && !JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_13)) {
@@ -114,6 +122,11 @@ allprojects {
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
         options.incremental = true
+        options.release = project_jdk
+    }
+
+    tasks.withType(AbstractTestTask).configureEach {
+        failOnNoDiscoveredTests = false
     }
 
     tasks.register('downloadDependencies') {
@@ -194,16 +207,16 @@ subprojects {
             repositories {
                 maven {
                     if (isRelease) {
-                        url 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2'
+                        url = 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2'
                     } else {
-                        url 'https://central.sonatype.com/repository/maven-snapshots'
+                        url = 'https://central.sonatype.com/repository/maven-snapshots'
                     }
                     def sonatypeUsername = findProperty('sonatypeUsername')
                     def sonatypePassword = findProperty('sonatypePassword')
                     if (sonatypeUsername != null && sonatypePassword != null) {
                         credentials {
-                            username sonatypeUsername
-                            password sonatypePassword
+                            username = sonatypeUsername
+                            password = sonatypePassword
                         }
                     }
                 }
