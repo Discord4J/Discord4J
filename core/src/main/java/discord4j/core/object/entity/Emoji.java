@@ -100,7 +100,7 @@ public abstract class Emoji implements Entity {
      */
     public boolean isAnimated() {
         return data.animated().toOptional()
-            .orElseThrow(IllegalStateException::new); // this should be safe for emojis
+            .orElse(false); // fallback for partial emoji from Reactions
     }
 
     /**
@@ -108,6 +108,7 @@ public abstract class Emoji implements Entity {
      *
      * @return {@code true} if this emoji is available, {@code false} otherwise (due to loss of Server Boosts for
      * example).
+     * @throws IllegalStateException if the available field is not present (can happen with partial emoji from reactions).
      */
     public boolean isAvailable() {
         return data.available().toOptional()
