@@ -455,6 +455,19 @@ public final class Role implements Entity {
         return this.changePosition(position, null);
     }
 
+    /**
+     * Requests the count of members in this role.
+     *
+     * @return a {@link Mono} where, upon successful completion, emits the {@link Integer} belonging to this role.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Integer> getMemberCount() {
+        if (this.isEveryone()) {
+            return this.getGuild().map(Guild::getMemberCount);
+        }
+        return this.rest.getMemberCount();
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
