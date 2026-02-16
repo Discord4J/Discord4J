@@ -72,10 +72,10 @@ allprojects {
         mavenLocal()
         mavenCentral()
         if (!isRelease || isJitpack) {
-            maven { url 'https://central.sonatype.com/repository/maven-snapshots' }
+            maven { url = 'https://central.sonatype.com/repository/maven-snapshots' }
         }
-        maven { url 'https://m2.dv8tion.net/releases' }
-        maven { url 'https://jitpack.io' }
+        maven { url = 'https://m2.dv8tion.net/releases' }
+        maven { url = 'https://jitpack.io' }
     }
 
     configurations.configureEach {
@@ -194,16 +194,16 @@ subprojects {
             repositories {
                 maven {
                     if (isRelease) {
-                        url 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2'
+                        url = 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2'
                     } else {
-                        url 'https://central.sonatype.com/repository/maven-snapshots'
+                        url = 'https://central.sonatype.com/repository/maven-snapshots'
                     }
                     def sonatypeUsername = findProperty('sonatypeUsername')
                     def sonatypePassword = findProperty('sonatypePassword')
                     if (sonatypeUsername != null && sonatypePassword != null) {
                         credentials {
-                            username sonatypeUsername
-                            password sonatypePassword
+                            username = sonatypeUsername
+                            password = sonatypePassword
                         }
                     }
                 }
