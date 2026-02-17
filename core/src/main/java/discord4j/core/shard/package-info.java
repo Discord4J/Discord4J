@@ -17,7 +17,7 @@
 /**
  * Core components for building grouped shard clients.
  */
-@NonNullApi
+@NullMarked
 package discord4j.core.shard;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

@@ -18,7 +18,7 @@ package discord4j.core.object.presence;
 
 import discord4j.discordjson.json.ActivityUpdateRequest;
 import discord4j.discordjson.json.gateway.StatusUpdate;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;

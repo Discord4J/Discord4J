@@ -20,7 +20,7 @@ package discord4j.rest.request;
 import discord4j.common.annotations.Experimental;
 import discord4j.rest.route.Route;
 import discord4j.rest.route.Routes;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.function.Predicate;

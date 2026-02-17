@@ -58,6 +58,7 @@ import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionFactory;
 import discord4j.voice.VoiceReactorResources;
 import io.netty.buffer.ByteBuf;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
@@ -68,7 +69,6 @@ import reactor.core.publisher.Sinks;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.annotation.Nullable;
 import reactor.util.context.Context;
 import reactor.util.retry.Retry;
 
@@ -116,28 +116,28 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private final Function<GatewayOptions, O> optionsModifier;
 
     private ShardingStrategy shardingStrategy = ShardingStrategy.recommended();
-    private Boolean awaitConnections = null;
-    private ShardCoordinator shardCoordinator = null;
-    private EventDispatcher eventDispatcher = null;
-    private Store store = null;
-    private MemberRequestFilter memberRequestFilter = null;
-    private Function<ShardInfo, ClientPresence> initialPresence = shard -> null;
-    private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
+    private @Nullable Boolean awaitConnections = null;
+    private @Nullable ShardCoordinator shardCoordinator = null;
+    private @Nullable EventDispatcher eventDispatcher = null;
+    private @Nullable Store store = null;
+    private @Nullable MemberRequestFilter memberRequestFilter = null;
+    private Function<ShardInfo, @Nullable ClientPresence> initialPresence = shard -> null;
+    private Function<ShardInfo, @Nullable SessionInfo> resumeOptions = shard -> null;
     private IntentSet intents = IntentSet.nonPrivileged();
-    private Boolean guildSubscriptions = null;
+    private @Nullable Boolean guildSubscriptions = null;
     private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = shutdownDestroyHandler();
-    private PayloadReader payloadReader = null;
-    private PayloadWriter payloadWriter = null;
-    private ReconnectOptions reconnectOptions = null;
-    private ReconnectOptions voiceReconnectOptions = null;
+    private @Nullable PayloadReader payloadReader = null;
+    private @Nullable PayloadWriter payloadWriter = null;
+    private @Nullable ReconnectOptions reconnectOptions = null;
+    private @Nullable ReconnectOptions voiceReconnectOptions = null;
     private GatewayObserver gatewayObserver = GatewayObserver.NOOP_LISTENER;
-    private Function<ReactorResources, GatewayReactorResources> gatewayReactorResources = null;
-    private Function<ReactorResources, VoiceReactorResources> voiceReactorResources = null;
+    private @Nullable Function<ReactorResources, GatewayReactorResources> gatewayReactorResources = null;
+    private @Nullable Function<ReactorResources, VoiceReactorResources> voiceReactorResources = null;
     private VoiceConnectionFactory voiceConnectionFactory = defaultVoiceConnectionFactory();
-    private EntityRetrievalStrategy entityRetrievalStrategy = null;
-    private DispatchEventMapper dispatchEventMapper = null;
+    private @Nullable EntityRetrievalStrategy entityRetrievalStrategy = null;
+    private @Nullable DispatchEventMapper dispatchEventMapper = null;
     private int maxMissedHeartbeatAck = 1;
-    private Function<EventDispatcher, Publisher<?>> dispatcherFunction;
+    private @Nullable Function<EventDispatcher, Publisher<?>> dispatcherFunction;
 
     /**
      * Create a default {@link GatewayBootstrap} based off the given {@link DiscordClient} that provides an instance
@@ -625,7 +625,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             b.initVoiceReactorResources(),
                             b.initReconnectOptions(voiceReactorResources), b.intents);
                     Sinks.Empty<Void> onCloseSink = Sinks.empty();
-                    AtomicReference<Throwable> dispatcherFunctionError = new AtomicReference<>();
+                    AtomicReference<@Nullable Throwable> dispatcherFunctionError = new AtomicReference<>();
                     EntityRetrievalStrategy entityRetrievalStrategy = b.initEntityRetrievalStrategy();
                     DispatchEventMapper dispatchMapper = b.initDispatchEventMapper();
                     Set<String> completingChunkNonces = ConcurrentHashMap.newKeySet();

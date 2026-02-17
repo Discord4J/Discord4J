@@ -21,9 +21,9 @@ import discord4j.voice.crypto.EncryptionAdapter;
 import discord4j.voice.crypto.EncryptionMode;
 import discord4j.voice.crypto.Xchacha20Poly1305EncryptionAdapter;
 import io.netty.buffer.ByteBuf;
+import org.jspecify.annotations.Nullable;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.annotation.Nullable;
 
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
@@ -59,8 +59,7 @@ final class PacketTransformer {
         this.encryptCounter = Math.abs(random.nextInt()) % 513 + 1;
     }
 
-    @Nullable
-    byte[] nextSend(byte[] audio) {
+    byte @Nullable [] nextSend(byte[] audio) {
         byte[] header = this.getRtpHeader(this.seq++);
 
         byte[] nonce = new byte[this.encryptionAdapter.getNonceLength()];
@@ -87,8 +86,7 @@ final class PacketTransformer {
         return finalPacket;
     }
 
-    @Nullable
-    byte[] nextReceive(ByteBuf packet) {
+    byte @Nullable [] nextReceive(ByteBuf packet) {
         // Read header
         byte extensionByte = packet.readByte();
         boolean hasExtension = (extensionByte & 0x10) != 0;
@@ -112,13 +110,13 @@ final class PacketTransformer {
             extension = 0;
         }
 
-        int headerLenght = packet.readerIndex();
+        int headerLength = packet.readerIndex();
 
         if (type != (byte) 0x78) {
             throw new IllegalArgumentException("Unsupported packet type: " + type);
         }
 
-        byte[] header = new byte[headerLenght];
+        byte[] header = new byte[headerLength];
         packet.getBytes(0, header);
 
         int nonceLenght = this.encryptionAdapter.getNonceLength();
@@ -126,10 +124,10 @@ final class PacketTransformer {
         int audioLength = audioOffset - nonceLenght;
 
         byte[] encrypted = new byte[audioLength];
-        packet.getBytes(headerLenght, encrypted, 0, audioLength);
+        packet.getBytes(headerLength, encrypted, 0, audioLength);
 
         byte[] nonce = new byte[nonceLenght];
-        packet.getBytes(headerLenght + audioLength, nonce);
+        packet.getBytes(headerLength + audioLength, nonce);
 
         packet.release();
 
@@ -143,9 +141,9 @@ final class PacketTransformer {
 
         int offset = 4 * extension;
 
-        byte[] newPacket = new byte[headerLenght + decrypted.length - offset];
-        System.arraycopy(header, 0, newPacket, 0, headerLenght);
-        System.arraycopy(decrypted, offset, newPacket, headerLenght, decrypted.length - offset);
+        byte[] newPacket = new byte[headerLength + decrypted.length - offset];
+        System.arraycopy(header, 0, newPacket, 0, headerLength);
+        System.arraycopy(decrypted, offset, newPacket, headerLength, decrypted.length - offset);
 
         return newPacket;
     }

@@ -22,9 +22,9 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.rest.util.Multimap;
 import org.immutables.value.Value;
+import org.jspecify.annotations.Nullable;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Set;
 import java.util.stream.Collectors;

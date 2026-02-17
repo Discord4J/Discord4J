@@ -26,6 +26,7 @@ import discord4j.discordjson.json.WebhookExecuteRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
 import discord4j.rest.util.MultipartRequest;
+import org.jspecify.annotations.Nullable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
@@ -46,8 +47,8 @@ public class LegacyWebhookExecuteSpec implements LegacySpec<MultipartRequest<Web
     private Possible<String> username = Possible.absent();
     private Possible<String> avatarUrl = Possible.absent();
     private Possible<Boolean> tts = Possible.absent();
-    private List<Tuple2<String, InputStream>> files = null;
-    private List<EmbedData> embeds = null;
+    private @Nullable List<Tuple2<String, InputStream>> files = null;
+    private @Nullable List<EmbedData> embeds = null;
     private Possible<AllowedMentionsData> allowedMentions = Possible.absent();
     private Possible<Snowflake> threadId = Possible.absent();
 

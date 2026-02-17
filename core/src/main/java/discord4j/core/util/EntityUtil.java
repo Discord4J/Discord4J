@@ -24,9 +24,9 @@ import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.emoji.Emoji;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.common.util.Snowflake;
+import org.jspecify.annotations.Nullable;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.annotation.Nullable;
 
 /** A utility class for entity processing. */
 public final class EntityUtil {

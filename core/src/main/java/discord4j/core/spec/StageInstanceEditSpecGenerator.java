@@ -17,18 +17,12 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.StageInstance;
-import discord4j.discordjson.json.RoleModifyRequest;
 import discord4j.discordjson.json.StageInstanceModifyRequest;
 import discord4j.discordjson.possible.Possible;
-import discord4j.rest.util.Color;
-import discord4j.rest.util.PermissionSet;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
-
-import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable(singleton = true)
 interface StageInstanceEditSpecGenerator extends AuditSpec<StageInstanceModifyRequest> {

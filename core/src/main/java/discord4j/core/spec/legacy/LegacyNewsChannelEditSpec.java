@@ -23,7 +23,7 @@ import discord4j.discordjson.json.ImmutableChannelModifyRequest;
 import discord4j.discordjson.json.OverwriteData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.common.util.Snowflake;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,8 +38,7 @@ import java.util.stream.Collectors;
 public class LegacyNewsChannelEditSpec implements LegacyAuditSpec<ChannelModifyRequest> {
 
     private final ImmutableChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Sets the name of the modified {@link NewsChannel}.
@@ -118,8 +117,7 @@ public class LegacyNewsChannelEditSpec implements LegacyAuditSpec<ChannelModifyR
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

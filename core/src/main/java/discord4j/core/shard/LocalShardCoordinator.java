@@ -21,6 +21,7 @@ import discord4j.gateway.SessionInfo;
 import discord4j.gateway.ShardInfo;
 import discord4j.gateway.limiter.PayloadTransformer;
 import discord4j.gateway.limiter.RateLimitTransformer;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -83,7 +84,7 @@ public class LocalShardCoordinator implements ShardCoordinator {
     }
 
     @Override
-    public Mono<Void> publishDisconnected(ShardInfo shardInfo, SessionInfo sessionInfo) {
+    public Mono<Void> publishDisconnected(ShardInfo shardInfo, @Nullable SessionInfo sessionInfo) {
         return Mono.deferContextual(ctx -> {
             boolean wasRemoved = shards.remove(shardInfo.getIndex());
             if (wasRemoved) {

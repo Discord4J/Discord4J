@@ -17,7 +17,7 @@
 /**
  * {@link reactor.netty.http.client.HttpClient} abstraction for Discord.
  */
-@NonNullApi
+@NullMarked
 package discord4j.rest.http.client;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

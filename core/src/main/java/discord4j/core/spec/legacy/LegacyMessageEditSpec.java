@@ -24,7 +24,7 @@ import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -125,9 +125,9 @@ public class LegacyMessageEditSpec implements LegacySpec<MessageEditRequest> {
      * @param flags An array of {@link discord4j.core.object.entity.Message.Flag} to set on the edited message.
      * @return This spec.
      */
-    public LegacyMessageEditSpec setFlags(@Nullable Message.Flag... flags) {
+    public LegacyMessageEditSpec setFlags(Message.@Nullable Flag... flags) {
         if (flags != null) {
-            this.flags = Possible.of(Optional.of(Arrays.stream(flags)
+            this.flags = Possible.of(Optional.of(Arrays.stream(flags).filter(Objects::nonNull)
                     .mapToInt(Message.Flag::getFlag)
                     .reduce(0, (left, right) -> left | right)));
         } else {

@@ -22,8 +22,8 @@ import discord4j.core.object.entity.Entity;
 import discord4j.core.util.MentionUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.rest.entity.RestChannel;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.EnumSet;
 

@@ -6,8 +6,8 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.GuildStickerEditMono;
 import discord4j.core.spec.GuildStickerEditSpec;
 import discord4j.discordjson.json.StickerData;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 import java.util.Objects;
 
 public final class GuildSticker extends Sticker {

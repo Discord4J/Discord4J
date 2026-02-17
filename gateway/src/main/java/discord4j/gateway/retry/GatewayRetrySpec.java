@@ -21,10 +21,10 @@ import discord4j.common.close.CloseException;
 import discord4j.common.retry.ReconnectContext;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.gateway.GatewayConnection;
+import org.jspecify.annotations.Nullable;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;

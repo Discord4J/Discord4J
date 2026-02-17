@@ -20,7 +20,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.Invite;
 import discord4j.discordjson.json.ImmutableInviteCreateRequest;
 import discord4j.discordjson.json.InviteCreateRequest;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * LegacySpec used to create guild channel {@link Invite} objects.
@@ -31,8 +31,7 @@ import reactor.util.annotation.Nullable;
 public class LegacyInviteCreateSpec implements LegacyAuditSpec<InviteCreateRequest> {
 
     private final ImmutableInviteCreateRequest.Builder requestBuilder = InviteCreateRequest.builder();
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Sets the duration of the created {@link Invite} in seconds before expiration, or {@code 0} to never expire. If
@@ -124,8 +123,7 @@ public class LegacyInviteCreateSpec implements LegacyAuditSpec<InviteCreateReque
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

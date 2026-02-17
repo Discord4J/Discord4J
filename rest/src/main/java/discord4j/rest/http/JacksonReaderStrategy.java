@@ -21,11 +21,11 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.IllegalReferenceCountException;
+import org.jspecify.annotations.Nullable;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.annotation.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.Type;

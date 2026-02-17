@@ -19,7 +19,7 @@ package discord4j.core.event.domain;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -37,7 +37,7 @@ import java.util.Optional;
 public class VoiceStateUpdateEvent extends Event {
 
     private final VoiceState current;
-    private final VoiceState old;
+    private final @Nullable VoiceState old;
 
     public VoiceStateUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, VoiceState current, @Nullable VoiceState old) {
         super(gateway, shardInfo);
@@ -60,7 +60,7 @@ public class VoiceStateUpdateEvent extends Event {
      *
      * @return The old {@link VoiceState}, if present.
      */
-    public Optional<VoiceState> getOld() {
+    public Optional<@Nullable VoiceState> getOld() {
         return Optional.ofNullable(old);
     }
 

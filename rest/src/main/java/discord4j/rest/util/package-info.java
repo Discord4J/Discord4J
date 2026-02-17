@@ -17,7 +17,7 @@
 /**
  * Utility classes supporting {@code discord4j-rest} module components.
  */
-@NonNullApi
+@NullMarked
 package discord4j.rest.util;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

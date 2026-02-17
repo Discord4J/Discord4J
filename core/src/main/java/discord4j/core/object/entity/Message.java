@@ -53,9 +53,9 @@ import discord4j.rest.entity.RestChannel;
 import discord4j.rest.entity.RestMessage;
 import discord4j.rest.util.MultipartRequest;
 import discord4j.rest.util.PaginationUtil;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;

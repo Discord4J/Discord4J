@@ -17,8 +17,8 @@
 
 package discord4j.common;
 
+import org.jspecify.annotations.Nullable;
 import reactor.util.Logger;
-import reactor.util.annotation.Nullable;
 import reactor.util.context.Context;
 import reactor.util.context.ContextView;
 

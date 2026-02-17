@@ -20,7 +20,7 @@
 /**
  * Components used to work with Discord interactions feature.
  */
-@NonNullApi
+@NullMarked
 package discord4j.rest.interaction;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

@@ -23,9 +23,9 @@ import discord4j.rest.request.Router;
 import discord4j.rest.request.RouterOptions;
 import discord4j.rest.service.*;
 import discord4j.rest.util.PaginationUtil;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.util.HashMap;

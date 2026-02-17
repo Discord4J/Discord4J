@@ -25,9 +25,9 @@ import discord4j.core.object.entity.Role;
 import discord4j.core.util.ImageUtil;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.util.Image;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;

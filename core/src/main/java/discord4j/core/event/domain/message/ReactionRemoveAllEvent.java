@@ -18,7 +18,7 @@ package discord4j.core.event.domain.message;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Dispatched when all the reactions on a message are removed.

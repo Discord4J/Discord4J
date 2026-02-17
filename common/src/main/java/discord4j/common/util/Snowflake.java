@@ -17,7 +17,7 @@
 package discord4j.common.util;
 
 import discord4j.discordjson.Id;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigInteger;
 import java.time.Instant;

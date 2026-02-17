@@ -17,8 +17,8 @@
 package discord4j.rest.http;
 
 import io.netty.buffer.ByteBuf;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 /**
  * Read a response without a body.

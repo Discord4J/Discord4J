@@ -26,7 +26,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.ApplicationCommandInteractionResolvedData;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
@@ -52,8 +52,7 @@ public class ApplicationCommandInteractionResolved implements DiscordObject {
     /** The raw data as represented by Discord. */
     private final ApplicationCommandInteractionResolvedData data;
 
-    @Nullable
-    private final Long guildId;
+    private final @Nullable Long guildId;
 
     public ApplicationCommandInteractionResolved(GatewayDiscordClient gateway,
                                                  ApplicationCommandInteractionResolvedData data,

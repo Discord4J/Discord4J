@@ -21,7 +21,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.gateway.Ready;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;

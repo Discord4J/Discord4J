@@ -17,7 +17,7 @@
 /**
  * Discord entity domain model.
  */
-@NonNullApi
+@NullMarked
 package discord4j.core.object.entity;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

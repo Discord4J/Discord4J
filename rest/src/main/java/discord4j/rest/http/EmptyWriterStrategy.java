@@ -16,10 +16,10 @@
  */
 package discord4j.rest.http;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufFlux;
 import reactor.netty.http.client.HttpClient;
-import reactor.util.annotation.Nullable;
 
 /**
  * Write a request without a body.

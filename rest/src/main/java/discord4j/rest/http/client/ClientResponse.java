@@ -25,12 +25,12 @@ import discord4j.rest.response.ResponseFunction;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.util.ReferenceCounted;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.netty.NettyInbound;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.annotation.Nullable;
 
 import java.util.List;
 import java.util.Optional;

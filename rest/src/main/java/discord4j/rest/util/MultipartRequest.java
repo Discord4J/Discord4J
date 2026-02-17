@@ -18,7 +18,7 @@
 package discord4j.rest.util;
 
 import discord4j.discordjson.json.MessageCreateRequest;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 

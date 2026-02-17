@@ -17,10 +17,10 @@
 /**
  * {@link discord4j.core.spec.Spec} contract and implementations to build requests to Discord.
  */
-@NonNullApi
+@NullMarked
 @MetaEncodingEnabled
 @SpecStyle
 package discord4j.core.spec;
 
 import discord4j.discordjson.encoding.MetaEncodingEnabled;
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

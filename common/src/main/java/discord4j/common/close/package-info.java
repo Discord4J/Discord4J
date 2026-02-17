@@ -17,7 +17,7 @@
 /**
  * Utility classes to handle closing behavior.
  */
-@NonNullApi
+@NullMarked
 package discord4j.common.close;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

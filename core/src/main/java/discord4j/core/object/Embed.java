@@ -21,7 +21,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -534,8 +534,7 @@ public final class Embed implements DiscordObject {
          *
          * @return A proxied URL of the video.
          */
-        @Nullable
-        public String getProxyUrl() {
+        public @Nullable String getProxyUrl() {
             return data.proxyUrl().toOptional().orElse(null);
         }
 

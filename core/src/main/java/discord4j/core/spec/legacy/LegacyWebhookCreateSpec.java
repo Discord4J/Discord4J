@@ -20,7 +20,7 @@ import discord4j.core.object.entity.Webhook;
 import discord4j.discordjson.json.WebhookCreateRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -31,11 +31,9 @@ import java.util.Optional;
  */
 public class LegacyWebhookCreateSpec implements LegacyAuditSpec<WebhookCreateRequest> {
 
-    private String name;
-    @Nullable
-    private String avatar;
-    @Nullable
-    private String reason;
+    private @Nullable String name;
+    private @Nullable String avatar;
+    private @Nullable String reason;
 
     /**
      * Sets the name of the created {@link Webhook}.
@@ -73,6 +71,9 @@ public class LegacyWebhookCreateSpec implements LegacyAuditSpec<WebhookCreateReq
 
     @Override
     public WebhookCreateRequest asRequest() {
+        if (name == null) {
+            throw new IllegalStateException("Name must be set.");
+        }
         return WebhookCreateRequest.builder()
                 .name(name)
                 .avatar(Possible.of(Optional.ofNullable(avatar)))

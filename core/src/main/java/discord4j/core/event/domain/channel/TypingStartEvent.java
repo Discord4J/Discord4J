@@ -23,8 +23,8 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.util.Optional;

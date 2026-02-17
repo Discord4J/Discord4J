@@ -31,7 +31,6 @@ import discord4j.core.spec.PollCreateSpec;
 import discord4j.core.spec.legacy.LegacyEmbedCreateSpec;
 import discord4j.core.spec.legacy.LegacyMessageCreateSpec;
 import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.json.PinnedMessageData;
 import discord4j.discordjson.json.PinnedMessagesResponseData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.PaginationUtil;

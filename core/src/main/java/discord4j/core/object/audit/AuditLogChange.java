@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.audit;
 
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
