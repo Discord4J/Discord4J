@@ -970,7 +970,7 @@ public abstract class Routes {
      *
      * @see <a href="https://docs.discord.com/developers/resources/invite#update-target-users">https://docs.discord.com/developers/resources/invite#update-target-users</a>
      */
-    public static final Route INVITE_UPDATE_TARGET_USER = Route.put("/invites/{invite.code}/target-users");
+    public static final Route INVITE_UPDATE_TARGET_USERS = Route.put("/invites/{invite.code}/target-users");
 
     /**
      * Processing target users from a CSV when creating or updating an invite is done asynchronously.<br>

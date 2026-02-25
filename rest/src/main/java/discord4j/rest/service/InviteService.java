@@ -58,7 +58,7 @@ public class InviteService extends RestService {
     }
 
     public Mono<Void> updateTargetUsers(String inviteCode, MultipartRequest<Void> request) {
-        return Routes.INVITE_UPDATE_TARGET_USER.newRequest(inviteCode)
+        return Routes.INVITE_UPDATE_TARGET_USERS.newRequest(inviteCode)
             .header("content-type", "multipart/form-data")
             .body(request)
             .exchange(getRouter())
