@@ -964,6 +964,15 @@ public abstract class Routes {
     public static final Route INVITE_GET_TARGET_USERS = Route.get("/invites/{invite.code}/target-users");
 
     /**
+     * Updates the users allowed to see and accept this invite.<br>
+     * Uploading a file with invalid user IDs will result in a 400 with the invalid IDs described.<br>
+     * Requires the caller to be the inviter or have the MANAGE_GUILD permission.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/invite#update-target-users">https://docs.discord.com/developers/resources/invite#update-target-users</a>
+     */
+    public static final Route INVITE_UPDATE_TARGET_USER = Route.put("/invites/{invite.code}/target-users");
+
+    /**
      * Accept an invite. This requires the guilds.join OAuth2 scope to be able to accept invites on behalf of normal
      * users (via an OAuth2 Bearer token). Bot users are disallowed. Returns an invite object on success.
      *

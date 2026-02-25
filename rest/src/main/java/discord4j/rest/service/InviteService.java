@@ -19,6 +19,7 @@ package discord4j.rest.service;
 import discord4j.discordjson.json.InviteData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -53,5 +54,13 @@ public class InviteService extends RestService {
         return Routes.INVITE_GET_TARGET_USERS.newRequest(inviteCode)
                 .exchange(getRouter())
                 .bodyToMono(String.class);
+    }
+
+    public Mono<Void> updateTargetUsers(String inviteCode, MultipartRequest<Void> request) {
+        return Routes.INVITE_UPDATE_TARGET_USER.newRequest(inviteCode)
+            .header("content-type", "multipart/form-data")
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(Void.class);
     }
 }

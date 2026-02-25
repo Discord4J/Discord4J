@@ -22,14 +22,18 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.CategorizableChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.common.util.Snowflake;
+import discord4j.core.spec.InviteCreateFields;
 import discord4j.discordjson.json.InviteData;
 import discord4j.discordjson.json.PartialGuildData;
 import discord4j.discordjson.json.PartialRoleDataFields;
 import discord4j.discordjson.json.UserData;
+import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -276,6 +280,21 @@ public class Invite implements DiscordObject {
             .map(String::trim)
             .filter(line -> !line.isEmpty() && !line.equalsIgnoreCase("user_id")) // ignore header csv
             .map(Snowflake::of);
+    }
+
+    /**
+     * Request the update of the target users associated with this invite.
+     *
+     * @param targetUserIds the target user ids
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the invite has been updated.
+     */
+    public final Mono<Void> updateTargetUserIds(List<Snowflake> targetUserIds) {
+        final String dataTargetUsers = targetUserIds.stream().map(Snowflake::asString).collect(Collectors.joining(System.lineSeparator()));
+        MultipartRequest<Void> inviteMultipartRequest = MultipartRequest.ofEmptyRequest("target_users_file");
+        InviteCreateFields.File file = InviteCreateFields.File.of("target_users_file", new ByteArrayInputStream(dataTargetUsers.getBytes(StandardCharsets.UTF_8)));
+        inviteMultipartRequest = inviteMultipartRequest.addFile(file.name(), file.inputStream());
+        return this.getClient().getRestClient().getInviteService()
+            .updateTargetUsers(this.getCode(), inviteMultipartRequest);
     }
 
     /**
