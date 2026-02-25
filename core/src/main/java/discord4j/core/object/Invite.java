@@ -298,6 +298,18 @@ public class Invite implements DiscordObject {
     }
 
     /**
+     * Requests to retrieve the status of the job associated with the target users for this invite.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits an {@link InviteTargetUsersJobStatus} object
+     * representing the status of the job. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<InviteTargetUsersJobStatus> getTargetUsersJobStatus() {
+        return this.getClient().getRestClient().getInviteService()
+            .getTargetUsersJobStatus(this.getCode())
+            .map(data -> new InviteTargetUsersJobStatus(this.getClient(), data));
+    }
+
+    /**
      * Requests to delete this invite.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the invite has been deleted.

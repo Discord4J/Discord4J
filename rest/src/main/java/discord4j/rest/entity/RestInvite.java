@@ -19,6 +19,7 @@ package discord4j.rest.entity;
 
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.InviteData;
+import discord4j.discordjson.json.InviteTargetUsersJobStatusData;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
@@ -105,6 +106,10 @@ public class RestInvite {
 
     public Mono<Void> updateTargetUsers(MultipartRequest<Void> request) {
         return this.restClient.getInviteService().updateTargetUsers(this.code, request);
+    }
+
+    public Mono<InviteTargetUsersJobStatusData> getTargetUsersJobStatus() {
+        return this.restClient.getInviteService().getTargetUsersJobStatus(this.code);
     }
 
     @Override

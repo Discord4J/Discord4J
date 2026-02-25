@@ -17,6 +17,7 @@
 package discord4j.rest.service;
 
 import discord4j.discordjson.json.InviteData;
+import discord4j.discordjson.json.InviteTargetUsersJobStatusData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import discord4j.rest.util.MultipartRequest;
@@ -62,5 +63,11 @@ public class InviteService extends RestService {
             .body(request)
             .exchange(getRouter())
             .bodyToMono(Void.class);
+    }
+
+    public Mono<InviteTargetUsersJobStatusData> getTargetUsersJobStatus(String inviteCode) {
+        return Routes.INVITE_GET_TARGET_USERS_JOB_STATUS.newRequest(inviteCode)
+                .exchange(getRouter())
+                .bodyToMono(InviteTargetUsersJobStatusData.class);
     }
 }
