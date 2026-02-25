@@ -278,7 +278,7 @@ public class Invite implements DiscordObject {
             .getTargetUsers(this.getCode())
             .flatMapMany(data -> Flux.fromArray(data.split(System.lineSeparator())))
             .map(String::trim)
-            .filter(line -> !line.isEmpty() && !line.equalsIgnoreCase("user_id")) // ignore header csv
+            .skip(1) // the first element is the header of the csv response
             .map(Snowflake::of);
     }
 
