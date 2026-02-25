@@ -121,7 +121,7 @@ public interface CategorizableChannel extends TopLevelGuildChannel {
     default Mono<ExtendedInvite> createInvite(InviteCreateSpec spec) {
         return Mono.defer(
                 () -> getClient().getRestClient().getChannelService()
-                        .createChannelInvite(getId().asLong(), spec.asRequest(), spec.reason()))
+                        .createChannelInvite(getId().asLong(), spec.asMultipartRequest(), spec.reason()))
                 .map(data -> new ExtendedInvite(getClient(), data));
     }
 
