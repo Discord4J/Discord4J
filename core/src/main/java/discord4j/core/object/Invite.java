@@ -283,6 +283,27 @@ public class Invite implements DiscordObject {
     }
 
     /**
+     * Request the target users associated with this invite by resolving their IDs
+     * and fetching their details using the associated {@link GatewayDiscordClient}.
+     *
+     * @return A {@link Flux} stream of {@link User} objects representing the target users
+     *         associated with this invite.
+     */
+    public final Flux<User> getTargetUsers() {
+        return this.getTargetUserIds().flatMap(this.getClient()::getUserById);
+    }
+
+    /**
+     * Request the update of the target users associated with this invite.
+     *
+     * @param targetUsers the target users
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the invite has been updated.
+     */
+    public final Mono<Void> updateTargetUsers(List<? extends User> targetUsers) {
+        return this.updateTargetUserIds(targetUsers.stream().map(User::getId).collect(Collectors.toList()));
+    }
+
+    /**
      * Request the update of the target users associated with this invite.
      *
      * @param targetUserIds the target user ids
