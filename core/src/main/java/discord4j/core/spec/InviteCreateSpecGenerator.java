@@ -21,16 +21,21 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.Invite;
 import discord4j.core.object.entity.channel.CategorizableChannel;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.InviteCreateRequest;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.MultipartRequest;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable(singleton = true)
-interface InviteCreateSpecGenerator extends AuditSpec<InviteCreateRequest> {
+interface InviteCreateSpecGenerator extends AuditSpec<MultipartRequest<InviteCreateRequest>> {
 
     Possible<Integer> maxAge();
 
@@ -46,17 +51,29 @@ interface InviteCreateSpecGenerator extends AuditSpec<InviteCreateRequest> {
 
     Possible<Snowflake> targetApplicationId();
 
+    Possible<InviteCreateFields.File> targetUsersFile();
+
+    Possible<List<Snowflake>> roleIds();
+
     @Override
-    default InviteCreateRequest asRequest() {
-        return InviteCreateRequest.builder()
-                .maxAge(maxAge())
-                .maxUses(maxUses())
-                .temporary(temporary())
-                .unique(unique())
-                .targetType(mapPossible(targetType(), Invite.Type::getValue))
-                .targetUserId(mapPossible(targetUserId(), Snowflake::asString))
-                .targetApplicationId(mapPossible(targetApplicationId(), Snowflake::asString))
-                .build();
+    default MultipartRequest<InviteCreateRequest> asRequest() {
+        InviteCreateRequest jsonRequest = InviteCreateRequest.builder()
+            .maxAge(maxAge())
+            .maxUses(maxUses())
+            .temporary(temporary())
+            .unique(unique())
+            .targetType(mapPossible(targetType(), Invite.Type::getValue))
+            .targetUserId(mapPossible(targetUserId(), Snowflake::asString))
+            .targetApplicationId(mapPossible(targetApplicationId(), Snowflake::asString))
+            .roleIds(mapPossible(roleIds(), r -> r.stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList())))
+            .build();
+
+        MultipartRequest<InviteCreateRequest> inviteCreateRequestMultipartRequest = MultipartRequest.ofRequest(jsonRequest, "target_users_file");
+        if (this.targetUsersFile().isPresent()) {
+            inviteCreateRequestMultipartRequest = inviteCreateRequestMultipartRequest.addFile(this.targetUsersFile().get().name(), this.targetUsersFile().get().inputStream());
+        }
+
+        return inviteCreateRequestMultipartRequest;
     }
 }
 
