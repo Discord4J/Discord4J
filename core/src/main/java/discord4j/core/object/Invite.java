@@ -24,16 +24,20 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.InviteData;
 import discord4j.discordjson.json.PartialGuildData;
+import discord4j.discordjson.json.PartialRoleDataFields;
 import discord4j.discordjson.json.UserData;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.stream.Collectors;
 
 /**
  * A Discord invite.
@@ -249,6 +253,16 @@ public class Invite implements DiscordObject {
     }
 
     /**
+     * Gets the ids of roles assigned to the user upon accepting the invite.
+     * @return The ids of roles assigned to the user upon accepting the invite.
+     */
+    public final List<Snowflake> getRoleIds() {
+        return this.getData().roles().toOptional()
+            .map(partialRoleDataFields -> partialRoleDataFields.stream().map(PartialRoleDataFields::id).map(Snowflake::of).collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
+    }
+
+    /**
      * Requests to delete this invite.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the invite has been deleted.
@@ -278,6 +292,13 @@ public class Invite implements DiscordObject {
      */
     InviteData getData() {
         return this.data;
+    }
+
+    @Override
+    public String toString() {
+        return "Invite{" +
+            "data=" + data +
+            '}';
     }
 
     /** Represents the various types of target user for an invite. */
@@ -393,12 +414,5 @@ public class Invite implements DiscordObject {
             }
             return inviteFlags;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Invite{" +
-                "data=" + data +
-                '}';
     }
 }
