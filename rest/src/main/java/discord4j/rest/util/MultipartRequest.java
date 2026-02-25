@@ -29,36 +29,65 @@ import java.util.List;
 
 public class MultipartRequest<T> {
 
-    private final T jsonPayload;
-    private final List<Tuple2<String, InputStream>> files;
+    /**
+     * Default file field (used for message creation).
+     */
+    private static final String FILE_FIELD = "file";
 
-    private MultipartRequest(T jsonPayload, List<Tuple2<String, InputStream>> files) {
+    private final @Nullable T jsonPayload;
+    private final List<Tuple2<String, InputStream>> files;
+    private final String fileField;
+
+    private MultipartRequest(@Nullable T jsonPayload, String fileField, List<Tuple2<String, InputStream>> files) {
         this.jsonPayload = jsonPayload;
         this.files = Collections.unmodifiableList(files);
+        this.fileField = fileField;
+    }
+
+    public static <T> MultipartRequest<T> ofEmptyRequest(String fileField) {
+        return new MultipartRequest<>(null, fileField, Collections.emptyList());
+    }
+
+    public static <T> MultipartRequest<T> ofRequest(T body, String fileField) {
+        return new MultipartRequest<>(body, fileField, Collections.emptyList());
     }
 
     public static <T> MultipartRequest<T> ofRequest(T body) {
-        return new MultipartRequest<>(body, Collections.emptyList());
+        return new MultipartRequest<>(body, FILE_FIELD, Collections.emptyList());
+    }
+
+    public static <T> MultipartRequest<T> ofEmptyRequestAndFiles(List<Tuple2<String, InputStream>> files) {
+        return new MultipartRequest<>(null, FILE_FIELD, files);
+    }
+
+    public static <T> MultipartRequest<T> ofEmptyRequestAndFiles(String fileField, List<Tuple2<String,
+        InputStream>> files) {
+        return new MultipartRequest<>(null, fileField, files);
     }
 
     public static <T> MultipartRequest<T> ofRequestAndFiles(T body, List<Tuple2<String, InputStream>> files) {
-        return new MultipartRequest<>(body, files);
+        return new MultipartRequest<>(body, FILE_FIELD, files);
+    }
+
+    public static <T> MultipartRequest<T> ofRequestAndFiles(T body, String fileField, List<Tuple2<String,
+        InputStream>> files) {
+        return new MultipartRequest<>(body, fileField, files);
     }
 
     public <R> MultipartRequest<R> withRequest(R body) {
-        return new MultipartRequest<>(body, files);
+        return new MultipartRequest<>(body, FILE_FIELD, files);
     }
 
     public MultipartRequest<T> addFile(String fileName, InputStream file) {
         List<Tuple2<String, InputStream>> list = new ArrayList<>(this.files);
         list.add(Tuples.of(fileName, file));
-        return new MultipartRequest<>(this.jsonPayload, Collections.unmodifiableList(list));
+        return new MultipartRequest<>(this.jsonPayload, this.fileField, Collections.unmodifiableList(list));
     }
 
     public MultipartRequest<T> addFiles(List<Tuple2<String, InputStream>> filesList) {
         List<Tuple2<String, InputStream>> list = new ArrayList<>(this.files);
         list.addAll(filesList);
-        return new MultipartRequest<>(this.jsonPayload, Collections.unmodifiableList(list));
+        return new MultipartRequest<>(this.jsonPayload, this.fileField, Collections.unmodifiableList(list));
     }
 
     /**
@@ -70,9 +99,15 @@ public class MultipartRequest<T> {
         return (MessageCreateRequest) jsonPayload;
     }
 
-    public T getJsonPayload() { return jsonPayload; }
+    public @Nullable T getJsonPayload() {
+        return this.jsonPayload;
+    }
+
+    public String getFileField() {
+        return this.fileField;
+    }
 
     public List<Tuple2<String, InputStream>> getFiles() {
-        return files;
+        return this.files;
     }
 }

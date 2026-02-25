@@ -17,8 +17,10 @@
 package discord4j.rest.service;
 
 import discord4j.discordjson.json.InviteData;
+import discord4j.discordjson.json.InviteTargetUsersJobStatusData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -47,5 +49,25 @@ public class InviteService extends RestService {
                 .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
                 .bodyToMono(InviteData.class);
+    }
+
+    public Mono<String> getTargetUsers(String inviteCode) {
+        return Routes.INVITE_GET_TARGET_USERS.newRequest(inviteCode)
+                .exchange(getRouter())
+                .bodyToMono(String.class);
+    }
+
+    public Mono<Void> updateTargetUsers(String inviteCode, MultipartRequest<Void> request) {
+        return Routes.INVITE_UPDATE_TARGET_USERS.newRequest(inviteCode)
+            .header("content-type", "multipart/form-data")
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(Void.class);
+    }
+
+    public Mono<InviteTargetUsersJobStatusData> getTargetUsersJobStatus(String inviteCode) {
+        return Routes.INVITE_GET_TARGET_USERS_JOB_STATUS.newRequest(inviteCode)
+                .exchange(getRouter())
+                .bodyToMono(InviteTargetUsersJobStatusData.class);
     }
 }

@@ -22,18 +22,24 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.CategorizableChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.common.util.Snowflake;
+import discord4j.core.spec.InviteTargetUsersUpdateSpec;
 import discord4j.discordjson.json.InviteData;
 import discord4j.discordjson.json.PartialGuildData;
+import discord4j.discordjson.json.PartialRoleDataFields;
 import discord4j.discordjson.json.UserData;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.stream.Collectors;
 
 /**
  * A Discord invite.
@@ -249,6 +255,75 @@ public class Invite implements DiscordObject {
     }
 
     /**
+     * Gets the ids of roles assigned to the user upon accepting the invite.
+     * @return The ids of roles assigned to the user upon accepting the invite.
+     */
+    public final List<Snowflake> getRoleIds() {
+        return this.getData().roles().toOptional()
+            .map(partialRoleDataFields -> partialRoleDataFields.stream().map(PartialRoleDataFields::id).map(Snowflake::of).collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
+    }
+
+    /**
+     * Request the IDs of target users associated with this invite.
+     *
+     * @return A {@link Flux} stream of {@link Snowflake} objects representing the IDs of the target users
+     *         associated with this invite.
+     */
+    public final Flux<Snowflake> getTargetUserIds() {
+        return this.getClient().getRestClient().getInviteService()
+            .getTargetUsers(this.getCode())
+            .flatMapMany(data -> Flux.fromArray(data.split(System.lineSeparator())))
+            .map(String::trim)
+            .skip(1) // the first element is the header of the csv response
+            .map(Snowflake::of);
+    }
+
+    /**
+     * Request the target users associated with this invite by resolving their IDs
+     * and fetching their details using the associated {@link GatewayDiscordClient}.
+     *
+     * @return A {@link Flux} stream of {@link User} objects representing the target users
+     *         associated with this invite.
+     */
+    public final Flux<User> getTargetUsers() {
+        return this.getTargetUserIds().flatMap(this.getClient()::getUserById);
+    }
+
+    /**
+     * Request the update of the target users associated with this invite.
+     *
+     * @param targetUsers the target users
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the invite has been updated.
+     */
+    public final Mono<Void> updateTargetUsers(List<? extends User> targetUsers) {
+        return this.updateTargetUserIds(targetUsers.stream().map(User::getId).collect(Collectors.toList()));
+    }
+
+    /**
+     * Request the update of the target users associated with this invite.
+     *
+     * @param targetUserIds the target user ids
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the invite has been updated.
+     */
+    public final Mono<Void> updateTargetUserIds(List<Snowflake> targetUserIds) {
+        return this.getClient().getRestClient().getInviteService()
+            .updateTargetUsers(this.getCode(), InviteTargetUsersUpdateSpec.create().withTargetUserIds(targetUserIds).asMultipartRequest());
+    }
+
+    /**
+     * Requests to retrieve the status of the job associated with the target users for this invite.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits an {@link InviteTargetUsersJobStatus} object
+     * representing the status of the job. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<InviteTargetUsersJobStatus> getTargetUsersJobStatus() {
+        return this.getClient().getRestClient().getInviteService()
+            .getTargetUsersJobStatus(this.getCode())
+            .map(data -> new InviteTargetUsersJobStatus(this.getClient(), data));
+    }
+
+    /**
      * Requests to delete this invite.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the invite has been deleted.
@@ -278,6 +353,13 @@ public class Invite implements DiscordObject {
      */
     InviteData getData() {
         return this.data;
+    }
+
+    @Override
+    public String toString() {
+        return "Invite{" +
+            "data=" + data +
+            '}';
     }
 
     /** Represents the various types of target user for an invite. */
@@ -393,12 +475,5 @@ public class Invite implements DiscordObject {
             }
             return inviteFlags;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Invite{" +
-                "data=" + data +
-                '}';
     }
 }

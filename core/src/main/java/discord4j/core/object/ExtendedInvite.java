@@ -18,12 +18,9 @@ package discord4j.core.object;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.discordjson.json.InviteData;
-import discord4j.discordjson.possible.Possible;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.Optional;
 
 // TODO FIXME: invites are generally just kind of a mess rn
 

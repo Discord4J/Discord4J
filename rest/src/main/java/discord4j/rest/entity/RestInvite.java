@@ -19,7 +19,9 @@ package discord4j.rest.entity;
 
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.InviteData;
+import discord4j.discordjson.json.InviteTargetUsersJobStatusData;
 import discord4j.rest.RestClient;
+import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -96,6 +98,35 @@ public class RestInvite {
      */
     public Mono<InviteData> delete(@Nullable String reason) {
         return restClient.getInviteService().deleteInvite(code, reason);
+    }
+
+    /**
+     * Retrieves the target users associated with an invite code by making a request to the API.
+     *
+     * @return a Mono emitting the response as a String if successful, otherwise an error Mono
+     */
+    public Mono<String> getTargetUsers() {
+        return this.restClient.getInviteService().getTargetUsers(this.code);
+    }
+
+    /**
+     * Updates the target users associated with an invite code by making a multipart request to the API.
+     *
+     * @param request a {@link MultipartRequest} containing the necessary parameters and files to update the target users
+     * @return a {@link Mono} that completes when the operation succeeds or emits an error if it fails
+     */
+    public Mono<Void> updateTargetUsers(MultipartRequest<Void> request) {
+        return this.restClient.getInviteService().updateTargetUsers(this.code, request);
+    }
+
+    /**
+     * Retrieves the job status for the target users associated with an invite code.
+     *
+     * @return a {@link Mono} emitting {@link InviteTargetUsersJobStatusData} if the request is successful,
+     *         or an error {@link Mono} if the request fails.
+     */
+    public Mono<InviteTargetUsersJobStatusData> getTargetUsersJobStatus() {
+        return this.restClient.getInviteService().getTargetUsersJobStatus(this.code);
     }
 
     @Override

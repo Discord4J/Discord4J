@@ -62,10 +62,10 @@ public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest<
         return Mono.fromCallable(() -> send.sendForm((request, form) -> {
             form.multipart(true);
             if (body.getFiles().size() == 1) {
-                form.file("file", files.get(0).getT1(), files.get(0).getT2(), "application/octet-stream");
+                form.file(body.getFileField(), files.get(0).getT1(), files.get(0).getT2(), "application/octet-stream");
             } else {
                 for (int i = 0; i < files.size(); i++) {
-                    form.file("file" + i, files.get(i).getT1(), files.get(i).getT2(), "application/octet-stream");
+                    form.file(body.getFileField().concat(String.valueOf(i)), files.get(i).getT1(), files.get(i).getT2(), "application/octet-stream");
                 }
             }
 
