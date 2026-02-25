@@ -954,6 +954,16 @@ public abstract class Routes {
     public static final Route INVITE_DELETE = Route.delete("/invites/{invite.code}");
 
     /**
+     * Gets the users allowed to see and accept this invite.<br>
+     * Response is a CSV file with the header user_id and each user ID from the original file passed to invite create on its own line.<br>
+     * Requires the caller to be the inviter, or have MANAGE_GUILD permission, or have VIEW_AUDIT_LOG permission.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/invite#get-target-users">
+     * https://docs.discord.com/developers/resources/invite#get-target-users</a>
+     */
+    public static final Route INVITE_GET_TARGET_USERS = Route.get("/invites/{invite.code}/target-users");
+
+    /**
      * Accept an invite. This requires the guilds.join OAuth2 scope to be able to accept invites on behalf of normal
      * users (via an OAuth2 Bearer token). Bot users are disallowed. Returns an invite object on success.
      *

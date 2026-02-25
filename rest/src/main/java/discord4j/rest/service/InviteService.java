@@ -48,4 +48,10 @@ public class InviteService extends RestService {
                 .exchange(getRouter())
                 .bodyToMono(InviteData.class);
     }
+
+    public Mono<String> getTargetUsers(String inviteCode) {
+        return Routes.INVITE_GET_TARGET_USERS.newRequest(inviteCode)
+                .exchange(getRouter())
+                .bodyToMono(String.class);
+    }
 }

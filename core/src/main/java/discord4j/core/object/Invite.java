@@ -26,6 +26,7 @@ import discord4j.discordjson.json.InviteData;
 import discord4j.discordjson.json.PartialGuildData;
 import discord4j.discordjson.json.PartialRoleDataFields;
 import discord4j.discordjson.json.UserData;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -260,6 +261,21 @@ public class Invite implements DiscordObject {
         return this.getData().roles().toOptional()
             .map(partialRoleDataFields -> partialRoleDataFields.stream().map(PartialRoleDataFields::id).map(Snowflake::of).collect(Collectors.toList()))
             .orElse(Collections.emptyList());
+    }
+
+    /**
+     * Request the IDs of target users associated with this invite.
+     *
+     * @return A {@link Flux} stream of {@link Snowflake} objects representing the IDs of the target users
+     *         associated with this invite.
+     */
+    public final Flux<Snowflake> getTargetUserIds() {
+        return this.getClient().getRestClient().getInviteService()
+            .getTargetUsers(this.getCode())
+            .flatMapMany(data -> Flux.fromArray(data.split(System.lineSeparator())))
+            .map(String::trim)
+            .filter(line -> !line.isEmpty() && !line.equalsIgnoreCase("user_id")) // ignore header csv
+            .map(Snowflake::of);
     }
 
     /**

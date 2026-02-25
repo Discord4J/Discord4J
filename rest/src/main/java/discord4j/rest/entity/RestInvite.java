@@ -98,6 +98,10 @@ public class RestInvite {
         return restClient.getInviteService().deleteInvite(code, reason);
     }
 
+    public Mono<String> getTargetUsers() {
+        return this.restClient.getInviteService().getTargetUsers(this.code);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
