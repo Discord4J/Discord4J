@@ -35,7 +35,7 @@ import java.util.Optional;
 public class GuildUpdateEvent extends GuildEvent {
 
     private final Guild current;
-    private final Guild old;
+    private final @Nullable Guild old;
 
     public GuildUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Guild current, @Nullable Guild old) {
         super(gateway, shardInfo);

@@ -31,6 +31,7 @@ import discord4j.discordjson.json.WebhookPartialGuildData;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -97,7 +98,7 @@ public final class Webhook implements Entity {
      * @return The ID of the guild this webhook is associated to.
      */
     public Snowflake getGuildId() {
-        return Snowflake.of(data.guildId().get().get()); // TODO FIXME: really Possible?
+        return Snowflake.of(data.guildId().get().orElseThrow(() -> new NoSuchElementException("No value present"))); // TODO FIXME: really Possible?
     }
 
     /**
@@ -127,7 +128,7 @@ public final class Webhook implements Entity {
      * @return The ID of the channel this webhook is associated to.
      */
     public Snowflake getChannelId() {
-        return Snowflake.of(data.channelId().get());
+        return Snowflake.of(data.channelId().orElseThrow(() -> new NoSuchElementException("No value present")));
     }
 
     /**

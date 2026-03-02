@@ -8,6 +8,8 @@ import discord4j.core.spec.GuildStickerEditSpec;
 import discord4j.discordjson.json.StickerData;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
+
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 public final class GuildSticker extends Sticker {
@@ -16,8 +18,7 @@ public final class GuildSticker extends Sticker {
     private final long guildId;
 
     public GuildSticker(GatewayDiscordClient gateway, StickerData data) {
-        super(gateway, data);
-        this.guildId = data.guildId().toOptional().get().asLong();
+        this(gateway, data, data.guildId().toOptional().orElseThrow(() -> new NoSuchElementException("No value present")).asLong());
     }
 
     public GuildSticker(GatewayDiscordClient gateway, StickerData data, final long guildId) {

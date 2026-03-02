@@ -34,15 +34,20 @@ public class DiscordWebRequest {
     private final String completeUri;
     private final Map<String, String> uriVariableMap;
 
-    private @Nullable Object body;
+    @Nullable
+    private Object body;
 
-    private @Nullable Multimap<String, Object> queryParams;
+    @Nullable
+    private Multimap<String, Object> queryParams;
 
-    private @Nullable Map<String, Set<String>> headers;
+    @Nullable
+    private Map<String, Set<String>> headers;
 
-    private @Nullable AuthorizationScheme authorizationScheme;
+    @Nullable
+    private AuthorizationScheme authorizationScheme;
 
-    private @Nullable String authorizationValue;
+    @Nullable
+    private String authorizationValue;
 
     /**
      * Create a new {@link DiscordWebRequest} template based on a {@link Route} and its compiled URI.

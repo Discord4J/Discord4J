@@ -36,7 +36,7 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
     private static final String T_FIELD = "t";
     private static final String S_FIELD = "s";
 
-    private static final Map<String, Class<? extends Dispatch>> dispatchTypes = new HashMap<>();
+    private static final Map<String, @Nullable Class<? extends Dispatch>> dispatchTypes = new HashMap<>();
 
     static {
         dispatchTypes.put(EventNames.READY, Ready.class);

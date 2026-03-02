@@ -203,11 +203,13 @@ public class User implements Entity {
      * @return The default avatar URL for this user.
      */
     public final String getDefaultAvatarUrl() {
-        if (isMigrated()) {
+        if (this.isMigrated()) {
             return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, (getId().asLong() >> 22) % 6), PNG);
         }
 
-        return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, Integer.parseInt(getDiscriminator()) % 5), PNG);
+        final String discriminator = Optional.ofNullable(getDiscriminator()).orElse("0000");
+
+        return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, Integer.parseInt(discriminator) % 5), PNG);
     }
 
     /**

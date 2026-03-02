@@ -16,6 +16,7 @@
  */
 package discord4j.rest.util;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import java.util.Comparator;
@@ -100,22 +101,20 @@ public final class PaginationUtil {
         return paginate(nextPage, keyExtractor, startAt, reverse);
     }
 
-    private static <T> Flux<T> paginate(final Function<String, Flux<T>> nextPage, final Function<T, String> keyExtractor,
+    private static <T> Flux<T> paginate(final Function<@Nullable String, Flux<T>> nextPage, final Function<T, String> keyExtractor,
                                         final String startAt, final boolean reverse) {
 
-        final Function<List<T>, String> updateLast = list ->
+        final Function<List<T>, @Nullable String> updateLast = list ->
             list.isEmpty() ? null : keyExtractor.apply(list.get(list.size() - 1));
 
         final Comparator<T> comparator = Comparator.comparing(keyExtractor);
-        final AtomicReference<String> previousStart = new AtomicReference<>(startAt);
+        final AtomicReference<@Nullable String> previousStart = new AtomicReference<>(startAt);
 
         return Flux.defer(() -> nextPage.apply(previousStart.get()))
             .sort(reverse ? comparator.reversed() : comparator)
             .collectList()
             .doOnNext(list -> previousStart.set(updateLast.apply(list)))
             .flatMapMany(Flux::fromIterable)
-            .repeat(() -> {
-                return previousStart.get() != null;
-            });
+            .repeat(() -> previousStart.get() != null);
     }
 }

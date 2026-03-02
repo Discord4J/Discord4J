@@ -35,7 +35,7 @@ import java.util.Optional;
 public class CategoryUpdateEvent extends ChannelEvent {
 
     private final Category current;
-    private final Category old;
+    private final @Nullable Category old;
 
     public CategoryUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Category current, @Nullable Category old) {
         super(gateway, shardInfo);

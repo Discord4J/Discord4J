@@ -32,7 +32,8 @@ import java.util.stream.Collectors;
 public class LegacyGuildPruneCountSpec implements LegacySpec<Multimap<String, Object>> {
 
     private final Multimap<String, Object> map = new Multimap<>();
-    private @Nullable String reason;
+    @Nullable
+    private String reason;
 
     /**
      * Set the number of days to count prune for.

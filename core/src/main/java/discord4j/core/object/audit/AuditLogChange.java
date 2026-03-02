@@ -22,8 +22,8 @@ import java.util.Optional;
 
 public class AuditLogChange<T> {
 
-    private final T oldValue;
-    private final T currentValue;
+    private final @Nullable T oldValue;
+    private final @Nullable T currentValue;
 
     public AuditLogChange(@Nullable T oldValue, @Nullable T currentValue) {
         this.oldValue = oldValue;

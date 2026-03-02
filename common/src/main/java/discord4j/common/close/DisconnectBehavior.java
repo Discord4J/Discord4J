@@ -25,7 +25,7 @@ import org.jspecify.annotations.Nullable;
 public class DisconnectBehavior {
 
     private final Action action;
-    private final Throwable cause;
+    private final @Nullable Throwable cause;
 
     /**
      * Create a {@link DisconnectBehavior} that instructs a client to retry in a graceful manner, with an optional cause.

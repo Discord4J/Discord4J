@@ -940,7 +940,8 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return contentByChannel.computeIfAbsent(channelId, ChannelContent::new);
     }
 
-    private @Nullable ChannelData saveChannel(long guildId, ChannelData channel) {
+    @Nullable
+    private ChannelData saveChannel(long guildId, ChannelData channel) {
         long channelId = channel.id().asLong();
         GuildContent guildContent = computeGuildContent(guildId);
         guildContent.channelIds.add(channelId);
@@ -948,7 +949,8 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return channels.put(channelId, ImmutableChannelData.copyOf(channel).withGuildId(guildId));
     }
 
-    private @Nullable RoleData saveRole(long guildId, RoleData role) {
+    @Nullable
+    private RoleData saveRole(long guildId, RoleData role) {
         long roleId = role.id().asLong();
         GuildContent guildContent = computeGuildContent(guildId);
         guildContent.roleIds.add(roleId);
@@ -986,7 +988,8 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                 ImmutableMemberData::withUser));
     }
 
-    private @Nullable ThreadMemberData saveThreadMember(ThreadMemberData threadMember) {
+    @Nullable
+    private ThreadMemberData saveThreadMember(ThreadMemberData threadMember) {
         long threadId = threadMember.id().get().asLong();
         ChannelContent content = computeChannelContent(threadId);
         Long2 id = new Long2(threadId, threadMember.userId().get().asLong());
@@ -1032,7 +1035,8 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                 .build();
     }
 
-    private @Nullable VoiceStateData saveOrRemoveVoiceState(long guildId, VoiceStateData voiceState) {
+    @Nullable
+    private VoiceStateData saveOrRemoveVoiceState(long guildId, VoiceStateData voiceState) {
         Long2 voiceStateId = new Long2(guildId, voiceState.userId().asLong());
         GuildContent guildContent = computeGuildContent(guildId);
         VoiceStateData old = voiceStates.remove(voiceStateId);
@@ -1051,7 +1055,8 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return old;
     }
 
-    private @Nullable MessageData deleteMessage(long channelId, long messageId) {
+    @Nullable
+    private MessageData deleteMessage(long channelId, long messageId) {
         Long2 id = new Long2(channelId, messageId);
         ChannelContent channelContent = computeChannelContent(channelId);
         channelContent.messageIds.remove(id);
@@ -1089,7 +1094,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     }
 
     private @Nullable <T> AtomicReference<ImmutableUserData> computeUserRef(long userId, T newData,
-                                                                  BiFunction<T, ImmutableUserData, ImmutableUserData>
+                                                                  BiFunction<T, @Nullable ImmutableUserData, @Nullable ImmutableUserData>
                                                                          userUpdater) {
         for (; ; ) {
             AtomicReference<ImmutableUserData> existing = users.get(userId);
@@ -1146,7 +1151,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     private static class EmojiKey {
 
         private final long id;
-        private final String name;
+        private final @Nullable String name;
 
         private EmojiKey(EmojiData emoji) {
             this.id = emoji.id().map(Id::asLong).orElse(-1L);
@@ -1196,8 +1201,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             return memberListComplete;
         }
 
-        @Nullable
-        private GuildData dispose() {
+        private @Nullable GuildData dispose() {
             WrappedGuildData old = guilds.remove(guildId);
             contentByGuild.remove(guildId);
             contentByChannel.values().stream()

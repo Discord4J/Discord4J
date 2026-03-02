@@ -17,6 +17,8 @@
 
 package discord4j.rest.util;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.*;
 import java.util.function.BiConsumer;
 
@@ -159,7 +161,7 @@ public class Multimap<K, V> implements Map<K, List<V>> {
     }
 
     @Override
-    public List<V> put(K key, List<V> value) {
+    public @Nullable List<V> put(K key, List<V> value) {
         return map.put(key, value);
     }
 

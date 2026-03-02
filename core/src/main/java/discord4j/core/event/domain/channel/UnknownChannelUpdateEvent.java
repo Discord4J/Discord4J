@@ -35,7 +35,7 @@ import java.util.Optional;
 public class UnknownChannelUpdateEvent extends ChannelEvent {
 
     private final UnknownChannel current;
-    private final UnknownChannel old;
+    private final @Nullable UnknownChannel old;
 
     public UnknownChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, UnknownChannel current, @Nullable UnknownChannel old) {
         super(gateway, shardInfo);

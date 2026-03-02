@@ -37,6 +37,7 @@ import discord4j.voice.retry.VoiceServerUpdateReconnectException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
+import org.jspecify.annotations.Nullable;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.publisher.*;
@@ -119,14 +120,14 @@ public class DefaultVoiceGatewayClient {
      */
     private final Sinks.Many<VoiceConnection.State> state;
 
-    private final AtomicReference<VoiceServerOptions> serverOptions = new AtomicReference<>();
-    private final AtomicReference<String> session = new AtomicReference<>();
+    private final AtomicReference<@Nullable VoiceServerOptions> serverOptions = new AtomicReference<>();
+    private final AtomicReference<@Nullable String> session = new AtomicReference<>();
 
     private volatile int ssrc;
-    private volatile Sinks.One<CloseStatus> disconnectNotifier;
-    private volatile ContextView currentContext;
-    private volatile VoiceWebsocketHandler sessionHandler;
-    private EncryptionMode encryptionMode;
+    private volatile Sinks.@Nullable One<CloseStatus> disconnectNotifier;
+    private volatile @Nullable ContextView currentContext;
+    private volatile @Nullable VoiceWebsocketHandler sessionHandler;
+    private @Nullable EncryptionMode encryptionMode;
 
     public DefaultVoiceGatewayClient(VoiceGatewayOptions options) {
         this.guildId = options.getGuildId();

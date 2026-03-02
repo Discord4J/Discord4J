@@ -35,7 +35,7 @@ import java.util.Optional;
 public class StoreChannelUpdateEvent extends ChannelEvent {
 
     private final StoreChannel current;
-    private final StoreChannel old;
+    private final @Nullable StoreChannel old;
 
     public StoreChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, StoreChannel current, @Nullable StoreChannel old) {
         super(gateway, shardInfo);

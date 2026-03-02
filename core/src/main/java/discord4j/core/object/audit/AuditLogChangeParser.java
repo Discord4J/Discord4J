@@ -30,6 +30,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -73,7 +74,7 @@ interface AuditLogChangeParser<T> extends BiFunction<AuditLogEntry, JsonNode, T>
             ObjectMapper mapper = client.getCoreResources().getJacksonResources().getObjectMapper();
             List<OverwriteData> overwrites = mapper.readerForListOf(OverwriteData.class).readValue(node);
 
-            long guildId = entry.getParent().getGuildId().asLong();
+            long guildId = Objects.requireNonNull(entry.getParent()).getGuildId().asLong();
             long channelId = entry.getTargetId()
                     .orElseThrow(() -> new NoSuchElementException("Audit log entry has no target ID"))
                     .asLong();

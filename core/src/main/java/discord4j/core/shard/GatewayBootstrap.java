@@ -654,7 +654,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                         destroySequence.contextWrite(buildContext(gateway, shard)), maxConcurrency))));
 
                     Supplier<Mono<Void>> withEventDispatcherFunction = () ->
-                            Flux.from(b.dispatcherFunction.apply(eventDispatcher))
+                            Flux.from(Objects.requireNonNull(b.dispatcherFunction).apply(eventDispatcher))
                                     .then()
                                     .subscribeOn(gatewayReactorResources.getBlockingTaskScheduler())
                                     .onErrorResume(t -> {

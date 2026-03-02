@@ -36,6 +36,7 @@ import discord4j.gateway.retry.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.util.IllegalReferenceCountException;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -135,16 +136,16 @@ public class DefaultGatewayClient implements GatewayClient {
     // Gateway session state tracking across multiple ws connections
     private final AtomicInteger sequence = new AtomicInteger(0);
     private final AtomicReference<String> sessionId = new AtomicReference<>("");
-    private final AtomicReference<String> resumeUrl = new AtomicReference<>();
+    private final AtomicReference<@Nullable String> resumeUrl = new AtomicReference<>();
     private final AtomicLong lastSent = new AtomicLong(0);
     private final AtomicLong lastAck = new AtomicLong(0);
     private final AtomicInteger missedAck = new AtomicInteger(0);
     private volatile long responseTime = 0;
 
     // References that are changing each time a new ws connection is opened
-    private volatile Sinks.One<CloseStatus> disconnectNotifier;
-    private volatile GatewayWebsocketHandler sessionHandler;
-    private volatile ContextView currentContext;
+    private volatile Sinks.@Nullable One<CloseStatus> disconnectNotifier;
+    private volatile @Nullable GatewayWebsocketHandler sessionHandler;
+    private volatile @Nullable ContextView currentContext;
 
     /**
      * Initializes a new GatewayClient.

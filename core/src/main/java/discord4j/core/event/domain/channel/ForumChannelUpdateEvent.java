@@ -35,7 +35,7 @@ import java.util.Optional;
 public class ForumChannelUpdateEvent extends ChannelEvent {
 
     private final ForumChannel current;
-    private final ForumChannel old;
+    private final @Nullable ForumChannel old;
 
     public ForumChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, ForumChannel current, @Nullable ForumChannel old) {
         super(gateway, shardInfo);

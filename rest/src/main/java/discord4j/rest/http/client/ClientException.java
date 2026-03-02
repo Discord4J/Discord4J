@@ -70,7 +70,7 @@ public class ClientException extends RuntimeException {
 
     private final ClientRequest request;
     private final HttpClientResponse response;
-    private final ErrorResponse errorResponse;
+    private final @Nullable ErrorResponse errorResponse;
 
     /**
      * Create a new {@link ClientException} with the given HTTP request and response details.
@@ -80,7 +80,7 @@ public class ClientException extends RuntimeException {
      * @param errorResponse the response body converted to an {@link ErrorResponse}, or {@code null} if not available
      */
     public ClientException(ClientRequest request, HttpClientResponse response, @Nullable ErrorResponse errorResponse) {
-        super(request.getMethod().toString() + " " + request.getUrl() + " returned " + response.status().toString() +
+        super(request.getMethod() + " " + request.getUrl() + " returned " + response.status() +
                 (errorResponse != null ? " with response " + errorResponse.getFields() : ""));
         this.request = request;
         this.response = response;
