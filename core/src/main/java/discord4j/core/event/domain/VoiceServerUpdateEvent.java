@@ -35,8 +35,7 @@ public class VoiceServerUpdateEvent extends Event {
 
     private final String token;
     private final long guildId;
-    @Nullable
-    private final String endpoint;
+    private final @Nullable String endpoint;
 
     public VoiceServerUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, String token, long guildId, @Nullable String endpoint) {
         super(gateway, shardInfo);
@@ -79,8 +78,7 @@ public class VoiceServerUpdateEvent extends Event {
      *
      * @return The void server host's endpoint URL.
      */
-    @Nullable
-    public String getEndpoint() {
+    public @Nullable String getEndpoint() {
         return endpoint;
     }
 

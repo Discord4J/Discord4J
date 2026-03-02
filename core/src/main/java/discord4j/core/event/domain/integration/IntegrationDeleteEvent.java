@@ -35,8 +35,7 @@ public class IntegrationDeleteEvent extends Event {
 
     private final long id;
     private final long guildId;
-    @Nullable
-    private final Long applicationId;
+    private final @Nullable Long applicationId;
 
     public IntegrationDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long id, long guildId,
                                   @Nullable Long applicationId) {

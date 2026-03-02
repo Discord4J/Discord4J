@@ -105,8 +105,7 @@ public class ExampleOAuth2CodeFlow {
                 });
     }
 
-    @Nullable
-    private static DiscordOAuth2Client getClient(HttpServerRequest request) {
+    private static @Nullable DiscordOAuth2Client getClient(HttpServerRequest request) {
         String key = request.cookies().getOrDefault(DiscordOAuth2Server.SESSION_KEY, Collections.emptySet())
                 .stream().map(Cookie::value).findFirst().orElse("");
         return CLIENTS.get(key);

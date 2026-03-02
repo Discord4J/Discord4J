@@ -27,8 +27,7 @@ import java.util.function.UnaryOperator;
 class WithUser<T> {
 
     private final T value;
-    @Nullable
-    private final AtomicReference<ImmutableUserData> ref;
+    private final @Nullable AtomicReference<ImmutableUserData> ref;
     private final BiFunction<T, ImmutableUserData, T> setter;
 
     public WithUser(T value, @Nullable AtomicReference<ImmutableUserData> ref,

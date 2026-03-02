@@ -39,8 +39,7 @@ public class RoleDeleteEvent extends RoleEvent {
 
     private final long guildId;
     private final long roleId;
-    @Nullable
-    private final Role role;
+    private final @Nullable Role role;
 
     public RoleDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long roleId, @Nullable Role role) {
         super(gateway, shardInfo);

@@ -65,8 +65,7 @@ public class GatewayStateChange implements Dispatch {
 
     private final State state;
     private final long currentAttempt;
-    @Nullable
-    private final Duration backoff;
+    private final @Nullable Duration backoff;
 
     protected GatewayStateChange(State state, long currentAttempt, @Nullable Duration backoff) {
         this.state = state;
@@ -82,8 +81,7 @@ public class GatewayStateChange implements Dispatch {
         return currentAttempt;
     }
 
-    @Nullable
-    public Duration getBackoff() {
+    public @Nullable Duration getBackoff() {
         return backoff;
     }
 

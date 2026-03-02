@@ -41,8 +41,7 @@ import java.util.stream.Collectors;
  */
 public class ReactionAddEvent extends ReactionUserEmojiEvent {
 
-    @Nullable
-    private final Member member;
+    private final @Nullable Member member;
     private final long messageAuthorId;
     private final List<String> burstColors;
 

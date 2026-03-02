@@ -39,12 +39,10 @@ import java.util.Optional;
 public class TypingStartEvent extends ChannelEvent {
 
     private final long channelId;
-    @Nullable
-    private final Long guildId;
+    private final @Nullable Long guildId;
     private final long userId;
     private final Instant startTime;
-    @Nullable
-    private final Member member;
+    private final @Nullable Member member;
 
     public TypingStartEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long channelId, @Nullable Long guildId,
                             long userId, Instant startTime, @Nullable Member member) {

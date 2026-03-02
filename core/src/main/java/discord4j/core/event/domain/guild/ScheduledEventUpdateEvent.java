@@ -30,8 +30,7 @@ import java.util.Optional;
 public class ScheduledEventUpdateEvent extends GuildEvent {
 
     private final ScheduledEvent current;
-    @Nullable
-    private final ScheduledEvent old;
+    private final @Nullable ScheduledEvent old;
 
     public ScheduledEventUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, ScheduledEvent current,
                                      @Nullable ScheduledEvent old) {

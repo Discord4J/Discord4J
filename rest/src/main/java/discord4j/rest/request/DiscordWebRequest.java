@@ -34,20 +34,15 @@ public class DiscordWebRequest {
     private final String completeUri;
     private final Map<String, String> uriVariableMap;
 
-    @Nullable
-    private Object body;
+    private @Nullable Object body;
 
-    @Nullable
-    private Multimap<String, Object> queryParams;
+    private @Nullable Multimap<String, Object> queryParams;
 
-    @Nullable
-    private Map<String, Set<String>> headers;
+    private @Nullable Map<String, Set<String>> headers;
 
-    @Nullable
-    private AuthorizationScheme authorizationScheme;
+    private @Nullable AuthorizationScheme authorizationScheme;
 
-    @Nullable
-    private String authorizationValue;
+    private @Nullable String authorizationValue;
 
     /**
      * Create a new {@link DiscordWebRequest} template based on a {@link Route} and its compiled URI.
@@ -104,8 +99,7 @@ public class DiscordWebRequest {
      *
      * @return the body of this request, or {@code null} if this request carries no HTTP body
      */
-    @Nullable
-    public Object getBody() {
+    public @Nullable Object getBody() {
         return body;
     }
 
@@ -114,8 +108,7 @@ public class DiscordWebRequest {
      *
      * @return a map representing query parameters, or {@code null} if none are defined
      */
-    @Nullable
-    public Multimap<String, Object> getQueryParams() {
+    public @Nullable Multimap<String, Object> getQueryParams() {
         return queryParams;
     }
 
@@ -124,18 +117,15 @@ public class DiscordWebRequest {
      *
      * @return a map representing HTTP headers, or {@code null} if none are defined
      */
-    @Nullable
-    public Map<String, Set<String>> getHeaders() {
+    public @Nullable Map<String, Set<String>> getHeaders() {
         return headers;
     }
 
-    @Nullable
-    public AuthorizationScheme getAuthorizationScheme() {
+    public @Nullable AuthorizationScheme getAuthorizationScheme() {
         return authorizationScheme;
     }
 
-    @Nullable
-    public String getAuthorizationValue() {
+    public @Nullable String getAuthorizationValue() {
         return authorizationValue;
     }
 

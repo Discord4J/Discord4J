@@ -39,8 +39,7 @@ public class StickersUpdateEvent extends GuildEvent {
     private final long guildId;
     private final Set<GuildSticker> stickers;
 
-    @Nullable
-    private final Set<GuildSticker> old;
+    private final @Nullable Set<GuildSticker> old;
 
     public StickersUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<GuildSticker> stickers, @Nullable Set<GuildSticker> old) {
         super(gateway, shardInfo);

@@ -65,8 +65,7 @@ public class MultipartRequest<T> {
      * @deprecated Use {@link #getJsonPayload()} instead.
      */
     @Deprecated
-    @Nullable
-    public MessageCreateRequest getCreateRequest() {
+    public @Nullable MessageCreateRequest getCreateRequest() {
         return (MessageCreateRequest) jsonPayload;
     }
 

@@ -78,8 +78,7 @@ public class LegacyGuildEmojiCreateSpec implements LegacyAuditSpec<GuildEmojiCre
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

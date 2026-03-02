@@ -44,8 +44,7 @@ public final class LegacyBanQuerySpec implements LegacyAuditSpec<Map<String, Obj
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return (String) request.get("reason");
     }
 

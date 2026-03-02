@@ -66,8 +66,7 @@ public class LegacyGuildEmojiEditSpec implements LegacyAuditSpec<GuildEmojiModif
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

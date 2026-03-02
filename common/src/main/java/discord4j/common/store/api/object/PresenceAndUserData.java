@@ -29,10 +29,8 @@ import java.util.Optional;
  */
 public class PresenceAndUserData {
 
-    @Nullable
-    private final PresenceData presenceData;
-    @Nullable
-    private final UserData userData;
+    private final @Nullable PresenceData presenceData;
+    private final @Nullable UserData userData;
 
     private PresenceAndUserData(@Nullable PresenceData presenceData, @Nullable UserData userData) {
         this.presenceData = presenceData;

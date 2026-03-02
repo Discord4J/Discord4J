@@ -123,8 +123,7 @@ public class LegacyVoiceChannelCreateSpec implements LegacyAuditSpec<ChannelCrea
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

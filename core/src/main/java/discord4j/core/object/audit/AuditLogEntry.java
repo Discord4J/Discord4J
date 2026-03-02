@@ -177,8 +177,7 @@ public class AuditLogEntry implements Entity {
      * @return The audit log part that this entry belongs to, or {@code null} if the entry originated from a
      * {@link AuditLogEntryCreateEvent}
      */
-    @Nullable
-    public AuditLogPart getParent() {
+    public @Nullable AuditLogPart getParent() {
         return auditLogPart;
     }
 

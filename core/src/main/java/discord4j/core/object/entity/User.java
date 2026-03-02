@@ -120,8 +120,7 @@ public class User implements Entity {
      * @deprecated This method will be removed once the system change is complete.
      */
     @Deprecated
-    @Nullable
-    public final String getDiscriminator() {
+    public final @Nullable String getDiscriminator() {
         return data.discriminator();
     }
 

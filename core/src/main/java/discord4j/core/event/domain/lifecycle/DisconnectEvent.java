@@ -31,8 +31,7 @@ import java.util.Optional;
  */
 public class DisconnectEvent extends GatewayLifecycleEvent {
     private final CloseStatus status;
-    @Nullable
-    private final Throwable cause;
+    private final @Nullable Throwable cause;
 
     public DisconnectEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, CloseStatus status, @Nullable Throwable cause) {
         super(gateway, shardInfo);

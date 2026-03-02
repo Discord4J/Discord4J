@@ -50,8 +50,7 @@ public class MemberChunkEvent extends GuildEvent {
     private final int chunkIndex;
     private final int chunkCount;
     private final List<Snowflake> notFound;
-    @Nullable
-    private final String nonce;
+    private final @Nullable String nonce;
 
     public MemberChunkEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<Member> members,
                             int chunkIndex, int chunkCount, List<Snowflake> notFound, @Nullable String nonce) {

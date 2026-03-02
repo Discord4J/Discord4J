@@ -52,26 +52,17 @@ public class MemberUpdateEvent extends GuildEvent {
     private final long guildId;
     private final long memberId;
 
-    @Nullable
-    private final Member old;
+    private final @Nullable Member old;
 
     private final Set<Long> currentRoleIds;
-    @Nullable
-    private final String currentNickname;
-    @Nullable
-    private final String currentAvatar;
-    @Nullable
-    private final String currentBanner;
-    @Nullable
-    private final String currentJoinedAt;
-    @Nullable
-    private final String currentPremiumSince;
-    @Nullable
-    private final Boolean currentPending;
-    @Nullable
-    private final String communicationDisabledUntil;
-    @Nullable
-    private final AvatarDecoration avatarDecoration;
+    private final @Nullable String currentNickname;
+    private final @Nullable String currentAvatar;
+    private final @Nullable String currentBanner;
+    private final @Nullable String currentJoinedAt;
+    private final @Nullable String currentPremiumSince;
+    private final @Nullable Boolean currentPending;
+    private final @Nullable String communicationDisabledUntil;
+    private final @Nullable AvatarDecoration avatarDecoration;
 
     public MemberUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long memberId,
                              @Nullable Member old, Set<Long> currentRoleIds, @Nullable String currentNickname,

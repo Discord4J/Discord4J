@@ -37,8 +37,7 @@ import java.util.Optional;
 public class ApplicationCommandUpdateEvent extends ApplicationCommandEvent {
 
     private final ApplicationCommand command;
-    @Nullable
-    private final Long guildId;
+    private final @Nullable Long guildId;
 
     public ApplicationCommandUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo,
                                          ApplicationCommand command, @Nullable Long guildId) {

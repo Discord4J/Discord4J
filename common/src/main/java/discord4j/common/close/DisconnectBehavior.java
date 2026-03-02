@@ -86,8 +86,7 @@ public class DisconnectBehavior {
      *
      * @return a {@link Throwable} representing the cause that triggers an action
      */
-    @Nullable
-    public Throwable getCause() {
+    public @Nullable Throwable getCause() {
         return cause;
     }
 

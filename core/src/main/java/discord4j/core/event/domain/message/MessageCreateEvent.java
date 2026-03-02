@@ -39,10 +39,8 @@ import java.util.Optional;
 public class MessageCreateEvent extends MessageEvent {
 
     private final Message message;
-    @Nullable
-    private final Long guildId;
-    @Nullable
-    private final Member member;
+    private final @Nullable Long guildId;
+    private final @Nullable Member member;
 
     public MessageCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Message message, @Nullable Long guildId, @Nullable Member member) {
         super(gateway, shardInfo);

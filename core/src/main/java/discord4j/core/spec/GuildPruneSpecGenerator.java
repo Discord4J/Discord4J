@@ -36,11 +36,9 @@ interface GuildPruneSpecGenerator extends AuditSpec<Multimap<String, Object>> {
 
     Integer days();
 
-    @Nullable
-    Set<Snowflake> roles();
+    @Nullable Set<Snowflake> roles();
 
-    @Nullable
-    Boolean computePruneCount();
+    @Nullable Boolean computePruneCount();
 
     @Override
     default Multimap<String, Object> asRequest() {

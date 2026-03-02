@@ -41,8 +41,7 @@ public class MemberLeaveEvent extends GuildEvent {
 
     private final User user;
     private final long guildId;
-    @Nullable
-    private final Member member;
+    private final @Nullable Member member;
 
     public MemberLeaveEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, User user, long guildId, @Nullable Member member) {
         super(gateway, shardInfo);

@@ -147,8 +147,7 @@ public class LegacyVoiceChannelEditSpec implements LegacyAuditSpec<ChannelModify
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

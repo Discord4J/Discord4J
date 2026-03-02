@@ -35,8 +35,7 @@ import java.util.Optional;
 public class RoleUpdateEvent extends RoleEvent {
 
     private final Role current;
-    @Nullable
-    private final Role old;
+    private final @Nullable Role old;
 
     public RoleUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Role current, @Nullable Role old) {
         super(gateway, shardInfo);

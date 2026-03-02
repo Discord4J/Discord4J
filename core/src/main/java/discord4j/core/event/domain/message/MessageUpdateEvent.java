@@ -44,15 +44,12 @@ public class MessageUpdateEvent extends MessageEvent {
 
     private final long messageId;
     private final long channelId;
-    @Nullable
-    private final Long guildId;
+    private final @Nullable Long guildId;
 
-    @Nullable
-    private final Message old;
+    private final @Nullable Message old;
 
     private final boolean contentChanged;
-    @Nullable
-    private final String currentContent;
+    private final @Nullable String currentContent;
     private final boolean embedsChanged;
     private final List<Embed> currentEmbeds;
 

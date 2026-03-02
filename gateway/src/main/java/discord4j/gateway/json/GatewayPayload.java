@@ -36,14 +36,11 @@ public class GatewayPayload<T extends PayloadData> {
     @JsonSerialize(converter = OpcodeConverter.class)
     private Opcode<T> op;
     @JsonProperty("d")
-    @Nullable
-    private T data;
+    private @Nullable T data;
     @JsonProperty("s")
-    @Nullable
-    private Integer sequence;
+    private @Nullable Integer sequence;
     @JsonProperty("t")
-    @Nullable
-    private String type;
+    private @Nullable String type;
 
     public GatewayPayload(Opcode<T> op, @Nullable T data, @Nullable Integer sequence, @Nullable String type) {
         this.op = op;
@@ -84,18 +81,15 @@ public class GatewayPayload<T extends PayloadData> {
         return op;
     }
 
-    @Nullable
-    public T getData() {
+    public @Nullable T getData() {
         return data;
     }
 
-    @Nullable
-    public Integer getSequence() {
+    public @Nullable Integer getSequence() {
         return sequence;
     }
 
-    @Nullable
-    public String getType() {
+    public @Nullable String getType() {
         return type;
     }
 

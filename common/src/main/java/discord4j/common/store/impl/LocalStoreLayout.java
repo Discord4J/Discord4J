@@ -940,8 +940,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return contentByChannel.computeIfAbsent(channelId, ChannelContent::new);
     }
 
-    @Nullable
-    private ChannelData saveChannel(long guildId, ChannelData channel) {
+    private @Nullable ChannelData saveChannel(long guildId, ChannelData channel) {
         long channelId = channel.id().asLong();
         GuildContent guildContent = computeGuildContent(guildId);
         guildContent.channelIds.add(channelId);
@@ -949,8 +948,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return channels.put(channelId, ImmutableChannelData.copyOf(channel).withGuildId(guildId));
     }
 
-    @Nullable
-    private RoleData saveRole(long guildId, RoleData role) {
+    private @Nullable RoleData saveRole(long guildId, RoleData role) {
         long roleId = role.id().asLong();
         GuildContent guildContent = computeGuildContent(guildId);
         guildContent.roleIds.add(roleId);
@@ -988,8 +986,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                 ImmutableMemberData::withUser));
     }
 
-    @Nullable
-    private ThreadMemberData saveThreadMember(ThreadMemberData threadMember) {
+    private @Nullable ThreadMemberData saveThreadMember(ThreadMemberData threadMember) {
         long threadId = threadMember.id().get().asLong();
         ChannelContent content = computeChannelContent(threadId);
         Long2 id = new Long2(threadId, threadMember.userId().get().asLong());
@@ -997,8 +994,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return threadMembers.put(id, ImmutableThreadMemberData.copyOf(threadMember));
     }
 
-    @Nullable
-    private PresenceAndUserData savePresence(long guildId, PresenceData presence) {
+    private @Nullable PresenceAndUserData savePresence(long guildId, PresenceData presence) {
         Long2 presenceId = new Long2(guildId, presence.user().id().asLong());
         ImmutableUserData oldUser = ifNonNullMap(users.get(presenceId.b), AtomicReference::get);
         return ifNonNullMap(computeUserRef(presenceId.b, presence, LocalStoreLayout::userFromPresence), userRef -> {
@@ -1020,8 +1016,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         });
     }
 
-    @Nullable
-    private static ImmutableUserData userFromPresence(PresenceData newPresence, @Nullable ImmutableUserData oldUser) {
+    private static @Nullable ImmutableUserData userFromPresence(PresenceData newPresence, @Nullable ImmutableUserData oldUser) {
         if (oldUser == null) return null;
         ImmutablePartialUserData partialUserData = ImmutablePartialUserData.copyOf(newPresence.user());
         return UserData.builder()
@@ -1037,8 +1032,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                 .build();
     }
 
-    @Nullable
-    private VoiceStateData saveOrRemoveVoiceState(long guildId, VoiceStateData voiceState) {
+    private @Nullable VoiceStateData saveOrRemoveVoiceState(long guildId, VoiceStateData voiceState) {
         Long2 voiceStateId = new Long2(guildId, voiceState.userId().asLong());
         GuildContent guildContent = computeGuildContent(guildId);
         VoiceStateData old = voiceStates.remove(voiceStateId);
@@ -1057,8 +1051,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return old;
     }
 
-    @Nullable
-    private MessageData deleteMessage(long channelId, long messageId) {
+    private @Nullable MessageData deleteMessage(long channelId, long messageId) {
         Long2 id = new Long2(channelId, messageId);
         ChannelContent channelContent = computeChannelContent(channelId);
         channelContent.messageIds.remove(id);
@@ -1095,8 +1088,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                 .collect(Collectors.toList())));
     }
 
-    @Nullable
-    private <T> AtomicReference<ImmutableUserData> computeUserRef(long userId, T newData,
+    private @Nullable <T> AtomicReference<ImmutableUserData> computeUserRef(long userId, T newData,
                                                                   BiFunction<T, ImmutableUserData, ImmutableUserData>
                                                                          userUpdater) {
         for (; ; ) {

@@ -294,8 +294,7 @@ public class LegacyGuildEditSpec implements LegacyAuditSpec<GuildModifyRequest> 
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

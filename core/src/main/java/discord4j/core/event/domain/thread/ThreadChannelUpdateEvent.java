@@ -32,8 +32,7 @@ import java.util.Optional;
 public class ThreadChannelUpdateEvent extends ThreadEvent {
 
     private final ThreadChannel channel;
-    @Nullable
-    private final ThreadChannel old;
+    private final @Nullable ThreadChannel old;
 
     public ThreadChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, ThreadChannel channel,
                                     @Nullable ThreadChannel old) {

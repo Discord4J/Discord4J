@@ -36,8 +36,7 @@ import java.util.stream.Collectors;
 public class LegacyGuildMemberEditSpec implements LegacyAuditSpec<GuildMemberModifyRequest> {
 
     private final ImmutableGuildMemberModifyRequest.Builder builder = GuildMemberModifyRequest.builder();
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Sets the new voice channel to move the targeted {@link Member}, if they are connected to voice. Requires the
@@ -105,8 +104,7 @@ public class LegacyGuildMemberEditSpec implements LegacyAuditSpec<GuildMemberMod
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

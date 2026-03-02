@@ -29,13 +29,10 @@ import java.util.Optional;
 public class IdentifyOptions {
 
     private final ShardInfo shardInfo;
-    @Nullable
-    private final StatusUpdate initialStatus;
-    @Nullable
-    private final IntentSet intents;
+    private final @Nullable StatusUpdate initialStatus;
+    private final @Nullable IntentSet intents;
     private final int largeThreshold;
-    @Nullable
-    private final SessionInfo resumeSession;
+    private final @Nullable SessionInfo resumeSession;
 
     /**
      * Create a new Gateway authentication policy.

@@ -38,10 +38,8 @@ public class RestResources {
     private final ReactorResources reactorResources;
     private final JacksonResources jacksonResources;
     private final Router router;
-    @Nullable
-    private final Long selfId;
-    @Nullable
-    private final AllowedMentions allowedMentions;
+    private final @Nullable Long selfId;
+    private final @Nullable AllowedMentions allowedMentions;
 
     public RestResources(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
                          Router router, @Nullable AllowedMentions allowedMentions) {

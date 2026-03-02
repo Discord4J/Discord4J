@@ -138,8 +138,7 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         return new GatewayPayload(Opcode.forRaw(op), data, s, t);
     }
 
-    @Nullable
-    private static Class<? extends PayloadData> getPayloadType(int op, String t) {
+    private static @Nullable Class<? extends PayloadData> getPayloadType(int op, String t) {
         if (op == Opcode.DISPATCH.getRawOp()) {
             if (!dispatchTypes.containsKey(t)) {
                 throw new IllegalArgumentException("Attempt to deserialize payload with unknown event type: " + t);

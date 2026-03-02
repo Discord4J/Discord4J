@@ -44,8 +44,7 @@ import java.util.Objects;
 public final class BucketKey {
 
     private final String uriTemplate;
-    @Nullable
-    private final String majorParam;
+    private final @Nullable String majorParam;
 
     private BucketKey(String uriTemplate, String completeUri) {
         this.uriTemplate = uriTemplate;

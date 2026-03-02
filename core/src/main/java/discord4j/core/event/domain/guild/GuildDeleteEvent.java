@@ -38,8 +38,7 @@ import java.util.Optional;
 public class GuildDeleteEvent extends GuildEvent {
 
     private final long guildId;
-    @Nullable
-    private final Guild guild;
+    private final @Nullable Guild guild;
     private final boolean unavailable;
 
     public GuildDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, @Nullable Guild guild, boolean unavailable) {

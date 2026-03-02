@@ -34,8 +34,7 @@ import java.util.Optional;
  */
 public class StageInstanceDeleteEvent extends Event {
 
-    @Nullable
-    private final StageInstance old;
+    private final @Nullable StageInstance old;
 
     public StageInstanceDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, final @Nullable StageInstance old) {
         super(gateway, shardInfo);

@@ -32,11 +32,9 @@ import java.util.function.Predicate;
 @Experimental
 public class RouteMatcher {
 
-    @Nullable
-    private final DiscordWebRequest request;
+    private final @Nullable DiscordWebRequest request;
 
-    @Nullable
-    private final Predicate<Map<String, String>> requestVariableMatcher;
+    private final @Nullable Predicate<Map<String, String>> requestVariableMatcher;
 
     private RouteMatcher(@Nullable DiscordWebRequest request) {
         this(request, null);

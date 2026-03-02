@@ -94,8 +94,7 @@ public class RouteUtils {
         return encoder.toString();
     }
 
-    @Nullable
-    public static String getMajorParam(String template, String complete) {
+    public static @Nullable String getMajorParam(String template, String complete) {
         // Currently, the only major parameters are channel.id, guild.id, and webhook.id
         if (template.contains("{channel.id}") || template.contains("{guild.id}") || template.contains("{webhook.id}")) {
             int start = template.indexOf('{');

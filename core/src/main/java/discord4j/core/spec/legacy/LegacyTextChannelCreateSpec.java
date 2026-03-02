@@ -132,8 +132,7 @@ public class LegacyTextChannelCreateSpec implements LegacyAuditSpec<ChannelCreat
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 
