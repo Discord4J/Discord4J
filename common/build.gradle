@@ -9,7 +9,9 @@ dependencies {
 
     api "com.discord4j:stores-api:$storesVersion"
 
-    testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_version"
+    testImplementation platform("org.junit:junit-bom:$junit_version")
+    testImplementation "org.junit.jupiter:junit-jupiter-engine"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher:"
     testImplementation "io.projectreactor:reactor-test"
     testImplementation "ch.qos.logback:logback-classic:$logback_version"
 }
@@ -25,7 +27,7 @@ gitProperties {
 jar {
     manifest {
         attributes 'Implementation-Title': base.archivesName.get(),
-                'Implementation-Version': archiveVersion,
-                'Automatic-Module-Name': 'discord4j.common'
+            'Implementation-Version': archiveVersion,
+            'Automatic-Module-Name': 'discord4j.common'
     }
 }

@@ -1,7 +1,9 @@
 dependencies {
     api project(':common')
 
-    testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_version"
+    testImplementation platform("org.junit:junit-bom:$junit_version")
+    testImplementation "org.junit.jupiter:junit-jupiter-engine"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher:"
     testImplementation "ch.qos.logback:logback-classic:$logback_version"
     testImplementation "io.projectreactor:reactor-test"
 }

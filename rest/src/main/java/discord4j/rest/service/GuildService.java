@@ -211,6 +211,12 @@ public class GuildService extends RestService {
             .bodyToMono(RoleData.class);
     }
 
+    public Mono<GuildRolesMemberCountResponseData> getGuildRoleMemberCounts(long guildId) {
+        return Routes.GUILD_ROLE_MEMBER_COUNTS_GET.newRequest(guildId)
+            .exchange(getRouter())
+            .bodyToMono(GuildRolesMemberCountResponseData.class);
+    }
+
     public Mono<RoleData> createGuildRole(long guildId, RoleCreateRequest request, @Nullable String reason) {
         return Routes.GUILD_ROLE_CREATE.newRequest(guildId)
             .body(request)

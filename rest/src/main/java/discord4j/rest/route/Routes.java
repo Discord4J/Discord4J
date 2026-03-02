@@ -752,6 +752,14 @@ public abstract class Routes {
     public static final Route GUILD_ROLE_GET = Route.get("/guilds/{guild.id}/roles/{role.id}");
 
     /**
+     * Returns a map of role IDs to the number of members with the role. Does not include the @everyone role.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#get-guild-role-member-counts">
+     * https://discord.com/developers/docs/resources/guild#get-guild-role-member-counts</a>
+     */
+    public static final Route GUILD_ROLE_MEMBER_COUNTS_GET = Route.get("/guilds/{guild.id}/roles/member-counts");
+
+    /**
      * Create a new role for the guild. Requires the 'MANAGE_ROLES' permission. Returns the new role object on success.
      * Fires a Guild Role Create Gateway event. All JSON params are optional.
      *

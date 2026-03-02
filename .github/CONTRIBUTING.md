@@ -18,13 +18,13 @@ Discord4J development is done over multiple branches, starting our oldest suppor
 changes forward. For this reason, it is likely that your PR should target that older maintenance branch instead of 
 `master`.
 
-As a general rule, if our stable releases are from `3.2.x` branch, changes should always target that. This allows
-us to avoid backports and instead merge changes forward applying all needed changes to newer branches up to `master`.
+As a general rule, if our stable releases are from `3.3.x` branch, changes should always target that. This allows
+us to avoid backports and instead merge changes forward applying all necessary changes to newer branches up to `master`.
 
-On the other hand, if the change only affects `3.3.x` line, changes should target that branch, or `master` if it's the 
+On the other hand, if the change only affects `3.2.x` line, changes should target that branch, or `master` if it's the 
 latest. For more information about our versions check our [docs](https://docs.discord4j.com/versions)
 
-For more background around this workflow check this issue: [Link](https://github.com/reactor/reactor-core/issues/1225).
+For more background around this workflow, check this issue: [Link](https://github.com/reactor/reactor-core/issues/1225).
 
 ### Wanted Changes
 * Bug Fixes
@@ -46,7 +46,7 @@ If you're unsure of whether a change is welcome, feel free to ask first in our [
 ### Style Requirements
 * Make sure your IDE is respecting the [.editorconfig](../.editorconfig)
 * This project uses space indents.
-* JavaDocs should be edited appropriately for your changes.
+* Javadocs should be edited appropriately for your changes.
 * All new files should have the same LGPL 3 boilerplate header found in existing files.
 
 Finally, thanks again for contributing to Discord4J. When your changes are accepted, make sure to ask about the 
