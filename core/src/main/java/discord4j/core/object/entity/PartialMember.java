@@ -477,7 +477,7 @@ public class PartialMember extends User {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member was kicked. If an
      * error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> kick(@Nullable final String reason) {
+    public Mono<Void> kick(final @Nullable String reason) {
         return getClient().getRestClient().getGuildService()
             .removeGuildMember(getGuildId().asLong(), getId().asLong(), reason);
     }
@@ -501,7 +501,7 @@ public class PartialMember extends User {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the role was added to this
      * member. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> addRole(final Snowflake roleId, @Nullable final String reason) {
+    public Mono<Void> addRole(final Snowflake roleId, final @Nullable String reason) {
         return getClient().getRestClient().getGuildService()
             .addGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason);
     }
@@ -525,7 +525,7 @@ public class PartialMember extends User {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the role was removed from
      * this member. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> removeRole(final Snowflake roleId, @Nullable final String reason) {
+    public Mono<Void> removeRole(final Snowflake roleId, final @Nullable String reason) {
         return getClient().getRestClient().getGuildService()
             .removeGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason);
     }
@@ -722,7 +722,7 @@ public class PartialMember extends User {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating this user was unbanned. If an
      * error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> unban(@Nullable final String reason) {
+    public Mono<Void> unban(final @Nullable String reason) {
         return getClient().getRestClient().getGuildService()
             .removeGuildBan(getGuildId().asLong(), getId().asLong(), reason);
     }
@@ -814,7 +814,7 @@ public class PartialMember extends User {
     }
 
     @Override
-    public boolean equals(@Nullable final Object object) {
+    public boolean equals(final @Nullable Object object) {
         if (object instanceof PartialMember) {
             PartialMember other = (PartialMember) object;
             return guildId == other.guildId && getId().equals(other.getId());

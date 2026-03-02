@@ -65,7 +65,7 @@ class BaseChannel implements Channel {
     }
 
     @Override
-    public final boolean equals(@Nullable final Object obj) {
+    public final boolean equals(final @Nullable Object obj) {
         if (this == obj) {
             return true;
         }

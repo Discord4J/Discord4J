@@ -108,7 +108,7 @@ public final class StageInstance implements Entity {
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         return EntityUtil.equals(this, obj);
     }
 

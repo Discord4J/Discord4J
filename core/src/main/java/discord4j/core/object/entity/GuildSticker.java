@@ -99,7 +99,7 @@ public final class GuildSticker extends Sticker {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the sticker has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> delete(@Nullable final String reason) {
+    public Mono<Void> delete(final @Nullable String reason) {
         return gateway.getRestClient().getStickerService()
             .deleteGuildSticker(getGuildId().asLong(), getId().asLong(), reason);
     }

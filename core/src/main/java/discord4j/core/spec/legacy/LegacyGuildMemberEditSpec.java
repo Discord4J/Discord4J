@@ -99,7 +99,7 @@ public class LegacyGuildMemberEditSpec implements LegacyAuditSpec<GuildMemberMod
     }
 
     @Override
-    public LegacyGuildMemberEditSpec setReason(@Nullable final String reason) {
+    public LegacyGuildMemberEditSpec setReason(final @Nullable String reason) {
         this.reason = reason;
         return this;
     }

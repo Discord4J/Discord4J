@@ -37,7 +37,7 @@ public class StageInstanceDeleteEvent extends Event {
     @Nullable
     private final StageInstance old;
 
-    public StageInstanceDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, @Nullable final StageInstance old) {
+    public StageInstanceDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, final @Nullable StageInstance old) {
         super(gateway, shardInfo);
         this.old = old;
     }

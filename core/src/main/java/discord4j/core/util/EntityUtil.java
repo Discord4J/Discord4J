@@ -88,7 +88,7 @@ public final class EntityUtil {
      * @param obj The object to compare to.
      * @return {@code true} if the two objects are equal, {@code false} otherwise.
      */
-    public static boolean equals(final Entity entity, @Nullable final Object obj) {
+    public static boolean equals(final Entity entity, final @Nullable Object obj) {
         return entity.getClass().isInstance(obj) && ((Entity) obj).getId().equals(entity.getId());
     }
 

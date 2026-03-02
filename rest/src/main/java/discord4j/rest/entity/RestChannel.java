@@ -422,7 +422,7 @@ public class RestChannel {
      * @see
      * <a href="https://discord.com/developers/docs/resources/channel#delete-channel-permission">Delete Channel Permission</a>
      */
-    public Mono<Void> deleteChannelPermission(Snowflake targetId, @Nullable final String reason) {
+    public Mono<Void> deleteChannelPermission(Snowflake targetId, final @Nullable String reason) {
         return restClient.getChannelService().deleteChannelPermission(id, targetId.asLong(), reason);
     }
 

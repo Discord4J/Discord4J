@@ -44,9 +44,9 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
     private final String value;
     private final @Nullable ApplicationCommandInteractionResolvedData resolved;
 
-    public ApplicationCommandInteractionOptionValue(final GatewayDiscordClient gateway, @Nullable final Long guildId,
+    public ApplicationCommandInteractionOptionValue(final GatewayDiscordClient gateway, final @Nullable Long guildId,
                                                     final int type, final String value,
-                                                    @Nullable final ApplicationCommandInteractionResolvedData resolved) {
+                                                    final @Nullable ApplicationCommandInteractionResolvedData resolved) {
         this.gateway = gateway;
         this.guildId = guildId;
         this.value = value;

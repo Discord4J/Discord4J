@@ -181,7 +181,7 @@ public class SoundboardSound implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the sound has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> delete(@Nullable final String reason) {
+    public Mono<Void> delete(final @Nullable String reason) {
         if (!this.getGuildId().isPresent()) {
             return Mono.error(new IllegalStateException("Cannot delete soundboard sound without guild id."));
         }

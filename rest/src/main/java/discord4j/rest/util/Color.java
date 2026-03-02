@@ -247,7 +247,7 @@ public final class Color {
                 '}';
     }
 
-    public boolean equals(@Nullable final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         return obj instanceof Color && ((Color) obj).getRGB() == getRGB();
     }
 

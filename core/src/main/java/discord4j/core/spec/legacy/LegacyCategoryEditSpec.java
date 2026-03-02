@@ -71,7 +71,7 @@ public class LegacyCategoryEditSpec implements LegacyAuditSpec<ChannelModifyRequ
     }
 
     @Override
-    public LegacyCategoryEditSpec setReason(@Nullable final String reason) {
+    public LegacyCategoryEditSpec setReason(final @Nullable String reason) {
         this.reason = reason;
         return this;
     }

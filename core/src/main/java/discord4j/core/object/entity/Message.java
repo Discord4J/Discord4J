@@ -835,7 +835,7 @@ public final class Message implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> delete(@Nullable final String reason) {
+    public Mono<Void> delete(final @Nullable String reason) {
         return gateway.getRestClient().getChannelService()
                 .deleteMessage(getChannelId().asLong(), getId().asLong(), reason);
     }
@@ -908,7 +908,7 @@ public final class Message implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the messaged was pinned. If
      * an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> pin(@Nullable final String reason) {
+    public Mono<Void> pin(final @Nullable String reason) {
         return gateway.getRestClient().getChannelService()
             .addPinnedMessage(getChannelId().asLong(), getId().asLong(), reason);
     }
@@ -931,7 +931,7 @@ public final class Message implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message was unpinned. If
      * an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> unpin(@Nullable final String reason) {
+    public Mono<Void> unpin(final @Nullable String reason) {
         return gateway.getRestClient().getChannelService()
             .deletePinnedMessage(getChannelId().asLong(), getId().asLong(), reason);
     }
@@ -1065,7 +1065,7 @@ public final class Message implements Entity {
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         return EntityUtil.equals(this, obj);
     }
 

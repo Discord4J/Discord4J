@@ -117,7 +117,7 @@ public class LegacyVoiceChannelCreateSpec implements LegacyAuditSpec<ChannelCrea
     }
 
     @Override
-    public LegacyVoiceChannelCreateSpec setReason(@Nullable final String reason) {
+    public LegacyVoiceChannelCreateSpec setReason(final @Nullable String reason) {
         this.reason = reason;
         return this;
     }

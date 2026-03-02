@@ -37,7 +37,7 @@ public class StageInstanceUpdateEvent extends Event {
     private final StageInstance current;
     private final @Nullable StageInstance old;
 
-    public StageInstanceUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, final StageInstance current, @Nullable final StageInstance old) {
+    public StageInstanceUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, final StageInstance current, final @Nullable StageInstance old) {
         super(gateway, shardInfo);
         this.current = current;
         this.old = old;

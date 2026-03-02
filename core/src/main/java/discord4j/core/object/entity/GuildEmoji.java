@@ -231,7 +231,7 @@ public final class GuildEmoji extends CustomEmoji implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the emoji has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> delete(@Nullable final String reason) {
+    public Mono<Void> delete(final @Nullable String reason) {
         return gateway.getRestClient().getEmojiService()
                 .deleteGuildEmoji(getGuildId().asLong(), getId().asLong(), reason);
     }
@@ -246,7 +246,7 @@ public final class GuildEmoji extends CustomEmoji implements Entity {
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         return EntityUtil.equals(this, obj);
     }
 

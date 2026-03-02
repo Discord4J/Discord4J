@@ -60,7 +60,7 @@ public class ApplicationCommandInteraction implements DiscordObject {
      */
     public ApplicationCommandInteraction(final GatewayDiscordClient gateway,
                                          final ApplicationCommandInteractionData data,
-                                         @Nullable final Long guildId) {
+                                         final @Nullable Long guildId) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
         this.guildId = guildId;

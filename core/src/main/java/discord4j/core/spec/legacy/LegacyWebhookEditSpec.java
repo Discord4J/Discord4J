@@ -69,7 +69,7 @@ public class LegacyWebhookEditSpec implements LegacyAuditSpec<WebhookModifyReque
     }
 
     @Override
-    public LegacyWebhookEditSpec setReason(@Nullable final String reason) {
+    public LegacyWebhookEditSpec setReason(final @Nullable String reason) {
         this.reason = reason;
         return this;
     }

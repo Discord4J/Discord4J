@@ -58,7 +58,7 @@ public class LegacyWebhookCreateSpec implements LegacyAuditSpec<WebhookCreateReq
     }
 
     @Override
-    public LegacyWebhookCreateSpec setReason(@Nullable final String reason) {
+    public LegacyWebhookCreateSpec setReason(final @Nullable String reason) {
         this.reason = reason;
         return this;
     }

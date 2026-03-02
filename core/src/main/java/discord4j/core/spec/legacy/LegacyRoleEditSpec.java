@@ -90,7 +90,7 @@ public class LegacyRoleEditSpec implements LegacyAuditSpec<RoleModifyRequest> {
     }
 
     @Override
-    public LegacyRoleEditSpec setReason(@Nullable final String reason) {
+    public LegacyRoleEditSpec setReason(final @Nullable String reason) {
         this.reason = reason;
         return this;
     }

@@ -72,7 +72,7 @@ public class LegacyGuildEmojiCreateSpec implements LegacyAuditSpec<GuildEmojiCre
     }
 
     @Override
-    public LegacyGuildEmojiCreateSpec setReason(@Nullable final String reason) {
+    public LegacyGuildEmojiCreateSpec setReason(final @Nullable String reason) {
         this.reason = reason;
         return this;
     }

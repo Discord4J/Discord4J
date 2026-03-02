@@ -117,7 +117,7 @@ public class LegacyInviteCreateSpec implements LegacyAuditSpec<InviteCreateReque
     }
 
     @Override
-    public LegacyInviteCreateSpec setReason(@Nullable final String reason) {
+    public LegacyInviteCreateSpec setReason(final @Nullable String reason) {
         this.reason = reason;
         return this;
     }

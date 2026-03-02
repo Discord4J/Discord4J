@@ -112,7 +112,7 @@ public class LegacyNewsChannelCreateSpec implements LegacyAuditSpec<ChannelCreat
     }
 
     @Override
-    public LegacyNewsChannelCreateSpec setReason(@Nullable final String reason) {
+    public LegacyNewsChannelCreateSpec setReason(final @Nullable String reason) {
         this.reason = reason;
         return this;
     }

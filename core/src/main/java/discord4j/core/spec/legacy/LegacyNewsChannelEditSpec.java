@@ -111,7 +111,7 @@ public class LegacyNewsChannelEditSpec implements LegacyAuditSpec<ChannelModifyR
     }
 
     @Override
-    public LegacyNewsChannelEditSpec setReason(@Nullable final String reason) {
+    public LegacyNewsChannelEditSpec setReason(final @Nullable String reason) {
         this.reason = reason;
         return this;
     }
