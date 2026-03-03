@@ -1004,6 +1004,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return threadMembers.put(id, ImmutableThreadMemberData.copyOf(threadMember));
     }
 
+    @SuppressWarnings("deprecation")
     private @Nullable PresenceAndUserData savePresence(long guildId, PresenceData presence) {
         Long2 presenceId = new Long2(guildId, presence.user().id().asLong());
         ImmutableUserData oldUser = ifNonNullMap(users.get(presenceId.b), AtomicReference::get);
@@ -1033,7 +1034,8 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                 .from(oldUser)
                 .globalName(or(Possible.flatOpt(partialUserData.globalName()), oldUser::globalName))
                 .username(partialUserData.usernameOrElse(oldUser.username()))
-                .discriminator(partialUserData.discriminatorOrElse(oldUser.discriminator()))
+                .discriminator(partialUserData.discriminator().toOptional()
+                        .orElse(oldUser.discriminator()))
                 .avatar(or(Possible.flatOpt(partialUserData.avatar()), oldUser::avatar))
                 .banner(Possible.of(or(Possible.flatOpt(partialUserData.banner()),
                         () -> Possible.flatOpt(oldUser.banner()))))
