@@ -25,6 +25,7 @@ import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.object.entity.poll.PollAnswer;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
@@ -41,10 +42,10 @@ public class PollVoteEvent extends Event {
     private final Snowflake userId;
     private final Snowflake channelId;
     private final Snowflake messageId;
-    private final Optional<Snowflake> guildId;
+    private final @Nullable Snowflake guildId;
     private final int answerId;
 
-    protected PollVoteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Snowflake userId, Snowflake channelId, Snowflake messageId, Optional<Snowflake> guildId, int answerId) {
+    protected PollVoteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Snowflake userId, Snowflake channelId, Snowflake messageId, @Nullable Snowflake guildId, int answerId) {
         super(gateway, shardInfo);
 
         this.userId = userId;
@@ -126,7 +127,7 @@ public class PollVoteEvent extends Event {
      * poll is in a DM.
      */
     public Optional<Snowflake> getGuildId() {
-        return this.guildId;
+        return Optional.ofNullable(this.guildId);
     }
 
     /**

@@ -31,7 +31,7 @@ import discord4j.gateway.ShardInfo;
 public class PollVoteAddEvent extends PollVoteEvent {
 
     public PollVoteAddEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, PollVoteAdd data) {
-        super(gateway, shardInfo, Snowflake.of(data.userId()), Snowflake.of(data.channelId()), Snowflake.of(data.messageId()), data.guildId().map(Snowflake::of), data.answerId());
+        super(gateway, shardInfo, Snowflake.of(data.userId()), Snowflake.of(data.channelId()), Snowflake.of(data.messageId()), data.guildId().map(Snowflake::of).orElse(null), data.answerId());
     }
 
 }
