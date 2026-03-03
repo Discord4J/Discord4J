@@ -22,6 +22,7 @@ import discord4j.discordjson.json.ReactionData;
 import discord4j.common.util.Snowflake;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -92,9 +93,10 @@ public abstract class Emoji {
      * @param name The name of the custom emoji OR the raw Unicode string for the emoji.
      * @param isAnimated Whether the emoji is animated OR false if the emoji is a Unicode emoji.
      * @return An emoji using the given information.
+     * @throws NullPointerException if the name and id are null, and the emoji is not a Unicode emoji
      */
-    public static Emoji of(@Nullable Long id, String name, boolean isAnimated) {
-        return id == null ? Emoji.unicode(name) : Emoji.custom(Snowflake.of(id), name, isAnimated);
+    public static Emoji of(@Nullable Long id, @Nullable String name, boolean isAnimated) {
+        return id == null ? Emoji.unicode(Objects.requireNonNull(name)) : Emoji.custom(Snowflake.of(id), name, isAnimated);
     }
 
     /**
