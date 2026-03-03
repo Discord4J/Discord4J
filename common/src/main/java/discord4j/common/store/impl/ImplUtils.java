@@ -40,9 +40,10 @@ class ImplUtils {
         }
     }
 
-    static @Nullable <T, R> R ifNonNullMap(@Nullable T val, Function<? super T, ? extends R> mapper) {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static @Nullable <T, R> R ifNonNullMap(@Nullable T val, Function<? super T, ?> mapper) {
         if (val != null) {
-            return mapper.apply(val);
+            return (R) ((Function) mapper).apply(val);
         }
         return null;
     }
