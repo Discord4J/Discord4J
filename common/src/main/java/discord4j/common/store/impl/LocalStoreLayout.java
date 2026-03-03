@@ -1017,7 +1017,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                             .avatar(Possible.of(u.avatar()))
                             .globalName(Possible.of(u.globalName()))
                             .username(u.username())
-                            .discriminator(u.discriminator())
+                            .discriminator(Possible.ofNullable(u.discriminator()))
                             .build())));
             if (oldPresence == null && oldUser == null) {
                 return null;
