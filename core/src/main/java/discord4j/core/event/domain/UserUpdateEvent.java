@@ -56,7 +56,7 @@ public class UserUpdateEvent extends Event {
      *
      * @return The old version of the {@link User} that has been updated in this event, if present.
      */
-    public Optional<@Nullable User> getOld() {
+    public Optional<User> getOld() {
         return Optional.ofNullable(old);
     }
 

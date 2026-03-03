@@ -81,7 +81,7 @@ public class ThreadMembersUpdateEvent extends ThreadEvent {
      *
      * @return a list of {@link ThreadMember} in the thread before the event, if present
      */
-    public Optional<@Nullable List<ThreadMember>> getOld() {
+    public Optional<List<ThreadMember>> getOld() {
         return Optional.ofNullable(old);
     }
 

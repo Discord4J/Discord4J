@@ -60,7 +60,7 @@ public class VoiceStateUpdateEvent extends Event {
      *
      * @return The old {@link VoiceState}, if present.
      */
-    public Optional<@Nullable VoiceState> getOld() {
+    public Optional<VoiceState> getOld() {
         return Optional.ofNullable(old);
     }
 

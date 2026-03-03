@@ -51,7 +51,7 @@ class SingleGatewayClientGroup implements GatewayClientGroupManager {
         client.set(null);
     }
 
-    private Optional<@Nullable GatewayClient> instance() {
+    private Optional<GatewayClient> instance() {
         return Optional.ofNullable(client.get());
     }
 

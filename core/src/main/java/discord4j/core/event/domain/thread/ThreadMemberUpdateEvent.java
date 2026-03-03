@@ -46,7 +46,7 @@ public class ThreadMemberUpdateEvent extends ThreadEvent {
         return member;
     }
 
-    public Optional<@Nullable ThreadMember> getOld() {
+    public Optional<ThreadMember> getOld() {
         return Optional.ofNullable(old);
     }
 

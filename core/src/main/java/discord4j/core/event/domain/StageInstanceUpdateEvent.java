@@ -57,7 +57,7 @@ public class StageInstanceUpdateEvent extends Event {
      *
      * @return The old {@link StageInstance}, if present
      */
-    public Optional<@Nullable StageInstance> getOld() {
+    public Optional<StageInstance> getOld() {
         return Optional.ofNullable(old);
     }
 
