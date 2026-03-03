@@ -83,6 +83,7 @@ class NoOpMap<K, V> implements ConcurrentMap<K, V> {
         return Collections.emptySet();
     }
 
+    @SuppressWarnings("NullableProblems")
     @Override
     public @Nullable V putIfAbsent(K key, V value) {
         return null;
@@ -93,11 +94,13 @@ class NoOpMap<K, V> implements ConcurrentMap<K, V> {
         return false;
     }
 
+    @SuppressWarnings("NullableProblems")
     @Override
     public boolean replace(K key, V oldValue, V newValue) {
-        return oldValue == null;
+        return false;
     }
 
+    @SuppressWarnings("NullableProblems")
     @Override
     public @Nullable V replace(K key, V value) {
         return null;
