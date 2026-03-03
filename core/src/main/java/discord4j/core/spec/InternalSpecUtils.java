@@ -35,8 +35,7 @@ final class InternalSpecUtils {
         return value == null ? Possible.absent() : Possible.of(value);
     }
 
-    @Nullable
-    static <T, R> R mapNullable(@Nullable T value, Function<? super T, ? extends R> mapper) {
+    static @Nullable <T, R> R mapNullable(@Nullable T value, Function<? super T, ? extends R> mapper) {
         return value != null ? mapper.apply(value) : null;
     }
 
