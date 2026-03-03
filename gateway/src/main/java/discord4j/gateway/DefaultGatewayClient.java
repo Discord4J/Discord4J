@@ -280,10 +280,10 @@ public class DefaultGatewayClient implements GatewayClient {
                     // Subscribe the handler's outbound exchange with our outbound signals
                     // routing completion signals to close the gateway
                     Mono<Void> senderFuture = outbound.asFlux()
-                            .doOnComplete(sessionHandler::close)
+                            .doOnComplete(Objects.requireNonNull(sessionHandler)::close)
                             .doOnNext(payload -> {
                                 if (Opcode.RECONNECT.equals(payload.getOp())) {
-                                    sessionHandler.error(
+                                    Objects.requireNonNull(sessionHandler).error(
                                             new GatewayException(context, "Reconnecting due to user action"));
                                 }
                             })
@@ -299,7 +299,7 @@ public class DefaultGatewayClient implements GatewayClient {
                                     if (missedAck.incrementAndGet() > maxMissedHeartbeatAck) {
                                         log.warn(format(context, "Missing heartbeat ACK for {} (tick: {}, seq: {})"),
                                                 Duration.ofNanos(delay), t, sequence.get());
-                                        sessionHandler.error(new GatewayException(context,
+                                        Objects.requireNonNull(sessionHandler).error(new GatewayException(context,
                                                 "Reconnecting due to zombie or failed connection"));
                                         return Mono.empty();
                                     }
@@ -317,7 +317,7 @@ public class DefaultGatewayClient implements GatewayClient {
                                     .maxFramePayloadLength(Integer.MAX_VALUE)
                                     .build())
                             .uri(buildGatewayUrl(gatewayUrl))
-                            .handle(sessionHandler::handle)
+                            .handle(Objects.requireNonNull(sessionHandler)::handle)
                             .contextWrite(LogUtil.clearContext())
                             .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2()))
                             .then();
@@ -333,12 +333,12 @@ public class DefaultGatewayClient implements GatewayClient {
                                 }
                             })
                             .doOnTerminate(heartbeatEmitter::stop)
-                            .doOnCancel(() -> sessionHandler.close())
+                            .doOnCancel(() -> Objects.requireNonNull(sessionHandler).close())
                             .then();
                 })
                 .contextWrite(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, identifyOptions.getShardInfo().getIndex()))
                 .retryWhen(retryFactory())
-                .then(Mono.defer(() -> disconnectNotifier.asMono().then()))
+                .then(Mono.defer(() -> Objects.requireNonNull(disconnectNotifier).asMono().then()))
                 .doOnSubscribe(s -> {
                     if (disconnectNotifier != null) {
                         throw new IllegalStateException("execute can only be subscribed once");
@@ -402,7 +402,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private <T extends PayloadData> Mono<Void> handlePayload(GatewayPayload<T> payload) {
         PayloadHandler<T> handler = (PayloadHandler<T>) handlerMap.get(payload.getOp());
         if (handler == null) {
-            log.warn(format(currentContext, "Handler not found from: {}"), payload);
+            log.warn(format(Objects.requireNonNull(currentContext), "Handler not found from: {}"), payload);
             return Mono.empty();
         }
         return Mono.defer(() -> handler.handle(payload))
@@ -423,13 +423,13 @@ public class DefaultGatewayClient implements GatewayClient {
     }
 
     private Mono<Void> handleHeartbeat(GatewayPayload<Heartbeat> payload) {
-        log.debug(format(currentContext, "Received heartbeat"));
+        log.debug(format(Objects.requireNonNull(currentContext), "Received heartbeat"));
         emissionStrategy.emitNext(outbound, GatewayPayload.heartbeat(ImmutableHeartbeat.of(sequence.get())));
         return Mono.empty();
     }
 
     private Mono<Void> handleReconnect(GatewayPayload<?> payload) {
-        sessionHandler.error(new ReconnectException(currentContext, "Reconnecting due to reconnect packet received"));
+        Objects.requireNonNull(sessionHandler).error(new ReconnectException(Objects.requireNonNull(currentContext), "Reconnecting due to reconnect packet received"));
         return Mono.empty();
     }
 
@@ -440,7 +440,7 @@ public class DefaultGatewayClient implements GatewayClient {
                     GatewayPayload.resume(ImmutableResume.of(token, sessionId.get(), sequence.get())));
         } else {
             resumeUrl.set(null);
-            sessionHandler.error(new InvalidSessionException(currentContext,
+            Objects.requireNonNull(sessionHandler).error(new InvalidSessionException(Objects.requireNonNull(currentContext),
                     "Reconnecting due to non-resumable session invalidation"));
         }
         return Mono.empty();
@@ -463,7 +463,7 @@ public class DefaultGatewayClient implements GatewayClient {
     }
 
     private void doResume(GatewayPayload<Hello> payload) {
-        log.debug(format(currentContext, "Resuming Gateway session from {}"), sequence.get());
+        log.debug(format(Objects.requireNonNull(currentContext), "Resuming Gateway session from {}"), sequence.get());
         emissionStrategy.emitNext(outbound,
                 GatewayPayload.resume(ImmutableResume.of(token, sessionId.get(), sequence.get())));
     }
@@ -480,14 +480,14 @@ public class DefaultGatewayClient implements GatewayClient {
                 .shard(identifyOptions.getShardInfo().asArray())
                 .presence(identifyOptions.getInitialStatus().map(Possible::of).orElse(Possible.absent()))
                 .build();
-        log.debug(format(currentContext, "Identifying to Gateway"), sequence.get());
+        log.debug(format(Objects.requireNonNull(currentContext), "Identifying to Gateway"), sequence.get());
         emissionStrategy.emitNext(outbound, GatewayPayload.identify(identify));
     }
 
     private Mono<Void> handleHeartbeatAck(GatewayPayload<?> context) {
         responseTime = lastAck.updateAndGet(x -> System.nanoTime()) - lastSent.get();
         missedAck.set(0);
-        log.debug(format(currentContext, "Heartbeat acknowledged after {}"), getResponseTime());
+        log.debug(format(Objects.requireNonNull(currentContext), "Heartbeat acknowledged after {}"), getResponseTime());
         return Mono.empty();
     }
 
@@ -561,12 +561,12 @@ public class DefaultGatewayClient implements GatewayClient {
                     if (behavior.getCause() != null) {
                         return Mono.just(new CloseException(closeStatus, ctx, behavior.getCause()))
                                 .flatMap(ex -> {
-                                    disconnectNotifier.emitError(ex, FAIL_FAST);
+                                    Objects.requireNonNull(disconnectNotifier).emitError(ex, FAIL_FAST);
                                     return Mono.error(ex);
                                 });
                     }
                     return Mono.just(closeStatus)
-                            .doOnNext(status -> disconnectNotifier.emitValue(closeStatus, FAIL_FAST));
+                            .doOnNext(status -> Objects.requireNonNull(disconnectNotifier).emitValue(closeStatus, FAIL_FAST));
                 case RETRY_ABRUPTLY:
                 case RETRY:
                 default:
@@ -582,11 +582,11 @@ public class DefaultGatewayClient implements GatewayClient {
                 return Mono.error(new IllegalStateException("Gateway client is not active!"));
             }
             if (allowResume) {
-                sessionHandler.close(DisconnectBehavior.stopAbruptly(null));
+                Objects.requireNonNull(sessionHandler).close(DisconnectBehavior.stopAbruptly(null));
             } else {
-                sessionHandler.close(DisconnectBehavior.stop(null));
+                Objects.requireNonNull(sessionHandler).close(DisconnectBehavior.stop(null));
             }
-            return disconnectNotifier.asMono();
+            return Objects.requireNonNull(disconnectNotifier).asMono();
         });
     }
 

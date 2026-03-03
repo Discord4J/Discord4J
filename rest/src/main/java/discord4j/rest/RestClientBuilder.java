@@ -43,19 +43,13 @@ public class RestClientBuilder<C, O extends RouterOptions> {
     protected final Function<RouterOptions, O> optionsModifier;
 
     protected String token;
-    @Nullable
-    protected ReactorResources reactorResources;
-    @Nullable
-    protected JacksonResources jacksonResources;
-    @Nullable
-    protected ExchangeStrategies exchangeStrategies;
+    protected @Nullable ReactorResources reactorResources;
+    protected @Nullable JacksonResources jacksonResources;
+    protected @Nullable ExchangeStrategies exchangeStrategies;
     protected List<ResponseFunction> responseTransformers = new ArrayList<>();
-    @Nullable
-    protected GlobalRateLimiter globalRateLimiter;
-    @Nullable
-    protected RequestQueueFactory requestQueueFactory;
-    @Nullable
-    protected AllowedMentions allowedMentions;
+    protected @Nullable GlobalRateLimiter globalRateLimiter;
+    protected @Nullable RequestQueueFactory requestQueueFactory;
+    protected @Nullable AllowedMentions allowedMentions;
 
     /**
      * Initialize a new builder with the given token.
@@ -260,7 +254,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         O options = buildOptions(reactor, jackson);
         Router router = routerFactory.apply(options);
         Config config = new Config(token, reactor, jackson, initExchangeStrategies(jackson),
-                Collections.unmodifiableList(responseTransformers), globalRateLimiter, router, allowedMentions);
+                Collections.unmodifiableList(responseTransformers), Objects.requireNonNull(globalRateLimiter), router, allowedMentions);
         return clientFactory.apply(config);
     }
 
@@ -314,8 +308,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         private final List<ResponseFunction> responseTransformers;
         private final GlobalRateLimiter globalRateLimiter;
         private final Router router;
-        @Nullable
-        private final AllowedMentions allowedMentions;
+        private @Nullable final AllowedMentions allowedMentions;
 
         public Config(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
                       ExchangeStrategies exchangeStrategies, List<ResponseFunction> responseTransformers,
