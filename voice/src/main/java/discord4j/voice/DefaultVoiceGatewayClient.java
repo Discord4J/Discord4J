@@ -281,7 +281,7 @@ public class DefaultVoiceGatewayClient {
                                                             }),
                                                             t -> {
                                                                 voiceConnectionSink.error(t);
-                                                                sessionHandler.close(DisconnectBehavior.stop(t));
+                                                                Objects.requireNonNull(sessionHandler).close(DisconnectBehavior.stop(t));
                                                             },
                                                             () -> log.debug(format(context, "Voice socket setup " +
                                                                     "complete"))));
