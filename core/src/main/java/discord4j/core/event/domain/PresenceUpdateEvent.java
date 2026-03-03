@@ -81,7 +81,7 @@ public class PresenceUpdateEvent extends Event {
      *
      * @return The old version of the {@link User}, if present.
      */
-    public Optional<@Nullable User> getOldUser() {
+    public Optional<User> getOldUser() {
         return Optional.ofNullable(oldUser);
     }
 
@@ -171,7 +171,7 @@ public class PresenceUpdateEvent extends Event {
      *
      * @return The old version of the {@link Presence}, if present.
      */
-    public Optional<@Nullable Presence> getOld() {
+    public Optional<Presence> getOld() {
         return Optional.ofNullable(old);
     }
 
