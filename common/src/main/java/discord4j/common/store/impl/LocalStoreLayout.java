@@ -79,7 +79,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     private final ConcurrentMap<Long, GuildScheduledEventData> scheduledEvents = new ConcurrentHashMap<>();
     private final ConcurrentMap<Long2, List<Long>> scheduledEventsUsers = new ConcurrentHashMap<>();
 
-    private final ConcurrentMap<Long, AtomicReference<ImmutableUserData>> users =
+    private final ConcurrentMap<Long, @Nullable AtomicReference<ImmutableUserData>> users =
             StorageBackend.caffeine(Caffeine::weakValues).newMap();
 
     private final ConcurrentMap<Long2, ImmutableVoiceStateData> voiceStates =
@@ -1064,7 +1064,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     }
 
     private ImmutableMessageData addReaction(ImmutableMessageData message, MessageReactionAdd dispatch) {
-        boolean me = dispatch.userId().asLong() == selfUser.get().id().asLong();
+        boolean me = dispatch.userId().asLong() == Objects.requireNonNull(selfUser).get().id().asLong();
         List<ReactionData> reactions = message.reactions().toOptional().orElse(Collections.emptyList());
         if (reactions.stream().anyMatch(EmojiKey.predicateEquals(dispatch.emoji()))) {
             return message.withReactions(Possible.of(reactions.stream()
@@ -1081,7 +1081,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     }
 
     private ImmutableMessageData removeReaction(ImmutableMessageData message, MessageReactionRemove dispatch) {
-        boolean me = dispatch.userId().asLong() == selfUser.get().id().asLong();
+        boolean me = dispatch.userId().asLong() == Objects.requireNonNull(selfUser).get().id().asLong();
         List<ReactionData> reactions = message.reactions().toOptional().orElse(Collections.emptyList());
         return message.withReactions(Possible.of(reactions.stream()
                 .map(r -> EmojiKey.predicateEquals(dispatch.emoji()).test(r) ? ImmutableReactionData.builder()
