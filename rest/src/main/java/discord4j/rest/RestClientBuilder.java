@@ -254,7 +254,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         O options = buildOptions(reactor, jackson);
         Router router = routerFactory.apply(options);
         Config config = new Config(token, reactor, jackson, initExchangeStrategies(jackson),
-                Collections.unmodifiableList(responseTransformers), Objects.requireNonNull(globalRateLimiter), router, allowedMentions);
+                Collections.unmodifiableList(responseTransformers), initGlobalRateLimiter(reactor), router, allowedMentions);
         return clientFactory.apply(config);
     }
 
