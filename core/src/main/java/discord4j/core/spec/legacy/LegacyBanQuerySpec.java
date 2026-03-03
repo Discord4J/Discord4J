@@ -24,7 +24,7 @@ import java.util.Map;
 /** A spec used to configure a user ban. */
 public final class LegacyBanQuerySpec implements LegacyAuditSpec<Map<String, Object>> {
 
-    private final Map<String, @Nullable Object> request = new HashMap<>(2);
+    private final Map<String, Object> request = new HashMap<>(2);
 
     /**
      * Sets the number of days to delete messages for (0-7).
@@ -39,6 +39,10 @@ public final class LegacyBanQuerySpec implements LegacyAuditSpec<Map<String, Obj
 
     @Override
     public LegacyBanQuerySpec setReason(final @Nullable String reason) {
+        if (reason == null) {
+            request.remove("reason");
+            return this;
+        }
         request.put("reason", reason);
         return this;
     }
@@ -49,7 +53,7 @@ public final class LegacyBanQuerySpec implements LegacyAuditSpec<Map<String, Obj
     }
 
     @Override
-    public Map<String, @Nullable Object> asRequest() {
+    public Map<String, Object> asRequest() {
         return request;
     }
 }
