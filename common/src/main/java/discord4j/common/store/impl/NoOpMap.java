@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 class NoOpMap<K, V> implements ConcurrentMap<K, V> {
+
     @Override
     public int size() {
         return 0;
