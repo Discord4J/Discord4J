@@ -89,7 +89,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             new ConcurrentHashMap<>();
 
     private final Set<Integer> shardsConnected = new HashSet<>();
-    private volatile AtomicReference<ImmutableUserData> selfUser;
+    private volatile @Nullable AtomicReference<ImmutableUserData> selfUser;
     private volatile int shardCount;
 
     private LocalStoreLayout(StorageConfig config) {

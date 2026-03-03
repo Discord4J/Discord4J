@@ -18,6 +18,7 @@
 package discord4j.voice;
 
 import discord4j.common.ReactorResources;
+import org.jspecify.annotations.Nullable;
 import reactor.core.scheduler.Scheduler;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.udp.UdpClient;
@@ -174,9 +175,9 @@ public class VoiceReactorResources extends ReactorResources {
      */
     public static class Builder extends ReactorResources.Builder {
 
-        private UdpClient udpClient;
-        private Scheduler sendTaskScheduler;
-        private Scheduler receiveTaskScheduler;
+        private @Nullable UdpClient udpClient;
+        private @Nullable Scheduler sendTaskScheduler;
+        private @Nullable Scheduler receiveTaskScheduler;
 
         protected Builder() {
         }
