@@ -206,7 +206,7 @@ public class IdentifyOptions {
      *
      * @return the presence used to identify bots
      */
-    public Optional<@Nullable StatusUpdate> getInitialStatus() {
+    public Optional<StatusUpdate> getInitialStatus() {
         return Optional.ofNullable(initialStatus);
     }
 
@@ -215,7 +215,7 @@ public class IdentifyOptions {
      *
      * @return {@code Possible.absent()} when no intents are set or the raw intent value which should be subscribed
      */
-    public Optional<@Nullable IntentSet> getIntents() {
+    public Optional<IntentSet> getIntents() {
         return Optional.ofNullable(intents);
     }
 
@@ -234,7 +234,7 @@ public class IdentifyOptions {
      *
      * @return the session details for resumption
      */
-    public Optional<@Nullable SessionInfo> getResumeSession() {
+    public Optional<SessionInfo> getResumeSession() {
         return Optional.ofNullable(resumeSession);
     }
 
