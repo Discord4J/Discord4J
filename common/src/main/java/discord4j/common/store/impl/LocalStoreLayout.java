@@ -708,11 +708,17 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<Set<MessageData>> onMessageDeleteBulk(int shardIndex, MessageDeleteBulk dispatch) {
-        return Mono.fromCallable(() -> dispatch.ids().stream()
-                .map(Id::asLong)
-                .map(messageId -> deleteMessage(dispatch.channelId().asLong(), messageId))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet()));
+        final long channelId = dispatch.channelId().asLong();
+        return Mono.fromCallable(() -> {
+            Set<MessageData> deletedMessages = new HashSet<>();
+            for (Id id : dispatch.ids()) {
+                MessageData deleted = deleteMessage(channelId, id.asLong());
+                if (deleted != null) {
+                    deletedMessages.add(deleted);
+                }
+            }
+            return deletedMessages;
+        });
     }
 
     @Override
@@ -1056,8 +1062,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return old;
     }
 
-    @Nullable
-    private MessageData deleteMessage(long channelId, long messageId) {
+    private @Nullable MessageData deleteMessage(long channelId, long messageId) {
         Long2 id = new Long2(channelId, messageId);
         ChannelContent channelContent = computeChannelContent(channelId);
         channelContent.messageIds.remove(id);
