@@ -79,7 +79,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     private final ConcurrentMap<Long, GuildScheduledEventData> scheduledEvents = new ConcurrentHashMap<>();
     private final ConcurrentMap<Long2, List<Long>> scheduledEventsUsers = new ConcurrentHashMap<>();
 
-    private final ConcurrentMap<Long, @Nullable AtomicReference<ImmutableUserData>> users =
+    private final ConcurrentMap<Long, AtomicReference<ImmutableUserData>> users =
             StorageBackend.caffeine(Caffeine::weakValues).newMap();
 
     private final ConcurrentMap<Long2, ImmutableVoiceStateData> voiceStates =
@@ -799,10 +799,11 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     public Mono<Void> onReady(Ready dispatch) {
         return Mono.fromRunnable(() -> {
             int[] shardInfo = dispatch.shard().toOptional().orElseGet(() -> new int[]{0, 1});
-            if (selfUser == null) {
+            if (this.selfUser == null) {
                 ImmutableUserData userData = ImmutableUserData.copyOf(dispatch.user());
-                selfUser = new AtomicReference<>(userData);
-                users.put(userData.id().asLong(), selfUser);
+                AtomicReference<ImmutableUserData> immutableUserDataAtomicReference = new AtomicReference<>(userData);
+                this.selfUser = immutableUserDataAtomicReference;
+                users.put(userData.id().asLong(), immutableUserDataAtomicReference);
             }
             if (shardCount == 0) {
                 shardCount = shardInfo[1];
