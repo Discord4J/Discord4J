@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package discord4j.core.spec;
 
 import discord4j.core.GatewayDiscordClient;
@@ -23,6 +22,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.discordjson.json.GuildCreateRequest;
 import discord4j.discordjson.json.PartialChannelCreateRequest;
 import discord4j.discordjson.json.RoleCreateRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import org.immutables.value.Value;
 import org.jspecify.annotations.Nullable;
@@ -34,8 +34,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static discord4j.core.spec.InternalSpecUtils.mapNullable;
-
 @Value.Immutable
 interface GuildCreateSpecGenerator extends Spec<GuildCreateRequest> {
 
@@ -43,8 +41,7 @@ interface GuildCreateSpecGenerator extends Spec<GuildCreateRequest> {
 
     Region region();
 
-    @Nullable
-    Image icon();
+    @Nullable Image icon();
 
     @Value.Default
     default Guild.VerificationLevel verificationLevel() {
@@ -77,25 +74,25 @@ interface GuildCreateSpecGenerator extends Spec<GuildCreateRequest> {
     @Override
     default GuildCreateRequest asRequest() {
         List<RoleCreateRequest> roles = roles().stream()
-                .map(RoleCreateSpec::asRequest)
-                .collect(Collectors.toCollection(ArrayList::new));
+            .map(RoleCreateSpec::asRequest)
+            .collect(Collectors.toCollection(ArrayList::new));
         RoleCreateSpec everyoneRole = everyoneRole();
         if (everyoneRole != null) {
             roles.add(0, everyoneRole.asRequest());
         }
         List<PartialChannelCreateRequest> channels = channels().stream()
-                .map(GuildCreateFields.PartialChannel::asRequest)
-                .collect(Collectors.toList());
+            .map(GuildCreateFields.PartialChannel::asRequest)
+            .collect(Collectors.toList());
         return GuildCreateRequest.builder()
-                .name(name())
-                .region(region().getId())
-                .icon(mapNullable(icon(), Image::getDataUri))
-                .verificationLevel(verificationLevel().getValue())
-                .defaultMessageNotifications(defaultMessageNotificationLevel().getValue())
-                .explicitContentFilter(explicitContentFilter().getValue())
-                .roles(roles)
-                .channels(channels)
-                .build();
+            .name(name())
+            .region(region().getId())
+            .icon(Possible.ofNullable(icon()).map(Image::getDataUri))
+            .verificationLevel(verificationLevel().getValue())
+            .defaultMessageNotifications(defaultMessageNotificationLevel().getValue())
+            .explicitContentFilter(explicitContentFilter().getValue())
+            .roles(roles)
+            .channels(channels)
+            .build();
     }
 }
 
