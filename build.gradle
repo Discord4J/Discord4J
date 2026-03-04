@@ -102,7 +102,8 @@ allprojects {
                 "https://www.javadocs.dev/io.projectreactor/reactor-core/3.8.3",
                 "https://www.javadocs.dev/io.projectreactor.netty/reactor-netty/1.3.3",
                 "https://www.javadocs.dev/io.projectreactor.addons/reactor-extra/3.6.0",
-                "https://netty.io/4.2/api/"
+                "https://netty.io/4.2/api/",
+                "https://jspecify.dev/docs/api/"
             ]
         }
         if (JavaVersion.current() == JavaVersion.VERSION_1_9) {
