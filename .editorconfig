@@ -7,6 +7,24 @@ end_of_line = lf
 charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
+ij_continuation_indent_size = 8
+
+[*.java]
+ij_java_align_multiline_for = false
+ij_java_align_multiline_resources = false
+ij_java_blank_lines_after_class_header = 1
+ij_java_if_brace_force = always
+ij_java_keep_first_column_comment = false
+ij_java_keep_simple_classes_in_one_line = true
+ij_java_keep_simple_lambdas_in_one_line = true
+ij_java_keep_simple_methods_in_one_line = true
+ij_java_keep_control_statement_in_one_line = false
+ij_java_variable_annotation_wrap = split_into_lines
+ij_java_while_brace_force = if_multiline
+ij_java_wrap_first_method_in_call_chain = true
+ij_java_wrap_long_lines = true
+ij_wrap_on_typing = false
+
 
 [*.md]
 trim_trailing_whitespace = false
