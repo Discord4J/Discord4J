@@ -20,7 +20,7 @@ import discord4j.rest.http.client.AuthorizationScheme;
 import discord4j.rest.route.Route;
 import discord4j.rest.util.Multimap;
 import discord4j.rest.util.RouteUtils;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -104,8 +104,7 @@ public class DiscordWebRequest {
      *
      * @return the body of this request, or {@code null} if this request carries no HTTP body
      */
-    @Nullable
-    public Object getBody() {
+    public @Nullable Object getBody() {
         return body;
     }
 
@@ -114,8 +113,7 @@ public class DiscordWebRequest {
      *
      * @return a map representing query parameters, or {@code null} if none are defined
      */
-    @Nullable
-    public Multimap<String, Object> getQueryParams() {
+    public @Nullable Multimap<String, Object> getQueryParams() {
         return queryParams;
     }
 
@@ -124,18 +122,15 @@ public class DiscordWebRequest {
      *
      * @return a map representing HTTP headers, or {@code null} if none are defined
      */
-    @Nullable
-    public Map<String, Set<String>> getHeaders() {
+    public @Nullable Map<String, Set<String>> getHeaders() {
         return headers;
     }
 
-    @Nullable
-    public AuthorizationScheme getAuthorizationScheme() {
+    public @Nullable AuthorizationScheme getAuthorizationScheme() {
         return authorizationScheme;
     }
 
-    @Nullable
-    public String getAuthorizationValue() {
+    public @Nullable String getAuthorizationValue() {
         return authorizationValue;
     }
 

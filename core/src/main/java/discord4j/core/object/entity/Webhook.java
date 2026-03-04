@@ -28,9 +28,10 @@ import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.WebhookData;
 import discord4j.discordjson.json.WebhookPartialChannelData;
 import discord4j.discordjson.json.WebhookPartialGuildData;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -97,7 +98,7 @@ public final class Webhook implements Entity {
      * @return The ID of the guild this webhook is associated to.
      */
     public Snowflake getGuildId() {
-        return Snowflake.of(data.guildId().get().get()); // TODO FIXME: really Possible?
+        return Snowflake.of(data.guildId().get().orElseThrow(() -> new NoSuchElementException("No value present"))); // TODO FIXME: really Possible?
     }
 
     /**
@@ -127,7 +128,7 @@ public final class Webhook implements Entity {
      * @return The ID of the channel this webhook is associated to.
      */
     public Snowflake getChannelId() {
-        return Snowflake.of(data.channelId().get());
+        return Snowflake.of(data.channelId().orElseThrow(() -> new NoSuchElementException("No value present")));
     }
 
     /**
@@ -259,7 +260,7 @@ public final class Webhook implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the webhook has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> delete(@Nullable final String reason) {
+    public Mono<Void> delete(final @Nullable String reason) {
         return gateway.getRestClient().getWebhookService()
                 .deleteWebhook(getId().asLong(), reason);
     }
@@ -738,7 +739,7 @@ public final class Webhook implements Entity {
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         return EntityUtil.equals(this, obj);
     }
 

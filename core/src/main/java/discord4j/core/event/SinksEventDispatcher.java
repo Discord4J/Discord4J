@@ -21,6 +21,7 @@ import discord4j.common.LogUtil;
 import discord4j.common.annotations.Experimental;
 import discord4j.common.sinks.EmissionStrategy;
 import discord4j.core.event.domain.Event;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
@@ -67,7 +68,7 @@ public class SinksEventDispatcher implements EventDispatcher {
 
     @Override
     public <E extends Event> Flux<E> on(Class<E> eventClass) {
-        AtomicReference<Subscription> subscription = new AtomicReference<>();
+        AtomicReference<@Nullable Subscription> subscription = new AtomicReference<>();
         return events.asFlux()
                 .publishOn(eventScheduler)
                 .ofType(eventClass)
@@ -88,7 +89,7 @@ public class SinksEventDispatcher implements EventDispatcher {
                 .doFinally(signal -> {
                     if (log.isDebugEnabled()) {
                         log.debug("Subscription {} to {} disposed due to {}",
-                                Integer.toHexString(subscription.get().hashCode()), eventClass.getSimpleName(), signal);
+                                Integer.toHexString(Objects.requireNonNull(subscription.get()).hashCode()), eventClass.getSimpleName(), signal);
                     }
                 });
     }
@@ -108,9 +109,9 @@ public class SinksEventDispatcher implements EventDispatcher {
      */
     public static class Builder {
 
-        protected Function<Sinks.ManySpec, Sinks.Many<Event>> eventSinkFactory;
-        protected EmissionStrategy emissionStrategy;
-        protected Scheduler eventScheduler;
+        protected @Nullable Function<Sinks.ManySpec, Sinks.Many<Event>> eventSinkFactory;
+        protected @Nullable EmissionStrategy emissionStrategy;
+        protected @Nullable Scheduler eventScheduler;
 
         protected Builder() {
         }

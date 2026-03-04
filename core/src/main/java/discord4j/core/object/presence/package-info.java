@@ -17,7 +17,7 @@
 /**
  * Classes supporting presence functionality.
  */
-@NonNullApi
+@NullMarked
 package discord4j.core.object.presence;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

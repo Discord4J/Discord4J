@@ -18,6 +18,7 @@ package discord4j.core.spec.legacy;
 
 import discord4j.discordjson.json.TemplateCreateRequest;
 import discord4j.discordjson.possible.Possible;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -28,7 +29,7 @@ import java.util.Optional;
  */
 public class LegacyGuildTemplateCreateSpec implements LegacySpec<TemplateCreateRequest> {
 
-    private String name = null;
+    private @Nullable String name = null;
     private Possible<Optional<String>> description = Possible.absent();
 
     /**
@@ -55,6 +56,9 @@ public class LegacyGuildTemplateCreateSpec implements LegacySpec<TemplateCreateR
 
     @Override
     public TemplateCreateRequest asRequest() {
+        if (name == null) {
+            throw new IllegalStateException("Name must be set.");
+        }
         return TemplateCreateRequest.builder()
             .name(name)
             .description(description)

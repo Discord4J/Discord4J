@@ -18,4 +18,7 @@
 /**
  * Classes related to the Gateway Intents feature to selectively disable some events.
  */
+@NullMarked
 package discord4j.gateway.intent;
+
+import org.jspecify.annotations.NullMarked;

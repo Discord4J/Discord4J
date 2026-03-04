@@ -28,9 +28,9 @@ import discord4j.discordjson.Id;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -89,7 +89,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             new ConcurrentHashMap<>();
 
     private final Set<Integer> shardsConnected = new HashSet<>();
-    private volatile AtomicReference<ImmutableUserData> selfUser;
+    private volatile @Nullable AtomicReference<ImmutableUserData> selfUser;
     private volatile int shardCount;
 
     private LocalStoreLayout(StorageConfig config) {
@@ -708,11 +708,17 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<Set<MessageData>> onMessageDeleteBulk(int shardIndex, MessageDeleteBulk dispatch) {
-        return Mono.fromCallable(() -> dispatch.ids().stream()
-                .map(Id::asLong)
-                .map(messageId -> deleteMessage(dispatch.channelId().asLong(), messageId))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet()));
+        final long channelId = dispatch.channelId().asLong();
+        return Mono.fromCallable(() -> {
+            Set<MessageData> deletedMessages = new HashSet<>();
+            for (Id id : dispatch.ids()) {
+                MessageData deleted = deleteMessage(channelId, id.asLong());
+                if (deleted != null) {
+                    deletedMessages.add(deleted);
+                }
+            }
+            return deletedMessages;
+        });
     }
 
     @Override
@@ -799,10 +805,11 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     public Mono<Void> onReady(Ready dispatch) {
         return Mono.fromRunnable(() -> {
             int[] shardInfo = dispatch.shard().toOptional().orElseGet(() -> new int[]{0, 1});
-            if (selfUser == null) {
+            if (this.selfUser == null) {
                 ImmutableUserData userData = ImmutableUserData.copyOf(dispatch.user());
-                selfUser = new AtomicReference<>(userData);
-                users.put(userData.id().asLong(), selfUser);
+                AtomicReference<ImmutableUserData> immutableUserDataAtomicReference = new AtomicReference<>(userData);
+                this.selfUser = immutableUserDataAtomicReference;
+                users.put(userData.id().asLong(), immutableUserDataAtomicReference);
             }
             if (shardCount == 0) {
                 shardCount = shardInfo[1];
@@ -997,8 +1004,8 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return threadMembers.put(id, ImmutableThreadMemberData.copyOf(threadMember));
     }
 
-    @Nullable
-    private PresenceAndUserData savePresence(long guildId, PresenceData presence) {
+    @SuppressWarnings("deprecation")
+    private @Nullable PresenceAndUserData savePresence(long guildId, PresenceData presence) {
         Long2 presenceId = new Long2(guildId, presence.user().id().asLong());
         ImmutableUserData oldUser = ifNonNullMap(users.get(presenceId.b), AtomicReference::get);
         return ifNonNullMap(computeUserRef(presenceId.b, presence, LocalStoreLayout::userFromPresence), userRef -> {
@@ -1011,7 +1018,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                             .avatar(Possible.of(u.avatar()))
                             .globalName(Possible.of(u.globalName()))
                             .username(u.username())
-                            .discriminator(u.discriminator())
+                            .discriminator(Possible.ofNullable(u.discriminator()))
                             .build())));
             if (oldPresence == null && oldUser == null) {
                 return null;
@@ -1020,15 +1027,15 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         });
     }
 
-    @Nullable
-    private static ImmutableUserData userFromPresence(PresenceData newPresence, @Nullable ImmutableUserData oldUser) {
+    private static @Nullable ImmutableUserData userFromPresence(PresenceData newPresence, @Nullable ImmutableUserData oldUser) {
         if (oldUser == null) return null;
         ImmutablePartialUserData partialUserData = ImmutablePartialUserData.copyOf(newPresence.user());
         return UserData.builder()
                 .from(oldUser)
                 .globalName(or(Possible.flatOpt(partialUserData.globalName()), oldUser::globalName))
                 .username(partialUserData.usernameOrElse(oldUser.username()))
-                .discriminator(partialUserData.discriminatorOrElse(oldUser.discriminator()))
+                .discriminator(partialUserData.discriminator().toOptional()
+                        .orElse(oldUser.discriminator()))
                 .avatar(or(Possible.flatOpt(partialUserData.avatar()), oldUser::avatar))
                 .banner(Possible.of(or(Possible.flatOpt(partialUserData.banner()),
                         () -> Possible.flatOpt(oldUser.banner()))))
@@ -1057,8 +1064,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return old;
     }
 
-    @Nullable
-    private MessageData deleteMessage(long channelId, long messageId) {
+    private @Nullable MessageData deleteMessage(long channelId, long messageId) {
         Long2 id = new Long2(channelId, messageId);
         ChannelContent channelContent = computeChannelContent(channelId);
         channelContent.messageIds.remove(id);
@@ -1066,7 +1072,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     }
 
     private ImmutableMessageData addReaction(ImmutableMessageData message, MessageReactionAdd dispatch) {
-        boolean me = dispatch.userId().asLong() == selfUser.get().id().asLong();
+        boolean me = dispatch.userId().asLong() == Objects.requireNonNull(selfUser).get().id().asLong();
         List<ReactionData> reactions = message.reactions().toOptional().orElse(Collections.emptyList());
         if (reactions.stream().anyMatch(EmojiKey.predicateEquals(dispatch.emoji()))) {
             return message.withReactions(Possible.of(reactions.stream()
@@ -1083,7 +1089,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     }
 
     private ImmutableMessageData removeReaction(ImmutableMessageData message, MessageReactionRemove dispatch) {
-        boolean me = dispatch.userId().asLong() == selfUser.get().id().asLong();
+        boolean me = dispatch.userId().asLong() == Objects.requireNonNull(selfUser).get().id().asLong();
         List<ReactionData> reactions = message.reactions().toOptional().orElse(Collections.emptyList());
         return message.withReactions(Possible.of(reactions.stream()
                 .map(r -> EmojiKey.predicateEquals(dispatch.emoji()).test(r) ? ImmutableReactionData.builder()
@@ -1095,9 +1101,8 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                 .collect(Collectors.toList())));
     }
 
-    @Nullable
-    private <T> AtomicReference<ImmutableUserData> computeUserRef(long userId, T newData,
-                                                                  BiFunction<T, ImmutableUserData, ImmutableUserData>
+    private @Nullable <T> AtomicReference<ImmutableUserData> computeUserRef(long userId, T newData,
+                                                                  BiFunction<T, @Nullable ImmutableUserData, @Nullable ImmutableUserData>
                                                                          userUpdater) {
         for (; ; ) {
             AtomicReference<ImmutableUserData> existing = users.get(userId);
@@ -1154,7 +1159,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     private static class EmojiKey {
 
         private final long id;
-        private final String name;
+        private final @Nullable String name;
 
         private EmojiKey(EmojiData emoji) {
             this.id = emoji.id().map(Id::asLong).orElse(-1L);
@@ -1204,8 +1209,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             return memberListComplete;
         }
 
-        @Nullable
-        private GuildData dispose() {
+        private @Nullable GuildData dispose() {
             WrappedGuildData old = guilds.remove(guildId);
             contentByGuild.remove(guildId);
             contentByChannel.values().stream()

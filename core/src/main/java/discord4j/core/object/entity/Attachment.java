@@ -21,7 +21,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.common.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.possible.Possible;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.EnumSet;
 import java.util.Objects;
@@ -180,7 +180,7 @@ public final class Attachment implements Entity {
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         return EntityUtil.equals(this, obj);
     }
 

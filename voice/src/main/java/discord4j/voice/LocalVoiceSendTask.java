@@ -21,6 +21,7 @@ import io.netty.buffer.Unpooled;
 import reactor.core.Disposable;
 import reactor.core.scheduler.Scheduler;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -70,13 +71,13 @@ public class LocalVoiceSendTask implements Disposable {
             byte[] b = new byte[provider.getBuffer().limit()];
             provider.getBuffer().get(b);
             provider.getBuffer().clear();
-            ByteBuf packet = Unpooled.wrappedBuffer(transformer.nextSend(b));
+            ByteBuf packet = Unpooled.wrappedBuffer(Objects.requireNonNull(transformer.nextSend(b)));
 
             voiceSender.accept(packet);
         } else if (speaking.compareAndSet(true, false)) {
             changeSpeaking(false);
         } else if (sentSilence.compareAndSet(false, true)) {
-            voiceSender.accept(Unpooled.wrappedBuffer(transformer.nextSend(silence)));
+            voiceSender.accept(Unpooled.wrappedBuffer(Objects.requireNonNull(transformer.nextSend(silence))));
         }
     }
 

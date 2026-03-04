@@ -25,8 +25,8 @@ import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.InviteData;
 import discord4j.discordjson.json.PartialGuildData;
 import discord4j.discordjson.json.UserData;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -265,7 +265,7 @@ public class Invite implements DiscordObject {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the invite has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public final Mono<Void> delete(@Nullable final String reason) {
+    public final Mono<Void> delete(final @Nullable String reason) {
         return this.getClient().getRestClient().getInviteService()
                 .deleteInvite(getCode(), reason)
                 .then();

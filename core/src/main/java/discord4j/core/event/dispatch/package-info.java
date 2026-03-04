@@ -17,7 +17,7 @@
 /**
  * Mappers between {@link discord4j.discordjson.json.gateway.Dispatch} and {@link discord4j.core.event.domain.Event}.
  */
-@NonNullApi
+@NullMarked
 package discord4j.core.event.dispatch;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

@@ -20,7 +20,6 @@ import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
-import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.component.SelectMenu;
 import discord4j.gateway.ShardInfo;
 

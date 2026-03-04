@@ -17,7 +17,7 @@
 
 package discord4j.common.close;
 
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Encapsulates a strategy to deal with the closing and release of a resource.
@@ -25,7 +25,7 @@ import reactor.util.annotation.Nullable;
 public class DisconnectBehavior {
 
     private final Action action;
-    private final Throwable cause;
+    private final @Nullable Throwable cause;
 
     /**
      * Create a {@link DisconnectBehavior} that instructs a client to retry in a graceful manner, with an optional cause.
@@ -86,8 +86,7 @@ public class DisconnectBehavior {
      *
      * @return a {@link Throwable} representing the cause that triggers an action
      */
-    @Nullable
-    public Throwable getCause() {
+    public @Nullable Throwable getCause() {
         return cause;
     }
 

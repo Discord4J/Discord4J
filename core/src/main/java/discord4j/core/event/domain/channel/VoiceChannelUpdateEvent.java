@@ -19,7 +19,7 @@ package discord4j.core.event.domain.channel;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -35,7 +35,7 @@ import java.util.Optional;
 public class VoiceChannelUpdateEvent extends ChannelEvent {
 
     private final VoiceChannel current;
-    private final VoiceChannel old;
+    private final @Nullable VoiceChannel old;
 
     public VoiceChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, VoiceChannel current, @Nullable VoiceChannel old) {
         super(gateway, shardInfo);

@@ -620,7 +620,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .id(member.user().id())
                 .globalName(Possible.of(member.user().globalName()))
                 .username(member.user().username())
-                .discriminator(member.user().discriminator())
+                .discriminator(Possible.ofNullable(member.user().discriminator()))
                 .avatar(Possible.of(member.user().avatar()))
                 .bot(member.user().bot())
                 .system(member.user().system())

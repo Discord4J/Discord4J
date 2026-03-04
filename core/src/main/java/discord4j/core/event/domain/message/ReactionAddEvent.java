@@ -24,7 +24,7 @@ import discord4j.core.object.emoji.Emoji;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.util.Color;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,8 +41,7 @@ import java.util.stream.Collectors;
  */
 public class ReactionAddEvent extends ReactionUserEmojiEvent {
 
-    @Nullable
-    private final Member member;
+    private final @Nullable Member member;
     private final long messageAuthorId;
     private final List<String> burstColors;
 

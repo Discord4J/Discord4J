@@ -17,7 +17,7 @@
 /**
  * Components used to build and interact with Discord4J clients.
  */
-@NonNullApi
+@NullMarked
 package discord4j.core;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

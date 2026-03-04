@@ -6,8 +6,10 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.GuildStickerEditMono;
 import discord4j.core.spec.GuildStickerEditSpec;
 import discord4j.discordjson.json.StickerData;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
+
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 public final class GuildSticker extends Sticker {
@@ -16,8 +18,7 @@ public final class GuildSticker extends Sticker {
     private final long guildId;
 
     public GuildSticker(GatewayDiscordClient gateway, StickerData data) {
-        super(gateway, data);
-        this.guildId = data.guildId().toOptional().get().asLong();
+        this(gateway, data, data.guildId().toOptional().orElseThrow(() -> new NoSuchElementException("No value present")).asLong());
     }
 
     public GuildSticker(GatewayDiscordClient gateway, StickerData data, final long guildId) {
@@ -99,7 +100,7 @@ public final class GuildSticker extends Sticker {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the sticker has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> delete(@Nullable final String reason) {
+    public Mono<Void> delete(final @Nullable String reason) {
         return gateway.getRestClient().getStickerService()
             .deleteGuildSticker(getGuildId().asLong(), getId().asLong(), reason);
     }

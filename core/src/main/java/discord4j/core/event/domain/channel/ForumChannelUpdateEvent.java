@@ -17,11 +17,9 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.object.entity.channel.ForumChannel;
-import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -37,7 +35,7 @@ import java.util.Optional;
 public class ForumChannelUpdateEvent extends ChannelEvent {
 
     private final ForumChannel current;
-    private final ForumChannel old;
+    private final @Nullable ForumChannel old;
 
     public ForumChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, ForumChannel current, @Nullable ForumChannel old) {
         super(gateway, shardInfo);

@@ -20,7 +20,7 @@ package discord4j.core.spec.legacy;
 import discord4j.common.util.Snowflake;
 import discord4j.rest.util.Multimap;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -33,8 +33,7 @@ import java.util.stream.Collectors;
 public class LegacyGuildPruneSpec implements LegacyAuditSpec<Multimap<String, Object>> {
 
     private final Multimap<String, Object> map = new Multimap<>();
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Set the number of days to prune.
@@ -85,13 +84,13 @@ public class LegacyGuildPruneSpec implements LegacyAuditSpec<Multimap<String, Ob
     }
 
     @Override
-    public LegacyGuildPruneSpec setReason(String reason) {
+    public LegacyGuildPruneSpec setReason(@Nullable String reason) {
         this.reason = reason;
         return this;
     }
 
     @Override
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

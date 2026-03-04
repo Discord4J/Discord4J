@@ -20,7 +20,7 @@ package discord4j.core.event.domain.lifecycle;
 import discord4j.common.close.CloseStatus;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -31,8 +31,7 @@ import java.util.Optional;
  */
 public class DisconnectEvent extends GatewayLifecycleEvent {
     private final CloseStatus status;
-    @Nullable
-    private final Throwable cause;
+    private final @Nullable Throwable cause;
 
     public DisconnectEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, CloseStatus status, @Nullable Throwable cause) {
         super(gateway, shardInfo);

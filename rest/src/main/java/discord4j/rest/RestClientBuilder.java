@@ -27,8 +27,8 @@ import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Route;
 import discord4j.rest.route.Routes;
 import discord4j.rest.util.AllowedMentions;
+import org.jspecify.annotations.Nullable;
 import reactor.netty.http.client.HttpClient;
-import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.util.*;
@@ -43,14 +43,13 @@ public class RestClientBuilder<C, O extends RouterOptions> {
     protected final Function<RouterOptions, O> optionsModifier;
 
     protected String token;
-    protected ReactorResources reactorResources;
-    protected JacksonResources jacksonResources;
-    protected ExchangeStrategies exchangeStrategies;
+    protected @Nullable ReactorResources reactorResources;
+    protected @Nullable JacksonResources jacksonResources;
+    protected @Nullable ExchangeStrategies exchangeStrategies;
     protected List<ResponseFunction> responseTransformers = new ArrayList<>();
-    protected GlobalRateLimiter globalRateLimiter;
-    protected RequestQueueFactory requestQueueFactory;
-    @Nullable
-    protected AllowedMentions allowedMentions;
+    protected @Nullable GlobalRateLimiter globalRateLimiter;
+    protected @Nullable RequestQueueFactory requestQueueFactory;
+    protected @Nullable AllowedMentions allowedMentions;
 
     /**
      * Initialize a new builder with the given token.
@@ -255,7 +254,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         O options = buildOptions(reactor, jackson);
         Router router = routerFactory.apply(options);
         Config config = new Config(token, reactor, jackson, initExchangeStrategies(jackson),
-                Collections.unmodifiableList(responseTransformers), globalRateLimiter, router, allowedMentions);
+                Collections.unmodifiableList(responseTransformers), initGlobalRateLimiter(reactor), router, allowedMentions);
         return clientFactory.apply(config);
     }
 
@@ -309,7 +308,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         private final List<ResponseFunction> responseTransformers;
         private final GlobalRateLimiter globalRateLimiter;
         private final Router router;
-        private final AllowedMentions allowedMentions;
+        private @Nullable final AllowedMentions allowedMentions;
 
         public Config(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
                       ExchangeStrategies exchangeStrategies, List<ResponseFunction> responseTransformers,
@@ -353,7 +352,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         }
 
         public Optional<AllowedMentions> getAllowedMentions() {
-            return Optional.ofNullable(allowedMentions);
+            return Optional.ofNullable(this.allowedMentions);
         }
     }
 }

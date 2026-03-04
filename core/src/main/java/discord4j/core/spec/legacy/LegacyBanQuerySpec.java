@@ -16,7 +16,7 @@
  */
 package discord4j.core.spec.legacy;
 
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,14 +38,17 @@ public final class LegacyBanQuerySpec implements LegacyAuditSpec<Map<String, Obj
     }
 
     @Override
-    public LegacyBanQuerySpec setReason(@Nullable final String reason) {
+    public LegacyBanQuerySpec setReason(final @Nullable String reason) {
+        if (reason == null) {
+            request.remove("reason");
+            return this;
+        }
         request.put("reason", reason);
         return this;
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return (String) request.get("reason");
     }
 

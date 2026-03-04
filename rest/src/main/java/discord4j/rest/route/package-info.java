@@ -17,7 +17,7 @@
 /**
  * Representation of the Discord REST API endpoints.
  */
-@NonNullApi
+@NullMarked
 package discord4j.rest.route;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

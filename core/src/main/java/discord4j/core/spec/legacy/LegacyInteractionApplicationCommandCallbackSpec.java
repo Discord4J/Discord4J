@@ -24,7 +24,7 @@ import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,13 +36,12 @@ import java.util.stream.Collectors;
 @Experimental
 public class LegacyInteractionApplicationCommandCallbackSpec implements LegacySpec<InteractionApplicationCommandCallbackData> {
 
-    @Nullable
-    private String content;
+    private @Nullable String content;
     private boolean tts;
-    private List<EmbedData> embeds;
-    private AllowedMentionsData allowedMentionsData;
+    private @Nullable List<EmbedData> embeds;
+    private @Nullable AllowedMentionsData allowedMentionsData;
     private int flags;
-    private List<LayoutComponent> components;
+    private @Nullable List<LayoutComponent> components;
 
     public LegacyInteractionApplicationCommandCallbackSpec setContent(String content) {
         this.content = content;

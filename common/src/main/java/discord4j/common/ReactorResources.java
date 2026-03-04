@@ -17,6 +17,7 @@
 
 package discord4j.common;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
@@ -87,9 +88,9 @@ public class ReactorResources {
 
     public static class Builder {
 
-        private HttpClient httpClient;
-        private Scheduler timerTaskScheduler;
-        private Scheduler blockingTaskScheduler;
+        private @Nullable HttpClient httpClient;
+        private @Nullable Scheduler timerTaskScheduler;
+        private @Nullable Scheduler blockingTaskScheduler;
 
         protected Builder() {
         }

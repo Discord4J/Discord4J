@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.discordjson.json.UserData;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.Cookie;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServerRequest;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -105,8 +105,7 @@ public class ExampleOAuth2CodeFlow {
                 });
     }
 
-    @Nullable
-    private static DiscordOAuth2Client getClient(HttpServerRequest request) {
+    private static @Nullable DiscordOAuth2Client getClient(HttpServerRequest request) {
         String key = request.cookies().getOrDefault(DiscordOAuth2Server.SESSION_KEY, Collections.emptySet())
                 .stream().map(Cookie::value).findFirst().orElse("");
         return CLIENTS.get(key);

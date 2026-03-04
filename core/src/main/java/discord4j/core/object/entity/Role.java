@@ -33,9 +33,9 @@ import discord4j.rest.entity.RestRole;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.PermissionSet;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.EnumSet;
 import java.util.Objects;
@@ -427,7 +427,7 @@ public final class Role implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the role has been deleted. If
      * an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> delete(@Nullable final String reason) {
+    public Mono<Void> delete(final @Nullable String reason) {
         return rest.delete(reason);
     }
 
@@ -439,7 +439,7 @@ public final class Role implements Entity {
      * @return A {@link Flux} that continually emits all the {@link Role roles} associated to this role's
      * {@link #getGuild() guild}. If an error is received, it is emitted through the {@code Flux}.
      */
-    public Flux<Role> changePosition(final int position, @Nullable final String reason) {
+    public Flux<Role> changePosition(final int position, final @Nullable String reason) {
         return rest.changePosition(position, reason)
             .map(data -> new Role(gateway, data, getGuildId().asLong()));
     }
@@ -469,7 +469,7 @@ public final class Role implements Entity {
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         return EntityUtil.equals(this, obj);
     }
 

@@ -24,8 +24,10 @@ import discord4j.core.object.entity.PartialMember;
 import discord4j.core.object.entity.StageInstance;
 import discord4j.discordjson.json.VoiceStateData;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
+
+import java.util.NoSuchElementException;
 
 /**
  * Dispatched when a user connected to a stage channel makes a request to speak.
@@ -74,7 +76,7 @@ public class StageRequestToSpeakEvent extends VoiceStateUpdateEvent {
      *         {@link StageInstance} in which the request has been made
      */
     public Mono<StageInstance> getStageInstance() {
-        return gateway.getStageInstanceByChannelId(Snowflake.of(voiceStateData.channelId().get()));
+        return gateway.getStageInstanceByChannelId(Snowflake.of(voiceStateData.channelId().orElseThrow(() -> new NoSuchElementException("No value present"))));
     }
 
     /**

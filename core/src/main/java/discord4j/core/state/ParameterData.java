@@ -14,14 +14,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package discord4j.core.state;
+
+import org.jspecify.annotations.Nullable;
 
 public class ParameterData {
 
-    private Object value;
+    private @Nullable Object value;
 
-    public Object getValue() {
+    public @Nullable Object getValue() {
         return value;
     }
 

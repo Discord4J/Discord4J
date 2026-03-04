@@ -24,7 +24,7 @@ import discord4j.common.util.TokenUtil;
 import discord4j.rest.http.client.AuthorizationScheme;
 import discord4j.rest.request.Router;
 import discord4j.rest.util.AllowedMentions;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -38,10 +38,8 @@ public class RestResources {
     private final ReactorResources reactorResources;
     private final JacksonResources jacksonResources;
     private final Router router;
-    @Nullable
-    private final Long selfId;
-    @Nullable
-    private final AllowedMentions allowedMentions;
+    private final @Nullable Long selfId;
+    private final @Nullable AllowedMentions allowedMentions;
 
     public RestResources(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
                          Router router, @Nullable AllowedMentions allowedMentions) {

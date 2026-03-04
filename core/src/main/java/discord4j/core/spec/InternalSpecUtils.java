@@ -18,7 +18,7 @@ package discord4j.core.spec;
 
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Multimap;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -35,8 +35,7 @@ final class InternalSpecUtils {
         return value == null ? Possible.absent() : Possible.of(value);
     }
 
-    @Nullable
-    static <T, R> R mapNullable(@Nullable T value, Function<? super T, ? extends R> mapper) {
+    static @Nullable <T, R> R mapNullable(@Nullable T value, Function<? super T, ? extends R> mapper) {
         return value != null ? mapper.apply(value) : null;
     }
 

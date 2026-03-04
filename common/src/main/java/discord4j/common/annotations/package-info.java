@@ -17,7 +17,7 @@
 /**
  * Common annotations used across modules.
  */
-@NonNullApi
+@NullMarked
 package discord4j.common.annotations;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

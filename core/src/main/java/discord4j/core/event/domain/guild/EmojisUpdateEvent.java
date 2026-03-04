@@ -21,7 +21,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
@@ -40,10 +40,9 @@ public class EmojisUpdateEvent extends GuildEvent {
     private final long guildId;
     private final Set<GuildEmoji> emojis;
 
-    @Nullable
-    private final Set<GuildEmoji> old;
+    private final @Nullable Set<GuildEmoji> old;
 
-    public EmojisUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<GuildEmoji> emojis, Set<GuildEmoji> old) {
+    public EmojisUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<GuildEmoji> emojis, @Nullable Set<GuildEmoji> old) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.emojis = emojis;

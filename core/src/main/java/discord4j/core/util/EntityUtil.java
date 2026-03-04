@@ -24,9 +24,9 @@ import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.emoji.Emoji;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.common.util.Snowflake;
+import org.jspecify.annotations.Nullable;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.annotation.Nullable;
 
 /** A utility class for entity processing. */
 public final class EntityUtil {
@@ -88,7 +88,7 @@ public final class EntityUtil {
      * @param obj The object to compare to.
      * @return {@code true} if the two objects are equal, {@code false} otherwise.
      */
-    public static boolean equals(final Entity entity, @Nullable final Object obj) {
+    public static boolean equals(final Entity entity, final @Nullable Object obj) {
         return entity.getClass().isInstance(obj) && ((Entity) obj).getId().equals(entity.getId());
     }
 

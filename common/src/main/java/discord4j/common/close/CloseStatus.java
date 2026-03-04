@@ -16,7 +16,7 @@
  */
 package discord4j.common.close;
 
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -31,8 +31,7 @@ public class CloseStatus {
     public static final CloseStatus ABNORMAL_CLOSE = new CloseStatus(1006, null);
 
     private final int code;
-    @Nullable
-    private final String reason;
+    private final @Nullable String reason;
 
     /**
      * Create a new {@link CloseStatus} instance.

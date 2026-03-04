@@ -5,8 +5,8 @@ import discord4j.discordjson.json.GuildStickerModifyRequest;
 import discord4j.discordjson.json.StickerData;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.Permission;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 import java.util.Objects;
 
 /**

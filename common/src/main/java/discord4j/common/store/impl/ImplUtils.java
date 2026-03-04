@@ -20,7 +20,7 @@ package discord4j.common.store.impl;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.PresenceData;
 import discord4j.discordjson.json.gateway.PresenceUpdate;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -40,9 +40,10 @@ class ImplUtils {
         }
     }
 
-    static @Nullable <T, R> R ifNonNullMap(@Nullable T val, Function<? super T, ? extends R> mapper) {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static @Nullable <T, R> R ifNonNullMap(@Nullable T val, Function<? super T, ?> mapper) {
         if (val != null) {
-            return mapper.apply(val);
+            return (R) ((Function) mapper).apply(val);
         }
         return null;
     }

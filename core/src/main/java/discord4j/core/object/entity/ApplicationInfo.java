@@ -35,9 +35,9 @@ import discord4j.discordjson.json.ApplicationInfoData;
 import discord4j.discordjson.json.ApplicationRoleConnectionMetadataData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.EnumSet;
@@ -549,7 +549,7 @@ public final class ApplicationInfo implements Entity {
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         return EntityUtil.equals(this, obj);
     }
 

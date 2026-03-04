@@ -21,7 +21,7 @@ import discord4j.discordjson.json.RoleCreateRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.PermissionSet;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 
 /**
@@ -31,13 +31,12 @@ import reactor.util.annotation.Nullable;
  */
 public class LegacyRoleCreateSpec implements LegacyAuditSpec<RoleCreateRequest> {
 
-    private String name;
-    private Long permissions;
-    private Integer color;
-    private Boolean hoist;
-    private Boolean mentionable;
-    @Nullable
-    private String reason;
+    private @Nullable String name;
+    private @Nullable Long permissions;
+    private @Nullable Integer color;
+    private @Nullable Boolean hoist;
+    private @Nullable Boolean mentionable;
+    private @Nullable String reason;
 
     /**
      * Sets the name of the created {@link Role}.
@@ -95,14 +94,13 @@ public class LegacyRoleCreateSpec implements LegacyAuditSpec<RoleCreateRequest> 
     }
 
     @Override
-    public LegacyRoleCreateSpec setReason(@Nullable final String reason) {
+    public LegacyRoleCreateSpec setReason(final @Nullable String reason) {
         this.reason = reason;
         return this;
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

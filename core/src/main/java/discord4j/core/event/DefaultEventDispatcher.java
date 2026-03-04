@@ -19,6 +19,7 @@ package discord4j.core.event;
 
 import discord4j.common.LogUtil;
 import discord4j.core.event.domain.Event;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.Scheduler;
@@ -67,7 +68,7 @@ public class DefaultEventDispatcher implements EventDispatcher {
 
     @Override
     public <E extends Event> Flux<E> on(Class<E> eventClass) {
-        AtomicReference<Subscription> subscription = new AtomicReference<>();
+        AtomicReference<@Nullable Subscription> subscription = new AtomicReference<>();
         return eventProcessor.publishOn(eventScheduler)
                 .ofType(eventClass)
                 .<E>handle((event, sink) -> {
@@ -87,7 +88,7 @@ public class DefaultEventDispatcher implements EventDispatcher {
                 .doFinally(signal -> {
                     if (log.isDebugEnabled()) {
                         log.debug("Subscription {} to {} disposed due to {}",
-                                Integer.toHexString(subscription.get().hashCode()), eventClass.getSimpleName(), signal);
+                                Integer.toHexString(Objects.requireNonNull(subscription.get()).hashCode()), eventClass.getSimpleName(), signal);
                     }
                 });
     }
@@ -108,9 +109,9 @@ public class DefaultEventDispatcher implements EventDispatcher {
      */
     public static class Builder implements EventDispatcher.Builder {
 
-        protected FluxProcessor<Event, Event> eventProcessor;
+        protected @Nullable FluxProcessor<Event, Event> eventProcessor;
         protected FluxSink.OverflowStrategy overflowStrategy = FluxSink.OverflowStrategy.BUFFER;
-        protected Scheduler eventScheduler;
+        protected @Nullable Scheduler eventScheduler;
 
         protected Builder() {
         }

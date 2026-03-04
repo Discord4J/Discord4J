@@ -23,9 +23,9 @@ import discord4j.discordjson.json.GuildScheduledEventModifyRequest;
 import discord4j.discordjson.json.GuildScheduledEventUserData;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.PaginationUtil;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -112,7 +112,7 @@ public class RestScheduledEvent {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the event was deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> delete(@Nullable final String reason) {
+    public Mono<Void> delete(final @Nullable String reason) {
         return restClient.getGuildService().deleteScheduledEvent(guildId, id, reason);
     }
 

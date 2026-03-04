@@ -19,7 +19,7 @@ package discord4j.core.event.domain.message;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.emoji.Emoji;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Dispatched when a reaction is removed from a message.

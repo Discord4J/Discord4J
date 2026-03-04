@@ -20,7 +20,7 @@ import discord4j.core.object.PermissionOverwrite;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
 import discord4j.common.util.Snowflake;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;

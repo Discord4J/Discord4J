@@ -33,6 +33,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -146,7 +147,7 @@ public class Interaction implements DiscordObject {
      */
     public Optional<Member> getMember() {
         return data.member().toOptional()
-                .map(data -> new Member(gateway, data, getGuildId().get().asLong()));
+                .map(data -> new Member(gateway, data, getGuildId().orElseThrow(() -> new NoSuchElementException("No value present")).asLong()));
     }
 
     /**
