@@ -117,6 +117,7 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         super(GatewayPayload.class);
     }
 
+    @SuppressWarnings({"unchecked","rawtypes"})
     @Override
     public GatewayPayload<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonNode payload = p.getCodec().readTree(p);
