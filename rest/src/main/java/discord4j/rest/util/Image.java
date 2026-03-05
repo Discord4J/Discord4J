@@ -27,7 +27,7 @@ import java.util.Objects;
 /**
  * Represents a Discord image.
  *
- * @see <a href="https://discord.com/developers/docs/reference#image-formatting">Image Formatting</a>
+ * @see <a href="https://docs.discord.com/developers/reference#image-formatting">Image Formatting</a>
  */
 public final class Image {
 
@@ -76,7 +76,7 @@ public final class Image {
      * @return The raw data of the image.
      */
     public byte[] getData() {
-        return data;
+        return this.data;
     }
 
     /**
@@ -85,7 +85,7 @@ public final class Image {
      * @return The format of the image.
      */
     public Format getFormat() {
-        return format;
+        return this.format;
     }
 
     /**
@@ -94,7 +94,7 @@ public final class Image {
      * @return The Base64-encoded data of the image.
      */
     public String getHash() {
-        return Base64.getEncoder().encodeToString(data);
+        return Base64.getEncoder().encodeToString(this.getData());
     }
 
     /**
@@ -103,14 +103,14 @@ public final class Image {
      * @return The data URI for this image.
      */
     public String getDataUri() {
-        return String.format("data:image/%s;base64,%s", format.extension, getHash());
+        return String.format("data:image/%s;base64,%s", this.getFormat().getExtension(), this.getHash());
     }
 
     @Override
     public String toString() {
         return "Image{" +
-                "data=" + Arrays.toString(data) +
-                ", format=" + format +
+                "data=" + Arrays.toString(this.data) +
+                ", format=" + this.format +
                 '}';
     }
 
@@ -119,25 +119,25 @@ public final class Image {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         Image image = (Image) o;
-        return Arrays.equals(data, image.data) &&
-                format == image.format;
+        return Arrays.equals(this.getData(), image.getData()) &&
+                this.getFormat() == image.getFormat();
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(format);
-        result = 31 * result + Arrays.hashCode(data);
+        int result = Objects.hash(this.getFormat());
+        result = 31 * result + Arrays.hashCode(this.getData());
         return result;
     }
 
     /**
      * The format of an image. This enum represents all the types supported by Discord.
      *
-     * @see <a href="https://discord.com/developers/docs/reference#image-formatting-image-formats">Image Formats</a>
+     * @see <a href="https://docs.discord.com/developers/reference#image-formatting-image-formats">Image Formats</a>
      */
     public enum Format {
 
@@ -153,7 +153,7 @@ public final class Image {
         /** Represents the WebP format. */
         WEB_P("webp"),
 
-        /** Represents the Graphics Interchange Format format. */
+        /** Represents the Graphics Interchange Format. */
         GIF("gif"),
 
         /** Represents the Lottie format. */
@@ -177,10 +177,10 @@ public final class Image {
          * @return The file extension associated with this format.
          */
         public String getExtension() {
-            return extension;
+            return this.extension;
         }
 
-        private static Format fromContentType(String contentType) {
+        private static Format fromContentType(final String contentType) {
             switch (contentType) {
                 case "image/jpeg": return JPEG;
                 case "image/png": return PNG;
