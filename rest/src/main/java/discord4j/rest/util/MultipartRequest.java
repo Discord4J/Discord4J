@@ -19,6 +19,7 @@ package discord4j.rest.util;
 
 import discord4j.discordjson.json.MessageCreateRequest;
 import org.jspecify.annotations.Nullable;
+import reactor.netty.http.client.HttpClientForm;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
@@ -26,39 +27,107 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class MultipartRequest<T> {
 
-    private final T jsonPayload;
-    private final List<Tuple2<String, InputStream>> files;
+    /**
+     * Default file field (used for message files).
+     *
+     * @see <a href="https://docs.discord.com/developers/reference#uploading-files">Upload Files</a>
+     */
+    public static final String DEFAULT_FILE_FIELD = "files";
 
-    private MultipartRequest(T jsonPayload, List<Tuple2<String, InputStream>> files) {
+    private final @Nullable T jsonPayload;
+    private final List<Tuple2<String, InputStream>> files;
+    private final String fileField;
+    private final Consumer<HttpClientForm> httpClientFormConsumer;
+
+    private MultipartRequest(@Nullable T jsonPayload,
+                             String fileField,
+                             List<Tuple2<String, InputStream>> files) {
         this.jsonPayload = jsonPayload;
         this.files = Collections.unmodifiableList(files);
+        this.fileField = fileField;
+        this.httpClientFormConsumer = httpClientForm -> {
+            for (int index = 0; index < this.getFiles().size(); index++) {
+                // files format https://docs.discord.com/developers/reference#uploading-files
+                final String name = this.getFileField().concat(String.format("[%d]", index));
+                httpClientForm.file(name, this.getFiles().get(index).getT1(), this.getFiles().get(index).getT2(), "application/octet-stream");
+            }
+        };
+    }
+
+    private MultipartRequest(@Nullable T jsonPayload,
+                             String fileField,
+                             Consumer<HttpClientForm> httpClientFormConsumer,
+                             List<Tuple2<String, InputStream>> files) {
+        this.jsonPayload = jsonPayload;
+        this.files = Collections.unmodifiableList(files);
+        this.fileField = fileField;
+        this.httpClientFormConsumer = httpClientFormConsumer;
+    }
+
+    public static <T> MultipartRequest<T> ofEmptyRequest(String fileField) {
+        return new MultipartRequest<>(null, fileField, Collections.emptyList());
+    }
+
+    public static <T> MultipartRequest<T> ofRequest(T body,
+                                                    String fileField) {
+        return new MultipartRequest<>(body, fileField, Collections.emptyList());
     }
 
     public static <T> MultipartRequest<T> ofRequest(T body) {
-        return new MultipartRequest<>(body, Collections.emptyList());
+        return new MultipartRequest<>(body, DEFAULT_FILE_FIELD, Collections.emptyList());
+    }
+
+    public static <T> MultipartRequest<T> ofEmptyRequestAndFiles(List<Tuple2<String, InputStream>> files) {
+        return new MultipartRequest<>(null, DEFAULT_FILE_FIELD, files);
+    }
+
+    public static <T> MultipartRequest<T> ofEmptyRequestAndFiles(String fileField,
+                                                                 List<Tuple2<String, InputStream>> files) {
+        return new MultipartRequest<>(null, fileField, files);
     }
 
     public static <T> MultipartRequest<T> ofRequestAndFiles(T body, List<Tuple2<String, InputStream>> files) {
-        return new MultipartRequest<>(body, files);
+        return new MultipartRequest<>(body, DEFAULT_FILE_FIELD, files);
+    }
+
+    public static <T> MultipartRequest<T> ofRequestAndFiles(T body,
+                                                            String fileField,
+                                                            List<Tuple2<String, InputStream>> files) {
+        return new MultipartRequest<>(body, fileField, files);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> MultipartRequest<R> withHttpFormConsumer(Consumer<HttpClientForm> httpClientFormConsumer) {
+        return new MultipartRequest<>((R)this.jsonPayload, this.fileField, httpClientFormConsumer, this.files);
     }
 
     public <R> MultipartRequest<R> withRequest(R body) {
-        return new MultipartRequest<>(body, files);
+        return new MultipartRequest<>(body, DEFAULT_FILE_FIELD, this.files);
     }
 
-    public MultipartRequest<T> addFile(String fileName, InputStream file) {
+    public MultipartRequest<T> addFile(String fileName,
+                                       InputStream file) {
         List<Tuple2<String, InputStream>> list = new ArrayList<>(this.files);
         list.add(Tuples.of(fileName, file));
-        return new MultipartRequest<>(this.jsonPayload, Collections.unmodifiableList(list));
+        List<Tuple2<String, InputStream>> unmodifiableList = Collections.unmodifiableList(list);
+        if (this.jsonPayload == null) {
+            return ofEmptyRequestAndFiles(this.fileField, unmodifiableList);
+        }
+        return ofRequestAndFiles(this.jsonPayload, this.fileField, unmodifiableList);
     }
 
     public MultipartRequest<T> addFiles(List<Tuple2<String, InputStream>> filesList) {
         List<Tuple2<String, InputStream>> list = new ArrayList<>(this.files);
         list.addAll(filesList);
-        return new MultipartRequest<>(this.jsonPayload, Collections.unmodifiableList(list));
+        List<Tuple2<String, InputStream>> unmodifiableList = Collections.unmodifiableList(list);
+        if (this.jsonPayload == null) {
+            return ofEmptyRequestAndFiles(this.fileField, unmodifiableList);
+        }
+        return ofRequestAndFiles(this.jsonPayload, this.fileField, unmodifiableList);
     }
 
     /**
@@ -66,12 +135,22 @@ public class MultipartRequest<T> {
      */
     @Deprecated
     public @Nullable MessageCreateRequest getCreateRequest() {
-        return (MessageCreateRequest) jsonPayload;
+        return (MessageCreateRequest) this.jsonPayload;
     }
 
-    public T getJsonPayload() { return jsonPayload; }
+    public @Nullable T getJsonPayload() {
+        return this.jsonPayload;
+    }
+
+    public String getFileField() {
+        return this.fileField;
+    }
 
     public List<Tuple2<String, InputStream>> getFiles() {
-        return files;
+        return this.files;
+    }
+
+    public Consumer<HttpClientForm> getHttpClientFormConsumer() {
+        return this.httpClientFormConsumer;
     }
 }

@@ -61,17 +61,11 @@ public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest<
         final List<Tuple2<String, InputStream>> files = body.getFiles();
         return Mono.fromCallable(() -> send.sendForm((request, form) -> {
             form.multipart(true);
-            if (body.getFiles().size() == 1) {
-                form.file("file", files.get(0).getT1(), files.get(0).getT2(), "application/octet-stream");
-            } else {
-                for (int i = 0; i < files.size(); i++) {
-                    form.file("file" + i, files.get(i).getT1(), files.get(i).getT2(), "application/octet-stream");
-                }
-            }
+            body.getHttpClientFormConsumer().accept(form);
 
             if (createRequest != null) {
                 try {
-                    String payload = objectMapper.writeValueAsString(createRequest);
+                    String payload = this.objectMapper.writeValueAsString(createRequest);
                     if (log.isTraceEnabled()) {
                         log.trace("{}", payload);
                     }
