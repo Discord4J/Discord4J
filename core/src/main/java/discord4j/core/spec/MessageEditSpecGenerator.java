@@ -21,6 +21,8 @@ import discord4j.core.object.component.BaseMessageComponent;
 import discord4j.core.object.component.TopLevelMessageComponent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
+import discord4j.discordjson.json.AttachmentData;
+import discord4j.discordjson.json.ImmutableMessageEditRequest;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
@@ -28,7 +30,10 @@ import discord4j.rest.util.MultipartRequest;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -66,32 +71,40 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
     @Override
     default MultipartRequest<MessageEditRequest> asRequest() {
         final Set<Message.Flag> flagsToApply = InternalMessageSpecUtils.decorateFlags(
-            Possible.flatOpt(this.flags()).orElse(null),
-            Possible.absent(),
-            Possible.absent(),
-            Possible.ofNullable(Possible.flatOpt(this.components()).orElse(null))
+                Possible.flatOpt(this.flags()).orElse(null),
+                Possible.absent(),
+                Possible.absent(),
+                Possible.ofNullable(Possible.flatOpt(this.components()).orElse(null))
         );
 
-        MessageEditRequest json = MessageEditRequest.builder()
-            .content(content())
-            .embeds(mapPossibleOptional(embeds(), embeds -> embeds.stream()
-                .map(EmbedCreateSpec::asRequest)
-                .collect(Collectors.toList())))
-            .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
-            .flags(mapPossibleOptional(Possible.of(Optional.ofNullable(flagsToApply)), f -> f.stream()
-                .mapToInt(Message.Flag::getFlag)
-                .reduce(0, (left, right) -> left | right)))
-            .components(mapPossibleOptional(components(), components -> components.stream()
-                .map(BaseMessageComponent::getData)
-                .collect(Collectors.toList())))
-            // TODO upon v10 upgrade, it is required to also include new files as attachment here
-            .attachments(mapPossibleOptional(attachments(), attachments -> attachments.stream()
-                .map(Attachment::getData)
-                .collect(Collectors.toList())))
-            .build();
-        return MultipartRequest.ofRequestAndFiles(json, Stream.concat(files().stream(), fileSpoilers().stream())
-            .map(MessageCreateFields.File::asRequest)
-            .collect(Collectors.toList()));
+        ImmutableMessageEditRequest.Builder messageEditRequestBuilder = MessageEditRequest.builder()
+                .content(content())
+                .embeds(mapPossibleOptional(embeds(), embeds -> embeds.stream()
+                        .map(EmbedCreateSpec::asRequest)
+                        .collect(Collectors.toList())))
+                .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
+                .flags(mapPossibleOptional(Possible.of(Optional.ofNullable(flagsToApply)), f -> f.stream()
+                        .mapToInt(Message.Flag::getFlag)
+                        .reduce(0, (left, right) -> left | right)))
+                .components(mapPossibleOptional(components(), components -> components.stream()
+                        .map(BaseMessageComponent::getData)
+                        .collect(Collectors.toList())))
+                .attachments(mapPossibleOptional(attachments(), attachments -> attachments.stream()
+                        .map(Attachment::getData)
+                        .collect(Collectors.toList())));
+
+        final List<Tuple2<String, InputStream>> filesCollected = Stream.concat(files().stream(), fileSpoilers().stream())
+                .map(MessageCreateFields.File::asRequest)
+                .collect(Collectors.toList());
+
+        if (!filesCollected.isEmpty()) {
+            for (int x = 0; x < filesCollected.size(); x++) {
+                messageEditRequestBuilder.addAttachment(AttachmentData.builder().id(x).filename(filesCollected.get(x).getT1()).build());
+            }
+        }
+
+        MessageEditRequest json = messageEditRequestBuilder.build();
+        return MultipartRequest.ofRequestAndFiles(json, filesCollected);
     }
 }
 
