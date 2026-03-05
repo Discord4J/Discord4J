@@ -573,7 +573,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * @return an empty {@link Mono} completing after all resources have released
      */
     public Mono<Void> withGateway(Function<GatewayDiscordClient, Publisher<?>> whileConnectedFunction) {
-        return usingConnection(gateway -> Flux.from(whileConnectedFunction.apply(gateway)).then(gateway.onDisconnect()));
+        return this.usingConnection(gateway -> Flux.from(whileConnectedFunction.apply(gateway)).then(gateway.onDisconnect()));
     }
 
     private <T> Mono<T> usingConnection(Function<GatewayDiscordClient, Mono<T>> onConnectedFunction) {
@@ -598,7 +598,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * sequence, it will be emitted through the {@link Mono}.
      */
     public Mono<GatewayDiscordClient> login() {
-        return login(DefaultGatewayClient::new);
+        return this.login(DefaultGatewayClient::new);
     }
 
     /**
@@ -850,22 +850,22 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     private PayloadReader initPayloadReader() {
-        if (payloadReader != null) {
-            return payloadReader;
+        if (this.payloadReader != null) {
+            return this.payloadReader;
         }
-        return new JacksonPayloadReader(client.getCoreResources().getJacksonResources().getObjectMapper());
+        return new JacksonPayloadReader(this.client.getCoreResources().getJacksonResources().getObjectMapper());
     }
 
     private PayloadWriter initPayloadWriter() {
-        if (payloadWriter != null) {
-            return payloadWriter;
+        if (this.payloadWriter != null) {
+            return this.payloadWriter;
         }
-        return new JacksonPayloadWriter(client.getCoreResources().getJacksonResources().getObjectMapper());
+        return new JacksonPayloadWriter(this.client.getCoreResources().getJacksonResources().getObjectMapper());
     }
 
     private ReconnectOptions initReconnectOptions(GatewayReactorResources resources) {
-        if (reconnectOptions != null) {
-            return reconnectOptions;
+        if (this.reconnectOptions != null) {
+            return this.reconnectOptions;
         }
         return ReconnectOptions.builder()
                 .setBackoffScheduler(resources.getTimerTaskScheduler())
@@ -873,8 +873,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     private ReconnectOptions initReconnectOptions(VoiceReactorResources resources) {
-        if (reconnectOptions != null) {
-            return reconnectOptions;
+        if (this.reconnectOptions != null) {
+            return this.reconnectOptions;
         }
         return ReconnectOptions.builder()
                 .setBackoffScheduler(resources.getTimerTaskScheduler())
@@ -882,62 +882,62 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     private GatewayReactorResources initGatewayReactorResources(int count) {
-        if (gatewayReactorResources == null) {
+        if (this.gatewayReactorResources == null) {
             int maxConnections = Math.max(ConnectionProvider.DEFAULT_POOL_MAX_CONNECTIONS, count);
-            gatewayReactorResources = res -> GatewayReactorResources.builder(res)
+            this.gatewayReactorResources = res -> GatewayReactorResources.builder(res)
                     .httpClient(ReactorResources.newHttpClient(
                             ConnectionProvider.create("d4j-gateway", maxConnections)))
                     .build();
         }
-        return gatewayReactorResources.apply(client.getCoreResources().getReactorResources());
+        return this.gatewayReactorResources.apply(this.client.getCoreResources().getReactorResources());
     }
 
     private VoiceReactorResources initVoiceReactorResources() {
-        if (voiceReactorResources == null) {
-            voiceReactorResources = VoiceReactorResources::new;
+        if (this.voiceReactorResources == null) {
+            this.voiceReactorResources = VoiceReactorResources::new;
         }
-        return voiceReactorResources.apply(client.getCoreResources().getReactorResources());
+        return this.voiceReactorResources.apply(this.client.getCoreResources().getReactorResources());
     }
 
     private EventDispatcher initEventDispatcher() {
-        if (eventDispatcher != null) {
-            return eventDispatcher;
+        if (this.eventDispatcher != null) {
+            return this.eventDispatcher;
         }
         return EventDispatcher.buffering();
     }
 
     private ShardCoordinator initShardCoordinator(ReactorResources reactorResources) {
-        if (shardCoordinator != null) {
-            return shardCoordinator;
+        if (this.shardCoordinator != null) {
+            return this.shardCoordinator;
         }
         return LocalShardCoordinator.create(() ->
                 new RateLimitTransformer(1, Duration.ofSeconds(6), reactorResources.getTimerTaskScheduler()));
     }
 
     private EntityRetrievalStrategy initEntityRetrievalStrategy() {
-        if (entityRetrievalStrategy != null) {
-            return entityRetrievalStrategy;
+        if (this.entityRetrievalStrategy != null) {
+            return this.entityRetrievalStrategy;
         }
         return EntityRetrievalStrategy.STORE_FALLBACK_REST;
     }
 
     private DispatchEventMapper initDispatchEventMapper() {
-        if (dispatchEventMapper != null) {
-            return dispatchEventMapper;
+        if (this.dispatchEventMapper != null) {
+            return this.dispatchEventMapper;
         }
         return DispatchEventMapper.emitEvents();
     }
 
     private Store initStore() {
-        if (store != null) {
-            return store;
+        if (this.store != null) {
+            return this.store;
         }
         return Store.fromLayout(LocalStoreLayout.create());
     }
 
     private MemberRequestFilter initMemberRequestFilter(IntentSet intents) {
-        if (memberRequestFilter != null) {
-            return memberRequestFilter;
+        if (this.memberRequestFilter != null) {
+            return this.memberRequestFilter;
         } else if (intents.contains(Intent.GUILD_MEMBERS)) {
             return MemberRequestFilter.withLargeGuilds();
         } else {

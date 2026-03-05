@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package discord4j.core.event;
 
 import discord4j.common.LogUtil;
@@ -70,8 +69,8 @@ public class SinksEventDispatcher implements EventDispatcher {
     @Override
     public <E extends Event> Flux<E> on(Class<E> eventClass) {
         AtomicReference<@Nullable Subscription> subscription = new AtomicReference<>();
-        return events.asFlux()
-                .publishOn(eventScheduler)
+        return this.events.asFlux()
+                .publishOn(this.eventScheduler)
                 .ofType(eventClass)
                 .<E>handle((event, sink) -> {
                     if (log.isTraceEnabled()) {
@@ -90,19 +89,20 @@ public class SinksEventDispatcher implements EventDispatcher {
                 .doFinally(signal -> {
                     if (log.isDebugEnabled()) {
                         log.debug("Subscription {} to {} disposed due to {}",
-                                Integer.toHexString(Objects.requireNonNull(subscription.get()).hashCode()), eventClass.getSimpleName(), signal);
+                                Integer.toHexString(Objects.requireNonNull(subscription.get()).hashCode()),
+                                eventClass.getSimpleName(), signal);
                     }
                 });
     }
 
     @Override
     public void publish(Event event) {
-        emissionStrategy.emitNext(events, event);
+        this.emissionStrategy.emitNext(events, event);
     }
 
     @Override
     public void shutdown() {
-        emissionStrategy.emitComplete(events);
+        this.emissionStrategy.emitComplete(events);
     }
 
     /**
@@ -118,7 +118,8 @@ public class SinksEventDispatcher implements EventDispatcher {
         }
 
         /**
-         * Set the underlying {@link reactor.core.publisher.Sinks.Many} the dispatcher will use to queue and distribute events. Defaults
+         * Set the underlying {@link reactor.core.publisher.Sinks.Many} the dispatcher will use to queue and
+         * distribute events. Defaults
          * to using a multicast buffering sink.
          *
          * @param eventSinkFactory the custom sink factory for events
@@ -155,16 +156,16 @@ public class SinksEventDispatcher implements EventDispatcher {
         }
 
         public EventDispatcher build() {
-            if (eventSinkFactory == null) {
-                eventSinkFactory = spec -> spec.multicast().onBackpressureBuffer(Queues.SMALL_BUFFER_SIZE, false);
+            if (this.eventSinkFactory == null) {
+                this.eventSinkFactory = spec -> spec.multicast().onBackpressureBuffer(Queues.SMALL_BUFFER_SIZE, false);
             }
-            if (emissionStrategy == null) {
-                emissionStrategy = EmissionStrategy.timeoutDrop(Duration.ofSeconds(10));
+            if (this.emissionStrategy == null) {
+                this.emissionStrategy = EmissionStrategy.timeoutDrop(Duration.ofSeconds(10));
             }
-            if (eventScheduler == null) {
-                eventScheduler = DEFAULT_EVENT_SCHEDULER.get();
+            if (this.eventScheduler == null) {
+                this.eventScheduler = DEFAULT_EVENT_SCHEDULER.get();
             }
-            return new SinksEventDispatcher(eventSinkFactory, emissionStrategy, eventScheduler);
+            return new SinksEventDispatcher(this.eventSinkFactory, this.emissionStrategy, this.eventScheduler);
         }
 
     }
