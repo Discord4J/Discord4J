@@ -240,6 +240,7 @@ public interface EventDispatcher {
      * @deprecated due to Processor API being deprecated, we recommend moving to {@link #replayingWithSize(int)} for a
      * dispatcher that is able to retain a given number of latest events
      */
+    @Deprecated
     static EventDispatcher withLatestEvents(int bufferSize) {
         return builder()
                 .eventProcessor(EmitterProcessor.create(bufferSize, false))
