@@ -18,6 +18,7 @@ package discord4j.core.object;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.PartialRole;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.CategorizableChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -36,6 +37,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -252,6 +254,17 @@ public class Invite implements DiscordObject {
         return this.getData().approximateMemberCount().toOptional()
             .map(OptionalInt::of)
             .orElse(OptionalInt.empty());
+    }
+
+    /**
+     * Gets the partial roles assigned to the user upon accepting the invite.
+     * @return The partial roles assigned to the user upon accepting the invite
+     * @see PartialRole#getRole() for the full data of the role
+     */
+    public final List<PartialRole> getRoles() {
+        return this.getData().roles().toOptional()
+                .map(partialRoleDataList -> partialRoleDataList.stream().map(partialRoleDataField -> new PartialRole(this.getClient(), partialRoleDataField, this.getGuildId().orElseThrow(() -> new NoSuchElementException("No value present")).asLong())).collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
     }
 
     /**
