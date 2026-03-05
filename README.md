@@ -4,7 +4,7 @@
 
 [![Support Server Invite](https://img.shields.io/discord/208023865127862272.svg?color=7289da&label=Discord4J&logo=discord&style=flat-square)](https://discord.gg/d4j)
 [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core/3.3.svg?style=flat-square)](https://search.maven.org/artifact/com.discord4j/discord4j-core)
-[![Javadocs](https://javadoc.io/badge2/com.discord4j/discord4j-core/3.3.0/javadoc.svg?color=blue&style=flat-square)](https://javadoc.io/doc/com.discord4j/discord4j-core/3.3.0)
+[![Javadocs](https://javadoc.io/badge2/com.discord4j/discord4j-core/3.3.1/javadoc.svg?color=blue&style=flat-square)](https://javadoc.io/doc/com.discord4j/discord4j-core/3.3.1)
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/Discord4J/Discord4J/gradle.yml?branch=master&logo=github&style=flat-square)](https://github.com/Discord4J/Discord4J/actions)
 
 Discord4J is a fast, powerful, unopinionated, reactive library to enable quick and easy development of Discord bots for Java, Kotlin, and other JVM languages using the official [Discord Bot API](https://discord.com/developers/docs/intro).
@@ -44,12 +44,12 @@ For a full project example, check out our example projects repository [here](htt
 * [Documentation](https://docs.discord4j.com)
 * [Example Projects](https://github.com/Discord4J/example-projects)
 * [More examples](https://docs.discord4j.com/examples)
-* [Gateway Intents](https://discord.com/developers/docs/events/gateway#gateway-intents)
+* [Gateway Intents](https://docs.discord.com/developers/events/gateway#gateway-intents)
 * [Discord](https://discord.gg/d4j)
 
 ## 💎 Benefits
 
-* 🚀 **Reactive** - Discord4J follows the [reactive-streams](http://www.reactive-streams.org/) protocol to ensure Discord bots run smoothly and efficiently regardless of size.
+* 🚀 **Reactive** - Discord4J follows the [reactive-streams](https://www.reactive-streams.org/) protocol to ensure Discord bots run smoothly and efficiently regardless of size.
 
 * 📜 **Official** - Automatic rate limiting, automatic reconnection strategies, and consistent naming conventions are among the many features Discord4J offers to ensure your Discord bots run up to Discord's specifications and to provide the least amount of surprises when interacting with our library.
 
@@ -251,7 +251,7 @@ GatewayDiscordClient client = DiscordClient.create(token)
 
 ### 📑 Message Embeds
 
-<img align="right" src="https://user-images.githubusercontent.com/6114565/82622174-b44a5900-9ba2-11ea-9bc1-2f558958f4cb.png" height=420px>
+<img style="float: right;" alt="message-embed" src="https://user-images.githubusercontent.com/6114565/82622174-b44a5900-9ba2-11ea-9bc1-2f558958f4cb.png" height=420px>
 
 ```java
 // IMAGE_URL = https://cdn.betterttv.net/emote/55028cd2135896936880fdd7/3x
