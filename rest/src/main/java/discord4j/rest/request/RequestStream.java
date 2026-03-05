@@ -49,7 +49,7 @@ import static reactor.core.publisher.Sinks.EmitFailureHandler.FAIL_FAST;
  * serialization ensures proper rate limit handling.
  * <p>
  * The flow of a request through the stream is as follows:
- *
+ * <p>
  * <img src="{@docRoot}img/RequestStream_Flow.png">
  */
 class RequestStream {

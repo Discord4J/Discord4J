@@ -21,7 +21,7 @@ package discord4j.rest.interaction;
  */
 public interface InteractionValidator {
     /**
-     * See https://discord.com/developers/docs/interactions/slash-commands#security-and-authorization
+     * See <a href="https://discord.com/developers/docs/interactions/slash-commands#security-and-authorization">https://discord.com/developers/docs/interactions/slash-commands#security-and-authorization</a>
      *
      * @param signature the signature header of the request
      * @param timestamp the timestamp header of the request

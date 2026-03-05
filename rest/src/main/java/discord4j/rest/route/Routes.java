@@ -975,9 +975,9 @@ public abstract class Routes {
     public static final Route GUILD_TEMPLATE_GET = Route.get("/guilds/templates/{template.code}");
 
     /**
-     * Create a new guild from template. Returns a guild object on success. Fires a Guild Create Gateway event.
-     *
-     * By default this endpoint can be used only by bots in less than 10 guilds.
+     * Create a new guild from a template. Returns a guild object on success. Fires a Guild Create Gateway event.
+     * <br>
+     * By default, this endpoint can be used only by bots in less than 10 guilds.
      *
      * @see <a href="https://discord.com/developers/docs/resources/template#create-guild-from-template">
      *         https://discord.com/developers/docs/resources/template#create-guild-from-template</a>
