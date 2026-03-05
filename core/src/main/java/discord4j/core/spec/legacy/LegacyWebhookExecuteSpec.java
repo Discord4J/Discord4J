@@ -19,7 +19,6 @@ package discord4j.core.spec.legacy;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Attachment;
-import discord4j.discordjson.Id;
 import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.WebhookExecuteRequest;

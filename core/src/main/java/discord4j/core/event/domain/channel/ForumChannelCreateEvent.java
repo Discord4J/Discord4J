@@ -18,7 +18,6 @@ package discord4j.core.event.domain.channel;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.ForumChannel;
-import discord4j.core.object.entity.channel.NewsChannel;
 import discord4j.gateway.ShardInfo;
 
 /**

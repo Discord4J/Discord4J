@@ -2,7 +2,6 @@ package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.Id;
-import discord4j.discordjson.json.ForumTagData;
 import discord4j.discordjson.json.ForumTagParamsData;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;

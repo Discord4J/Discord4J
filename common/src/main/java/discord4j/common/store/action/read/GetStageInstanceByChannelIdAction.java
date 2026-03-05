@@ -19,7 +19,6 @@ package discord4j.common.store.action.read;
 
 import discord4j.common.store.api.StoreAction;
 import discord4j.discordjson.json.StageInstanceData;
-import discord4j.discordjson.json.VoiceStateData;
 
 public class GetStageInstanceByChannelIdAction implements StoreAction<StageInstanceData> {
 

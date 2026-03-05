@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.monetization.Entitlement;
 import discord4j.core.object.monetization.Subscription;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Multimap;

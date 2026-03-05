@@ -2,10 +2,7 @@ package discord4j.core.object;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.BulkBanResponseData;
-import discord4j.discordjson.json.RegionData;
-import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.stream.Collectors;

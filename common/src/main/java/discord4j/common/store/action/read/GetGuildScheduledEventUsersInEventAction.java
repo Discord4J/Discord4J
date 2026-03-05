@@ -19,7 +19,6 @@ package discord4j.common.store.action.read;
 
 import discord4j.common.store.api.StoreAction;
 import discord4j.discordjson.Id;
-import discord4j.discordjson.json.GuildScheduledEventUserData;
 
 public class GetGuildScheduledEventUsersInEventAction implements StoreAction<Id> {
 

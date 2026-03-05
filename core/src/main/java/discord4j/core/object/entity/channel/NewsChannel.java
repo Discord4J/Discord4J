@@ -19,18 +19,14 @@ package discord4j.core.object.entity.channel;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.FollowedChannel;
-import discord4j.core.object.ThreadListPart;
-import discord4j.core.object.entity.Message;
 import discord4j.core.spec.NewsChannelEditMono;
 import discord4j.core.spec.NewsChannelEditSpec;
-import discord4j.core.spec.StartThreadFromMessageMono;
 import discord4j.core.spec.StartThreadWithoutMessageMono;
 import discord4j.core.spec.StartThreadWithoutMessageSpec;
 import discord4j.core.spec.legacy.LegacyNewsChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.NewsChannelFollowRequest;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;

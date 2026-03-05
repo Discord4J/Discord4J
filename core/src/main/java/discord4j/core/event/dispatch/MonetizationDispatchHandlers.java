@@ -1,6 +1,5 @@
 package discord4j.core.event.dispatch;
 
-import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.monetization.EntitlementCreateEvent;
 import discord4j.core.object.monetization.Entitlement;
 import discord4j.discordjson.json.EntitlementData;

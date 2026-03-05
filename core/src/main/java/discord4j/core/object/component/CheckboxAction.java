@@ -19,7 +19,6 @@ package discord4j.core.object.component;
 import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.json.ImmutableComponentData;
 
-import java.util.List;
 import java.util.Optional;
 
 public class CheckboxAction extends ActionComponent implements ICanBeUsedInLabelComponent {
