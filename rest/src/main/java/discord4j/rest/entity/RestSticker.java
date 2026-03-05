@@ -78,7 +78,7 @@ public class RestSticker {
     }
 
     /**
-     * Modify this guild sticker. Requires the {@link Permission#MANAGE_EMOJIS_AND_STICKERS} permission. Returns the updated sticker
+     * Modify this guild sticker. Requires the {@link Permission#MANAGE_GUILD_EXPRESSIONS} permission. Returns the updated sticker
      * object on success.
      *
      * @param request the guild sticker modify request
@@ -91,7 +91,7 @@ public class RestSticker {
     }
 
     /**
-     * Delete this guild sticker. Requires the {@link Permission#MANAGE_EMOJIS_AND_STICKERS} permission. Returns empty on success.
+     * Delete this guild sticker. Requires the {@link Permission#MANAGE_GUILD_EXPRESSIONS} permission. Returns empty on success.
      *
      * @param reason an optional reason for the audit log
      * @return a {@link Mono} where, upon subscription, emits a complete signal on success. If an error is received, it
