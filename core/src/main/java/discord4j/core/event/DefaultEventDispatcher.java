@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package discord4j.core.event;
 
 import discord4j.common.LogUtil;
@@ -27,6 +26,7 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.concurrent.Queues;
 
+import reactor.util.context.Context;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -73,7 +73,7 @@ public class DefaultEventDispatcher implements EventDispatcher {
                 .ofType(eventClass)
                 .<E>handle((event, sink) -> {
                     if (log.isTraceEnabled()) {
-                        log.trace(format(sink.currentContext().put(LogUtil.KEY_SHARD_ID,
+                        log.trace(format(Context.of(sink.contextView()).put(LogUtil.KEY_SHARD_ID,
                                 event.getShardInfo().getIndex()), "{}"), event.toString());
                     }
                     sink.next(event);

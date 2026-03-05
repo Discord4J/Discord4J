@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package discord4j.voice;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -182,22 +181,22 @@ public class DefaultVoiceGatewayClient {
                     .subscribe(newValue -> {
                         VoiceServerOptions current = serverOptions.get();
                         if (current != null && !current.getEndpoint().equals(newValue.getEndpoint())) {
-                            log.debug(format(sink.currentContext(), "Voice server endpoint change: {}"),
+                            log.debug(format(sink.contextView(), "Voice server endpoint change: {}"),
                                     current.getEndpoint(), newValue.getEndpoint());
                             serverOptions.set(newValue);
                             VoiceWebsocketHandler sessionHandlerToClose = sessionHandler;
                             if (sessionHandlerToClose != null) {
                                 sessionHandlerToClose.close(DisconnectBehavior.retryAbruptly(
-                                        new VoiceServerUpdateReconnectException(sink.currentContext())));
+                                        new VoiceServerUpdateReconnectException(sink.contextView())));
                             }
                         }
                     }));
 
             outerCleanup.add(connect(voiceServerOptions, session, sink)
-                    .contextWrite(sink.currentContext())
+                    .contextWrite(sink.contextView())
                     .subscribe(null,
-                            t -> log.debug(format(sink.currentContext(), "Voice gateway error: {}"), t.toString()),
-                            () -> log.debug(format(sink.currentContext(), "Voice gateway completed"))
+                            t -> log.debug(format(sink.contextView(), "Voice gateway error: {}"), t.toString()),
+                            () -> log.debug(format(sink.contextView(), "Voice gateway completed"))
                     ));
 
             sink.onCancel(outerCleanup);
@@ -225,13 +224,14 @@ public class DefaultVoiceGatewayClient {
                                         if (s == VoiceConnection.State.RESUMING) {
                                             log.info(format(context, "Attempting to resume"));
                                             emissionStrategy.emitNext(outbound, new Resume(guildId.asString(),
-                                                Objects.requireNonNull(session.get()),
+                                                    Objects.requireNonNull(session.get()),
                                                     Objects.requireNonNull(serverOptions.get()).getToken()));
                                         } else {
                                             nextState(VoiceConnection.State.CONNECTING);
                                             log.info(format(context, "Identifying"));
                                             emissionStrategy.emitNext(outbound, new Identify(guildId.asString(),
-                                                    selfId.asString(), Objects.requireNonNull(session.get()), Objects.requireNonNull(serverOptions.get()).getToken()));
+                                                    selfId.asString(), Objects.requireNonNull(session.get()),
+                                                    Objects.requireNonNull(serverOptions.get()).getToken()));
                                         }
                                     });
 
@@ -272,7 +272,8 @@ public class DefaultVoiceGatewayClient {
                                                                     return;
                                                                 }
 
-                                                                log.info("Using encryption mode {}", this.encryptionMode.name());
+                                                                log.info("Using encryption mode {}",
+                                                                        this.encryptionMode.name());
 
                                                                 emissionStrategy.emitNext(outbound,
                                                                         new SelectProtocol(VoiceSocket.PROTOCOL,
@@ -294,7 +295,8 @@ public class DefaultVoiceGatewayClient {
 
                                             PacketTransformer transformer;
                                             try {
-                                                transformer = new PacketTransformer(ssrc, Objects.requireNonNull(encryptionMode), secretKey);
+                                                transformer = new PacketTransformer(ssrc,
+                                                        Objects.requireNonNull(encryptionMode), secretKey);
                                             } catch (GeneralSecurityException e) {
                                                 log.error("Failed to create packet transformer", e);
                                                 nextState(VoiceConnection.State.DISCONNECTED);
@@ -333,7 +335,8 @@ public class DefaultVoiceGatewayClient {
                                             .maxFramePayloadLength(Integer.MAX_VALUE)
                                             .build())
                                     .uri(fullEndpoint)
-                                    .handle((in, out) -> onOpen.then(Objects.requireNonNull(sessionHandler).handle(in, out)))
+                                    .handle((in, out) -> onOpen.then(Objects.requireNonNull(sessionHandler).handle(in
+                                            , out)))
                                     .contextWrite(LogUtil.clearContext())
                                     .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2()))
                                     .then();

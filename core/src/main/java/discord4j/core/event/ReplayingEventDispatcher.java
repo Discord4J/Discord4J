@@ -31,6 +31,7 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.concurrent.Queues;
 
+import reactor.util.context.Context;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -112,7 +113,7 @@ public class ReplayingEventDispatcher implements EventDispatcher {
                 .ofType(eventClass)
                 .<E>handle((event, sink) -> {
                     if (log.isTraceEnabled()) {
-                        log.trace(format(sink.currentContext().put(LogUtil.KEY_SHARD_ID,
+                        log.trace(format(Context.of(sink.contextView()).put(LogUtil.KEY_SHARD_ID,
                                 event.getShardInfo().getIndex()), "{}"), event.toString());
                     }
                     sink.next(event);
