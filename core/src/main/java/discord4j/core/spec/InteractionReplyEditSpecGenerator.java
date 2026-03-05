@@ -112,9 +112,7 @@ interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<Webhoo
         }
 
         WebhookMessageEditRequest json = webhookMessageEditRequestBuilder.build();
-        return MultipartRequest.ofRequestAndFiles(json, Stream.concat(files().stream(), fileSpoilers().stream())
-            .map(MessageCreateFields.File::asRequest)
-            .collect(Collectors.toList()));
+        return MultipartRequest.ofRequestAndFiles(json, filesCollected);
     }
 }
 
