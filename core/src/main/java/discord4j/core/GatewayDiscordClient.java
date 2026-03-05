@@ -905,11 +905,9 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     @Experimental // This method could not be tested due to the lack of a Discord verified application
     public Flux<SKU> getSKUs() {
-        return getApplicationInfo().flatMapMany(applicationInfo -> {
-            return getRestClient().getMonetizationService()
-                .getAllSkus(applicationInfo.getId().asLong())
-                .map(data -> new SKU(this, data));
-        });
+        return getApplicationInfo().flatMapMany(applicationInfo -> getRestClient().getMonetizationService()
+            .getAllSkus(applicationInfo.getId().asLong())
+            .map(data -> new SKU(this, data)));
     }
 
     /**
@@ -973,10 +971,8 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     @Experimental // This method could not be tested due to the lack of a Discord verified application
     public Mono<Void> deleteTestEntitlement(Snowflake entitlementId) {
-        return getApplicationInfo().flatMap(applicationInfo -> {
-            return getRestClient().getMonetizationService()
-                .deleteTestEntitlement(applicationInfo.getId().asLong(), entitlementId.asLong());
-        });
+        return getApplicationInfo().flatMap(applicationInfo -> getRestClient().getMonetizationService()
+            .deleteTestEntitlement(applicationInfo.getId().asLong(), entitlementId.asLong()));
     }
 
     /**

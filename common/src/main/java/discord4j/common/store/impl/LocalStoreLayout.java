@@ -891,14 +891,14 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     @Override
     public Mono<Void> onThreadListSync(int shardIndex, ThreadListSync dispatch) {
         return Mono.fromRunnable(() -> {
-            dispatch.threads().forEach(thread -> channels.put(thread.id().asLong(), ImmutableChannelData.copyOf(thread)));
-            dispatch.members().forEach(member -> saveThreadMember(member));
+            dispatch.threads().forEach(thread -> this.channels.put(thread.id().asLong(), ImmutableChannelData.copyOf(thread)));
+            dispatch.members().forEach(this::saveThreadMember);
         });
     }
 
     @Override
     public Mono<ThreadMemberData> onThreadMemberUpdate(int shardIndex, ThreadMemberUpdate dispatch) {
-        return Mono.fromCallable(() -> saveThreadMember(dispatch.member()));
+        return Mono.fromCallable(() -> this.saveThreadMember(dispatch.member()));
     }
 
     @Override
