@@ -24,9 +24,9 @@ import discord4j.discordjson.json.GuildEmojiCreateRequest;
 import discord4j.discordjson.json.GuildEmojiModifyRequest;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 public class EmojiService extends RestService {
 

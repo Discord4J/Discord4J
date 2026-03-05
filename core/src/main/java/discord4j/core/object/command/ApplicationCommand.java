@@ -17,7 +17,6 @@
 
 package discord4j.core.object.command;
 
-import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;

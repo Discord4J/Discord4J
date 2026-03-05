@@ -18,7 +18,6 @@
 package discord4j.core.spec;
 
 import discord4j.core.object.entity.Webhook;
-import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.object.entity.channel.TopLevelGuildMessageChannel;
 import discord4j.discordjson.json.WebhookCreateRequest;
 import discord4j.discordjson.possible.Possible;

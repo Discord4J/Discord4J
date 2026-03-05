@@ -25,8 +25,8 @@ import discord4j.core.shard.MemberRequestFilter;
 import discord4j.gateway.ShardInfo;
 import discord4j.gateway.intent.Intent;
 import discord4j.gateway.intent.IntentSet;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,8 +50,7 @@ public class MemberChunkEvent extends GuildEvent {
     private final int chunkIndex;
     private final int chunkCount;
     private final List<Snowflake> notFound;
-    @Nullable
-    private final String nonce;
+    private final @Nullable String nonce;
 
     public MemberChunkEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<Member> members,
                             int chunkIndex, int chunkCount, List<Snowflake> notFound, @Nullable String nonce) {

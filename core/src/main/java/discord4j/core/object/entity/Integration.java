@@ -22,8 +22,8 @@ import discord4j.core.object.IntegrationAccount;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.IntegrationData;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -239,7 +239,7 @@ public class Integration implements Entity {
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         return EntityUtil.equals(this, obj);
     }
 

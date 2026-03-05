@@ -4,11 +4,10 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.User;
-import discord4j.core.spec.AutoModRuleEditMono;
 import discord4j.core.spec.AutoModRuleEditSpec;
 import discord4j.discordjson.json.AutoModRuleData;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -169,7 +168,7 @@ public class AutoModRule implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the rule has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> delete(@Nullable final String reason) {
+    public Mono<Void> delete(final @Nullable String reason) {
         return gateway.getRestClient().getAutoModService()
                 .deleteAutoModRule(getGuildId().asLong(), getId().asLong(), reason);
     }

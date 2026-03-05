@@ -1,10 +1,8 @@
 package discord4j.core.object;
 
 import discord4j.discordjson.json.InstallParamsData;
-import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**

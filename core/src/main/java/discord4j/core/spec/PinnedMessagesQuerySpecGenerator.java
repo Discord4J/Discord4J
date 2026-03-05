@@ -19,9 +19,9 @@ package discord4j.core.spec;
 import discord4j.core.object.entity.PinnedMessageReference;
 import discord4j.core.object.entity.channel.MessageChannel;
 import org.immutables.value.Value;
+import org.jspecify.annotations.Nullable;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Flux;
-import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.util.HashMap;

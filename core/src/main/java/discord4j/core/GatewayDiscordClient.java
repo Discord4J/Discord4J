@@ -65,7 +65,6 @@ import discord4j.discordjson.json.SendSoundboardSoundRequest;
 import discord4j.discordjson.json.UpdateCurrentUserVoiceStateRequest;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
-import discord4j.discordjson.json.gateway.RequestSoundboardSounds;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayClientGroup;
@@ -78,12 +77,12 @@ import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionFactory;
 import discord4j.voice.VoiceConnectionRegistry;
 import io.netty.handler.timeout.TimeoutException;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -906,11 +905,9 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     @Experimental // This method could not be tested due to the lack of a Discord verified application
     public Flux<SKU> getSKUs() {
-        return getApplicationInfo().flatMapMany(applicationInfo -> {
-            return getRestClient().getMonetizationService()
-                .getAllSkus(applicationInfo.getId().asLong())
-                .map(data -> new SKU(this, data));
-        });
+        return getApplicationInfo().flatMapMany(applicationInfo -> getRestClient().getMonetizationService()
+            .getAllSkus(applicationInfo.getId().asLong())
+            .map(data -> new SKU(this, data)));
     }
 
     /**
@@ -974,10 +971,8 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     @Experimental // This method could not be tested due to the lack of a Discord verified application
     public Mono<Void> deleteTestEntitlement(Snowflake entitlementId) {
-        return getApplicationInfo().flatMap(applicationInfo -> {
-            return getRestClient().getMonetizationService()
-                .deleteTestEntitlement(applicationInfo.getId().asLong(), entitlementId.asLong());
-        });
+        return getApplicationInfo().flatMap(applicationInfo -> getRestClient().getMonetizationService()
+            .deleteTestEntitlement(applicationInfo.getId().asLong(), entitlementId.asLong()));
     }
 
     /**

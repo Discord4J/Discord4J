@@ -20,8 +20,8 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 /**
  * Dispatched when the current user is initially connecting to a voice channel, and when the current voice instance
@@ -35,8 +35,7 @@ public class VoiceServerUpdateEvent extends Event {
 
     private final String token;
     private final long guildId;
-    @Nullable
-    private final String endpoint;
+    private final @Nullable String endpoint;
 
     public VoiceServerUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, String token, long guildId, @Nullable String endpoint) {
         super(gateway, shardInfo);
@@ -79,8 +78,7 @@ public class VoiceServerUpdateEvent extends Event {
      *
      * @return The void server host's endpoint URL.
      */
-    @Nullable
-    public String getEndpoint() {
+    public @Nullable String getEndpoint() {
         return endpoint;
     }
 

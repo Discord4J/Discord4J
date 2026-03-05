@@ -20,9 +20,9 @@ import discord4j.core.object.reaction.Reaction;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.ReactionData;
 import discord4j.common.util.Snowflake;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
-import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -39,7 +39,7 @@ public abstract class Emoji {
      * @param name The name of the custom emoji.
      * @param isAnimated Whether the custom emoji is animated.
      * @return A custom emoji using the given information.
-     * @see CustomEmoji#of(Long, String, boolean) 
+     * @see CustomEmoji#of(Long, String, boolean)
      */
     public static CustomEmoji custom(Snowflake id, @Nullable String name, boolean isAnimated) {
         return CustomEmoji.of(id, name, isAnimated);
@@ -61,7 +61,7 @@ public abstract class Emoji {
      *
      * @param raw The raw Unicode string for the emoji.
      * @return A Unicode emoji using the given information.
-     * @see UnicodeEmoji#of(String) 
+     * @see UnicodeEmoji#of(String)
      */
     public static UnicodeEmoji unicode(String raw) {
         return UnicodeEmoji.of(raw);
@@ -80,7 +80,7 @@ public abstract class Emoji {
      *
      * @param codepoints The codepoints that make up the emoji.
      * @return A Unicode emoji using the given information.
-     * @see UnicodeEmoji#ofCodePoints(String...) 
+     * @see UnicodeEmoji#ofCodePoints(String...)
      */
     public static UnicodeEmoji codepoints(String... codepoints) {
         return UnicodeEmoji.ofCodePoints(codepoints);
@@ -93,9 +93,10 @@ public abstract class Emoji {
      * @param name The name of the custom emoji OR the raw Unicode string for the emoji.
      * @param isAnimated Whether the emoji is animated OR false if the emoji is a Unicode emoji.
      * @return An emoji using the given information.
+     * @throws NullPointerException if the name and id are null, and the emoji is not a Unicode emoji
      */
-    public static Emoji of(@Nullable Long id, String name, boolean isAnimated) {
-        return id == null ? Emoji.unicode(name) : Emoji.custom(Snowflake.of(id), name, isAnimated);
+    public static Emoji of(@Nullable Long id, @Nullable String name, boolean isAnimated) {
+        return id == null ? Emoji.unicode(Objects.requireNonNull(name)) : Emoji.custom(Snowflake.of(id), name, isAnimated);
     }
 
     /**

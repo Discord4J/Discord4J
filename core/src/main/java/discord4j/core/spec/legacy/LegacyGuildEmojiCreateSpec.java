@@ -20,7 +20,7 @@ import discord4j.core.object.entity.GuildEmoji;
 import discord4j.discordjson.json.GuildEmojiCreateRequest;
 import discord4j.rest.util.Image;
 import discord4j.common.util.Snowflake;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -33,11 +33,10 @@ import java.util.stream.Collectors;
  */
 public class LegacyGuildEmojiCreateSpec implements LegacyAuditSpec<GuildEmojiCreateRequest> {
 
-    private String name;
-    private String image;
+    private @Nullable String name;
+    private @Nullable String image;
     private final Set<Snowflake> roles = new HashSet<>();
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Sets the name for the created {@link GuildEmoji}.
@@ -73,19 +72,21 @@ public class LegacyGuildEmojiCreateSpec implements LegacyAuditSpec<GuildEmojiCre
     }
 
     @Override
-    public LegacyGuildEmojiCreateSpec setReason(@Nullable final String reason) {
+    public LegacyGuildEmojiCreateSpec setReason(final @Nullable String reason) {
         this.reason = reason;
         return this;
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 
     @Override
     public GuildEmojiCreateRequest asRequest() {
+        if (name == null || image == null) {
+            throw new IllegalStateException("Name and image must be set.");
+        }
         return GuildEmojiCreateRequest.builder()
                 .name(name)
                 .image(image)

@@ -23,11 +23,12 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.dispatch.EventNames;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
 
@@ -36,7 +37,7 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
     private static final String T_FIELD = "t";
     private static final String S_FIELD = "s";
 
-    private static final Map<String, Class<? extends Dispatch>> dispatchTypes = new HashMap<>();
+    private static final Map<String, @Nullable Class<? extends Dispatch>> dispatchTypes = new HashMap<>();
 
     static {
         dispatchTypes.put(EventNames.READY, Ready.class);
@@ -116,6 +117,7 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         super(GatewayPayload.class);
     }
 
+    @SuppressWarnings({"unchecked","rawtypes"})
     @Override
     public GatewayPayload<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonNode payload = p.getCodec().readTree(p);
@@ -130,16 +132,15 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
             JsonNode unavailable = d.get("unavailable");
             if (unavailable != null && unavailable.asBoolean()) {
                 PayloadData data = p.getCodec().treeToValue(d, UnavailableGuildCreate.class);
-                return new GatewayPayload(Opcode.forRaw(op), data, s, t);
+                return new GatewayPayload(Objects.requireNonNull(Opcode.forRaw(op)), data, s, t);
             }
         }
         PayloadData data = payloadType == null ? null : p.getCodec().treeToValue(payload.get(D_FIELD), payloadType);
 
-        return new GatewayPayload(Opcode.forRaw(op), data, s, t);
+        return new GatewayPayload(Objects.requireNonNull(Opcode.forRaw(op)), data, s, t);
     }
 
-    @Nullable
-    private static Class<? extends PayloadData> getPayloadType(int op, String t) {
+    private static @Nullable Class<? extends PayloadData> getPayloadType(int op, String t) {
         if (op == Opcode.DISPATCH.getRawOp()) {
             if (!dispatchTypes.containsKey(t)) {
                 throw new IllegalArgumentException("Attempt to deserialize payload with unknown event type: " + t);

@@ -5,6 +5,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.emoji.Emoji;
 import discord4j.discordjson.json.OnboardingPromptOptionData;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +24,7 @@ public class OnboardingPromptOption implements Entity {
     private final Snowflake id;
     private final List<Snowflake> addedChannelIds;
     private final List<Snowflake> roleIds;
-    private final Emoji emoji;
+    private final @Nullable Emoji emoji;
 
     public OnboardingPromptOption(GatewayDiscordClient client, OnboardingPromptOptionData data) {
         this.client = client;

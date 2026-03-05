@@ -31,9 +31,9 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.Image;
 import discord4j.common.util.Snowflake;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.EnumSet;
 import java.util.Objects;
@@ -120,8 +120,7 @@ public class User implements Entity {
      * @deprecated This method will be removed once the system change is complete.
      */
     @Deprecated
-    @Nullable
-    public final String getDiscriminator() {
+    public final @Nullable String getDiscriminator() {
         return data.discriminator();
     }
 
@@ -204,11 +203,13 @@ public class User implements Entity {
      * @return The default avatar URL for this user.
      */
     public final String getDefaultAvatarUrl() {
-        if (isMigrated()) {
+        if (this.isMigrated()) {
             return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, (getId().asLong() >> 22) % 6), PNG);
         }
 
-        return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, Integer.parseInt(getDiscriminator()) % 5), PNG);
+        final String discriminator = Optional.ofNullable(getDiscriminator()).orElse("0000");
+
+        return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, Integer.parseInt(discriminator) % 5), PNG);
     }
 
     /**
@@ -379,7 +380,7 @@ public class User implements Entity {
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         return EntityUtil.equals(this, obj);
     }
 

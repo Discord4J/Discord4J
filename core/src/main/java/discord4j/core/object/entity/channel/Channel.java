@@ -22,8 +22,8 @@ import discord4j.core.object.entity.Entity;
 import discord4j.core.util.MentionUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.rest.entity.RestChannel;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.EnumSet;
 
@@ -198,9 +198,9 @@ public interface Channel extends Entity {
         }
 
         /**
-         * Gets the shift amount associated to this bit value
+         * Gets the shift amount associated with this bit value
          *
-         * @return N in 1 << N that is the bit value for this flag
+         * @return N in <code>1 << N</code> that is the bit value for this flag
          */
         public int getShiftValue() {
             return shiftValue;

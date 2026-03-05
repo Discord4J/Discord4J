@@ -15,7 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-@NonNullApi
+@NullMarked
 package discord4j.common.store.legacy;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

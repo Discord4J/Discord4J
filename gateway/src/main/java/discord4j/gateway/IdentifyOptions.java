@@ -19,7 +19,7 @@ package discord4j.gateway;
 
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.gateway.intent.IntentSet;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -29,13 +29,10 @@ import java.util.Optional;
 public class IdentifyOptions {
 
     private final ShardInfo shardInfo;
-    @Nullable
-    private final StatusUpdate initialStatus;
-    @Nullable
-    private final IntentSet intents;
+    private final @Nullable StatusUpdate initialStatus;
+    private final @Nullable IntentSet intents;
     private final int largeThreshold;
-    @Nullable
-    private final SessionInfo resumeSession;
+    private final @Nullable SessionInfo resumeSession;
 
     /**
      * Create a new Gateway authentication policy.
@@ -98,10 +95,10 @@ public class IdentifyOptions {
     public static class Builder {
 
         private final ShardInfo shardInfo;
-        private StatusUpdate initialStatus;
-        private IntentSet intents;
+        private @Nullable StatusUpdate initialStatus;
+        private @Nullable IntentSet intents;
         private int largeThreshold = 250;
-        private SessionInfo resumeSession;
+        private @Nullable SessionInfo resumeSession;
 
         /**
          * Create a builder using the given shard information.

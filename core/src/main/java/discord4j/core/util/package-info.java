@@ -17,7 +17,7 @@
 /**
  * Core utilities to manipulate objects.
  */
-@NonNullApi
+@NullMarked
 package discord4j.core.util;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

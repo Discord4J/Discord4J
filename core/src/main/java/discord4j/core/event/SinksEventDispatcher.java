@@ -14,17 +14,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package discord4j.core.event;
 
 import discord4j.common.LogUtil;
 import discord4j.common.annotations.Experimental;
 import discord4j.common.sinks.EmissionStrategy;
 import discord4j.core.event.domain.Event;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
+import reactor.util.context.Context;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.concurrent.Queues;
@@ -67,13 +68,13 @@ public class SinksEventDispatcher implements EventDispatcher {
 
     @Override
     public <E extends Event> Flux<E> on(Class<E> eventClass) {
-        AtomicReference<Subscription> subscription = new AtomicReference<>();
-        return events.asFlux()
-                .publishOn(eventScheduler)
+        AtomicReference<@Nullable Subscription> subscription = new AtomicReference<>();
+        return this.events.asFlux()
+                .publishOn(this.eventScheduler)
                 .ofType(eventClass)
                 .<E>handle((event, sink) -> {
                     if (log.isTraceEnabled()) {
-                        log.trace(format(sink.currentContext().put(LogUtil.KEY_SHARD_ID,
+                        log.trace(format(Context.of(sink.contextView()).put(LogUtil.KEY_SHARD_ID,
                                 event.getShardInfo().getIndex()), "{}"), event.toString());
                     }
                     sink.next(event);
@@ -88,19 +89,20 @@ public class SinksEventDispatcher implements EventDispatcher {
                 .doFinally(signal -> {
                     if (log.isDebugEnabled()) {
                         log.debug("Subscription {} to {} disposed due to {}",
-                                Integer.toHexString(subscription.get().hashCode()), eventClass.getSimpleName(), signal);
+                                Integer.toHexString(Objects.requireNonNull(subscription.get()).hashCode()),
+                                eventClass.getSimpleName(), signal);
                     }
                 });
     }
 
     @Override
     public void publish(Event event) {
-        emissionStrategy.emitNext(events, event);
+        this.emissionStrategy.emitNext(events, event);
     }
 
     @Override
     public void shutdown() {
-        emissionStrategy.emitComplete(events);
+        this.emissionStrategy.emitComplete(events);
     }
 
     /**
@@ -108,15 +110,16 @@ public class SinksEventDispatcher implements EventDispatcher {
      */
     public static class Builder {
 
-        protected Function<Sinks.ManySpec, Sinks.Many<Event>> eventSinkFactory;
-        protected EmissionStrategy emissionStrategy;
-        protected Scheduler eventScheduler;
+        protected @Nullable Function<Sinks.ManySpec, Sinks.Many<Event>> eventSinkFactory;
+        protected @Nullable EmissionStrategy emissionStrategy;
+        protected @Nullable Scheduler eventScheduler;
 
         protected Builder() {
         }
 
         /**
-         * Set the underlying {@link reactor.core.publisher.Sinks.Many} the dispatcher will use to queue and distribute events. Defaults
+         * Set the underlying {@link reactor.core.publisher.Sinks.Many} the dispatcher will use to queue and
+         * distribute events. Defaults
          * to using a multicast buffering sink.
          *
          * @param eventSinkFactory the custom sink factory for events
@@ -153,16 +156,16 @@ public class SinksEventDispatcher implements EventDispatcher {
         }
 
         public EventDispatcher build() {
-            if (eventSinkFactory == null) {
-                eventSinkFactory = spec -> spec.multicast().onBackpressureBuffer(Queues.SMALL_BUFFER_SIZE, false);
+            if (this.eventSinkFactory == null) {
+                this.eventSinkFactory = spec -> spec.multicast().onBackpressureBuffer(Queues.SMALL_BUFFER_SIZE, false);
             }
-            if (emissionStrategy == null) {
-                emissionStrategy = EmissionStrategy.timeoutDrop(Duration.ofSeconds(10));
+            if (this.emissionStrategy == null) {
+                this.emissionStrategy = EmissionStrategy.timeoutDrop(Duration.ofSeconds(10));
             }
-            if (eventScheduler == null) {
-                eventScheduler = DEFAULT_EVENT_SCHEDULER.get();
+            if (this.eventScheduler == null) {
+                this.eventScheduler = DEFAULT_EVENT_SCHEDULER.get();
             }
-            return new SinksEventDispatcher(eventSinkFactory, emissionStrategy, eventScheduler);
+            return new SinksEventDispatcher(this.eventSinkFactory, this.emissionStrategy, this.eventScheduler);
         }
 
     }

@@ -84,7 +84,7 @@ public interface EventDispatcher {
      * For more alternatives to handling errors, please see
      * <a href="https://docs.discord4j.com/error-handling">Error Handling</a> docs page.
      *
-     * @param eventClass the event class to obtain events from
+     * @param eventClass the event class to get events from
      * @param <E> the type of the event class
      * @return a new {@link Flux} with the requested events
      */
@@ -113,7 +113,7 @@ public interface EventDispatcher {
      * Continuing the chain after {@code on(class, event -> ...)} will require your own error handling strategy.
      * Check the docs for {@link #on(Class)} for more details.
      *
-     * @param eventClass the event class to obtain events from
+     * @param eventClass the event class to get events from
      * @param mapper an event mapping function called on each event. If you do not wish to perform further operations
      * you can return {@code Mono.empty()}.
      * @param <E> the type of the event class
@@ -232,7 +232,7 @@ public interface EventDispatcher {
 
     /**
      * Create an {@link EventDispatcher} that will buffer incoming events up to the given {@code bufferSize} elements,
-     * where earliest events will be dropped in favor of retaining the latest ones. Startup events collected before
+     * where the earliest events will be dropped in favor of retaining the latest ones. Startup events collected before
      * the first subscription are only forwarded to that subscriber.
      *
      * @param bufferSize the number of events to keep in the backlog
@@ -240,6 +240,7 @@ public interface EventDispatcher {
      * @deprecated due to Processor API being deprecated, we recommend moving to {@link #replayingWithSize(int)} for a
      * dispatcher that is able to retain a given number of latest events
      */
+    @Deprecated
     static EventDispatcher withLatestEvents(int bufferSize) {
         return builder()
                 .eventProcessor(EmitterProcessor.create(bufferSize, false))

@@ -20,7 +20,7 @@ package discord4j.rest.request;
 import discord4j.common.annotations.Experimental;
 import discord4j.rest.route.Route;
 import discord4j.rest.route.Routes;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.function.Predicate;
@@ -32,11 +32,9 @@ import java.util.function.Predicate;
 @Experimental
 public class RouteMatcher {
 
-    @Nullable
-    private final DiscordWebRequest request;
+    private final @Nullable DiscordWebRequest request;
 
-    @Nullable
-    private final Predicate<Map<String, String>> requestVariableMatcher;
+    private final @Nullable Predicate<Map<String, String>> requestVariableMatcher;
 
     private RouteMatcher(@Nullable DiscordWebRequest request) {
         this(request, null);

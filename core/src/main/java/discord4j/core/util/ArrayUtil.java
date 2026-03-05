@@ -92,8 +92,8 @@ public class ArrayUtil {
     }
 
     public static boolean contains(long[] array, long l) {
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] == l) {
+        for (final long value : array) {
+            if (value == l) {
                 return true;
             }
         }

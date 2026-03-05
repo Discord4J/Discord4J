@@ -21,8 +21,8 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 
@@ -39,8 +39,7 @@ public class RoleDeleteEvent extends RoleEvent {
 
     private final long guildId;
     private final long roleId;
-    @Nullable
-    private final Role role;
+    private final @Nullable Role role;
 
     public RoleDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long roleId, @Nullable Role role) {
         super(gateway, shardInfo);

@@ -19,7 +19,7 @@ package discord4j.core.object.component;
 import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -292,7 +292,8 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInContainerComponent}
      * @return a {@link Container} containing the existing and added components
      */
-    public <C extends MessageComponent & ICanBeUsedInContainerComponent> Container withAddedComponents(C... components) {
+    @SafeVarargs
+    public final <C extends MessageComponent & ICanBeUsedInContainerComponent> Container withAddedComponents(C... components) {
         List<MessageComponent> componentsToAdd = new ArrayList<>(getChildren());
         componentsToAdd.addAll(Arrays.asList(components));
         return new Container(ComponentData.builder().from(this.getData()).components(componentsToAdd.stream().map(MessageComponent::getData).collect(Collectors.toList())).build());

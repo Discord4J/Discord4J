@@ -17,7 +17,7 @@
 /**
  * Classes supporting reaction functionality like {@link discord4j.core.object.emoji.Emoji}
  */
-@NonNullApi
+@NullMarked
 package discord4j.core.object.reaction;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

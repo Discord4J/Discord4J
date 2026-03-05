@@ -462,7 +462,7 @@ public abstract class Routes {
     public static final Route STICKER_PACK_GET = Route.get("/sticker-packs/{pack.id}");
 
     /**
-     * Returns an array of sticker objects for the given guild. Includes user fields if the bot has the MANAGE_EMOJIS_AND_STICKERS permission.
+     * Returns an array of sticker objects for the given guild. Includes user fields if the bot has the MANAGE_GUILD_EXPRESSIONS permission.
      *
      * @see <a href="https://discord.com/developers/docs/resources/sticker#list-guild-stickers">
      * https://discord.com/developers/docs/resources/sticker#list-guild-stickers</a>
@@ -470,7 +470,7 @@ public abstract class Routes {
     public static final Route GUILD_STICKERS_GET = Route.get("/guilds/{guild.id}/stickers");
 
     /**
-     * Returns a sticker object for the given guild and sticker IDs. Includes the user field if the bot has the MANAGE_EMOJIS_AND_STICKERS permission.
+     * Returns a sticker object for the given guild and sticker IDs. Includes the user field if the bot has the MANAGE_GUILD_EXPRESSIONS permission.
      *
      * @see <a href="https://discord.com/developers/docs/resources/sticker#get-guild-sticker">
      * https://discord.com/developers/docs/resources/sticker#get-guild-sticker</a>
@@ -478,7 +478,7 @@ public abstract class Routes {
     public static final Route GUILD_STICKER_GET = Route.get("/guilds/{guild.id}/stickers/{sticker.id}");
 
     /**
-     * Create a new sticker for the guild. Send a multipart/form-data body. Requires the MANAGE_EMOJIS_AND_STICKERS permission. Returns the new sticker object on success.
+     * Create a new sticker for the guild. Send a multipart/form-data body. Requires the MANAGE_GUILD_EXPRESSIONS permission. Returns the new sticker object on success.
      *
      * @see <a href="https://discord.com/developers/docs/resources/sticker#create-guild-sticker">
      * https://discord.com/developers/docs/resources/sticker#create-guild-sticker</a>
@@ -486,7 +486,7 @@ public abstract class Routes {
     public static final Route GUILD_STICKER_CREATE = Route.post("/guilds/{guild.id}/stickers");
 
     /**
-     * Modify the given sticker. Requires the MANAGE_EMOJIS_AND_STICKERS permission. Returns the updated sticker object on success.
+     * Modify the given sticker. Requires the MANAGE_GUILD_EXPRESSIONS permission. Returns the updated sticker object on success.
      *
      * @see <a href="https://discord.com/developers/docs/resources/sticker#modify-guild-sticker">
      * https://discord.com/developers/docs/resources/sticker#modify-guild-sticker</a>
@@ -494,7 +494,7 @@ public abstract class Routes {
     public static final Route GUILD_STICKER_MODIFY = Route.patch("/guilds/{guild.id}/stickers/{sticker.id}");
 
     /**
-     * Delete the given sticker. Requires the MANAGE_EMOJIS_AND_STICKERS permission. Returns 204 No Content on success.
+     * Delete the given sticker. Requires the MANAGE_GUILD_EXPRESSIONS permission. Returns 204 No Content on success.
      *
      * @see <a href="https://discord.com/developers/docs/resources/sticker#delete-guild-sticker">
      * https://discord.com/developers/docs/resources/sticker#delete-guild-sticker</a>
@@ -1003,9 +1003,9 @@ public abstract class Routes {
     public static final Route GUILD_TEMPLATE_GET = Route.get("/guilds/templates/{template.code}");
 
     /**
-     * Create a new guild from template. Returns a guild object on success. Fires a Guild Create Gateway event.
-     *
-     * By default this endpoint can be used only by bots in less than 10 guilds.
+     * Create a new guild from a template. Returns a guild object on success. Fires a Guild Create Gateway event.
+     * <br>
+     * By default, this endpoint can be used only by bots in less than 10 guilds.
      *
      * @see <a href="https://discord.com/developers/docs/resources/template#create-guild-from-template">
      *         https://discord.com/developers/docs/resources/template#create-guild-from-template</a>

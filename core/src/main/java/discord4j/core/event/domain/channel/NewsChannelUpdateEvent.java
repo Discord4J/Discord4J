@@ -21,7 +21,7 @@ import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.object.entity.channel.NewsChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -39,7 +39,7 @@ import java.util.Optional;
 public class NewsChannelUpdateEvent extends ChannelEvent {
 
     private final GuildMessageChannel current;
-    private final NewsChannel old;
+    private final @Nullable NewsChannel old;
 
     public NewsChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, GuildMessageChannel current, @Nullable NewsChannel old) {
         super(gateway, shardInfo);

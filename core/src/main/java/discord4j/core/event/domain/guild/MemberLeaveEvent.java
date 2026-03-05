@@ -22,8 +22,8 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 
@@ -41,8 +41,7 @@ public class MemberLeaveEvent extends GuildEvent {
 
     private final User user;
     private final long guildId;
-    @Nullable
-    private final Member member;
+    private final @Nullable Member member;
 
     public MemberLeaveEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, User user, long guildId, @Nullable Member member) {
         super(gateway, shardInfo);

@@ -18,7 +18,7 @@ package discord4j.core.object;
 
 import discord4j.discordjson.json.RegionData;
 import discord4j.core.GatewayDiscordClient;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -156,14 +156,14 @@ public final class Region implements DiscordObject {
         INDIA("india");
 
         /** The underlying value as represented by Discord. */
-        private final String value;
+        private final @Nullable String value;
 
         /**
          * Constructs a {@code Region.Id}.
          *
          * @param value The underlying value as represented by Discord.
          */
-        Id(@Nullable final String value) {
+        Id(final @Nullable String value) {
             this.value = value;
         }
 
@@ -172,8 +172,7 @@ public final class Region implements DiscordObject {
          *
          * @return The underlying value as represented by Discord.
          */
-        @Nullable
-        public String getValue() {
+        public @Nullable String getValue() {
             return value;
         }
 
@@ -184,7 +183,7 @@ public final class Region implements DiscordObject {
          * @param value The underlying value as represented by Discord.
          * @return The region id.
          */
-        public static Region.Id of(@Nullable final String value) {
+        public static Region.Id of(final @Nullable String value) {
             if(value == null) {
                 return AUTOMATIC;
             }

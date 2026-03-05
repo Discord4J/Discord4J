@@ -21,6 +21,7 @@ import discord4j.common.LogUtil;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.lifecycle.GatewayLifecycleEvent;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.*;
@@ -30,6 +31,7 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.concurrent.Queues;
 
+import reactor.util.context.Context;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -105,13 +107,13 @@ public class ReplayingEventDispatcher implements EventDispatcher {
 
     @Override
     public <E extends Event> Flux<E> on(Class<E> eventClass) {
-        AtomicReference<Subscription> subscription = new AtomicReference<>();
+        AtomicReference<@Nullable Subscription> subscription = new AtomicReference<>();
         return eventProcessor.publishOn(eventScheduler)
                 .startWith(replayEventProcessor.timeout(Duration.ofMillis(1), Mono.empty(), timedTaskScheduler))
                 .ofType(eventClass)
                 .<E>handle((event, sink) -> {
                     if (log.isTraceEnabled()) {
-                        log.trace(format(sink.currentContext().put(LogUtil.KEY_SHARD_ID,
+                        log.trace(format(Context.of(sink.contextView()).put(LogUtil.KEY_SHARD_ID,
                                 event.getShardInfo().getIndex()), "{}"), event.toString());
                     }
                     sink.next(event);
@@ -126,7 +128,7 @@ public class ReplayingEventDispatcher implements EventDispatcher {
                 .doFinally(signal -> {
                     if (log.isDebugEnabled()) {
                         log.debug("Subscription {} to {} disposed due to {}",
-                                Integer.toHexString(subscription.get().hashCode()), eventClass.getSimpleName(), signal);
+                                Integer.toHexString(Objects.requireNonNull(subscription.get()).hashCode()), eventClass.getSimpleName(), signal);
                     }
                 });
     }
@@ -183,13 +185,21 @@ public class ReplayingEventDispatcher implements EventDispatcher {
         protected Predicate<Event> replayEventFilter =
                 event -> event instanceof GatewayLifecycleEvent || event instanceof GuildCreateEvent;
         protected Scheduler timedTaskScheduler = Schedulers.parallel();
-        protected ReplayProcessor<Event> replayEventProcessor;
+        protected @Nullable ReplayProcessor<Event> replayEventProcessor;
         protected FluxSink.OverflowStrategy replayEventOverflowStrategy = FluxSink.OverflowStrategy.DROP;
-        protected Publisher<?> stopReplayingTrigger;
+        protected @Nullable Publisher<?> stopReplayingTrigger;
 
         protected Builder() {
         }
 
+        /**
+         * Set the underlying {@link FluxProcessor} the dispatcher will use to queue and distribute events.
+         *
+         * @param eventProcessor the custom processor for events
+         * @return this builder
+         * @deprecated This method is marked as deprecated based in the deprecation of {@link FluxProcessor}
+         */
+        @Deprecated
         @Override
         public Builder eventProcessor(FluxProcessor<Event, Event> eventProcessor) {
             this.eventProcessor = Objects.requireNonNull(eventProcessor);
@@ -214,7 +224,9 @@ public class ReplayingEventDispatcher implements EventDispatcher {
          *
          * @param replayEventProcessor the replay processor to use as backend
          * @return this builder
+         * @deprecated This method is marked as deprecated based in the deprecation of {@link ReplayProcessor}
          */
+        @Deprecated
         public Builder replayEventProcessor(ReplayProcessor<Event> replayEventProcessor) {
             this.replayEventProcessor = Objects.requireNonNull(replayEventProcessor);
             return this;
@@ -267,32 +279,38 @@ public class ReplayingEventDispatcher implements EventDispatcher {
             return this;
         }
 
+        /**
+         * Builds and returns a configured instance of {@link EventDispatcher}.
+         * The method initializes any unconfigured components with default values
+         * before creating the {@link ReplayingEventDispatcher}.
+         *
+         * @return a new {@link EventDispatcher} instance configured with the provided or default values.
+         * @deprecated This method is marked as deprecated based in the deprecation of {@link ReplayProcessor}
+         */
+        @Deprecated
         @Override
         public EventDispatcher build() {
-            if (eventProcessor == null) {
-                eventProcessor = EmitterProcessor.create(Queues.SMALL_BUFFER_SIZE, false);
+            if (this.eventProcessor == null) {
+                this.eventProcessor = EmitterProcessor.create(Queues.SMALL_BUFFER_SIZE, false);
             }
-            if (eventScheduler == null) {
-                eventScheduler = DEFAULT_EVENT_SCHEDULER.get();
+            if (this.eventScheduler == null) {
+                this.eventScheduler = DEFAULT_EVENT_SCHEDULER.get();
             }
-            if (timedTaskScheduler == null) {
-                timedTaskScheduler = Schedulers.parallel();
+            if (this.replayEventProcessor == null) {
+                this.replayEventProcessor = ReplayProcessor.createTimeout(Duration.ofMinutes(2), this.timedTaskScheduler);
             }
-            if (replayEventProcessor == null) {
-                replayEventProcessor = ReplayProcessor.createTimeout(Duration.ofMinutes(2), timedTaskScheduler);
-            }
-            if (stopReplayingTrigger == null) {
-                stopReplayingTrigger = Mono.delay(Duration.ofSeconds(5), timedTaskScheduler);
+            if (this.stopReplayingTrigger == null) {
+                this.stopReplayingTrigger = Mono.delay(Duration.ofSeconds(5), this.timedTaskScheduler);
             }
             return new ReplayingEventDispatcher(
-                    eventProcessor,
-                    overflowStrategy,
-                    eventScheduler,
-                    replayEventProcessor,
-                    replayEventOverflowStrategy,
-                    replayEventFilter,
-                    timedTaskScheduler,
-                    stopReplayingTrigger);
+                    this.eventProcessor,
+                    this.overflowStrategy,
+                    this.eventScheduler,
+                    this.replayEventProcessor,
+                    this.replayEventOverflowStrategy,
+                    this.replayEventFilter,
+                    this.timedTaskScheduler,
+                    this.stopReplayingTrigger);
         }
 
     }

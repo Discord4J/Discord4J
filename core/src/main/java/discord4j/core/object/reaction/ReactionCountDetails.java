@@ -3,7 +3,6 @@ package discord4j.core.object.reaction;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.discordjson.json.ReactionCountDetailsData;
-import discord4j.discordjson.json.ReactionData;
 
 import java.util.Objects;
 

@@ -23,8 +23,8 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,15 +44,12 @@ public class MessageUpdateEvent extends MessageEvent {
 
     private final long messageId;
     private final long channelId;
-    @Nullable
-    private final Long guildId;
+    private final @Nullable Long guildId;
 
-    @Nullable
-    private final Message old;
+    private final @Nullable Message old;
 
     private final boolean contentChanged;
-    @Nullable
-    private final String currentContent;
+    private final @Nullable String currentContent;
     private final boolean embedsChanged;
     private final List<Embed> currentEmbeds;
 

@@ -26,8 +26,8 @@ import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.discordjson.json.ApplicationCommandInteractionResolvedData;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -39,16 +39,14 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
 
-    @Nullable
-    private final Long guildId;
+    private final @Nullable Long guildId;
     private final int type;
     private final String value;
-    @Nullable
-    private final ApplicationCommandInteractionResolvedData resolved;
+    private final @Nullable ApplicationCommandInteractionResolvedData resolved;
 
-    public ApplicationCommandInteractionOptionValue(final GatewayDiscordClient gateway, @Nullable final Long guildId,
+    public ApplicationCommandInteractionOptionValue(final GatewayDiscordClient gateway, final @Nullable Long guildId,
                                                     final int type, final String value,
-                                                    @Nullable final ApplicationCommandInteractionResolvedData resolved) {
+                                                    final @Nullable ApplicationCommandInteractionResolvedData resolved) {
         this.gateway = gateway;
         this.guildId = guildId;
         this.value = value;

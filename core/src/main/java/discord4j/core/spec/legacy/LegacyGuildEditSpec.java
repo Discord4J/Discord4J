@@ -23,10 +23,11 @@ import discord4j.discordjson.json.GuildModifyRequest;
 import discord4j.discordjson.json.ImmutableGuildModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -38,8 +39,7 @@ import java.util.Set;
 public class LegacyGuildEditSpec implements LegacyAuditSpec<GuildModifyRequest> {
 
     private final ImmutableGuildModifyRequest.Builder requestBuilder = GuildModifyRequest.builder();
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Sets the modified {@link Guild} name.
@@ -204,7 +204,7 @@ public class LegacyGuildEditSpec implements LegacyAuditSpec<GuildModifyRequest> 
      * @deprecated use {@link #setSystemChannelFlags(Guild.SystemChannelFlag...)}
      */
     @Deprecated
-    public LegacyGuildEditSpec setSystemChannelFlags(@Nullable Guild.SystemChannelFlag flag) {
+    public LegacyGuildEditSpec setSystemChannelFlags(Guild.@Nullable SystemChannelFlag flag) {
         requestBuilder.systemChannelFlags(flag == null ? Possible.absent() : Possible.of(flag.getValue()));
         return this;
     }
@@ -215,9 +215,9 @@ public class LegacyGuildEditSpec implements LegacyAuditSpec<GuildModifyRequest> 
      * @param flags The system channel flags.
      * @return This spec.
      */
-    public LegacyGuildEditSpec setSystemChannelFlags(@Nullable Guild.SystemChannelFlag... flags) {
+    public LegacyGuildEditSpec setSystemChannelFlags(Guild.@Nullable SystemChannelFlag... flags) {
         if (flags != null) {
-            requestBuilder.systemChannelFlags(Possible.of(Arrays.stream(flags)
+            requestBuilder.systemChannelFlags(Possible.of(Arrays.stream(flags).filter(Objects::nonNull)
                     .mapToInt(Guild.SystemChannelFlag::getValue)
                     .reduce(0, (left, right) -> left | right)));
         } else {
@@ -288,14 +288,13 @@ public class LegacyGuildEditSpec implements LegacyAuditSpec<GuildModifyRequest> 
     }
 
     @Override
-    public LegacyGuildEditSpec setReason(@Nullable final String reason) {
+    public LegacyGuildEditSpec setReason(final @Nullable String reason) {
         this.reason = reason;
         return this;
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

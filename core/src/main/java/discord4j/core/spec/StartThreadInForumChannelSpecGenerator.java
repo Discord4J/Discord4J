@@ -18,7 +18,6 @@
 package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.Region;
 import discord4j.core.object.entity.channel.ForumChannel;
 import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.discordjson.Id;

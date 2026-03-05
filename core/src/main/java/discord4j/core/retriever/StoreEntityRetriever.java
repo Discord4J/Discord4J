@@ -28,7 +28,6 @@ import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.util.EntityUtil;
-import discord4j.discordjson.Id;
 import discord4j.discordjson.json.GuildScheduledEventUserData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

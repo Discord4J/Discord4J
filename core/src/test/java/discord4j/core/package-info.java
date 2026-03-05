@@ -18,4 +18,7 @@
 /**
  * Examples using the core module API. Most require an environment variable "token" to run.
  */
+@NullMarked
 package discord4j.core;
+
+import org.jspecify.annotations.NullMarked;

@@ -22,8 +22,8 @@ import discord4j.discordjson.json.InviteData;
 import discord4j.discordjson.json.InviteTargetUsersJobStatusData;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.MultipartRequest;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;

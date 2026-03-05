@@ -38,9 +38,9 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.PaginationUtil;
 import discord4j.voice.VoiceConnection;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -1570,7 +1570,7 @@ public final class Guild implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was kicked
      * from this guild. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> kick(final Snowflake userId, @Nullable final String reason) {
+    public Mono<Void> kick(final Snowflake userId, final @Nullable String reason) {
         return gateway.getRestClient().getGuildService()
                 .removeGuildMember(getId().asLong(), userId.asLong(), reason);
     }
@@ -1668,7 +1668,7 @@ public final class Guild implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
      * unbanned. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> unban(final Snowflake userId, @Nullable final String reason) {
+    public Mono<Void> unban(final Snowflake userId, final @Nullable String reason) {
         return gateway.getRestClient().getGuildService()
                 .removeGuildBan(getId().asLong(), userId.asLong(), reason);
     }
@@ -1963,7 +1963,7 @@ public final class Guild implements Entity {
      * the nickname was set to {@code null}, then this {@link Mono} will complete empty. If an error is received, it
      * is emitted through the {@code Mono}.
      */
-    public Mono<String> changeSelfNickname(@Nullable final String nickname) {
+    public Mono<String> changeSelfNickname(final @Nullable String nickname) {
         return this.changeSelfNickname(nickname, null);
     }
 
@@ -1977,7 +1977,7 @@ public final class Guild implements Entity {
      * is emitted through the {@code Mono}.
      * @see #editSelfMember()
      */
-    public Mono<String> changeSelfNickname(@Nullable final String nickname, @Nullable final String reason) {
+    public Mono<String> changeSelfNickname(final @Nullable String nickname, final @Nullable String reason) {
         return gateway.getRestClient().getGuildService()
             .modifyCurrentMember(getId().asLong(), CurrentMemberModifyData.builder()
                 .nickOrNull(nickname)
@@ -2209,7 +2209,7 @@ public final class Guild implements Entity {
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         return EntityUtil.equals(this, obj);
     }
 

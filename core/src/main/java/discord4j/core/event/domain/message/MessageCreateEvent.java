@@ -22,8 +22,8 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 
@@ -39,10 +39,8 @@ import java.util.Optional;
 public class MessageCreateEvent extends MessageEvent {
 
     private final Message message;
-    @Nullable
-    private final Long guildId;
-    @Nullable
-    private final Member member;
+    private final @Nullable Long guildId;
+    private final @Nullable Member member;
 
     public MessageCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Message message, @Nullable Long guildId, @Nullable Member member) {
         super(gateway, shardInfo);

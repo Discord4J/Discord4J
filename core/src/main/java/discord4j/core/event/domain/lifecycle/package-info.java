@@ -17,7 +17,7 @@
 /**
  * Domain model for gateway lifecycle events.
  */
-@NonNullApi
+@NullMarked
 package discord4j.core.event.domain.lifecycle;
 
-import reactor.util.annotation.NonNullApi;
+import org.jspecify.annotations.NullMarked;

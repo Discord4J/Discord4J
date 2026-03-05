@@ -19,7 +19,7 @@ package discord4j.core.event.domain.channel;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.UnknownChannel;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -35,7 +35,7 @@ import java.util.Optional;
 public class UnknownChannelUpdateEvent extends ChannelEvent {
 
     private final UnknownChannel current;
-    private final UnknownChannel old;
+    private final @Nullable UnknownChannel old;
 
     public UnknownChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, UnknownChannel current, @Nullable UnknownChannel old) {
         super(gateway, shardInfo);

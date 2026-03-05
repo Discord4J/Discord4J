@@ -57,7 +57,7 @@ public class MessageBulkDeleteEvent extends MessageEvent {
     /**
      * Gets a list of {@link Snowflake} IDs of the messages that were deleted.
      *
-     * @return a list of IDs of the messages that were deleted.
+     * @return a set of IDs of the messages that were deleted.
      */
     public Set<Snowflake> getMessageIds() {
         return messageIds.stream()
@@ -68,7 +68,7 @@ public class MessageBulkDeleteEvent extends MessageEvent {
     /**
      * Gets a list of {@link Message} objects there were deleted in this event.
      *
-     * @return a list of {@link Message} objects that were deleted.
+     * @return a set of {@link Message} objects that were deleted.
      */
     public Set<Message> getMessages() {
         return messages;

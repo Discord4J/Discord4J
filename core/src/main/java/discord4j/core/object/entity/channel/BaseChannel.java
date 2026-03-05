@@ -21,7 +21,7 @@ import discord4j.discordjson.json.ChannelData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.common.util.Snowflake;
 import discord4j.rest.entity.RestChannel;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -65,7 +65,7 @@ class BaseChannel implements Channel {
     }
 
     @Override
-    public final boolean equals(@Nullable final Object obj) {
+    public final boolean equals(final @Nullable Object obj) {
         if (this == obj) {
             return true;
         }

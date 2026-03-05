@@ -7,8 +7,8 @@ import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.StageInstanceData;
 import discord4j.discordjson.json.UpdateUserVoiceStateRequest;
 import discord4j.rest.entity.RestStageInstance;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 
@@ -108,7 +108,7 @@ public final class StageInstance implements Entity {
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         return EntityUtil.equals(this, obj);
     }
 

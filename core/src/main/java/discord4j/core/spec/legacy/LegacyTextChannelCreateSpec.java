@@ -25,7 +25,7 @@ import discord4j.discordjson.json.OverwriteData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Permission;
 import discord4j.common.util.Snowflake;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -40,8 +40,7 @@ public class LegacyTextChannelCreateSpec implements LegacyAuditSpec<ChannelCreat
 
     private final ImmutableChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
             .type(Channel.Type.GUILD_TEXT.getValue());
-    @Nullable
-    private String reason;
+    private @Nullable String reason;
 
     /**
      * Sets the name of the created {@link TextChannel}.
@@ -127,14 +126,13 @@ public class LegacyTextChannelCreateSpec implements LegacyAuditSpec<ChannelCreat
     }
 
     @Override
-    public LegacyTextChannelCreateSpec setReason(@Nullable final String reason) {
+    public LegacyTextChannelCreateSpec setReason(final @Nullable String reason) {
         this.reason = reason;
         return this;
     }
 
     @Override
-    @Nullable
-    public String getReason() {
+    public @Nullable String getReason() {
         return reason;
     }
 

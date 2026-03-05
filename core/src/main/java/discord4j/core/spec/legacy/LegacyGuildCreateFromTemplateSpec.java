@@ -19,6 +19,7 @@ package discord4j.core.spec.legacy;
 import discord4j.discordjson.json.TemplateCreateGuildRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
+import org.jspecify.annotations.Nullable;
 
 /**
  * LegacySpec used to create a guild from a template.
@@ -27,7 +28,7 @@ import discord4j.rest.util.Image;
  */
 public class LegacyGuildCreateFromTemplateSpec implements LegacySpec<TemplateCreateGuildRequest> {
 
-    private String name = null;
+    private @Nullable String name = null;
     private Possible<String> icon = Possible.absent();
 
     /**
@@ -54,6 +55,9 @@ public class LegacyGuildCreateFromTemplateSpec implements LegacySpec<TemplateCre
 
     @Override
     public TemplateCreateGuildRequest asRequest() {
+        if (this.name == null) {
+            throw new IllegalStateException("Name must be set.");
+        }
         return TemplateCreateGuildRequest.builder()
             .name(name)
             .icon(icon)

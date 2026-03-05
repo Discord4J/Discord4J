@@ -22,8 +22,8 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -38,10 +38,8 @@ import java.util.Optional;
 public class PinsUpdateEvent extends ChannelEvent {
 
     private final long channelId;
-    @Nullable
-    private final Long guildId;
-    @Nullable
-    private final Instant lastPinTimestamp;
+    private final @Nullable Long guildId;
+    private final @Nullable Instant lastPinTimestamp;
 
     public PinsUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long channelId, @Nullable Long guildId, @Nullable Instant lastPinTimestamp) {
         super(gateway, shardInfo);
@@ -97,7 +95,7 @@ public class PinsUpdateEvent extends ChannelEvent {
     /**
      * Gets the ISO8601 timestamp of when the last pinned {@link discord4j.core.object.entity.Message} w
      * as pinned, if present. This is NOT the timestamp of when the {@code Message} was created.
-     * 
+     *
      * @return The timestamp of the when the last pinned {@link discord4j.core.object.entity.Message} was pinned,
      * if present.
      */

@@ -22,9 +22,13 @@ import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.ImmutableAllowedMentionsData;
 import discord4j.discordjson.possible.Possible;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * A class for holding the allowed_mentions object with an built-in factory for default values.
@@ -222,10 +226,10 @@ public class AllowedMentions {
          * @return this builder
          */
         public Builder allowRole(final Snowflake roleId) {
-            if (roleIds.isAbsent()) {
-                roleIds = Possible.of(new HashSet<>());
+            if (this.roleIds.isAbsent()) {
+                this.roleIds = Possible.of(new HashSet<>());
             }
-            roleIds.get().add(roleId);
+            this.roleIds.get().add(roleId);
             return this;
         }
 
@@ -236,10 +240,10 @@ public class AllowedMentions {
          * @return this builder
          */
         public Builder parseType(final AllowedMentions.Type... type) {
-            if (parse.isAbsent()) {
-                parse = Possible.of(new HashSet<>());
+            if (this.parse.isAbsent()) {
+                this.parse = Possible.of(new HashSet<>());
             }
-            parse.get().addAll(Arrays.asList(type));
+            this.parse.get().addAll(Arrays.asList(type));
             return this;
         }
 
@@ -250,10 +254,10 @@ public class AllowedMentions {
          * @return this builder
          */
         public Builder allowUser(final Snowflake... userId) {
-            if (userIds.isAbsent()) {
-                userIds = Possible.of(new HashSet<>());
+            if (this.userIds.isAbsent()) {
+                this.userIds = Possible.of(new HashSet<>());
             }
-            userIds.get().addAll(Arrays.asList(userId));
+            this.userIds.get().addAll(Arrays.asList(userId));
             return this;
         }
 
@@ -264,10 +268,10 @@ public class AllowedMentions {
          * @return this builder
          */
         public Builder allowRole(final Snowflake... roleId) {
-            if (roleIds.isAbsent()) {
-                roleIds = Possible.of(new HashSet<>());
+            if (this.roleIds.isAbsent()) {
+                this.roleIds = Possible.of(new HashSet<>());
             }
-            roleIds.get().addAll(Arrays.asList(roleId));
+            this.roleIds.get().addAll(Arrays.asList(roleId));
             return this;
         }
 
@@ -288,7 +292,7 @@ public class AllowedMentions {
          * @return the allowed mentions object
          */
         public AllowedMentions build() {
-            return new AllowedMentions(parse, userIds, roleIds, repliedUser);
+            return new AllowedMentions(this.parse, this.userIds, this.roleIds, this.repliedUser);
         }
     }
 

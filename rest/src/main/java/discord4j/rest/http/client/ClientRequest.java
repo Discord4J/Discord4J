@@ -24,7 +24,7 @@ import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -37,13 +37,11 @@ public class ClientRequest {
     private final DiscordWebRequest request;
     private final String url;
     private final HttpHeaders headers;
-    private final Object body;
+    private final @Nullable Object body;
 
-    @Nullable
-    private final AuthorizationScheme authorizationScheme;
+    private final @Nullable AuthorizationScheme authorizationScheme;
 
-    @Nullable
-    private final String authorizationValue;
+    private final @Nullable String authorizationValue;
 
     /**
      * Create a new {@link ClientRequest} from the given request template.
@@ -108,8 +106,7 @@ public class ClientRequest {
      *
      * @return the request body, can be {@code null}
      */
-    @Nullable
-    public Object getBody() {
+    public @Nullable Object getBody() {
         return body;
     }
 
@@ -135,13 +132,11 @@ public class ClientRequest {
         return request.getDescription();
     }
 
-    @Nullable
-    public AuthorizationScheme getAuthorizationScheme() {
+    public @Nullable AuthorizationScheme getAuthorizationScheme() {
         return authorizationScheme;
     }
 
-    @Nullable
-    public String getAuthorizationValue() {
+    public @Nullable String getAuthorizationValue() {
         return authorizationValue;
     }
 

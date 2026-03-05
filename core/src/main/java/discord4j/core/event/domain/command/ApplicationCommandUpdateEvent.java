@@ -22,8 +22,8 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommand;
 import discord4j.core.object.entity.Guild;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 
@@ -37,8 +37,7 @@ import java.util.Optional;
 public class ApplicationCommandUpdateEvent extends ApplicationCommandEvent {
 
     private final ApplicationCommand command;
-    @Nullable
-    private final Long guildId;
+    private final @Nullable Long guildId;
 
     public ApplicationCommandUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo,
                                          ApplicationCommand command, @Nullable Long guildId) {

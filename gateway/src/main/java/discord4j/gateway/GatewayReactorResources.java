@@ -18,6 +18,7 @@
 package discord4j.gateway;
 
 import discord4j.common.ReactorResources;
+import org.jspecify.annotations.Nullable;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
@@ -144,7 +145,7 @@ public class GatewayReactorResources extends ReactorResources {
      */
     public static class Builder extends ReactorResources.Builder {
 
-        private Scheduler payloadSenderScheduler;
+        private @Nullable Scheduler payloadSenderScheduler;
 
         protected Builder() {
         }

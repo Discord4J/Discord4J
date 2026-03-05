@@ -9,8 +9,6 @@ import discord4j.core.object.monetization.Entitlement;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
-import java.util.Optional;
-
 /**
  * Dispatched when an entitlement is created.
  * <p>

@@ -22,16 +22,15 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.ScheduledEvent;
 import discord4j.gateway.ShardInfo;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 
 public class ScheduledEventUpdateEvent extends GuildEvent {
 
     private final ScheduledEvent current;
-    @Nullable
-    private final ScheduledEvent old;
+    private final @Nullable ScheduledEvent old;
 
     public ScheduledEventUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, ScheduledEvent current,
                                      @Nullable ScheduledEvent old) {

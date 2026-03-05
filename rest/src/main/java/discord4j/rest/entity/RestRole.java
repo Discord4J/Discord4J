@@ -23,9 +23,9 @@ import discord4j.discordjson.json.RolePositionModifyRequest;
 import discord4j.discordjson.json.RoleData;
 import discord4j.discordjson.json.RoleModifyRequest;
 import discord4j.rest.RestClient;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
@@ -106,7 +106,7 @@ public class RestRole {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the role has been deleted. If
      * an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> delete(@Nullable final String reason) {
+    public Mono<Void> delete(final @Nullable String reason) {
         return restClient.getGuildService().deleteGuildRole(guildId, id, reason);
     }
 
@@ -118,7 +118,7 @@ public class RestRole {
      * @return A {@link Flux} that continually emits all the {@link RoleData roles} associated to this role's
      * guild. If an error is received, it is emitted through the {@code Flux}.
      */
-    public Flux<RoleData> changePosition(final int position, @Nullable final String reason) {
+    public Flux<RoleData> changePosition(final int position, final @Nullable String reason) {
         final RolePositionModifyRequest[] requests = {RolePositionModifyRequest.builder()
             .id(Snowflake.asString(id))
             .positionOrNull(position)

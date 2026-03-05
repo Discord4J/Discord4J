@@ -17,7 +17,6 @@
 package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.discordjson.Id;
@@ -29,11 +28,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
-import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 
 @Value.Immutable(singleton = true)
 interface ThreadChannelEditSpecGenerator extends AuditSpec<ThreadModifyRequest> {

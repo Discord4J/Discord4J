@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package discord4j.core.event;
 
 import discord4j.common.LogUtil;
 import discord4j.core.event.domain.Event;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.Scheduler;
@@ -26,6 +26,7 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.concurrent.Queues;
 
+import reactor.util.context.Context;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -67,12 +68,12 @@ public class DefaultEventDispatcher implements EventDispatcher {
 
     @Override
     public <E extends Event> Flux<E> on(Class<E> eventClass) {
-        AtomicReference<Subscription> subscription = new AtomicReference<>();
-        return eventProcessor.publishOn(eventScheduler)
+        AtomicReference<@Nullable Subscription> subscription = new AtomicReference<>();
+        return this.eventProcessor.publishOn(this.eventScheduler)
                 .ofType(eventClass)
                 .<E>handle((event, sink) -> {
                     if (log.isTraceEnabled()) {
-                        log.trace(format(sink.currentContext().put(LogUtil.KEY_SHARD_ID,
+                        log.trace(format(Context.of(sink.contextView()).put(LogUtil.KEY_SHARD_ID,
                                 event.getShardInfo().getIndex()), "{}"), event.toString());
                     }
                     sink.next(event);
@@ -87,19 +88,19 @@ public class DefaultEventDispatcher implements EventDispatcher {
                 .doFinally(signal -> {
                     if (log.isDebugEnabled()) {
                         log.debug("Subscription {} to {} disposed due to {}",
-                                Integer.toHexString(subscription.get().hashCode()), eventClass.getSimpleName(), signal);
+                                Integer.toHexString(Objects.requireNonNull(subscription.get()).hashCode()), eventClass.getSimpleName(), signal);
                     }
                 });
     }
 
     @Override
     public void publish(Event event) {
-        sink.next(event);
+        this.sink.next(event);
     }
 
     @Override
     public void shutdown() {
-        sink.complete();
+        this.sink.complete();
     }
 
     /**
@@ -108,9 +109,9 @@ public class DefaultEventDispatcher implements EventDispatcher {
      */
     public static class Builder implements EventDispatcher.Builder {
 
-        protected FluxProcessor<Event, Event> eventProcessor;
+        protected @Nullable FluxProcessor<Event, Event> eventProcessor;
         protected FluxSink.OverflowStrategy overflowStrategy = FluxSink.OverflowStrategy.BUFFER;
-        protected Scheduler eventScheduler;
+        protected @Nullable Scheduler eventScheduler;
 
         protected Builder() {
         }
@@ -120,7 +121,7 @@ public class DefaultEventDispatcher implements EventDispatcher {
             SinksEventDispatcher.Builder builder = new SinksEventDispatcher.Builder()
                     .eventSink(Objects.requireNonNull(eventSinkFactory));
             if (this.eventScheduler != null) {
-                builder.eventScheduler(this.eventScheduler);
+                builder = builder.eventScheduler(this.eventScheduler);
             }
             return builder;
         }
@@ -147,13 +148,13 @@ public class DefaultEventDispatcher implements EventDispatcher {
         @Deprecated
         @Override
         public EventDispatcher build() {
-            if (eventProcessor == null) {
-                eventProcessor = EmitterProcessor.create(Queues.SMALL_BUFFER_SIZE, false);
+            if (this.eventProcessor == null) {
+                this.eventProcessor = EmitterProcessor.create(Queues.SMALL_BUFFER_SIZE, false);
             }
-            if (eventScheduler == null) {
-                eventScheduler = DEFAULT_EVENT_SCHEDULER.get();
+            if (this.eventScheduler == null) {
+                this.eventScheduler = DEFAULT_EVENT_SCHEDULER.get();
             }
-            return new DefaultEventDispatcher(eventProcessor, overflowStrategy, eventScheduler);
+            return new DefaultEventDispatcher(this.eventProcessor, this.overflowStrategy, this.eventScheduler);
         }
 
     }

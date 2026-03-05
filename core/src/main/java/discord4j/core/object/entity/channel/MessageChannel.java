@@ -31,7 +31,6 @@ import discord4j.core.spec.PollCreateSpec;
 import discord4j.core.spec.legacy.LegacyEmbedCreateSpec;
 import discord4j.core.spec.legacy.LegacyMessageCreateSpec;
 import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.json.PinnedMessageData;
 import discord4j.discordjson.json.PinnedMessagesResponseData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.PaginationUtil;
@@ -43,14 +42,12 @@ import reactor.core.scheduler.Scheduler;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.ToLongFunction;
 
 /**
  * A Discord channel that can utilize messages.

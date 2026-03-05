@@ -19,13 +19,13 @@ package discord4j.rest.http;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.rest.util.MultipartRequest;
+import org.jspecify.annotations.Nullable;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClientForm;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.annotation.Nullable;
 import reactor.util.function.Tuple2;
 
 import java.io.InputStream;
@@ -61,17 +61,11 @@ public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest<
         final List<Tuple2<String, InputStream>> files = body.getFiles();
         return Mono.fromCallable(() -> send.sendForm((request, form) -> {
             form.multipart(true);
-            if (body.getFiles().size() == 1) {
-                form.file(body.getFileField(), files.get(0).getT1(), files.get(0).getT2(), "application/octet-stream");
-            } else {
-                for (int i = 0; i < files.size(); i++) {
-                    form.file(body.getFileField().concat(String.valueOf(i)), files.get(i).getT1(), files.get(i).getT2(), "application/octet-stream");
-                }
-            }
+            body.getHttpClientFormConsumer().accept(form);
 
             if (createRequest != null) {
                 try {
-                    String payload = objectMapper.writeValueAsString(createRequest);
+                    String payload = this.objectMapper.writeValueAsString(createRequest);
                     if (log.isTraceEnabled()) {
                         log.trace("{}", payload);
                     }

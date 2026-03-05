@@ -58,6 +58,7 @@ import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionFactory;
 import discord4j.voice.VoiceReactorResources;
 import io.netty.buffer.ByteBuf;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
@@ -68,7 +69,6 @@ import reactor.core.publisher.Sinks;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.annotation.Nullable;
 import reactor.util.context.Context;
 import reactor.util.retry.Retry;
 
@@ -116,28 +116,28 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private final Function<GatewayOptions, O> optionsModifier;
 
     private ShardingStrategy shardingStrategy = ShardingStrategy.recommended();
-    private Boolean awaitConnections = null;
-    private ShardCoordinator shardCoordinator = null;
-    private EventDispatcher eventDispatcher = null;
-    private Store store = null;
-    private MemberRequestFilter memberRequestFilter = null;
-    private Function<ShardInfo, ClientPresence> initialPresence = shard -> null;
-    private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
+    private @Nullable Boolean awaitConnections = null;
+    private @Nullable ShardCoordinator shardCoordinator = null;
+    private @Nullable EventDispatcher eventDispatcher = null;
+    private @Nullable Store store = null;
+    private @Nullable MemberRequestFilter memberRequestFilter = null;
+    private Function<ShardInfo, @Nullable ClientPresence> initialPresence = shard -> null;
+    private Function<ShardInfo, @Nullable SessionInfo> resumeOptions = shard -> null;
     private IntentSet intents = IntentSet.nonPrivileged();
-    private Boolean guildSubscriptions = null;
+    private @Nullable Boolean guildSubscriptions = null;
     private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = shutdownDestroyHandler();
-    private PayloadReader payloadReader = null;
-    private PayloadWriter payloadWriter = null;
-    private ReconnectOptions reconnectOptions = null;
-    private ReconnectOptions voiceReconnectOptions = null;
+    private @Nullable PayloadReader payloadReader = null;
+    private @Nullable PayloadWriter payloadWriter = null;
+    private @Nullable ReconnectOptions reconnectOptions = null;
+    private @Nullable ReconnectOptions voiceReconnectOptions = null;
     private GatewayObserver gatewayObserver = GatewayObserver.NOOP_LISTENER;
-    private Function<ReactorResources, GatewayReactorResources> gatewayReactorResources = null;
-    private Function<ReactorResources, VoiceReactorResources> voiceReactorResources = null;
+    private @Nullable Function<ReactorResources, GatewayReactorResources> gatewayReactorResources = null;
+    private @Nullable Function<ReactorResources, VoiceReactorResources> voiceReactorResources = null;
     private VoiceConnectionFactory voiceConnectionFactory = defaultVoiceConnectionFactory();
-    private EntityRetrievalStrategy entityRetrievalStrategy = null;
-    private DispatchEventMapper dispatchEventMapper = null;
+    private @Nullable EntityRetrievalStrategy entityRetrievalStrategy = null;
+    private @Nullable DispatchEventMapper dispatchEventMapper = null;
     private int maxMissedHeartbeatAck = 1;
-    private Function<EventDispatcher, Publisher<?>> dispatcherFunction;
+    private @Nullable Function<EventDispatcher, Publisher<?>> dispatcherFunction;
 
     /**
      * Create a default {@link GatewayBootstrap} based off the given {@link DiscordClient} that provides an instance
@@ -573,7 +573,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * @return an empty {@link Mono} completing after all resources have released
      */
     public Mono<Void> withGateway(Function<GatewayDiscordClient, Publisher<?>> whileConnectedFunction) {
-        return usingConnection(gateway -> Flux.from(whileConnectedFunction.apply(gateway)).then(gateway.onDisconnect()));
+        return this.usingConnection(gateway -> Flux.from(whileConnectedFunction.apply(gateway)).then(gateway.onDisconnect()));
     }
 
     private <T> Mono<T> usingConnection(Function<GatewayDiscordClient, Mono<T>> onConnectedFunction) {
@@ -598,7 +598,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * sequence, it will be emitted through the {@link Mono}.
      */
     public Mono<GatewayDiscordClient> login() {
-        return login(DefaultGatewayClient::new);
+        return this.login(DefaultGatewayClient::new);
     }
 
     /**
@@ -625,7 +625,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             b.initVoiceReactorResources(),
                             b.initReconnectOptions(voiceReactorResources), b.intents);
                     Sinks.Empty<Void> onCloseSink = Sinks.empty();
-                    AtomicReference<Throwable> dispatcherFunctionError = new AtomicReference<>();
+                    AtomicReference<@Nullable Throwable> dispatcherFunctionError = new AtomicReference<>();
                     EntityRetrievalStrategy entityRetrievalStrategy = b.initEntityRetrievalStrategy();
                     DispatchEventMapper dispatchMapper = b.initDispatchEventMapper();
                     Set<String> completingChunkNonces = ConcurrentHashMap.newKeySet();
@@ -654,7 +654,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                         destroySequence.contextWrite(buildContext(gateway, shard)), maxConcurrency))));
 
                     Supplier<Mono<Void>> withEventDispatcherFunction = () ->
-                            Flux.from(b.dispatcherFunction.apply(eventDispatcher))
+                            Flux.from(Objects.requireNonNull(b.dispatcherFunction).apply(eventDispatcher))
                                     .then()
                                     .subscribeOn(gatewayReactorResources.getBlockingTaskScheduler())
                                     .onErrorResume(t -> {
@@ -850,22 +850,22 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     private PayloadReader initPayloadReader() {
-        if (payloadReader != null) {
-            return payloadReader;
+        if (this.payloadReader != null) {
+            return this.payloadReader;
         }
-        return new JacksonPayloadReader(client.getCoreResources().getJacksonResources().getObjectMapper());
+        return new JacksonPayloadReader(this.client.getCoreResources().getJacksonResources().getObjectMapper());
     }
 
     private PayloadWriter initPayloadWriter() {
-        if (payloadWriter != null) {
-            return payloadWriter;
+        if (this.payloadWriter != null) {
+            return this.payloadWriter;
         }
-        return new JacksonPayloadWriter(client.getCoreResources().getJacksonResources().getObjectMapper());
+        return new JacksonPayloadWriter(this.client.getCoreResources().getJacksonResources().getObjectMapper());
     }
 
     private ReconnectOptions initReconnectOptions(GatewayReactorResources resources) {
-        if (reconnectOptions != null) {
-            return reconnectOptions;
+        if (this.reconnectOptions != null) {
+            return this.reconnectOptions;
         }
         return ReconnectOptions.builder()
                 .setBackoffScheduler(resources.getTimerTaskScheduler())
@@ -873,8 +873,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     private ReconnectOptions initReconnectOptions(VoiceReactorResources resources) {
-        if (reconnectOptions != null) {
-            return reconnectOptions;
+        if (this.reconnectOptions != null) {
+            return this.reconnectOptions;
         }
         return ReconnectOptions.builder()
                 .setBackoffScheduler(resources.getTimerTaskScheduler())
@@ -882,62 +882,62 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     private GatewayReactorResources initGatewayReactorResources(int count) {
-        if (gatewayReactorResources == null) {
+        if (this.gatewayReactorResources == null) {
             int maxConnections = Math.max(ConnectionProvider.DEFAULT_POOL_MAX_CONNECTIONS, count);
-            gatewayReactorResources = res -> GatewayReactorResources.builder(res)
+            this.gatewayReactorResources = res -> GatewayReactorResources.builder(res)
                     .httpClient(ReactorResources.newHttpClient(
                             ConnectionProvider.create("d4j-gateway", maxConnections)))
                     .build();
         }
-        return gatewayReactorResources.apply(client.getCoreResources().getReactorResources());
+        return this.gatewayReactorResources.apply(this.client.getCoreResources().getReactorResources());
     }
 
     private VoiceReactorResources initVoiceReactorResources() {
-        if (voiceReactorResources == null) {
-            voiceReactorResources = VoiceReactorResources::new;
+        if (this.voiceReactorResources == null) {
+            this.voiceReactorResources = VoiceReactorResources::new;
         }
-        return voiceReactorResources.apply(client.getCoreResources().getReactorResources());
+        return this.voiceReactorResources.apply(this.client.getCoreResources().getReactorResources());
     }
 
     private EventDispatcher initEventDispatcher() {
-        if (eventDispatcher != null) {
-            return eventDispatcher;
+        if (this.eventDispatcher != null) {
+            return this.eventDispatcher;
         }
         return EventDispatcher.buffering();
     }
 
     private ShardCoordinator initShardCoordinator(ReactorResources reactorResources) {
-        if (shardCoordinator != null) {
-            return shardCoordinator;
+        if (this.shardCoordinator != null) {
+            return this.shardCoordinator;
         }
         return LocalShardCoordinator.create(() ->
                 new RateLimitTransformer(1, Duration.ofSeconds(6), reactorResources.getTimerTaskScheduler()));
     }
 
     private EntityRetrievalStrategy initEntityRetrievalStrategy() {
-        if (entityRetrievalStrategy != null) {
-            return entityRetrievalStrategy;
+        if (this.entityRetrievalStrategy != null) {
+            return this.entityRetrievalStrategy;
         }
         return EntityRetrievalStrategy.STORE_FALLBACK_REST;
     }
 
     private DispatchEventMapper initDispatchEventMapper() {
-        if (dispatchEventMapper != null) {
-            return dispatchEventMapper;
+        if (this.dispatchEventMapper != null) {
+            return this.dispatchEventMapper;
         }
         return DispatchEventMapper.emitEvents();
     }
 
     private Store initStore() {
-        if (store != null) {
-            return store;
+        if (this.store != null) {
+            return this.store;
         }
         return Store.fromLayout(LocalStoreLayout.create());
     }
 
     private MemberRequestFilter initMemberRequestFilter(IntentSet intents) {
-        if (memberRequestFilter != null) {
-            return memberRequestFilter;
+        if (this.memberRequestFilter != null) {
+            return this.memberRequestFilter;
         } else if (intents.contains(Intent.GUILD_MEMBERS)) {
             return MemberRequestFilter.withLargeGuilds();
         } else {

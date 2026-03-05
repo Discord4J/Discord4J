@@ -22,8 +22,8 @@ import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.GuildEmojiModifyRequest;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.Permission;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 
@@ -96,7 +96,7 @@ public class RestEmoji {
     }
 
     /**
-     * Modify this guild emoji. Requires the {@link Permission#MANAGE_EMOJIS} permission. Returns the updated emoji
+     * Modify this guild emoji. Requires the {@link Permission#MANAGE_GUILD_EXPRESSIONS} permission. Returns the updated emoji
      * object on success.
      *
      * @param request the guild emoji modify request
@@ -109,7 +109,7 @@ public class RestEmoji {
     }
 
     /**
-     * Delete this guild emoji. Requires the {@link Permission#MANAGE_EMOJIS} permission. Returns empty on success.
+     * Delete this guild emoji. Requires the {@link Permission#MANAGE_GUILD_EXPRESSIONS} permission. Returns empty on success.
      *
      * @param reason an optional reason for the audit log
      * @return a {@link Mono} where, upon subscription, emits a complete signal on success. If an error is received, it

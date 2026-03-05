@@ -122,9 +122,7 @@ public class ActionRow extends LayoutComponent implements TopLevelMessageCompone
      */
     public ActionRow withRemovedComponent(String customId) {
         List<MessageComponent> components = this.getChildren();
-        components.removeIf(messageComponent -> {
-            return messageComponent instanceof ActionComponent && customId.equals(((ActionComponent) messageComponent).getCustomId());
-        });
+        components.removeIf(messageComponent -> messageComponent instanceof ActionComponent && customId.equals(((ActionComponent) messageComponent).getCustomId()));
         return new ActionRow(ComponentData.builder()
                 .type(this.getType().getValue())
                 .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))

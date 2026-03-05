@@ -24,7 +24,7 @@ import discord4j.discordjson.json.ImmutableComponentData;
 import discord4j.discordjson.json.SelectDefaultValueData;
 import discord4j.discordjson.json.SelectOptionData;
 import discord4j.discordjson.possible.Possible;
-import reactor.util.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -206,7 +206,7 @@ public class SelectMenu extends ActionComponent implements ICanBeUsedInLabelComp
      * @return A select menu with the given data.
      */
     public static SelectMenu of(int id, String customId, Option... options) {
-        return of(id, Type.SELECT_MENU, customId, Arrays.asList(options), null, null);
+        return of(id, Type.SELECT_MENU_STRING, customId, Arrays.asList(options), null, null);
     }
 
     /**
@@ -219,7 +219,7 @@ public class SelectMenu extends ActionComponent implements ICanBeUsedInLabelComp
      */
     public static SelectMenu of(int id, String customId, List<Option> options) {
         Objects.requireNonNull(options);
-        return of(id, Type.SELECT_MENU, customId, options, null, null);
+        return of(id, Type.SELECT_MENU_STRING, customId, options, null, null);
     }
 
     /**
@@ -434,7 +434,7 @@ public class SelectMenu extends ActionComponent implements ICanBeUsedInLabelComp
 
     /**
      * Gets the options that can be selected in the menu. List can be empty
-     * if {@link #getType() type} of select menu is not {@link MessageComponent.Type#SELECT_MENU}
+     * if {@link #getType() type} of select menu is not {@link MessageComponent.Type#SELECT_MENU_STRING}
      *
      * @return The options that can be selected in the menu.
      */
