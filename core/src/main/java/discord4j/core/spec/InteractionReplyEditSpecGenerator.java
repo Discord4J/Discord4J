@@ -23,7 +23,7 @@ import discord4j.core.object.component.BaseMessageComponent;
 import discord4j.core.object.component.TopLevelMessageComponent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
-import discord4j.discordjson.json.AttachmentData;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ImmutableWebhookMessageEditRequest;
 import discord4j.discordjson.json.PollCreateData;
 import discord4j.discordjson.json.WebhookMessageEditRequest;
@@ -101,18 +101,20 @@ interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<Webhoo
                         .map(Attachment::getData)
                         .collect(Collectors.toList())));
 
-        final List<Tuple2<String, InputStream>> filesCollected = Stream.concat(files().stream(), fileSpoilers().stream())
+        final List<MessageCreateFields.File> filesCollected = Stream.concat(files().stream(), fileSpoilers().stream())
+                .collect(Collectors.toList());
+        final List<Tuple2<String, InputStream>> filesTuples = filesCollected.stream()
                 .map(MessageCreateFields.File::asRequest)
                 .collect(Collectors.toList());
 
         if (!filesCollected.isEmpty()) {
             for (int x = 0; x < filesCollected.size(); x++) {
-                webhookMessageEditRequestBuilder.addAttachment(AttachmentData.builder().id(x).filename(filesCollected.get(x).getT1()).build());
+                webhookMessageEditRequestBuilder.addAttachment(filesCollected.get(x).asPartialAttachmentData(Id.of(x)));
             }
         }
 
         WebhookMessageEditRequest json = webhookMessageEditRequestBuilder.build();
-        return MultipartRequest.ofRequestAndFiles(json, filesCollected);
+        return MultipartRequest.ofRequestAndFiles(json, filesTuples);
     }
 }
 

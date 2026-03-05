@@ -21,7 +21,7 @@ import discord4j.core.object.component.BaseMessageComponent;
 import discord4j.core.object.component.TopLevelMessageComponent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
-import discord4j.discordjson.json.AttachmentData;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ImmutableMessageEditRequest;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.discordjson.possible.Possible;
@@ -33,7 +33,6 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -93,18 +92,19 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
                         .map(Attachment::getData)
                         .collect(Collectors.toList())));
 
-        final List<Tuple2<String, InputStream>> filesCollected = Stream.concat(files().stream(), fileSpoilers().stream())
+        final List<MessageCreateFields.File> filesCollected = Stream.concat(files().stream(), fileSpoilers().stream()).collect(Collectors.toList());
+        final List<Tuple2<String, InputStream>> filesTuples = filesCollected.stream()
                 .map(MessageCreateFields.File::asRequest)
                 .collect(Collectors.toList());
 
         if (!filesCollected.isEmpty()) {
             for (int x = 0; x < filesCollected.size(); x++) {
-                messageEditRequestBuilder.addAttachment(AttachmentData.builder().id(x).filename(filesCollected.get(x).getT1()).build());
+                messageEditRequestBuilder.addAttachment(filesCollected.get(x).asPartialAttachmentData(Id.of(x)));
             }
         }
 
         MessageEditRequest json = messageEditRequestBuilder.build();
-        return MultipartRequest.ofRequestAndFiles(json, filesCollected);
+        return MultipartRequest.ofRequestAndFiles(json, filesTuples);
     }
 }
 
