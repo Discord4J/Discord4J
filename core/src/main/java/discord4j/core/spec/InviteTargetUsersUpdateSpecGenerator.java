@@ -36,10 +36,19 @@ public interface InviteTargetUsersUpdateSpecGenerator extends Spec<Void> {
     }
 
     default MultipartRequest<Void> asMultipartRequest() {
-        final String dataTargetUsers = targetUserIds().stream().map(Snowflake::asString).collect(Collectors.joining(System.lineSeparator()));
-        MultipartRequest<Void> inviteMultipartRequest = MultipartRequest.ofEmptyRequest("target_users_file");
-        InviteCreateFields.File file = InviteCreateFields.File.of("target_users_file", new ByteArrayInputStream(dataTargetUsers.getBytes(StandardCharsets.UTF_8)));
-        return inviteMultipartRequest.addFile(file.name(), file.inputStream());
+        final String fileField = "target_users_file";
+        final String fileContentType = "text/csv";
+        final String dataTargetUsers =
+                targetUserIds().stream().map(Snowflake::asString).collect(Collectors.joining(System.lineSeparator()));
+        MultipartRequest<Void> inviteMultipartRequest =
+                MultipartRequest.ofEmptyRequest(fileField).withHttpFormConsumer(httpClientForm -> {
+
+        });
+        InviteCreateFields.File file = InviteCreateFields.File.of("target_users_file",
+                new ByteArrayInputStream(dataTargetUsers.getBytes(StandardCharsets.UTF_8)));
+        inviteMultipartRequest = inviteMultipartRequest.addFile(file.name(), file.inputStream());
+        inviteMultipartRequest = inviteMultipartRequest.withHttpFormConsumer(httpClientForm -> httpClientForm.file(fileField, file.name(), file.inputStream(), fileContentType));
+        return inviteMultipartRequest;
     }
 
 }
