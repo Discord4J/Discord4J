@@ -29,7 +29,7 @@ public interface OnboardingEditSpecGenerator extends AuditSpec<OnboardingEditDat
         return OnboardingEditData.builder()
             .prompts(this.prompts().toOptional().orElseThrow(() -> new IllegalStateException("Prompts are required.")))
             .defaultChannelIds(this.defaultChannelIds().toOptional().orElseThrow(() -> new IllegalStateException("Default channel IDs are required.")).stream().map(snowflake -> Id.of(snowflake.asLong())).collect(java.util.stream.Collectors.toList()))
-            .enabled(this.enabled().toOptional().orElseThrow(() -> new IllegalStateException("Enabled is required.")).booleanValue())
+            .enabled(this.enabled().toOptional().orElseThrow(() -> new IllegalStateException("Enabled is required.")))
             .mode(this.mode().toOptional().orElseThrow(() -> new IllegalStateException("Mode is required.")).getValue())
             .build();
     }
