@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
  */
 public class Invite implements DiscordObject {
 
-    /** The gateway associated to this object. */
+    /** The gateway associated with this object. */
     private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
@@ -84,7 +84,7 @@ public class Invite implements DiscordObject {
     /**
      * Gets the instant this invite expires, if possible.
      *
-     * @return The instant this invite expires, if empty, invite is never expiring.
+     * @return The instant this invite expires, if empty, the invite is never expiring.
      */
     public final Optional<Instant> getExpiration() {
         return this.getData().expiresAt().map(srtExpiresAt -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(srtExpiresAt, Instant::from));
@@ -118,7 +118,7 @@ public class Invite implements DiscordObject {
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this invite is associated
      * to. If an error is received, it is emitted through the {@code Mono}.
      */
-    public final Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
+    public final Mono<Guild> getGuild(final EntityRetrievalStrategy retrievalStrategy) {
         return this.getGuildId()
                 .map(id -> this.getClient().withRetrievalStrategy(retrievalStrategy).getGuildById(id))
                 .orElse(Mono.empty());
@@ -140,7 +140,7 @@ public class Invite implements DiscordObject {
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<CategorizableChannel> getChannel() {
-        return this.getClient().getChannelById(getChannelId()).cast(CategorizableChannel.class);
+        return this.getClient().getChannelById(this.getChannelId()).cast(CategorizableChannel.class);
     }
 
     /**
@@ -150,9 +150,9 @@ public class Invite implements DiscordObject {
      * @return A {@link Mono} where, upon successful completion, emits the {@link CategorizableChannel channel} this invite is
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
-    public final Mono<CategorizableChannel> getChannel(EntityRetrievalStrategy retrievalStrategy) {
+    public final Mono<CategorizableChannel> getChannel(final EntityRetrievalStrategy retrievalStrategy) {
         return this.getClient().withRetrievalStrategy(retrievalStrategy)
-                .getChannelById(getChannelId())
+                .getChannelById(this.getChannelId())
                 .cast(CategorizableChannel.class);
     }
 
@@ -309,7 +309,7 @@ public class Invite implements DiscordObject {
      * @param targetUsers the target users
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the invite has been updated.
      */
-    public final Mono<Void> updateTargetUsers(List<? extends User> targetUsers) {
+    public final Mono<Void> updateTargetUsers(final List<? extends User> targetUsers) {
         return this.updateTargetUserIds(targetUsers.stream().map(User::getId).collect(Collectors.toList()));
     }
 
@@ -319,7 +319,7 @@ public class Invite implements DiscordObject {
      * @param targetUserIds the target user ids
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the invite has been updated.
      */
-    public final Mono<Void> updateTargetUserIds(List<Snowflake> targetUserIds) {
+    public final Mono<Void> updateTargetUserIds(final List<Snowflake> targetUserIds) {
         return this.getClient().getRestClient().getInviteService()
             .updateTargetUsers(this.getCode(), InviteTargetUsersUpdateSpec.create().withTargetUserIds(targetUserIds).asMultipartRequest());
     }
@@ -343,7 +343,7 @@ public class Invite implements DiscordObject {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<Void> delete() {
-        return delete(null);
+        return this.delete(null);
     }
 
     /**
@@ -355,7 +355,7 @@ public class Invite implements DiscordObject {
      */
     public final Mono<Void> delete(final @Nullable String reason) {
         return this.getClient().getRestClient().getInviteService()
-                .deleteInvite(getCode(), reason)
+                .deleteInvite(this.getCode(), reason)
                 .then();
     }
 
@@ -371,7 +371,7 @@ public class Invite implements DiscordObject {
     @Override
     public String toString() {
         return "Invite{" +
-            "data=" + data +
+            "data=" + this.data +
             '}';
     }
 
@@ -405,7 +405,7 @@ public class Invite implements DiscordObject {
          * @return The underlying value as represented by Discord.
          */
         public int getValue() {
-            return value;
+            return this.value;
         }
 
         /**
@@ -459,7 +459,7 @@ public class Invite implements DiscordObject {
          * @return The underlying value as represented by Discord.
          */
         public int getValue() {
-            return value;
+            return this.value;
         }
 
         /**
@@ -468,7 +468,7 @@ public class Invite implements DiscordObject {
          * @return The flag value as represented by Discord.
          */
         public int getFlag() {
-            return flag;
+            return this.flag;
         }
 
         /**
