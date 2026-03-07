@@ -18,22 +18,30 @@ package discord4j.core.object;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.PartialRole;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.CategorizableChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.common.util.Snowflake;
+import discord4j.core.spec.InviteTargetUsersUpdateSpec;
 import discord4j.discordjson.json.InviteData;
 import discord4j.discordjson.json.PartialGuildData;
+import discord4j.discordjson.json.PartialRoleDataFields;
 import discord4j.discordjson.json.UserData;
-import org.jspecify.annotations.Nullable;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.stream.Collectors;
 
 /**
  * A Discord invite.
@@ -42,7 +50,7 @@ import java.util.OptionalInt;
  */
 public class Invite implements DiscordObject {
 
-    /** The gateway associated to this object. */
+    /** The gateway associated with this object. */
     private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
@@ -76,7 +84,7 @@ public class Invite implements DiscordObject {
     /**
      * Gets the instant this invite expires, if possible.
      *
-     * @return The instant this invite expires, if empty, invite is never expiring.
+     * @return The instant this invite expires, if empty, the invite is never expiring.
      */
     public final Optional<Instant> getExpiration() {
         return this.getData().expiresAt().map(srtExpiresAt -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(srtExpiresAt, Instant::from));
@@ -110,7 +118,7 @@ public class Invite implements DiscordObject {
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this invite is associated
      * to. If an error is received, it is emitted through the {@code Mono}.
      */
-    public final Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
+    public final Mono<Guild> getGuild(final EntityRetrievalStrategy retrievalStrategy) {
         return this.getGuildId()
                 .map(id -> this.getClient().withRetrievalStrategy(retrievalStrategy).getGuildById(id))
                 .orElse(Mono.empty());
@@ -132,7 +140,7 @@ public class Invite implements DiscordObject {
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<CategorizableChannel> getChannel() {
-        return this.getClient().getChannelById(getChannelId()).cast(CategorizableChannel.class);
+        return this.getClient().getChannelById(this.getChannelId()).cast(CategorizableChannel.class);
     }
 
     /**
@@ -142,9 +150,9 @@ public class Invite implements DiscordObject {
      * @return A {@link Mono} where, upon successful completion, emits the {@link CategorizableChannel channel} this invite is
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
-    public final Mono<CategorizableChannel> getChannel(EntityRetrievalStrategy retrievalStrategy) {
+    public final Mono<CategorizableChannel> getChannel(final EntityRetrievalStrategy retrievalStrategy) {
         return this.getClient().withRetrievalStrategy(retrievalStrategy)
-                .getChannelById(getChannelId())
+                .getChannelById(this.getChannelId())
                 .cast(CategorizableChannel.class);
     }
 
@@ -249,13 +257,93 @@ public class Invite implements DiscordObject {
     }
 
     /**
+     * Gets the partial roles assigned to the user upon accepting the invite.
+     * @return The partial roles assigned to the user upon accepting the invite
+     * @see PartialRole#getRole() for the full data of the role
+     */
+    public final List<PartialRole> getRoles() {
+        return this.getData().roles().toOptional()
+                .map(partialRoleDataList -> partialRoleDataList.stream().map(partialRoleDataField -> new PartialRole(this.getClient(), partialRoleDataField, this.getGuildId().orElseThrow(() -> new NoSuchElementException("No value present")).asLong())).collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
+    }
+
+    /**
+     * Gets the ids of roles assigned to the user upon accepting the invite.
+     * @return The ids of roles assigned to the user upon accepting the invite.
+     */
+    public final List<Snowflake> getRoleIds() {
+        return this.getData().roles().toOptional()
+            .map(partialRoleDataFields -> partialRoleDataFields.stream().map(PartialRoleDataFields::id).map(Snowflake::of).collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
+    }
+
+    /**
+     * Request the IDs of target users associated with this invite.
+     *
+     * @return A {@link Flux} stream of {@link Snowflake} objects representing the IDs of the target users
+     *         associated with this invite.
+     */
+    public final Flux<Snowflake> getTargetUserIds() {
+        return this.getClient().getRestClient().getInviteService()
+            .getTargetUsers(this.getCode())
+            .flatMapMany(data -> Flux.fromArray(data.split(System.lineSeparator())))
+            .map(String::trim)
+            .skip(1) // the first element is the header of the csv response
+            .map(Snowflake::of);
+    }
+
+    /**
+     * Request the target users associated with this invite by resolving their IDs
+     * and fetching their details using the associated {@link GatewayDiscordClient}.
+     *
+     * @return A {@link Flux} stream of {@link User} objects representing the target users
+     *         associated with this invite.
+     */
+    public final Flux<User> getTargetUsers() {
+        return this.getTargetUserIds().flatMap(this.getClient()::getUserById);
+    }
+
+    /**
+     * Request the update of the target users associated with this invite.
+     *
+     * @param targetUsers the target users
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the invite has been updated.
+     */
+    public final Mono<Void> updateTargetUsers(final List<? extends User> targetUsers) {
+        return this.updateTargetUserIds(targetUsers.stream().map(User::getId).collect(Collectors.toList()));
+    }
+
+    /**
+     * Request the update of the target users associated with this invite.
+     *
+     * @param targetUserIds the target user ids
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the invite has been updated.
+     */
+    public final Mono<Void> updateTargetUserIds(final List<Snowflake> targetUserIds) {
+        return this.getClient().getRestClient().getInviteService()
+            .updateTargetUsers(this.getCode(), InviteTargetUsersUpdateSpec.create().withTargetUserIds(targetUserIds).asMultipartRequest());
+    }
+
+    /**
+     * Requests to retrieve the status of the job associated with the target users for this invite.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits an {@link InviteTargetUsersJobStatus} object
+     * representing the status of the job. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<InviteTargetUsersJobStatus> getTargetUsersJobStatus() {
+        return this.getClient().getRestClient().getInviteService()
+            .getTargetUsersJobStatus(this.getCode())
+            .map(data -> new InviteTargetUsersJobStatus(this.getClient(), data));
+    }
+
+    /**
      * Requests to delete this invite.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the invite has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<Void> delete() {
-        return delete(null);
+        return this.delete(null);
     }
 
     /**
@@ -267,7 +355,7 @@ public class Invite implements DiscordObject {
      */
     public final Mono<Void> delete(final @Nullable String reason) {
         return this.getClient().getRestClient().getInviteService()
-                .deleteInvite(getCode(), reason)
+                .deleteInvite(this.getCode(), reason)
                 .then();
     }
 
@@ -278,6 +366,13 @@ public class Invite implements DiscordObject {
      */
     InviteData getData() {
         return this.data;
+    }
+
+    @Override
+    public String toString() {
+        return "Invite{" +
+            "data=" + this.data +
+            '}';
     }
 
     /** Represents the various types of target user for an invite. */
@@ -310,7 +405,7 @@ public class Invite implements DiscordObject {
          * @return The underlying value as represented by Discord.
          */
         public int getValue() {
-            return value;
+            return this.value;
         }
 
         /**
@@ -364,7 +459,7 @@ public class Invite implements DiscordObject {
          * @return The underlying value as represented by Discord.
          */
         public int getValue() {
-            return value;
+            return this.value;
         }
 
         /**
@@ -373,7 +468,7 @@ public class Invite implements DiscordObject {
          * @return The flag value as represented by Discord.
          */
         public int getFlag() {
-            return flag;
+            return this.flag;
         }
 
         /**
@@ -393,12 +488,5 @@ public class Invite implements DiscordObject {
             }
             return inviteFlags;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Invite{" +
-                "data=" + data +
-                '}';
     }
 }

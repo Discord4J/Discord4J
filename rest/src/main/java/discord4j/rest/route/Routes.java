@@ -954,6 +954,34 @@ public abstract class Routes {
     public static final Route INVITE_DELETE = Route.delete("/invites/{invite.code}");
 
     /**
+     * Gets the users allowed to see and accept this invite.<br>
+     * Response is a CSV file with the header user_id and each user ID from the original file passed to invite create on its own line.<br>
+     * Requires the caller to be the inviter, or have MANAGE_GUILD permission, or have VIEW_AUDIT_LOG permission.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/invite#get-target-users">
+     * https://docs.discord.com/developers/resources/invite#get-target-users</a>
+     */
+    public static final Route INVITE_GET_TARGET_USERS = Route.get("/invites/{invite.code}/target-users");
+
+    /**
+     * Updates the users allowed to see and accept this invite.<br>
+     * Uploading a file with invalid user IDs will result in a 400 with the invalid IDs described.<br>
+     * Requires the caller to be the inviter or have the MANAGE_GUILD permission.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/invite#update-target-users">https://docs.discord.com/developers/resources/invite#update-target-users</a>
+     */
+    public static final Route INVITE_UPDATE_TARGET_USERS = Route.put("/invites/{invite.code}/target-users");
+
+    /**
+     * Processing target users from a CSV when creating or updating an invite is done asynchronously.<br>
+     * This endpoint allows you to check the status of that job.<br>
+     * Requires the caller to be the inviter, or have MANAGE_GUILD permission, or have VIEW_AUDIT_LOG permission.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/invite#get-target-users-job-status">https://docs.discord.com/developers/resources/invite#get-target-users-job-status</a>
+     */
+    public static final Route INVITE_GET_TARGET_USERS_JOB_STATUS = Route.get("/invites/{invite.code}/target-users/job-status");
+
+    /**
      * Accept an invite. This requires the guilds.join OAuth2 scope to be able to accept invites on behalf of normal
      * users (via an OAuth2 Bearer token). Bot users are disallowed. Returns an invite object on success.
      *
