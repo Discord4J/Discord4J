@@ -18,11 +18,9 @@ package discord4j.core.object.entity;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.util.ImageUtil;
 import discord4j.discordjson.json.PartialRoleDataFields;
 import discord4j.discordjson.possible.Possible;
-import discord4j.rest.entity.RestRole;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.Image;
 import reactor.core.publisher.Mono;
@@ -37,31 +35,27 @@ import java.util.Optional;
 public class PartialRole implements Entity {
 
     /** The path for role icon image URLs. */
-    private static final String ICON_IMAGE_PATH = "role-icons/%s/%s";
+    private static final String ICON_IMAGE_PATH = Role.ICON_IMAGE_PATH;
 
-    /** The gateway associated to this object. */
+    /** The gateway associated with this object. */
     private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
     private final PartialRoleDataFields data;
 
-    /** A handle to make API requests associated to this entity. */
-    private final RestRole rest;
-
-    /** The ID of the guild this role is associated to. */
+    /** The ID of the guild this role is associated with. */
     private final long guildId;
 
     /**
      * Constructs a {@code Role} with an associated {@link GatewayDiscordClient} and Discord data.
      *
-     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data The raw data as represented by Discord, must be non-null.
-     * @param guildId The ID of the guild this role is associated to.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null
+     * @param data The raw data, as represented by Discord, must be non-null
+     * @param guildId The ID of the guild this role is associated with
      */
     public PartialRole(final GatewayDiscordClient gateway, final PartialRoleDataFields data, final long guildId) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
-        this.rest = RestRole.create(gateway.rest(), Snowflake.of(guildId), Snowflake.of(data.id()));
         this.guildId = guildId;
     }
 
@@ -127,7 +121,7 @@ public class PartialRole implements Entity {
      * @return The icon URL of the role, if present.
      */
     public Optional<String> getIconUrl(final Image.Format format) {
-        return Possible.flatOpt(data.icon())
+        return Possible.flatOpt(this.getData().icon())
                 .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
     }
 
@@ -137,7 +131,7 @@ public class PartialRole implements Entity {
      * @return The Unicode Emoji of the role, if present.
      */
     public Optional<String> getUnicodeEmoji() {
-        return Possible.flatOpt(data.unicodeEmoji());
+        return Possible.flatOpt(this.getData().unicodeEmoji());
     }
 
     /**
@@ -146,7 +140,7 @@ public class PartialRole implements Entity {
      * @return The ID of the guild this role is associated to.
      */
     public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
+        return Snowflake.of(this.guildId);
     }
 
     /**
