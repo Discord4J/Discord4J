@@ -23,6 +23,8 @@ import discord4j.core.object.component.BaseMessageComponent;
 import discord4j.core.object.component.TopLevelMessageComponent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
+import discord4j.discordjson.Id;
+import discord4j.discordjson.json.ImmutableWebhookMessageEditRequest;
 import discord4j.discordjson.json.PollCreateData;
 import discord4j.discordjson.json.WebhookMessageEditRequest;
 import discord4j.discordjson.possible.Possible;
@@ -31,7 +33,9 @@ import discord4j.rest.util.MultipartRequest;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -78,29 +82,39 @@ interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<Webhoo
             Possible.ofNullable(Possible.flatOpt(this.components()).orElse(null))
         );
 
-        WebhookMessageEditRequest json = WebhookMessageEditRequest.builder()
-            .content(content())
-            .embeds(mapPossibleOptional(embeds(), embeds -> embeds.stream()
-                .map(EmbedCreateSpec::asRequest)
-                .collect(Collectors.toList())))
-            .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
-            .components(mapPossible(components(), components -> components
-                .map(list -> list.stream()
-                    .map(BaseMessageComponent::getData)
-                    .collect(Collectors.toList()))
-                .orElse(Collections.emptyList())))
-            .poll(poll())
-            .flags(mapPossibleOptional(Possible.of(Optional.ofNullable(flagsToApply)), f -> f.stream()
-                .mapToInt(Message.Flag::getFlag)
-                .reduce(0, (left, right) -> left | right)))
-            // TODO upon v10 upgrade, it is required to also include new files as attachment here
-            .attachments(mapPossibleOptional(attachments(), attachments -> attachments.stream()
-                .map(Attachment::getData)
-                .collect(Collectors.toList())))
-            .build();
-        return MultipartRequest.ofRequestAndFiles(json, Stream.concat(files().stream(), fileSpoilers().stream())
-            .map(MessageCreateFields.File::asRequest)
-            .collect(Collectors.toList()));
+        ImmutableWebhookMessageEditRequest.Builder webhookMessageEditRequestBuilder = WebhookMessageEditRequest.builder()
+                .content(content())
+                .embeds(mapPossibleOptional(embeds(), embeds -> embeds.stream()
+                        .map(EmbedCreateSpec::asRequest)
+                        .collect(Collectors.toList())))
+                .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
+                .components(mapPossible(components(), components -> components
+                        .map(list -> list.stream()
+                                .map(BaseMessageComponent::getData)
+                                .collect(Collectors.toList()))
+                        .orElse(Collections.emptyList())))
+                .poll(poll())
+                .flags(mapPossibleOptional(Possible.of(Optional.ofNullable(flagsToApply)), f -> f.stream()
+                        .mapToInt(Message.Flag::getFlag)
+                        .reduce(0, (left, right) -> left | right)))
+                .attachments(mapPossibleOptional(attachments(), attachments -> attachments.stream()
+                        .map(Attachment::getData)
+                        .collect(Collectors.toList())));
+
+        final List<MessageCreateFields.File> filesCollected = Stream.concat(files().stream(), fileSpoilers().stream())
+                .collect(Collectors.toList());
+        final List<Tuple2<String, InputStream>> filesTuples = filesCollected.stream()
+                .map(MessageCreateFields.File::asRequest)
+                .collect(Collectors.toList());
+
+        if (!filesCollected.isEmpty()) {
+            for (int x = 0; x < filesCollected.size(); x++) {
+                webhookMessageEditRequestBuilder.addAttachment(filesCollected.get(x).asPartialAttachmentData(Id.of(x)));
+            }
+        }
+
+        WebhookMessageEditRequest json = webhookMessageEditRequestBuilder.build();
+        return MultipartRequest.ofRequestAndFiles(json, filesTuples);
     }
 }
 

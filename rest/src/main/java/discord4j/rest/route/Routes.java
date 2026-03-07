@@ -24,12 +24,24 @@ package discord4j.rest.route;
 public abstract class Routes {
 
     /**
+     * Represents the version identifier for the routes defined in the `Routes` class.
+     * This constant is used to specify the current version of the API used
+     * within the application.
+     * <br>
+     * The version string is generally used in constructing API endpoints and ensuring
+     * compatibility between the client and the server.
+     *
+     * @see <a href="https://discord.com/developers/docs/reference#api-versioning">
+     */
+    public static final String VERSION = "10";
+
+    /**
      * The base URL for all API requests.
      *
      * @see <a href="https://discord.com/developers/docs/reference#base-url">
      * https://discord.com/developers/docs/reference#base-url</a>
      */
-    public static final String BASE_URL = "https://discord.com/api/v10";
+    public static final String BASE_URL = "https://discord.com/api/v".concat(VERSION);
 
     //////////////////////////////////////////////
     ////////////// Gateway Resource //////////////
