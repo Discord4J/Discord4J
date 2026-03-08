@@ -86,24 +86,14 @@ public class InteractionCreateEvent extends Event {
         return this.getInteraction().getUser();
     }
 
-    @Deprecated
-    protected Mono<Void> createInteractionResponse(InteractionResponseType responseType,
-                                                   @Nullable InteractionApplicationCommandCallbackData data) {
-        InteractionResponseData responseData = InteractionResponseData.builder()
-                .type(responseType.getValue())
-                .data(Possible.ofNullable(data))
-                .build();
-
-        final long id = this.getInteraction().getId().asLong();
-        final String token = this.getInteraction().getToken();
-
-        return this.getClient().rest().getInteractionService()
-                .createInteractionResponse(id, token, responseData);
+    protected Mono<Void> createInteractionResponse(final InteractionResponseType responseType,
+                                                   final @Nullable InteractionApplicationCommandCallbackData data) {
+        return this.createInteractionResponse(responseType, data == null ? MultipartRequest.ofEmpty() : MultipartRequest.ofRequest(data));
     }
 
-    protected Mono<Void> createInteractionResponse(InteractionResponseType responseType,
-                                                   MultipartRequest<InteractionApplicationCommandCallbackData> data) {
-        InteractionResponseData responseData = InteractionResponseData.builder()
+    protected Mono<Void> createInteractionResponse(final InteractionResponseType responseType,
+                                                   final MultipartRequest<InteractionApplicationCommandCallbackData> data) {
+        final InteractionResponseData responseData = InteractionResponseData.builder()
                 .type(responseType.getValue())
                 .data(Possible.ofNullable(data.getJsonPayload()))
                 .build();
