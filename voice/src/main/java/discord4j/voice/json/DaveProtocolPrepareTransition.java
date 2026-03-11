@@ -16,6 +16,8 @@
  */
 package discord4j.voice.json;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class DaveProtocolPrepareTransition extends VoiceGatewayPayload<DaveProtocolPrepareTransition.Data> {
 
     public static final int OP = 21;
@@ -38,10 +40,12 @@ public class DaveProtocolPrepareTransition extends VoiceGatewayPayload<DaveProto
             this.protocolVersion = protocolVersion;
         }
 
+        @JsonProperty("transition_id")
         public int getTransitionId() {
             return transitionId;
         }
 
+        @JsonProperty("protocol_version")
         public int getProtocolVersion() {
             return protocolVersion;
         }

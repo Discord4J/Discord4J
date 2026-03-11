@@ -16,6 +16,8 @@
  */
 package discord4j.voice.json;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class MlsInvalidCommitWelcome extends VoiceGatewayPayload<MlsInvalidCommitWelcome.Data> {
 
     public static final int OP = 31;
@@ -36,6 +38,7 @@ public class MlsInvalidCommitWelcome extends VoiceGatewayPayload<MlsInvalidCommi
             this.transitionId = transitionId;
         }
 
+        @JsonProperty("transition_id")
         public int getTransitionId() {
             return transitionId;
         }
