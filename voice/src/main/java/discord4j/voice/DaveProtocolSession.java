@@ -17,7 +17,7 @@
 
 package discord4j.voice;
 
-import club.minnced.discord.jdave.ffi.LibDave;
+import moe.kyokobot.libdave.NativeDaveFactory;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -58,9 +58,10 @@ interface DaveProtocolSession extends AutoCloseable {
 
     static int getMaxSupportedProtocolVersion() {
         try {
-            return LibDave.getMaxSupportedProtocolVersion();
+            NativeDaveFactory.ensureAvailable();
+            return new NativeDaveFactory().maxSupportedProtocolVersion();
         } catch (Throwable t) {
-            LOGGER.warn("Unable to query JDAVE max protocol version, disabling DAVE advertisement", t);
+            LOGGER.warn("Unable to query libdave-jvm max protocol version, disabling DAVE advertisement", t);
             return 0;
         }
     }
@@ -72,9 +73,9 @@ interface DaveProtocolSession extends AutoCloseable {
     static DaveProtocolSession create(long selfUserId, long channelId, String authSessionId,
                                       DaveGatewayCallbacks callbacks) {
         try {
-            return new JdaveProtocolSession(selfUserId, channelId, authSessionId, callbacks);
+            return new LibdaveProtocolSession(selfUserId, channelId, authSessionId, callbacks);
         } catch (Throwable t) {
-            LOGGER.warn("Unable to initialize JDAVE runtime, falling back to passthrough mode. "
+            LOGGER.warn("Unable to initialize libdave-jvm, falling back to passthrough mode. "
                     + "Voice connections that require DAVE will fail after March 1, 2026.", t);
             return new NoOpDaveProtocolSession();
         }

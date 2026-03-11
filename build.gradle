@@ -16,7 +16,7 @@ ext {
     project_version = "$version".toString()
     project_description = 'Java interface for the Discord API'
     project_url = 'https://discord4j.com'
-    project_jdk = 25
+    project_jdk = 8
     jdk = JavaVersion.current().majorVersion
 
     jdk_javadoc = "https://docs.oracle.com/javase/$jdk/docs/api/".toString()

@@ -33,13 +33,6 @@ libraryDependencies ++= Seq(
 ## DAVE Requirements
 Discord requires the DAVE voice protocol for standard voice connections as of March 1, 2026.
 
-This fork now integrates JDAVE directly. The `voice` module and applications using it must run on Java 25 and enable
-native access:
-
-```shell
-java --enable-native-access=ALL-UNNAMED ...
-```
-
 ## Development builds
 Please follow our instructions at [Using Jitpack](https://github.com/Discord4J/Discord4J/wiki/Using-Jitpack)
 
