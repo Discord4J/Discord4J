@@ -51,6 +51,7 @@ import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.gateway.state.DispatchStoreLayer;
 import discord4j.gateway.state.StatefulDispatch;
+import discord4j.rest.route.Routes;
 import discord4j.rest.util.Multimap;
 import discord4j.rest.util.RouteUtils;
 import discord4j.voice.DefaultVoiceConnectionFactory;
@@ -949,7 +950,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         final Multimap<String, Object> parameters = new Multimap<>(3);
         parameters.add("compress", "zlib-stream");
         parameters.add("encoding", "json");
-        parameters.add("v", 9);
+        parameters.add("v", Routes.VERSION);
         return parameters;
     }
 

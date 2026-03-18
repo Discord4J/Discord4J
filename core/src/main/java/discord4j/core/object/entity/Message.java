@@ -753,7 +753,7 @@ public final class Message implements Entity {
      * <p>
      * By default, this method will append any file added through {@code withFiles}. To replace or remove individual
      * attachments, use {@code withAttachments} along with {@link discord4j.core.object.entity.Attachment} objects from
-     * the original message you want to keep. It is not required to include the new files as {@code Attachment} objects.
+     * the original message you want to keep. It is not required to include the new files as {@code Attachment} objects (this action its make internally when the request are made).
      * <p>
      * For example, to replace all previous attachments, provide an empty {@code withAttachments} and your files:
      * <pre>{@code
@@ -825,7 +825,7 @@ public final class Message implements Entity {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> delete() {
-        return delete(null);
+        return this.delete(null);
     }
 
     /**
@@ -836,7 +836,7 @@ public final class Message implements Entity {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> delete(final @Nullable String reason) {
-        return gateway.getRestClient().getChannelService()
+        return this.getClient().getRestClient().getChannelService()
                 .deleteMessage(getChannelId().asLong(), getId().asLong(), reason);
     }
 

@@ -114,7 +114,7 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      * Acknowledges the interaction indicating a response will be edited later. The user sees a loading state, visible
      * to all participants in the invoking channel.
      * <p>
-     * After calling {@code deferReply}, you are not allowed to call other acknowledging or reply method and have to
+     * After calling {@code deferReply}, you are not allowed to call another acknowledging or reply method and have to
      * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
      * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
      * {@link #deleteFollowup(Snowflake)}.
@@ -126,7 +126,7 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      */
     public Mono<Void> deferReply(InteractionCallbackSpec spec) {
         Objects.requireNonNull(spec);
-        return Mono.defer(() -> createInteractionResponse(
+        return Mono.defer(() -> this.createInteractionResponse(
                 InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, spec.asRequest()));
     }
 
@@ -331,7 +331,7 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      * <p>
      * By default, this method will append any file added through {@code withFiles}. To replace or remove individual
      * attachments, use {@code withAttachments} along with {@link discord4j.core.object.entity.Attachment} objects from
-     * the original message you want to keep. It is not required to include the new files as {@code Attachment} objects.
+     * the original message you want to keep. It is not required to include the new files as {@code Attachment} objects (this action its make internally when the request are made).
      * <p>
      * For example, to replace all previous attachments, provide an empty {@code withAttachments} and your files:
      * <pre>{@code
@@ -389,6 +389,7 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      * @param spec an immutable object that specifies how to edit the initial reply
      * @return a {@link Mono} where, upon successful completion, emits the updated message. If an error is received,
      * it is emitted through the {@code Mono}.
+     * @see #editReply()
      */
     public Mono<Message> editReply(InteractionReplyEditSpec spec) {
         Objects.requireNonNull(spec);

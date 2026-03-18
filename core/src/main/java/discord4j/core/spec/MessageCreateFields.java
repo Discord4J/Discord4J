@@ -18,7 +18,11 @@
 package discord4j.core.spec;
 
 import discord4j.core.object.entity.Attachment;
+import discord4j.discordjson.Id;
+import discord4j.discordjson.json.PartialAttachmentData;
+import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
+import org.jspecify.annotations.Nullable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
@@ -35,13 +39,31 @@ public final class MessageCreateFields {
     @Value.Immutable
     public interface File extends Spec<Tuple2<String, InputStream>> {
 
-        static File of(String name, InputStream inputStream) {
-            return ImmutableMessageCreateFields.File.of(name, inputStream);
+        static File of(final String name, final InputStream inputStream) {
+            return ImmutableMessageCreateFields.File.of(name, null, inputStream);
+        }
+
+        static File of(final String name, final String description, final InputStream inputStream) {
+            return ImmutableMessageCreateFields.File.of(name, description, inputStream);
         }
 
         String name();
 
+        @Nullable String description();
+
         InputStream inputStream();
+
+        default String getFileName() {
+            return this.name();
+        }
+
+        default PartialAttachmentData asPartialAttachmentData(final Id id) {
+            return PartialAttachmentData.builder()
+                    .id(id)
+                    .filename(this.getFileName())
+                    .description(Possible.ofNullable(this.description()))
+                    .build();
+        }
 
         @Override
         default Tuple2<String, InputStream> asRequest() {
@@ -54,12 +76,21 @@ public final class MessageCreateFields {
     public interface FileSpoiler extends File {
 
         static FileSpoiler of(String name, InputStream inputStream) {
-            return ImmutableMessageCreateFields.FileSpoiler.of(name, inputStream);
+            return ImmutableMessageCreateFields.FileSpoiler.of(name, null, inputStream);
+        }
+
+        static FileSpoiler of(String name, String description, InputStream inputStream) {
+            return ImmutableMessageCreateFields.FileSpoiler.of(name, description, inputStream);
+        }
+
+        @Override
+        default String getFileName() {
+            return Attachment.SPOILER_PREFIX + this.name();
         }
 
         @Override
         default Tuple2<String, InputStream> asRequest() {
-            return Tuples.of(Attachment.SPOILER_PREFIX + name(), inputStream());
+            return Tuples.of(this.getFileName(), this.inputStream());
         }
     }
 }

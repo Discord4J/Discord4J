@@ -68,6 +68,10 @@ public class MultipartRequest<T> {
         this.httpClientFormConsumer = httpClientFormConsumer;
     }
 
+    public static <T> MultipartRequest<T> ofEmpty() {
+        return new MultipartRequest<>(null, DEFAULT_FILE_FIELD, Collections.emptyList());
+    }
+
     public static <T> MultipartRequest<T> ofEmptyRequest(String fileField) {
         return new MultipartRequest<>(null, fileField, Collections.emptyList());
     }
