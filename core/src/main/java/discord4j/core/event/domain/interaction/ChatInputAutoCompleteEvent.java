@@ -65,7 +65,7 @@ public class ChatInputAutoCompleteEvent extends AutoCompleteInteractionEvent {
                 .choices(choices)
                 .build();
 
-        return createInteractionResponse(InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT, data);
+        return this.createInteractionResponse(InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT, data);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////

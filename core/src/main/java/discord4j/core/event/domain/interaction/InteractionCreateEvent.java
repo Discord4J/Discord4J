@@ -33,6 +33,8 @@ import discord4j.rest.util.MultipartRequest;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 /**
  * Dispatched when a user in a guild interacts with an application command, component, or other interaction based UI
  * element. It is recommended you use a subclass in your event listeners to access interaction-specific methods.
@@ -49,7 +51,7 @@ import reactor.core.publisher.Mono;
  *     <li>{@link ModalSubmitInteractionEvent} dispatched when a user submits a previously presented modal</li>
  * </ul>
  * <p>
- * This event is dispatched by Discord.
+ * Discord dispatches this event.
  *
  * @see <a href="https://discord.com/developers/docs/topics/gateway#interaction-create">Interaction Create</a>
  * <p>
@@ -71,7 +73,7 @@ public class InteractionCreateEvent extends Event {
      * @return The {@link discord4j.core.object.command.Interaction} associated with the event.
      */
     public Interaction getInteraction() {
-        return interaction;
+        return this.interaction;
     }
 
     /**
@@ -81,35 +83,25 @@ public class InteractionCreateEvent extends Event {
      * @return The {@link discord4j.core.object.entity.User} associated with the event.
      */
     public User getUser() {
-        return interaction.getUser();
+        return this.getInteraction().getUser();
     }
 
-    @Deprecated
-    protected Mono<Void> createInteractionResponse(InteractionResponseType responseType,
-                                                   @Nullable InteractionApplicationCommandCallbackData data) {
-        InteractionResponseData responseData = InteractionResponseData.builder()
-                .type(responseType.getValue())
-                .data(data == null ? Possible.absent() : Possible.of(data))
-                .build();
-
-        long id = interaction.getId().asLong();
-        String token = interaction.getToken();
-
-        return getClient().rest().getInteractionService()
-                .createInteractionResponse(id, token, responseData);
+    protected Mono<Void> createInteractionResponse(final InteractionResponseType responseType,
+                                                   final @Nullable InteractionApplicationCommandCallbackData data) {
+        return this.createInteractionResponse(responseType, data == null ? MultipartRequest.ofEmpty() : MultipartRequest.ofRequest(data));
     }
 
-    protected Mono<Void> createInteractionResponse(InteractionResponseType responseType,
-                                                   MultipartRequest<InteractionApplicationCommandCallbackData> data) {
-        InteractionResponseData responseData = InteractionResponseData.builder()
+    protected Mono<Void> createInteractionResponse(final InteractionResponseType responseType,
+                                                   final MultipartRequest<InteractionApplicationCommandCallbackData> data) {
+        final InteractionResponseData responseData = InteractionResponseData.builder()
                 .type(responseType.getValue())
-                .data(Possible.of(data.getJsonPayload()))
+                .data(Possible.ofNullable(data.getJsonPayload()))
                 .build();
 
-        long id = interaction.getId().asLong();
-        String token = interaction.getToken();
+        final long id = this.getInteraction().getId().asLong();
+        final String token = this.getInteraction().getToken();
 
-        return getClient().rest().getInteractionService()
+        return this.getClient().rest().getInteractionService()
                 .createInteractionResponse(id, token, data.withRequest(responseData));
     }
 
@@ -127,39 +119,39 @@ public class InteractionCreateEvent extends Event {
 
         @Override
         public Mono<MessageData> getInitialResponse() {
-            return restClient.getWebhookService()
-                    .getWebhookMessage(applicationId, interactionData.token(), "@original");
+            return this.restClient.getWebhookService()
+                    .getWebhookMessage(this.applicationId, this.interactionData.token(), "@original");
         }
 
         @Override
         public Mono<MessageData> editInitialResponse(WebhookMessageEditRequest request) {
-            return restClient.getWebhookService()
-                    .modifyWebhookMessage(applicationId, interactionData.token(), "@original", request);
+            return this.restClient.getWebhookService()
+                    .modifyWebhookMessage(this.applicationId, this.interactionData.token(), "@original", request);
         }
 
         @Override
         public Mono<MessageData> editInitialResponse(MultipartRequest<WebhookMessageEditRequest> request) {
-            return restClient.getWebhookService()
-                    .modifyWebhookMessage(applicationId, interactionData.token(), "@original", request);
+            return this.restClient.getWebhookService()
+                    .modifyWebhookMessage(this.applicationId, this.interactionData.token(), "@original", request);
         }
 
         @Override
         public Mono<Void> deleteInitialResponse() {
-            return restClient.getWebhookService()
-                    .deleteWebhookMessage(applicationId, interactionData.token(), "@original");
+            return this.restClient.getWebhookService()
+                    .deleteWebhookMessage(this.applicationId, this.interactionData.token(), "@original");
         }
 
         @Override
         public Mono<MessageData> createFollowupMessage(String content) {
             FollowupMessageRequest body = FollowupMessageRequest.builder().content(content).build();
-            return restClient.getWebhookService()
-                    .executeWebhook(applicationId, interactionData.token(), true, MultipartRequest.ofRequest(body));
+            return this.restClient.getWebhookService()
+                    .executeWebhook(this.applicationId, this.interactionData.token(), true, MultipartRequest.ofRequest(body));
         }
 
         @Override
         public Mono<MessageData> createFollowupMessage(MultipartRequest<? extends WebhookExecuteRequest> request) {
-            return restClient.getWebhookService()
-                    .executeWebhook(applicationId, interactionData.token(), true, request);
+            return this.restClient.getWebhookService()
+                    .executeWebhook(this.applicationId, this.interactionData.token(), true, request);
         }
 
         @Override
@@ -168,37 +160,37 @@ public class InteractionCreateEvent extends Event {
                     .content(content)
                     .flags(Message.Flag.EPHEMERAL.getFlag())
                     .build();
-            return restClient.getWebhookService()
-                    .executeWebhook(applicationId, interactionData.token(), true, MultipartRequest.ofRequest(body));
+            return this.restClient.getWebhookService()
+                    .executeWebhook(this.applicationId, this.interactionData.token(), true, MultipartRequest.ofRequest(body));
         }
 
         @Override
         public Mono<MessageData> createFollowupMessageEphemeral(MultipartRequest<WebhookExecuteRequest> request) {
             FollowupMessageRequest newBody = FollowupMessageRequest.builder()
-                    .from(request.getJsonPayload())
+                    .from(Objects.requireNonNull(request.getJsonPayload()))
                     .flags(Message.Flag.EPHEMERAL.getFlag())
                     .build();
-            return restClient.getWebhookService()
-                    .executeWebhook(applicationId, interactionData.token(), true, MultipartRequest.ofRequest(newBody));
+            return this.restClient.getWebhookService()
+                    .executeWebhook(this.applicationId, this.interactionData.token(), true, MultipartRequest.ofRequest(newBody));
         }
 
         @Override
         public Mono<MessageData> editFollowupMessage(long messageId, WebhookMessageEditRequest request, boolean wait) {
-            return restClient.getWebhookService()
-                    .modifyWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId), request);
+            return this.restClient.getWebhookService()
+                    .modifyWebhookMessage(this.applicationId, this.interactionData.token(), String.valueOf(messageId), request);
         }
 
         @Override
         public Mono<MessageData> editFollowupMessage(long messageId,
                                                      MultipartRequest<WebhookMessageEditRequest> request) {
-            return restClient.getWebhookService()
-                    .modifyWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId), request);
+            return this.restClient.getWebhookService()
+                    .modifyWebhookMessage(this.applicationId, this.interactionData.token(), String.valueOf(messageId), request);
         }
 
         @Override
         public Mono<Void> deleteFollowupMessage(long messageId) {
-            return restClient.getWebhookService()
-                    .deleteWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId));
+            return this.restClient.getWebhookService()
+                    .deleteWebhookMessage(this.applicationId, this.interactionData.token(), String.valueOf(messageId));
         }
     }
 }
