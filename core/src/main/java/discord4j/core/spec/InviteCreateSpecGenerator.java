@@ -80,11 +80,15 @@ interface InviteCreateSpecGenerator extends AuditSpec<InviteCreateRequest> {
     default MultipartRequest<InviteCreateRequest> asMultipartRequest() {
         InviteCreateRequest jsonRequest = this.asRequest();
 
-        MultipartRequest<InviteCreateRequest> inviteCreateRequestMultipartRequest = MultipartRequest.ofRequest(jsonRequest, "target_users_file");
+        final String fileField = "target_users_file";
+        final String fileContentType = "text/csv";
+
+        MultipartRequest<InviteCreateRequest> inviteCreateRequestMultipartRequest = MultipartRequest.ofRequest(jsonRequest, fileField);
         if (this.targetUserIds().isPresent()) {
             final String dataTargetUsers = this.targetUserIds().get().stream().map(Snowflake::asString).collect(Collectors.joining(System.lineSeparator()));
-            InviteCreateFields.File file = InviteCreateFields.File.of("target_users_file", new ByteArrayInputStream(dataTargetUsers.getBytes(StandardCharsets.UTF_8)));
+            InviteCreateFields.File file = InviteCreateFields.File.of(fileField, new ByteArrayInputStream(dataTargetUsers.getBytes(StandardCharsets.UTF_8)));
             inviteCreateRequestMultipartRequest = inviteCreateRequestMultipartRequest.addFile(file.name(), file.inputStream());
+            inviteCreateRequestMultipartRequest = inviteCreateRequestMultipartRequest.withHttpFormConsumer(httpClientForm -> httpClientForm.file(fileField, file.name(), file.inputStream(), fileContentType));
         }
 
         return inviteCreateRequestMultipartRequest;
