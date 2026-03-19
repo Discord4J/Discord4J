@@ -55,7 +55,7 @@ public class InviteCreateFields {
         }
 
         default String name() {
-            return "target_users_file";
+            return "target_users.csv";
         }
 
         InputStream inputStream();
