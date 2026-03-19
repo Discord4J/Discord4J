@@ -53,7 +53,12 @@ public class MultipartRequest<T> {
             for (int index = 0; index < this.getFiles().size(); index++) {
                 // files format https://docs.discord.com/developers/reference#uploading-files
                 final String name = this.getFileField().concat(String.format("[%d]", index));
-                httpClientForm.file(name, this.getFiles().get(index).getT1(), this.getFiles().get(index).getT2(), "application/octet-stream");
+                httpClientForm.file(
+                        name,
+                        this.getFiles().get(index).getT1(),
+                        this.getFiles().get(index).getT2(),
+                        "application/octet-stream"
+                );
             }
         };
     }
@@ -105,8 +110,16 @@ public class MultipartRequest<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public <R> MultipartRequest<R> withHttpFormConsumer(Consumer<HttpClientForm> httpClientFormConsumer) {
-        return new MultipartRequest<>((R)this.jsonPayload, this.fileField, httpClientFormConsumer, this.files);
+    public <R> MultipartRequest<R> withFileHandler(MultipartFileHandler handler) {
+        Consumer<HttpClientForm> consumer = form ->
+                handler.accept(form, this.files);
+
+        return new MultipartRequest<>(
+                (R) this.jsonPayload,
+                this.fileField,
+                consumer,
+                this.files
+        );
     }
 
     public <R> MultipartRequest<R> withRequest(R body) {
@@ -157,4 +170,5 @@ public class MultipartRequest<T> {
     public Consumer<HttpClientForm> getHttpClientFormConsumer() {
         return this.httpClientFormConsumer;
     }
+
 }
