@@ -111,7 +111,7 @@ public class MultipartRequest<T> {
 
     @SuppressWarnings("unchecked")
     public <R> MultipartRequest<R> withFileHandler(MultipartFileHandler handler) {
-        Consumer<HttpClientForm> consumer = form ->
+        final Consumer<HttpClientForm> consumer = form ->
                 handler.accept(form, this.files);
 
         return new MultipartRequest<>(
