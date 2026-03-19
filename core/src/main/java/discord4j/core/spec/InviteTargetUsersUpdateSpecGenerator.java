@@ -40,7 +40,13 @@ public interface InviteTargetUsersUpdateSpecGenerator extends Spec<Void> {
 
         multipartRequest = multipartRequest.addFile(file.name(), file.inputStream());
         multipartRequest = multipartRequest.withFileHandler((form, files) ->
-                form.file(files.get(0).getT1(), files.get(0).getT2(), InviteCreateFields.TargetUsersFile.CONTENT_TYPE));
+                form.file(
+                        InviteCreateFields.TARGET_USERS_FILE_FIELD,
+                        files.get(0).getT1(),
+                        files.get(0).getT2(),
+                        InviteCreateFields.TargetUsersFile.CONTENT_TYPE
+                )
+        );
         return multipartRequest;
     }
 
