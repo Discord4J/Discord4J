@@ -16,34 +16,53 @@
  */
 package discord4j.core.spec;
 
+import discord4j.common.util.Snowflake;
 import org.immutables.value.Value;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @InlineFieldStyle
 @Value.Enclosing
 public class InviteCreateFields {
+
+    public static final String TARGET_USERS_FILE_FIELD = "target_users_file";
 
     private InviteCreateFields() {
         throw new AssertionError();
     }
 
     @Value.Immutable
-    public interface File extends Spec<Tuple2<String, InputStream>> {
+    public interface TargetUsersFile extends Spec<Tuple2<String, InputStream>> {
 
-        static InviteCreateFields.File of(String name, InputStream inputStream) {
-            return ImmutableInviteCreateFields.File.of(name, inputStream);
+        String CONTENT_TYPE = "text/csv";
+
+        static InviteCreateFields.TargetUsersFile of(List<Snowflake> ids) {
+            final String dataTargetUsers = ids.stream()
+                    .map(Snowflake::asString)
+                    .collect(Collectors.joining(System.lineSeparator()));
+
+            return of(new ByteArrayInputStream(dataTargetUsers.getBytes(StandardCharsets.UTF_8)));
         }
 
-        String name();
+        static InviteCreateFields.TargetUsersFile of(InputStream inputStream) {
+            return ImmutableInviteCreateFields.TargetUsersFile.of(inputStream);
+        }
+
+        default String name() {
+            return "target_users_file";
+        }
 
         InputStream inputStream();
 
         @Override
         default Tuple2<String, InputStream> asRequest() {
-            return Tuples.of(name(), inputStream());
+            return Tuples.of(this.name(), this.inputStream());
         }
     }
 }

@@ -29,8 +29,6 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,37 +59,36 @@ interface InviteCreateSpecGenerator extends AuditSpec<InviteCreateRequest> {
      * Creates a new InviteCreateRequest from the spec.
      *
      * @return a new InviteCreateRequest
-     * @apiNote if the Spec use {@link #targetUserIds()} need use {@link #asMultipartRequest()}
      */
     @Override
     default InviteCreateRequest asRequest() {
         return InviteCreateRequest.builder()
-            .maxAge(maxAge())
-            .maxUses(maxUses())
-            .temporary(temporary())
-            .unique(unique())
-            .targetType(mapPossible(targetType(), Invite.Type::getValue))
-            .targetUserId(mapPossible(targetUserId(), Snowflake::asString))
-            .targetApplicationId(mapPossible(targetApplicationId(), Snowflake::asString))
-            .roleIds(mapPossible(roleIds(), r -> r.stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList())))
-            .build();
+                .maxAge(maxAge())
+                .maxUses(maxUses())
+                .temporary(temporary())
+                .unique(unique())
+                .targetType(mapPossible(targetType(), Invite.Type::getValue))
+                .targetUserId(mapPossible(targetUserId(), Snowflake::asString))
+                .targetApplicationId(mapPossible(targetApplicationId(), Snowflake::asString))
+                .roleIds(mapPossible(roleIds(),
+                        r -> r.stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList())))
+                .build();
     }
 
     default MultipartRequest<InviteCreateRequest> asMultipartRequest() {
-        InviteCreateRequest jsonRequest = this.asRequest();
+        final InviteCreateRequest jsonRequest = this.asRequest();
 
-        final String fileField = "target_users_file";
-        final String fileContentType = "text/csv";
-
-        MultipartRequest<InviteCreateRequest> inviteCreateRequestMultipartRequest = MultipartRequest.ofRequest(jsonRequest, fileField);
+        MultipartRequest<InviteCreateRequest> multipartRequest = MultipartRequest.ofRequest(jsonRequest,
+                InviteCreateFields.TARGET_USERS_FILE_FIELD);
         if (this.targetUserIds().isPresent()) {
-            final String dataTargetUsers = this.targetUserIds().get().stream().map(Snowflake::asString).collect(Collectors.joining(System.lineSeparator()));
-            InviteCreateFields.File file = InviteCreateFields.File.of(fileField, new ByteArrayInputStream(dataTargetUsers.getBytes(StandardCharsets.UTF_8)));
-            inviteCreateRequestMultipartRequest = inviteCreateRequestMultipartRequest.addFile(file.name(), file.inputStream());
-            inviteCreateRequestMultipartRequest = inviteCreateRequestMultipartRequest.withHttpFormConsumer(httpClientForm -> httpClientForm.file(fileField, file.name(), file.inputStream(), fileContentType));
+            InviteCreateFields.TargetUsersFile file = InviteCreateFields.TargetUsersFile.of(this.targetUserIds().get());
+            multipartRequest = multipartRequest.addFile(file.name(), file.inputStream());
+            multipartRequest = multipartRequest.withFileHandler((form, files) ->
+                    form.file(files.get(0).getT1(), files.get(0).getT2(),
+                            InviteCreateFields.TargetUsersFile.CONTENT_TYPE));
         }
 
-        return inviteCreateRequestMultipartRequest;
+        return multipartRequest;
     }
 }
 

@@ -20,10 +20,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.rest.util.MultipartRequest;
 import org.immutables.value.Value;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Value.Immutable(singleton = true)
 public interface InviteTargetUsersUpdateSpecGenerator extends Spec<Void> {
@@ -36,21 +33,15 @@ public interface InviteTargetUsersUpdateSpecGenerator extends Spec<Void> {
     }
 
     default MultipartRequest<Void> asMultipartRequest() {
-        final String fileField = "target_users_file";
-        final String fileContentType = "text/csv";
+        MultipartRequest<Void> multipartRequest =
+                MultipartRequest.ofEmptyRequest(InviteCreateFields.TARGET_USERS_FILE_FIELD);
 
-        final String dataTargetUsers = targetUserIds().stream()
-                .map(Snowflake::asString)
-                .collect(Collectors.joining(System.lineSeparator()));
+        final InviteCreateFields.TargetUsersFile file = InviteCreateFields.TargetUsersFile.of(this.targetUserIds());
 
-        MultipartRequest<Void> inviteMultipartRequest = MultipartRequest.ofEmptyRequest(fileField);
-
-        final InviteCreateFields.File file = InviteCreateFields.File.of("target_users_file",
-                new ByteArrayInputStream(dataTargetUsers.getBytes(StandardCharsets.UTF_8)));
-
-        inviteMultipartRequest = inviteMultipartRequest.addFile(file.name(), file.inputStream());
-        inviteMultipartRequest = inviteMultipartRequest.withHttpFormConsumer(httpClientForm -> httpClientForm.file(fileField, file.name(), file.inputStream(), fileContentType));
-        return inviteMultipartRequest;
+        multipartRequest = multipartRequest.addFile(file.name(), file.inputStream());
+        multipartRequest = multipartRequest.withFileHandler((form, files) ->
+                form.file(files.get(0).getT1(), files.get(0).getT2(), InviteCreateFields.TargetUsersFile.CONTENT_TYPE));
+        return multipartRequest;
     }
 
 }
