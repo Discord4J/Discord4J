@@ -19,7 +19,6 @@ package discord4j.voice;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import discord4j.common.LogUtil;
 import discord4j.common.ResettableInterval;
 import discord4j.common.close.CloseException;
@@ -36,7 +35,6 @@ import discord4j.voice.json.DaveProtocolPrepareEpoch;
 import discord4j.voice.json.DaveProtocolPrepareTransition;
 import discord4j.voice.json.DaveProtocolReadyForTransition;
 import discord4j.voice.json.Heartbeat;
-import discord4j.voice.json.HeartbeatAck;
 import discord4j.voice.json.Hello;
 import discord4j.voice.json.Identify;
 import discord4j.voice.json.MlsInvalidCommitWelcome;
@@ -49,6 +47,7 @@ import discord4j.voice.json.SessionDescription;
 import discord4j.voice.json.Speaking;
 import discord4j.voice.json.VoiceDisconnect;
 import discord4j.voice.json.VoiceGatewayPayload;
+import discord4j.voice.json.VoiceGatewayPayloadDeserializer;
 import discord4j.voice.retry.VoiceGatewayException;
 import discord4j.voice.retry.VoiceGatewayReconnectException;
 import discord4j.voice.retry.VoiceGatewayRetrySpec;
@@ -101,6 +100,14 @@ public class DefaultVoiceGatewayClient {
     private static final Logger log = Loggers.getLogger(DefaultVoiceGatewayClient.class);
     private static final Logger senderLog = Loggers.getLogger("discord4j.voice.protocol.sender");
     private static final Logger receiverLog = Loggers.getLogger("discord4j.voice.protocol.receiver");
+
+    private static final int MLS_EXTERNAL_SENDER = 25;
+    private static final int MLS_KEY_PACKAGE = 26;
+    private static final int MLS_PROPOSALS = 27;
+    private static final int MLS_COMMIT_WELCOME = 28;
+    private static final int MLS_ANNOUNCE_COMMIT_TRANSITION = 29;
+    private static final int MLS_WELCOME = 30;
+    private static final int MLS_INVALID_COMMIT_WELCOME = 31;
 
     private final Snowflake guildId;
     private final Snowflake selfId;
@@ -329,7 +336,7 @@ public class DefaultVoiceGatewayClient {
                 authSessionId, new DaveGatewayCallbacks() {
                     @Override
                     public void sendMlsKeyPackage(byte[] mlsKeyPackage) {
-                        emitBinary(26, mlsKeyPackage);
+                        emitBinary(MLS_KEY_PACKAGE, mlsKeyPackage);
                     }
 
                     @Override
@@ -493,44 +500,7 @@ public class DefaultVoiceGatewayClient {
             gatewaySequence = json.get("seq").asLong();
         }
 
-        int op = json.get("op").asInt();
-        JsonNode d = json.get("d");
-        switch (op) {
-            case Hello.OP:
-                return new Hello(d.get("heartbeat_interval").asLong());
-            case Ready.OP:
-                return new Ready(d.get("ssrc").asInt(), d.get("ip").asText(), d.get("port").asInt(),
-                        readStringArray(d.get("modes")),
-                        d.has("auth_session_id") && !d.get("auth_session_id").isNull()
-                                ? d.get("auth_session_id").asText()
-                                : null);
-            case HeartbeatAck.OP:
-                return new HeartbeatAck(d.asLong());
-            case SessionDescription.OP:
-                ArrayNode secretKeyNode = (ArrayNode) d.get("secret_key");
-                byte[] secretKey = mapper.readValue(secretKeyNode.traverse(mapper), byte[].class);
-                return new SessionDescription(d.get("mode").asText(), secretKey,
-                        d.has("dave_protocol_version") ? d.get("dave_protocol_version").asInt() : 0);
-            case Speaking.OP:
-                return new Speaking(d.get("user_id").asText(), d.get("ssrc").asInt(), d.get("speaking").asBoolean());
-            case ClientsConnect.OP:
-                return new ClientsConnect(readStringArray(d.get("user_ids")));
-            case VoiceDisconnect.OP:
-                return new VoiceDisconnect(d.get("user_id").asText());
-            case Resumed.OP:
-                return new Resumed(d != null ? d.asText() : null);
-            case DaveProtocolPrepareTransition.OP:
-                return new DaveProtocolPrepareTransition(d.get("transition_id").asInt(),
-                        d.get("protocol_version").asInt());
-            case DaveProtocolExecuteTransition.OP:
-                return new DaveProtocolExecuteTransition(d.get("transition_id").asInt());
-            case DaveProtocolPrepareEpoch.OP:
-                return new DaveProtocolPrepareEpoch(d.get("epoch").asLong(),
-                        d.get("protocol_version").asInt());
-            default:
-                log.debug("Received voice gateway payload with unhandled OP: {}", op);
-                return null;
-        }
+        return VoiceGatewayPayloadDeserializer.deserialize(json, mapper);
     }
 
     private @Nullable VoiceGatewayEvent decodeBinaryFrame(ByteBuf buf) {
@@ -554,17 +524,17 @@ public class DefaultVoiceGatewayClient {
         int opcode = buf.readUnsignedByte();
 
         switch (opcode) {
-            case 25:
+            case MLS_EXTERNAL_SENDER:
                 return new DaveMlsExternalSenderPackage(sequenceNumber, readRemaining(buf));
-            case 27:
+            case MLS_PROPOSALS:
                 return new DaveMlsProposals(sequenceNumber, readRemaining(buf));
-            case 29:
+            case MLS_ANNOUNCE_COMMIT_TRANSITION:
                 if (buf.readableBytes() < 2) {
                     log.debug("Received truncated MLS announce commit transition frame");
                     return null;
                 }
                 return new DaveMlsAnnounceCommitTransition(sequenceNumber, buf.readUnsignedShort(), readRemaining(buf));
-            case 30:
+            case MLS_WELCOME:
                 if (buf.readableBytes() < 2) {
                     log.debug("Received truncated MLS welcome frame");
                     return null;
@@ -580,13 +550,13 @@ public class DefaultVoiceGatewayClient {
         int opcode = buf.readUnsignedByte();
 
         switch (opcode) {
-            case 25:
+            case MLS_EXTERNAL_SENDER:
                 return new DaveMlsExternalSenderPackage(-1, readRemaining(buf));
-            case 27:
+            case MLS_PROPOSALS:
                 return new DaveMlsProposals(-1, readRemaining(buf));
-            case 29:
+            case MLS_ANNOUNCE_COMMIT_TRANSITION:
                 return decodeOpcodePrefixedTransitionFrame(buf, true);
-            case 30:
+            case MLS_WELCOME:
                 return decodeOpcodePrefixedTransitionFrame(buf, false);
             default:
                 log.debug("Received opcode-prefixed binary voice gateway payload with unhandled OP: {}", opcode);
@@ -608,7 +578,7 @@ public class DefaultVoiceGatewayClient {
     }
 
     private static List<String> readStringArray(@Nullable JsonNode node) {
-        List<String> values = new ArrayList<String>();
+        List<String> values = new ArrayList<>();
         if (node == null) {
             return values;
         }
@@ -626,10 +596,13 @@ public class DefaultVoiceGatewayClient {
 
     private static boolean isDaveBinaryOpcode(int value) {
         switch (value) {
-            case 25:
-            case 27:
-            case 29:
-            case 30:
+            case MLS_EXTERNAL_SENDER:
+            case MLS_KEY_PACKAGE:
+            case MLS_PROPOSALS:
+            case MLS_COMMIT_WELCOME:
+            case MLS_ANNOUNCE_COMMIT_TRANSITION:
+            case MLS_WELCOME:
+            case MLS_INVALID_COMMIT_WELCOME:
                 return true;
             default:
                 return false;
@@ -775,6 +748,7 @@ public class DefaultVoiceGatewayClient {
         return Mono.deferContextual(ctx -> {
             DisconnectBehavior behavior;
             if (VoiceGatewayRetrySpec.NON_RETRYABLE_STATUS_CODES.contains(closeStatus.getCode())) {
+                // non-retryable close codes are non-transient errors therefore stopping is the only choice
                 behavior = DisconnectBehavior.stop(sourceBehavior.getCause());
             } else {
                 behavior = sourceBehavior;
@@ -810,6 +784,7 @@ public class DefaultVoiceGatewayClient {
                 case RETRY_ABRUPTLY:
                 case RETRY:
                 default:
+                    // reconnect should be handled now by retryFactory
                     return Mono.error(new CloseException(closeStatus, ctx, behavior.getCause()));
             }
         });

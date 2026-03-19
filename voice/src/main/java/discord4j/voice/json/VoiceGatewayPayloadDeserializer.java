@@ -17,6 +17,7 @@
 package discord4j.voice.json;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -40,15 +41,19 @@ public class VoiceGatewayPayloadDeserializer extends StdDeserializer<VoiceGatewa
     @Nullable
     @Override
     public VoiceGatewayPayload<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        JsonNode json = p.getCodec().readTree(p);
+        ObjectCodec codec = p.getCodec();
+        JsonNode json = codec.readTree(p);
+        return deserialize(json, codec);
+    }
+
+    public static VoiceGatewayPayload<?> deserialize(JsonNode json, ObjectCodec codec) throws IOException {
         int op = json.get("op").asInt();
         JsonNode d = json.get("d");
-
         switch (op) {
             case Hello.OP:
                 return new Hello(d.get("heartbeat_interval").asLong());
             case Ready.OP:
-                List<String> modes = new ArrayList<String>();
+                List<String> modes = new ArrayList<>();
                 if (d.has("modes")) {
                     for (JsonNode mode : d.get("modes")) {
                         modes.add(mode.asText());
@@ -62,13 +67,13 @@ public class VoiceGatewayPayloadDeserializer extends StdDeserializer<VoiceGatewa
                 return new HeartbeatAck(d.asLong());
             case SessionDescription.OP:
                 ArrayNode arrayNode = ((ArrayNode) d.get("secret_key"));
-                byte[] secret_key = p.getCodec().readValue(arrayNode.traverse(p.getCodec()), byte[].class);
+                byte[] secret_key = codec.readValue(arrayNode.traverse(codec), byte[].class);
                 return new SessionDescription(d.get("mode").asText(), secret_key,
                         d.has("dave_protocol_version") ? d.get("dave_protocol_version").asInt() : 0);
             case Speaking.OP:
                 return new Speaking(d.get("user_id").asText(), d.get("ssrc").asInt(), d.get("speaking").asBoolean());
             case ClientsConnect.OP:
-                List<String> userIds = new ArrayList<String>();
+                List<String> userIds = new ArrayList<>();
                 if (d.has("user_ids")) {
                     for (JsonNode userId : d.get("user_ids")) {
                         userIds.add(userId.asText());
