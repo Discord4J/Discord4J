@@ -165,4 +165,4 @@ Discord requires the DAVE voice protocol for standard voice connections as of Ma
 Please follow our instructions at [Using Jitpack](https://github.com/Discord4J/Discord4J/wiki/Using-Jitpack)
 
 ## Example Usage
-Check out this [Example voice bot](https://github.com/Discord4J/Discord4J/blob/master/core/src/test/java/discord4j/core/ExampleVoiceBot.java).
+Check out this [Example music bot](https://github.com/Discord4J/music-player-demo).
