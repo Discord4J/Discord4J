@@ -168,8 +168,13 @@ public class ChannelService extends RestService {
     }
 
     public Mono<InviteData> createChannelInvite(long channelId, InviteCreateRequest request, @Nullable String reason) {
+        return this.createChannelInvite(channelId, MultipartRequest.ofRequest(request), reason);
+    }
+
+    public Mono<InviteData> createChannelInvite(long channelId, MultipartRequest<InviteCreateRequest> request, @Nullable String reason) {
         return Routes.CHANNEL_INVITE_CREATE.newRequest(channelId)
-            .body(request)
+            .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
+            .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
             .optionalHeader("X-Audit-Log-Reason", reason)
             .exchange(getRouter())
             .bodyToMono(InviteData.class);
