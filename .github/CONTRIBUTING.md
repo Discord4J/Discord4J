@@ -12,6 +12,11 @@ Make sure to select and follow the appropriate issue template.
 
 ## Pull Requests
 
+### About Generative AI
+
+We don't accept pull requests that are generated entirely by AI. You can use them for writing documentation, or javadocs for example, but not for code.
+Please note that any pull request generated entirely by AI will be rejected.
+
 ### Development workflow
 
 Discord4J development is done over multiple branches, starting our oldest supported branch first and then **merging**
