@@ -53,7 +53,7 @@ public final class Role implements Entity {
     public static final Color DEFAULT_COLOR = Color.of(0);
 
     /** The path for role icon image URLs. */
-    private static final String ICON_IMAGE_PATH = "role-icons/%s/%s";
+    static final String ICON_IMAGE_PATH = "role-icons/%s/%s";
 
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;

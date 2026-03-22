@@ -93,7 +93,8 @@ public class ComponentInteractionEvent extends DeferrableInteractionEvent {
      */
     public Snowflake getMessageId() {
         return getInteraction().getMessageId()
-                .orElseThrow(IllegalStateException::new); // at least the ID is always present for component interactions
+                .orElseThrow(IllegalStateException::new); // at least the ID is always present for component
+        // interactions
     }
 
     /**
@@ -130,7 +131,7 @@ public class ComponentInteractionEvent extends DeferrableInteractionEvent {
      */
     public Mono<Void> deferEdit(InteractionCallbackSpec spec) {
         Objects.requireNonNull(spec);
-        return Mono.defer(() -> createInteractionResponse(
+        return Mono.defer(() -> this.createInteractionResponse(
                 InteractionResponseType.DEFERRED_UPDATE_MESSAGE, spec.asRequest()));
     }
 
@@ -157,7 +158,7 @@ public class ComponentInteractionEvent extends DeferrableInteractionEvent {
 
                     spec.accept(mutatedSpec);
 
-                    return createInteractionResponse(InteractionResponseType.UPDATE_MESSAGE, mutatedSpec.asRequest());
+                    return this.createInteractionResponse(InteractionResponseType.UPDATE_MESSAGE, mutatedSpec.asRequest());
                 });
     }
 
@@ -233,6 +234,7 @@ public class ComponentInteractionEvent extends DeferrableInteractionEvent {
      * through the {@code Mono}.
      * @deprecated for components, migrate to {@link #deferEdit()}
      */
+    @Deprecated
     @Override
     public Mono<Void> acknowledge() {
         return createInteractionResponse(InteractionResponseType.DEFERRED_UPDATE_MESSAGE, (InteractionApplicationCommandCallbackData) null);
@@ -246,12 +248,13 @@ public class ComponentInteractionEvent extends DeferrableInteractionEvent {
      * and indicating a response will be edited later. If an error is received, it is emitted through the {@code Mono}.
      * @deprecated for components, migrate to {@link #deferEdit() deferEdit().withEphemeral(true)}
      */
+    @Deprecated
     @Override
     public Mono<Void> acknowledgeEphemeral() {
         InteractionApplicationCommandCallbackData data = InteractionApplicationCommandCallbackData.builder()
                 .flags(Message.Flag.EPHEMERAL.getFlag())
                 .build();
 
-        return createInteractionResponse(InteractionResponseType.DEFERRED_UPDATE_MESSAGE, data);
+        return this.createInteractionResponse(InteractionResponseType.DEFERRED_UPDATE_MESSAGE, data);
     }
 }

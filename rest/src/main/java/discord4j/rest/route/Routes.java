@@ -24,12 +24,24 @@ package discord4j.rest.route;
 public abstract class Routes {
 
     /**
+     * Represents the version identifier for the routes defined in the `Routes` class.
+     * This constant is used to specify the current version of the API used
+     * within the application.
+     * <br>
+     * The version string is generally used in constructing API endpoints and ensuring
+     * compatibility between the client and the server.
+     *
+     * @see <a href="https://discord.com/developers/docs/reference#api-versioning">
+     */
+    public static final String VERSION = "10";
+
+    /**
      * The base URL for all API requests.
      *
      * @see <a href="https://discord.com/developers/docs/reference#base-url">
      * https://discord.com/developers/docs/reference#base-url</a>
      */
-    public static final String BASE_URL = "https://discord.com/api/v10";
+    public static final String BASE_URL = "https://discord.com/api/v".concat(VERSION);
 
     //////////////////////////////////////////////
     ////////////// Gateway Resource //////////////
@@ -952,6 +964,34 @@ public abstract class Routes {
      * https://discord.com/developers/docs/resources/invite#delete-invite</a>
      */
     public static final Route INVITE_DELETE = Route.delete("/invites/{invite.code}");
+
+    /**
+     * Gets the users allowed to see and accept this invite.<br>
+     * Response is a CSV file with the header user_id and each user ID from the original file passed to invite create on its own line.<br>
+     * Requires the caller to be the inviter, or have MANAGE_GUILD permission, or have VIEW_AUDIT_LOG permission.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/invite#get-target-users">
+     * https://docs.discord.com/developers/resources/invite#get-target-users</a>
+     */
+    public static final Route INVITE_GET_TARGET_USERS = Route.get("/invites/{invite.code}/target-users");
+
+    /**
+     * Updates the users allowed to see and accept this invite.<br>
+     * Uploading a file with invalid user IDs will result in a 400 with the invalid IDs described.<br>
+     * Requires the caller to be the inviter or have the MANAGE_GUILD permission.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/invite#update-target-users">https://docs.discord.com/developers/resources/invite#update-target-users</a>
+     */
+    public static final Route INVITE_UPDATE_TARGET_USERS = Route.put("/invites/{invite.code}/target-users");
+
+    /**
+     * Processing target users from a CSV when creating or updating an invite is done asynchronously.<br>
+     * This endpoint allows you to check the status of that job.<br>
+     * Requires the caller to be the inviter, or have MANAGE_GUILD permission, or have VIEW_AUDIT_LOG permission.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/invite#get-target-users-job-status">https://docs.discord.com/developers/resources/invite#get-target-users-job-status</a>
+     */
+    public static final Route INVITE_GET_TARGET_USERS_JOB_STATUS = Route.get("/invites/{invite.code}/target-users/job-status");
 
     /**
      * Accept an invite. This requires the guilds.join OAuth2 scope to be able to accept invites on behalf of normal
