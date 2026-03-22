@@ -1,3 +1,5 @@
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
 dependencies {
     api project(':rest')
     api project(':gateway')
@@ -19,6 +21,19 @@ dependencies {
     testImplementation "io.projectreactor:reactor-test"
     testImplementation "org.reflections:reflections:$reflections_version"
     testImplementation "com.github.walkyst:lavaplayer-fork:$lavaplayer_version"
+
+    if (DefaultNativePlatform.getCurrentOperatingSystem().isWindows()) {
+        testImplementation("moe.kyokobot.libdave:natives-win-x86-64:$libdave_version")
+        testImplementation("moe.kyokobot.libdave:natives-win-x86:$libdave_version")
+        testImplementation("moe.kyokobot.libdave:natives-win-aarch64:$libdave_version")
+    } else if (DefaultNativePlatform.getCurrentOperatingSystem().isLinux()) {
+        implementation("moe.kyokobot.libdave:natives-linux-x86:$libdave_version")
+        implementation("moe.kyokobot.libdave:natives-linux-aarch64:$libdave_version")
+        implementation("moe.kyokobot.libdave:natives-linux-arm:$libdave_version")
+    } else if (DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX()) {
+        implementation("moe.kyokobot.libdave:natives-darwin:$libdave_version")
+    }
+
 }
 
 javadoc {
