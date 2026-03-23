@@ -17,6 +17,7 @@
 package discord4j.voice.json;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -26,6 +27,8 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VoiceGatewayPayloadDeserializer extends StdDeserializer<VoiceGatewayPayload<?>> {
 
@@ -38,25 +41,57 @@ public class VoiceGatewayPayloadDeserializer extends StdDeserializer<VoiceGatewa
     @Nullable
     @Override
     public VoiceGatewayPayload<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        JsonNode json = p.getCodec().readTree(p);
+        ObjectCodec codec = p.getCodec();
+        JsonNode json = codec.readTree(p);
+        return deserialize(json, codec);
+    }
+
+    public static VoiceGatewayPayload<?> deserialize(JsonNode json, ObjectCodec codec) throws IOException {
         int op = json.get("op").asInt();
         JsonNode d = json.get("d");
-
         switch (op) {
             case Hello.OP:
                 return new Hello(d.get("heartbeat_interval").asLong());
             case Ready.OP:
-                return new Ready(d.get("ssrc").asInt(), d.get("ip").asText(), d.get("port").asInt());
+                List<String> modes = new ArrayList<>();
+                if (d.has("modes")) {
+                    for (JsonNode mode : d.get("modes")) {
+                        modes.add(mode.asText());
+                    }
+                }
+                return new Ready(d.get("ssrc").asInt(), d.get("ip").asText(), d.get("port").asInt(), modes,
+                        d.has("auth_session_id") && !d.get("auth_session_id").isNull()
+                                ? d.get("auth_session_id").asText()
+                                : null);
             case HeartbeatAck.OP:
                 return new HeartbeatAck(d.asLong());
             case SessionDescription.OP:
                 ArrayNode arrayNode = ((ArrayNode) d.get("secret_key"));
-                byte[] secret_key = p.getCodec().readValue(arrayNode.traverse(p.getCodec()), byte[].class);
-                return new SessionDescription(d.get("mode").asText(), secret_key);
+                byte[] secret_key = codec.readValue(arrayNode.traverse(codec), byte[].class);
+                return new SessionDescription(d.get("mode").asText(), secret_key,
+                        d.has("dave_protocol_version") ? d.get("dave_protocol_version").asInt() : 0);
             case Speaking.OP:
                 return new Speaking(d.get("user_id").asText(), d.get("ssrc").asInt(), d.get("speaking").asBoolean());
+            case ClientsConnect.OP:
+                List<String> userIds = new ArrayList<>();
+                if (d.has("user_ids")) {
+                    for (JsonNode userId : d.get("user_ids")) {
+                        userIds.add(userId.asText());
+                    }
+                }
+                return new ClientsConnect(userIds);
             case VoiceDisconnect.OP:
                 return new VoiceDisconnect(d.get("user_id").asText());
+            case DaveProtocolPrepareTransition.OP:
+                return new DaveProtocolPrepareTransition(d.get("transition_id").asInt(),
+                        d.get("protocol_version").asInt());
+            case DaveProtocolExecuteTransition.OP:
+                return new DaveProtocolExecuteTransition(d.get("transition_id").asInt());
+            case DaveProtocolPrepareEpoch.OP:
+                return new DaveProtocolPrepareEpoch(d.get("epoch").asLong(),
+                        d.get("protocol_version").asInt());
+            case MlsInvalidCommitWelcome.OP:
+                return new MlsInvalidCommitWelcome(d.get("transition_id").asInt());
             case Resumed.OP:
                 return new Resumed(d.asText()); // actually "d": null
             default:

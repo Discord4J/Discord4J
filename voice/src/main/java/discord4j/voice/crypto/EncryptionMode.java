@@ -18,6 +18,7 @@
 package discord4j.voice.crypto;
 
 import java.security.Security;
+import java.util.List;
 
 public enum EncryptionMode {
 
@@ -44,6 +45,16 @@ public enum EncryptionMode {
     public static EncryptionMode getBestMode() {
         for (EncryptionMode value : EncryptionMode.values()) {
             if (value.isAvailable()) {
+                return value;
+            }
+        }
+
+        return null;
+    }
+
+    public static EncryptionMode getBestMode(List<String> supportedModes) {
+        for (EncryptionMode value : EncryptionMode.values()) {
+            if (value.isAvailable() && supportedModes.contains(value.getValue())) {
                 return value;
             }
         }

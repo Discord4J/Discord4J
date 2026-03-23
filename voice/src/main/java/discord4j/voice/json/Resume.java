@@ -16,6 +16,7 @@
  */
 package discord4j.voice.json;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Resume extends VoiceGatewayPayload<Resume.Data> {
@@ -23,7 +24,11 @@ public class Resume extends VoiceGatewayPayload<Resume.Data> {
     public static final int OP = 7;
 
     public Resume(String serverId, String sessionId, String token) {
-        this(new Data(serverId, sessionId, token));
+        this(serverId, sessionId, token, null);
+    }
+
+    public Resume(String serverId, String sessionId, String token, Long sequenceAck) {
+        this(new Data(serverId, sessionId, token, sequenceAck));
     }
 
     public Resume(Data data) {
@@ -35,11 +40,13 @@ public class Resume extends VoiceGatewayPayload<Resume.Data> {
         private final String serverId;
         private final String sessionId;
         private final String token;
+        private final Long sequenceAck;
 
-        public Data(String serverId, String sessionId, String token) {
+        public Data(String serverId, String sessionId, String token, Long sequenceAck) {
             this.serverId = serverId;
             this.sessionId = sessionId;
             this.token = token;
+            this.sequenceAck = sequenceAck;
         }
 
         @JsonProperty("server_id")
@@ -54,6 +61,12 @@ public class Resume extends VoiceGatewayPayload<Resume.Data> {
 
         public String getToken() {
             return token;
+        }
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @JsonProperty("seq_ack")
+        public Long getSequenceAck() {
+            return sequenceAck;
         }
     }
 }

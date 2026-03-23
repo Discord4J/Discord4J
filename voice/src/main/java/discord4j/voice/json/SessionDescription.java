@@ -25,17 +25,23 @@ public class SessionDescription extends VoiceGatewayPayload<SessionDescription.D
     }
 
     public SessionDescription(String mode, byte[] secretKey) {
-        this(new Data(mode, secretKey));
+        this(mode, secretKey, 0);
+    }
+
+    public SessionDescription(String mode, byte[] secretKey, int daveProtocolVersion) {
+        this(new Data(mode, secretKey, daveProtocolVersion));
     }
 
     public static class Data {
 
         private final String mode;
         private final byte[] secretKey;
+        private final int daveProtocolVersion;
 
-        public Data(String mode, byte[] secretKey) {
+        public Data(String mode, byte[] secretKey, int daveProtocolVersion) {
             this.mode = mode;
             this.secretKey = secretKey;
+            this.daveProtocolVersion = daveProtocolVersion;
         }
 
         public String getMode() {
@@ -44,6 +50,10 @@ public class SessionDescription extends VoiceGatewayPayload<SessionDescription.D
 
         public byte[] getSecretKey() {
             return secretKey;
+        }
+
+        public int getDaveProtocolVersion() {
+            return daveProtocolVersion;
         }
     }
 }

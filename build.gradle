@@ -37,6 +37,7 @@ ext {
     logback_version = '1.3.16'
     reflections_version = '0.9.12'
     lavaplayer_version = '1.4.3'
+    libdave_version = '0.1.3'
 
     isJitpack = "true" == System.getenv("JITPACK")
     isRelease = !version.toString().endsWith('-SNAPSHOT')

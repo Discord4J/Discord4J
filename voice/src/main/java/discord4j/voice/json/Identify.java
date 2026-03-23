@@ -23,7 +23,11 @@ public class Identify extends VoiceGatewayPayload<Identify.Data> {
     public static final int OP = 0;
 
     public Identify(String serverId, String userId, String sessionId, String token) {
-        this(new Data(serverId, userId, sessionId, token));
+        this(serverId, userId, sessionId, token, 0);
+    }
+
+    public Identify(String serverId, String userId, String sessionId, String token, int maxDaveProtocolVersion) {
+        this(new Data(serverId, userId, sessionId, token, maxDaveProtocolVersion));
     }
 
     public Identify(Data data) {
@@ -36,12 +40,14 @@ public class Identify extends VoiceGatewayPayload<Identify.Data> {
         private final String userId;
         private final String sessionId;
         private final String token;
+        private final int maxDaveProtocolVersion;
 
-        public Data(String serverId, String userId, String sessionId, String token) {
+        public Data(String serverId, String userId, String sessionId, String token, int maxDaveProtocolVersion) {
             this.serverId = serverId;
             this.userId = userId;
             this.sessionId = sessionId;
             this.token = token;
+            this.maxDaveProtocolVersion = maxDaveProtocolVersion;
         }
 
         @JsonProperty("server_id")
@@ -61,6 +67,11 @@ public class Identify extends VoiceGatewayPayload<Identify.Data> {
 
         public String getToken() {
             return token;
+        }
+
+        @JsonProperty("max_dave_protocol_version")
+        public int getMaxDaveProtocolVersion() {
+            return maxDaveProtocolVersion;
         }
     }
 }

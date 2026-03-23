@@ -22,12 +22,9 @@ import discord4j.common.close.DisconnectBehavior;
 import discord4j.common.sinks.EmissionStrategy;
 import discord4j.voice.retry.PartialDisconnectException;
 import discord4j.voice.retry.VoiceGatewayException;
-import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.http.websocket.WebsocketInbound;
@@ -47,8 +44,8 @@ import static reactor.core.publisher.Sinks.EmitFailureHandler.FAIL_FAST;
  * <p>
  * Capable of handling closing events that normally occur in its lifecycle.
  * <p>
- * This handler uses a {@link FluxSink} of {@link ByteBuf} to push inbound payloads and a {@link Flux} of
- * {@link ByteBuf} to pull outbound payloads.
+ * This handler uses a sink of {@link VoiceGatewayFrame} to push inbound payloads and a {@link Flux} of
+ * {@link VoiceGatewayFrame} to pull outbound payloads.
  * <p>
  * The handler also provides methods to control the lifecycle, which perform operations on the current session. It is
  * required to use them to properly release important resources and complete the session.
@@ -57,8 +54,8 @@ public class VoiceWebsocketHandler {
 
     private static final Logger log = Loggers.getLogger(VoiceWebsocketHandler.class);
 
-    private final Sinks.Many<ByteBuf> inbound;
-    private final Flux<ByteBuf> outbound;
+    private final Sinks.Many<VoiceGatewayFrame> inbound;
+    private final Flux<VoiceGatewayFrame> outbound;
     private final Sinks.One<DisconnectBehavior> sessionClose;
     private final ContextView context;
     private final EmissionStrategy emissionStrategy;
@@ -66,11 +63,12 @@ public class VoiceWebsocketHandler {
     /**
      * Create a new handler with the given data pipelines.
      *
-     * @param inbound the {@link reactor.core.publisher.Sinks.Many} of {@link ByteBuf} to process inbound payloads
-     * @param outbound the {@link Flux} of {@link ByteBuf} to process outbound payloads
+     * @param inbound the inbound frame sink
+     * @param outbound the outbound frames
      * @param context the Reactor {@link ContextView} that owns this handler, to enrich logging
      */
-    public VoiceWebsocketHandler(Sinks.Many<ByteBuf> inbound, Flux<ByteBuf> outbound, ContextView context) {
+    public VoiceWebsocketHandler(Sinks.Many<VoiceGatewayFrame> inbound, Flux<VoiceGatewayFrame> outbound,
+                                 ContextView context) {
         this.inbound = inbound;
         this.outbound = outbound;
         this.sessionClose = Sinks.one();
@@ -116,14 +114,14 @@ public class VoiceWebsocketHandler {
                     close(DisconnectBehavior.retryAbruptly(new VoiceGatewayException(context, "Inbound close status")));
                 });
 
-        Mono<Void> outboundEvents = out.sendObject(Flux.merge(outboundClose, outbound.map(TextWebSocketFrame::new)))
+        Mono<Void> outboundEvents = out.sendObject(Flux.merge(outboundClose, outbound.map(VoiceGatewayFrame::toWebSocketFrame)))
                 .then();
 
         in.withConnection(c -> c.onDispose(() -> log.debug(format(context, "Connection disposed"))));
 
         Mono<Void> inboundEvents = in.aggregateFrames()
                 .receiveFrames()
-                .map(WebSocketFrame::content)
+                .map(VoiceGatewayFrame::inbound)
                 .doOnNext(this::emitInbound)
                 .then();
 
@@ -133,7 +131,7 @@ public class VoiceWebsocketHandler {
                 .then(Mono.zip(sessionClose.asMono(), inboundClose.defaultIfEmpty(CloseStatus.ABNORMAL_CLOSE)));
     }
 
-    private void emitInbound(ByteBuf value) {
+    private void emitInbound(VoiceGatewayFrame value) {
         emissionStrategy.emitNext(inbound, value);
     }
 
