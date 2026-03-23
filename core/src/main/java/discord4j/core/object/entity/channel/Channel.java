@@ -200,7 +200,7 @@ public interface Channel extends Entity {
         /**
          * Gets the shift amount associated with this bit value
          *
-         * @return N in <code>1 << N</code> that is the bit value for this flag
+         * @return N in {@literal 1 << N} that is the bit value for this flag
          */
         public int getShiftValue() {
             return shiftValue;

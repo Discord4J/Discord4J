@@ -29,3 +29,4 @@ local.properties
 # Misc
 logs/
 *.test
+.env
