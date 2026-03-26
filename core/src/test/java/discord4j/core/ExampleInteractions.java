@@ -227,7 +227,7 @@ public class ExampleInteractions {
                 ActionRow.of(Button.primary(ACTION_BUTTON, "Click me!").disabled(disabled)));
     }
 
-    private static LayoutComponent getModalComponent() {
+    private static TopLevelModalComponent getModalComponent() {
         return Label.of("What should happen next?", TextInput.small(REPLY_MODE_SELECT, 4, 10).required());
     }
 }
