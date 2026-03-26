@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class Label extends LayoutComponent {
+public class Label extends LayoutComponent implements TopLevelModalComponent {
 
     /**
      * Creates a {@link Label} with the given component.
