@@ -20,7 +20,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.Interaction;
-import discord4j.core.object.component.LayoutComponent;
+import discord4j.core.object.component.TopLevelModalComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.*;
 import discord4j.core.spec.legacy.LegacyInteractionApplicationCommandCallbackSpec;
@@ -287,7 +287,7 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
      * been sent. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> presentModal(String title, String customId, Collection<LayoutComponent> components) {
+    public Mono<Void> presentModal(String title, String customId, Collection<TopLevelModalComponent> components) {
         return presentModal().withTitle(title).withCustomId(customId).withComponents(components);
     }
 
