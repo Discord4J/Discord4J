@@ -96,7 +96,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param components The child components of the container.
      * @return A {@link Container} containing the given components.
      */
-    public static Container of(List<ICanBeUsedInContainerComponent> components) {
+    public static Container of(List<? extends ICanBeUsedInContainerComponent> components) {
         return new Container(null, null, false, components);
     }
 
@@ -107,7 +107,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param components The child components of the container.
      * @return A {@link Container} containing the given components.
      */
-    public static Container of(boolean spoiler, List<ICanBeUsedInContainerComponent> components) {
+    public static Container of(boolean spoiler, List<? extends ICanBeUsedInContainerComponent> components) {
         return new Container(null, null, spoiler, components);
     }
 
@@ -118,7 +118,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param components The components of the container.
      * @return A {@link Container} containing the given components.
      */
-    public static Container of(@Nullable Color color, List<ICanBeUsedInContainerComponent> components) {
+    public static Container of(@Nullable Color color, List<? extends ICanBeUsedInContainerComponent> components) {
         return new Container(null, color, false, components);
     }
 
@@ -131,7 +131,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @return A {@link Container} containing the given components.
      */
     public static Container of(@Nullable Color color, boolean spoiler,
-                               List<ICanBeUsedInContainerComponent> components) {
+                               List<? extends ICanBeUsedInContainerComponent> components) {
         return new Container(null, color, spoiler, components);
     }
 
@@ -191,7 +191,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param components The child components of the container.
      * @return A {@link Container} containing the given components.
      */
-    public static Container of(int id, List<ICanBeUsedInContainerComponent> components) {
+    public static Container of(int id, List<? extends ICanBeUsedInContainerComponent> components) {
         return new Container(id, null, false, components);
     }
 
@@ -203,7 +203,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param components The components of the container.
      * @return A {@link Container} containing the given components.
      */
-    public static Container of(int id, @Nullable Color color, List<ICanBeUsedInContainerComponent> components) {
+    public static Container of(int id, @Nullable Color color, List<? extends ICanBeUsedInContainerComponent> components) {
         return new Container(id, color, false, components);
     }
 
@@ -215,7 +215,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param components The components of the container.
      * @return A {@link Container} containing the given components.
      */
-    public static Container of(int id, boolean spoiler, List<ICanBeUsedInContainerComponent> components) {
+    public static Container of(int id, boolean spoiler, List<? extends ICanBeUsedInContainerComponent> components) {
         return new Container(id, null, spoiler, components);
     }
 
@@ -229,19 +229,19 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @return A {@link Container} containing the given components.
      */
     public static Container of(int id, @Nullable Color color, boolean spoiler,
-                               List<ICanBeUsedInContainerComponent> components) {
+                               List<? extends ICanBeUsedInContainerComponent> components) {
         return new Container(id, color, spoiler, components);
     }
 
     protected Container(@Nullable Integer id, @Nullable Color color, boolean spoiler,
-                        List<ICanBeUsedInContainerComponent> components) {
+                        List<? extends ICanBeUsedInContainerComponent> components) {
         this(
                 MessageComponent.getBuilder(Type.CONTAINER)
                         .id(Possible.ofNullable(id))
                         .spoiler(spoiler)
                         .components(components.stream()
                                 .filter(c -> c instanceof MessageComponent)
-                                .map(c -> ((MessageComponent) c).getData())
+                                .map(BaseMessageComponent::getData)
                                 .collect(Collectors.toList()))
                         .accentColor(Possible.of(Optional.ofNullable(color).map(Color::getRGB)))
                         .build()
@@ -291,7 +291,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @param components the child components to be added
      * @return a {@link Container} containing the existing and added components
      */
-    public Container withAddedComponents(List<ICanBeUsedInContainerComponent> components) {
+    public Container withAddedComponents(List<? extends ICanBeUsedInContainerComponent> components) {
         return new Container(ComponentData.builder()
                 .from(this.getData())
                 .components(Stream.concat(getChildren().stream(), components.stream())

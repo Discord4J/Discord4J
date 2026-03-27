@@ -56,7 +56,7 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * @param components The components of the section
      * @return A {@link Section} containing the given components
      */
-    public static Section of(IAccessoryComponent accessory, List<ICanBeUsedInSectionComponent> components) {
+    public static Section of(IAccessoryComponent accessory, List<? extends ICanBeUsedInSectionComponent> components) {
         return new Section(MessageComponent.getBuilder(Type.SECTION)
             .accessory(accessory.getData())
             .components(components.stream()
@@ -86,7 +86,7 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * @param components The components of the section
      * @return A {@link Section} containing the given components
      */
-    public static Section of(int id, IAccessoryComponent accessory, List<ICanBeUsedInSectionComponent> components) {
+    public static Section of(int id, IAccessoryComponent accessory, List<? extends ICanBeUsedInSectionComponent> components) {
         return new Section(MessageComponent.getBuilder(Type.SECTION)
             .id(id)
             .accessory(accessory.getData())
@@ -98,7 +98,7 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
     }
 
 
-    protected Section(Integer id, IAccessoryComponent accessory, List<ICanBeUsedInSectionComponent> components) {
+    protected Section(Integer id, IAccessoryComponent accessory, List<? extends ICanBeUsedInSectionComponent> components) {
         this(MessageComponent.getBuilder(Type.SECTION)
             .id(Possible.ofNullable(id))
             .accessory(accessory.getData())
@@ -166,7 +166,7 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * @param components the child components to be added
      * @return an {@code Section} containing the existing and added components with the current accessory
      */
-    public Section withAddedComponents(List<ICanBeUsedInSectionComponent> components) {
+    public Section withAddedComponents(List<? extends ICanBeUsedInSectionComponent> components) {
         return new Section(ComponentData.builder()
             .from(getData())
             .accessory(Possible.ofNullable(this.getData().accessory().toOptional().orElse(null)))
