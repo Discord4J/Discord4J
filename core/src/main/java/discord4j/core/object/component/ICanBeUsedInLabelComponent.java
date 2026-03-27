@@ -20,5 +20,5 @@ package discord4j.core.object.component;
 /**
  * A special type of {@link ActionComponent} that can be used in a {@link Label}
  */
-public interface ICanBeUsedInLabelComponent {
+public interface ICanBeUsedInLabelComponent extends BaseMessageComponent {
 }

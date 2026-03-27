@@ -30,10 +30,9 @@ public class Label extends LayoutComponent implements TopLevelModalComponent {
      * Creates a {@link Label} with the given component.
      *
      * @param component The component of the label.
-     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInLabelComponent}
      * @return A {@link Label} containing the given components.
      */
-    public static <C extends MessageComponent & ICanBeUsedInLabelComponent> Label of(String label, C component) {
+    public static Label of(String label, ICanBeUsedInLabelComponent component) {
         return new Label(label, null, component);
     }
 
@@ -42,14 +41,13 @@ public class Label extends LayoutComponent implements TopLevelModalComponent {
      *
      * @param component The component of the label.
      * @param description The description of the label.
-     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInLabelComponent}
      * @return A {@link Label} containing the given components.
      */
-    public static <C extends MessageComponent & ICanBeUsedInLabelComponent> Label of(String label, String description, C component) {
+    public static Label of(String label, String description, ICanBeUsedInLabelComponent component) {
         return new Label(label, description, component);
     }
 
-    protected <C extends ICanBeUsedInLabelComponent> Label(String label, @Nullable String description, C component) {
+    protected Label(String label, @Nullable String description, ICanBeUsedInLabelComponent component) {
         this(
             MessageComponent.getBuilder(Type.LABEL)
                 .label(Possible.of(Optional.of(label)))

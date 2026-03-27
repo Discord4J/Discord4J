@@ -43,11 +43,9 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      *
      * @param accessory The accessory component of the section
      * @param components The components of the section
-     * @param <C> The type of component, must implement {@link ICanBeUsedInSectionComponent}
      * @return A {@link Section} containing the given components
      */
-    @SafeVarargs
-    public static <C extends MessageComponent & ICanBeUsedInSectionComponent> Section of(IAccessoryComponent accessory, C... components) {
+    public static Section of(IAccessoryComponent accessory, ICanBeUsedInSectionComponent... components) {
         return of(accessory, Arrays.asList(components));
     }
 
@@ -56,10 +54,9 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      *
      * @param accessory The accessory component of the section
      * @param components The components of the section
-     * @param <C> The type of component, must implement {@link ICanBeUsedInSectionComponent}
      * @return A {@link Section} containing the given components
      */
-    public static <C extends ICanBeUsedInSectionComponent> Section of(IAccessoryComponent accessory, List<C> components) {
+    public static Section of(IAccessoryComponent accessory, List<ICanBeUsedInSectionComponent> components) {
         return new Section(MessageComponent.getBuilder(Type.SECTION)
             .accessory(accessory.getData())
             .components(components.stream()
@@ -75,11 +72,9 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * @param id the component id
      * @param accessory The accessory component of the section
      * @param components The components of the section
-     * @param <C> The type of component, must implement {@link ICanBeUsedInSectionComponent}
      * @return A {@link Section} containing the given components
      */
-    @SafeVarargs
-    public static <C extends MessageComponent & ICanBeUsedInSectionComponent> Section of(int id, IAccessoryComponent accessory, C... components) {
+    public static Section of(int id, IAccessoryComponent accessory, ICanBeUsedInSectionComponent... components) {
         return of(id, accessory, Arrays.asList(components));
     }
 
@@ -89,10 +84,9 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * @param id the component id
      * @param accessory The accessory component of the section
      * @param components The components of the section
-     * @param <C> The type of component, must implement {@link ICanBeUsedInSectionComponent}
      * @return A {@link Section} containing the given components
      */
-    public static <C extends ICanBeUsedInSectionComponent> Section of(int id, IAccessoryComponent accessory, List<C> components) {
+    public static Section of(int id, IAccessoryComponent accessory, List<ICanBeUsedInSectionComponent> components) {
         return new Section(MessageComponent.getBuilder(Type.SECTION)
             .id(id)
             .accessory(accessory.getData())
@@ -104,7 +98,7 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
     }
 
 
-    protected <C extends ICanBeUsedInSectionComponent> Section(Integer id, IAccessoryComponent accessory, List<C> components) {
+    protected Section(Integer id, IAccessoryComponent accessory, List<ICanBeUsedInSectionComponent> components) {
         this(MessageComponent.getBuilder(Type.SECTION)
             .id(Possible.ofNullable(id))
             .accessory(accessory.getData())
@@ -140,13 +134,13 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * @param component the child component to be added
      * @return an {@code Section} containing the existing and added components with the current accessory
      */
-    public <C extends MessageComponent & ICanBeUsedInSectionComponent> Section withAddedComponent(C component) {
-        List<MessageComponent> components = new ArrayList<>(getChildren());
+    public Section withAddedComponent(ICanBeUsedInSectionComponent component) {
+        List<BaseMessageComponent> components = new ArrayList<>(getChildren());
         components.add(component);
         return new Section(ComponentData.builder()
             .from(getData())
             .accessory(Possible.ofNullable(this.getData().accessory().toOptional().orElse(null)))
-            .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+            .components(components.stream().map(BaseMessageComponent::getData).collect(Collectors.toList()))
             .build());
     }
 
@@ -156,14 +150,13 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * @param components the child components to be added
      * @return an {@code Section} containing the existing and added components with the current accessory
      */
-    @SafeVarargs
-    public final <C extends MessageComponent & ICanBeUsedInSectionComponent> Section withAddedComponents(C... components) {
-        List<MessageComponent> componentsToAdd = new ArrayList<>(getChildren());
+    public final Section withAddedComponents(ICanBeUsedInSectionComponent... components) {
+        List<BaseMessageComponent> componentsToAdd = new ArrayList<>(getChildren());
         componentsToAdd.addAll(Arrays.asList(components));
         return new Section(ComponentData.builder()
             .from(getData())
             .accessory(Possible.ofNullable(this.getData().accessory().toOptional().orElse(null)))
-            .components(componentsToAdd.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+            .components(componentsToAdd.stream().map(BaseMessageComponent::getData).collect(Collectors.toList()))
             .build());
     }
 
@@ -173,7 +166,7 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * @param components the child components to be added
      * @return an {@code Section} containing the existing and added components with the current accessory
      */
-    public <C extends ICanBeUsedInSectionComponent> Section withAddedComponents(List<C> components) {
+    public Section withAddedComponents(List<ICanBeUsedInSectionComponent> components) {
         return new Section(ComponentData.builder()
             .from(getData())
             .accessory(Possible.ofNullable(this.getData().accessory().toOptional().orElse(null)))
@@ -190,7 +183,7 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * @param accessory the child component to be added
      * @return an {@code Section} containing the existing and added components with an accessory
      */
-    public Section withAddedAccessory(IAccessoryComponent accessory) {
+    public Section withAccessory(IAccessoryComponent accessory) {
         List<MessageComponent> components = new ArrayList<>(getChildren());
         return new Section(ComponentData.builder()
             .from(getData())
