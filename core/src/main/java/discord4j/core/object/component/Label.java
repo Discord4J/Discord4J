@@ -30,11 +30,10 @@ public class Label extends LayoutComponent implements TopLevelModalComponent {
      * Creates a {@link Label} with the given component.
      *
      * @param component The component of the label.
-     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInLabelComponent}
      * @return A {@link Label} containing the given components.
      */
-    public static <C extends MessageComponent & ICanBeUsedInLabelComponent> Label of(String label, C component) {
-        return new Label(label, null, component);
+    public static Label of(String label, ICanBeUsedInLabelComponent component) {
+        return new Label(null, label, null, component);
     }
 
     /**
@@ -42,18 +41,40 @@ public class Label extends LayoutComponent implements TopLevelModalComponent {
      *
      * @param component The component of the label.
      * @param description The description of the label.
-     * @param <C> The type of component to add, needs to be a {@link ICanBeUsedInLabelComponent}
      * @return A {@link Label} containing the given components.
      */
-    public static <C extends MessageComponent & ICanBeUsedInLabelComponent> Label of(String label, String description, C component) {
-        return new Label(label, description, component);
+    public static Label of(String label, String description, ICanBeUsedInLabelComponent component) {
+        return new Label(null, label, description, component);
     }
 
-    protected <C extends ICanBeUsedInLabelComponent> Label(String label, @Nullable String description, C component) {
+    /**
+     * Creates a {@link Label} with the given component.
+     *
+     * @param component The component of the label.
+     * @return A {@link Label} containing the given components.
+     */
+    public static Label of(int componentId, String label, ICanBeUsedInLabelComponent component) {
+        return new Label(componentId, label, null, component);
+    }
+
+    /**
+     * Creates a {@link Label} with the given component.
+     *
+     * @param component The component of the label.
+     * @param description The description of the label.
+     * @return A {@link Label} containing the given components.
+     */
+    public static Label of(int componentId, String label, String description, ICanBeUsedInLabelComponent component) {
+        return new Label(componentId, label, description, component);
+    }
+
+
+    protected Label(@Nullable Integer componentId, String label, @Nullable String description, ICanBeUsedInLabelComponent component) {
         this(
             MessageComponent.getBuilder(Type.LABEL)
+                .id(Possible.ofNullable(componentId))
                 .label(Possible.of(Optional.of(label)))
-                .component(((BaseMessageComponent) component).getData())
+                .component((component).getData())
                 .description(Possible.ofNullable(description).map(Optional::ofNullable))
                 .build()
         );
@@ -66,13 +87,13 @@ public class Label extends LayoutComponent implements TopLevelModalComponent {
     /**
      * Create a new {@link Label} instance from {@code this}, using a given component.
      *
-     * @param component the child component to be added
-     * @return an {@code Section} containing the existing and added components with an accessory
+     * @param component the child component to be replaced
+     * @return a {@link Label} containing the new component
      */
-    public Label withAddedComponent(ICanBeUsedInLabelComponent component) {
+    public Label withComponent(ICanBeUsedInLabelComponent component) {
         return new Label(ComponentData.builder()
             .from(getData())
-            .component(Possible.of(((BaseMessageComponent) component).getData()))
+            .component(Possible.of((component).getData()))
             .build());
     }
 
