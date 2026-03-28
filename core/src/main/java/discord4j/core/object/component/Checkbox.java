@@ -21,7 +21,7 @@ import discord4j.discordjson.json.ImmutableComponentData;
 
 import java.util.Optional;
 
-public class CheckboxAction extends ActionComponent implements ICanBeUsedInLabelComponent {
+public class Checkbox extends MessageComponent implements ICanBeUsedInLabelComponent {
 
     /**
      * Creates a checkbox.
@@ -29,12 +29,12 @@ public class CheckboxAction extends ActionComponent implements ICanBeUsedInLabel
      * @param customId A developer-defined identifier for the checkbox.
      * @return A checkbox with the given data.
      */
-    public static CheckboxAction of(String customId) {
+    public static Checkbox of(String customId) {
         ImmutableComponentData.Builder builder = ComponentData.builder()
             .type(Type.CHECKBOX.getValue())
             .customId(customId);
 
-        return new CheckboxAction(builder.build());
+        return new Checkbox(builder.build());
     }
 
     /**
@@ -43,30 +43,32 @@ public class CheckboxAction extends ActionComponent implements ICanBeUsedInLabel
      * @param customId A developer-defined identifier for the checkbox.
      * @return A checkbox with the given data.
      */
-    public static CheckboxAction of(int id, String customId) {
+    public static Checkbox of(int id, String customId) {
         ImmutableComponentData.Builder builder = ComponentData.builder()
             .type(Type.CHECKBOX.getValue())
             .id(id)
             .customId(customId);
 
-        return new CheckboxAction(builder.build());
+        return new Checkbox(builder.build());
     }
 
-    CheckboxAction(ComponentData data) {
+    Checkbox(ComponentData data) {
         super(data);
     }
 
-    protected CheckboxAction of(ComponentData data) {
-        return new CheckboxAction(data);
+    protected Checkbox of(ComponentData data) {
+        return new Checkbox(data);
     }
 
     /**
-     * Gets the component value, if any. Can be present with an empty list if no value was selected.
+     * Gets the checkbox's value. Defaults to false if not present.
      *
-     * @return the component's value
+     * @return the checkbox's value
      */
-    public Optional<Boolean> getValue() {
-        return getData().value().toOptional().map(Boolean::parseBoolean);
+    public boolean getValue() {
+        return getData().value().toOptional()
+                .map(Boolean::parseBoolean)
+                .orElse(false);
     }
 
 }

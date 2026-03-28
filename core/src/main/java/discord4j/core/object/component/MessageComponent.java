@@ -62,8 +62,8 @@ public class MessageComponent implements BaseMessageComponent {
             case LABEL: return new Label(data);
             case FILE_UPLOAD: return new FileUpload(data);
             case RADIO_GROUP: return new RadioGroupAction(data);
-            case CHECKBOX_GROUP: return new CheckboxGroupAction(data);
-            case CHECKBOX: return new CheckboxAction(data);
+            case CHECKBOX_GROUP: return new CheckboxGroup(data);
+            case CHECKBOX: return new Checkbox(data);
             default: {
                 MessageComponent.LOGGER.warn("Unhandled component type: " + data.type());
                 return new MessageComponent(data);
