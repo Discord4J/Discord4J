@@ -20,5 +20,5 @@ package discord4j.core.object.component;
 /**
  * A special type of {@link MessageComponent} that can be used in a {@link Section}
  */
-public interface ICanBeUsedInSectionComponent {
+public interface ICanBeUsedInSectionComponent extends BaseMessageComponent {
 }
