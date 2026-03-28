@@ -52,6 +52,39 @@ public class Checkbox extends MessageComponent implements ICanBeUsedInLabelCompo
         return new Checkbox(builder.build());
     }
 
+    /**
+     * Creates a checkbox.
+     *
+     * @param customId A developer-defined identifier for the checkbox.
+     * @param value The initial value of the checkbox.
+     * @return A checkbox with the given data.
+     */
+    public static Checkbox of(String customId, boolean value) {
+        ImmutableComponentData.Builder builder = ComponentData.builder()
+                .type(Type.CHECKBOX.getValue())
+                .customId(customId)
+                .isDefault(value);
+
+        return new Checkbox(builder.build());
+    }
+
+    /**
+     * Creates a checkbox.
+     *
+     * @param customId A developer-defined identifier for the checkbox.
+     * @param value The initial value of the checkbox.
+     * @return A checkbox with the given data.
+     */
+    public static Checkbox of(int id, String customId, boolean value) {
+        ImmutableComponentData.Builder builder = ComponentData.builder()
+                .type(Type.CHECKBOX.getValue())
+                .id(id)
+                .customId(customId)
+                .isDefault(value);
+
+        return new Checkbox(builder.build());
+    }
+
     Checkbox(ComponentData data) {
         super(data);
     }
