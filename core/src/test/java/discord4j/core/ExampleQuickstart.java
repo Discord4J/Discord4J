@@ -20,11 +20,15 @@ package discord4j.core;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
+import discord4j.gateway.intent.Intent;
+import discord4j.gateway.intent.IntentSet;
 
 public class ExampleQuickstart {
 
     public static void main(String[] args) {
         DiscordClient.create(System.getenv("token"))
+                .gateway()
+                .setEnabledIntents(IntentSet.nonPrivileged().or(IntentSet.of(Intent.MESSAGE_CONTENT)))
                 .withGateway(client -> {
                     client.getEventDispatcher().on(ReadyEvent.class)
                             .subscribe(ready -> System.out.println("Logged in as " + ready.getSelf().getUsername()));
