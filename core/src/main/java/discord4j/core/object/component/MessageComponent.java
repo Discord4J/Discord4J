@@ -17,7 +17,22 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
-import discord4j.discordjson.json.ImmutableComponentData;
+import discord4j.discordjson.json.component.ActionRowComponentData;
+import discord4j.discordjson.json.component.ButtonComponentData;
+import discord4j.discordjson.json.component.CheckboxComponentData;
+import discord4j.discordjson.json.component.CheckboxGroupComponentData;
+import discord4j.discordjson.json.component.ContainerComponentData;
+import discord4j.discordjson.json.component.FileComponentData;
+import discord4j.discordjson.json.component.FileUploadComponentData;
+import discord4j.discordjson.json.component.LabelComponentData;
+import discord4j.discordjson.json.component.MediaGalleryComponentData;
+import discord4j.discordjson.json.component.RadioGroupComponentData;
+import discord4j.discordjson.json.component.SectionComponentData;
+import discord4j.discordjson.json.component.SeparatorComponentData;
+import discord4j.discordjson.json.component.StringSelectComponentData;
+import discord4j.discordjson.json.component.TextDisplayComponentData;
+import discord4j.discordjson.json.component.TextInputComponentData;
+import discord4j.discordjson.json.component.ThumbnailComponentData;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -26,13 +41,9 @@ import reactor.util.Loggers;
  *
  * @see <a href="https://discord.com/developers/docs/components/using-message-components">Message Components</a>
  */
-public class MessageComponent implements BaseMessageComponent {
+public class MessageComponent<D extends ComponentData> implements BaseMessageComponent {
 
     private static final Logger LOGGER = Loggers.getLogger(MessageComponent.class);
-
-    static ImmutableComponentData.Builder getBuilder(final Type type) {
-        return ImmutableComponentData.builder().type(type.getValue());
-    }
 
     /**
      * Constructs a {@code MessageComponent} from raw data.
@@ -42,38 +53,38 @@ public class MessageComponent implements BaseMessageComponent {
      * @param data The raw component data.
      * @return A component with the given data.
      */
-    public static MessageComponent fromData(ComponentData data) {
+    public static MessageComponent<?> fromData(ComponentData data) {
         switch (Type.of(data.type())) {
-            case CONTAINER: return new Container(data);
-            case SECTION: return new Section(data);
-            case SEPARATOR: return new Separator(data);
-            case ACTION_ROW: return new ActionRow(data);
-            case TEXT_DISPLAY: return new TextDisplay(data);
-            case THUMBNAIL: return new Thumbnail(data);
-            case MEDIA_GALLERY: return new MediaGallery(data);
-            case FILE: return new File(data);
-            case BUTTON: return new Button(data);
+            case CONTAINER: return new Container((ContainerComponentData) data);
+            case SECTION: return new Section((SectionComponentData) data);
+            case SEPARATOR: return new Separator((SeparatorComponentData) data);
+            case ACTION_ROW: return new ActionRow((ActionRowComponentData) data);
+            case TEXT_DISPLAY: return new TextDisplay((TextDisplayComponentData) data);
+            case THUMBNAIL: return new Thumbnail((ThumbnailComponentData) data);
+            case MEDIA_GALLERY: return new MediaGallery((MediaGalleryComponentData) data);
+            case FILE: return new File((FileComponentData) data);
+            case BUTTON: return new Button((ButtonComponentData) data);
             case SELECT_MENU_ROLE:
             case SELECT_MENU_CHANNEL:
             case SELECT_MENU_MENTIONABLE:
             case SELECT_MENU_USER: return new SelectMenu(data);
-            case SELECT_MENU_STRING: return new StringSelectMenu(data);
-            case TEXT_INPUT: return new TextInput(data);
-            case LABEL: return new Label(data);
-            case FILE_UPLOAD: return new FileUpload(data);
-            case RADIO_GROUP: return new RadioGroup(data);
-            case CHECKBOX_GROUP: return new CheckboxGroup(data);
-            case CHECKBOX: return new Checkbox(data);
+            case SELECT_MENU_STRING: return new StringSelectMenu((StringSelectComponentData) data);
+            case TEXT_INPUT: return new TextInput((TextInputComponentData) data);
+            case LABEL: return new Label((LabelComponentData) data);
+            case FILE_UPLOAD: return new FileUpload((FileUploadComponentData) data);
+            case RADIO_GROUP: return new RadioGroup((RadioGroupComponentData) data);
+            case CHECKBOX_GROUP: return new CheckboxGroup((CheckboxGroupComponentData) data);
+            case CHECKBOX: return new Checkbox((CheckboxComponentData) data);
             default: {
                 MessageComponent.LOGGER.warn("Unhandled component type: " + data.type());
-                return new MessageComponent(data);
+                return new MessageComponent<>(data);
             }
         }
     }
 
-    private final ComponentData data;
+    private final D data;
 
-    MessageComponent(ComponentData data) {
+    MessageComponent(D data) {
         this.data = data;
     }
 
@@ -93,7 +104,7 @@ public class MessageComponent implements BaseMessageComponent {
      * @return The data of the component.
      */
     @Override
-    public ComponentData getData() {
+    public D getData() {
         return data;
     }
 
@@ -130,12 +141,6 @@ public class MessageComponent implements BaseMessageComponent {
         CHECKBOX_GROUP(22),
         CHECKBOX(23),
         ;
-
-        /**
-         * @deprecated Use {@link #SELECT_MENU_STRING} instead.
-         */
-        @Deprecated
-        public static final Type SELECT_MENU = SELECT_MENU_STRING;
 
         private final int value;
         private final boolean requireFlag;

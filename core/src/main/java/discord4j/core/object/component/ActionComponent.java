@@ -17,15 +17,17 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.json.component.attribute.ICanHaveCustomId;
+import discord4j.discordjson.json.component.attribute.IHasCustomId;
 
 import java.util.Optional;
 
 /**
  * A message component who can trigger an action.
  */
-public abstract class ActionComponent extends MessageComponent {
+public abstract class ActionComponent<D extends ComponentData> extends MessageComponent<D> {
 
-    protected ActionComponent(ComponentData data) {
+    protected ActionComponent(D data) {
         super(data);
     }
 
@@ -35,7 +37,15 @@ public abstract class ActionComponent extends MessageComponent {
      * @return An {@link Optional} containing the custom id if present
      */
     public String getCustomId() {
-        return getData().customId().toOptional().orElseThrow(IllegalStateException::new);
+        D data = getData();
+
+        if (data instanceof ICanHaveCustomId) {
+            return ((ICanHaveCustomId) data).customId().toOptional().orElseThrow(IllegalStateException::new);
+        } else if (data instanceof IHasCustomId) {
+            return ((IHasCustomId) data).customId();
+        } else {
+            throw new IllegalStateException("Component data does not support custom id");
+        }
     }
 
 }

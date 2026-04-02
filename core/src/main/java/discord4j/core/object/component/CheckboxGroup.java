@@ -16,9 +16,8 @@
  */
 package discord4j.core.object.component;
 
-import discord4j.discordjson.json.ComponentData;
-import discord4j.discordjson.json.ImmutableComponentData;
-import discord4j.discordjson.json.SelectOptionData;
+import discord4j.discordjson.json.component.CheckboxGroupComponentData;
+import discord4j.discordjson.json.component.ImmutableCheckboxGroupComponentData;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,7 +25,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class CheckboxGroup extends MessageComponent implements ICanBeUsedInLabelComponent {
+public class CheckboxGroup extends MessageComponent<CheckboxGroupComponentData> implements ICanBeUsedInLabelComponent {
 
     /**
      * Creates a checkbox group.
@@ -37,7 +36,7 @@ public class CheckboxGroup extends MessageComponent implements ICanBeUsedInLabel
      */
     public static CheckboxGroup of(String customId, List<CheckboxGroup.Option> options) {
         Objects.requireNonNull(options);
-        ImmutableComponentData.Builder builder = ComponentData.builder()
+        ImmutableCheckboxGroupComponentData.Builder builder = CheckboxGroupComponentData.builder()
                 .type(Type.CHECKBOX_GROUP.getValue())
                 .customId(customId);
 
@@ -55,7 +54,7 @@ public class CheckboxGroup extends MessageComponent implements ICanBeUsedInLabel
      */
     public static CheckboxGroup of(int id, String customId, List<CheckboxGroup.Option> options) {
         Objects.requireNonNull(options);
-        ImmutableComponentData.Builder builder = ComponentData.builder()
+        ImmutableCheckboxGroupComponentData.Builder builder = CheckboxGroupComponentData.builder()
                 .type(Type.CHECKBOX_GROUP.getValue())
                 .id(id)
                 .customId(customId);
@@ -65,11 +64,11 @@ public class CheckboxGroup extends MessageComponent implements ICanBeUsedInLabel
         return new CheckboxGroup(builder.build());
     }
 
-    CheckboxGroup(ComponentData data) {
+    CheckboxGroup(CheckboxGroupComponentData data) {
         super(data);
     }
 
-    protected CheckboxGroup of(ComponentData data) {
+    protected CheckboxGroup of(CheckboxGroupComponentData data) {
         return new CheckboxGroup(data);
     }
 
@@ -90,27 +89,7 @@ public class CheckboxGroup extends MessageComponent implements ICanBeUsedInLabel
      * @return A new possibly required checkbox group with the same data as this one.
      */
     public CheckboxGroup required(boolean value) {
-        return of(ComponentData.builder().from(getData()).required(value).build());
-    }
-
-    /**
-     * Creates a new checkbox group with the same data as this one, but disabled.
-     *
-     * @return A new disabled checkbox group with the same data as this one.
-     */
-    public CheckboxGroup disabled() {
-        return this.disabled(true);
-    }
-
-    /**
-     * Creates a new checkbox group with the same data as this one, but depending on the value param, it may be
-     * disabled or not.
-     *
-     * @param value True if the checkbox group should be disabled otherwise False.
-     * @return A new possibly disabled checkbox group with the same data as this one.
-     */
-    public CheckboxGroup disabled(boolean value) {
-        return of(ComponentData.builder().from(getData()).disabled(value).build());
+        return of(CheckboxGroupComponentData.builder().from(getData()).required(value).build());
     }
 
     /**
@@ -120,7 +99,7 @@ public class CheckboxGroup extends MessageComponent implements ICanBeUsedInLabel
      * @return A new checkbox group with the given minimum values.
      */
     public CheckboxGroup withMinValues(int minValues) {
-        return of(ComponentData.builder().from(this.getData()).minValues(minValues).build());
+        return of(CheckboxGroupComponentData.builder().from(this.getData()).minValues(minValues).build());
     }
 
     /**
@@ -130,7 +109,7 @@ public class CheckboxGroup extends MessageComponent implements ICanBeUsedInLabel
      * @return A new checkbox group with the given maximum values.
      */
     public CheckboxGroup withMaxValues(int maxValues) {
-        return of(ComponentData.builder().from(this.getData()).maxValues(maxValues).build());
+        return of(CheckboxGroupComponentData.builder().from(this.getData()).maxValues(maxValues).build());
     }
 
     /**
@@ -163,20 +142,20 @@ public class CheckboxGroup extends MessageComponent implements ICanBeUsedInLabel
         }
 
         private static CheckboxGroup.Option of(String label, String value, boolean isSelectedByDefault) {
-            return new CheckboxGroup.Option(SelectOptionData.builder()
+            return new CheckboxGroup.Option(CheckboxGroupComponentData.CheckboxGroupOptionData.builder()
                     .label(label)
                     .value(value)
                     .isDefault(isSelectedByDefault)
                     .build());
         }
 
-        private final SelectOptionData data;
+        private final CheckboxGroupComponentData.CheckboxGroupOptionData data;
 
-        Option(SelectOptionData data) {
+        Option(CheckboxGroupComponentData.CheckboxGroupOptionData data) {
             this.data = data;
         }
 
-        public SelectOptionData getData() {
+        public CheckboxGroupComponentData.CheckboxGroupOptionData getData() {
             return data;
         }
 
@@ -223,7 +202,7 @@ public class CheckboxGroup extends MessageComponent implements ICanBeUsedInLabel
          * @return A new option with the given description.
          */
         public CheckboxGroup.Option withDescription(String description) {
-            return new CheckboxGroup.Option(SelectOptionData.builder().from(data).description(description).build());
+            return new CheckboxGroup.Option(CheckboxGroupComponentData.CheckboxGroupOptionData.builder().from(data).description(description).build());
         }
 
         /**
@@ -233,7 +212,7 @@ public class CheckboxGroup extends MessageComponent implements ICanBeUsedInLabel
          * @return A new option with the given default state.
          */
         public CheckboxGroup.Option withSelectedByDefault(boolean isSelectedByDefault) {
-            return new CheckboxGroup.Option(SelectOptionData.builder().from(data).isDefault(isSelectedByDefault).build());
+            return new CheckboxGroup.Option(CheckboxGroupComponentData.CheckboxGroupOptionData.builder().from(data).isDefault(isSelectedByDefault).build());
         }
 
     }

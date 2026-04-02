@@ -16,15 +16,11 @@
  */
 package discord4j.core.object.component;
 
-import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.json.component.LabelComponentData;
 import discord4j.discordjson.possible.Possible;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-public class Label extends LayoutComponent implements TopLevelModalComponent {
+public class Label extends MessageComponent<LabelComponentData> implements TopLevelModalComponent {
 
     /**
      * Creates a {@link Label} with the given component.
@@ -39,7 +35,7 @@ public class Label extends LayoutComponent implements TopLevelModalComponent {
     /**
      * Creates a {@link Label} with the given component.
      *
-     * @param component The component of the label.
+     * @param component   The component of the label.
      * @param description The description of the label.
      * @return A {@link Label} containing the given components.
      */
@@ -60,7 +56,7 @@ public class Label extends LayoutComponent implements TopLevelModalComponent {
     /**
      * Creates a {@link Label} with the given component.
      *
-     * @param component The component of the label.
+     * @param component   The component of the label.
      * @param description The description of the label.
      * @return A {@link Label} containing the given components.
      */
@@ -69,18 +65,19 @@ public class Label extends LayoutComponent implements TopLevelModalComponent {
     }
 
 
-    protected Label(@Nullable Integer componentId, String label, @Nullable String description, ICanBeUsedInLabelComponent component) {
+    protected Label(@Nullable Integer componentId, String label, @Nullable String description,
+                    ICanBeUsedInLabelComponent component) {
         this(
-            MessageComponent.getBuilder(Type.LABEL)
-                .id(Possible.ofNullable(componentId))
-                .label(Possible.of(Optional.of(label)))
-                .component((component).getData())
-                .description(Possible.ofNullable(description).map(Optional::ofNullable))
-                .build()
+                LabelComponentData.builder()
+                        .id(Possible.ofNullable(componentId))
+                        .label(label)
+                        .component((component).getData())
+                        .description(Possible.ofNullable(description))
+                        .build()
         );
     }
 
-    Label(ComponentData data) {
+    Label(LabelComponentData data) {
         super(data);
     }
 
@@ -91,34 +88,19 @@ public class Label extends LayoutComponent implements TopLevelModalComponent {
      * @return a {@link Label} containing the new component
      */
     public Label withComponent(ICanBeUsedInLabelComponent component) {
-        return new Label(ComponentData.builder()
-            .from(getData())
-            .component(Possible.of((component).getData()))
-            .build());
+        return new Label(LabelComponentData.builder()
+                .from(getData())
+                .component(component.getData())
+                .build());
     }
 
     /**
-     * Get the direct children of this {@link LayoutComponent}
+     * Get the component of this {@link LayoutComponent}
      *
-     * @return The direct children of this component
+     * @return The component of this component
      */
-    @Override
-    public List<MessageComponent> getChildren() {
-        return this.getData()
-            .component()
-            .toOptional()
-            .map(MessageComponent::fromData)
-            .map(Collections::singletonList)
-            .orElse(Collections.emptyList());
+    public MessageComponent<?> getComponent() {
+        return MessageComponent.fromData(this.getData().component());
     }
 
-    /**
-     * Retrieves the component attached to this {@link Label}.
-     *
-     * @return The {@link MessageComponent} attached to this label.
-     * @see ICanBeUsedInLabelComponent
-     */
-    public MessageComponent getComponent() {
-        return this.getChildren().get(0);
-    }
 }

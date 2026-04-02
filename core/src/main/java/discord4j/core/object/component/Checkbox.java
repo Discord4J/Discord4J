@@ -16,12 +16,10 @@
  */
 package discord4j.core.object.component;
 
-import discord4j.discordjson.json.ComponentData;
-import discord4j.discordjson.json.ImmutableComponentData;
+import discord4j.discordjson.json.component.CheckboxComponentData;
+import discord4j.discordjson.json.component.ImmutableCheckboxComponentData;
 
-import java.util.Optional;
-
-public class Checkbox extends MessageComponent implements ICanBeUsedInLabelComponent {
+public class Checkbox extends MessageComponent<CheckboxComponentData> implements ICanBeUsedInLabelComponent {
 
     /**
      * Creates a checkbox.
@@ -30,7 +28,7 @@ public class Checkbox extends MessageComponent implements ICanBeUsedInLabelCompo
      * @return A checkbox with the given data.
      */
     public static Checkbox of(String customId) {
-        ImmutableComponentData.Builder builder = ComponentData.builder()
+        ImmutableCheckboxComponentData.Builder builder = CheckboxComponentData.builder()
             .type(Type.CHECKBOX.getValue())
             .customId(customId);
 
@@ -44,7 +42,7 @@ public class Checkbox extends MessageComponent implements ICanBeUsedInLabelCompo
      * @return A checkbox with the given data.
      */
     public static Checkbox of(int id, String customId) {
-        ImmutableComponentData.Builder builder = ComponentData.builder()
+        ImmutableCheckboxComponentData.Builder builder = CheckboxComponentData.builder()
             .type(Type.CHECKBOX.getValue())
             .id(id)
             .customId(customId);
@@ -60,7 +58,7 @@ public class Checkbox extends MessageComponent implements ICanBeUsedInLabelCompo
      * @return A checkbox with the given data.
      */
     public static Checkbox of(String customId, boolean value) {
-        ImmutableComponentData.Builder builder = ComponentData.builder()
+        ImmutableCheckboxComponentData.Builder builder = CheckboxComponentData.builder()
                 .type(Type.CHECKBOX.getValue())
                 .customId(customId)
                 .isDefault(value);
@@ -76,7 +74,7 @@ public class Checkbox extends MessageComponent implements ICanBeUsedInLabelCompo
      * @return A checkbox with the given data.
      */
     public static Checkbox of(int id, String customId, boolean value) {
-        ImmutableComponentData.Builder builder = ComponentData.builder()
+        ImmutableCheckboxComponentData.Builder builder = CheckboxComponentData.builder()
                 .type(Type.CHECKBOX.getValue())
                 .id(id)
                 .customId(customId)
@@ -85,11 +83,11 @@ public class Checkbox extends MessageComponent implements ICanBeUsedInLabelCompo
         return new Checkbox(builder.build());
     }
 
-    Checkbox(ComponentData data) {
+    Checkbox(CheckboxComponentData data) {
         super(data);
     }
 
-    protected Checkbox of(ComponentData data) {
+    protected Checkbox of(CheckboxComponentData data) {
         return new Checkbox(data);
     }
 
@@ -99,7 +97,9 @@ public class Checkbox extends MessageComponent implements ICanBeUsedInLabelCompo
      * @return the checkbox's value
      */
     public boolean getValue() {
-        return getData().value().toOptional()
+        return getData()
+                .value()
+                .toOptional()
                 .map(Boolean::parseBoolean)
                 .orElse(false);
     }

@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.component;
 
-import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.json.component.SectionComponentData;
 import discord4j.discordjson.possible.Possible;
 
 import java.util.ArrayList;
@@ -36,12 +36,13 @@ import java.util.stream.Stream;
  * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/components/reference#section">Section</a>
  */
-public class Section extends LayoutComponent implements TopLevelMessageComponent, ICanBeUsedInContainerComponent {
+public class Section extends LayoutComponent<SectionComponentData> implements TopLevelMessageComponent,
+        ICanBeUsedInContainerComponent {
 
     /**
      * Creates a {@link Section} with the given components.
      *
-     * @param accessory The accessory component of the section
+     * @param accessory  The accessory component of the section
      * @param components The components of the section
      * @return A {@link Section} containing the given components
      */
@@ -52,25 +53,25 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
     /**
      * Creates a {@link Section} with the given components.
      *
-     * @param accessory The accessory component of the section
+     * @param accessory  The accessory component of the section
      * @param components The components of the section
      * @return A {@link Section} containing the given components
      */
     public static Section of(IAccessoryComponent accessory, List<? extends ICanBeUsedInSectionComponent> components) {
-        return new Section(MessageComponent.getBuilder(Type.SECTION)
-            .accessory(accessory.getData())
-            .components(components.stream()
-                .filter(c -> c instanceof MessageComponent)
-                .map(c -> ((MessageComponent) c).getData())
-                .collect(Collectors.toList()))
-            .build());
+        return new Section(SectionComponentData.builder()
+                .accessory(accessory.getData())
+                .components(components.stream()
+                        .filter(c -> c instanceof MessageComponent)
+                        .map(c -> c.getData())
+                        .collect(Collectors.toList()))
+                .build());
     }
 
     /**
      * Creates a {@link Section} with the given components.
      *
-     * @param id the component id
-     * @param accessory The accessory component of the section
+     * @param id         the component id
+     * @param accessory  The accessory component of the section
      * @param components The components of the section
      * @return A {@link Section} containing the given components
      */
@@ -81,35 +82,37 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
     /**
      * Creates a {@link Section} with the given components.
      *
-     * @param id the component id
-     * @param accessory The accessory component of the section
+     * @param id         the component id
+     * @param accessory  The accessory component of the section
      * @param components The components of the section
      * @return A {@link Section} containing the given components
      */
-    public static Section of(int id, IAccessoryComponent accessory, List<? extends ICanBeUsedInSectionComponent> components) {
-        return new Section(MessageComponent.getBuilder(Type.SECTION)
-            .id(id)
-            .accessory(accessory.getData())
-            .components(components.stream()
-                .filter(c -> c instanceof MessageComponent)
-                .map(c -> ((MessageComponent) c).getData())
-                .collect(Collectors.toList()))
-            .build());
+    public static Section of(int id, IAccessoryComponent accessory,
+                             List<? extends ICanBeUsedInSectionComponent> components) {
+        return new Section(SectionComponentData.builder()
+                .id(id)
+                .accessory(accessory.getData())
+                .components(components.stream()
+                        .filter(c -> c instanceof MessageComponent)
+                        .map(c -> c.getData())
+                        .collect(Collectors.toList()))
+                .build());
     }
 
 
-    protected Section(Integer id, IAccessoryComponent accessory, List<? extends ICanBeUsedInSectionComponent> components) {
-        this(MessageComponent.getBuilder(Type.SECTION)
-            .id(Possible.ofNullable(id))
-            .accessory(accessory.getData())
-            .components(components.stream()
-                .filter(c -> c instanceof MessageComponent)
-                .map(c -> ((MessageComponent) c).getData())
-                .collect(Collectors.toList()))
-            .build());
+    protected Section(Integer id, IAccessoryComponent accessory,
+                      List<? extends ICanBeUsedInSectionComponent> components) {
+        this(SectionComponentData.builder()
+                .id(Possible.ofNullable(id))
+                .accessory(accessory.getData())
+                .components(components.stream()
+                        .filter(c -> c instanceof MessageComponent)
+                        .map(c -> c.getData())
+                        .collect(Collectors.toList()))
+                .build());
     }
 
-    Section(ComponentData data) {
+    Section(SectionComponentData data) {
         super(data);
     }
 
@@ -119,13 +122,13 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * @return An component
      */
     public IAccessoryComponent getAccessory() {
-        return this.getData()
-            .accessory()
-            .toOptional()
-            .map(MessageComponent::fromData)
-            .filter(IAccessoryComponent.class::isInstance)
-            .map(IAccessoryComponent.class::cast)
-            .orElseThrow(IllegalStateException::new); // accessory should always exist in a section
+        MessageComponent<?> accessoryComponent = MessageComponent.fromData(this.getData().accessory());
+
+        if (accessoryComponent instanceof IAccessoryComponent) {
+            return (IAccessoryComponent) accessoryComponent;
+        } else {
+            throw new IllegalStateException("Received component is not an instance of IAccessoryComponent");
+        }
     }
 
     /**
@@ -137,11 +140,11 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
     public Section withAddedComponent(ICanBeUsedInSectionComponent component) {
         List<BaseMessageComponent> components = new ArrayList<>(getChildren());
         components.add(component);
-        return new Section(ComponentData.builder()
-            .from(getData())
-            .accessory(Possible.ofNullable(this.getData().accessory().toOptional().orElse(null)))
-            .components(components.stream().map(BaseMessageComponent::getData).collect(Collectors.toList()))
-            .build());
+        return new Section(SectionComponentData.builder()
+                .from(getData())
+                .accessory(this.getData().accessory())
+                .components(components.stream().map(BaseMessageComponent::getData).collect(Collectors.toList()))
+                .build());
     }
 
     /**
@@ -153,11 +156,11 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
     public final Section withAddedComponents(ICanBeUsedInSectionComponent... components) {
         List<BaseMessageComponent> componentsToAdd = new ArrayList<>(getChildren());
         componentsToAdd.addAll(Arrays.asList(components));
-        return new Section(ComponentData.builder()
-            .from(getData())
-            .accessory(Possible.ofNullable(this.getData().accessory().toOptional().orElse(null)))
-            .components(componentsToAdd.stream().map(BaseMessageComponent::getData).collect(Collectors.toList()))
-            .build());
+        return new Section(SectionComponentData.builder()
+                .from(getData())
+                .accessory(this.getData().accessory())
+                .components(componentsToAdd.stream().map(BaseMessageComponent::getData).collect(Collectors.toList()))
+                .build());
     }
 
     /**
@@ -167,14 +170,14 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * @return an {@code Section} containing the existing and added components with the current accessory
      */
     public Section withAddedComponents(List<? extends ICanBeUsedInSectionComponent> components) {
-        return new Section(ComponentData.builder()
-            .from(getData())
-            .accessory(Possible.ofNullable(this.getData().accessory().toOptional().orElse(null)))
-            .components(Stream.concat(getChildren().stream(), components.stream())
-                .filter(c -> c instanceof MessageComponent)
-                .map(c -> ((MessageComponent) c).getData())
-                .collect(Collectors.toList()))
-            .build());
+        return new Section(SectionComponentData.builder()
+                .from(getData())
+                .accessory(this.getData().accessory())
+                .components(Stream.concat(getChildren().stream(), components.stream())
+                        .filter(c -> c instanceof MessageComponent)
+                        .map(c -> c.getData())
+                        .collect(Collectors.toList()))
+                .build());
     }
 
     /**
@@ -184,12 +187,12 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * @return an {@code Section} containing the existing and added components with an accessory
      */
     public Section withAccessory(IAccessoryComponent accessory) {
-        List<MessageComponent> components = new ArrayList<>(getChildren());
-        return new Section(ComponentData.builder()
-            .from(getData())
-            .accessory(Possible.of(accessory.getData()))
-            .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
-            .build());
+        List<MessageComponent<?>> components = new ArrayList<>(getChildren());
+        return new Section(SectionComponentData.builder()
+                .from(getData())
+                .accessory(accessory.getData())
+                .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+                .build());
     }
 
     /**
@@ -199,12 +202,12 @@ public class Section extends LayoutComponent implements TopLevelMessageComponent
      * @return an {@code Section} containing all components that did not match the given {@code customId}
      */
     public Section withRemovedComponent(int componentId) {
-        List<MessageComponent> components = getChildren();
+        List<MessageComponent<?>> components = getChildren();
         components.removeIf(messageComponent -> componentId == messageComponent.getId());
 
-        return new Section(ComponentData.builder()
-            .from(getData())
-            .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
-            .build());
+        return new Section(SectionComponentData.builder()
+                .from(getData())
+                .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
+                .build());
     }
 }

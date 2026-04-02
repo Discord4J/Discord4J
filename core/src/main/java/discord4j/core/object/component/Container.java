@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.component;
 
-import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.json.component.ContainerComponentData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import org.jspecify.annotations.Nullable;
@@ -44,7 +44,7 @@ import java.util.stream.Stream;
  * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/components/reference#container">Containers</a>
  */
-public class Container extends LayoutComponent implements TopLevelMessageComponent {
+public class Container extends LayoutComponent<ContainerComponentData> implements TopLevelMessageComponent {
 
     /**
      * Creates a {@link Container} with the given components.
@@ -236,7 +236,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
     protected Container(@Nullable Integer id, @Nullable Color color, boolean spoiler,
                         List<? extends ICanBeUsedInContainerComponent> components) {
         this(
-                MessageComponent.getBuilder(Type.CONTAINER)
+                ContainerComponentData.builder()
                         .id(Possible.ofNullable(id))
                         .spoiler(spoiler)
                         .components(components.stream()
@@ -248,7 +248,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
         );
     }
 
-    Container(ComponentData data) {
+    Container(ContainerComponentData data) {
         super(data);
     }
 
@@ -261,7 +261,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
     public Container withAddedComponent(ICanBeUsedInContainerComponent component) {
         List<BaseMessageComponent> components = new ArrayList<>(getChildren());
         components.add(component);
-        return new Container(ComponentData.builder()
+        return new Container(ContainerComponentData.builder()
                 .from(this.getData())
                 .components(components.stream()
                         .map(BaseMessageComponent::getData)
@@ -278,7 +278,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
     public final Container withAddedComponents(ICanBeUsedInContainerComponent... components) {
         List<BaseMessageComponent> componentsToAdd = new ArrayList<>(getChildren());
         componentsToAdd.addAll(Arrays.asList(components));
-        return new Container(ComponentData.builder().from(this.getData())
+        return new Container(ContainerComponentData.builder().from(this.getData())
                 .components(componentsToAdd.stream()
                         .map(BaseMessageComponent::getData)
                         .collect(Collectors.toList()))
@@ -292,7 +292,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @return a {@link Container} containing the existing and added components
      */
     public Container withAddedComponents(List<? extends ICanBeUsedInContainerComponent> components) {
-        return new Container(ComponentData.builder()
+        return new Container(ContainerComponentData.builder()
                 .from(this.getData())
                 .components(Stream.concat(getChildren().stream(), components.stream())
                         .filter(c -> c instanceof MessageComponent)
@@ -308,10 +308,10 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @return a {@link Container} containing all components that did not match the given {@code customId}
      */
     public Container withRemovedComponent(int componentId) {
-        List<MessageComponent> components = new ArrayList<>(getChildren());
+        List<MessageComponent<?>> components = new ArrayList<>(getChildren());
         components.removeIf(messageComponent -> componentId == messageComponent.getId());
 
-        return new Container(ComponentData.builder()
+        return new Container(ContainerComponentData.builder()
                 .from(this.getData())
                 .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
                 .build());
@@ -324,7 +324,7 @@ public class Container extends LayoutComponent implements TopLevelMessageCompone
      * @return The newly created {@link Container}
      */
     public Container withColor(@Nullable Color color) {
-        return new Container(ComponentData.builder()
+        return new Container(ContainerComponentData.builder()
                 .from(this.getData())
                 .accentColor(Possible.of(Optional.ofNullable(color).map(Color::getRGB)))
                 .build());

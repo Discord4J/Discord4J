@@ -17,7 +17,7 @@
 package discord4j.core.object.component;
 
 import discord4j.common.util.Snowflake;
-import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.json.component.FileUploadComponentData;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://discord.com/developers/docs/components/reference#file-upload">File Upload</a>
  */
-public class FileUpload extends MessageComponent implements ICanBeUsedInLabelComponent {
+public class FileUpload extends MessageComponent<FileUploadComponentData> implements ICanBeUsedInLabelComponent {
 
     /**
      * Creates a {@link FileUpload}.
@@ -37,7 +37,7 @@ public class FileUpload extends MessageComponent implements ICanBeUsedInLabelCom
      * @return A {@link FileUpload}
      */
     public static FileUpload of(String customId) {
-        return new FileUpload(MessageComponent.getBuilder(Type.FILE_UPLOAD).customId(customId).build());
+        return new FileUpload(FileUploadComponentData.builder().customId(customId).build());
     }
 
     /**
@@ -48,10 +48,10 @@ public class FileUpload extends MessageComponent implements ICanBeUsedInLabelCom
      * @return A {@link FileUpload}
      */
     public static FileUpload of(String customId, int id) {
-        return new FileUpload(MessageComponent.getBuilder(Type.FILE_UPLOAD).id(id).customId(customId).build());
+        return new FileUpload(FileUploadComponentData.builder().id(id).customId(customId).build());
     }
 
-    FileUpload(ComponentData data) {
+    FileUpload(FileUploadComponentData data) {
         super(data);
     }
 
@@ -61,7 +61,7 @@ public class FileUpload extends MessageComponent implements ICanBeUsedInLabelCom
      * @return A developer-defined custom id
      */
     public String getCustomId() {
-        return this.getData().customId().toOptional().orElseThrow(IllegalStateException::new);
+        return this.getData().customId();
     }
 
     /**
@@ -81,7 +81,7 @@ public class FileUpload extends MessageComponent implements ICanBeUsedInLabelCom
      * @return A new possibly required select menu with the same data as this one.
      */
     public FileUpload required(boolean value) {
-        return new FileUpload(ComponentData.builder().from(this.getData()).required(value).build());
+        return new FileUpload(FileUploadComponentData.builder().from(this.getData()).required(value).build());
     }
 
     /**
@@ -91,7 +91,7 @@ public class FileUpload extends MessageComponent implements ICanBeUsedInLabelCom
      * @return A new file upload with the given minimum values.
      */
     public FileUpload withMinValues(int minValues) {
-        return new FileUpload(ComponentData.builder().from(this.getData()).minValues(minValues).build());
+        return new FileUpload(FileUploadComponentData.builder().from(this.getData()).minValues(minValues).build());
     }
 
     /**
@@ -101,6 +101,6 @@ public class FileUpload extends MessageComponent implements ICanBeUsedInLabelCom
      * @return A new file upload with the given maximum values.
      */
     public FileUpload withMaxValues(int maxValues) {
-        return new FileUpload(ComponentData.builder().from(this.getData()).maxValues(maxValues).build());
+        return new FileUpload(FileUploadComponentData.builder().from(this.getData()).maxValues(maxValues).build());
     }
 }

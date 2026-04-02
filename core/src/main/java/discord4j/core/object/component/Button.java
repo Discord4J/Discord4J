@@ -20,7 +20,8 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.emoji.Emoji;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ComponentData;
-import discord4j.discordjson.json.ImmutableComponentData;
+import discord4j.discordjson.json.component.ButtonComponentData;
+import discord4j.discordjson.json.component.ImmutableButtonComponentData;
 import discord4j.discordjson.possible.Possible;
 import org.jspecify.annotations.Nullable;
 
@@ -31,7 +32,7 @@ import java.util.Optional;
  *
  * @see <a href="https://discord.com/developers/docs/components/reference#button">Buttons</a>
  */
-public class Button extends ActionComponent implements IAccessoryComponent {
+public class Button extends ActionComponent<ButtonComponentData> implements IAccessoryComponent {
 
     /**
      * Creates a {@link Button.Style#PRIMARY primary} button.
@@ -215,7 +216,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
 
     private static Button of(Style style, @Nullable String customId, @Nullable Emoji emoji,
                              @Nullable String label, @Nullable String url, @Nullable String skuId) {
-        ImmutableComponentData.Builder builder = ComponentData.builder()
+        ImmutableButtonComponentData.Builder builder = ButtonComponentData.builder()
             .type(MessageComponent.Type.BUTTON.getValue())
             .style(style.getValue());
 
@@ -228,7 +229,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
         }
 
         if (label != null) {
-            builder.label(Possible.of(Optional.of(label)));
+            builder.label(Possible.of(label));
         }
 
         if (url != null) {
@@ -440,7 +441,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
 
     private static Button of(int id, Style style, @Nullable String customId, @Nullable Emoji emoji,
                              @Nullable String label, @Nullable String url, @Nullable String skuId) {
-        ImmutableComponentData.Builder builder = ComponentData.builder()
+        ImmutableButtonComponentData.Builder builder = ButtonComponentData.builder()
             .type(MessageComponent.Type.BUTTON.getValue())
             .id(id)
             .style(style.getValue());
@@ -470,19 +471,19 @@ public class Button extends ActionComponent implements IAccessoryComponent {
 
     protected Button(Integer id, Style style, @Nullable String customId, @Nullable Emoji emoji,
                      @Nullable String label, @Nullable String url, @Nullable String skuId) {
-        super(MessageComponent.getBuilder(Type.BUTTON)
+        super(ButtonComponentData.builder()
             .id(Possible.ofNullable(id))
             .style(style.getValue())
             .customId(Possible.ofNullable(customId))
             .emoji(Possible.ofNullable(emoji).map(Emoji::asEmojiData))
-            .label(Possible.ofNullable(label).map(Optional::ofNullable))
+            .label(Possible.ofNullable(label))
             .url(Possible.ofNullable(url))
             .skuId(Possible.ofNullable(skuId).map(Id::of))
             .build()
         );
     }
 
-    Button(ComponentData data) {
+    Button(ButtonComponentData data) {
         super(data);
     }
 
@@ -492,9 +493,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @return The button's style.
      */
     public Style getStyle() {
-        return getData().style().toOptional()
-            .map(Style::of)
-            .orElseThrow(IllegalStateException::new); // style should always be present on buttons
+        return Style.of(getData().style());
     }
 
     /**
@@ -503,7 +502,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @return The button's label.
      */
     public Optional<String> getLabel() {
-        return Possible.flatOpt(getData().label());
+        return getData().label().toOptional();
     }
 
     /**
@@ -559,7 +558,7 @@ public class Button extends ActionComponent implements IAccessoryComponent {
      * @return A new possibly disabled button with the same data as this one.
      */
     public Button disabled(boolean value) {
-        return new Button(ComponentData.builder().from(getData()).disabled(value).build());
+        return new Button(ButtonComponentData.builder().from(getData()).disabled(value).build());
     }
 
     /**

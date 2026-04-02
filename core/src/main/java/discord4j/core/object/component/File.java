@@ -17,6 +17,7 @@
 package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.json.component.FileComponentData;
 import discord4j.discordjson.possible.Possible;
 
 /**
@@ -25,7 +26,7 @@ import discord4j.discordjson.possible.Possible;
  * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
  * @see <a href="https://discord.com/developers/docs/components/reference#file">File</a>
  */
-public class File extends MessageComponent implements TopLevelMessageComponent, ICanBeUsedInContainerComponent {
+public class File extends MessageComponent<FileComponentData> implements TopLevelMessageComponent, ICanBeUsedInContainerComponent {
 
     /**
      * Creates an {@code File} with the given {@code UnfurledMediaItem}.
@@ -34,7 +35,7 @@ public class File extends MessageComponent implements TopLevelMessageComponent, 
      * @return An {@code File} containing the given item
      */
     public static File of(UnfurledMediaItem file) {
-        return new File(MessageComponent.getBuilder(Type.FILE)
+        return new File(FileComponentData.builder()
             .file(file.getData())
             .build());
     }
@@ -47,7 +48,7 @@ public class File extends MessageComponent implements TopLevelMessageComponent, 
      * @return An {@code File} containing the given item
      */
     public static File of(UnfurledMediaItem file, boolean spoiler) {
-        return new File(MessageComponent.getBuilder(Type.FILE)
+        return new File(FileComponentData.builder()
             .file(file.getData())
             .spoiler(spoiler)
             .build());
@@ -61,7 +62,7 @@ public class File extends MessageComponent implements TopLevelMessageComponent, 
      * @return An {@code File} containing the given item
      */
     public static File of(int id, UnfurledMediaItem file) {
-        return new File(MessageComponent.getBuilder(Type.FILE)
+        return new File(FileComponentData.builder()
             .id(id)
             .file(file.getData())
             .build());
@@ -76,7 +77,7 @@ public class File extends MessageComponent implements TopLevelMessageComponent, 
      * @return An {@code File} containing the given item
      */
     public static File of(int id, UnfurledMediaItem file, boolean spoiler) {
-        return new File(MessageComponent.getBuilder(Type.FILE)
+        return new File(FileComponentData.builder()
             .id(id)
             .file(file.getData())
             .spoiler(spoiler)
@@ -85,14 +86,14 @@ public class File extends MessageComponent implements TopLevelMessageComponent, 
 
 
     protected File(Integer id, UnfurledMediaItem file, boolean spoiler) {
-        this(MessageComponent.getBuilder(Type.FILE)
+        this(FileComponentData.builder()
             .id(Possible.ofNullable(id))
             .file(file.getData())
             .spoiler(spoiler)
             .build());
     }
 
-    File(ComponentData data) {
+    File(FileComponentData data) {
         super(data);
     }
 
@@ -102,7 +103,7 @@ public class File extends MessageComponent implements TopLevelMessageComponent, 
      * @return a {@link UnfurledMediaItem}
      */
     public UnfurledMediaItem getFile() {
-        return new UnfurledMediaItem(this.getData().file().get());
+        return new UnfurledMediaItem(this.getData().file());
     }
 
     /**

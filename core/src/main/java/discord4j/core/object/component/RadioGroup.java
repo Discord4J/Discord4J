@@ -16,9 +16,8 @@
  */
 package discord4j.core.object.component;
 
-import discord4j.discordjson.json.ComponentData;
-import discord4j.discordjson.json.ImmutableComponentData;
-import discord4j.discordjson.json.SelectOptionData;
+import discord4j.discordjson.json.component.ImmutableRadioGroupComponentData;
+import discord4j.discordjson.json.component.RadioGroupComponentData;
 import discord4j.discordjson.possible.Possible;
 import org.jspecify.annotations.Nullable;
 
@@ -27,7 +26,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class RadioGroup extends MessageComponent implements ICanBeUsedInLabelComponent {
+public class RadioGroup extends MessageComponent<RadioGroupComponentData> implements ICanBeUsedInLabelComponent {
 
     /**
      * Creates a radio group.
@@ -38,7 +37,7 @@ public class RadioGroup extends MessageComponent implements ICanBeUsedInLabelCom
      */
     public static RadioGroup of(String customId, List<RadioGroup.Option> options) {
         Objects.requireNonNull(options);
-        ImmutableComponentData.Builder builder = ComponentData.builder()
+        ImmutableRadioGroupComponentData.Builder builder = RadioGroupComponentData.builder()
                 .type(Type.RADIO_GROUP.getValue())
                 .customId(customId);
 
@@ -56,7 +55,7 @@ public class RadioGroup extends MessageComponent implements ICanBeUsedInLabelCom
      */
     public static RadioGroup of(int id, String customId, List<RadioGroup.Option> options) {
         Objects.requireNonNull(options);
-        ImmutableComponentData.Builder builder = ComponentData.builder()
+        ImmutableRadioGroupComponentData.Builder builder = RadioGroupComponentData.builder()
                 .type(Type.RADIO_GROUP.getValue())
                 .id(id)
                 .customId(customId);
@@ -66,11 +65,11 @@ public class RadioGroup extends MessageComponent implements ICanBeUsedInLabelCom
         return new RadioGroup(builder.build());
     }
 
-    RadioGroup(ComponentData data) {
+    RadioGroup(RadioGroupComponentData data) {
         super(data);
     }
 
-    protected RadioGroup of(ComponentData data) {
+    protected RadioGroup of(RadioGroupComponentData data) {
         return new RadioGroup(data);
     }
 
@@ -91,7 +90,7 @@ public class RadioGroup extends MessageComponent implements ICanBeUsedInLabelCom
      * @return A new possibly required radio group with the same data as this one.
      */
     public RadioGroup required(boolean value) {
-        return of(ComponentData.builder().from(getData()).required(value).build());
+        return of(RadioGroupComponentData.builder().from(getData()).required(value).build());
     }
 
     /**
@@ -151,7 +150,7 @@ public class RadioGroup extends MessageComponent implements ICanBeUsedInLabelCom
 
         private static RadioGroup.Option of(String label, String value, @Nullable String description,
                                             boolean isSelectedByDefault) {
-            return new RadioGroup.Option(SelectOptionData.builder()
+            return new RadioGroup.Option(RadioGroupComponentData.RadioGroupOptionData.builder()
                     .label(label)
                     .value(value)
                     .description(Possible.ofNullable(description))
@@ -159,13 +158,13 @@ public class RadioGroup extends MessageComponent implements ICanBeUsedInLabelCom
                     .build());
         }
 
-        private final SelectOptionData data;
+        private final RadioGroupComponentData.RadioGroupOptionData data;
 
-        Option(SelectOptionData data) {
+        Option(RadioGroupComponentData.RadioGroupOptionData data) {
             this.data = data;
         }
 
-        public SelectOptionData getData() {
+        public RadioGroupComponentData.RadioGroupOptionData getData() {
             return data;
         }
 
@@ -212,7 +211,7 @@ public class RadioGroup extends MessageComponent implements ICanBeUsedInLabelCom
          * @return A new option with the given label.
          */
         public RadioGroup.Option withLabel(String label) {
-            return new RadioGroup.Option(SelectOptionData.builder().from(data).label(label).build());
+            return new RadioGroup.Option(RadioGroupComponentData.RadioGroupOptionData.builder().from(data).label(label).build());
         }
 
         /**
@@ -222,7 +221,7 @@ public class RadioGroup extends MessageComponent implements ICanBeUsedInLabelCom
          * @return A new option with the given value.
          */
         public RadioGroup.Option withValue(String value) {
-            return new RadioGroup.Option(SelectOptionData.builder().from(data).value(value).build());
+            return new RadioGroup.Option(RadioGroupComponentData.RadioGroupOptionData.builder().from(data).value(value).build());
         }
 
         /**
@@ -232,7 +231,7 @@ public class RadioGroup extends MessageComponent implements ICanBeUsedInLabelCom
          * @return A new option with the given description.
          */
         public RadioGroup.Option withDescription(String description) {
-            return new RadioGroup.Option(SelectOptionData.builder().from(data).description(description).build());
+            return new RadioGroup.Option(RadioGroupComponentData.RadioGroupOptionData.builder().from(data).description(description).build());
         }
 
         /**
@@ -242,7 +241,7 @@ public class RadioGroup extends MessageComponent implements ICanBeUsedInLabelCom
          * @return A new option with the given selected-by-default state.
          */
         public RadioGroup.Option withSelectedByDefault(boolean isSelectedByDefault) {
-            return new RadioGroup.Option(SelectOptionData.builder().from(data).isDefault(isSelectedByDefault).build());
+            return new RadioGroup.Option(RadioGroupComponentData.RadioGroupOptionData.builder().from(data).isDefault(isSelectedByDefault).build());
         }
 
     }
