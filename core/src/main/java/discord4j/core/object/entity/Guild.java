@@ -1510,6 +1510,22 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create a media channel.
+     *
+     * @param spec an immutable object that specifies how to create the media channel
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link MediaChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<MediaChannel> createMediaChannel(MediaChannelCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                        () -> gateway.getRestClient().getGuildService()
+                                .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+                .map(data -> EntityUtil.getChannel(gateway, data))
+                .cast(MediaChannel.class);
+    }
+
+    /**
      * Requests to create an automod rule. Properties specifying how to create the rule can be set via the
      * {@code withXxx} methods of the returned {@link AutoModRuleCreateMono}.
      *
