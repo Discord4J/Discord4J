@@ -60,7 +60,8 @@ public class DefaultRouter implements Router {
         this.reactorResources = routerOptions.getReactorResources();
         this.httpClient = new DiscordWebClient(reactorResources.getHttpClient(),
                 routerOptions.getExchangeStrategies(), routerOptions.getAuthorizationScheme(), routerOptions.getToken(),
-                routerOptions.getResponseTransformers(), routerOptions.getDiscordBaseUrl());
+                routerOptions.getResponseTransformers(), routerOptions.getDiscordBaseUrl(),
+                routerOptions.areMetricsEnabled());
     }
 
     @Override

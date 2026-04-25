@@ -21,12 +21,15 @@ import discord4j.common.GitProperties;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.WriterStrategy;
 import discord4j.rest.response.ResponseFunction;
+import discord4j.rest.route.Route;
+import discord4j.rest.route.Routes;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.netty.ConnectionObserver;
+import reactor.netty.channel.ChannelMetricsRecorder;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClientRequest;
 import reactor.util.Logger;
@@ -35,6 +38,7 @@ import reactor.util.Loggers;
 import java.time.Instant;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Matcher;
 
 import static discord4j.common.LogUtil.format;
 
@@ -51,11 +55,12 @@ public class DiscordWebClient {
     private final HttpHeaders defaultHeaders;
     private final ExchangeStrategies exchangeStrategies;
     private final List<ResponseFunction> responseFunctions;
+    private final boolean enableMetrics;
 
     public DiscordWebClient(HttpClient httpClient, ExchangeStrategies exchangeStrategies,
                             AuthorizationScheme authorizationScheme, String token,
-                            List<ResponseFunction> responseFunctions, String discordBaseUrl) {
-        this(httpClient, exchangeStrategies, authorizationScheme.getScheme(), token, responseFunctions, discordBaseUrl);
+                            List<ResponseFunction> responseFunctions, String discordBaseUrl, boolean enableMetrics) {
+        this(httpClient, exchangeStrategies, authorizationScheme.getScheme(), token, responseFunctions, discordBaseUrl, enableMetrics);
     }
 
     /**
@@ -69,7 +74,9 @@ public class DiscordWebClient {
      */
     public DiscordWebClient(HttpClient httpClient, ExchangeStrategies exchangeStrategies,
                             String authorizationScheme, String token,
-                            List<ResponseFunction> responseFunctions, String discordBaseUrl) {
+                            List<ResponseFunction> responseFunctions, String discordBaseUrl, boolean enableMetrics) {
+        this.enableMetrics = enableMetrics;
+
         final Properties properties = GitProperties.getProperties();
         final String version = properties.getProperty(GitProperties.APPLICATION_VERSION, "3");
         final String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
@@ -95,6 +102,25 @@ public class DiscordWebClient {
                     HttpClientRequest httpClientRequest = (HttpClientRequest) connection;
                     log.trace(format(httpClientRequest.currentContextView(), "{} {}"), state, connection);
                 }
+            });
+        }
+        if (this.enableMetrics) {
+            return httpClient.metrics(true, s -> {
+                String routePath = s.substring(Routes.URI_PREFIX.length());
+
+                for (Route route : Routes.getAllRoutes()) {
+                    Matcher matcher = route.getMatchingPattern().matcher(routePath);
+
+                    if (matcher.matches()) {
+                        return route.getUriTemplate();
+                    }
+                }
+
+                if (log.isTraceEnabled()) {
+                    log.trace("No matcher found for " + routePath);
+                }
+
+                return s;
             });
         }
         return httpClient;

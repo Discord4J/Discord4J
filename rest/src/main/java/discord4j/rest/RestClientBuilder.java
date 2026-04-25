@@ -50,6 +50,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
     protected @Nullable GlobalRateLimiter globalRateLimiter;
     protected @Nullable RequestQueueFactory requestQueueFactory;
     protected @Nullable AllowedMentions allowedMentions;
+    protected boolean enableMetrics = false;
 
     /**
      * Initialize a new builder with the given token.
@@ -59,7 +60,8 @@ public class RestClientBuilder<C, O extends RouterOptions> {
     public static RestClientBuilder<RestClient, RouterOptions> createRest(String token) {
         Function<Config, RestClient> clientFactory = config -> {
             RestResources restResources = new RestResources(config.getToken(), config.getReactorResources(),
-                    config.getJacksonResources(), config.getRouter(), config.getAllowedMentions().orElse(null));
+                    config.getJacksonResources(), config.getRouter(), config.getAllowedMentions().orElse(null),
+                    config.areMetricsEnabled());
             return new RestClient(restResources);
         };
         return new RestClientBuilder<>(token, clientFactory, Function.identity());
@@ -69,7 +71,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         Function<Config, RestClient> clientFactory = config -> {
             RestResources restResources = new RestResources(AuthorizationScheme.NONE, "",
                     config.getReactorResources(), config.getJacksonResources(), config.getRouter(),
-                    config.getAllowedMentions().orElse(null));
+                    config.getAllowedMentions().orElse(null), config.areMetricsEnabled());
             return new RestClient(restResources);
         };
         return new RestClientBuilder<>("", clientFactory, Function.identity());
@@ -232,6 +234,16 @@ public class RestClientBuilder<C, O extends RouterOptions> {
     }
 
     /**
+     * Enable the metrics for this client
+     *
+     * @return this builder
+     */
+    public RestClientBuilder<C, O> enableMetrics() {
+        this.enableMetrics = true;
+        return this;
+    }
+
+    /**
      * Create a client capable of connecting to Discord REST API using a {@link DefaultRouter} that is capable of
      * working in monolithic environments.
      *
@@ -254,13 +266,15 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         O options = buildOptions(reactor, jackson);
         Router router = routerFactory.apply(options);
         Config config = new Config(token, reactor, jackson, initExchangeStrategies(jackson),
-                Collections.unmodifiableList(responseTransformers), initGlobalRateLimiter(reactor), router, allowedMentions);
+                Collections.unmodifiableList(responseTransformers), initGlobalRateLimiter(reactor), router, allowedMentions,
+                enableMetrics);
         return clientFactory.apply(config);
     }
 
     private O buildOptions(ReactorResources reactor, JacksonResources jackson) {
         RouterOptions options = new RouterOptions(token, reactor, initExchangeStrategies(jackson),
-                responseTransformers, initGlobalRateLimiter(reactor), initRequestQueueFactory(), Routes.BASE_URL);
+                responseTransformers, initGlobalRateLimiter(reactor), initRequestQueueFactory(), Routes.BASE_URL,
+                enableMetrics);
         return this.optionsModifier.apply(options);
     }
 
@@ -309,10 +323,12 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         private final GlobalRateLimiter globalRateLimiter;
         private final Router router;
         private @Nullable final AllowedMentions allowedMentions;
+        private final boolean enableMetrics;
 
         public Config(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
                       ExchangeStrategies exchangeStrategies, List<ResponseFunction> responseTransformers,
-                      GlobalRateLimiter globalRateLimiter, Router router, @Nullable AllowedMentions allowedMentions) {
+                      GlobalRateLimiter globalRateLimiter, Router router, @Nullable AllowedMentions allowedMentions,
+                      boolean enableMetrics) {
             this.token = token;
             this.reactorResources = reactorResources;
             this.jacksonResources = jacksonResources;
@@ -321,6 +337,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
             this.globalRateLimiter = globalRateLimiter;
             this.router = router;
             this.allowedMentions = allowedMentions;
+            this.enableMetrics = enableMetrics;
         }
 
         public String getToken() {
@@ -353,6 +370,10 @@ public class RestClientBuilder<C, O extends RouterOptions> {
 
         public Optional<AllowedMentions> getAllowedMentions() {
             return Optional.ofNullable(this.allowedMentions);
+        }
+
+        public  boolean areMetricsEnabled() {
+            return enableMetrics;
         }
     }
 }

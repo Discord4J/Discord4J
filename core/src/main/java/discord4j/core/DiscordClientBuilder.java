@@ -42,7 +42,8 @@ public final class DiscordClientBuilder<C, O extends RouterOptions> extends Rest
     public static DiscordClientBuilder<DiscordClient, RouterOptions> create(String token) {
         Function<Config, DiscordClient> clientFactory = config -> {
             CoreResources coreResources = new CoreResources(config.getToken(), config.getReactorResources(),
-                    config.getJacksonResources(), config.getRouter(), config.getAllowedMentions().orElse(null));
+                    config.getJacksonResources(), config.getRouter(), config.getAllowedMentions().orElse(null),
+                    config.areMetricsEnabled());
             Properties properties = GitProperties.getProperties();
             String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
             String name = properties.getProperty(GitProperties.APPLICATION_NAME, "Discord4J");

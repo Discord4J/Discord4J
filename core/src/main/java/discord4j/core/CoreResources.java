@@ -40,7 +40,7 @@ public class CoreResources extends RestResources {
      * @param allowedMentions a configuration object to limit mentions creating notifications on message sending
      */
     public CoreResources(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
-                         Router router, @Nullable AllowedMentions allowedMentions) {
-        super(token, reactorResources, jacksonResources, router, allowedMentions);
+                         Router router, @Nullable AllowedMentions allowedMentions, boolean enableMetrics) {
+        super(token, reactorResources, jacksonResources, router, allowedMentions, enableMetrics);
     }
 }

@@ -40,10 +40,11 @@ public class RestResources {
     private final Router router;
     private final @Nullable Long selfId;
     private final @Nullable AllowedMentions allowedMentions;
+    private final boolean metricsEnabled;
 
     public RestResources(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
-                         Router router, @Nullable AllowedMentions allowedMentions) {
-        this(AuthorizationScheme.BOT, token, reactorResources, jacksonResources, router, allowedMentions);
+                         Router router, @Nullable AllowedMentions allowedMentions, boolean metricsEnabled) {
+        this(AuthorizationScheme.BOT, token, reactorResources, jacksonResources, router, allowedMentions, metricsEnabled);
     }
 
     /**
@@ -54,14 +55,17 @@ public class RestResources {
      * @param jacksonResources Jackson data-binding resources to map objects
      * @param router a connector to perform requests against Discord API
      * @param allowedMentions a configuration object to limit mentions creating notifications on message sending
+     * @param metricsEnabled if the metrics are enabled
      */
     public RestResources(AuthorizationScheme scheme, String token, ReactorResources reactorResources,
-                         JacksonResources jacksonResources, Router router, @Nullable AllowedMentions allowedMentions) {
+                         JacksonResources jacksonResources, Router router, @Nullable AllowedMentions allowedMentions,
+                         boolean metricsEnabled) {
         this.scheme = scheme;
         this.token = token;
         this.reactorResources = reactorResources;
         this.jacksonResources = jacksonResources;
         this.router = router;
+        this.metricsEnabled = metricsEnabled;
         this.selfId = scheme == AuthorizationScheme.BOT ? TokenUtil.getSelfId(token) : null;
         this.allowedMentions = allowedMentions;
     }
@@ -122,5 +126,14 @@ public class RestResources {
      */
     public Optional<AllowedMentions> getAllowedMentions() {
         return Optional.ofNullable(allowedMentions);
+    }
+
+    /**
+     * Return if the metrics are enabled
+     * 
+     * @return if the metrics are enabled
+     */
+    public boolean areMetricsEnabled() {
+        return metricsEnabled;
     }
 }

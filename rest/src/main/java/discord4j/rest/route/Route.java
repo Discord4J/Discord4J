@@ -21,6 +21,7 @@ import io.netty.handler.codec.http.HttpMethod;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * Provides a mapping between a Discord API endpoint and its response type.
@@ -29,10 +30,21 @@ public class Route {
 
     private final HttpMethod method;
     private final String uriTemplate;
+    private final Pattern matchingPattern;
 
     private Route(HttpMethod method, String uriTemplate) {
         this.method = method;
         this.uriTemplate = uriTemplate;
+
+        this.matchingPattern = this.buildPattern();
+    }
+
+    private Pattern buildPattern() {
+        String regex = "^"
+                + this.uriTemplate.replaceAll("\\{[^}]+}", "([^/]+)")
+                + "(?:\\?.*)?$";
+
+        return Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
     }
 
     public static Route get(String uri) {
@@ -82,6 +94,15 @@ public class Route {
      */
     public String getUriTemplate() {
         return uriTemplate;
+    }
+
+    /**
+     * Return the URI matching pattern for this route
+     *
+     * @return A {@link Pattern} matching the URIs for this route
+     */
+    public Pattern getMatchingPattern() {
+        return this.matchingPattern;
     }
 
     @Override

@@ -38,19 +38,20 @@ public class RouterOptions {
     private final GlobalRateLimiter globalRateLimiter;
     private final RequestQueueFactory requestQueueFactory;
     private final String discordBaseUrl;
+    private final boolean enableMetrics;
 
     public RouterOptions(String token, ReactorResources reactorResources, ExchangeStrategies exchangeStrategies,
                          List<ResponseFunction> responseTransformers, GlobalRateLimiter globalRateLimiter,
-                         RequestQueueFactory requestQueueFactory, String discordBaseUrl) {
+                         RequestQueueFactory requestQueueFactory, String discordBaseUrl, boolean enableMetrics) {
         this(AuthorizationScheme.BOT, token, reactorResources, exchangeStrategies,
                 responseTransformers, globalRateLimiter,
-                requestQueueFactory, discordBaseUrl);
+                requestQueueFactory, discordBaseUrl, enableMetrics);
     }
 
     public RouterOptions(AuthorizationScheme authorizationScheme, String token, ReactorResources reactorResources,
                          ExchangeStrategies exchangeStrategies, List<ResponseFunction> responseTransformers,
                          GlobalRateLimiter globalRateLimiter, RequestQueueFactory requestQueueFactory,
-                         String discordBaseUrl) {
+                         String discordBaseUrl, boolean enableMetrics) {
         this.authorizationScheme = Objects.requireNonNull(authorizationScheme, "authorizationScheme");
         this.token = Objects.requireNonNull(token, "token");
         this.reactorResources = Objects.requireNonNull(reactorResources, "reactorResources");
@@ -59,6 +60,7 @@ public class RouterOptions {
         this.globalRateLimiter = Objects.requireNonNull(globalRateLimiter, "globalRateLimiter");
         this.requestQueueFactory = Objects.requireNonNull(requestQueueFactory, "requestQueueFactory");
         this.discordBaseUrl = Objects.requireNonNull(discordBaseUrl, "discordBaseUrl");
+        this.enableMetrics = enableMetrics;
     }
 
     public AuthorizationScheme getAuthorizationScheme() {
@@ -127,5 +129,14 @@ public class RouterOptions {
      */
     public String getDiscordBaseUrl() {
         return discordBaseUrl;
+    }
+
+    /**
+     * Returns if the metrics are enabled
+     *
+     * @return if the metrics are enabled
+     */
+    public boolean areMetricsEnabled() {
+        return enableMetrics;
     }
 }

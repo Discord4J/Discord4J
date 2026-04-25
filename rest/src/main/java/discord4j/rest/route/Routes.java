@@ -16,6 +16,11 @@
  */
 package discord4j.rest.route;
 
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * A collection of {@link discord4j.rest.route.Route} object definitions.
  *
@@ -36,12 +41,39 @@ public abstract class Routes {
     public static final String VERSION = "10";
 
     /**
+     * Represents the URI prefix for all requests
+     */
+    public static final String URI_PREFIX = "/api/v".concat(VERSION);
+
+    /**
      * The base URL for all API requests.
      *
      * @see <a href="https://discord.com/developers/docs/reference#base-url">
      * https://discord.com/developers/docs/reference#base-url</a>
      */
-    public static final String BASE_URL = "https://discord.com/api/v".concat(VERSION);
+    public static final String BASE_URL = "https://discord.com".concat(URI_PREFIX);
+
+    private static List<Route> ALL_ROUTES;
+
+    public static List<Route> getAllRoutes() {
+        if (ALL_ROUTES == null) {
+            ALL_ROUTES = Arrays.stream(Routes.class.getDeclaredFields())
+                    .filter(field -> field.getType() == Route.class)
+                    .filter(field -> Modifier.isStatic(field.getModifiers()))
+                    .map(field -> {
+                        try {
+                            return field.get(null);
+                        } catch (IllegalAccessException e) {
+                            return null;
+                        }
+                    })
+                    .filter(o -> o instanceof Route)
+                    .map(Route.class::cast)
+                    .collect(Collectors.toList());
+        }
+
+        return ALL_ROUTES;
+    }
 
     //////////////////////////////////////////////
     ////////////// Gateway Resource //////////////
