@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directories:
+        - "/"
+        - "common"
+        - "core"
+        - "gateway"
+        - "oauth2"
+        - "rest"
+        - "voice"
+    schedule:
+      interval: "cron"
+      cronjob: "0 0 * * *"
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
