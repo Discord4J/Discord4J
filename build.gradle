@@ -32,7 +32,7 @@ ext {
     immutables_version = '2.12.1'
 
     // Test dependencies
-    junit_version = '5.14.2'
+    junit_version = '5.14.4'
     mockito_version = '3.11.2'
     logback_version = '1.5.32'
     reflections_version = '0.10.2'
