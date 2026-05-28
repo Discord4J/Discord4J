@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
-    id 'com.gorylenko.gradle-git-properties' version '3.0.2' apply false
+    id 'com.gorylenko.gradle-git-properties' version '3.0.3' apply false
     id 'com.github.ben-manes.versions' version '0.54.0'
     id 'net.researchgate.release' version '3.1.0'
 }
@@ -34,7 +34,7 @@ ext {
     // Test dependencies
     junit_version = '5.14.4'
     mockito_version = '3.11.2'
-    logback_version = '1.5.32'
+    logback_version = '1.5.33'
     reflections_version = '0.10.2'
     lavaplayer_version = '1.4.3'
     libdave_version = '0.1.3'
