@@ -452,16 +452,23 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
     /** Duration in minutes to automatically archive the thread after recent activity. */
     public enum AutoArchiveDuration {
 
-        // TODO naming
         UNKNOWN(-1),
-        /** 1 hour */
-        DURATION1(60),
-        /** 1 day */
-        DURATION2(1440),
-        /** 3 days */
-        DURATION3(4320),
-        /** 7 days */
-        DURATION4(10080);
+        /**
+         * 1 hour
+         */
+        HOURS_1(60),
+        /**
+         * 1 day
+         */
+        DAYS_1(1440),
+        /**
+         * 3 days
+         */
+        DAYS_3(4320),
+        /**
+         * 7 days
+         */
+        DAYS_7(10080);
 
         private final int value;
 
@@ -473,19 +480,53 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
             return value;
         }
 
+        /**
+         * Gets the current enum value to an Duration object.
+         *
+         * @return a Duration
+         */
         public Duration asDuration() {
             return Duration.ofMinutes(value);
         }
 
         public static AutoArchiveDuration of(int value) {
             switch (value) {
-                case 60: return DURATION1;
-                case 1440: return DURATION2;
-                case 4320: return DURATION3;
-                case 10080: return DURATION4;
+                case 60: return HOURS_1;
+                case 1440: return DAYS_1;
+                case 4320: return DAYS_3;
+                case 10080: return DAYS_7;
                 default: return UNKNOWN;
             }
         }
+
+        /**
+         * 1 hour
+         * @deprecated Use {@link #HOURS_1} instead.
+         */
+        @Deprecated
+        public static final AutoArchiveDuration DURATION1 = HOURS_1;
+
+        /**
+         * 1 day
+         * @deprecated Use {@link #DAYS_1} instead.
+         */
+        @Deprecated
+        public static final AutoArchiveDuration DURATION2 = DAYS_1;
+
+        /**
+         * 3 days
+         * @deprecated Use {@link #DAYS_3} instead.
+         */
+        @Deprecated
+        public static final AutoArchiveDuration DURATION3 = DAYS_3;
+
+        /**
+         * 7 days
+         * @deprecated Use {@link #DAYS_7} instead.
+         */
+        @Deprecated
+        public static final AutoArchiveDuration DURATION4 = DAYS_7;
+
     }
 
     public enum Type {
