@@ -17,8 +17,8 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.object.component.BaseMessageComponent;
-import discord4j.core.object.component.TopLevelMessageComponent;
+import discord4j.core.object.component.kind.BaseComponent;
+import discord4j.core.object.component.kind.TopLevelComponent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.Id;
@@ -63,7 +63,7 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
 
     Possible<Optional<List<Message.Flag>>> flags();
 
-    Possible<Optional<List<TopLevelMessageComponent>>> components();
+    Possible<Optional<List<TopLevelComponent>>> components();
 
     Possible<Optional<List<Attachment>>> attachments();
 
@@ -86,7 +86,7 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
                         .mapToInt(Message.Flag::getFlag)
                         .reduce(0, (left, right) -> left | right)))
                 .components(mapPossibleOptional(components(), components -> components.stream()
-                        .map(BaseMessageComponent::getData)
+                        .map(BaseComponent::getData)
                         .collect(Collectors.toList())))
                 .attachments(mapPossibleOptional(attachments(), attachments -> attachments.stream()
                         .map(Attachment::getData)

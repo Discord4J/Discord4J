@@ -19,7 +19,7 @@ package discord4j.core.event.domain.interaction;
 import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.Interaction;
-import discord4j.core.object.component.Button;
+import discord4j.core.object.component.impl.Button;
 import discord4j.gateway.ShardInfo;
 
 import java.util.Collection;

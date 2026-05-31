@@ -1,0 +1,227 @@
+/*
+ * This file is part of Discord4J.
+ *
+ * Discord4J is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Discord4J is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
+ */
+package discord4j.core.object.component.impl.layout;
+
+import discord4j.core.object.component.Component;
+import discord4j.core.object.component.kind.BaseComponent;
+import discord4j.core.object.component.impl.Button;
+import discord4j.core.object.component.usage.ICanBeUsedAsAccessoryComponent;
+import discord4j.core.object.component.kind.LayoutComponent;
+import discord4j.core.object.component.impl.TextDisplay;
+import discord4j.core.object.component.impl.Thumbnail;
+import discord4j.core.object.component.kind.TopLevelComponent;
+import discord4j.core.object.component.usage.ICanBeUsedInContainerComponent;
+import discord4j.core.object.component.usage.ICanBeUsedInSectionComponent;
+import discord4j.discordjson.json.component.SectionComponentData;
+import discord4j.discordjson.possible.Possible;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+/**
+ * A section component for message.
+ * <br>
+ * <ul>
+ *     <li>Currently accessory only support {@link Thumbnail} and {@link Button}</li>
+ *     <li>Currently the components valid are {@link TextDisplay}</li>
+ * </ul>
+ *
+ * @apiNote This component require {@link discord4j.core.object.entity.Message.Flag#IS_COMPONENTS_V2}
+ * @see <a href="https://discord.com/developers/docs/components/reference#section">Section</a>
+ */
+public class Section extends LayoutComponent<SectionComponentData> implements TopLevelComponent,
+        ICanBeUsedInContainerComponent {
+
+    /**
+     * Creates a {@link Section} with the given components.
+     *
+     * @param accessory  The accessory component of the section
+     * @param components The components of the section
+     * @return A {@link Section} containing the given components
+     */
+    public static Section of(ICanBeUsedAsAccessoryComponent accessory, ICanBeUsedInSectionComponent... components) {
+        return of(accessory, Arrays.asList(components));
+    }
+
+    public static Section of(SectionComponentData data) {
+        return new Section(data);
+    }
+
+    /**
+     * Creates a {@link Section} with the given components.
+     *
+     * @param accessory  The accessory component of the section
+     * @param components The components of the section
+     * @return A {@link Section} containing the given components
+     */
+    public static Section of(ICanBeUsedAsAccessoryComponent accessory, List<? extends ICanBeUsedInSectionComponent> components) {
+        return new Section(SectionComponentData.builder()
+                .accessory(accessory.getData())
+                .components(components.stream()
+                        .filter(c -> c instanceof Component)
+                        .map(c -> c.getData())
+                        .collect(Collectors.toList()))
+                .build());
+    }
+
+    /**
+     * Creates a {@link Section} with the given components.
+     *
+     * @param id         the component id
+     * @param accessory  The accessory component of the section
+     * @param components The components of the section
+     * @return A {@link Section} containing the given components
+     */
+    public static Section of(int id, ICanBeUsedAsAccessoryComponent accessory, ICanBeUsedInSectionComponent... components) {
+        return of(id, accessory, Arrays.asList(components));
+    }
+
+    /**
+     * Creates a {@link Section} with the given components.
+     *
+     * @param id         the component id
+     * @param accessory  The accessory component of the section
+     * @param components The components of the section
+     * @return A {@link Section} containing the given components
+     */
+    public static Section of(int id, ICanBeUsedAsAccessoryComponent accessory,
+                             List<? extends ICanBeUsedInSectionComponent> components) {
+        return new Section(SectionComponentData.builder()
+                .id(id)
+                .accessory(accessory.getData())
+                .components(components.stream()
+                        .filter(c -> c instanceof Component)
+                        .map(c -> c.getData())
+                        .collect(Collectors.toList()))
+                .build());
+    }
+
+
+    protected Section(Integer id, ICanBeUsedAsAccessoryComponent accessory,
+                      List<? extends ICanBeUsedInSectionComponent> components) {
+        this(SectionComponentData.builder()
+                .id(Possible.ofNullable(id))
+                .accessory(accessory.getData())
+                .components(components.stream()
+                        .filter(c -> c instanceof Component)
+                        .map(c -> c.getData())
+                        .collect(Collectors.toList()))
+                .build());
+    }
+
+    private Section(SectionComponentData data) {
+        super(data);
+    }
+
+    /**
+     * Gets the accessory for this section.
+     *
+     * @return An component
+     */
+    public ICanBeUsedAsAccessoryComponent getAccessory() {
+        Component<?> accessoryComponent = Component.fromData(this.getData().accessory());
+
+        if (accessoryComponent instanceof ICanBeUsedAsAccessoryComponent) {
+            return (ICanBeUsedAsAccessoryComponent) accessoryComponent;
+        } else {
+            throw new IllegalStateException("Received component is not an instance of IAccessoryComponent");
+        }
+    }
+
+    /**
+     * Create a new {@link Section} instance from {@code this}, adding a given component.
+     *
+     * @param component the child component to be added
+     * @return an {@code Section} containing the existing and added components with the current accessory
+     */
+    public Section withAddedComponent(ICanBeUsedInSectionComponent component) {
+        List<BaseComponent> components = new ArrayList<>(getChildren());
+        components.add(component);
+        return new Section(SectionComponentData.builder()
+                .from(getData())
+                .accessory(this.getData().accessory())
+                .components(components.stream().map(BaseComponent::getData).collect(Collectors.toList()))
+                .build());
+    }
+
+    /**
+     * Create a new {@link Section} instance from {@code this}, adding given components.
+     *
+     * @param components the child components to be added
+     * @return an {@code Section} containing the existing and added components with the current accessory
+     */
+    public final Section withAddedComponents(ICanBeUsedInSectionComponent... components) {
+        List<BaseComponent> componentsToAdd = new ArrayList<>(getChildren());
+        componentsToAdd.addAll(Arrays.asList(components));
+        return new Section(SectionComponentData.builder()
+                .from(getData())
+                .accessory(this.getData().accessory())
+                .components(componentsToAdd.stream().map(BaseComponent::getData).collect(Collectors.toList()))
+                .build());
+    }
+
+    /**
+     * Create a new {@link Section} instance from {@code this}, adding given components.
+     *
+     * @param components the child components to be added
+     * @return an {@code Section} containing the existing and added components with the current accessory
+     */
+    public Section withAddedComponents(List<? extends ICanBeUsedInSectionComponent> components) {
+        return new Section(SectionComponentData.builder()
+                .from(getData())
+                .accessory(this.getData().accessory())
+                .components(Stream.concat(getChildren().stream(), components.stream())
+                        .filter(c -> c instanceof Component)
+                        .map(c -> c.getData())
+                        .collect(Collectors.toList()))
+                .build());
+    }
+
+    /**
+     * Create a new {@link Section} instance from {@code this}, using a given accessory.
+     *
+     * @param accessory the child component to be added
+     * @return an {@code Section} containing the existing and added components with an accessory
+     */
+    public Section withAccessory(ICanBeUsedAsAccessoryComponent accessory) {
+        List<Component<?>> components = new ArrayList<>(getChildren());
+        return new Section(SectionComponentData.builder()
+                .from(getData())
+                .accessory(accessory.getData())
+                .components(components.stream().map(Component::getData).collect(Collectors.toList()))
+                .build());
+    }
+
+    /**
+     * Create a new {@link Section} instance from {@code this}, removing any existing component by {@code customId}.
+     *
+     * @param componentId the customId of the component to remove
+     * @return an {@code Section} containing all components that did not match the given {@code customId}
+     */
+    public Section withRemovedComponent(int componentId) {
+        List<Component<?>> components = getChildren();
+        components.removeIf(messageComponent -> componentId == messageComponent.getComponentId());
+
+        return new Section(SectionComponentData.builder()
+                .from(getData())
+                .components(components.stream().map(Component::getData).collect(Collectors.toList()))
+                .build());
+    }
+}

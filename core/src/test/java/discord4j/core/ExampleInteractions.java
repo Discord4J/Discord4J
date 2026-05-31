@@ -18,20 +18,37 @@
 package discord4j.core;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.event.domain.interaction.*;
+import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.event.domain.interaction.ComponentInteractionEvent;
+import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
+import discord4j.core.event.domain.interaction.MessageInteractionEvent;
+import discord4j.core.event.domain.interaction.ModalSubmitInteractionEvent;
+import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
+import discord4j.core.event.domain.interaction.UserInteractionEvent;
 import discord4j.core.object.command.ApplicationCommand;
-import discord4j.core.object.component.*;
+import discord4j.core.object.component.impl.Button;
+import discord4j.core.object.component.impl.Label;
+import discord4j.core.object.component.impl.TextInput;
+import discord4j.core.object.component.impl.layout.ActionRow;
+import discord4j.core.object.component.impl.option.StringSelectOption;
+import discord4j.core.object.component.impl.selectmenu.StringSelectMenu;
+import discord4j.core.object.component.kind.TopLevelComponent;
+import discord4j.core.object.component.kind.TopLevelModalComponent;
 import discord4j.core.object.emoji.Emoji;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.InteractionPresentModalSpec;
-import discord4j.rest.interaction.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.interaction.GuildCommandRegistrar;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -96,9 +113,11 @@ public class ExampleInteractions {
                                                     .withFields(
                                                             EmbedCreateFields.Field.of("Name", user.getUsername(),
                                                                     false),
-                                                            EmbedCreateFields.Field.of("Display Name", user.getDisplayName(),
+                                                            EmbedCreateFields.Field.of("Display Name",
+                                                                    user.getDisplayName(),
                                                                     false),
-                                                            EmbedCreateFields.Field.of("Global Name", user.getGlobalName().orElse("none"),
+                                                            EmbedCreateFields.Field.of("Global Name",
+                                                                    user.getGlobalName().orElse("none"),
                                                                     false),
                                                             EmbedCreateFields.Field.of("Avatar URL",
                                                                     user.getAvatarUrl(), false))
@@ -159,10 +178,10 @@ public class ExampleInteractions {
                                             .withComponents(getComponents(true));
                                 case MODAL:
                                     return event.presentModal(InteractionPresentModalSpec.builder()
-                                                    .title("Type deferReply, reply, deferEdit or edit")
-                                                    .customId(MODAL_CUSTOM_ID)
-                                                    .addComponent(getModalComponent())
-                                                    .build());
+                                            .title("Type deferReply, reply, deferEdit or edit")
+                                            .customId(MODAL_CUSTOM_ID)
+                                            .addComponent(getModalComponent())
+                                            .build());
                             }
                         }
                         return Mono.empty();
@@ -215,15 +234,16 @@ public class ExampleInteractions {
                 .block();
     }
 
-    private static Iterable<TopLevelMessageComponent> getComponents(boolean disabled) {
-        return Arrays.asList(ActionRow.of(SelectMenu.of(REPLY_MODE_SELECT,
-                                SelectMenu.Option.ofDefault("Deferred reply", DEFER_REPLY),
-                                SelectMenu.Option.of("Reply", REPLY),
-                                SelectMenu.Option.of("Deferred edit", DEFER_EDIT),
-                                SelectMenu.Option.of("Edit", EDIT),
-                                SelectMenu.Option.of("Modal", MODAL))
+    private static Iterable<TopLevelComponent> getComponents(boolean disabled) {
+        return Arrays.asList(ActionRow.of(StringSelectMenu.of(REPLY_MODE_SELECT)
+                        .withOptions(
+                                StringSelectOption.ofDefault("Deferred reply", DEFER_REPLY),
+                                StringSelectOption.of("Reply", REPLY),
+                                StringSelectOption.of("Deferred edit", DEFER_EDIT),
+                                StringSelectOption.of("Edit", EDIT),
+                                StringSelectOption.of("Modal", MODAL))
                         .withMaxValues(1)
-                        .disabled(disabled)),
+                        .withDisabled(disabled)),
                 ActionRow.of(Button.primary(ACTION_BUTTON, "Click me!").disabled(disabled)));
     }
 

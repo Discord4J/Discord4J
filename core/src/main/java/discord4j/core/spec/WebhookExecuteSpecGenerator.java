@@ -18,8 +18,8 @@
 package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.component.BaseMessageComponent;
-import discord4j.core.object.component.TopLevelMessageComponent;
+import discord4j.core.object.component.kind.BaseComponent;
+import discord4j.core.object.component.kind.TopLevelComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
 import discord4j.discordjson.json.WebhookExecuteRequest;
@@ -68,7 +68,7 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
 
     Possible<AllowedMentions> allowedMentions();
 
-    Possible<List<TopLevelMessageComponent>> components();
+    Possible<List<TopLevelComponent>> components();
 
     Possible<String> threadName();
 
@@ -86,7 +86,7 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
             .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
             .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
             .components(mapPossible(components(), components -> components.stream()
-                .map(BaseMessageComponent::getData)
+                .map(BaseComponent::getData)
                 .collect(Collectors.toList())))
             .threadName(threadName())
             .flags(mapPossible(flags(), f -> f.stream()

@@ -18,7 +18,7 @@ package discord4j.core.spec.legacy;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.Embed;
-import discord4j.core.object.component.LayoutComponent;
+import discord4j.core.object.component.kind.LayoutComponent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;

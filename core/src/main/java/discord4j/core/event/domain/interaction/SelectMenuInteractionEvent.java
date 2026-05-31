@@ -20,14 +20,14 @@ import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
-import discord4j.core.object.component.SelectMenu;
+import discord4j.core.object.component.Component;
 import discord4j.gateway.ShardInfo;
 
 import java.util.Collection;
 import java.util.List;
 
 /**
- * Dispatched when a user interacts with a {@link SelectMenu} the bot has sent.
+ * Dispatched when a user interacts with a {@link OldSelectMenu} the bot has sent.
  * <p>
  * You are required to respond to this interaction within a three-second window by using one of the following:
  * <ul>
@@ -54,10 +54,10 @@ public class SelectMenuInteractionEvent extends ComponentInteractionEvent {
 
     /**
      * Get the string values selected in the menu.
-     * If type of select menu is not {@link discord4j.core.object.component.MessageComponent.Type#SELECT_MENU_STRING} then ids of entities will be returned.
+     * If type of select menu is not {@link Component.Type#SELECT_MENU_STRING} then ids of entities will be returned.
      *
      * @return The string values selected in the menu.
-     * @see discord4j.core.object.component.SelectMenu.Option#getValue()
+     * @see OldSelectMenu.Option#getValue()
      */
     public List<String> getValues() {
         return getInteraction().getCommandInteraction()

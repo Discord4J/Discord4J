@@ -20,7 +20,8 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.Interaction;
-import discord4j.core.object.component.TopLevelModalComponent;
+import discord4j.core.object.component.impl.Button;
+import discord4j.core.object.component.kind.TopLevelModalComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.*;
 import discord4j.core.spec.legacy.LegacyInteractionApplicationCommandCallbackSpec;
@@ -201,7 +202,7 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      * Requests to respond to the interaction with a notification instructing the user that this interaction requires a premium subscription.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has been sent. If an error is received, it is emitted through the {@code Mono}.
-     * @deprecated in favor of using {@link discord4j.core.object.component.Button#premium(Snowflake)}. This will continue to function but may be eventually unsupported
+     * @deprecated in favor of using {@link Button#premium(Snowflake)}. This will continue to function but may be eventually unsupported
      */
     @Experimental // This method could not be tested due to the lack of a Discord verified application
     @Deprecated

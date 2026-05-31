@@ -23,9 +23,10 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.ApplicationCommandInteractionResolved;
 import discord4j.core.object.command.Interaction;
-import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.component.Label;
-import discord4j.core.object.component.MessageComponent;
+import discord4j.core.object.component.Component;
+import discord4j.core.object.component.impl.layout.ActionRow;
+import discord4j.core.object.component.impl.Label;
+import discord4j.core.object.component.kind.BaseComponent;
 import discord4j.core.spec.InteractionPresentModalSpec;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
@@ -104,9 +105,10 @@ public class ModalSubmitInteractionEvent extends ComponentInteractionEvent {
      *
      * @return The components from the modal
      */
-    public List<MessageComponent> getComponents() {
+    public List<BaseComponent> getComponents() {
         return getInteraction().getCommandInteraction()
                 .map(ApplicationCommandInteraction::getComponents)
+                .map(list -> list.stream().map(BaseComponent.class::cast).collect(Collectors.toList()))
                 .orElse(Collections.emptyList()); // the list should never actually be empty, but just in case
     }
 
@@ -116,7 +118,7 @@ public class ModalSubmitInteractionEvent extends ComponentInteractionEvent {
      * @param componentType the modal component type to return
      * @return The components from the modal
      */
-    public <T extends MessageComponent> List<T> getComponents(Class<T> componentType) {
+    public <T extends Component<?>> List<T> getComponents(Class<T> componentType) {
         return getComponents()
                 .stream()
                 .flatMap(it -> {
@@ -125,7 +127,7 @@ public class ModalSubmitInteractionEvent extends ComponentInteractionEvent {
                         return row.getChildren().stream();
                     } else if (it instanceof Label) {
                         Label label = (Label) it;
-                        return label.getChildren().stream();
+                        return Stream.of(label.getComponent());
                     }
                     return Stream.empty();
                 })

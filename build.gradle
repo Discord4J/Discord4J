@@ -119,6 +119,7 @@ allprojects {
         options.encoding = 'UTF-8'
         options.incremental = true
         options.release = project_jdk
+        options.compilerArgs << "-Xmaxerrs" << "1000"
     }
 
     tasks.withType(AbstractTestTask).configureEach {

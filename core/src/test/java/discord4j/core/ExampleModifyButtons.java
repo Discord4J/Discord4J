@@ -19,10 +19,10 @@ package discord4j.core;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
-import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.component.Button;
-import discord4j.core.object.component.LayoutComponent;
-import discord4j.core.object.component.TopLevelMessageComponent;
+import discord4j.core.object.component.impl.layout.ActionRow;
+import discord4j.core.object.component.impl.Button;
+import discord4j.core.object.component.kind.LayoutComponent;
+import discord4j.core.object.component.kind.TopLevelComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
@@ -66,9 +66,9 @@ public class ExampleModifyButtons {
                         Message message = event.getMessage().orElseThrow(RuntimeException::new);
 
                         if (add.equals(event.getCustomId())) {
-                            List<TopLevelMessageComponent> edited = new ArrayList<>(message.getComponents());
+                            List<TopLevelComponent> edited = new ArrayList<>(message.getComponents());
                             int lastIndex = message.getComponents().size() - 1;
-                            TopLevelMessageComponent last = message.getComponents().get(lastIndex);
+                            TopLevelComponent last = message.getComponents().get(lastIndex);
                             int count = message.getComponents()
                                     .stream()
                                     .mapToInt(it -> {
@@ -106,9 +106,9 @@ public class ExampleModifyButtons {
                                 }
                             }
                         } else if (rem.equals(event.getCustomId())) {
-                            List<TopLevelMessageComponent> edited = new ArrayList<>(message.getComponents());
+                            List<TopLevelComponent> edited = new ArrayList<>(message.getComponents());
                             int lastIndex = message.getComponents().size() - 1;
-                            TopLevelMessageComponent last = message.getComponents().get(lastIndex);
+                            TopLevelComponent last = message.getComponents().get(lastIndex);
                             int count = message.getComponents()
                                     .stream()
                                     .mapToInt(it -> (it instanceof LayoutComponent) ? ((LayoutComponent) it).getChildren().size() : 0)

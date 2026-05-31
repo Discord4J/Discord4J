@@ -1,7 +1,7 @@
 package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.component.MessageComponent;
+import discord4j.core.object.component.Component;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ForumThreadMessageParamsData;
 import discord4j.discordjson.json.ImmutableForumThreadMessageParamsData;
@@ -23,7 +23,7 @@ public interface ForumThreadMessageCreateSpecGenerator extends Spec<ForumThreadM
 
     Possible<AllowedMentions> allowedMentions();
 
-    Possible<List<MessageComponent>> components();
+    Possible<List<Component>> components();
 
     Possible<List<Snowflake>> stickerIds();
 
@@ -34,7 +34,7 @@ public interface ForumThreadMessageCreateSpecGenerator extends Spec<ForumThreadM
         return builder.content(content())
             .embeds(mapPossible(embeds(), list -> list.stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList())))
             .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
-            .components(mapPossible(components(), list -> list.stream().map(MessageComponent::getData).collect(Collectors.toList())))
+            .components(mapPossible(components(), list -> list.stream().map(Component::getData).collect(Collectors.toList())))
             .stickerIds(mapPossible(stickerIds(), list -> list.stream().map(snowflake -> Id.of(snowflake.asLong())).collect(Collectors.toList())))
             .build();
     }

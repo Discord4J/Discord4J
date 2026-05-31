@@ -18,3 +18,10 @@ include 'gateway'
 include 'common'
 include 'voice'
 include 'oauth2'
+
+includeBuild("../discord-json") {
+    dependencySubstitution {
+        substitute module("com.discord4j:discord-json")
+        substitute module("com.discord4j:discord-json-api")
+    }
+}

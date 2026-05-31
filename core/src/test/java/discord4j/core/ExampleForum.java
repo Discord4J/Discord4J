@@ -19,8 +19,8 @@ package discord4j.core;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
-import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.component.Button;
+import discord4j.core.object.component.impl.layout.ActionRow;
+import discord4j.core.object.component.impl.Button;
 import discord4j.core.object.entity.ForumTag;
 import discord4j.core.object.entity.channel.ForumChannel;
 import discord4j.core.spec.*;

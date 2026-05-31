@@ -17,8 +17,8 @@
 package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.component.BaseMessageComponent;
-import discord4j.core.object.component.TopLevelMessageComponent;
+import discord4j.core.object.component.kind.BaseComponent;
+import discord4j.core.object.component.kind.TopLevelComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.discordjson.Id;
@@ -67,7 +67,7 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
 
     Possible<MessageReferenceData> messageReference();
 
-    Possible<List<TopLevelMessageComponent>> components();
+    Possible<List<TopLevelComponent>> components();
 
     Possible<List<Snowflake>> stickersIds();
 
@@ -90,7 +90,7 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
             .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
             .messageReference(messageReference())
             .components(mapPossible(components(), components -> components.stream()
-                .map(BaseMessageComponent::getData)
+                .map(BaseComponent::getData)
                 .collect(Collectors.toList())))
             .stickerIds(mapPossible(stickersIds(),
                 r -> r.stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList())))

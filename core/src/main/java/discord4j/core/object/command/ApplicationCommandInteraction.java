@@ -21,7 +21,8 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
-import discord4j.core.object.component.MessageComponent;
+import discord4j.core.object.component.Component;
+import discord4j.core.object.component.ComponentType;
 import discord4j.discordjson.json.ApplicationCommandInteractionData;
 import org.jspecify.annotations.Nullable;
 
@@ -111,8 +112,8 @@ public class ApplicationCommandInteraction implements DiscordObject {
      *
      * @return The type of the component.
      */
-    public Optional<MessageComponent.Type> getComponentType() {
-        return data.componentType().toOptional().map(MessageComponent.Type::of);
+    public Optional<ComponentType> getComponentType() {
+        return data.componentType().toOptional().map(ComponentType::of);
     }
 
     /**
@@ -175,9 +176,9 @@ public class ApplicationCommandInteraction implements DiscordObject {
      *
      * @return The components of the submitted modal.
      */
-    public List<MessageComponent> getComponents() {
+    public List<Component> getComponents() {
         return data.components().toOptional().orElse(Collections.emptyList()).stream()
-                .map(MessageComponent::fromData)
+                .map(Component::fromData)
                 .collect(Collectors.toList());
     }
 

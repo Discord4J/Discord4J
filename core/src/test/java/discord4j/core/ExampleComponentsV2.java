@@ -18,12 +18,12 @@ package discord4j.core;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
-import discord4j.core.object.component.Container;
-import discord4j.core.object.component.ICanBeUsedInContainerComponent;
-import discord4j.core.object.component.Section;
-import discord4j.core.object.component.TextDisplay;
-import discord4j.core.object.component.Thumbnail;
-import discord4j.core.object.component.UnfurledMediaItem;
+import discord4j.core.object.component.impl.layout.Container;
+import discord4j.core.object.component.usage.ICanBeUsedInContainerComponent;
+import discord4j.core.object.component.impl.layout.Section;
+import discord4j.core.object.component.impl.TextDisplay;
+import discord4j.core.object.component.impl.Thumbnail;
+import discord4j.core.object.component.impl.item.UnfurledMediaItem;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.MessageCreateSpec;

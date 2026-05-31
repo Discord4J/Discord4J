@@ -19,8 +19,8 @@ package discord4j.core.object;
 import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.component.LayoutComponent;
-import discord4j.core.object.component.MessageComponent;
+import discord4j.core.object.component.kind.LayoutComponent;
+import discord4j.core.object.component.Component;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.PartialMember;
@@ -189,7 +189,7 @@ public class PartialMessage implements DiscordObject {
     public List<LayoutComponent> getComponents() {
         return data.components().toOptional()
             .map(componentList -> componentList.stream()
-                .map(MessageComponent::fromData)
+                .map(Component::fromData)
                 // top level message components should only be LayoutComponents
                 .filter(component -> component instanceof LayoutComponent)
                 .map(component -> (LayoutComponent) component)

@@ -19,14 +19,15 @@ package discord4j.core;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
-import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.component.SelectMenu;
+import discord4j.core.object.component.impl.layout.ActionRow;
+import discord4j.core.object.component.impl.option.StringSelectOption;
+import discord4j.core.object.component.impl.selectmenu.ChannelSelectMenu;
+import discord4j.core.object.component.impl.selectmenu.StringSelectMenu;
+import discord4j.core.object.component.impl.selectmenu.UserSelectMenu;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.TextChannel;
 import reactor.core.publisher.Mono;
-
-import java.util.Collections;
 
 public class ExampleSelectMenu {
 
@@ -44,20 +45,21 @@ public class ExampleSelectMenu {
                             .ofType(TextChannel.class)
                             .flatMap(channel -> channel.createMessage("Select some string options!")
                                     .withComponents(ActionRow.of(
-                                            SelectMenu.of("mySelectMenu1",
-                                                            SelectMenu.Option.of("option 1", "foo"),
-                                                            SelectMenu.Option.of("option 2", "bar"),
-                                                            SelectMenu.Option.of("option 3", "baz"))
+                                            StringSelectMenu.of("mySelectMenu1")
+                                                    .withOptions(
+                                                            StringSelectOption.of("option 1", "foo"),
+                                                            StringSelectOption.of("option 2", "bar"),
+                                                            StringSelectOption.of("option 3", "baz"))
                                                     .withMaxValues(2)))
                                     .then(channel.createMessage("Select some user options!")
-                                            .withComponents(ActionRow.of(SelectMenu.ofUser("mySelectMenu2"))))
+                                            .withComponents(ActionRow.of(UserSelectMenu.of("mySelectMenu2"))))
                                     .then(channel.createMessage("Select some user with default options!")
-                                            .withComponents(ActionRow.of(SelectMenu.ofUser("mySelectMenu2", Collections.singletonList(
-                                                    SelectMenu.DefaultValue.of(Snowflake.of("177000261233934336"), SelectMenu.DefaultValue.Type.USER)
-                                            )))))
+                                            .withComponents(ActionRow.of(UserSelectMenu.of("mySelectMenu2")
+                                                    .withDefaultValues(Snowflake.of("177000261233934336"))
+                                            )))
                                     .then(channel.createMessage("Select some channel options!")
-                                            .withComponents(ActionRow.of(SelectMenu.ofChannel("mySelectMenu3",
-                                                    Collections.singletonList(Channel.Type.GUILD_TEXT))))));
+                                            .withComponents(ActionRow.of(ChannelSelectMenu.of("mySelectMenu3")
+                                                    .withChannelTypes(Channel.Type.GUILD_TEXT)))));
 
                     return sendMessage
                             .map(Message::getId)

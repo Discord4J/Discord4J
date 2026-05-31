@@ -20,8 +20,8 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
-import discord4j.core.object.component.Button;
-import discord4j.core.object.component.MessageComponent;
+import discord4j.core.object.component.impl.Button;
+import discord4j.core.object.component.Component;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.*;
 import discord4j.core.spec.legacy.LegacyInteractionApplicationCommandCallbackSpec;
@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * Dispatched when a user interacts with a {@link MessageComponent} the bot has sent.
+ * Dispatched when a user interacts with a {@link Component} the bot has sent.
  * <p>
  * You are required to respond to this interaction within a three-second window by using one of the following:
  * <ul>

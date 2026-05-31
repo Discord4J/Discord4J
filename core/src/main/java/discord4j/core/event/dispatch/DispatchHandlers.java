@@ -35,7 +35,8 @@ import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.command.ApplicationCommand;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
-import discord4j.core.object.component.MessageComponent;
+import discord4j.core.object.component.Component;
+import discord4j.core.object.component.ComponentType;
 import discord4j.core.object.entity.Integration;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
@@ -317,7 +318,7 @@ public class DispatchHandlers implements DispatchEventMapper {
                         );
                 }
             case MESSAGE_COMPONENT:
-                MessageComponent.Type componentType = interaction.getCommandInteraction()
+                ComponentType componentType = interaction.getCommandInteraction()
                         .flatMap(ApplicationCommandInteraction::getComponentType)
                         .orElseThrow(IllegalStateException::new); // component type must be present
 

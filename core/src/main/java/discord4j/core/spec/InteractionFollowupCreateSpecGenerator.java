@@ -18,8 +18,8 @@
 package discord4j.core.spec;
 
 import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
-import discord4j.core.object.component.BaseMessageComponent;
-import discord4j.core.object.component.TopLevelMessageComponent;
+import discord4j.core.object.component.kind.BaseComponent;
+import discord4j.core.object.component.kind.TopLevelComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.FollowupMessageRequest;
 import discord4j.discordjson.possible.Possible;
@@ -68,7 +68,7 @@ interface InteractionFollowupCreateSpecGenerator extends Spec<MultipartRequest<F
 
     Possible<AllowedMentions> allowedMentions();
 
-    Possible<List<TopLevelMessageComponent>> components();
+    Possible<List<TopLevelComponent>> components();
 
     Possible<Boolean> ephemeral();
 
@@ -84,7 +84,7 @@ interface InteractionFollowupCreateSpecGenerator extends Spec<MultipartRequest<F
                 .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
                 .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
                 .components(mapPossible(components(), components -> components.stream()
-                    .map(BaseMessageComponent::getData)
+                    .map(BaseComponent::getData)
                     .collect(Collectors.toList())))
                 .flags(mapPossible(Possible.ofNullable(flagsToApply), f -> f.stream()
                     .mapToInt(Message.Flag::getFlag)

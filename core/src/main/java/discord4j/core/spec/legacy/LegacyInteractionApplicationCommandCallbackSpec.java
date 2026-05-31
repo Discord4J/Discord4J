@@ -17,7 +17,7 @@
 package discord4j.core.spec.legacy;
 
 import discord4j.common.annotations.Experimental;
-import discord4j.core.object.component.LayoutComponent;
+import discord4j.core.object.component.kind.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.EmbedData;

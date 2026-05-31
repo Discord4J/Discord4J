@@ -18,8 +18,8 @@
 package discord4j.core.spec;
 
 import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
-import discord4j.core.object.component.BaseMessageComponent;
-import discord4j.core.object.component.TopLevelModalComponent;
+import discord4j.core.object.component.kind.BaseComponent;
+import discord4j.core.object.component.kind.TopLevelModalComponent;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
@@ -46,8 +46,8 @@ interface InteractionPresentModalSpecGenerator extends Spec<InteractionApplicati
             .title(title())
             .customId(customId())
             .components(mapPossible(components(), components -> components.stream()
-                .map(BaseMessageComponent.class::cast)
-                .map(BaseMessageComponent::getData)
+                .map(BaseComponent.class::cast)
+                .map(BaseComponent::getData)
                 .collect(Collectors.toList())))
             .build();
     }

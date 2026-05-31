@@ -16,7 +16,7 @@
  */
 package discord4j.core.spec;
 
-import discord4j.core.object.component.TopLevelMessageComponent;
+import discord4j.core.object.component.kind.TopLevelComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.possible.Possible;
 import org.jspecify.annotations.Nullable;
@@ -32,7 +32,7 @@ final class InternalMessageSpecUtils {
         throw new AssertionError();
     }
 
-    public static @Nullable Set<Message.Flag> decorateFlags(final @Nullable Collection<Message.Flag> oldFlags, final Possible<Boolean> ephemeral, final Possible<Boolean> suppressEmbeds, final Possible<List<TopLevelMessageComponent>> components) {
+    public static @Nullable Set<Message.Flag> decorateFlags(final @Nullable Collection<Message.Flag> oldFlags, final Possible<Boolean> ephemeral, final Possible<Boolean> suppressEmbeds, final Possible<List<TopLevelComponent>> components) {
         final Set<Message.Flag> newFlags = new HashSet<>();
         if (ephemeral.toOptional().orElse(false)) {
             newFlags.add(Message.Flag.EPHEMERAL);

@@ -34,10 +34,9 @@ import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.command.ApplicationCommandPermission;
-import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.component.Button;
-import discord4j.core.object.component.LayoutComponent;
-import discord4j.core.object.component.TopLevelMessageComponent;
+import discord4j.core.object.component.impl.layout.ActionRow;
+import discord4j.core.object.component.impl.Button;
+import discord4j.core.object.component.kind.TopLevelComponent;
 import discord4j.core.object.entity.Member;
 import discord4j.rest.interaction.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -77,7 +76,7 @@ public class ExampleSoundboard {
         Map<Snowflake, GuildVoiceSupport> voiceGuildMap = new ConcurrentHashMap<>();
 
         // preemptively check for sources
-        List<TopLevelMessageComponent> buttons = getButtons();
+        List<TopLevelComponent> buttons = getButtons();
         if (buttons.isEmpty()) {
             return Mono.error(new RuntimeException("Please define at least 1 'sourceN' env variable (N up to 25)"));
         }
@@ -179,7 +178,7 @@ public class ExampleSoundboard {
                 .thenMany(Mono.when(onChatInputInteraction, onButtonInteraction, onPermsUpdate));
     }
 
-    private static List<TopLevelMessageComponent> getButtons() {
+    private static List<TopLevelComponent> getButtons() {
         List<Button> buttons = new ArrayList<>();
         for (int i = 1; i <= 25; i++) {
             String source = System.getenv("source" + i);
@@ -189,7 +188,7 @@ public class ExampleSoundboard {
                 log.info("Source #{}: {}", i, source);
             }
         }
-        List<TopLevelMessageComponent> components = new ArrayList<>();
+        List<TopLevelComponent> components = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             int from = i * 5;
             int to = Math.min(buttons.size(), (i + 1) * 5);

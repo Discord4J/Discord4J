@@ -19,8 +19,8 @@ package discord4j.core.spec;
 
 import discord4j.core.event.domain.interaction.ComponentInteractionEvent;
 import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
-import discord4j.core.object.component.BaseMessageComponent;
-import discord4j.core.object.component.TopLevelMessageComponent;
+import discord4j.core.object.component.kind.BaseComponent;
+import discord4j.core.object.component.kind.TopLevelComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.discordjson.possible.Possible;
@@ -61,7 +61,7 @@ interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<Multip
 
     Possible<AllowedMentions> allowedMentions();
 
-    Possible<List<TopLevelMessageComponent>> components();
+    Possible<List<TopLevelComponent>> components();
 
     @Override
     default MultipartRequest<InteractionApplicationCommandCallbackData> asRequest() {
@@ -77,7 +77,7 @@ interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<Multip
                         .map(EmbedCreateSpec::asRequest)
                         .collect(Collectors.toList())))
                 .components(mapPossible(components(), components -> components.stream()
-                    .map(BaseMessageComponent::getData)
+                    .map(BaseComponent::getData)
                     .collect(Collectors.toList())))
                 .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
                 .build();
