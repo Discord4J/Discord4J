@@ -26,7 +26,7 @@ ext {
 
     // Dependencies
     reactor_bom_version = '2025.0.5'
-    jackson_bom_version = '2.21.3'
+    jackson_bom_version = '2.22.0'
     caffeine_version = '2.9.3'
     immutables_group = 'org.immutables'
     immutables_version = '2.12.2'
@@ -34,7 +34,7 @@ ext {
     // Test dependencies
     junit_version = '5.14.4'
     mockito_version = '3.11.2'
-    logback_version = '1.5.33'
+    logback_version = '1.5.34'
     reflections_version = '0.10.2'
     lavaplayer_version = '1.4.3'
     libdave_version = '0.1.3'
