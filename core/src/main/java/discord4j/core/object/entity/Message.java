@@ -1315,7 +1315,7 @@ public final class Message implements Entity {
 
         GUILD_INCIDENT_REPORT_FALSE_ALARM(39),
 
-        PURCHASE_NOTIFICATION(40),
+        PURCHASE_NOTIFICATION(44),
 
         POLL_RESULT(46);
 
