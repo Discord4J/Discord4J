@@ -1315,7 +1315,9 @@ public final class Message implements Entity {
 
         GUILD_INCIDENT_REPORT_FALSE_ALARM(39),
 
-        PURCHASE_NOTIFICATION(44);
+        PURCHASE_NOTIFICATION(44),
+
+        POLL_RESULT(46);
 
         /**
          * The underlying value as represented by Discord.
@@ -1353,7 +1355,7 @@ public final class Message implements Entity {
          * @return The underlying value as represented by Discord.
          */
         public int getValue() {
-            return value;
+            return this.value;
         }
 
         /**
@@ -1362,7 +1364,7 @@ public final class Message implements Entity {
          * @return {@code true} if this type of message can be deleted.
          */
         public boolean isDeletable() {
-            return deletable;
+            return this.deletable;
         }
 
         /**
@@ -1410,6 +1412,7 @@ public final class Message implements Entity {
                 case 38: return GUILD_INCIDENT_REPORT_RAID;
                 case 39: return GUILD_INCIDENT_REPORT_FALSE_ALARM;
                 case 44: return PURCHASE_NOTIFICATION;
+                case 46: return POLL_RESULT;
                 default: return UNKNOWN;
             }
         }
@@ -1418,7 +1421,7 @@ public final class Message implements Entity {
     @Override
     public String toString() {
         return "Message{" +
-                "data=" + data +
+                "data=" + this.data +
                 '}';
     }
 }
