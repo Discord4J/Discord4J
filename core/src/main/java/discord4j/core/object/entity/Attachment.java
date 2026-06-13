@@ -201,8 +201,31 @@ public final class Attachment implements Entity {
      */
     public enum AttachmentFlags {
 
-        /* This attachment has been edited using the remix feature on mobile */
-        IS_REMIX(1 << 2);
+        /**
+         * This attachment is a Clip from a stream.
+         */
+        IS_CLIP(1),
+
+        /**
+         * This attachment has been edited using the remix feature on mobile (deprecated).
+         */
+        @Deprecated
+        IS_THUMBNAIL(1 << 1),
+
+        /**
+         * This attachment has been edited using the remix feature on mobile.
+         */
+        IS_REMIX(1 << 2),
+
+        /**
+         * This attachment was marked as a spoiler and is blurred until clicked.
+         */
+        IS_SPOILER(1 << 3),
+
+        /**
+         * This attachment is an animated image.
+         */
+        IS_ANIMATED(1 << 5),;
 
         /** The flag value as represented by Discord. */
         private final int value;
