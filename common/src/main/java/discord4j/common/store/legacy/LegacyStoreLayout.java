@@ -385,7 +385,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_NEWS:
             case GUILD_STORE:
             case GUILD_STAGE_VOICE:
-            case GUILD_FORUM: return saveChannel(dispatch);
+            case GUILD_FORUM:
+            case GUILD_MEDIA: return saveChannel(dispatch);
             case DM:
             case GROUP_DM: return Mono.empty();
             default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
@@ -419,7 +420,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_NEWS:
             case GUILD_STORE:
             case GUILD_STAGE_VOICE:
-            case GUILD_FORUM: return deleteChannel(dispatch);
+            case GUILD_FORUM:
+            case GUILD_MEDIA: return deleteChannel(dispatch);
             case DM:
             case GROUP_DM: return Mono.empty();
             default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
@@ -453,7 +455,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_NEWS:
             case GUILD_STORE:
             case GUILD_STAGE_VOICE:
-            case GUILD_FORUM: return updateChannel(dispatch.channel());
+            case GUILD_FORUM:
+            case GUILD_MEDIA:   return updateChannel(dispatch.channel());
             case DM:
             case GROUP_DM: return Mono.empty();
             default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
@@ -473,7 +476,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         GUILD_PUBLIC_THREAD(11),
         GUILD_PRIVATE_THREAD(12),
         GUILD_STAGE_VOICE(13),
-        GUILD_FORUM(15);
+        GUILD_FORUM(15),
+        GUILD_MEDIA(16);
 
         private final int value;
 
@@ -499,6 +503,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 case 12: return GUILD_PRIVATE_THREAD;
                 case 13: return GUILD_STAGE_VOICE;
                 case 15: return GUILD_FORUM;
+                case 16: return GUILD_MEDIA;
                 default: return UNKNOWN;
             }
         }
