@@ -21,6 +21,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.common.util.Snowflake;
+import discord4j.core.object.entity.channel.Channel;
 import discord4j.gateway.ShardInfo;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -41,12 +42,14 @@ public class MessageCreateEvent extends MessageEvent {
     private final Message message;
     private final @Nullable Long guildId;
     private final @Nullable Member member;
+    private final Channel.@Nullable Type channelType;
 
-    public MessageCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Message message, @Nullable Long guildId, @Nullable Member member) {
+    public MessageCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Message message, @Nullable Long guildId, @Nullable Member member, Channel.@Nullable Type channelType) {
         super(gateway, shardInfo);
         this.message = message;
         this.guildId = guildId;
         this.member = member;
+        this.channelType = channelType;
     }
 
     /**
@@ -55,7 +58,7 @@ public class MessageCreateEvent extends MessageEvent {
      * @return The {@link Message} that was created.
      */
     public Message getMessage() {
-        return message;
+        return this.message;
     }
 
     /**
@@ -65,7 +68,7 @@ public class MessageCreateEvent extends MessageEvent {
      * @return The ID of the {@link Guild} containing the {@link Message}, if present.
      */
     public Optional<Snowflake> getGuildId() {
-        return Optional.ofNullable(guildId).map(Snowflake::of);
+        return Optional.ofNullable(this.guildId).map(Snowflake::of);
     }
 
     /**
@@ -76,7 +79,7 @@ public class MessageCreateEvent extends MessageEvent {
      * if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
+        return Mono.justOrEmpty(this.getGuildId()).flatMap(this.getClient()::getGuildById);
     }
 
     /**
@@ -86,15 +89,25 @@ public class MessageCreateEvent extends MessageEvent {
      * @return The {@link Member} who has sent the {@link Message} created in this event, if present.
      */
     public Optional<Member> getMember() {
-        return Optional.ofNullable(member);
+        return Optional.ofNullable(this.member);
+    }
+
+    /**
+     * Retrieves the {@link Channel.Type} in which the {@link Message} was created, if present.
+     *
+     * @return The {@link Channel.Type type of channel} the message was sent in, if present.
+     */
+    public Optional<Channel.Type> getChannelType() {
+        return Optional.ofNullable(this.channelType);
     }
 
     @Override
     public String toString() {
         return "MessageCreateEvent{" +
-                "message=" + message +
-                ", guildId=" + guildId +
-                ", member=" + member +
+                "message=" + this.message +
+                ", guildId=" + this.guildId +
+                ", member=" + this.member +
+                ", channelType=" + this.channelType +
                 '}';
     }
 }
