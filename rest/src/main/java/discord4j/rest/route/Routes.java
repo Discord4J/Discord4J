@@ -1156,6 +1156,14 @@ public abstract class Routes {
      */
     public static final Route USER_APPLICATIONS_ROLE_CONNECTION_MODIFY = Route.put("/users/@me/applications/{application.id}/role-connection");
 
+    /**
+     * Deletes the application role connection for the user. Requires an OAuth2 access token with role_connections.write scope for the application specified in the path.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/user#delete-current-user-application-role-connection">
+     * https://docs.discord.com/developers/resources/user#delete-current-user-application-role-connection</a>
+     */
+    public static final Route USER_APPLICATIONS_ROLE_CONNECTION_DELETE = Route.delete("/users/@me/applications/{application.id}/role-connection");
+
     ////////////////////////////////////////////
     ////////////// Voice Resource //////////////
     ////////////////////////////////////////////
