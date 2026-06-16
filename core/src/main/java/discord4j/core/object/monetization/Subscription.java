@@ -151,21 +151,18 @@ public class Subscription implements Entity {
          * Unknown status
          */
         UNKNOWN(-1),
-
         /**
          * Subscription is active and scheduled to renew.
          */
         ACTIVE(0),
-
-        /**
-         * Subscription is active but will not renew.
-         */
-        ENDING(1),
-
         /**
          * Subscription is inactive and not being charged.
          */
-        INACTIVE(2),
+        INACTIVE(1),
+        /**
+         * Subscription is active but will not renew.
+         */
+        ENDING(2),
         ;
 
         /**
