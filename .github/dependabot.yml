@@ -11,16 +11,6 @@ updates:
   - package-ecosystem: "gradle"
     directories:
       - "/"
-    schedule:
-      interval: "cron"
-      cronjob: "0 0 * * *"
-    groups:
-      gradle-wrapper:
-        patterns:
-          - "gradle-wrapper"
-  - package-ecosystem: "gradle"
-    directories:
-      - "/"
       - "common"
       - "core"
       - "gateway"
@@ -31,9 +21,12 @@ updates:
       interval: "cron"
       cronjob: "0 0 * * *"
     groups:
+      gradle-wrapper:
+        patterns:
+          - "gradle-wrapper"
       minor-and-patch:
         update-types:
           - minor
           - patch
-    ignore:
-      - dependency-name: "gradle-wrapper"
+        exclude-patterns:
+          - "gradle-wrapper"
