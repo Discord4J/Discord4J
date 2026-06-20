@@ -21,7 +21,7 @@ on:
       - '**.properties'
       - '**/src/**'
       - '.github/workflows/**'
-    types: [opened, synchronize, reopened]
+    types: [ opened, synchronize, reopened ]
 
 jobs:
   build:
@@ -54,15 +54,15 @@ jobs:
     if: ${{ github.event_name != 'pull_request' && ( (vars.runReleaseOnPush || 'true') == 'true' || contains(github.event.head_commit.message, '[release]') ) }}
     needs: build
     env:
-        HAS_CREDENTIALS: ${{ secrets.signingKey != '' && secrets.signingPassword != '' && secrets.sonatypeUsername != '' && secrets.sonatypePassword != '' }}
+      HAS_CREDENTIALS: ${{ secrets.signingKey != '' && secrets.signingPassword != '' && secrets.sonatypeUsername != '' && secrets.sonatypePassword != '' }}
     steps:
       - name: Validate repository secrets for publish
         if: ${{ env.HAS_CREDENTIALS != 'true' }}
         run: |
-            echo '### Release Failed ❌' >> $GITHUB_STEP_SUMMARY
-            echo 'This repository does not have all required secrets: signingKey, signingPassword, sonatypeUsername or sonatypePassword).' >> $GITHUB_STEP_SUMMARY
-            echo "::error::This repository does not have all required secrets: signingKey, signingPassword, sonatypeUsername or sonatypePassword)."
-            exit -1
+          echo '### Release Failed ❌' >> $GITHUB_STEP_SUMMARY
+          echo 'This repository does not have all required secrets: signingKey, signingPassword, sonatypeUsername or sonatypePassword).' >> $GITHUB_STEP_SUMMARY
+          echo "::error::This repository does not have all required secrets: signingKey, signingPassword, sonatypeUsername or sonatypePassword)."
+          exit -1
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0

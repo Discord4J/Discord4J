@@ -26,6 +26,8 @@ ij_java_wrap_first_method_in_call_chain = true
 ij_java_wrap_long_lines = true
 ij_wrap_on_typing = false
 
+[*.yml]
+indent_size = 2
 
 [*.md]
 trim_trailing_whitespace = false
