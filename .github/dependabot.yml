@@ -1,5 +1,13 @@
 version: 2
 updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      github-actions:
+        update-types:
+          - major
   - package-ecosystem: "gradle"
     directories:
       - "/"
