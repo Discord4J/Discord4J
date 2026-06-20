@@ -2,13 +2,23 @@ version: 2
 updates:
   - package-ecosystem: "gradle"
     directories:
-        - "/"
-        - "common"
-        - "core"
-        - "gateway"
-        - "oauth2"
-        - "rest"
-        - "voice"
+      - "/"
+    schedule:
+      interval: "cron"
+      cronjob: "0 0 * * *"
+    groups:
+      gradle-wrapper:
+        patterns:
+          - "gradle-wrapper"
+  - package-ecosystem: "gradle"
+    directories:
+      - "/"
+      - "common"
+      - "core"
+      - "gateway"
+      - "oauth2"
+      - "rest"
+      - "voice"
     schedule:
       interval: "cron"
       cronjob: "0 0 * * *"
@@ -17,3 +27,5 @@ updates:
         update-types:
           - minor
           - patch
+    ignore:
+      - dependency-name: "gradle-wrapper"
