@@ -55,12 +55,12 @@ public class IntegrationApplication implements Entity {
 
     @Override
     public GatewayDiscordClient getClient() {
-        return gateway;
+        return this.gateway;
     }
 
     @Override
     public Snowflake getId() {
-        return Snowflake.of(data.id());
+        return Snowflake.of(this.getData().id());
     }
 
     /**
@@ -69,7 +69,7 @@ public class IntegrationApplication implements Entity {
      * @return The data of the account.
      */
     public IntegrationApplicationData getData() {
-        return data;
+        return this.data;
     }
 
     /**
@@ -78,7 +78,7 @@ public class IntegrationApplication implements Entity {
      * @return The name of the app.
      */
     public String getName() {
-        return data.name();
+        return this.getData().name();
     }
 
     /**
@@ -88,7 +88,7 @@ public class IntegrationApplication implements Entity {
      * @return The icon URL of the application, if present.
      */
     public Optional<String> getIconUrl(final Image.Format format) {
-        return data.icon()
+        return this.getData().icon()
                 .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
     }
 
@@ -98,7 +98,7 @@ public class IntegrationApplication implements Entity {
      * @return The description of the app.
      */
     public String getDescription() {
-        return data.description();
+        return this.getData().description();
     }
 
     /**
@@ -109,7 +109,7 @@ public class IntegrationApplication implements Entity {
      */
     @Deprecated
     public String getSummary() {
-        return data.summary();
+        return "";
     }
 
     /**
@@ -118,8 +118,8 @@ public class IntegrationApplication implements Entity {
      * @return The bot associated with this application, if present.
      */
     public Optional<User> getBot() {
-        return data.bot().toOptional()
-                .map(data -> new User(gateway, data));
+        return this.getData().bot().toOptional()
+                .map(data -> new User(this.getClient(), data));
     }
 
 }
