@@ -86,7 +86,7 @@ public class ExampleModal {
                                     SelectMenu.Option.of("Poetry", "Poetry")
                                 ))),
                                 Label.of("Attach the author", SelectMenu.ofUser(SELECT_USER_CUSTOM_ID)),
-                                Label.of("Add a thumbnail", FileUpload.of(FILE_UPLOAD_CUSTOM_ID).required(true))
+                                Label.of("Add a thumbnail", FileUpload.of(FILE_UPLOAD_CUSTOM_ID).withFileTypes(Collections.singletonList("image")).required(true))
                             ))
                             .build());
                     }
