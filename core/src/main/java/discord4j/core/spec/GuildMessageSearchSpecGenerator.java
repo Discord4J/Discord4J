@@ -10,18 +10,18 @@ import discord4j.core.object.guildmessagesearch.SortBy;
 import discord4j.core.object.guildmessagesearch.SortOrder;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.service.GuildService;
+import discord4j.rest.util.Multimap;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Value.Immutable
-public interface GuildMessageSearchSpecGenerator extends Spec<Map<String, Object>> {
+public interface GuildMessageSearchSpecGenerator extends Spec<Multimap<String, Object>> {
 
     Possible<Integer> limit();
 
@@ -76,46 +76,46 @@ public interface GuildMessageSearchSpecGenerator extends Spec<Map<String, Object
     Possible<Boolean> includeNsfw();
 
     @Override
-    default Map<String, Object> asRequest() {
-        Map<String, Object> args = new HashMap<>();
+    default Multimap<String, Object> asRequest() {
+        Multimap<String, Object> args = new Multimap<>();
 
-        if (limit().isPresent()) args.put("limit", limit().get());
-        if (offset().isPresent()) args.put("offset", offset().get());
-        if (before().isPresent()) args.put("max_id", before().get());
-        if (after().isPresent()) args.put("min_id", after().get());
-        if (slop().isPresent()) args.put("slop", slop().get());
-        if (content().isPresent()) args.put("content", content().get());
-        if (mentionEveryone().isPresent()) args.put("mention_everyone", mentionEveryone().get());
-        if (pinned().isPresent()) args.put("pinned", pinned().get());
-        if (embedProvider().isPresent()) args.put("embed_provider", embedProvider().get());
-        if (linkHostname().isPresent()) args.put("link_hostname", linkHostname().get());
-        if (attachmentFilename().isPresent()) args.put("attachment_filename", attachmentFilename().get());
-        if (attachmentExtension().isPresent()) args.put("attachment_extension", attachmentExtension().get());
-        if (includeNsfw().isPresent()) args.put("include_nsfw", includeNsfw().get());
+        if (limit().isPresent()) args.put("limit", Collections.singletonList(limit().get()));
+        if (offset().isPresent()) args.put("offset", Collections.singletonList(offset().get()));
+        if (before().isPresent()) args.put("max_id", Collections.singletonList(before().get()));
+        if (after().isPresent()) args.put("min_id", Collections.singletonList(after().get()));
+        if (slop().isPresent()) args.put("slop", Collections.singletonList(slop().get()));
+        if (content().isPresent()) args.put("content", Collections.singletonList(content().get()));
+        if (mentionEveryone().isPresent()) args.put("mention_everyone", Collections.singletonList(mentionEveryone().get()));
+        if (pinned().isPresent()) args.put("pinned", Collections.singletonList(pinned().get()));
+        if (embedProvider().isPresent()) args.put("embed_provider", Collections.singletonList(embedProvider().get()));
+        if (linkHostname().isPresent()) args.put("link_hostname", Collections.singletonList(linkHostname().get()));
+        if (attachmentFilename().isPresent()) args.put("attachment_filename", Collections.singletonList(attachmentFilename().get()));
+        if (attachmentExtension().isPresent()) args.put("attachment_extension", Collections.singletonList(attachmentExtension().get()));
+        if (includeNsfw().isPresent()) args.put("include_nsfw", Collections.singletonList(includeNsfw().get()));
 
-        if (sortBy().isPresent()) args.put("sort_by", sortBy().get().toString());
-        if (sortOrder().isPresent()) args.put("sort_order", sortOrder().get().toString());
+        if (sortBy().isPresent()) args.put("sort_by", Collections.singletonList(sortBy().get().toString()));
+        if (sortOrder().isPresent()) args.put("sort_order", Collections.singletonList(sortOrder().get().toString()));
 
-        if (hasEmbedType().isPresent()) args.put("embed_type", hasEmbedType().get().stream().map(SearchEmbedType::toString).collect(Collectors.joining(",")));
+        if (hasEmbedType().isPresent()) args.put("embed_type", hasEmbedType().get().stream().map(SearchEmbedType::toString).collect(Collectors.toList()));
 
-        if (channelIds().isPresent()) args.put("channel_id", channelIds().get().stream().map(Snowflake::asString).collect(Collectors.joining(",")));
-        if (authorIds().isPresent()) args.put("author_id", authorIds().get().stream().map(Snowflake::asString).collect(Collectors.joining(",")));
-        if (mentionUsers().isPresent()) args.put("mentions", mentionUsers().get().stream().map(Snowflake::asString).collect(Collectors.joining(",")));
-        if (mentionRoles().isPresent()) args.put("mentions_role_id", mentionRoles().get().stream().map(Snowflake::asString).collect(Collectors.joining(",")));
-        if (repliedUsers().isPresent()) args.put("replied_to_user_id", repliedUsers().get().stream().map(Snowflake::asString).collect(Collectors.joining(",")));
-        if (repliedMessages().isPresent()) args.put("replied_to_message_id", repliedMessages().get().stream().map(Snowflake::asString).collect(Collectors.joining(",")));
+        if (channelIds().isPresent()) args.put("channel_id", channelIds().get().stream().map(Snowflake::asString).collect(Collectors.toList()));
+        if (authorIds().isPresent()) args.put("author_id", authorIds().get().stream().map(Snowflake::asString).collect(Collectors.toList()));
+        if (mentionUsers().isPresent()) args.put("mentions", mentionUsers().get().stream().map(Snowflake::asString).collect(Collectors.toList()));
+        if (mentionRoles().isPresent()) args.put("mentions_role_id", mentionRoles().get().stream().map(Snowflake::asString).collect(Collectors.toList()));
+        if (repliedUsers().isPresent()) args.put("replied_to_user_id", repliedUsers().get().stream().map(Snowflake::asString).collect(Collectors.toList()));
+        if (repliedMessages().isPresent()) args.put("replied_to_message_id", repliedMessages().get().stream().map(Snowflake::asString).collect(Collectors.toList()));
 
-        List<String> finalAuthorTypes = new ArrayList<>();
-        List<String> finalHasTypes = new ArrayList<>();
+        List<Object> finalAuthorTypes = new ArrayList<>();
+        List<Object> finalHasTypes = new ArrayList<>();
 
-        if (authorTypes().isPresent()) finalAuthorTypes.add(authorTypes().get().stream().map(AuthorType::toString).collect(Collectors.joining(",")));
-        if (authorNotTypes().isPresent()) finalAuthorTypes.add(authorNotTypes().get().stream().map(authorType -> "-" + authorType).collect(Collectors.joining(",")));
+        if (authorTypes().isPresent()) finalAuthorTypes.addAll(authorTypes().get().stream().map(AuthorType::toString).collect(Collectors.toList()));
+        if (authorNotTypes().isPresent()) finalAuthorTypes.addAll(authorNotTypes().get().stream().map(authorType -> "-" + authorType).collect(Collectors.toList()));
 
-        if (hasType().isPresent()) finalHasTypes.add(hasType().get().stream().map(SearchHasType::toString).collect(Collectors.joining(",")));
-        if (hasNotType().isPresent()) finalHasTypes.add(hasNotType().get().stream().map(searchHasType -> "-" + searchHasType).collect(Collectors.joining(",")));
+        if (hasType().isPresent()) finalHasTypes.addAll(hasType().get().stream().map(SearchHasType::toString).collect(Collectors.toList()));
+        if (hasNotType().isPresent()) finalHasTypes.addAll(hasNotType().get().stream().map(searchHasType -> "-" + searchHasType).collect(Collectors.toList()));
 
-        if (!finalHasTypes.isEmpty()) args.put("has", String.join(",", finalHasTypes));
-        if (!finalAuthorTypes.isEmpty()) args.put("author_type", String.join(",", finalAuthorTypes));
+        if (!finalHasTypes.isEmpty()) args.put("has", finalHasTypes);
+        if (!finalAuthorTypes.isEmpty()) args.put("author_type", finalAuthorTypes);
 
         return args;
     }

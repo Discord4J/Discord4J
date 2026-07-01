@@ -112,7 +112,7 @@ public class GuildService extends RestService {
             .flatMapMany(Flux::fromArray);
     }
 
-    public Mono<GuildMessageSearchResponse> searchGuildMessages(long guildId, Map<String, Object> queryParams) {
+    public Mono<GuildMessageSearchResponse> searchGuildMessages(long guildId, Multimap<String, Object> queryParams) {
         return Routes.SEARCH_GUILD_MESSAGES.newRequest(guildId)
             .query(queryParams)
             .exchange(getRouter())

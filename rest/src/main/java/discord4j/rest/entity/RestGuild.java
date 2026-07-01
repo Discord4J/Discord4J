@@ -20,6 +20,7 @@ package discord4j.rest.entity;
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
+import discord4j.rest.util.Multimap;
 import discord4j.rest.util.PaginationUtil;
 import discord4j.rest.util.Permission;
 import org.jspecify.annotations.Nullable;
@@ -203,7 +204,7 @@ public class RestGuild {
         return restClient.getGuildService().searchGuildMembers(id, queryParams);
     }
 
-    public Mono<GuildMessageSearchResponse> searchMessages(Map<String, Object> queryParams) {
+    public Mono<GuildMessageSearchResponse> searchMessages(Multimap<String, Object> queryParams) {
         return restClient.getGuildService().searchGuildMessages(id, queryParams);
     }
 
