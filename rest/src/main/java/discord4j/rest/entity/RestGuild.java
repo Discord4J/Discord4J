@@ -203,6 +203,10 @@ public class RestGuild {
         return restClient.getGuildService().searchGuildMembers(id, queryParams);
     }
 
+    public Mono<GuildMessageSearchResponse> searchMessages(Map<String, Object> queryParams) {
+        return restClient.getGuildService().searchGuildMessages(id, queryParams);
+    }
+
     public Mono<MemberData> addMember(Snowflake userId, GuildMemberAddRequest request) {
         return restClient.getGuildService().addGuildMember(id, userId.asLong(), request);
     }

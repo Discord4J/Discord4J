@@ -24,6 +24,7 @@ import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Map;
 
 public class GuildService extends RestService {
@@ -109,6 +110,22 @@ public class GuildService extends RestService {
             .exchange(getRouter())
             .bodyToMono(MemberData[].class)
             .flatMapMany(Flux::fromArray);
+    }
+
+    public Mono<GuildMessageSearchResponse> searchGuildMessages(long guildId, Map<String, Object> queryParams) {
+        return Routes.SEARCH_GUILD_MESSAGES.newRequest(guildId)
+            .query(queryParams)
+            .exchange(getRouter())
+                .mono()
+                .flatMap(clientResponse -> {
+                    if (clientResponse.getHttpResponse().status().code() == 202) { // Server not yet indexed
+                        return clientResponse.bodyToMono(GuildMessageSearchNotIndexedResponse.class)
+                                .delayUntil(response -> Mono.delay(Duration.ofSeconds(response.retryAfter())))
+                                .then(searchGuildMessages(guildId, queryParams));
+                    }
+
+                    return clientResponse.bodyToMono(GuildMessageSearchResponse.class);
+                });
     }
 
     public Mono<MemberData> addGuildMember(long guildId, long userId, GuildMemberAddRequest request) {

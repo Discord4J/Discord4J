@@ -649,6 +649,14 @@ public abstract class Routes {
     public static final Route SEARCH_GUILD_MEMBERS_GET = Route.get("/guilds/{guild.id}/members/search");
 
     /**
+     * Returns a list of messages without the reactions key that match a search query in the guild. Requires the READ_MESSAGE_HISTORY permission.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/message#search-guild-messages">
+     * https://docs.discord.com/developers/resources/message#search-guild-messages</a>
+     */
+    public static final Route SEARCH_GUILD_MESSAGES = Route.get("/guilds/{guild.id}/messages/search");
+
+    /**
      * Adds a user to the guild, provided you have a valid oauth2 access token for the user with the guilds.join scope.
      * Returns a 201 Created with the guild member as the body. Fires a Guild Member Add Gateway event. Requires the
      * bot to have the CREATE_INSTANT_INVITE permission.
