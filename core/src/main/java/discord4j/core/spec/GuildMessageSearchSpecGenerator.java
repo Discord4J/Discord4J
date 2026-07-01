@@ -109,10 +109,10 @@ public interface GuildMessageSearchSpecGenerator extends Spec<Map<String, Object
         List<String> finalHasTypes = new ArrayList<>();
 
         if (authorTypes().isPresent()) finalAuthorTypes.add(authorTypes().get().stream().map(AuthorType::toString).collect(Collectors.joining(",")));
-        if (authorNotTypes().isPresent()) finalAuthorTypes.add(authorTypes().get().stream().map(authorType -> "-" + authorType).collect(Collectors.joining(",")));
+        if (authorNotTypes().isPresent()) finalAuthorTypes.add(authorNotTypes().get().stream().map(authorType -> "-" + authorType).collect(Collectors.joining(",")));
 
         if (hasType().isPresent()) finalHasTypes.add(hasType().get().stream().map(SearchHasType::toString).collect(Collectors.joining(",")));
-        if (hasNotType().isPresent()) finalHasTypes.add(hasType().get().stream().map(searchHasType -> "-" + searchHasType).collect(Collectors.joining(",")));
+        if (hasNotType().isPresent()) finalHasTypes.add(hasNotType().get().stream().map(searchHasType -> "-" + searchHasType).collect(Collectors.joining(",")));
 
         if (!finalHasTypes.isEmpty()) args.put("has", String.join(",", finalHasTypes));
         if (!finalAuthorTypes.isEmpty()) args.put("author_type", String.join(",", finalAuthorTypes));
