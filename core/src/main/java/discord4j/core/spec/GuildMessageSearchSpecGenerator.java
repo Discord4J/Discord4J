@@ -93,10 +93,10 @@ public interface GuildMessageSearchSpecGenerator extends Spec<Multimap<String, O
         if (attachmentExtension().isPresent()) args.put("attachment_extension", Collections.singletonList(attachmentExtension().get()));
         if (includeNsfw().isPresent()) args.put("include_nsfw", Collections.singletonList(includeNsfw().get()));
 
-        if (sortBy().isPresent()) args.put("sort_by", Collections.singletonList(sortBy().get().toString()));
-        if (sortOrder().isPresent()) args.put("sort_order", Collections.singletonList(sortOrder().get().toString()));
+        if (sortBy().isPresent()) args.put("sort_by", Collections.singletonList(sortBy().get().getValue()));
+        if (sortOrder().isPresent()) args.put("sort_order", Collections.singletonList(sortOrder().get().getValue()));
 
-        if (hasEmbedType().isPresent()) args.put("embed_type", hasEmbedType().get().stream().map(SearchEmbedType::toString).collect(Collectors.toList()));
+        if (hasEmbedType().isPresent()) args.put("embed_type", hasEmbedType().get().stream().map(SearchEmbedType::getValue).collect(Collectors.toList()));
 
         if (channelIds().isPresent()) args.put("channel_id", channelIds().get().stream().map(Snowflake::asString).collect(Collectors.toList()));
         if (authorIds().isPresent()) args.put("author_id", authorIds().get().stream().map(Snowflake::asString).collect(Collectors.toList()));
@@ -108,11 +108,11 @@ public interface GuildMessageSearchSpecGenerator extends Spec<Multimap<String, O
         List<Object> finalAuthorTypes = new ArrayList<>();
         List<Object> finalHasTypes = new ArrayList<>();
 
-        if (authorTypes().isPresent()) finalAuthorTypes.addAll(authorTypes().get().stream().map(AuthorType::toString).collect(Collectors.toList()));
-        if (authorNotTypes().isPresent()) finalAuthorTypes.addAll(authorNotTypes().get().stream().map(authorType -> "-" + authorType).collect(Collectors.toList()));
+        if (authorTypes().isPresent()) finalAuthorTypes.addAll(authorTypes().get().stream().map(AuthorType::getValue).collect(Collectors.toList()));
+        if (authorNotTypes().isPresent()) finalAuthorTypes.addAll(authorNotTypes().get().stream().map(authorType -> "-" + authorType.getValue()).collect(Collectors.toList()));
 
-        if (hasType().isPresent()) finalHasTypes.addAll(hasType().get().stream().map(SearchHasType::toString).collect(Collectors.toList()));
-        if (hasNotType().isPresent()) finalHasTypes.addAll(hasNotType().get().stream().map(searchHasType -> "-" + searchHasType).collect(Collectors.toList()));
+        if (hasType().isPresent()) finalHasTypes.addAll(hasType().get().stream().map(SearchHasType::getValue).collect(Collectors.toList()));
+        if (hasNotType().isPresent()) finalHasTypes.addAll(hasNotType().get().stream().map(searchHasType -> "-" + searchHasType.getValue()).collect(Collectors.toList()));
 
         if (!finalHasTypes.isEmpty()) args.put("has", finalHasTypes);
         if (!finalAuthorTypes.isEmpty()) args.put("author_type", finalAuthorTypes);
