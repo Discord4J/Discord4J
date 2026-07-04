@@ -113,7 +113,7 @@ public class GuildService extends RestService {
     }
 
     public Mono<GuildMessageSearchResponse> searchGuildMessages(long guildId, Multimap<String, Object> queryParams) {
-        return Routes.SEARCH_GUILD_MESSAGES.newRequest(guildId)
+        return Routes.SEARCH_GUILD_MESSAGES_GET.newRequest(guildId)
             .query(queryParams)
             .exchange(getRouter())
                 .mono()

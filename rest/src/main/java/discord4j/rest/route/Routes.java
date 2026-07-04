@@ -654,7 +654,7 @@ public abstract class Routes {
      * @see <a href="https://docs.discord.com/developers/resources/message#search-guild-messages">
      * https://docs.discord.com/developers/resources/message#search-guild-messages</a>
      */
-    public static final Route SEARCH_GUILD_MESSAGES = Route.get("/guilds/{guild.id}/messages/search");
+    public static final Route SEARCH_GUILD_MESSAGES_GET = Route.get("/guilds/{guild.id}/messages/search");
 
     /**
      * Adds a user to the guild, provided you have a valid oauth2 access token for the user with the guilds.join scope.
