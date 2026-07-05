@@ -217,5 +217,13 @@ public class PartialMessage implements DiscordObject {
             .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
+    /**
+     * Gets the activity message, if present.
+     *
+     * @return The activity message.
+     */
+    public Optional<ActivityMessage> getActivityMessage() {
+        return this.getData().activity().map(data -> new ActivityMessage(this.getClient(), data)).toOptional();
+    }
 
 }

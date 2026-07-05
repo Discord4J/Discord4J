@@ -19,6 +19,7 @@ package discord4j.core.object.entity;
 import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.ActivityMessage;
 import discord4j.core.object.Embed;
 import discord4j.core.object.MessageInteraction;
 import discord4j.core.object.MessageReference;
@@ -84,12 +85,15 @@ public final class Message implements Entity {
     public static final int MAX_TOTAL_EMBEDS_CHARACTER_LENGTH = 6000;
 
     /**
-     * The maximum amount of {@link TopLevelMessageComponent} that can be added to a message's {@link #getComponents() root component list} when using the V2 component system ({@link Flag#IS_COMPONENTS_V2}). ({@value})
+     * The maximum amount of {@link TopLevelMessageComponent} that can be added to a message's
+     * {@link #getComponents() root component list} when using the V2 component system ({@link Flag#IS_COMPONENTS_V2}
+     * ). ({@value})
      */
     public static final int MAX_COMPONENT_COUNT_COMPONENTS_V2 = 10;
 
     /**
-     * The maximum amount of {@link BaseMessageComponent components} that can be added to a message including nested components. ({@value})
+     * The maximum amount of {@link BaseMessageComponent components} that can be added to a message including nested
+     * components. ({@value})
      */
     public static final int MAX_COMPONENT_COUNT_NESTED = 30;
 
@@ -230,9 +234,9 @@ public final class Message implements Entity {
     /**
      * Gets the contents of the message, if present.
      *
+     * @return The contents of the message, if present.
      * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled and
      * the content cannot be accessed
-     * @return The contents of the message, if present.
      */
     public String getContent() {
         String content = data.content();
@@ -317,8 +321,8 @@ public final class Message implements Entity {
         }
         long guildId = data.guildId().get().asLong();
         return data.mentions().stream()
-            .map(data -> new PartialMember(gateway, data, data.member().get(), guildId))
-            .collect(Collectors.toList());
+                .map(data -> new PartialMember(gateway, data, data.member().get(), guildId))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -378,9 +382,9 @@ public final class Message implements Entity {
     /**
      * Gets any attached files, with the same order as in the message.
      *
+     * @return Any attached files, with the same order as in the message.
      * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled and
      * the content cannot be accessed
-     * @return Any attached files, with the same order as in the message.
      */
     public List<Attachment> getAttachments() {
         List<Attachment> attachments = data.attachments().stream()
@@ -406,9 +410,9 @@ public final class Message implements Entity {
     /**
      * Gets any embedded content.
      *
+     * @return Any embedded content.
      * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled and
      * the content cannot be accessed
-     * @return Any embedded content.
      */
     public List<Embed> getEmbeds() {
         List<Embed> embeds = data.embeds().stream()
@@ -460,7 +464,8 @@ public final class Message implements Entity {
      * Requests to retrieve the reactors (users) for the specified emoji and reaction type for this message.
      *
      * @param emoji The emoji to get the reactors (users) for this message.
-     * @param reactionType The type of reaction to get for this message, will throw an error if {@link discord4j.core.object.reaction.Reaction.Type#UNKNOWN} is passed.
+     * @param reactionType The type of reaction to get for this message, will throw an error if
+     * {@link discord4j.core.object.reaction.Reaction.Type#UNKNOWN} is passed.
      * @return A {@link Flux} that continually emits the {@link User reactors} for the specified emoji for this message.
      * If an error is received, it is emitted through the {@code Flux}.
      */
@@ -518,10 +523,10 @@ public final class Message implements Entity {
      */
     public List<MessageSnapshot> getMessageSnapshots() {
         return data.messageSnapshots().toOptional()
-            .map(messageSnapshotsData -> messageSnapshotsData.stream()
-                .map(data -> new MessageSnapshot(gateway, data))
-                .collect(Collectors.toList()))
-            .orElse(Collections.emptyList());
+                .map(messageSnapshotsData -> messageSnapshotsData.stream()
+                        .map(data -> new MessageSnapshot(gateway, data))
+                        .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
     }
 
     /**
@@ -584,10 +589,10 @@ public final class Message implements Entity {
     @Experimental
     public List<PartialSticker> getStickersItems() {
         return data.stickerItems().toOptional()
-            .map(partialStickers -> partialStickers.stream()
-                .map(data -> new PartialSticker(gateway, data))
-                .collect(Collectors.toList()))
-            .orElse(Collections.emptyList());
+                .map(partialStickers -> partialStickers.stream()
+                        .map(data -> new PartialSticker(gateway, data))
+                        .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
     }
 
     /**
@@ -627,9 +632,9 @@ public final class Message implements Entity {
     /**
      * Gets the components on the message.
      *
+     * @return The components on the message.
      * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled and
      * the content cannot be accessed
-     * @return The components on the message.
      */
     public List<TopLevelMessageComponent> getComponents() {
         List<TopLevelMessageComponent> components = data.components().toOptional()
@@ -665,14 +670,14 @@ public final class Message implements Entity {
      */
     public Optional<ActionComponent> getActionComponentById(String customId) {
         return getComponents()
-            .stream()
-            .filter(component -> component instanceof LayoutComponent)
-            .map(LayoutComponent.class::cast)
-            .flatMap(layoutComponent -> layoutComponent.getAllChildren().stream())
-            .filter(component -> component instanceof ActionComponent)
-            .map(ActionComponent.class::cast)
-            .filter(actionComponent -> customId.equalsIgnoreCase(actionComponent.getCustomId()))
-            .findFirst();
+                .stream()
+                .filter(component -> component instanceof LayoutComponent)
+                .map(LayoutComponent.class::cast)
+                .flatMap(layoutComponent -> layoutComponent.getAllChildren().stream())
+                .filter(component -> component instanceof ActionComponent)
+                .map(ActionComponent.class::cast)
+                .filter(actionComponent -> customId.equalsIgnoreCase(actionComponent.getCustomId()))
+                .findFirst();
     }
 
     /**
@@ -683,18 +688,18 @@ public final class Message implements Entity {
      */
     public Optional<BaseMessageComponent> getComponentById(int componentId) {
         return getComponents()
-            .stream()
-            .flatMap(component -> {
-                Stream<TopLevelMessageComponent> selfStream = Stream.of(component);
+                .stream()
+                .flatMap(component -> {
+                    Stream<TopLevelMessageComponent> selfStream = Stream.of(component);
 
-                if (component instanceof LayoutComponent) {
-                    return Stream.concat(selfStream, ((LayoutComponent) component).getAllChildren().stream());
-                } else {
-                    return selfStream;
-                }
-            })
-            .filter(component -> componentId == component.getId())
-            .findFirst();
+                    if (component instanceof LayoutComponent) {
+                        return Stream.concat(selfStream, ((LayoutComponent) component).getAllChildren().stream());
+                    } else {
+                        return selfStream;
+                    }
+                })
+                .filter(component -> componentId == component.getId())
+                .findFirst();
     }
 
     /**
@@ -709,16 +714,16 @@ public final class Message implements Entity {
     @Deprecated
     public Mono<Message> edit(final Consumer<? super LegacyMessageEditSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyMessageEditSpec mutatedSpec = new LegacyMessageEditSpec();
-                    getClient().getRestClient().getRestResources()
-                            .getAllowedMentions()
-                            .ifPresent(mutatedSpec::setAllowedMentions);
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getChannelService()
-                            .editMessage(getChannelId().asLong(), getId().asLong(),
-                                    MultipartRequest.ofRequest(mutatedSpec.asRequest()));
-                })
+                        () -> {
+                            LegacyMessageEditSpec mutatedSpec = new LegacyMessageEditSpec();
+                            getClient().getRestClient().getRestResources()
+                                    .getAllowedMentions()
+                                    .ifPresent(mutatedSpec::setAllowedMentions);
+                            spec.accept(mutatedSpec);
+                            return gateway.getRestClient().getChannelService()
+                                    .editMessage(getChannelId().asLong(), getId().asLong(),
+                                            MultipartRequest.ofRequest(mutatedSpec.asRequest()));
+                        })
                 .map(data -> new Message(gateway, data));
     }
 
@@ -735,15 +740,15 @@ public final class Message implements Entity {
     public Mono<Message> edit(MessageEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> {
-                    MessageEditSpec actualSpec = getClient().getRestClient().getRestResources()
-                            .getAllowedMentions()
-                            .filter(allowedMentions -> !spec.isAllowedMentionsPresent())
-                            .map(spec::withAllowedMentionsOrNull)
-                            .orElse(spec);
-                    return gateway.getRestClient().getChannelService()
-                            .editMessage(getChannelId().asLong(), getId().asLong(), actualSpec.asRequest());
-                })
+                        () -> {
+                            MessageEditSpec actualSpec = getClient().getRestClient().getRestResources()
+                                    .getAllowedMentions()
+                                    .filter(allowedMentions -> !spec.isAllowedMentionsPresent())
+                                    .map(spec::withAllowedMentionsOrNull)
+                                    .orElse(spec);
+                            return gateway.getRestClient().getChannelService()
+                                    .editMessage(getChannelId().asLong(), getId().asLong(), actualSpec.asRequest());
+                        })
                 .map(data -> new Message(gateway, data));
     }
 
@@ -753,7 +758,8 @@ public final class Message implements Entity {
      * <p>
      * By default, this method will append any file added through {@code withFiles}. To replace or remove individual
      * attachments, use {@code withAttachments} along with {@link discord4j.core.object.entity.Attachment} objects from
-     * the original message you want to keep. It is not required to include the new files as {@code Attachment} objects (this action its make internally when the request are made).
+     * the original message you want to keep. It is not required to include the new files as {@code Attachment}
+     * objects (this action its make internally when the request are made).
      * <p>
      * For example, to replace all previous attachments, provide an empty {@code withAttachments} and your files:
      * <pre>{@code
@@ -910,7 +916,7 @@ public final class Message implements Entity {
      */
     public Mono<Void> pin(final @Nullable String reason) {
         return gateway.getRestClient().getChannelService()
-            .addPinnedMessage(getChannelId().asLong(), getId().asLong(), reason);
+                .addPinnedMessage(getChannelId().asLong(), getId().asLong(), reason);
     }
 
     /**
@@ -933,7 +939,7 @@ public final class Message implements Entity {
      */
     public Mono<Void> unpin(final @Nullable String reason) {
         return gateway.getRestClient().getChannelService()
-            .deletePinnedMessage(getChannelId().asLong(), getId().asLong(), reason);
+                .deletePinnedMessage(getChannelId().asLong(), getId().asLong(), reason);
     }
 
     /**
@@ -986,7 +992,8 @@ public final class Message implements Entity {
 
         // If we already have the poll data, we can create the Poll object
         if (pollData.isPresent()) {
-            return pollData.map(data -> new Poll(this.gateway, data, this.data.channelId().asLong(), this.data.id().asLong()));
+            return pollData.map(data -> new Poll(this.gateway, data, this.data.channelId().asLong(),
+                    this.data.id().asLong()));
         }
 
         // We need the MESSAGE_CONTENT intent to access the poll
@@ -1028,14 +1035,17 @@ public final class Message implements Entity {
 
         // Check if the MESSAGE_CONTENT intent is enabled
         if (!this.gateway.getGatewayResources().getIntents().contains(Intent.MESSAGE_CONTENT)) {
-            throw new UnsupportedOperationException("The MESSAGE_CONTENT intent is required to access message content!" +
-                    "\nSee https://github.com/Discord4J/Discord4J?tab=readme-ov-file#calling-messagegetcontent-without-enabling-the-message-content-intent" +
+            throw new UnsupportedOperationException("The MESSAGE_CONTENT intent is required to access message " +
+                    "content!" +
+                    "\nSee https://github.com/Discord4J/Discord4J?tab=readme-ov-file#calling-messagegetcontent" +
+                    "-without-enabling-the-message-content-intent" +
                     " for more information.");
         }
 
         // If we are here, then the MESSAGE_CONTENT intent is enabled, but we still don't have access to the content
         // This can happen in the following cases:
-        // - The message is a notification message (ex. message pin), and thus don't have neither content nor embeds, etc.
+        // - The message is a notification message (ex. message pin), and thus don't have neither content nor embeds,
+        // etc.
         // - Discord broke their API :'(
     }
 
@@ -1057,11 +1067,21 @@ public final class Message implements Entity {
      * by calling the "withXxx" methods on the returned {@link StartThreadFromMessageMono}.
      *
      * @param threadName The name of the thread.
-     * @return A {@link StartThreadFromMessageMono} where, upon successful completion, emits the created {@link ThreadChannel}. If
+     * @return A {@link StartThreadFromMessageMono} where, upon successful completion, emits the created
+     * {@link ThreadChannel}. If
      * an error is received, it is emitted through the {@link Mono}.
      */
     public StartThreadFromMessageMono createPublicThread(String threadName) {
         return StartThreadFromMessageMono.of(threadName, this);
+    }
+
+    /**
+     * Gets the activity message, if present.
+     *
+     * @return The activity message.
+     */
+    public Optional<ActivityMessage> getActivityMessage() {
+        return this.getData().activity().map(data -> new ActivityMessage(this.getClient(), data)).toOptional();
     }
 
     @Override
@@ -1072,6 +1092,13 @@ public final class Message implements Entity {
     @Override
     public int hashCode() {
         return EntityUtil.hashCode(this);
+    }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "data=" + this.data +
+                '}';
     }
 
     /**
@@ -1114,8 +1141,6 @@ public final class Message implements Entity {
 
         /**
          * This message use components v2.
-         *
-         * @apiNote this tag restrict the use of content and embeds when create a message
          */
         IS_COMPONENTS_V2(15);
 
@@ -1247,7 +1272,8 @@ public final class Message implements Entity {
         /**
          * A message created when a user follows a channel from another guild into specific channel.
          *
-         * @see <a href="https://support.discord.com/hc/en-us/articles/360028384531-Channel-Following-FAQ">Channel Following</a>
+         * @see
+         * <a href="https://support.discord.com/hc/en-us/articles/360028384531-Channel-Following-FAQ">Channel Following</a>
          */
         CHANNEL_FOLLOW_ADD(12),
 
@@ -1264,7 +1290,8 @@ public final class Message implements Entity {
         GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING(17),
 
         /**
-         * A message created when a Thread is started ( <a href="https://support.discord.com/hc/es/articles/4403205878423-Threads">Threads</a> )
+         * A message created when a Thread is started (
+         * <a href="https://support.discord.com/hc/es/articles/4403205878423-Threads">Threads</a> )
          */
         THREAD_CREATED(18),
 
@@ -1275,10 +1302,11 @@ public final class Message implements Entity {
         APPLICATION_COMMAND(20),
 
         /**
-         * The first message in a thread pointing to a related message in the parent channel from which the thread was started
+         * The first message in a thread pointing to a related message in the parent channel from which the thread
+         * was started
          * <br>
          * <b>Note:</b> Only supported from v9 of API
-        **/
+         **/
         THREAD_STARTER_MESSAGE(21),
 
         /** A message created for notice the servers owners about invite new users (only in new servers) **/
@@ -1418,10 +1446,4 @@ public final class Message implements Entity {
         }
     }
 
-    @Override
-    public String toString() {
-        return "Message{" +
-                "data=" + this.data +
-                '}';
-    }
 }
