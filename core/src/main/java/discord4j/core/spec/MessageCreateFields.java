@@ -17,6 +17,7 @@
 
 package discord4j.core.spec;
 
+import discord4j.core.object.entity.Attachment;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.PartialAttachmentData;
 import discord4j.discordjson.possible.Possible;
@@ -25,7 +26,9 @@ import org.jspecify.annotations.Nullable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 @InlineFieldStyle
 @Value.Enclosing
@@ -42,25 +45,16 @@ public final class MessageCreateFields {
             return ImmutableMessageCreateFields.File.of(name, null, inputStream);
         }
 
-        static File of(final String name, final InputStream inputStream, final boolean isSpoiler) {
-            return ImmutableMessageCreateFields.File.builder()
-                    .name(name)
-                    .inputStream(inputStream)
-                    .isSpoiler(isSpoiler)
-                    .build();
-        }
-
         static File of(final String name, final String description, final InputStream inputStream) {
             return ImmutableMessageCreateFields.File.of(name, description, inputStream);
         }
 
-        static File of(final String name, final String description, final InputStream inputStream, final boolean isSpoiler) {
-            return ImmutableMessageCreateFields.File.builder()
-                    .name(name)
-                    .description(description)
-                    .inputStream(inputStream)
-                    .isSpoiler(isSpoiler)
-                    .build();
+        static File of(FileSpoiler file) {
+            return ImmutableMessageCreateFields.File.of(file.name(), file.description(), file.inputStream());
+        }
+
+        static File of(final Attachment attachment) throws IOException {
+            return ImmutableMessageCreateFields.File.of(attachment.getFilename(), attachment.getDescription().orElse(null), new URL(attachment.getUrl()).openStream());
         }
 
         String name();
@@ -98,12 +92,20 @@ public final class MessageCreateFields {
     @Value.Immutable
     public interface FileSpoiler extends File {
 
-        static FileSpoiler of(String name, InputStream inputStream) {
+        static FileSpoiler of(final String name, final InputStream inputStream) {
             return ImmutableMessageCreateFields.FileSpoiler.of(name, null, inputStream);
         }
 
-        static FileSpoiler of(String name, String description, InputStream inputStream) {
+        static FileSpoiler of(final String name, final String description, final InputStream inputStream) {
             return ImmutableMessageCreateFields.FileSpoiler.of(name, description, inputStream);
+        }
+
+        static FileSpoiler of(final File file) {
+            return ImmutableMessageCreateFields.FileSpoiler.of(file.name(), file.description(), file.inputStream());
+        }
+
+        static File of(final Attachment attachment) throws IOException {
+            return ImmutableMessageCreateFields.FileSpoiler.of(attachment.getFilename(), attachment.getDescription().orElse(null), new URL(attachment.getUrl()).openStream());
         }
 
         @Override
