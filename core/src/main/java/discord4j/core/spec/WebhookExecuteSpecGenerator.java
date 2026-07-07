@@ -56,6 +56,10 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
         return Collections.emptyList();
     }
 
+    /**
+     * @deprecated Use {@link #files()} instead with {@link MessageCreateFields.FileSpoiler}
+     */
+    @Deprecated
     @Value.Default
     default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
         return Collections.emptyList();
