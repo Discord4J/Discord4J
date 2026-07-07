@@ -22,13 +22,14 @@ import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
-import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.MessageCreateFields;
 import discord4j.rest.interaction.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -60,11 +61,13 @@ public class ExampleButtonAttachment {
                     String append = "append";
                     String replace = "replace";
                     String replaceFirst = "replace-first";
+                    String toggleFirstSpoiler = "toggle-first-spoiler";
                     String clear = "clear";
                     ActionRow row = ActionRow.of(
                             Button.success(append, "Append attachment"),
                             Button.success(replace, "Replace all attachments"),
                             Button.success(replaceFirst, "Replace 1st attachment"),
+                            Button.success(toggleFirstSpoiler, "Toggle spoiler tag 1st attachment"),
                             Button.danger(clear, "Clear attachments"));
 
                     // a listener that captures our slash command interactions
@@ -108,6 +111,24 @@ public class ExampleButtonAttachment {
                                                     .collect(Collectors.toList())));
                             return press.deferEdit().then(edit);
 
+                        } else if (toggleFirstSpoiler.equals(press.getCustomId())) {
+                            Mono<Message> edit = press.getReply()
+                                    .flatMap(reply -> {
+                                        Attachment first = reply.getAttachments().get(0);
+
+                                        return Mono.fromCallable(() -> (first.isSpoiler()) ? MessageCreateFields.File.of(first) : MessageCreateFields.FileSpoiler.of(first))
+                                                .subscribeOn(Schedulers.boundedElastic())
+                                                .flatMap(file -> press.editReply()
+                                                        .withContentOrNull("Replaced the first attachment")
+                                                        .withFiles(file)
+                                                        .withComponents(row)
+                                                        .withAttachmentsOrNull(reply.getAttachments()
+                                                                .stream()
+                                                                .skip(1)
+                                                                .collect(Collectors.toList())));
+                                    });
+                            return press.deferEdit().then(edit);
+
                         } else if (clear.equals(press.getCustomId())) {
                             Mono<Message> edit = press.editReply()
                                     .withContentOrNull("Removed all attachments")
@@ -130,6 +151,6 @@ public class ExampleButtonAttachment {
     private static MessageCreateFields.File getFile() {
         String content = "This is a text file created at " + LocalDateTime.now();
         InputStream stream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-        return MessageCreateFields.File.of("content.txt", stream);
+        return MessageCreateFields.File.of("content.txt", "A file with content.", stream);
     }
 }
