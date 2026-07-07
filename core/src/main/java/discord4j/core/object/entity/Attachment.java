@@ -35,7 +35,13 @@ import java.util.OptionalInt;
  */
 public final class Attachment implements Entity {
 
-    /** The prefix of the name of files which are displayed as spoilers. **/
+    /**
+     * The prefix of the name of files which are displayed as spoilers.
+     *
+     * @deprecated Discord now uses {@code Attachment.AttachmentFlags#IS_SPOILER} flag on the attachment object instead.
+     * The {@code SPOILER_} prefix still marks a file as spoiler, but not all spoilered attachments use it.
+     **/
+    @Deprecated
     public static final String SPOILER_PREFIX = "SPOILER_";
 
     /** The gateway associated to this object. */
@@ -57,12 +63,12 @@ public final class Attachment implements Entity {
 
     @Override
     public GatewayDiscordClient getClient() {
-        return gateway;
+        return this.gateway;
     }
 
     @Override
     public Snowflake getId() {
-        return Snowflake.of(data.id());
+        return Snowflake.of(this.getData().id());
     }
 
     /**
@@ -71,7 +77,7 @@ public final class Attachment implements Entity {
      * @return The data of the attachment.
      */
     public AttachmentData getData() {
-        return data;
+        return this.data;
     }
 
     /**
@@ -80,7 +86,25 @@ public final class Attachment implements Entity {
      * @return The name of the file attached.
      */
     public String getFilename() {
-        return data.filename();
+        return this.getData().filename();
+    }
+
+    /**
+     * Gets the title of the file attached, if present.
+     *
+     * @return The title of the file attached, if present.
+     */
+    public Optional<String> getTitle() {
+        return this.getData().title().toOptional();
+    }
+
+    /**
+     * Gets the description of the file attached, if present.
+     *
+     * @return The description of the file attached, if present.
+     */
+    public Optional<String> getDescription() {
+        return this.getData().description().toOptional();
     }
 
     /**
@@ -89,7 +113,7 @@ public final class Attachment implements Entity {
      * @return The size of the file in bytes.
      */
     public int getSize() {
-        return data.size();
+        return this.getData().size();
     }
 
     /**
@@ -98,7 +122,7 @@ public final class Attachment implements Entity {
      * @return The source URL of the file.
      */
     public String getUrl() {
-        return data.url();
+        return this.getData().url();
     }
 
     /**
@@ -107,7 +131,7 @@ public final class Attachment implements Entity {
      * @return A proxied URL of the file.
      */
     public String getProxyUrl() {
-        return data.proxyUrl();
+        return this.getData().proxyUrl();
     }
 
     /**
@@ -116,7 +140,7 @@ public final class Attachment implements Entity {
      * @return The height of the file, if present.
      */
     public OptionalInt getHeight() {
-        return Possible.flatOpt(data.height())
+        return Possible.flatOpt(this.getData().height())
             .map(OptionalInt::of)
             .orElse(OptionalInt.empty());
     }
@@ -127,7 +151,7 @@ public final class Attachment implements Entity {
      * @return The width of the file, if present.
      */
     public OptionalInt getWidth() {
-        return Possible.flatOpt(data.width())
+        return Possible.flatOpt(this.getData().width())
             .map(OptionalInt::of)
             .orElse(OptionalInt.empty());
     }
@@ -138,7 +162,7 @@ public final class Attachment implements Entity {
      * @return {@code true} if the attachment is a spoiler, {@code false} otherwise.
      */
     public boolean isSpoiler() {
-        return getFilename().startsWith(SPOILER_PREFIX);
+        return this.getFlags().contains(AttachmentFlags.IS_SPOILER);
     }
 
     /**
@@ -147,7 +171,7 @@ public final class Attachment implements Entity {
      * @return The attachment's media type, if present.
      */
     public Optional<String> getContentType() {
-        return data.contentType().toOptional();
+        return this.getData().contentType().toOptional();
     }
 
     /**
@@ -157,7 +181,7 @@ public final class Attachment implements Entity {
      * @return The attachment's duration in seconds, if present.
      */
     public Optional<Float> getDurationSeconds() {
-        return data.durationSeconds().toOptional();
+        return this.getData().durationSeconds().toOptional();
     }
 
     /**
@@ -167,7 +191,7 @@ public final class Attachment implements Entity {
      * @return A base64 encoded bytearray representing a sampled waveform, if present.
      */
     public Optional<String> getWaveform() {
-        return data.waveform().toOptional();
+        return this.getData().waveform().toOptional();
     }
 
     /**
@@ -176,7 +200,7 @@ public final class Attachment implements Entity {
      * @return A {@code EnumSet} with the flags of the attachment.
      */
     public EnumSet<AttachmentFlags> getFlags() {
-        return AttachmentFlags.of(data.flags().toOptional().orElse(0));
+        return AttachmentFlags.of(this.getData().flags().toOptional().orElse(0));
     }
 
     @Override
@@ -192,7 +216,7 @@ public final class Attachment implements Entity {
     @Override
     public String toString() {
         return "Attachment{" +
-                "data=" + data +
+                "data=" + this.data +
                 '}';
     }
 
@@ -258,8 +282,8 @@ public final class Attachment implements Entity {
         public static EnumSet<AttachmentFlags> of(final int value) {
             final EnumSet<AttachmentFlags> flags = EnumSet.noneOf(AttachmentFlags.class);
 
-            for (AttachmentFlags flag : AttachmentFlags.values()) {
-                long flagValue = flag.getValue();
+            for (final AttachmentFlags flag : AttachmentFlags.values()) {
+                final long flagValue = flag.getValue();
 
                 if ((flagValue & value) == flagValue) {
                     flags.add(flag);
