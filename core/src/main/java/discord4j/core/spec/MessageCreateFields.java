@@ -17,7 +17,6 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.object.entity.Attachment;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.PartialAttachmentData;
 import discord4j.discordjson.possible.Possible;
@@ -43,8 +42,25 @@ public final class MessageCreateFields {
             return ImmutableMessageCreateFields.File.of(name, null, inputStream);
         }
 
+        static File of(final String name, final InputStream inputStream, final boolean isSpoiler) {
+            return ImmutableMessageCreateFields.File.builder()
+                    .name(name)
+                    .inputStream(inputStream)
+                    .isSpoiler(isSpoiler)
+                    .build();
+        }
+
         static File of(final String name, final String description, final InputStream inputStream) {
             return ImmutableMessageCreateFields.File.of(name, description, inputStream);
+        }
+
+        static File of(final String name, final String description, final InputStream inputStream, final boolean isSpoiler) {
+            return ImmutableMessageCreateFields.File.builder()
+                    .name(name)
+                    .description(description)
+                    .inputStream(inputStream)
+                    .isSpoiler(isSpoiler)
+                    .build();
         }
 
         String name();
@@ -57,11 +73,18 @@ public final class MessageCreateFields {
             return this.name();
         }
 
+        @Value.Default
+        @Value.Parameter(value = false)
+        default boolean isSpoiler() {
+            return false;
+        }
+
         default PartialAttachmentData asPartialAttachmentData(final Id id) {
             return PartialAttachmentData.builder()
                     .id(id)
                     .filename(this.getFileName())
                     .description(Possible.ofNullable(this.description()))
+                    .isSpoiler(this.isSpoiler())
                     .build();
         }
 
@@ -84,8 +107,8 @@ public final class MessageCreateFields {
         }
 
         @Override
-        default String getFileName() {
-            return Attachment.SPOILER_PREFIX + this.name();
+        default boolean isSpoiler() {
+            return true;
         }
 
         @Override
