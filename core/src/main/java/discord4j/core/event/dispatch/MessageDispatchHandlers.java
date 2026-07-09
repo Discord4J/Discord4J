@@ -23,6 +23,7 @@ import discord4j.core.object.Embed;
 import discord4j.core.object.emoji.Emoji;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.MemberData;
 import discord4j.discordjson.json.MessageData;
@@ -59,11 +60,14 @@ class MessageDispatchHandlers {
                                 .user(message.author())
                                 .build(), guildId)));
 
+        Optional<Channel.Type> channelType = context.getDispatch().channelType().toOptional().map(Channel.Type::of);
+
         return Mono.just(new MessageCreateEvent(gateway, context.getShardInfo(), new Message(gateway, message),
-                        context.getDispatch().message().guildId().toOptional()
-                                .map(Snowflake::asLong)
-                                .orElse(null),
-                        maybeMember.orElse(null)));
+                context.getDispatch().message().guildId().toOptional()
+                        .map(Snowflake::asLong)
+                        .orElse(null),
+                maybeMember.orElse(null),
+                channelType.orElse(null)));
     }
 
     static Mono<MessageDeleteEvent> messageDelete(DispatchContext<MessageDelete, MessageData> context) {
@@ -71,9 +75,9 @@ class MessageDispatchHandlers {
         long messageId = Snowflake.asLong(context.getDispatch().id());
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
         Long guildId = context.getDispatch().guildId()
-            .toOptional()
-            .map(Snowflake::asLong)
-            .orElse(null);
+                .toOptional()
+                .map(Snowflake::asLong)
+                .orElse(null);
 
         Message oldMessage = context.getOldState()
                 .map(data -> new Message(gateway, data))
@@ -98,7 +102,7 @@ class MessageDispatchHandlers {
                 .orElse(Collections.emptySet());
 
         return Mono.just(new MessageBulkDeleteEvent(gateway, context.getShardInfo(), messageIds, channelId,
-                        guildId, deletedMessages));
+                guildId, deletedMessages));
     }
 
     static Mono<ReactionAddEvent> messageReactionAdd(DispatchContext<MessageReactionAdd, Void> context) {
@@ -158,7 +162,8 @@ class MessageDispatchHandlers {
                 channelId, messageId, guildId, emoji, burst, type));
     }
 
-    static Mono<ReactionRemoveEmojiEvent> messageReactionRemoveEmoji(DispatchContext<MessageReactionRemoveEmoji, Void> context) {
+    static Mono<ReactionRemoveEmojiEvent> messageReactionRemoveEmoji(DispatchContext<MessageReactionRemoveEmoji,
+            Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
         long messageId = Snowflake.asLong(context.getDispatch().messageId());
@@ -211,8 +216,8 @@ class MessageDispatchHandlers {
                 .collect(Collectors.toList());
 
         Message oldMessage = context.getOldState()
-            .map(data -> new Message(gateway, data))
-            .orElse(null);
+                .map(data -> new Message(gateway, data))
+                .orElse(null);
 
         return Mono.just(new MessageUpdateEvent(gateway, context.getShardInfo(), messageId, channelId,
                 guildId, oldMessage, !messageData.content().isAbsent(),
