@@ -19,6 +19,7 @@ package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.channel.ForumChannel;
+import discord4j.core.object.entity.channel.MediaChannel;
 import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.StartThreadInForumChannelRequest;
@@ -78,6 +79,22 @@ public interface StartThreadInForumChannelSpecGenerator extends AuditSpec<StartT
 abstract class StartThreadInForumChannelMonoGenerator extends Mono<ThreadChannel> implements StartThreadInForumChannelSpecGenerator {
 
     abstract ForumChannel channel();
+
+    @Override
+    public void subscribe(CoreSubscriber<? super ThreadChannel> actual) {
+        channel().startThread(StartThreadInForumChannelSpec.copyOf(this)).subscribe(actual);
+    }
+
+    @Override
+    public abstract String toString();
+
+}
+
+@SuppressWarnings("immutables:subtype")
+@Value.Immutable(builder = false)
+abstract class StartThreadInMediaChannelMonoGenerator extends Mono<ThreadChannel> implements StartThreadInForumChannelSpecGenerator {
+
+    abstract MediaChannel channel();
 
     @Override
     public void subscribe(CoreSubscriber<? super ThreadChannel> actual) {

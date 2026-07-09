@@ -127,7 +127,10 @@ public interface Channel extends Entity {
         GUILD_STAGE_VOICE(13),
 
         /** Represents a {@link ForumChannel} that can only contain threads */
-        GUILD_FORUM(15);
+        GUILD_FORUM(15),
+
+        /** Represents a {@link MediaChannel} that can only contain threads */
+        GUILD_MEDIA(16);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -171,23 +174,29 @@ public interface Channel extends Entity {
                 case 12: return GUILD_PRIVATE_THREAD;
                 case 13: return GUILD_STAGE_VOICE;
                 case 15: return GUILD_FORUM;
+                case 16: return GUILD_MEDIA;
                 default: return UNKNOWN;
             }
         }
     }
 
-    /** Represent channel flags : <a href="https://discord.com/developers/docs/resources/channel#channel-object-channel-flags">https://discord.com/developers/docs/resources/channel#channel-object-channel-flags</a> */
+    /** Represent channel flags : <a href="https://docs.discord.com/developers/resources/channel#channel-object-channel-flags">https://docs.discord.com/developers/resources/channel#channel-object-channel-flags</a> */
     @Experimental
     enum Flag {
         /**
-         * This {@link ThreadChannel} is pinned to the top of its parent {@link ForumChannel}
+         * This {@link ThreadChannel} is pinned to the top of its parent {@link ForumChannel} or {@link MediaChannel}
          */
         PINNED(1),
 
         /**
-         * Whether a tag is required to be specified when creating a {@link ThreadChannel} in a {@link ForumChannel}. Tags are specified in the applied_tags field.
+         * Whether a tag is required to be specified when creating a {@link ThreadChannel} in a {@link ForumChannel} or {@link MediaChannel}. Tags are specified in the applied_tags field.
          */
-        REQUIRE_TAG(4);
+        REQUIRE_TAG(4),
+
+        /**
+         * When set hides the embedded media download options. Available only for {@link MediaChannel}
+         */
+        HIDE_MEDIA_DOWNLOAD_OPTIONS(15);
 
         private final int shiftValue;
         private final int bitValue;
