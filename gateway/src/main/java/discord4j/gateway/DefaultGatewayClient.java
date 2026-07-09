@@ -474,6 +474,7 @@ public class DefaultGatewayClient implements GatewayClient {
         Identify identify = Identify.builder()
                 .token(token)
                 .intents(identifyOptions.getIntents().map(set -> Possible.of(set.getRawValue())).orElse(Possible.absent()))
+                .capabilities(identifyOptions.getCapabilities().map(Possible::of).orElse(Possible.absent()))
                 .properties(props)
                 .compress(false)
                 .largeThreshold(identifyOptions.getLargeThreshold())
