@@ -17,6 +17,7 @@
 
 package discord4j.gateway;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.gateway.intent.IntentSet;
 import org.jspecify.annotations.Nullable;
@@ -31,6 +32,7 @@ public class IdentifyOptions {
     private final ShardInfo shardInfo;
     private final @Nullable StatusUpdate initialStatus;
     private final @Nullable IntentSet intents;
+    private final @Nullable Long capabilities;
     private final int largeThreshold;
     private final @Nullable SessionInfo resumeSession;
 
@@ -43,6 +45,7 @@ public class IdentifyOptions {
         this.shardInfo = builder.shardInfo;
         this.initialStatus = builder.initialStatus;
         this.intents = builder.intents;
+        this.capabilities = builder.capabilities;
         this.largeThreshold = builder.largeThreshold;
         this.resumeSession = builder.resumeSession;
     }
@@ -97,6 +100,7 @@ public class IdentifyOptions {
         private final ShardInfo shardInfo;
         private @Nullable StatusUpdate initialStatus;
         private @Nullable IntentSet intents;
+        private @Nullable Long capabilities;
         private int largeThreshold = 250;
         private @Nullable SessionInfo resumeSession;
 
@@ -128,6 +132,18 @@ public class IdentifyOptions {
          */
         public Builder intents(@Nullable IntentSet intents) {
             this.intents = intents;
+            return this;
+        }
+
+        /**
+         * Set the Gateway capabilities bitfield to opt in to specific gateway behaviors.
+         *
+         * @param capabilities a raw bitfield of Gateway capabilities, or {@code null} if not using this capability
+         * @return this builder
+         */
+        @Experimental
+        public Builder capabilities(@Nullable Long capabilities) {
+            this.capabilities = capabilities;
             return this;
         }
 
@@ -173,6 +189,7 @@ public class IdentifyOptions {
         return new Builder(shardInfo)
                 .initialStatus(initialStatus)
                 .intents(intents)
+                .capabilities(capabilities)
                 .largeThreshold(largeThreshold)
                 .resumeSession(resumeSession);
     }
@@ -188,6 +205,7 @@ public class IdentifyOptions {
         return new Builder(shardInfo)
                 .initialStatus(initialStatus)
                 .intents(intents)
+                .capabilities(capabilities)
                 .largeThreshold(largeThreshold)
                 .resumeSession(resumeSession);
     }
@@ -220,6 +238,15 @@ public class IdentifyOptions {
     }
 
     /**
+     * Retrieve the capabilities which should be subscribed from the gateway when identifying.
+     *
+     * @return {@code Possible.absent()} when no capabilities are set or the raw capabilities value which should be subscribed
+     */
+    public Optional<Long> getCapabilities() {
+        return Optional.ofNullable(capabilities);
+    }
+
+    /**
      * Retrieve the number of members used to determine if a guild is "large". Gateway will not send offline member
      * information for a large guild member list.
      *
@@ -244,6 +271,7 @@ public class IdentifyOptions {
                 "shardInfo=" + shardInfo +
                 ", initialStatus=" + initialStatus +
                 ", intents=" + intents +
+                ", capabilities=" + capabilities +
                 ", largeThreshold=" + largeThreshold +
                 ", resumeSession=" + resumeSession +
                 '}';
