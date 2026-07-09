@@ -1,6 +1,7 @@
 package discord4j.core.object.guildmessagesearch;
 
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.DiscordObject;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.ThreadMember;
@@ -17,14 +18,16 @@ import java.util.stream.Collectors;
  *
  * @see Guild#searchMessages()
  */
-public class GuildSearchResult {
+public class GuildSearchResult implements DiscordObject {
 
+    private final GatewayDiscordClient client;
     private final GuildMessageSearchResponse data;
     private final List<Message> messages;
     private final List<ThreadChannel> threads;
     private final List<ThreadMember> threadMembers;
 
     public GuildSearchResult(GatewayDiscordClient gateway, GuildMessageSearchResponse data) {
+        this.client = gateway;
         this.data = data;
 
         this.messages = data.messages()
@@ -111,5 +114,10 @@ public class GuildSearchResult {
      */
     public int getIndexedDocuments() {
         return this.data.documentsIndexed().toOptional().orElse(0);
+    }
+
+    @Override
+    public GatewayDiscordClient getClient() {
+        return this.client;
     }
 }
