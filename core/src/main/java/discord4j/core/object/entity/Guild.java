@@ -24,6 +24,7 @@ import discord4j.core.object.*;
 import discord4j.core.object.audit.AuditLogPart;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.channel.*;
+import discord4j.core.object.guildmessagesearch.GuildSearchResult;
 import discord4j.core.object.onboarding.Onboarding;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -913,6 +914,18 @@ public final class Guild implements Entity {
         return gateway.getRestClient().getGuildService()
                 .searchGuildMembers(data.id().asLong(), queryParams)
                 .map(memberData -> new Member(gateway, memberData, data.id().asLong()));
+    }
+
+    /**
+     * Returns a {@link Mono} emiting a {@link GuildSearchResult} containing the messages that match the search criteria.
+     * You can use the #withXXX methods on the returned {@link GuildMessageSearchMono} to specify the search criteria.
+     *
+     * @return A {@link GuildMessageSearchMono} that can be used to specify the search criteria and retrieve the
+     * messages. It emits a {@link GuildSearchResult} upon successful completion. If an error occurs, it is emitted
+     * through the {@link Mono}.
+     */
+    public GuildMessageSearchMono searchMessages() {
+        return GuildMessageSearchMono.of(getId().asLong(), gateway.rest().getGuildService(), gateway);
     }
 
     /**
