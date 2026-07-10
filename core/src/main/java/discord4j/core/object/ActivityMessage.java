@@ -17,11 +17,13 @@
 package discord4j.core.object;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.MessageActivityData;
 
+import java.util.Optional;
+
 /**
- * Represent a partial message where just a few elements from a {@link Message} are present.
+ * Represents a message activity sent with a Rich Presence-related chat embed, such as a join, spectate,
+ * or listen invite.
  *
  * @see <a href="https://docs.discord.com/developers/resources/message#message-object-message-activity-structure">
  * Activity Message Object</a>
@@ -51,6 +53,24 @@ public class ActivityMessage implements DiscordObject {
      */
     public MessageActivityData getData() {
         return this.data;
+    }
+
+    /**
+     * Gets the party id of the message activity.
+     *
+     * @return The party id of the message activity.
+     */
+    public Optional<String> getPartyId() {
+        return this.getData().partyId().toOptional();
+    }
+
+    /**
+     * Gets the type of the message activity.
+     *
+     * @return The type of the message activity.
+     */
+    public Type getType() {
+        return Type.of(this.getData().type());
     }
 
     @Override
@@ -96,7 +116,8 @@ public class ActivityMessage implements DiscordObject {
         }
 
         /**
-         * Gets the type of the activity message. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
+         * Gets the type of the activity message. It is guaranteed that invoking {@link #getValue()} from the
+         * returned enum will be
          * equal ({@code ==}) to the supplied {@code value}.
          *
          * @param value The underlying value as represented by Discord.
