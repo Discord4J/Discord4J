@@ -23,6 +23,9 @@ import discord4j.core.object.guildmessagesearch.AuthorType;
 import discord4j.core.object.guildmessagesearch.SearchHasType;
 import discord4j.core.object.guildmessagesearch.SortBy;
 import discord4j.core.object.guildmessagesearch.SortOrder;
+import discord4j.gateway.intent.Intent;
+import discord4j.gateway.intent.IntentSet;
+import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
@@ -35,33 +38,35 @@ public class ExampleGuildMessageSearch {
     private static final String guildId = System.getenv("guildId");
 
     public static void main(String[] args) {
+        ExampleGuildMessageSearch.LOGGER.info("Starting example for guild message search [{}]", guildId);
         DiscordClient.create(token)
+                .gateway()
+                .setEnabledIntents(IntentSet.of(Intent.MESSAGE_CONTENT))
                 .withGateway(gw -> {
-                    return Mono.when(
-                            gw.on(ReadyEvent.class)
-                                    .then(gw.getGuildById(Snowflake.of(guildId)))
-                                    .flatMap(guild -> {
-                                        // Search for the last 12 messages that contain a file but not an image,
-                                        // sent by anyone except bots, and exclude nsfw
-                                        return guild.searchMessages()
-                                                .withLimit(12)
-                                                .withSortBy(SortBy.TIMESTAMP)
-                                                .withSortOrder(SortOrder.DESC)
-                                                .withHasType(SearchHasType.FILE)
-                                                .withHasNotType(SearchHasType.IMAGE)
-                                                .withAuthorNotTypes(AuthorType.BOT)
-                                                .withIncludeNsfw(false)
-                                                .flatMap(guildSearchResult -> {
-                                                    return Mono.fromRunnable(() -> {
-                                                        ExampleGuildMessageSearch.LOGGER.info("Found {} messages in total", guildSearchResult.getTotalResults());
+                    Publisher<?> messagesSearch = gw.on(ReadyEvent.class)
+                            .flatMap(ready -> gw.getGuildById(Snowflake.of(guildId)))
+                            .flatMap(guild -> {
+                                // Search for the last 12 messages that contain a file but not an image,
+                                // sent by anyone except bots, and exclude nsfw
+                                ExampleGuildMessageSearch.LOGGER.info("Try to search messages in {}", guild.getName());
+                                return guild.searchMessages()
+                                        .withLimit(12)
+                                        .withSortBy(SortBy.TIMESTAMP)
+                                        .withSortOrder(SortOrder.DESC)
+                                        .withHasType(SearchHasType.FILE)
+                                        .withHasNotType(SearchHasType.IMAGE)
+                                        .withAuthorNotTypes(AuthorType.BOT)
+                                        .withIncludeNsfw(false)
+                                        .flatMap(guildSearchResult -> Mono.fromRunnable(() -> {
+                                            ExampleGuildMessageSearch.LOGGER.info("Found {} messages in total", guildSearchResult.getTotalResults());
 
-                                                        for (Message message : guildSearchResult.getMessages()) {
-                                                            ExampleGuildMessageSearch.LOGGER.info("- {}", message.getContent());
-                                                        }
-                                                    });
-                                                });
-                                    })
-                    );
+                                            for (Message message : guildSearchResult.getMessages()) {
+                                                ExampleGuildMessageSearch.LOGGER.info("- {}", message.toString());
+                                            }
+                                        }));
+                            })
+                            .switchIfEmpty(Mono.fromRunnable(() -> ExampleGuildMessageSearch.LOGGER.info("No messages found")));
+                    return Mono.when(messagesSearch);
                 })
                 .block();
     }
