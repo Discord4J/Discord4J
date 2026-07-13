@@ -187,7 +187,12 @@ public interface Channel extends Entity {
         /**
          * Whether a tag is required to be specified when creating a {@link ThreadChannel} in a {@link ForumChannel}. Tags are specified in the applied_tags field.
          */
-        REQUIRE_TAG(4);
+        REQUIRE_TAG(4),
+
+        /**
+         * Whether hides the embedded media download options. Available only for media channels.
+         */
+        HIDE_MEDIA_DOWNLOAD_OPTIONS(15);
 
         private final int shiftValue;
         private final int bitValue;
