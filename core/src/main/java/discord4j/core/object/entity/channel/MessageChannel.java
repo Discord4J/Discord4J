@@ -42,6 +42,7 @@ import reactor.core.scheduler.Scheduler;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -366,5 +367,17 @@ public interface MessageChannel extends Channel {
             .map(PinnedMessagesResponseData::items)
             .flatMapMany(pinnedMessagesData -> Flux.fromIterable(pinnedMessagesData)
                 .map(pinnedMessageData -> new PinnedMessageReference(getClient(), pinnedMessageData)));
+    }
+
+    /**
+     * Gets the channels {@link discord4j.core.object.entity.channel.Channel.Flag} associated to this channel
+     * Unknown flags are currently ignored.
+     *
+     * @return An {@link EnumSet} representing the <b>known flags</b> for this channel.
+     */
+    default EnumSet<Flag> getFlags() {
+        return getData().flags().toOptional()
+                .map(Flag::valueOf)
+                .orElse(EnumSet.noneOf(Flag.class));
     }
 }
