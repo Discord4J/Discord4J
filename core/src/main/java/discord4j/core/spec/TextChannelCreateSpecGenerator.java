@@ -28,6 +28,7 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,6 +51,8 @@ interface TextChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest>
 
     Possible<Boolean> nsfw();
 
+    Possible<EnumSet<Channel.Flag>> flags();
+
     @Override
     default ChannelCreateRequest asRequest() {
         return ChannelCreateRequest.builder()
@@ -63,6 +66,7 @@ interface TextChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest>
                         .collect(Collectors.toList())))
                 .parentId(mapPossible(parentId(), Snowflake::asString))
                 .nsfw(nsfw())
+                .flags(mapPossible(flags(), Channel.Flag::toBitfield))
                 .build();
     }
 }

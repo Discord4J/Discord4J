@@ -19,6 +19,7 @@ package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ChannelModifyRequest;
 import discord4j.discordjson.possible.Possible;
@@ -26,10 +27,12 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 
 @Value.Immutable(singleton = true)
@@ -49,6 +52,8 @@ interface TextChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
 
     Possible<Optional<Snowflake>> parentId();
 
+    Possible<EnumSet<Channel.Flag>> flags();
+
     @Override
     default ChannelModifyRequest asRequest() {
         return ChannelModifyRequest.builder()
@@ -61,6 +66,7 @@ interface TextChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
                         .map(PermissionOverwrite::getData)
                         .collect(Collectors.toList())))
                 .parentId(mapPossibleOptional(parentId(), Snowflake::asString))
+                .flags(mapPossible(flags(), Channel.Flag::toBitfield))
                 .build();
     }
 }

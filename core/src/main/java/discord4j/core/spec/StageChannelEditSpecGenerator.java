@@ -19,6 +19,7 @@ package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.StageChannel;
 import discord4j.discordjson.json.ChannelModifyRequest;
 import discord4j.discordjson.possible.Possible;
@@ -26,6 +27,7 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -50,6 +52,8 @@ interface StageChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> 
 
     Possible<Optional<String>> rtcRegion();
 
+    Possible<EnumSet<Channel.Flag>> flags();
+
     @Override
     default ChannelModifyRequest asRequest() {
         return ChannelModifyRequest.builder()
@@ -62,6 +66,7 @@ interface StageChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> 
                         .collect(Collectors.toList())))
                 .parentId(mapPossibleOptional(parentId(), Snowflake::asString))
                 .rtcRegion(rtcRegion())
+                .flags(mapPossible(flags(), Channel.Flag::toBitfield))
                 .build();
     }
 }

@@ -28,6 +28,7 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,6 +49,8 @@ interface StageChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest
 
     Possible<Snowflake> parentId();
 
+    Possible<EnumSet<Channel.Flag>> flags();
+
     @Override
     default ChannelCreateRequest asRequest() {
         return ChannelCreateRequest.builder()
@@ -60,6 +63,7 @@ interface StageChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest
                         .map(PermissionOverwrite::getData)
                         .collect(Collectors.toList())))
                 .parentId(mapPossible(parentId(), Snowflake::asString))
+                .flags(mapPossible(flags(), Channel.Flag::toBitfield))
                 .build();
     }
 }

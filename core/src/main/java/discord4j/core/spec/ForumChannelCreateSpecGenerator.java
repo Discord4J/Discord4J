@@ -67,22 +67,22 @@ public interface ForumChannelCreateSpecGenerator extends AuditSpec<ChannelCreate
     @Override
     default ChannelCreateRequest asRequest() {
         return ChannelCreateRequest.builder()
-            .type(Channel.Type.GUILD_FORUM.getValue())
-            .name(name())
-            .topic(topic())
-            .rateLimitPerUser(rateLimitPerUser())
-            .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
-                .map(PermissionOverwrite::getData)
-                .collect(Collectors.toList())))
-            .parentId(mapPossible(parentId(), Snowflake::asString))
-            .nsfw(nsfw())
-            .defaultAutoArchiveDuration(defaultAutoArchiveDuration())
-            .flags(mapPossible(flags(), Channel.Flag::toBitfield))
-            .defaultReactionEmoji(mapPossible(defaultReactionEmoji(), opt -> opt.map(DefaultReaction::getData)))
-            .defaultForumLayout(defaultForumLayout())
-            .availableTags(availableTags().stream().map(ForumTagCreateSpec::asRequest).collect(Collectors.toList()))
-            .defaultSortOrder(defaultSortOrder())
-            .build();
+                .type(Channel.Type.GUILD_FORUM.getValue())
+                .name(name())
+                .topic(topic())
+                .rateLimitPerUser(rateLimitPerUser())
+                .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
+                        .map(PermissionOverwrite::getData)
+                        .collect(Collectors.toList())))
+                .parentId(mapPossible(parentId(), Snowflake::asString))
+                .nsfw(nsfw())
+                .defaultAutoArchiveDuration(defaultAutoArchiveDuration())
+                .flags(mapPossible(flags(), Channel.Flag::toBitfield))
+                .defaultReactionEmoji(mapPossible(defaultReactionEmoji(), opt -> opt.map(DefaultReaction::getData)))
+                .defaultForumLayout(defaultForumLayout())
+                .availableTags(availableTags().stream().map(ForumTagCreateSpec::asRequest).collect(Collectors.toList()))
+                .defaultSortOrder(defaultSortOrder())
+                .build();
     }
 }
 
