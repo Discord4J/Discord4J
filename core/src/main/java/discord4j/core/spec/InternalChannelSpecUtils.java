@@ -38,17 +38,13 @@ final class InternalChannelSpecUtils {
             return;
         }
         final Channel.ContentVisibilityMode contentVisibilityMode = contentVisibilityModePossible.get();
-        if (contentVisibilityMode == Channel.ContentVisibilityMode.DEFAULT) {
-            builder.nsfw(false);
-            currentFlags.remove(Channel.Flag.IS_SPOILER_CHANNEL);
-        } else if (contentVisibilityMode == Channel.ContentVisibilityMode.SPOILER) {
-            builder.nsfw(false);
+        if (contentVisibilityMode == Channel.ContentVisibilityMode.SPOILER) {
             currentFlags.add(Channel.Flag.IS_SPOILER_CHANNEL);
-        } else if (contentVisibilityMode == Channel.ContentVisibilityMode.NSFW) {
-            builder.nsfw(true);
+        } else {
             currentFlags.remove(Channel.Flag.IS_SPOILER_CHANNEL);
         }
         builder.flags(Channel.Flag.toBitfield(currentFlags));
+        builder.nsfw(contentVisibilityMode == Channel.ContentVisibilityMode.NSFW);
     }
 
     public static void handleContentVisibilityMode(
@@ -60,17 +56,13 @@ final class InternalChannelSpecUtils {
             return;
         }
         final Channel.ContentVisibilityMode contentVisibilityMode = contentVisibilityModePossible.get();
-        if (contentVisibilityMode == Channel.ContentVisibilityMode.DEFAULT) {
-            builder.nsfw(false);
-            currentFlags.remove(Channel.Flag.IS_SPOILER_CHANNEL);
-        } else if (contentVisibilityMode == Channel.ContentVisibilityMode.SPOILER) {
-            builder.nsfw(false);
+        if (contentVisibilityMode == Channel.ContentVisibilityMode.SPOILER) {
             currentFlags.add(Channel.Flag.IS_SPOILER_CHANNEL);
-        } else if (contentVisibilityMode == Channel.ContentVisibilityMode.NSFW) {
-            builder.nsfw(true);
+        } else {
             currentFlags.remove(Channel.Flag.IS_SPOILER_CHANNEL);
         }
         builder.flags(Channel.Flag.toBitfield(currentFlags));
+        builder.nsfw(contentVisibilityMode == Channel.ContentVisibilityMode.NSFW);
     }
 
 }
