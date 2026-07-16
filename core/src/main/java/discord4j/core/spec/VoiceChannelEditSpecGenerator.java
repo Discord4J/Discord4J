@@ -22,6 +22,7 @@ import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.discordjson.json.ChannelModifyRequest;
+import discord4j.discordjson.json.ImmutableChannelModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
@@ -57,9 +58,11 @@ interface VoiceChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> 
 
     Possible<EnumSet<Channel.Flag>> flags();
 
+    Possible<Channel.ContentVisibilityMode> contentVisibilityMode();
+
     @Override
     default ChannelModifyRequest asRequest() {
-        return ChannelModifyRequest.builder()
+        ImmutableChannelModifyRequest.Builder builder = ChannelModifyRequest.builder()
                 .name(name())
                 .bitrate(bitrate())
                 .userLimit(userLimit())
@@ -71,8 +74,12 @@ interface VoiceChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> 
                 .parentId(mapPossibleOptional(parentId(), Snowflake::asString))
                 .rtcRegion(rtcRegion())
                 .videoQualityMode(mapPossibleOptional(videoQualityMode(), VoiceChannel.Mode::getValue))
-                .flags(mapPossible(flags(), Channel.Flag::toBitfield))
-                .build();
+                .flags(mapPossible(flags(), Channel.Flag::toBitfield));
+
+        InternalChannelSpecUtils.handleContentVisibilityMode(builder, contentVisibilityMode(),
+                flags().toOptional().map(EnumSet::copyOf).orElse(EnumSet.noneOf(Channel.Flag.class)));
+
+        return builder.build();
     }
 }
 

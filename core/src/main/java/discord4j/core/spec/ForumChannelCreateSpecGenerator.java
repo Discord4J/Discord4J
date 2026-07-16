@@ -23,6 +23,7 @@ import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.ForumChannel;
 import discord4j.core.object.reaction.DefaultReaction;
 import discord4j.discordjson.json.ChannelCreateRequest;
+import discord4j.discordjson.json.ImmutableChannelCreateRequest;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
@@ -56,6 +57,8 @@ public interface ForumChannelCreateSpecGenerator extends AuditSpec<ChannelCreate
 
     Possible<EnumSet<Channel.Flag>> flags();
 
+    Possible<Channel.ContentVisibilityMode> contentVisibilityMode();
+
     Possible<Optional<DefaultReaction>> defaultReactionEmoji();
 
     List<ForumTagCreateSpec> availableTags();
@@ -66,7 +69,7 @@ public interface ForumChannelCreateSpecGenerator extends AuditSpec<ChannelCreate
 
     @Override
     default ChannelCreateRequest asRequest() {
-        return ChannelCreateRequest.builder()
+        ImmutableChannelCreateRequest.Builder builder = ChannelCreateRequest.builder()
                 .type(Channel.Type.GUILD_FORUM.getValue())
                 .name(name())
                 .topic(topic())
@@ -81,8 +84,12 @@ public interface ForumChannelCreateSpecGenerator extends AuditSpec<ChannelCreate
                 .defaultReactionEmoji(mapPossible(defaultReactionEmoji(), opt -> opt.map(DefaultReaction::getData)))
                 .defaultForumLayout(defaultForumLayout())
                 .availableTags(availableTags().stream().map(ForumTagCreateSpec::asRequest).collect(Collectors.toList()))
-                .defaultSortOrder(defaultSortOrder())
-                .build();
+                .defaultSortOrder(defaultSortOrder());
+
+        InternalChannelSpecUtils.handleContentVisibilityMode(builder, contentVisibilityMode(),
+                flags().toOptional().map(EnumSet::copyOf).orElse(EnumSet.noneOf(Channel.Flag.class)));
+
+        return builder.build();
     }
 }
 

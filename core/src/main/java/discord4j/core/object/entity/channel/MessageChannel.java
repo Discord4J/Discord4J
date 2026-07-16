@@ -380,4 +380,18 @@ public interface MessageChannel extends Channel {
                 .map(Flag::valueOf)
                 .orElse(EnumSet.noneOf(Flag.class));
     }
+
+    /**
+     * Get the channel visibility mode for the content.
+     *
+     * @return A ContentVisibilityMode.
+     */
+    default ContentVisibilityMode getContentVisibilityMode() {
+        if (this.getFlags().contains(Flag.IS_SPOILER_CHANNEL)) {
+            return ContentVisibilityMode.SPOILER;
+        } else if (this.getData().nsfw().toOptional().orElse(false)) {
+            return ContentVisibilityMode.NSFW;
+        }
+        return ContentVisibilityMode.DEFAULT;
+    }
 }

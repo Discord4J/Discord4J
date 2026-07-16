@@ -23,6 +23,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ChannelCreateRequest;
+import discord4j.discordjson.json.ImmutableChannelCreateRequest;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
@@ -53,9 +54,11 @@ interface TextChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest>
 
     Possible<EnumSet<Channel.Flag>> flags();
 
+    Possible<Channel.ContentVisibilityMode> contentVisibilityMode();
+
     @Override
     default ChannelCreateRequest asRequest() {
-        return ChannelCreateRequest.builder()
+        ImmutableChannelCreateRequest.Builder builder = ChannelCreateRequest.builder()
                 .type(Channel.Type.GUILD_TEXT.getValue())
                 .name(name())
                 .topic(topic())
@@ -66,8 +69,12 @@ interface TextChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest>
                         .collect(Collectors.toList())))
                 .parentId(mapPossible(parentId(), Snowflake::asString))
                 .nsfw(nsfw())
-                .flags(mapPossible(flags(), Channel.Flag::toBitfield))
-                .build();
+                .flags(mapPossible(flags(), Channel.Flag::toBitfield));
+
+        InternalChannelSpecUtils.handleContentVisibilityMode(builder, contentVisibilityMode(),
+                flags().toOptional().map(EnumSet::copyOf).orElse(EnumSet.noneOf(Channel.Flag.class)));
+
+        return builder.build();
     }
 }
 

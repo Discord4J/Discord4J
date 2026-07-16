@@ -180,7 +180,7 @@ public interface Channel extends Entity {
      * Represent the channel flags.
      *
      * @see <a href="https://docs.discord.com/developers/resources/channel#channel-object-channel-flags">https://docs.discord.com/developers/resources/channel#channel-object-channel-flags</a>
-     **/
+     */
     @Experimental
     enum Flag {
         /**
@@ -260,5 +260,19 @@ public interface Channel extends Entity {
             return bitfield;
         }
 
+    }
+
+    /**
+     * Represent the channel content view (like client) for Spoiler or NSFW channels.
+     */
+    @Experimental
+    enum ContentVisibilityMode {
+        DEFAULT,
+        SPOILER,
+        NSFW;
+
+        public String getValue() {
+            return name().toLowerCase();
+        }
     }
 }
