@@ -154,6 +154,16 @@ public class ResolvedChannel implements DiscordObject {
     }
 
     /**
+     * Gets the computed permissions for the bot in the channel, including overwrites.
+     * This field can be absent when the bot is not in a guild, e.g. when providing a DM channel.
+     *
+     * @return The permissions of the channel.
+     */
+    public Optional<PermissionSet> getEffectiveAppPermissions() {
+        return Possible.flatOpt(this.getData().appPermissions()).map(PermissionSet::of);
+    }
+
+    /**
      * Gets the associated thread metadata, if the provided channel is a thread.
      *
      * @return Associated {@link ThreadMetadata}, if present.
