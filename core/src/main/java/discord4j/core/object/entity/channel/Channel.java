@@ -176,11 +176,15 @@ public interface Channel extends Entity {
         }
     }
 
-    /** Represent channel flags : <a href="https://discord.com/developers/docs/resources/channel#channel-object-channel-flags">https://discord.com/developers/docs/resources/channel#channel-object-channel-flags</a> */
+    /**
+     * Represent the channel flags.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/channel#channel-object-channel-flags">https://docs.discord.com/developers/resources/channel#channel-object-channel-flags</a>
+     */
     @Experimental
     enum Flag {
         /**
-         * This {@link ThreadChannel} is pinned to the top of its parent {@link ForumChannel}
+         * This {@link ThreadChannel} is pinned to the top of its parent {@link ForumChannel}.
          */
         PINNED(1),
 
@@ -192,7 +196,12 @@ public interface Channel extends Entity {
         /**
          * Whether hides the embedded media download options. Available only for media channels.
          */
-        HIDE_MEDIA_DOWNLOAD_OPTIONS(15);
+        HIDE_MEDIA_DOWNLOAD_OPTIONS(15),
+
+        /**
+         * Whether is a Spoiler Channel where users must opt in to view its contents.
+         */
+        IS_SPOILER_CHANNEL(21);
 
         private final int shiftValue;
         private final int bitValue;
@@ -251,5 +260,19 @@ public interface Channel extends Entity {
             return bitfield;
         }
 
+    }
+
+    /**
+     * Represent the channel content view (like client) for Spoiler or NSFW channels.
+     */
+    @Experimental
+    enum ContentVisibilityMode {
+        DEFAULT,
+        SPOILER,
+        NSFW;
+
+        public String getValue() {
+            return name().toLowerCase();
+        }
     }
 }

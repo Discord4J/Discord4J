@@ -23,11 +23,13 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.discordjson.json.ChannelCreateRequest;
+import discord4j.discordjson.json.ImmutableChannelCreateRequest;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,9 +52,13 @@ interface VoiceChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest
 
     Possible<Snowflake> parentId();
 
+    Possible<EnumSet<Channel.Flag>> flags();
+
+    Possible<Channel.ContentVisibilityMode> contentVisibilityMode();
+
     @Override
     default ChannelCreateRequest asRequest() {
-        return ChannelCreateRequest.builder()
+        ImmutableChannelCreateRequest.Builder builder = ChannelCreateRequest.builder()
                 .type(Channel.Type.GUILD_VOICE.getValue())
                 .name(name())
                 .bitrate(bitrate())
@@ -63,7 +69,12 @@ interface VoiceChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest
                         .map(PermissionOverwrite::getData)
                         .collect(Collectors.toList())))
                 .parentId(mapPossible(parentId(), Snowflake::asString))
-                .build();
+                .flags(mapPossible(flags(), Channel.Flag::toBitfield));
+
+        InternalChannelSpecUtils.handleContentVisibilityMode(builder, contentVisibilityMode(),
+                flags().toOptional().map(EnumSet::copyOf).orElse(EnumSet.noneOf(Channel.Flag.class)));
+
+        return builder.build();
     }
 }
 
