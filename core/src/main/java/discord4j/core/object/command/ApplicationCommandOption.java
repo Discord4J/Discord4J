@@ -236,6 +236,15 @@ public class ApplicationCommandOption implements DiscordObject {
         return data.maxLength().toOptional();
     }
 
+    /**
+     * Returns the list of file types that this option accepts if {@link #getType()} is {@link Type#ATTACHMENT}.
+     *
+     * @return The list of file types that this option accepts, otherwise an empty list.
+     */
+    public List<String> getFileTypes() {
+        return data.fileTypes().toOptional().orElse(Collections.emptyList());
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;

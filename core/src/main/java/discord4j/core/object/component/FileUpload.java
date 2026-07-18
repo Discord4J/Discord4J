@@ -19,6 +19,7 @@ package discord4j.core.object.component;
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.ComponentData;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -74,6 +75,15 @@ public class FileUpload extends MessageComponent implements ICanBeUsedInLabelCom
     }
 
     /**
+     * Retrieves the list of allowed file types for the file upload component.
+     *
+     * @return A list of allowed file types. Returns an empty list if no file types are defined.
+     */
+    public List<String> getFileTypes() {
+        return this.getData().fileTypes().toOptional().orElse(Collections.emptyList());
+    }
+
+    /**
      * Creates a new file upload with the same data as this one, but depending on the value param, it may be
      * required or not.
      *
@@ -102,5 +112,15 @@ public class FileUpload extends MessageComponent implements ICanBeUsedInLabelCom
      */
     public FileUpload withMaxValues(int maxValues) {
         return new FileUpload(ComponentData.builder().from(this.getData()).maxValues(maxValues).build());
+    }
+
+    /**
+     * Creates a new file upload with the same data as this one, but with the given allowed file types.
+     *
+     * @param fileTypes The new allowed file types. (ex: image, .pdf)
+     * @return A new file upload with the given allowed file types.
+     */
+    public FileUpload withFileTypes(final List<String> fileTypes) {
+        return new FileUpload(ComponentData.builder().from(this.getData()).fileTypes(fileTypes).build());
     }
 }
