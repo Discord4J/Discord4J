@@ -24,6 +24,7 @@ import discord4j.core.object.entity.channel.*;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.gateway.ChannelCreate;
 import discord4j.discordjson.json.gateway.ChannelDelete;
+import discord4j.discordjson.json.gateway.ChannelInfo;
 import discord4j.discordjson.json.gateway.ChannelPinsUpdate;
 import discord4j.discordjson.json.gateway.ChannelUpdate;
 import discord4j.discordjson.possible.Possible;
@@ -87,6 +88,11 @@ class ChannelDispatchHandlers {
                     return new UnknownChannelDeleteEvent(gateway, context.getShardInfo(), new UnknownChannel(gateway, channel));
             }
         });
+    }
+
+    static Mono<? extends Event> channelInfo(DispatchContext<ChannelInfo, Void> context) {
+        // TODO: Implement channel info event
+        return Mono.empty();
     }
 
     static Mono<PinsUpdateEvent> channelPinsUpdate(DispatchContext<ChannelPinsUpdate, Void> context) {

@@ -81,8 +81,9 @@ public enum ActionType {
     ONBOARDING_CREATE(166),
     ONBOARDING_UPDATE(167),
     HOME_SETTINGS_CREATE(190),
-    HOME_SETTINGS_UPDATE(191);
-
+    HOME_SETTINGS_UPDATE(191),
+    VOICE_CHANNEL_STATUS_CREATE(192),
+    VOICE_CHANNEL_STATUS_DELETE(193);
 
     /**
      * Gets the type of action. It is guaranteed that invoking {@link #getValue()} from the returned enum will equal
@@ -151,6 +152,8 @@ public enum ActionType {
             case 167: return ONBOARDING_UPDATE;
             case 190: return HOME_SETTINGS_CREATE;
             case 191: return HOME_SETTINGS_UPDATE;
+            case 192: return VOICE_CHANNEL_STATUS_CREATE;
+            case 193: return VOICE_CHANNEL_STATUS_DELETE;
             default: return UNKNOWN;
         }
     }
@@ -173,6 +176,6 @@ public enum ActionType {
      * @return The underlying value as represented by Discord.
      */
     public int getValue() {
-        return value;
+        return this.value;
     }
 }

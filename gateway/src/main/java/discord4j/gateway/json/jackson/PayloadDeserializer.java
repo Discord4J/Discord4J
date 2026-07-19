@@ -43,6 +43,7 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         dispatchTypes.put(EventNames.READY, Ready.class);
         dispatchTypes.put(EventNames.RESUMED, Resumed.class);
         dispatchTypes.put(EventNames.CHANNEL_CREATE, ChannelCreate.class);
+        dispatchTypes.put(EventNames.CHANNEL_INFO, ChannelInfo.class);
         dispatchTypes.put(EventNames.CHANNEL_UPDATE, ChannelUpdate.class);
         dispatchTypes.put(EventNames.CHANNEL_DELETE, ChannelDelete.class);
         dispatchTypes.put(EventNames.CHANNEL_PINS_UPDATE, ChannelPinsUpdate.class);
@@ -76,6 +77,8 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         dispatchTypes.put(EventNames.PRESENCE_UPDATE, PresenceUpdate.class);
         dispatchTypes.put(EventNames.TYPING_START, TypingStart.class);
         dispatchTypes.put(EventNames.USER_UPDATE, UserUpdate.class);
+        dispatchTypes.put(EventNames.VOICE_CHANNEL_STATUS_UPDATE, VoiceChannelStatusUpdate.class);
+        dispatchTypes.put(EventNames.VOICE_CHANNEL_START_TIME_UPDATE, VoiceChannelStartTimeUpdate.class);
         dispatchTypes.put(EventNames.VOICE_STATE_UPDATE, VoiceStateUpdateDispatch.class);
         dispatchTypes.put(EventNames.VOICE_SERVER_UPDATE, VoiceServerUpdate.class);
         dispatchTypes.put(EventNames.WEBHOOKS_UPDATE, WebhooksUpdate.class);

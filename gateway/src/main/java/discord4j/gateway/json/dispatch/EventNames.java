@@ -21,6 +21,7 @@ public abstract class EventNames {
     public static final String READY = "READY";
     public static final String RESUMED = "RESUMED";
     public static final String CHANNEL_CREATE = "CHANNEL_CREATE";
+    public static final String CHANNEL_INFO = "CHANNEL_INFO";
     public static final String CHANNEL_UPDATE = "CHANNEL_UPDATE";
     public static final String CHANNEL_DELETE = "CHANNEL_DELETE";
     public static final String CHANNEL_PINS_UPDATE = "CHANNEL_PINS_UPDATE";
@@ -54,6 +55,8 @@ public abstract class EventNames {
     public static final String PRESENCE_UPDATE = "PRESENCE_UPDATE";
     public static final String TYPING_START = "TYPING_START";
     public static final String USER_UPDATE = "USER_UPDATE";
+    public static final String VOICE_CHANNEL_STATUS_UPDATE = "VOICE_CHANNEL_STATUS_UPDATE";
+    public static final String VOICE_CHANNEL_START_TIME_UPDATE = "VOICE_CHANNEL_START_TIME_UPDATE";
     public static final String VOICE_STATE_UPDATE = "VOICE_STATE_UPDATE";
     public static final String VOICE_SERVER_UPDATE = "VOICE_SERVER_UPDATE";
     public static final String WEBHOOKS_UPDATE = "WEBHOOKS_UPDATE";
