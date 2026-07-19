@@ -36,6 +36,7 @@ import discord4j.discordjson.json.StartThreadFromMessageRequest;
 import discord4j.discordjson.json.StartThreadWithoutMessageRequest;
 import discord4j.discordjson.json.ThreadMemberData;
 import discord4j.discordjson.json.ThreadMetadata;
+import discord4j.discordjson.json.VoiceChannelStatusSetRequest;
 import discord4j.discordjson.json.WebhookData;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.MultipartRequest;
@@ -125,6 +126,19 @@ public class RestChannel {
      */
     public Mono<ChannelData> modify(ChannelModifyRequest request, @Nullable String reason) {
         return restClient.getChannelService().modifyChannel(id, request, reason);
+    }
+
+    /**
+     * Request to edit the status of this voice channel using a given {@link VoiceChannelStatusSetRequest} as body and optionally, a reason.
+     *
+     * @param request request body used to modify the status of the voice channel
+     * @param reason a reason for this action, can be {@code null}
+     * @return a {@link Mono} where, upon successful completion, emits nothing; indicating the channel status has been set.
+     * If an error is received, it is emitted through the {@code Mono}.
+     * @see <a href="https://docs.discord.com/developers/resources/channel#set-voice-channel-status">Set Voice Channel Status</a>
+     */
+    public Mono<Void> setVoiceChannelStatus(VoiceChannelStatusSetRequest request, @Nullable String reason) {
+        return restClient.getChannelService().setVoiceChannelStatus(id, request, reason);
     }
 
     /**

@@ -53,6 +53,8 @@ public class OptionKey<T> {
     public static final OptionKey<String> AUTO_MODERATION_RULE_TRIGGER_TYPE = optionKey("auto_moderation_rule_trigger_type", Function.identity());
     /** ID of the app whose permissions were targeted. */
     public static final OptionKey<Snowflake> APPLICATION_ID = optionKey("application_id", Snowflake::of);
+    /** The new voice channel status. */
+    public static final OptionKey<String> STATUS = optionKey("status", Function.identity());
 
     private static <T> OptionKey<T> optionKey(String field, Function<String, T> parser) {
         return new OptionKey<>(field, parser);

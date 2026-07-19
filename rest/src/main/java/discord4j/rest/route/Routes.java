@@ -158,6 +158,16 @@ public abstract class Routes {
     public static final Route CHANNEL_MODIFY_PARTIAL = Route.patch("/channels/{channel.id}");
 
     /**
+     * Set a voice channel’s status. Requires the `SET_VOICE_CHANNEL_STATUS` permission, and additionally
+     * the `MANAGE_CHANNELS` permission if the current user is not connected to the voice channel.
+     * Fires a Voice Channel Status Update Gateway event.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/channel#set-voice-channel-status">
+     *     https://docs.discord.com/developers/resources/channel#set-voice-channel-status</a>
+     */
+    public static final Route VOICE_CHANNEL_STATUS_SET = Route.put("/channels/{channel.id}/voice-status");
+
+    /**
      * Delete a guild channel, or close a private message. Requires the 'MANAGE_CHANNELS' permission for the guild.
      * Returns a guild channel or dm channel object on success. Fires a Channel Delete Gateway event.
      *

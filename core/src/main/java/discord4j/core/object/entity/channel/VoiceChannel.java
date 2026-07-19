@@ -23,6 +23,8 @@ import discord4j.core.spec.VoiceChannelEditSpec;
 import discord4j.core.spec.legacy.LegacyVoiceChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.VoiceChannelStatusSetRequest;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -114,6 +116,17 @@ public final class VoiceChannel extends BaseTopLevelGuildChannel implements Audi
      */
     public Mono<Void> sendSoundBoard(SoundboardSound soundboardSound) {
         return soundboardSound.sendSound(this.getId());
+    }
+
+    /**
+     * Set the status of this voice channel.
+     *
+     * @param status the status to set
+     * @param reason the reason for this action, can be {@code null}
+     * @return An empty mono which completes when the request was sent
+     */
+    public Mono<Void> setStatus(final String status, final @Nullable String reason) {
+        return this.getRestChannel().setVoiceChannelStatus(VoiceChannelStatusSetRequest.builder().status(status).build(), reason);
     }
 
     @Override
