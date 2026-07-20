@@ -55,6 +55,13 @@ public class ChannelService extends RestService {
             .bodyToMono(ChannelData.class);
     }
 
+    public Mono<Void> setVoiceChannelStatus(long channelId, VoiceChannelStatusSetRequest request, @Nullable String reason) {
+        return Routes.VOICE_CHANNEL_STATUS_SET.newRequest(channelId, request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
+    }
+
     public Mono<ChannelData> deleteChannel(long channelId, @Nullable String reason) {
         return Routes.CHANNEL_DELETE.newRequest(channelId)
             .optionalHeader("X-Audit-Log-Reason", reason)

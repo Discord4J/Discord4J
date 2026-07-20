@@ -268,6 +268,11 @@ public enum Permission {
     SEND_VOICE_MESSAGES(0x0000400000000000L, false),
 
     /**
+     * Allows setting voice channel status.
+     */
+    SET_VOICE_CHANNEL_STATUS(0x0001000000000000L, false),
+
+    /**
      * Allows creating polls.
      */
     SEND_POLLS(0x0002000000000000L, false),

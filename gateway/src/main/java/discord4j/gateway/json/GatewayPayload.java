@@ -77,25 +77,29 @@ public class GatewayPayload<T extends PayloadData> {
         return new GatewayPayload<>(Opcode.REQUEST_SOUNDBOARD_SOUNDS, data, null, null);
     }
 
+    public static GatewayPayload<RequestChannelInfo> requestChannelInfo(RequestChannelInfo data) {
+        return new GatewayPayload<>(Opcode.REQUEST_CHANNEL_INFO, data, null, null);
+    }
+
     public Opcode<T> getOp() {
-        return op;
+        return this.op;
     }
 
     public @Nullable T getData() {
-        return data;
+        return this.data;
     }
 
     public @Nullable Integer getSequence() {
-        return sequence;
+        return this.sequence;
     }
 
     public @Nullable String getType() {
-        return type;
+        return this.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(op, data, sequence, type);
+        return Objects.hash(this.op, this.data, this.sequence, this.type);
     }
 
     @Override
@@ -115,10 +119,10 @@ public class GatewayPayload<T extends PayloadData> {
     @Override
     public String toString() {
         return "GatewayPayload{" +
-                "op=" + op +
-                ", data=" + data +
-                ", sequence=" + sequence +
-                ", type='" + type + '\'' +
+                "op=" + this.op +
+                ", data=" + this.data +
+                ", sequence=" + this.sequence +
+                ", type='" + this.type + '\'' +
                 '}';
     }
 }
