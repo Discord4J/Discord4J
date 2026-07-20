@@ -102,7 +102,8 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(Resumed.class, LifecycleDispatchHandlers::resumed);
         addHandler(TypingStart.class, DispatchHandlers::typingStart);
         addHandler(UserUpdate.class, DispatchHandlers::userUpdate);
-        // TODO: handler for voice channel status and start time
+        addHandler(VoiceChannelStatusUpdate.class, ChannelDispatchHandlers::voiceChannelStatusUpdate);
+        addHandler(VoiceChannelStartTimeUpdate.class, ChannelDispatchHandlers::voiceChannelStartTimeUpdate);
         addHandler(VoiceServerUpdate.class, DispatchHandlers::voiceServerUpdate);
         addHandler(VoiceStateUpdateDispatch.class, DispatchHandlers::voiceStateUpdateDispatch);
         addHandler(WebhooksUpdate.class, DispatchHandlers::webhooksUpdate);
