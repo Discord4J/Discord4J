@@ -8,6 +8,11 @@ updates:
       github-actions:
         update-types:
           - major
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-minor"
+          - "version-update:semver-patch"
   - package-ecosystem: "gradle"
     directories:
       - "/"
