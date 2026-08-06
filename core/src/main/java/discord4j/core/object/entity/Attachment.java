@@ -108,6 +108,19 @@ public final class Attachment implements Entity {
     }
 
     /**
+     * Create a copy of this attachment with the given description.
+     *
+     * @param description The new description of the attachment, if present.
+     * @return A copy of this attachment with the given description.
+     */
+    public Attachment withDescription(@Nullable String description) {
+        return new Attachment(this.gateway, AttachmentData.builder()
+                .from(this.getData())
+                .description(Possible.ofNullable(description))
+                .build());
+    }
+
+    /**
      * Gets the size of the file in bytes.
      *
      * @return The size of the file in bytes.
@@ -163,6 +176,19 @@ public final class Attachment implements Entity {
      */
     public boolean isSpoiler() {
         return this.getFlags().contains(AttachmentFlags.IS_SPOILER);
+    }
+
+    /**
+     * Create a copy of this attachment with the given spoiler state.
+     *
+     * @param spoiler Whether the attachment is a spoiler.
+     * @return A copy of this attachment with the given spoiler state.
+     */
+    public Attachment withSpoiler(boolean spoiler) {
+        return new Attachment(this.gateway, AttachmentData.builder()
+                .from(this.getData())
+                .isSpoiler(spoiler)
+                .build());
     }
 
     /**
