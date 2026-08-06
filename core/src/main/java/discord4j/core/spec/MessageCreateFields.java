@@ -17,7 +17,6 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.object.entity.Attachment;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.PartialAttachmentData;
 import discord4j.discordjson.possible.Possible;
@@ -26,9 +25,7 @@ import org.jspecify.annotations.Nullable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 
 @InlineFieldStyle
 @Value.Enclosing
@@ -51,10 +48,6 @@ public final class MessageCreateFields {
 
         static File of(FileSpoiler file) {
             return ImmutableMessageCreateFields.File.of(file.name(), file.description(), file.inputStream());
-        }
-
-        static File of(final Attachment attachment) throws IOException {
-            return ImmutableMessageCreateFields.File.of(attachment.getFilename(), attachment.getDescription().orElse(null), new URL(attachment.getUrl()).openStream());
         }
 
         String name();
@@ -102,10 +95,6 @@ public final class MessageCreateFields {
 
         static FileSpoiler of(final File file) {
             return ImmutableMessageCreateFields.FileSpoiler.of(file.name(), file.description(), file.inputStream());
-        }
-
-        static File of(final Attachment attachment) throws IOException {
-            return ImmutableMessageCreateFields.FileSpoiler.of(attachment.getFilename(), attachment.getDescription().orElse(null), new URL(attachment.getUrl()).openStream());
         }
 
         @Override
