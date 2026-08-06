@@ -17,7 +17,6 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.object.entity.Attachment;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.PartialAttachmentData;
 import discord4j.discordjson.possible.Possible;
@@ -47,6 +46,10 @@ public final class MessageCreateFields {
             return ImmutableMessageCreateFields.File.of(name, description, inputStream);
         }
 
+        static File of(FileSpoiler file) {
+            return ImmutableMessageCreateFields.File.of(file.name(), file.description(), file.inputStream());
+        }
+
         String name();
 
         @Nullable String description();
@@ -57,11 +60,18 @@ public final class MessageCreateFields {
             return this.name();
         }
 
+        @Value.Default
+        @Value.Parameter(value = false)
+        default boolean isSpoiler() {
+            return false;
+        }
+
         default PartialAttachmentData asPartialAttachmentData(final Id id) {
             return PartialAttachmentData.builder()
                     .id(id)
                     .filename(this.getFileName())
                     .description(Possible.ofNullable(this.description()))
+                    .isSpoiler(this.isSpoiler())
                     .build();
         }
 
@@ -75,17 +85,21 @@ public final class MessageCreateFields {
     @Value.Immutable
     public interface FileSpoiler extends File {
 
-        static FileSpoiler of(String name, InputStream inputStream) {
+        static FileSpoiler of(final String name, final InputStream inputStream) {
             return ImmutableMessageCreateFields.FileSpoiler.of(name, null, inputStream);
         }
 
-        static FileSpoiler of(String name, String description, InputStream inputStream) {
+        static FileSpoiler of(final String name, final String description, final InputStream inputStream) {
             return ImmutableMessageCreateFields.FileSpoiler.of(name, description, inputStream);
         }
 
+        static FileSpoiler of(final File file) {
+            return ImmutableMessageCreateFields.FileSpoiler.of(file.name(), file.description(), file.inputStream());
+        }
+
         @Override
-        default String getFileName() {
-            return Attachment.SPOILER_PREFIX + this.name();
+        default boolean isSpoiler() {
+            return true;
         }
 
         @Override
