@@ -19,6 +19,7 @@ package discord4j.core.event.domain.channel;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.channel.ChannelInfo;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
@@ -35,13 +36,13 @@ import java.util.List;
 public class ChannelInfoEvent extends ChannelEvent {
 
     private final long guildId;
-    private final List<? extends Object> channels;
+    private final List<ChannelInfo> channels;
 
     public ChannelInfoEvent(
             final GatewayDiscordClient gateway,
             final ShardInfo shardInfo,
             long guildId,
-            List<? extends Object> channels
+            List<ChannelInfo> channels
     ) {
         super(gateway, shardInfo);
         this.guildId = guildId;
@@ -49,14 +50,31 @@ public class ChannelInfoEvent extends ChannelEvent {
     }
 
     /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
      *
+     * @return The ID of the {@link Guild}.
      */
     public Snowflake getGuildId() {
         return Snowflake.of(this.guildId);
     }
 
+    /**
+     * Requests to retrieve the {@link Guild} involved in the event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<Guild> getGuild() {
         return this.getClient().getGuildById(this.getGuildId());
+    }
+
+    /**
+     * Gets the list of channels involved in the event.
+     *
+     * @return The list of channels involved in the event.
+     */
+    public List<ChannelInfo> getChannels() {
+        return this.channels;
     }
 
 }
