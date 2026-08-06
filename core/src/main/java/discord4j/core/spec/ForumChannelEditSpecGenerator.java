@@ -22,6 +22,7 @@ import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.ForumChannel;
 import discord4j.core.object.reaction.DefaultReaction;
 import discord4j.discordjson.json.ChannelModifyRequest;
+import discord4j.discordjson.json.ImmutableChannelModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
@@ -53,6 +54,8 @@ public interface ForumChannelEditSpecGenerator extends AuditSpec<ChannelModifyRe
 
     Possible<EnumSet<Channel.Flag>> flags();
 
+    Possible<Channel.ContentVisibilityMode> contentVisibilityMode();
+
     Possible<Optional<Integer>> defaultAutoArchiveDuration();
 
     Possible<Optional<DefaultReaction>> defaultReactionEmoji();
@@ -65,22 +68,26 @@ public interface ForumChannelEditSpecGenerator extends AuditSpec<ChannelModifyRe
 
     @Override
     default ChannelModifyRequest asRequest() {
-        return ChannelModifyRequest.builder()
-            .name(name())
-            .topic(topic())
-            .rateLimitPerUser(rateLimitPerUser())
-            .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
-                .map(PermissionOverwrite::getData)
-                .collect(Collectors.toList())))
-            .parentId(mapPossible(parentId(), snowflake -> Optional.of(snowflake.asString())))
-            .nsfw(nsfw())
-            .defaultAutoArchiveDuration(defaultAutoArchiveDuration())
-            .flags(mapPossible(flags(), Channel.Flag::toBitfield))
-            .defaultReactionEmoji(mapPossible(defaultReactionEmoji(), opt -> opt.map(DefaultReaction::getData)))
-            .defaultForumLayout(defaultForumLayout())
-            .availableTags(mapPossible(availableTags(), list -> list.stream().map(ForumTagCreateSpecGenerator::asRequest).collect(Collectors.toList())))
-            .defaultSortOrder(defaultSortOrder())
-            .build();
+        ImmutableChannelModifyRequest.Builder builder = ChannelModifyRequest.builder()
+                .name(name())
+                .topic(topic())
+                .rateLimitPerUser(rateLimitPerUser())
+                .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
+                        .map(PermissionOverwrite::getData)
+                        .collect(Collectors.toList())))
+                .parentId(mapPossible(parentId(), snowflake -> Optional.of(snowflake.asString())))
+                .nsfw(nsfw())
+                .defaultAutoArchiveDuration(defaultAutoArchiveDuration())
+                .flags(mapPossible(flags(), Channel.Flag::toBitfield))
+                .defaultReactionEmoji(mapPossible(defaultReactionEmoji(), opt -> opt.map(DefaultReaction::getData)))
+                .defaultForumLayout(defaultForumLayout())
+                .availableTags(mapPossible(availableTags(), list -> list.stream().map(ForumTagCreateSpecGenerator::asRequest).collect(Collectors.toList())))
+                .defaultSortOrder(defaultSortOrder());
+
+        InternalChannelSpecUtils.handleContentVisibilityMode(builder, contentVisibilityMode(),
+                flags().toOptional().map(EnumSet::copyOf).orElse(EnumSet.noneOf(Channel.Flag.class)));
+
+        return builder.build();
     }
 }
 
