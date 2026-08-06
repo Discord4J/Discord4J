@@ -25,8 +25,8 @@ import discord4j.core.object.component.Button;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.MessageCreateFields;
-import discord4j.rest.interaction.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.interaction.GuildCommandRegistrar;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -35,6 +35,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -114,18 +115,18 @@ public class ExampleButtonAttachment {
                         } else if (toggleFirstSpoiler.equals(press.getCustomId())) {
                             Mono<Message> edit = press.getReply()
                                     .flatMap(reply -> {
-                                        Attachment first = reply.getAttachments().get(0);
-
-                                        return Mono.fromCallable(() -> (first.isSpoiler()) ? MessageCreateFields.File.of(first) : MessageCreateFields.FileSpoiler.of(first))
+                                        return Mono.fromCallable(() -> {
+                                                    List<Attachment> attachments = new ArrayList<>(reply.getAttachments());
+                                                    Attachment first = attachments.get(0);
+                                                    first = first.withSpoiler(!first.isSpoiler());
+                                                    attachments.set(0, first);
+                                                    return attachments;
+                                                })
                                                 .subscribeOn(Schedulers.boundedElastic())
-                                                .flatMap(file -> press.editReply()
+                                                .flatMap(newAttachments -> press.editReply()
                                                         .withContentOrNull("Replaced the first attachment")
-                                                        .withFiles(file)
                                                         .withComponents(row)
-                                                        .withAttachmentsOrNull(reply.getAttachments()
-                                                                .stream()
-                                                                .skip(1)
-                                                                .collect(Collectors.toList())));
+                                                        .withAttachmentsOrNull(newAttachments));
                                     });
                             return press.deferEdit().then(edit);
 
