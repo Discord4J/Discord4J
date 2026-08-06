@@ -24,16 +24,22 @@ import discord4j.core.object.entity.channel.*;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.gateway.ChannelCreate;
 import discord4j.discordjson.json.gateway.ChannelDelete;
+import discord4j.discordjson.json.gateway.ChannelInfo;
 import discord4j.discordjson.json.gateway.ChannelPinsUpdate;
 import discord4j.discordjson.json.gateway.ChannelUpdate;
+import discord4j.discordjson.json.gateway.VoiceChannelStartTimeUpdate;
+import discord4j.discordjson.json.gateway.VoiceChannelStatusUpdate;
 import discord4j.discordjson.possible.Possible;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 class ChannelDispatchHandlers {
 
@@ -47,19 +53,26 @@ class ChannelDispatchHandlers {
 
         return Mono.fromCallable(() -> {
             switch (type) {
-                case GUILD_TEXT: return new TextChannelCreateEvent(gateway, context.getShardInfo(), new TextChannel(gateway, channel));
+                case GUILD_TEXT: return new TextChannelCreateEvent(gateway, context.getShardInfo(),
+                        new TextChannel(gateway, channel));
                 case GUILD_VOICE:
                 case GUILD_STAGE_VOICE:
-                    return new VoiceChannelCreateEvent(gateway, context.getShardInfo(), new VoiceChannel(gateway, channel));
+                    return new VoiceChannelCreateEvent(gateway, context.getShardInfo(), new VoiceChannel(gateway,
+                            channel));
                 case GROUP_DM:
                     throw new UnsupportedOperationException("Received channel_create for group on a bot account!");
-                case GUILD_CATEGORY: return new CategoryCreateEvent(gateway, context.getShardInfo(), new Category(gateway, channel));
-                case GUILD_NEWS: return new NewsChannelCreateEvent(gateway, context.getShardInfo(), new NewsChannel(gateway, channel));
-                case GUILD_STORE: return new StoreChannelCreateEvent(gateway, context.getShardInfo(), new StoreChannel(gateway, channel));
-                case GUILD_FORUM: return new ForumChannelCreateEvent(gateway, context.getShardInfo(), new ForumChannel(gateway, channel));
+                case GUILD_CATEGORY: return new CategoryCreateEvent(gateway, context.getShardInfo(),
+                        new Category(gateway, channel));
+                case GUILD_NEWS: return new NewsChannelCreateEvent(gateway, context.getShardInfo(),
+                        new NewsChannel(gateway, channel));
+                case GUILD_STORE: return new StoreChannelCreateEvent(gateway, context.getShardInfo(),
+                        new StoreChannel(gateway, channel));
+                case GUILD_FORUM: return new ForumChannelCreateEvent(gateway, context.getShardInfo(),
+                        new ForumChannel(gateway, channel));
                 default:
                     log.info("Received unknown channel create: {}", channel);
-                    return new UnknownChannelCreateEvent(gateway, context.getShardInfo(), new UnknownChannel(gateway, channel));
+                    return new UnknownChannelCreateEvent(gateway, context.getShardInfo(), new UnknownChannel(gateway,
+                            channel));
             }
         });
     }
@@ -71,36 +84,77 @@ class ChannelDispatchHandlers {
 
         return Mono.fromCallable(() -> {
             switch (type) {
-                case GUILD_TEXT: return new TextChannelDeleteEvent(gateway, context.getShardInfo(), new TextChannel(gateway, channel));
-                case DM: return new PrivateChannelDeleteEvent(gateway, context.getShardInfo(), new PrivateChannel(gateway, channel));
+                case GUILD_TEXT: return new TextChannelDeleteEvent(gateway, context.getShardInfo(),
+                        new TextChannel(gateway, channel));
+                case DM: return new PrivateChannelDeleteEvent(gateway, context.getShardInfo(),
+                        new PrivateChannel(gateway, channel));
                 case GUILD_VOICE:
                 case GUILD_STAGE_VOICE:
-                    return new VoiceChannelDeleteEvent(gateway, context.getShardInfo(), new VoiceChannel(gateway, channel));
+                    return new VoiceChannelDeleteEvent(gateway, context.getShardInfo(), new VoiceChannel(gateway,
+                            channel));
                 case GROUP_DM:
                     throw new UnsupportedOperationException("Received channel_delete for a group on a bot account!");
-                case GUILD_CATEGORY: return new CategoryDeleteEvent(gateway, context.getShardInfo(), new Category(gateway, channel));
-                case GUILD_NEWS: return new NewsChannelDeleteEvent(gateway, context.getShardInfo(), new NewsChannel(gateway, channel));
-                case GUILD_STORE: return new StoreChannelDeleteEvent(gateway, context.getShardInfo(), new StoreChannel(gateway, channel));
-                case GUILD_FORUM: return new ForumChannelDeleteEvent(gateway, context.getShardInfo(), new ForumChannel(gateway, channel));
+                case GUILD_CATEGORY: return new CategoryDeleteEvent(gateway, context.getShardInfo(),
+                        new Category(gateway, channel));
+                case GUILD_NEWS: return new NewsChannelDeleteEvent(gateway, context.getShardInfo(),
+                        new NewsChannel(gateway, channel));
+                case GUILD_STORE: return new StoreChannelDeleteEvent(gateway, context.getShardInfo(),
+                        new StoreChannel(gateway, channel));
+                case GUILD_FORUM: return new ForumChannelDeleteEvent(gateway, context.getShardInfo(),
+                        new ForumChannel(gateway, channel));
                 default:
                     log.info("Received unknown channel delete: {}", channel);
-                    return new UnknownChannelDeleteEvent(gateway, context.getShardInfo(), new UnknownChannel(gateway, channel));
+                    return new UnknownChannelDeleteEvent(gateway, context.getShardInfo(), new UnknownChannel(gateway,
+                            channel));
             }
         });
+    }
+
+    static Mono<? extends Event> channelInfo(DispatchContext<ChannelInfo, Void> context) {
+        final GatewayDiscordClient gateway = context.getGateway();
+        final ShardInfo shardInfo = context.getShardInfo();
+        final long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        final List<discord4j.core.object.entity.channel.ChannelInfo> channelInfoList = context.getDispatch()
+                .channels()
+                .stream()
+                .map(channelInfoData -> new discord4j.core.object.entity.channel.ChannelInfo(gateway, guildId, channelInfoData))
+                .collect(Collectors.toList());
+        return Mono.just(new ChannelInfoEvent(gateway, shardInfo, guildId, channelInfoList));
+    }
+
+    static Mono<? extends Event> voiceChannelStatusUpdate(DispatchContext<VoiceChannelStatusUpdate, Void> context) {
+        final GatewayDiscordClient gateway = context.getGateway();
+        final ShardInfo shardInfo = context.getShardInfo();
+        final long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        final long channelId = Snowflake.asLong(context.getDispatch().id());
+        final String status = context.getDispatch().status().orElse(null);
+
+        return Mono.just(new VoiceChannelStatusUpdateEvent(gateway, shardInfo, guildId, channelId, status));
+    }
+
+    static Mono<? extends Event> voiceChannelStartTimeUpdate(DispatchContext<VoiceChannelStartTimeUpdate, Void> context) {
+        final GatewayDiscordClient gateway = context.getGateway();
+        final ShardInfo shardInfo = context.getShardInfo();
+        final long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        final long channelId = Snowflake.asLong(context.getDispatch().id());
+        final Instant voiceStartTime = context.getDispatch().voiceStartTime().map(Instant::ofEpochSecond).orElse(null);
+
+        return Mono.just(new VoiceChannelStartTimeUpdateEvent(gateway, shardInfo, guildId, channelId, voiceStartTime));
     }
 
     static Mono<PinsUpdateEvent> channelPinsUpdate(DispatchContext<ChannelPinsUpdate, Void> context) {
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
         Long guildId = context.getDispatch().guildId()
-            .toOptional()
-            .map(Snowflake::asLong)
-            .orElse(null);
+                .toOptional()
+                .map(Snowflake::asLong)
+                .orElse(null);
 
         Instant timestamp = Possible.flatOpt(context.getDispatch().lastPinTimestamp())
                 .map(text -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(text, Instant::from))
                 .orElse(null);
 
-        return Mono.just(new PinsUpdateEvent(context.getGateway(), context.getShardInfo(), channelId, guildId, timestamp));
+        return Mono.just(new PinsUpdateEvent(context.getGateway(), context.getShardInfo(), channelId, guildId,
+                timestamp));
     }
 
     static Mono<? extends Event> channelUpdate(DispatchContext<ChannelUpdate, ChannelData> context) {
@@ -138,8 +192,8 @@ class ChannelDispatchHandlers {
                 default:
                     log.info("Received unknown channel update: {}", channel);
                     return new UnknownChannelUpdateEvent(gateway, context.getShardInfo(),
-                        new UnknownChannel(gateway, channel),
-                        oldData.map(old -> new UnknownChannel(gateway, old)).orElse(null));
+                            new UnknownChannel(gateway, channel),
+                            oldData.map(old -> new UnknownChannel(gateway, old)).orElse(null));
             }
         });
     }
