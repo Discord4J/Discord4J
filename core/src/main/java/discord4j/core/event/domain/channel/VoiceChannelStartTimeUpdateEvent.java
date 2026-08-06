@@ -89,7 +89,7 @@ public class VoiceChannelStartTimeUpdateEvent extends ChannelEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceChannel> getChannel() {
-        return this.getClient().getChannelById(this.getChannelId()).cast(VoiceChannel.class);
+        return this.getClient().getChannelById(this.getChannelId()).ofType(VoiceChannel.class);
     }
 
     /**
