@@ -15,7 +15,6 @@ import discord4j.discordjson.json.ListThreadsData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -47,18 +46,6 @@ public final class ForumChannel extends BaseTopLevelGuildChannel implements Cate
      */
     public boolean isNsfw() {
         return getData().nsfw().toOptional().orElse(false);
-    }
-
-    /**
-     * Gets the channels {@link discord4j.core.object.entity.Message.Flag} associated to this forum channel
-     * Unknown flags are currently ignored.
-     *
-     * @return An {@link EnumSet} representing the <b>known flags</b> for this forum channel.
-     */
-    public EnumSet<Flag> getFlags() {
-        return getData().flags().toOptional()
-            .map(Flag::valueOf)
-            .orElseThrow(IllegalStateException::new); // Mandatory for Forum Channels
     }
 
     /**
