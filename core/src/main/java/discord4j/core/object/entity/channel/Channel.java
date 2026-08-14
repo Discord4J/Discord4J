@@ -64,6 +64,7 @@ public interface Channel extends Entity {
      * Gets whether this channel is obfuscated for this client.
      *
      * @return {@code true} if this channel is obfuscated, {@code false} otherwise.
+     * @see <a href="https://docs.discord.com/developers/resources/channel#channel-object-obfuscated-channels">https://docs.discord.com/developers/resources/channel#channel-object-obfuscated-channels</a>
      */
     default boolean isObfuscated() {
         return getFlags().contains(Flag.CHANNEL_OBFUSCATED);
