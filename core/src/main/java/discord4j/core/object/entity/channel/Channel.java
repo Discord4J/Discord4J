@@ -90,6 +90,18 @@ public interface Channel extends Entity {
      */
     ChannelData getData();
 
+    /**
+     * Gets the channels {@link Flag} associated to this channel
+     * Unknown flags are currently ignored.
+     *
+     * @return An {@link EnumSet} representing the <b>known flags</b> for this channel.
+     */
+    default EnumSet<Flag> getFlags() {
+        return getData().flags().toOptional()
+                .map(Flag::valueOf)
+                .orElse(EnumSet.noneOf(Flag.class));
+    }
+
     /** Represents the various types of channels. */
     enum Type {
 
