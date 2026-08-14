@@ -65,7 +65,7 @@ public interface Channel extends Entity {
      *
      * @return {@code true} if this channel is obfuscated, {@code false} otherwise.
      */
-    default Boolean isObfuscated() {
+    default boolean isObfuscated() {
         return getFlags().contains(Flag.CHANNEL_OBFUSCATED);
     }
 
