@@ -370,18 +370,6 @@ public interface MessageChannel extends Channel {
     }
 
     /**
-     * Gets the channels {@link discord4j.core.object.entity.channel.Channel.Flag} associated to this channel
-     * Unknown flags are currently ignored.
-     *
-     * @return An {@link EnumSet} representing the <b>known flags</b> for this channel.
-     */
-    default EnumSet<Flag> getFlags() {
-        return getData().flags().toOptional()
-                .map(Flag::valueOf)
-                .orElse(EnumSet.noneOf(Flag.class));
-    }
-
-    /**
      * Get the channel visibility mode for the content.
      *
      * @return A ContentVisibilityMode.
