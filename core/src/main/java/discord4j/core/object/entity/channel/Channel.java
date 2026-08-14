@@ -211,6 +211,11 @@ public interface Channel extends Entity {
         HIDE_MEDIA_DOWNLOAD_OPTIONS(15),
 
         /**
+         * Some metadata of this channel is not visible to this client.
+         */
+        CHANNEL_OBFUSCATED(17),
+
+        /**
          * Whether is a Spoiler Channel where users must opt in to view its contents.
          */
         IS_SPOILER_CHANNEL(21);
