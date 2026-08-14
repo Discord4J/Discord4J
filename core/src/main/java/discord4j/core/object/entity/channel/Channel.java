@@ -60,6 +60,10 @@ public interface Channel extends Entity {
                 .orElse(EnumSet.noneOf(Flag.class));
     }
 
+    default Boolean getIsObfuscated() {
+        return getFlags().contains(Flag.CHANNEL_OBFUSCATED);
+    }
+
     /**
      * Requests to delete this channel.
      *
