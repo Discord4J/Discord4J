@@ -102,6 +102,11 @@ public interface Channel extends Entity {
                 .orElse(EnumSet.noneOf(Flag.class));
     }
 
+    /**
+     * Gets whether this channel is obfuscated.
+     *
+     * @return Whether this channel is obfuscated for this client.
+     */
     default Boolean getIsObfuscated() {
         return getFlags().contains(Flag.CHANNEL_OBFUSCATED);
     }
