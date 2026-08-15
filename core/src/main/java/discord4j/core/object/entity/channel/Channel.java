@@ -49,6 +49,28 @@ public interface Channel extends Entity {
     }
 
     /**
+     * Gets the channels {@link discord4j.core.object.entity.channel.Channel.Flag} associated to this channel
+     * Unknown flags are currently ignored.
+     *
+     * @return An {@link EnumSet} representing the <b>known flags</b> for this channel.
+     */
+    default EnumSet<Flag> getFlags() {
+        return getData().flags().toOptional()
+                .map(Flag::valueOf)
+                .orElse(EnumSet.noneOf(Flag.class));
+    }
+
+    /**
+     * Gets whether this channel is obfuscated for this client.
+     *
+     * @return {@code true} if this channel is obfuscated, {@code false} otherwise.
+     * @see <a href="https://docs.discord.com/developers/resources/channel#channel-object-obfuscated-channels">https://docs.discord.com/developers/resources/channel#channel-object-obfuscated-channels</a>
+     */
+    default boolean isObfuscated() {
+        return getFlags().contains(Flag.CHANNEL_OBFUSCATED);
+    }
+
+    /**
      * Requests to delete this channel.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the channel has been deleted.
@@ -197,6 +219,11 @@ public interface Channel extends Entity {
          * Whether hides the embedded media download options. Available only for media channels.
          */
         HIDE_MEDIA_DOWNLOAD_OPTIONS(15),
+
+        /**
+         * Some metadata of this channel is not visible to this client.
+         */
+        CHANNEL_OBFUSCATED(17),
 
         /**
          * Whether is a Spoiler Channel where users must opt in to view its contents.
