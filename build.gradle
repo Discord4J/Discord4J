@@ -32,7 +32,7 @@ ext {
 
     // Test dependencies
     junit_version = '5.14.4'
-    logback_version = '1.6.2'
+    logback_version = '1.6.3'
     reflections_version = '0.10.2'
     lavaplayer_version = '1.4.3'
     libdave_version = '0.1.3'
