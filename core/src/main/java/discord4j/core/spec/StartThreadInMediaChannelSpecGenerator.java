@@ -18,7 +18,7 @@
 package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.entity.channel.ForumChannel;
+import discord4j.core.object.entity.channel.MediaChannel;
 import discord4j.core.object.entity.channel.ThreadChannel;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.StartThreadInForumChannelRequest;
@@ -49,11 +49,11 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
  * @see <a href="https://discord.com/developers/docs/resources/channel#start-thread-in-forum-channel">Documentation</a>
  */
 @Value.Immutable
-public interface StartThreadInForumChannelSpecGenerator extends AuditSpec<StartThreadInForumChannelRequest> {
+public interface StartThreadInMediaChannelSpecGenerator extends AuditSpec<StartThreadInForumChannelRequest> {
 
     String name();
 
-    ForumThreadMessageCreateSpec message();
+    MediaThreadMessageCreateSpec message();
 
     Possible<ThreadChannel.AutoArchiveDuration> autoArchiveDuration();
 
@@ -76,13 +76,13 @@ public interface StartThreadInForumChannelSpecGenerator extends AuditSpec<StartT
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
-abstract class StartThreadInForumChannelMonoGenerator extends Mono<ThreadChannel> implements StartThreadInForumChannelSpecGenerator {
+abstract class StartThreadInMediaChannelMonoGenerator extends Mono<ThreadChannel> implements StartThreadInMediaChannelSpecGenerator {
 
-    abstract ForumChannel channel();
+    abstract MediaChannel channel();
 
     @Override
     public void subscribe(CoreSubscriber<? super ThreadChannel> actual) {
-        channel().startThread(StartThreadInForumChannelSpec.copyOf(this)).subscribe(actual);
+        channel().startThread(StartThreadInMediaChannelSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override
