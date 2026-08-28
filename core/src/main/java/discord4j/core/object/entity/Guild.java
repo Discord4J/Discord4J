@@ -2620,7 +2620,9 @@ public final class Guild implements Entity {
         /* guild has access to set 384kbps bitrate in voice (previously VIP voice servers) */
         VIP_REGIONS("VIP_REGIONS", false),
         /* guild has enabled the welcome screen */
-        WELCOME_SCREEN_ENABLED("WELCOME_SCREEN_ENABLED", false);
+        WELCOME_SCREEN_ENABLED("WELCOME_SCREEN_ENABLED", false),
+        /* guild's prune feature requires admin permission */
+        PRUNE_REQUIRES_ADMIN("PRUNE_REQUIRES_ADMIN", true);
 
         private final String value;
 
