@@ -2708,7 +2708,9 @@ public final class Guild implements Entity {
         /* guild has access to set guild tags */
         GUILD_TAGS("GUILD_TAGS", false),
         /* guild is able to set gradient colors to roles */
-        ENHANCED_ROLE_COLORS("ENHANCED_ROLE_COLORS", false);
+        ENHANCED_ROLE_COLORS("ENHANCED_ROLE_COLORS", false),
+        /* guild's prune feature requires admin permission */
+        PRUNE_REQUIRES_ADMIN("PRUNE_REQUIRES_ADMIN", true),
         ;
 
         private final String value;
