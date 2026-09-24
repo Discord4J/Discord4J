@@ -20,56 +20,57 @@ import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.json.ImmutableComponentData;
 import discord4j.discordjson.json.SelectOptionData;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class CheckboxGroupAction extends ActionComponent implements ICanBeUsedInLabelComponent {
+public class CheckboxGroup extends MessageComponent implements ICanBeUsedInLabelComponent {
 
     /**
      * Creates a checkbox group.
      *
      * @param customId A developer-defined identifier for the checkbox group.
-     * @param options The options that can be selected in the menu.
+     * @param options  The options that can be selected in the checkbox group.
      * @return A checkbox group with the given data.
      */
-    public static CheckboxGroupAction of(String customId, List<CheckboxGroupAction.Option> options) {
+    public static CheckboxGroup of(String customId, List<CheckboxGroup.Option> options) {
         Objects.requireNonNull(options);
         ImmutableComponentData.Builder builder = ComponentData.builder()
-            .type(Type.CHECKBOX_GROUP.getValue())
-            .customId(customId);
+                .type(Type.CHECKBOX_GROUP.getValue())
+                .customId(customId);
 
-        builder.options(options.stream().map(CheckboxGroupAction.Option::getData).collect(Collectors.toList()));
+        builder.options(options.stream().map(CheckboxGroup.Option::getData).collect(Collectors.toList()));
 
-        return new CheckboxGroupAction(builder.build());
+        return new CheckboxGroup(builder.build());
     }
 
     /**
      * Creates a checkbox group.
      *
      * @param customId A developer-defined identifier for the checkbox group.
-     * @param options The options that can be selected in the menu.
+     * @param options  The options that can be selected in the checkbox group.
      * @return A checkbox group with the given data.
      */
-    public static CheckboxGroupAction of(int id, String customId, List<CheckboxGroupAction.Option> options) {
+    public static CheckboxGroup of(int id, String customId, List<CheckboxGroup.Option> options) {
         Objects.requireNonNull(options);
         ImmutableComponentData.Builder builder = ComponentData.builder()
-            .type(Type.CHECKBOX_GROUP.getValue())
-            .id(id)
-            .customId(customId);
+                .type(Type.CHECKBOX_GROUP.getValue())
+                .id(id)
+                .customId(customId);
 
-        builder.options(options.stream().map(CheckboxGroupAction.Option::getData).collect(Collectors.toList()));
+        builder.options(options.stream().map(CheckboxGroup.Option::getData).collect(Collectors.toList()));
 
-        return new CheckboxGroupAction(builder.build());
+        return new CheckboxGroup(builder.build());
     }
 
-    CheckboxGroupAction(ComponentData data) {
+    CheckboxGroup(ComponentData data) {
         super(data);
     }
 
-    protected CheckboxGroupAction of(ComponentData data) {
-        return new CheckboxGroupAction(data);
+    protected CheckboxGroup of(ComponentData data) {
+        return new CheckboxGroup(data);
     }
 
     /**
@@ -77,19 +78,18 @@ public class CheckboxGroupAction extends ActionComponent implements ICanBeUsedIn
      *
      * @return the component's value
      */
-    public Optional<List<String>> getValues() {
-        return getData().values().toOptional();
+    public List<String> getValues() {
+        return getData().values().toOptional().orElse(Collections.emptyList());
     }
 
     /**
      * Creates a new checkbox group with the same data as this one, but depending on the value param it may be
-     * required
-     * or not.
+     * required or not.
      *
      * @param value True if the checkbox group should be required otherwise False.
      * @return A new possibly required checkbox group with the same data as this one.
      */
-    public CheckboxGroupAction required(boolean value) {
+    public CheckboxGroup required(boolean value) {
         return of(ComponentData.builder().from(getData()).required(value).build());
     }
 
@@ -98,18 +98,18 @@ public class CheckboxGroupAction extends ActionComponent implements ICanBeUsedIn
      *
      * @return A new disabled checkbox group with the same data as this one.
      */
-    public CheckboxGroupAction disabled() {
+    public CheckboxGroup disabled() {
         return this.disabled(true);
     }
 
     /**
-     * Creates a new checkbox group with the same data as this one, but depending on the value param, it may be disabled or
-     * not.
+     * Creates a new checkbox group with the same data as this one, but depending on the value param, it may be
+     * disabled or not.
      *
      * @param value True if the checkbox group should be disabled otherwise False.
      * @return A new possibly disabled checkbox group with the same data as this one.
      */
-    public CheckboxGroupAction disabled(boolean value) {
+    public CheckboxGroup disabled(boolean value) {
         return of(ComponentData.builder().from(getData()).disabled(value).build());
     }
 
@@ -119,7 +119,7 @@ public class CheckboxGroupAction extends ActionComponent implements ICanBeUsedIn
      * @param minValues The new minimum values (0-10)
      * @return A new checkbox group with the given minimum values.
      */
-    public CheckboxGroupAction withMinValues(int minValues) {
+    public CheckboxGroup withMinValues(int minValues) {
         return of(ComponentData.builder().from(this.getData()).minValues(minValues).build());
     }
 
@@ -129,7 +129,7 @@ public class CheckboxGroupAction extends ActionComponent implements ICanBeUsedIn
      * @param maxValues The new maximum values (1-10)
      * @return A new checkbox group with the given maximum values.
      */
-    public CheckboxGroupAction withMaxValues(int maxValues) {
+    public CheckboxGroup withMaxValues(int maxValues) {
         return of(ComponentData.builder().from(this.getData()).maxValues(maxValues).build());
     }
 
@@ -145,29 +145,29 @@ public class CheckboxGroupAction extends ActionComponent implements ICanBeUsedIn
          * @param value A developer-defined identifier for the option.
          * @return A checkbox group option with the given data.
          */
-        public static CheckboxGroupAction.Option of(String label, String value) {
+        public static CheckboxGroup.Option of(String label, String value) {
             return of(label, value, false);
         }
 
         /**
-         * Creates a default checkbox group option.
+         * Creates a selected-by-default checkbox group option.
          * <p>
          * Default options are selected by default.
          *
          * @param label The user-facing name of the option
          * @param value A developer-defined identifier for the option.
-         * @return A default checkbox group option with the given data.
+         * @return A selected-by-default checkbox group option with the given data.
          */
-        public static CheckboxGroupAction.Option ofDefault(String label, String value) {
+        public static CheckboxGroup.Option ofSelectedByDefault(String label, String value) {
             return of(label, value, true);
         }
 
-        private static CheckboxGroupAction.Option of(String label, String value, boolean isDefault) {
-            return new CheckboxGroupAction.Option(SelectOptionData.builder()
-                .label(label)
-                .value(value)
-                .isDefault(isDefault)
-                .build());
+        private static CheckboxGroup.Option of(String label, String value, boolean isSelectedByDefault) {
+            return new CheckboxGroup.Option(SelectOptionData.builder()
+                    .label(label)
+                    .value(value)
+                    .isDefault(isSelectedByDefault)
+                    .build());
         }
 
         private final SelectOptionData data;
@@ -208,11 +208,11 @@ public class CheckboxGroupAction extends ActionComponent implements ICanBeUsedIn
         }
 
         /**
-         * Gets whether the option is default.
+         * Gets whether the option is selected by default.
          *
-         * @return Whether the option is default.
+         * @return Whether the option is selected by default.
          */
-        public boolean isDefault() {
+        public boolean isSelectedByDefault() {
             return data.isDefault().toOptional().orElse(false);
         }
 
@@ -222,18 +222,18 @@ public class CheckboxGroupAction extends ActionComponent implements ICanBeUsedIn
          * @param description The additional description of the option.
          * @return A new option with the given description.
          */
-        public CheckboxGroupAction.Option withDescription(String description) {
-            return new CheckboxGroupAction.Option(SelectOptionData.builder().from(data).description(description).build());
+        public CheckboxGroup.Option withDescription(String description) {
+            return new CheckboxGroup.Option(SelectOptionData.builder().from(data).description(description).build());
         }
 
         /**
-         * Creates a new possibly-default option with the same data as this one.
+         * Creates a new possibly-selected-by-default option with the same data as this one.
          *
-         * @param isDefault Whether the option should be default.
+         * @param isSelectedByDefault Whether the option should be selected by default.
          * @return A new option with the given default state.
          */
-        public CheckboxGroupAction.Option withDefault(boolean isDefault) {
-            return new CheckboxGroupAction.Option(SelectOptionData.builder().from(data).isDefault(isDefault).build());
+        public CheckboxGroup.Option withSelectedByDefault(boolean isSelectedByDefault) {
+            return new CheckboxGroup.Option(SelectOptionData.builder().from(data).isDefault(isSelectedByDefault).build());
         }
 
     }
