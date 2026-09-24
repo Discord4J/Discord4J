@@ -1,6 +1,6 @@
 plugins {
     id "com.gradle.develocity" version "4.5.1"
-    id 'io.github.ben-manes.versions.settings' version '0.63.1'
+    id 'io.github.ben-manes.versions.settings' version '0.64.0'
 }
 
 develocity {
