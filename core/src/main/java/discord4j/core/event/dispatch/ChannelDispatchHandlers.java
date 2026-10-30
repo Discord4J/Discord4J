@@ -69,6 +69,8 @@ class ChannelDispatchHandlers {
                         new StoreChannel(gateway, channel));
                 case GUILD_FORUM: return new ForumChannelCreateEvent(gateway, context.getShardInfo(),
                         new ForumChannel(gateway, channel));
+                case GUILD_MEDIA: return new MediaChannelCreateEvent(gateway, context.getShardInfo(),
+                        new MediaChannel(gateway, channel));
                 default:
                     log.info("Received unknown channel create: {}", channel);
                     return new UnknownChannelCreateEvent(gateway, context.getShardInfo(), new UnknownChannel(gateway,
@@ -102,6 +104,8 @@ class ChannelDispatchHandlers {
                         new StoreChannel(gateway, channel));
                 case GUILD_FORUM: return new ForumChannelDeleteEvent(gateway, context.getShardInfo(),
                         new ForumChannel(gateway, channel));
+                case GUILD_MEDIA: return new MediaChannelDeleteEvent(gateway, context.getShardInfo(),
+                        new MediaChannel(gateway, channel));
                 default:
                     log.info("Received unknown channel delete: {}", channel);
                     return new UnknownChannelDeleteEvent(gateway, context.getShardInfo(), new UnknownChannel(gateway,
@@ -189,6 +193,9 @@ class ChannelDispatchHandlers {
                 case GUILD_FORUM: return new ForumChannelUpdateEvent(gateway, context.getShardInfo(),
                         new ForumChannel(gateway, channel),
                         oldData.map(old -> new ForumChannel(gateway, old)).orElse(null));
+                case GUILD_MEDIA: return new MediaChannelUpdateEvent(gateway, context.getShardInfo(),
+                        new MediaChannel(gateway, channel),
+                        oldData.map(old -> new MediaChannel(gateway, old)).orElse(null));
                 default:
                     log.info("Received unknown channel update: {}", channel);
                     return new UnknownChannelUpdateEvent(gateway, context.getShardInfo(),
