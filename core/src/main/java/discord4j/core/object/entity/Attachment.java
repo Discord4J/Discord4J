@@ -275,7 +275,17 @@ public final class Attachment implements Entity {
         /**
          * This attachment is an animated image.
          */
-        IS_ANIMATED(1 << 5),;
+        IS_ANIMATED(1 << 5),
+
+        /**
+         * This attachment was flagged as gore by Discord’s content scanning
+         */
+        CONTAINS_GORE_CONTENT(1 << 6),
+
+        /**
+         * This attachment was flagged as self-harm by Discord’s content scanning
+         */
+        CONTAINS_SELF_HARM_CONTENT(1 << 7);
 
         /** The flag value as represented by Discord. */
         private final int value;
