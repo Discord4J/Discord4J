@@ -18,11 +18,14 @@ package discord4j.core.object.component;
 
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.spec.MessageCreateFields;
+import discord4j.discordjson.json.ContentScanMetadata;
 import discord4j.discordjson.json.UnfurledMediaItemData;
 import discord4j.discordjson.possible.Possible;
 
 import java.io.InputStream;
+import java.util.EnumSet;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Represents an unfurled media item.
@@ -138,6 +141,29 @@ public class UnfurledMediaItem {
         return Possible.flatOpt(this.getData().loadingState()).map(LoadingState::of);
     }
 
+    /**
+     * Returns the flags of this {@link UnfurledMediaItem}.
+     *
+     * @return A {@code EnumSet} with the flags.
+     */
+    public Set<Flag> getFlags() {
+        return Possible.flatOpt(data.flags())
+                .map(UnfurledMediaItem.Flag::of)
+                .orElse(EnumSet.noneOf(UnfurledMediaItem.Flag.class));
+    }
+
+    /**
+     * Returns the results of Discord’s content scanning, if the media item has been scanned
+     *
+     * @return A {@code EnumSet} with the flags.
+     */
+    public Set<ContentScanMetadataFlag> getContentScanMetadataFlags() {
+        return Possible.flatOpt(data.contentScanMetadata())
+                .map(ContentScanMetadata::flags)
+                .map(UnfurledMediaItem.ContentScanMetadataFlag::of)
+                .orElse(EnumSet.noneOf(UnfurledMediaItem.ContentScanMetadataFlag.class));
+    }
+
     public enum LoadingState {
         UNKNOWN(0),
         LOADING(1),
@@ -163,6 +189,61 @@ public class UnfurledMediaItem {
                 case 0:
                 default: return UNKNOWN;
             }
+        }
+    }
+
+    public enum Flag {
+
+        UNKNOWN(0),
+        IS_ANIMATED(1);
+        private final int value;
+
+        Flag(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return this.value;
+        }
+
+        public static Set<Flag> of(final int value) {
+            final EnumSet<Flag> flags = EnumSet.noneOf(Flag.class);
+            for (Flag flag : Flag.values()) {
+                long flagValue = flag.getValue();
+                if ((flagValue & value) == flagValue) {
+                    flags.add(flag);
+                }
+            }
+            return flags;
+        }
+
+    }
+
+    public enum ContentScanMetadataFlag {
+        UNKNOWN(0),
+        IS_EXPLICIT_CONTENT(1 << 0),
+        IS_GORE_CONTENT(1 << 1),
+        IS_SELF_HARM_CONTENT(1 << 2);
+
+        private final int value;
+
+        ContentScanMetadataFlag(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return this.value;
+        }
+
+        public static Set<ContentScanMetadataFlag> of(final int value) {
+            final EnumSet<ContentScanMetadataFlag> flags = EnumSet.noneOf(ContentScanMetadataFlag.class);
+            for (ContentScanMetadataFlag flag : ContentScanMetadataFlag.values()) {
+                long flagValue = flag.getValue();
+                if ((flagValue & value) == flagValue) {
+                    flags.add(flag);
+                }
+            }
+            return flags;
         }
     }
 
