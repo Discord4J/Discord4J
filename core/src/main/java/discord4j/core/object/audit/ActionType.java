@@ -31,6 +31,7 @@ public enum ActionType {
     CHANNEL_OVERWRITE_CREATE(13),
     CHANNEL_OVERWRITE_UPDATE(14),
     CHANNEL_OVERWRITE_DELETE(15),
+    CHANNEL_POSITION_UPDATE(16),
     MEMBER_KICK(20),
     MEMBER_PRUNE(21),
     MEMBER_BAN_ADD(22),
@@ -43,6 +44,7 @@ public enum ActionType {
     ROLE_CREATE(30),
     ROLE_UPDATE(31),
     ROLE_DELETE(32),
+    ROLE_POSITION_UPDATE(33),
     INVITE_CREATE(40),
     INVITE_UPDATE(41),
     INVITE_DELETE(42),
@@ -101,6 +103,7 @@ public enum ActionType {
             case 13: return CHANNEL_OVERWRITE_CREATE;
             case 14: return CHANNEL_OVERWRITE_UPDATE;
             case 15: return CHANNEL_OVERWRITE_DELETE;
+            case 16: return CHANNEL_POSITION_UPDATE;
             case 20: return MEMBER_KICK;
             case 21: return MEMBER_PRUNE;
             case 22: return MEMBER_BAN_ADD;
@@ -113,6 +116,7 @@ public enum ActionType {
             case 30: return ROLE_CREATE;
             case 31: return ROLE_UPDATE;
             case 32: return ROLE_DELETE;
+            case 33: return ROLE_POSITION_UPDATE;
             case 40: return INVITE_CREATE;
             case 41: return INVITE_UPDATE;
             case 42: return INVITE_DELETE;
