@@ -437,6 +437,8 @@ public abstract class Routes {
 
     public static final Route LIST_JOINED_PRIVATE_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/users/@me/threads/archived/private");
 
+    public static final Route CHANNEL_MEMBER_PERMISSIONS_GET = Route.get("/channels/{channel.id}/permissions/member/{user.id}");
+
     ///////////////////////////////////////////
     ////////////////// Polls //////////////////
     ///////////////////////////////////////////
