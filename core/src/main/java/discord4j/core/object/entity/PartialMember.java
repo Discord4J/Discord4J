@@ -32,6 +32,7 @@ import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.PartialMemberData;
+import discord4j.discordjson.json.PermissionsData;
 import discord4j.discordjson.json.UpdateUserVoiceStateRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.json.gateway.ImmutableRequestGuildMembers;
@@ -531,18 +532,14 @@ public class PartialMember extends User {
     }
 
     /**
-     * Requests to calculate the permissions granted to this member by his roles in the guild.
+     * Returns the member’s computed guild permissions, combining their roles with {@code @everyone}.
      *
      * @return The permissions granted to this member by his roles in the guild.
      */
     public Mono<PermissionSet> getBasePermissions() {
-        Mono<Boolean> getIsOwner = getGuild().map(guild -> guild.getOwnerId().equals(getId()));
-        Mono<PermissionSet> getEveryonePerms = getGuild().flatMap(Guild::getEveryoneRole).map(Role::getPermissions);
-        Mono<List<PermissionSet>> getRolePerms = getRoles().map(Role::getPermissions).collectList();
-
-        return getIsOwner.filter(Predicate.isEqual(Boolean.TRUE))
-            .flatMap(ignored -> Mono.just(PermissionSet.all()))
-            .switchIfEmpty(Mono.zip(getEveryonePerms, getRolePerms, PermissionUtil::computeBasePermissions));
+        return getClient().getRestClient().getGuildService().getGuildMemberPermissions(getGuildId().asLong(), getId().asLong())
+            .map(PermissionsData::permissions)
+            .map(PermissionSet::of);
     }
 
     /**

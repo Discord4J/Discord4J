@@ -659,6 +659,14 @@ public abstract class Routes {
     public static final Route SEARCH_GUILD_MEMBERS_GET = Route.get("/guilds/{guild.id}/members/search");
 
     /**
+     * Returns the member’s computed guild permissions, combining their roles with @everyone.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/guild#get-guild-member-permissions">
+     * https://docs.discord.com/developers/resources/guild#get-guild-member-permissions</a>
+     */
+    public static final Route GUILD_MEMBER_PERMISSIONS_GET = Route.get("/guilds/{guild.id}/permissions/member/{user.id}");
+
+    /**
      * Returns a list of messages without the reactions key that match a search query in the guild. Requires the READ_MESSAGE_HISTORY permission.
      *
      * @see <a href="https://docs.discord.com/developers/resources/message#search-guild-messages">
