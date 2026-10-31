@@ -20,8 +20,14 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.discordjson.json.PermissionsData;
 import discord4j.rest.util.PermissionSet;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /** A Discord channel associated to a {@link Guild}. */
 public interface GuildChannel extends Channel {
@@ -62,9 +68,41 @@ public interface GuildChannel extends Channel {
      * Gets the permissions for the given member, taking into account permission overwrites in this channel.
      *
      * @param memberId The ID of the member to get permissions for.
+     * @param implicit whether to apply implicit <a href="https://docs.discord.com/developers/topics/permissions#implicit-permissions">permission masking</a> for missing {@code VIEW_CHANNEL} or voice/stage {@code CONNECT}
      * @return The permissions for the given member.
      */
-    Mono<PermissionSet> getEffectivePermissions(Snowflake memberId);
+    default Mono<PermissionSet> getEffectivePermissions(Snowflake memberId, @Nullable Boolean implicit) {
+        final Map<String, Object> params = new HashMap<>(Collections.emptyMap());
+        if (implicit != null) {
+            params.put("implicit", implicit);
+        }
+
+        return getClient().getRestClient().getChannelService()
+            .getChannelMemberPermissions(getId().asLong(), memberId.asLong(), params)
+            .map(PermissionsData::permissions)
+            .map(PermissionSet::of);
+    }
+
+    /**
+     * Gets the permissions for the given member, taking into account permission overwrites in this channel.
+     *
+     * @param memberId The ID of the member to get permissions for.
+     * @return The permissions for the given member.
+     */
+    default Mono<PermissionSet> getEffectivePermissions(Snowflake memberId) {
+        return getEffectivePermissions(memberId, null);
+    }
+
+    /**
+     * Gets the permissions for the given member, taking into account permission overwrites in this channel.
+     *
+     * @param member The member to get permissions for.
+     * @param implicit whether to apply implicit <a href="https://docs.discord.com/developers/topics/permissions#implicit-permissions">permission masking</a> for missing {@code VIEW_CHANNEL} or voice/stage {@code CONNECT}
+     * @return The permissions for the given member.
+     */
+    default Mono<PermissionSet> getEffectivePermissions(Member member, @Nullable Boolean implicit) {
+        return getEffectivePermissions(member.getId(), implicit);
+    }
 
     /**
      * Gets the permissions for the given member, taking into account permission overwrites in this channel.
@@ -72,7 +110,9 @@ public interface GuildChannel extends Channel {
      * @param member The member to get permissions for.
      * @return The permissions for the given member.
      */
-    Mono<PermissionSet> getEffectivePermissions(Member member);
+    default Mono<PermissionSet> getEffectivePermissions(Member member) {
+        return getEffectivePermissions(member.getId(), null);
+    }
 
     /**
      * Gets the name of the channel.
