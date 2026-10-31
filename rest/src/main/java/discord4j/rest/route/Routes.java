@@ -845,6 +845,15 @@ public abstract class Routes {
     public static final Route GUILD_ROLE_DELETE = Route.delete("/guilds/{guild.id}/roles/{role.id}");
 
     /**
+     * Returns the combined guild permissions of the specified role and {@code @everyone}. This calculation does not
+     * include other roles or member-specific restrictions.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/guild#get-guild-role-permissions">
+     * https://docs.discord.com/developers/resources/guild#get-guild-role-permissions</a>
+     */
+    public static final Route GUILD_ROLE_PERMISSIONS_GET = Route.get("/guilds/{guild.id}/permissions/role/{role.id}");
+
+    /**
      * Returns an object with one 'pruned' key indicating the number of members that would be removed in a prune
      * operation. Requires the 'KICK_MEMBERS' permission.
      *

@@ -27,6 +27,7 @@ import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.MentionUtil;
 import discord4j.core.util.OrderUtil;
+import discord4j.discordjson.json.PermissionsData;
 import discord4j.discordjson.json.RoleData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.entity.RestRole;
@@ -257,6 +258,13 @@ public final class Role implements Entity {
      */
     public PermissionSet getPermissions() {
         return PermissionSet.of(data.permissions());
+    }
+
+    public Mono<PermissionSet> getPermissions() {
+        return getClient().getRestClient().getGuildService()
+            .getGuildRolePermissions(getGuildId().asLong(), getId().asLong())
+            .map(PermissionsData::permissions)
+            .map(PermissionSet::of);
     }
 
     /**

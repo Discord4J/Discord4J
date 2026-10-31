@@ -278,6 +278,12 @@ public class GuildService extends RestService {
             .bodyToMono(Void.class);
     }
 
+    public Mono<PermissionsData> getGuildRolePermissions(long guildId, long roleId) {
+        return Routes.GUILD_ROLE_PERMISSIONS_GET.newRequest(guildId, roleId)
+            .exchange(getRouter())
+            .bodyToMono(PermissionsData.class);
+    }
+
     @Deprecated
     public Mono<PruneData> getGuildPruneCount(long guildId, Map<String, Object> queryParams) {
         return Routes.GUILD_PRUNE_COUNT_GET.newRequest(guildId)
