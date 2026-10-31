@@ -532,9 +532,9 @@ public class PartialMember extends User {
     }
 
     /**
-     * Returns the member’s computed guild permissions, combining their roles with {@code @everyone}.
+     * Requests to retrieve the member’s computed guild permissions.
      *
-     * @return The permissions granted to this member by his roles in the guild.
+     * @return The member’s computed guild permissions, combining their roles with {@code @everyone}.
      */
     public Mono<PermissionSet> getBasePermissions() {
         return getClient().getRestClient().getGuildService().getGuildMemberPermissions(getGuildId().asLong(), getId().asLong())
