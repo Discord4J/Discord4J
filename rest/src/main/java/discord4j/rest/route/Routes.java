@@ -437,6 +437,15 @@ public abstract class Routes {
 
     public static final Route LIST_JOINED_PRIVATE_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/users/@me/threads/archived/private");
 
+    /**
+     * Returns the permissions granted by the specified role together with @everyone, applying their channel overwrites.
+     * Other roles and member-specific overwrites are not included.
+     * Threads use their parent channel’s overwrites.
+     * Requires the `VIEW_CHANNEL` permission, and additionally `CONNECT` for voice and stage channels.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/channel#get-channel-member-permissions">
+     * https://discord.com/developers/docs/resources/channel#get-channel-member-permissions</a>
+     */
     public static final Route CHANNEL_MEMBER_PERMISSIONS_GET = Route.get("/channels/{channel.id}/permissions/member/{user.id}");
 
     ///////////////////////////////////////////
