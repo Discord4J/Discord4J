@@ -20,7 +20,6 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.ForumTag;
-import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.ThreadMember;
 import discord4j.core.object.entity.User;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -29,7 +28,6 @@ import discord4j.core.spec.ThreadChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.ThreadMetadata;
-import discord4j.rest.util.PermissionSet;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -275,30 +273,6 @@ public final class ThreadChannel extends BaseChannel implements GuildMessageChan
     private ThreadMetadata getMetadata() {
         return getData().threadMetadata().toOptional()
                 .orElseThrow(IllegalStateException::new); // should always be present for threads
-    }
-
-    /**
-     * Computes permissions given to a specified member regarding this channel.
-     *
-     * @param memberId The ID of the member to get permissions for.
-     * @return A {@link Mono} that, upon completion, emits a {@link PermissionSet} containing all allowed or denied
-     * permissions to the given member.
-     */
-    @Override
-    public Mono<PermissionSet> getEffectivePermissions(Snowflake memberId) {
-        return getParent().flatMap(parent -> parent.getEffectivePermissions(memberId));
-    }
-
-    /**
-     * Computes permissions given to a specified member regarding this channel.
-     *
-     * @param member The member to get permissions for.
-     * @return A {@link Mono} that, upon completion, emits a {@link PermissionSet} containing all allowed or denied
-     * permissions to the given member.
-     */
-    @Override
-    public Mono<PermissionSet> getEffectivePermissions(Member member) {
-        return getParent().flatMap(parent -> parent.getEffectivePermissions(member));
     }
 
     /**
