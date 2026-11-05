@@ -30,7 +30,6 @@ import discord4j.core.spec.legacy.LegacyBanQuerySpec;
 import discord4j.core.spec.legacy.LegacyGuildMemberEditSpec;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
-import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.PartialMemberData;
 import discord4j.discordjson.json.PermissionsData;
 import discord4j.discordjson.json.UpdateUserVoiceStateRequest;
@@ -49,12 +48,10 @@ import reactor.math.MathFlux;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static discord4j.rest.util.Image.Format.GIF;
@@ -537,7 +534,7 @@ public class PartialMember extends User {
      * @return The member’s computed guild permissions, combining their roles with {@code @everyone}.
      */
     public Mono<PermissionSet> getBasePermissions() {
-        return getClient().getRestClient().getGuildService().getGuildMemberPermissions(getGuildId().asLong(), getId().asLong())
+        return this.getClient().getRestClient().getGuildService().getGuildMemberPermissions(getGuildId().asLong(), getId().asLong())
             .map(PermissionsData::permissions)
             .map(PermissionSet::of);
     }
