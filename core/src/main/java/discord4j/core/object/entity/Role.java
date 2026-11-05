@@ -254,29 +254,29 @@ public final class Role implements Entity {
     /**
      * Gets the permissions assigned to this role only.
      * <p>
-     * To request for the combined permission with {@code @everyone}, use {@link getFullPermissions}.
+     * To request for the combined permission with {@code @everyone}, use {@link #getFullPermissions}.
      *
-     * @return The permissions assigned to this role only.
+     * @return The permissions assigned to this role only
      */
     public PermissionSet getPermissions() {
-        return PermissionSet.of(data.permissions());
+        return PermissionSet.of(this.getData().permissions());
     }
 
     /**
      * Requests to retrieve the combined guild permissions of the specified role and {@code @everyone}. This calculation does not
      * include other roles or member-specific restrictions.
      * <p>
-     * To retrieve the permission of this role only, use {@link getPermissions}.
+     * To retrieve the permission of this role only, use {@link #getPermissions}.
      *
      * @return the combined guild permissions of the specified role and {@code @everyone}. This calculation does not
-     * include other roles or member-specific restrictions.
+     * include other roles or member-specific restrictions
      *
      * @see <a href="https://docs.discord.com/developers/resources/guild#get-guild-role-permissions">
      * https://docs.discord.com/developers/resources/guild#get-guild-role-permissions</a>
      */
     public Mono<PermissionSet> getFullPermissions() {
-        return getClient().getRestClient().getGuildService()
-            .getGuildRolePermissions(getGuildId().asLong(), getId().asLong())
+        return this.getClient().getRestClient().getGuildService()
+            .getGuildRolePermissions(this.getGuildId().asLong(), this.getId().asLong())
             .map(PermissionsData::permissions)
             .map(PermissionSet::of);
     }
