@@ -20,6 +20,7 @@ import discord4j.discordjson.json.*;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import discord4j.rest.util.Multimap;
+import discord4j.rest.util.PermissionSet;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -110,6 +111,12 @@ public class GuildService extends RestService {
             .exchange(getRouter())
             .bodyToMono(MemberData[].class)
             .flatMapMany(Flux::fromArray);
+    }
+
+    public Mono<PermissionsData> getGuildMemberPermissions(long guildId, long userId) {
+        return Routes.GUILD_MEMBER_PERMISSIONS_GET.newRequest(guildId, userId)
+            .exchange(getRouter())
+            .bodyToMono(PermissionsData.class);
     }
 
     public Mono<GuildMessageSearchResponse> searchGuildMessages(long guildId, Multimap<String, Object> queryParams) {

@@ -30,8 +30,8 @@ import discord4j.core.spec.legacy.LegacyBanQuerySpec;
 import discord4j.core.spec.legacy.LegacyGuildMemberEditSpec;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
-import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.PartialMemberData;
+import discord4j.discordjson.json.PermissionsData;
 import discord4j.discordjson.json.UpdateUserVoiceStateRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.json.gateway.ImmutableRequestGuildMembers;
@@ -48,12 +48,10 @@ import reactor.math.MathFlux;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static discord4j.rest.util.Image.Format.GIF;
@@ -531,18 +529,14 @@ public class PartialMember extends User {
     }
 
     /**
-     * Requests to calculate the permissions granted to this member by his roles in the guild.
+     * Requests to retrieve the member’s computed guild permissions.
      *
-     * @return The permissions granted to this member by his roles in the guild.
+     * @return The member’s computed guild permissions, combining their roles with {@code @everyone}.
      */
     public Mono<PermissionSet> getBasePermissions() {
-        Mono<Boolean> getIsOwner = getGuild().map(guild -> guild.getOwnerId().equals(getId()));
-        Mono<PermissionSet> getEveryonePerms = getGuild().flatMap(Guild::getEveryoneRole).map(Role::getPermissions);
-        Mono<List<PermissionSet>> getRolePerms = getRoles().map(Role::getPermissions).collectList();
-
-        return getIsOwner.filter(Predicate.isEqual(Boolean.TRUE))
-            .flatMap(ignored -> Mono.just(PermissionSet.all()))
-            .switchIfEmpty(Mono.zip(getEveryonePerms, getRolePerms, PermissionUtil::computeBasePermissions));
+        return this.getClient().getRestClient().getGuildService().getGuildMemberPermissions(getGuildId().asLong(), getId().asLong())
+            .map(PermissionsData::permissions)
+            .map(PermissionSet::of);
     }
 
     /**
