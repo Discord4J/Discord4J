@@ -45,13 +45,13 @@ allprojects {
     }
 
     dependencies {
-        api platform(libs.reactor.bom)
-        api platform(libs.jackson.bom)
-        api libs.jackson.datatype.jsr310
-        api libs.discord4j.json
+        api platform(rootProject.libs.reactor.bom)
+        api platform(rootProject.libs.jackson.bom)
+        api rootProject.libs.jackson.datatype.jsr310
+        api rootProject.libs.discord4j.json
 
-        compileOnly libs.jsr305
-        testCompileOnly libs.jsr305
+        compileOnly rootProject.libs.jsr305
+        testCompileOnly rootProject.libs.jsr305
     }
 
     repositories {
