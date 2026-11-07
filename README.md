@@ -120,7 +120,7 @@ our [Migration Guide](https://docs.discord4j.com/migrating-from-v3-2-to-v3-3) fo
 | Discord4J                                                    | Support          | Gateway/API | Intents                           | Interactions     |
 |--------------------------------------------------------------|------------------|-------------|-----------------------------------|------------------|
 | [v3.3.x](https://github.com/Discord4J/Discord4J/tree/master) | Current          | v10         | Mandatory, non-privileged default | Fully supported  |
-| [v3.2.x](https://github.com/Discord4J/Discord4J/tree/3.2.x)  | Maintenance only | v8          | Mandatory, non-privileged default | Fully supported  |
+| [v3.2.x](https://github.com/Discord4J/Discord4J/tree/3.2.x)  | Unsupported | v8          | Mandatory, non-privileged default | Fully supported  |
 | [v3.1.x](https://github.com/Discord4J/Discord4J/tree/3.1.x)  | Unsupported      | v6          | Optional, no intent default       | Maintenance only |
 
 See [our docs](https://docs.discord4j.com/versions) for more details about compatibility.
