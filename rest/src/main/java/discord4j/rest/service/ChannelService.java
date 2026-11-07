@@ -334,4 +334,18 @@ public class ChannelService extends RestService {
             .exchange(getRouter())
             .bodyToMono(ListThreadsData.class);
     }
+
+    public Mono<PermissionsData> getChannelMemberPermissions(long channelId, long userId, Map<String, Object> queryParams) {
+        return Routes.CHANNEL_MEMBER_PERMISSIONS_GET.newRequest(channelId, userId)
+            .query(queryParams)
+            .exchange(getRouter())
+            .bodyToMono(PermissionsData.class);
+    }
+
+    public Mono<PermissionsData> getChannelRolePermissions(long channelId, long roleId, Map<String, Object> queryParams) {
+        return Routes.CHANNEL_ROLE_PERMISSIONS_GET.newRequest(channelId, roleId)
+            .query(queryParams)
+            .exchange(getRouter())
+            .bodyToMono(PermissionsData.class);
+    }
 }

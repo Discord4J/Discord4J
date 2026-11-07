@@ -27,6 +27,7 @@ import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.MentionUtil;
 import discord4j.core.util.OrderUtil;
+import discord4j.discordjson.json.PermissionsData;
 import discord4j.discordjson.json.RoleData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.entity.RestRole;
@@ -251,12 +252,33 @@ public final class Role implements Entity {
     }
 
     /**
-     * Gets the permissions assigned to this role.
+     * Gets the permissions assigned to this role only.
+     * <p>
+     * To request for the combined permission with {@code @everyone}, use {@link #getFullPermissions}.
      *
-     * @return The permissions assigned to this role.
+     * @return The permissions assigned to this role only
      */
     public PermissionSet getPermissions() {
-        return PermissionSet.of(data.permissions());
+        return PermissionSet.of(this.getData().permissions());
+    }
+
+    /**
+     * Requests to retrieve the combined guild permissions of the specified role and {@code @everyone}. This calculation does not
+     * include other roles or member-specific restrictions.
+     * <p>
+     * To retrieve the permission of this role only, use {@link #getPermissions}.
+     *
+     * @return the combined guild permissions of the specified role and {@code @everyone}. This calculation does not
+     * include other roles or member-specific restrictions
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/guild#get-guild-role-permissions">
+     * https://docs.discord.com/developers/resources/guild#get-guild-role-permissions</a>
+     */
+    public Mono<PermissionSet> getFullPermissions() {
+        return this.getClient().getRestClient().getGuildService()
+            .getGuildRolePermissions(this.getGuildId().asLong(), this.getId().asLong())
+            .map(PermissionsData::permissions)
+            .map(PermissionSet::of);
     }
 
     /**

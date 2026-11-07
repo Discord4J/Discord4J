@@ -437,6 +437,27 @@ public abstract class Routes {
 
     public static final Route LIST_JOINED_PRIVATE_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/users/@me/threads/archived/private");
 
+    /**
+     * Returns the permissions granted by the specified role together with @everyone, applying their channel overwrites.
+     * Other roles and member-specific overwrites are not included.
+     * Threads use their parent channel’s overwrites.
+     * Requires the `VIEW_CHANNEL` permission, and additionally `CONNECT` for voice and stage channels.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/channel#get-channel-member-permissions">
+     * https://discord.com/developers/docs/resources/channel#get-channel-member-permissions</a>
+     */
+    public static final Route CHANNEL_MEMBER_PERMISSIONS_GET = Route.get("/channels/{channel.id}/permissions/member/{user.id}");
+
+    /**
+     * Returns the permissions granted by the specified role together with {@code @everyone}, applying their channel
+     * overwrites. Other roles and member-specific overwrites are not included. Threads use their parent channel’s
+     * overwrites. Requires the {@code VIEW_CHANNEL} permission, and additionally {@code CONNECT} for voice and stage channels.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/channel#get-channel-role-permissions">
+     * https://docs.discord.com/developers/resources/channel#get-channel-role-permissions</a>
+     */
+    public static final Route CHANNEL_ROLE_PERMISSIONS_GET = Route.get("/channels/{channel.id}/permissions/role/{role.id}");
+
     ///////////////////////////////////////////
     ////////////////// Polls //////////////////
     ///////////////////////////////////////////
@@ -659,6 +680,14 @@ public abstract class Routes {
     public static final Route SEARCH_GUILD_MEMBERS_GET = Route.get("/guilds/{guild.id}/members/search");
 
     /**
+     * Returns the member’s computed guild permissions, combining their roles with @everyone.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/guild#get-guild-member-permissions">
+     * https://docs.discord.com/developers/resources/guild#get-guild-member-permissions</a>
+     */
+    public static final Route GUILD_MEMBER_PERMISSIONS_GET = Route.get("/guilds/{guild.id}/permissions/member/{user.id}");
+
+    /**
      * Returns a list of messages without the reactions key that match a search query in the guild. Requires the READ_MESSAGE_HISTORY permission.
      *
      * @see <a href="https://docs.discord.com/developers/resources/message#search-guild-messages">
@@ -824,6 +853,15 @@ public abstract class Routes {
      * https://discord.com/developers/docs/resources/guild#delete-guild-role</a>
      */
     public static final Route GUILD_ROLE_DELETE = Route.delete("/guilds/{guild.id}/roles/{role.id}");
+
+    /**
+     * Returns the combined guild permissions of the specified role and {@code @everyone}. This calculation does not
+     * include other roles or member-specific restrictions.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/guild#get-guild-role-permissions">
+     * https://docs.discord.com/developers/resources/guild#get-guild-role-permissions</a>
+     */
+    public static final Route GUILD_ROLE_PERMISSIONS_GET = Route.get("/guilds/{guild.id}/permissions/role/{role.id}");
 
     /**
      * Returns an object with one 'pruned' key indicating the number of members that would be removed in a prune
