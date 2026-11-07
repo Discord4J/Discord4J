@@ -149,7 +149,10 @@ public interface Channel extends Entity {
         GUILD_STAGE_VOICE(13),
 
         /** Represents a {@link ForumChannel} that can only contain threads */
-        GUILD_FORUM(15);
+        GUILD_FORUM(15),
+
+        /** Represents a {@link MediaChannel} that can only contain threads */
+        GUILD_MEDIA(16);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -193,6 +196,7 @@ public interface Channel extends Entity {
                 case 12: return GUILD_PRIVATE_THREAD;
                 case 13: return GUILD_STAGE_VOICE;
                 case 15: return GUILD_FORUM;
+                case 16: return GUILD_MEDIA;
                 default: return UNKNOWN;
             }
         }
@@ -211,7 +215,7 @@ public interface Channel extends Entity {
         PINNED(1),
 
         /**
-         * Whether a tag is required to be specified when creating a {@link ThreadChannel} in a {@link ForumChannel}. Tags are specified in the applied_tags field.
+         * Whether a tag is required to be specified when creating a {@link ThreadChannel} in a {@link ForumChannel} or {@link MediaChannel}. Tags are specified in the applied_tags field.
          */
         REQUIRE_TAG(4),
 
