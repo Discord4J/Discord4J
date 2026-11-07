@@ -144,21 +144,21 @@ public class UnfurledMediaItem {
     /**
      * Returns the flags of this {@link UnfurledMediaItem}.
      *
-     * @return A {@code EnumSet} with the flags.
+     * @return A {@code EnumSet} with the flags
      */
     public Set<Flag> getFlags() {
-        return Possible.flatOpt(data.flags())
+        return Possible.flatOpt(this.getData().flags())
                 .map(UnfurledMediaItem.Flag::of)
                 .orElse(EnumSet.noneOf(UnfurledMediaItem.Flag.class));
     }
 
     /**
-     * Returns the results of Discord’s content scanning, if the media item has been scanned
+     * Returns the results of Discord’s content scanning, if the media item has been scanned.
      *
-     * @return A {@code EnumSet} with the flags.
+     * @return A {@code EnumSet} with the flags
      */
     public Set<ContentScanMetadataFlag> getContentScanMetadataFlags() {
-        return Possible.flatOpt(data.contentScanMetadata())
+        return Possible.flatOpt(this.getData().contentScanMetadata())
                 .map(ContentScanMetadata::flags)
                 .map(UnfurledMediaItem.ContentScanMetadataFlag::of)
                 .orElse(EnumSet.noneOf(UnfurledMediaItem.ContentScanMetadataFlag.class));
@@ -192,24 +192,64 @@ public class UnfurledMediaItem {
         }
     }
 
+    /**
+     * Represent the {@link UnfurledMediaItem} flags.
+     *
+     * @see <a href="https://docs.discord.com/developers/components/reference#unfurled-media-item-unfurled-media-item-flags">https://docs.discord.com/developers/components/reference#unfurled-media-item-unfurled-media-item-flags</a>
+     */
     public enum Flag {
+        /**
+         * This image is animated.
+         */
+        IS_ANIMATED(0);
 
-        UNKNOWN(0),
-        IS_ANIMATED(1);
+        /**
+         * The underlying value as represented by Discord.
+         */
         private final int value;
 
-        Flag(int value) {
+        /**
+         * The flag value as represented by Discord.
+         */
+        private final int flag;
+
+        /**
+         * Constructs a {@code UnfurledMediaItem.Flag}.
+         */
+        Flag(final int value) {
             this.value = value;
+            this.flag = 1 << value;
         }
 
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord
+         */
         public int getValue() {
             return this.value;
         }
 
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord
+         */
+        public int getFlag() {
+            return this.flag;
+        }
+
+        /**
+         * Gets the flags of {@link UnfurledMediaItem}. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
+         * equal ({@code ==}) to the supplied {@code value}.
+         *
+         * @param value The flags value as represented by Discord
+         * @return The {@link EnumSet} of flags
+         */
         public static Set<Flag> of(final int value) {
             final EnumSet<Flag> flags = EnumSet.noneOf(Flag.class);
-            for (Flag flag : Flag.values()) {
-                long flagValue = flag.getValue();
+            for (final Flag flag : Flag.values()) {
+                final long flagValue = flag.getFlag();
                 if ((flagValue & value) == flagValue) {
                     flags.add(flag);
                 }
@@ -219,26 +259,72 @@ public class UnfurledMediaItem {
 
     }
 
+    /**
+     * Represent the content scan metadata flags of {@link UnfurledMediaItem}.
+     *
+     * @see <a href="https://docs.discord.com/developers/components/reference#unfurled-media-item-content-scan-metadata-structure">https://docs.discord.com/developers/components/reference#unfurled-media-item-content-scan-metadata-structure</a>
+     */
     public enum ContentScanMetadataFlag {
-        UNKNOWN(0),
-        IS_EXPLICIT_CONTENT(1 << 0),
-        IS_GORE_CONTENT(1 << 1),
-        IS_SELF_HARM_CONTENT(1 << 2);
+        /**
+         * This media was flagged as explicit by Discord’s content scanning.
+         */
+        IS_EXPLICIT_CONTENT(0),
+        /**
+         * This media was flagged as gore by Discord’s content scanning.
+         */
+        IS_GORE_CONTENT(1),
+        /**
+         * This media was flagged as self-harm by Discord’s content scanning.
+         */
+        IS_SELF_HARM_CONTENT(2);
 
+        /**
+         * The underlying value as represented by Discord.
+         */
         private final int value;
 
-        ContentScanMetadataFlag(int value) {
+        /**
+         * The flag value as represented by Discord.
+         */
+        private final int flag;
+
+        /**
+         * Constructs a {@code ContentScanMetadataFlag}.
+         */
+        ContentScanMetadataFlag(final int value) {
             this.value = value;
+            this.flag = 1 << value;
         }
 
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord
+         */
         public int getValue() {
             return this.value;
         }
 
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord
+         */
+        public int getFlag() {
+            return this.flag;
+        }
+
+        /**
+         * Gets the flags of {@link ContentScanMetadata}. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
+         * equal ({@code ==}) to the supplied {@code value}.
+         *
+         * @param value The flags value as represented by Discord
+         * @return The {@link EnumSet} of flags
+         */
         public static Set<ContentScanMetadataFlag> of(final int value) {
             final EnumSet<ContentScanMetadataFlag> flags = EnumSet.noneOf(ContentScanMetadataFlag.class);
-            for (ContentScanMetadataFlag flag : ContentScanMetadataFlag.values()) {
-                long flagValue = flag.getValue();
+            for (final ContentScanMetadataFlag flag : ContentScanMetadataFlag.values()) {
+                final long flagValue = flag.getFlag();
                 if ((flagValue & value) == flagValue) {
                     flags.add(flag);
                 }
