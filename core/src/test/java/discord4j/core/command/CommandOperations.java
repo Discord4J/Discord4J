@@ -110,7 +110,7 @@ class CommandOperations implements CommandContext {
         Objects.requireNonNull(spec);
         return replyChannel.get()
                 .publishOn(replyScheduler)
-                .flatMap(channel -> channel.createEmbed(spec))
+                .flatMap(channel -> channel.createMessage(spec))
                 .then();
     }
 }
