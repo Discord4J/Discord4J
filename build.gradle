@@ -68,6 +68,8 @@ allprojects {
         resolutionStrategy.cacheChangingModulesFor 60, 'seconds'
     }
 
+    apply from: rootProject.file('gradle/javadoc-links.gradle')
+
     tasks.withType(Javadoc).configureEach {
         //setFailOnError(false) // NOTE: Use this if any javadoc url is down and wanna ignore that errors
         options {
@@ -77,18 +79,6 @@ allprojects {
                     "implNote:a:Implementation Note:"]
             addStringOption 'Xdoclint:none', '-quiet'
             addStringOption 'encoding', 'UTF-8'
-            // adding links to javadocs for filling specific classes when not existing inside current javadoc
-            // io.projectreactor: https://github.com/reactor/reactor/issues/767
-            links = [
-                jdk_javadoc,
-                "https://www.javadocs.dev/com.fasterxml.jackson.core/jackson-databind/${libs.versions.jackson.bom.get()}/".toString(),
-                "https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
-                "https://www.javadocs.dev/io.projectreactor/reactor-core/3.8.6",
-                "https://www.javadocs.dev/io.projectreactor.netty/reactor-netty/1.3.6",
-                "https://www.javadocs.dev/io.projectreactor.addons/reactor-extra/3.6.0",
-                "https://netty.io/4.2/api/",
-                "https://www.javadocs.dev/org.jspecify/jspecify/1.0.0"
-            ]
         }
         if (JavaVersion.current() == JavaVersion.VERSION_1_9) {
             options.addBooleanOption('html5', true)

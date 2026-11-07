@@ -1,0 +1,43 @@
+// Adds links to external javadocs so classes outside of this project resolve correctly.
+// Versions are taken from the resolved compileClasspath of each project.
+//
+// To add a new link, add one entry to the list below:
+//   group/module: coordinates of an artifact present in the compile classpath
+//   url:          javadoc location, {version} is the full resolved version and {minor} is major.minor
+
+def externalJavadocs = [
+    [group: 'com.fasterxml.jackson.core', module: 'jackson-databind',   url: 'https://www.javadocs.dev/com.fasterxml.jackson.core/jackson-databind/{version}/'],
+    [group: 'org.reactivestreams',        module: 'reactive-streams',    url: 'https://www.reactive-streams.org/reactive-streams-{version}-javadoc/'],
+    [group: 'io.projectreactor',          module: 'reactor-core',        url: 'https://www.javadocs.dev/io.projectreactor/reactor-core/{version}'],
+    [group: 'io.projectreactor.netty',    module: 'reactor-netty-core',  url: 'https://www.javadocs.dev/io.projectreactor.netty/reactor-netty/{version}'],
+    [group: 'io.projectreactor.addons',   module: 'reactor-extra',       url: 'https://www.javadocs.dev/io.projectreactor.addons/reactor-extra/{version}'],
+    [group: 'io.netty',                   module: 'netty-handler',       url: 'https://netty.io/{minor}/api/'],
+    [group: 'org.jspecify',               module: 'jspecify',            url: 'https://www.javadocs.dev/org.jspecify/jspecify/{version}'],
+]
+
+tasks.withType(Javadoc).configureEach { javadocTask ->
+    def cache = [:]
+    def resolvedLinks = providers.provider {
+        if (cache.links) return cache.links
+        def components = configurations.compileClasspath.incoming.resolutionResult.allComponents*.moduleVersion
+        def links = [jdk_javadoc.toString()]
+        externalJavadocs.each { entry ->
+            def version = components.find { it.group == entry.group && it.name == entry.module }?.version
+            if (version == null) {
+                logger.warn("[javadoc] ${javadocTask.path}: '${entry.group}:${entry.module}' not found in compileClasspath, link skipped")
+                return
+            }
+            def minor = version.tokenize('.').take(2).join('.')
+            def url = entry.url.replace('{version}', version).replace('{minor}', minor)
+            logger.info("[javadoc] ${javadocTask.path}: ${entry.group}:${entry.module}:${version} -> ${url}")
+            links << url
+        }
+        cache.links = links
+    }.map { it.toList() }
+
+    // Declared as input so cached/up-to-date results stay in sync with the resolved versions
+    inputs.property('resolvedExternalLinks', resolvedLinks)
+    doFirst {
+        options.links = resolvedLinks.get()
+    }
+}
