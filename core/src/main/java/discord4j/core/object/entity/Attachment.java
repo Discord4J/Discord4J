@@ -254,41 +254,50 @@ public final class Attachment implements Entity {
         /**
          * This attachment is a Clip from a stream.
          */
-        IS_CLIP(1),
+        IS_CLIP(0),
 
         /**
-         * This attachment has been edited using the remix feature on mobile (deprecated).
+         * This attachment is the thumbnail of a thread in a media channel, displayed in the grid but not on the message.
          */
-        @Deprecated
-        IS_THUMBNAIL(1 << 1),
+        IS_THUMBNAIL(1),
 
         /**
          * This attachment has been edited using the remix feature on mobile.
+         *
+         * @deprecated Discord has removed the remix feature, and this flag is no longer used
          */
-        IS_REMIX(1 << 2),
+        @Deprecated
+        IS_REMIX(2),
 
         /**
          * This attachment was marked as a spoiler and is blurred until clicked.
          */
-        IS_SPOILER(1 << 3),
+        IS_SPOILER(3),
 
         /**
          * This attachment is an animated image.
          */
-        IS_ANIMATED(1 << 5),
+        IS_ANIMATED(5),
 
         /**
          * This attachment was flagged as gore by Discord’s content scanning
          */
-        CONTAINS_GORE_CONTENT(1 << 6),
+        CONTAINS_GORE_CONTENT(6),
 
         /**
          * This attachment was flagged as self-harm by Discord’s content scanning
          */
-        CONTAINS_SELF_HARM_CONTENT(1 << 7);
+        CONTAINS_SELF_HARM_CONTENT(7);
 
-        /** The flag value as represented by Discord. */
+        /**
+         * The underlying value as represented by Discord.
+         */
         private final int value;
+
+        /**
+         * The flag value as represented by Discord.
+         */
+        private final int flag;
 
         /**
          * Constructs an {@code AttachmentFlags} with a value.
@@ -297,19 +306,29 @@ public final class Attachment implements Entity {
          */
         AttachmentFlags(int value) {
             this.value = value;
+            this.flag = 1 << value;
         }
 
         /**
-         * Gets the flag value as represented by Discord.
+         * Gets the underlying value as represented by Discord.
          *
-         * @return The flag value as represented by Discord.
+         * @return The underlying value as represented by Discord
          */
         public int getValue() {
             return this.value;
         }
 
         /**
-         * Gets the flags of the attachment. It is guaranteed that invoking {@link #getValue()} from the returned enum
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord
+         */
+        public int getFlag() {
+            return this.flag;
+        }
+
+        /**
+         * Gets the flags of the attachment. It is guaranteed that invoking {@link #getFlag()} from the returned enum
          * will be equal ({@code ==}) to the supplied {@code value}.
          *
          * @param value The flags value as represented by Discord.
@@ -319,7 +338,7 @@ public final class Attachment implements Entity {
             final EnumSet<AttachmentFlags> flags = EnumSet.noneOf(AttachmentFlags.class);
 
             for (final AttachmentFlags flag : AttachmentFlags.values()) {
-                final long flagValue = flag.getValue();
+                final long flagValue = flag.getFlag();
 
                 if ((flagValue & value) == flagValue) {
                     flags.add(flag);
