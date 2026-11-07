@@ -19,6 +19,7 @@ package discord4j.core.object.entity.channel;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.PermissionsData;
 import discord4j.rest.util.PermissionSet;
@@ -112,6 +113,56 @@ public interface GuildChannel extends Channel {
      */
     default Mono<PermissionSet> getEffectivePermissions(final Member member) {
         return this.getEffectivePermissions(member.getId(), null);
+    }
+
+    /**
+     * Gets the permissions for the given role, combined with the permission with {@code @everyone}.
+     *
+     * @param roleId The ID of the role to get permissions for
+     * @param implicit whether to apply implicit <a href="https://docs.discord.com/developers/topics/permissions#implicit-permissions">permission masking</a> for missing {@code VIEW_CHANNEL} or voice/stage {@code CONNECT}
+     * @return The effective permissions for the given role in the channel in context
+     */
+    default Mono<PermissionSet> getEffectiveRolePermissions(final Snowflake roleId, final @Nullable Boolean implicit) {
+        final Map<String, Object> params = new HashMap<>(Collections.emptyMap());
+        if (implicit != null) {
+            params.put("implicit", implicit);
+        }
+
+        return this.getClient().getRestClient().getChannelService()
+            .getChannelRolePermissions(getId().asLong(), roleId.asLong(), params)
+            .map(PermissionsData::permissions)
+            .map(PermissionSet::of);
+    }
+
+    /**
+     * Gets the permissions for the given role, combined with the permission with {@code @everyone}.
+     *
+     * @param roleId The ID of the role to get permissions for
+     * @return The effective permissions for the given role in the channel in context
+     */
+    default Mono<PermissionSet> getEffectiveRolePermissions(final Snowflake roleId) {
+        return this.getEffectiveRolePermissions(roleId, null);
+    }
+
+    /**
+     * Gets the permissions for the given role, combined with the permission with {@code @everyone}.
+     *
+     * @param role The role to get permissions for
+     * @param implicit whether to apply implicit <a href="https://docs.discord.com/developers/topics/permissions#implicit-permissions">permission masking</a> for missing {@code VIEW_CHANNEL} or voice/stage {@code CONNECT}
+     * @return The effective permissions for the given role in the channel in context
+     */
+    default Mono<PermissionSet> getEffectiveRolePermissions(final Role role, final @Nullable Boolean implicit) {
+        return this.getEffectiveRolePermissions(role.getId(), implicit);
+    }
+
+    /**
+     * Gets the permissions for the given role, combined with the permission with {@code @everyone}.
+     *
+     * @param role The role to get permissions for
+     * @return The effective permissions for the given role in the channel in context
+     */
+    default Mono<PermissionSet> getEffectiveRolePermissions(final Role role) {
+        return this.getEffectiveRolePermissions(role.getId(), null);
     }
 
     /**

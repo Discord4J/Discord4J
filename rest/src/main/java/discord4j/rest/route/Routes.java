@@ -448,6 +448,16 @@ public abstract class Routes {
      */
     public static final Route CHANNEL_MEMBER_PERMISSIONS_GET = Route.get("/channels/{channel.id}/permissions/member/{user.id}");
 
+    /**
+     * Returns the permissions granted by the specified role together with {@code @everyone}, applying their channel
+     * overwrites. Other roles and member-specific overwrites are not included. Threads use their parent channel’s
+     * overwrites. Requires the {@code VIEW_CHANNEL} permission, and additionally {@code CONNECT} for voice and stage channels.
+     *
+     * @see <a href="https://docs.discord.com/developers/resources/channel#get-channel-role-permissions">
+     * https://docs.discord.com/developers/resources/channel#get-channel-role-permissions</a>
+     */
+    public static final Route CHANNEL_ROLE_PERMISSIONS_GET = Route.get("/channels/{channel.id}/permissions/role/{role.id}");
+
     ///////////////////////////////////////////
     ////////////////// Polls //////////////////
     ///////////////////////////////////////////
