@@ -1,11 +1,11 @@
 dependencies {
     api project(':rest')
 
-    testImplementation platform("org.junit:junit-bom:$junit_version")
-    testImplementation "org.junit.jupiter:junit-jupiter-engine"
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher:"
-    testImplementation "ch.qos.logback:logback-classic:$logback_version"
-    testImplementation "io.projectreactor:reactor-test"
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.junit.jupiter.engine
+    testRuntimeOnly libs.junit.platform.launcher
+    testImplementation libs.logback.classic
+    testImplementation libs.reactor.test
 }
 
 javadoc {

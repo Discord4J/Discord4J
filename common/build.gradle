@@ -1,19 +1,21 @@
-apply plugin: 'com.gorylenko.gradle-git-properties'
+plugins {
+    alias(libs.plugins.git.properties)
+}
 
 dependencies {
-    api "io.projectreactor.netty:reactor-netty-http"
-    api "io.projectreactor.addons:reactor-extra"
-    api "com.fasterxml.jackson.core:jackson-databind"
-    api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
-    api "com.github.ben-manes.caffeine:caffeine:$caffeine_version"
+    api libs.reactor.netty.http
+    api libs.reactor.extra
+    api libs.jackson.databind
+    api libs.jackson.datatype.jdk8
+    api libs.caffeine
 
-    api "com.discord4j:stores-api:$storesVersion"
+    api libs.discord4j.stores.api
 
-    testImplementation platform("org.junit:junit-bom:$junit_version")
-    testImplementation "org.junit.jupiter:junit-jupiter-engine"
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher:"
-    testImplementation "io.projectreactor:reactor-test"
-    testImplementation "ch.qos.logback:logback-classic:$logback_version"
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.junit.jupiter.engine
+    testRuntimeOnly libs.junit.platform.launcher
+    testImplementation libs.reactor.test
+    testImplementation libs.logback.classic
 }
 
 gitProperties {

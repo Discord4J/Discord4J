@@ -1,0 +1,61 @@
+[versions]
+
+# Dependencies
+reactor-bom = "2025.0.8"
+jackson-bom = "2.22.4"
+caffeine = "2.9.3"
+immutables = "2.12.3"
+discord4j-json = "1.7.25"
+discord4j-stores = "3.2.3"
+discord4j-simple-fsm = "1.0.1"
+tink = "1.24.0"
+jsr305 = "3.0.2"
+junit = "5.14.4"
+logback = "1.6.6"
+reflections = "0.10.2"
+lavaplayer = "1.4.3"
+libdave = "0.2.0"
+
+# Plugins
+nexus-publish = "2.0.0"
+git-properties = "3.0.3"
+release = "3.2.0"
+
+[libraries]
+reactor-bom = { module = "io.projectreactor:reactor-bom", version.ref = "reactor-bom" }
+jackson-bom = { module = "com.fasterxml.jackson:jackson-bom", version.ref = "jackson-bom" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind" }
+jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" }
+jackson-datatype-jdk8 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8" }
+reactor-netty-http = { module = "io.projectreactor.netty:reactor-netty-http" }
+reactor-extra = { module = "io.projectreactor.addons:reactor-extra" }
+reactor-test = { module = "io.projectreactor:reactor-test" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+discord4j-json = { module = "com.discord4j:discord-json", version.ref = "discord4j-json" }
+discord4j-json-encoding = { module = "com.discord4j:discord-json-encoding", version.ref = "discord4j-json" }
+discord4j-stores-api = { module = "com.discord4j:stores-api", version.ref = "discord4j-stores" }
+discord4j-stores-jdk = { module = "com.discord4j:stores-jdk", version.ref = "discord4j-stores" }
+discord4j-simple-fsm = { module = "com.discord4j:simple-fsm", version.ref = "discord4j-simple-fsm" }
+tink = { module = "com.google.crypto.tink:tink", version.ref = "tink" }
+libdave-impl-jni = { module = "moe.kyokobot.libdave:impl-jni", version.ref = "libdave" }
+libdave-natives-win-amd64 = { module = "moe.kyokobot.libdave:natives-win-x86-64", version.ref = "libdave" }
+libdave-natives-win-i386 = { module = "moe.kyokobot.libdave:natives-win-x86", version.ref = "libdave" }
+libdave-natives-win-arm64 = { module = "moe.kyokobot.libdave:natives-win-aarch64", version.ref = "libdave" }
+libdave-natives-linux-x86 = { module = "moe.kyokobot.libdave:natives-linux-x86", version.ref = "libdave" }
+libdave-natives-linux-aarch64 = { module = "moe.kyokobot.libdave:natives-linux-aarch64", version.ref = "libdave" }
+libdave-natives-linux-arm = { module = "moe.kyokobot.libdave:natives-linux-arm", version.ref = "libdave" }
+libdave-natives-darwin = { module = "moe.kyokobot.libdave:natives-darwin", version.ref = "libdave" }
+immutables-value = { module = "org.immutables:value", version.ref = "immutables" }
+immutables-builder = { module = "org.immutables:builder", version.ref = "immutables" }
+jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "jsr305" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
+lavaplayer = { module = "com.github.walkyst:lavaplayer-fork", version.ref = "lavaplayer" }
+
+[plugins]
+nexus-publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexus-publish" }
+git-properties = { id = "com.gorylenko.gradle-git-properties", version.ref = "git-properties" }
+release = { id = "net.researchgate.release", version.ref = "release" }

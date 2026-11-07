@@ -5,32 +5,32 @@ dependencies {
     api project(':gateway')
     api project(':voice')
 
-    api "com.discord4j:stores-jdk:$storesVersion"
+    api libs.discord4j.stores.jdk
 
-    compileOnly "$immutables_group:value:$immutables_version"
-    compileOnly "$immutables_group:builder:$immutables_version"
-    annotationProcessor "$immutables_group:value:$immutables_version"
+    compileOnly libs.immutables.value
+    compileOnly libs.immutables.builder
+    annotationProcessor libs.immutables.value
 
-    compileOnly "com.discord4j:discord-json-encoding:$discordJsonVersion"
+    compileOnly libs.discord4j.json.encoding
 
-    testImplementation platform("org.junit:junit-bom:$junit_version")
-    testImplementation "org.junit.jupiter:junit-jupiter-engine"
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher:"
-    testImplementation "ch.qos.logback:logback-classic:$logback_version"
-    testImplementation "io.projectreactor:reactor-test"
-    testImplementation "org.reflections:reflections:$reflections_version"
-    testImplementation "com.github.walkyst:lavaplayer-fork:$lavaplayer_version"
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.junit.jupiter.engine
+    testRuntimeOnly libs.junit.platform.launcher
+    testImplementation libs.logback.classic
+    testImplementation libs.reactor.test
+    testImplementation libs.reflections
+    testImplementation libs.lavaplayer
 
     if (DefaultNativePlatform.getCurrentOperatingSystem().isWindows()) {
-        testImplementation("moe.kyokobot.libdave:natives-win-x86-64:$libdave_version")
-        testImplementation("moe.kyokobot.libdave:natives-win-x86:$libdave_version")
-        testImplementation("moe.kyokobot.libdave:natives-win-aarch64:$libdave_version")
+        testImplementation libs.libdave.natives.win.amd64
+        testImplementation libs.libdave.natives.win.i386
+        testImplementation libs.libdave.natives.win.arm64
     } else if (DefaultNativePlatform.getCurrentOperatingSystem().isLinux()) {
-        implementation("moe.kyokobot.libdave:natives-linux-x86:$libdave_version")
-        implementation("moe.kyokobot.libdave:natives-linux-aarch64:$libdave_version")
-        implementation("moe.kyokobot.libdave:natives-linux-arm:$libdave_version")
+        implementation libs.libdave.natives.linux.x86
+        implementation libs.libdave.natives.linux.aarch64
+        implementation libs.libdave.natives.linux.arm
     } else if (DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX()) {
-        implementation("moe.kyokobot.libdave:natives-darwin:$libdave_version")
+        implementation libs.libdave.natives.darwin
     }
 
 }

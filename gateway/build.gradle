@@ -1,12 +1,12 @@
 dependencies {
     api project(':common')
 
-    api "io.projectreactor.addons:reactor-extra"
+    api libs.reactor.extra
 
-    testImplementation platform("org.junit:junit-bom:$junit_version")
-    testImplementation "org.junit.jupiter:junit-jupiter-engine"
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher:"
-    testImplementation "ch.qos.logback:logback-classic:$logback_version"
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.junit.jupiter.engine
+    testRuntimeOnly libs.junit.platform.launcher
+    testImplementation libs.logback.classic
 }
 
 javadoc {
