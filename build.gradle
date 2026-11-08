@@ -7,6 +7,9 @@ plugins {
     alias(libs.plugins.release)
 }
 
+// https://youtrack.jetbrains.com/issue/IDEA-395724
+def catalogLibs = libs
+
 allprojects {
     ext {
         // Project constants
@@ -45,13 +48,13 @@ allprojects {
     }
 
     dependencies {
-        api platform(rootProject.libs.reactor.bom)
-        api platform(rootProject.libs.jackson.bom)
-        api rootProject.libs.jackson.datatype.jsr310
-        api rootProject.libs.discord4j.json
+        api platform(catalogLibs.reactor.bom)
+        api platform(catalogLibs.jackson.bom)
+        api catalogLibs.jackson.datatype.jsr310
+        api catalogLibs.discord4j.json
 
-        compileOnly rootProject.libs.jsr305
-        testCompileOnly rootProject.libs.jsr305
+        compileOnly catalogLibs.jsr305
+        testCompileOnly catalogLibs.jsr305
     }
 
     repositories {
