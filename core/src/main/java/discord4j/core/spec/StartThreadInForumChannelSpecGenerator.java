@@ -64,12 +64,13 @@ public interface StartThreadInForumChannelSpecGenerator extends AuditSpec<StartT
     @Override
     default StartThreadInForumChannelRequest asRequest() {
         return StartThreadInForumChannelRequest.builder()
-            .name(name())
-            .message(message().asRequest())
-            .autoArchiveDuration(mapPossible(autoArchiveDuration(), ThreadChannel.AutoArchiveDuration::getValue))
-            .rateLimitPerUser(rateLimitPerUser())
-            .appliedTags(mapPossible(appliedTags(), list -> list.stream().map(snowflake -> Id.of(snowflake.asLong())).collect(Collectors.toList())))
-            .build();
+                .name(name())
+                .message(message().asRequest())
+                .autoArchiveDuration(mapPossible(autoArchiveDuration(), ThreadChannel.AutoArchiveDuration::getValue))
+                .rateLimitPerUser(rateLimitPerUser())
+                .appliedTags(mapPossible(appliedTags(),
+                        list -> list.stream().map(snowflake -> Id.of(snowflake.asLong())).collect(Collectors.toList())))
+                .build();
     }
 }
 
