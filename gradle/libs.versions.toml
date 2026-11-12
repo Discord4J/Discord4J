@@ -2,7 +2,7 @@
 
 # Dependencies
 reactor-bom = "2025.0.8"
-jackson-bom = "2.22.4"
+jackson-bom = "2.23.0"
 caffeine = "2.9.3"
 immutables = "2.12.3"
 discord4j-json = "1.7.25"
