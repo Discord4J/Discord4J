@@ -1,7 +1,7 @@
 [versions]
 
 # Dependencies
-reactor-bom = "2025.0.8"
+reactor-bom = "2026.0.0"
 jackson-bom = "2.23.0"
 caffeine = "2.9.3"
 immutables = "2.12.3"
