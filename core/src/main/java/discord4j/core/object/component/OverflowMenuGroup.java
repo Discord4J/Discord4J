@@ -34,8 +34,6 @@ import java.util.stream.Collectors;
  */
 public class OverflowMenuGroup {
 
-    private final OverflowMenuGroupData data;
-
     /**
      * Creates a group without label.
      *
@@ -95,6 +93,8 @@ public class OverflowMenuGroup {
         return new OverflowMenuGroup(data);
     }
 
+    private final OverflowMenuGroupData data;
+
     private OverflowMenuGroup(final OverflowMenuGroupData data) {
         this.data = data;
     }
@@ -114,7 +114,7 @@ public class OverflowMenuGroup {
      * @return The label, if present
      */
     public Optional<String> getLabel() {
-        return Possible.flatOpt(this.data.label());
+        return Possible.flatOpt(this.getData().label());
     }
 
     /**
@@ -123,7 +123,7 @@ public class OverflowMenuGroup {
      * @return The items of this group
      */
     public List<MenuActionItem> getComponents() {
-        return this.data.components().stream()
+        return this.getData().components().stream()
                 .map(MessageComponent::fromData)
                 .filter(component -> component instanceof MenuActionItem)
                 .map(component -> (MenuActionItem) component)
