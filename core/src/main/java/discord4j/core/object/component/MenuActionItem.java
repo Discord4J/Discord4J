@@ -203,6 +203,10 @@ public class MenuActionItem extends ActionComponent {
         return new MenuActionItem(builder.build());
     }
 
+    MenuActionItem(final ComponentData data) {
+        super(data);
+    }
+
     /**
      * Creates a new item with the given description, keeping the rest of the data.
      *
@@ -216,8 +220,33 @@ public class MenuActionItem extends ActionComponent {
                 .build());
     }
 
-    MenuActionItem(final ComponentData data) {
-        super(data);
+    /**
+     * Creates a new item with the same data as this one, but disabled.
+     *
+     * @return A new disabled item with the same data as this one
+     */
+    public MenuActionItem disabled() {
+        return this.disabled(true);
+    }
+
+    /**
+     * Creates a new item with the same data as this one, but depending on the value param, it may be disabled or
+     * not.
+     *
+     * @param value True if the item should be disabled otherwise False
+     * @return A new possibly disabled item with the same data as this one
+     */
+    public MenuActionItem disabled(boolean value) {
+        return new MenuActionItem(ImmutableComponentData.builder().from(this.getData()).disabled(value).build());
+    }
+
+    /**
+     * Gets whether this item is disabled.
+     *
+     * @return Whether the item is disabled
+     */
+    public boolean isDisabled() {
+        return this.getData().disabled().toOptional().orElse(false);
     }
 
     /**
