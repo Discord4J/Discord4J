@@ -64,6 +64,8 @@ public class MessageComponent implements BaseMessageComponent {
             case RADIO_GROUP: return new RadioGroupAction(data);
             case CHECKBOX_GROUP: return new CheckboxGroupAction(data);
             case CHECKBOX: return new CheckboxAction(data);
+            case OVERFLOW_MENU: return new OverflowMenu(data);
+            case MENU_ACTION_ITEM: return new MenuActionItem(data);
             default: {
                 MessageComponent.LOGGER.warn("Unhandled component type: " + data.type());
                 return new MessageComponent(data);
@@ -73,7 +75,7 @@ public class MessageComponent implements BaseMessageComponent {
 
     private final ComponentData data;
 
-    MessageComponent(ComponentData data) {
+    MessageComponent(final ComponentData data) {
         this.data = data;
     }
 
@@ -84,7 +86,7 @@ public class MessageComponent implements BaseMessageComponent {
      */
     @Override
     public int getId() {
-        return data.id().toOptional().orElseThrow(IllegalStateException::new);
+        return this.getData().id().toOptional().orElseThrow(IllegalStateException::new);
     }
 
     /**
@@ -94,7 +96,7 @@ public class MessageComponent implements BaseMessageComponent {
      */
     @Override
     public ComponentData getData() {
-        return data;
+        return this.data;
     }
 
     /**
@@ -104,7 +106,7 @@ public class MessageComponent implements BaseMessageComponent {
      */
     @Override
     public Type getType() {
-        return Type.of(data.type());
+        return Type.of(this.data.type());
     }
 
     public enum Type {
@@ -129,6 +131,8 @@ public class MessageComponent implements BaseMessageComponent {
         RADIO_GROUP(21),
         CHECKBOX_GROUP(22),
         CHECKBOX(23),
+        OVERFLOW_MENU(25),
+        MENU_ACTION_ITEM(26),
         ;
 
         /**
@@ -140,11 +144,11 @@ public class MessageComponent implements BaseMessageComponent {
         private final int value;
         private final boolean requireFlag;
 
-        Type(int value) {
+        Type(final int value) {
             this(value, false);
         }
 
-        Type(int value, boolean requireFlag) {
+        Type(final int value, final boolean requireFlag) {
             this.value = value;
             this.requireFlag = requireFlag;
         }
@@ -155,14 +159,14 @@ public class MessageComponent implements BaseMessageComponent {
          * @return {@code true} if need the use of the flag, {@code false} otherwise
          */
         public boolean isRequiredFlag() {
-            return requireFlag;
+            return this.requireFlag;
         }
 
         public int getValue() {
-            return value;
+            return this.value;
         }
 
-        public static Type of(int value) {
+        public static Type of(final int value) {
             switch (value) {
                 case 1: return ACTION_ROW;
                 case 2: return BUTTON;
@@ -184,6 +188,8 @@ public class MessageComponent implements BaseMessageComponent {
                 case 21: return RADIO_GROUP;
                 case 22: return CHECKBOX_GROUP;
                 case 23: return CHECKBOX;
+                case 25: return OVERFLOW_MENU;
+                case 26: return MENU_ACTION_ITEM;
                 default: return UNKNOWN;
             }
         }

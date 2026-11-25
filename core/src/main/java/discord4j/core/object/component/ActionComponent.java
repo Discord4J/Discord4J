@@ -25,7 +25,7 @@ import java.util.Optional;
  */
 public abstract class ActionComponent extends MessageComponent {
 
-    protected ActionComponent(ComponentData data) {
+    protected ActionComponent(final ComponentData data) {
         super(data);
     }
 
@@ -35,7 +35,7 @@ public abstract class ActionComponent extends MessageComponent {
      * @return An {@link Optional} containing the custom id if present
      */
     public String getCustomId() {
-        return getData().customId().toOptional().orElseThrow(IllegalStateException::new);
+        return this.getData().customId().toOptional().orElseThrow(IllegalStateException::new);
     }
 
 }

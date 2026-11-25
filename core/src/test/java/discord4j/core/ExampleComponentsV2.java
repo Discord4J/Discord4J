@@ -17,9 +17,15 @@
 package discord4j.core;
 
 import discord4j.common.util.Snowflake;
+import discord4j.core.event.domain.interaction.ComponentInteractionEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import discord4j.core.object.command.ApplicationCommandInteraction;
+import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Container;
 import discord4j.core.object.component.ICanBeUsedInContainerComponent;
+import discord4j.core.object.component.MenuActionItem;
+import discord4j.core.object.component.OverflowMenu;
+import discord4j.core.object.component.OverflowMenuGroup;
 import discord4j.core.object.component.Section;
 import discord4j.core.object.component.TextDisplay;
 import discord4j.core.object.component.Thumbnail;
@@ -27,6 +33,7 @@ import discord4j.core.object.component.UnfurledMediaItem;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.MessageCreateSpec;
+import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -46,6 +53,24 @@ public class ExampleComponentsV2 {
             .block();
 
         assert client != null;
+
+        client.on(ComponentInteractionEvent.class, event -> {
+            String componentType = event.getInteraction().getCommandInteraction()
+                .flatMap(ApplicationCommandInteraction::getComponentType)
+                .map(Enum::name)
+                .orElse("UNKNOWN");
+            log.info("Component interaction: customId={}, type={}", event.getCustomId(), componentType);
+
+            switch (event.getCustomId()) {
+                case "edit":
+                case "delete":
+                case "more":
+                    return event.reply("MenuActionItem `" + event.getCustomId() + "` clicked!").withEphemeral(true);
+                default:
+                    return Mono.empty();
+            }
+        }).subscribe();
+
         client.getChannelById(Snowflake.of(System.getenv("channelId"))).ofType(MessageChannel.class).flatMap(channel -> {
             List<ICanBeUsedInContainerComponent> firstComponents = new ArrayList<>();
             firstComponents.add(TextDisplay.of("D4J"));
@@ -56,10 +81,21 @@ public class ExampleComponentsV2 {
 
             Section section = Section.of(Thumbnail.of(UnfurledMediaItem.of("https://docs.discord4j.com/img/embed-preview.png")), TextDisplay.of("Old days..."));
 
+            Section menuSection = Section.of(
+                OverflowMenu.of(
+                    OverflowMenuGroup.of("Actions",
+                        MenuActionItem.defaultStyle("edit", "Edit").withDescription("Edit the item"),
+                        MenuActionItem.danger("delete", "Delete")),
+                    OverflowMenuGroup.of(MenuActionItem.link("https://docs.discord4j.com", "Docs"))),
+                TextDisplay.of("Section with an overflow menu"));
+
             MessageCreateSpec.Builder builder = MessageCreateSpec.builder();
             builder.addFlag(Message.Flag.IS_COMPONENTS_V2);
             builder.addComponent(container);
             builder.addComponent(section);
+            builder.addComponent(menuSection);
+            builder.addComponent(ActionRow.of(OverflowMenu.of(
+                OverflowMenuGroup.of(MenuActionItem.defaultStyle("more", "More")))));
 
 
             return channel.createMessage(builder.build());
