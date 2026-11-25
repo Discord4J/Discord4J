@@ -27,8 +27,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * A group of {@link MenuActionItem items} of an {@link OverflowMenu}. It is not a component by itself, so it has
- * no type nor id.
+ * A group of {@link MenuActionItem items} of an {@link OverflowMenu}.
  *
  * @see <a href="https://discord.com/developers/docs/components/reference#overflow-menu">Overflow Menu</a>
  */
